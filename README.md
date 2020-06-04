@@ -2,7 +2,7 @@
 
 <img src="https://yarnspinner.dev/img/YarnSpinnerLogo.png" alt="Yarn Spinner logo" width="100px;" align="right">
 
-[Yarn Spinner](https://yarnspinner.dev) is the friendly tool for writing dialogue games. This repo contains the Unity integration. 
+[Yarn Spinner](https://yarnspinner.dev) is the friendly tool for writing dialogue games. This repo contains the Unity integration; you can find the core [Yarn Spinner compiler](https://github.com/YarnSpinnerTool/YarnSpinner) in its own repository.
 
 ## Getting Started
 
