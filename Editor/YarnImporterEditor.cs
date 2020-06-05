@@ -4,7 +4,10 @@ using UnityEditor.Experimental.AssetImporters;
 using System.Linq;
 using System.IO;
 using System.Globalization;
+
+#if ADDRESSABLES
 using UnityEngine.AddressableAssets;
+#endif
 using System.Collections.Generic;
 using Yarn.Unity;
 

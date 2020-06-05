@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+#if ADDRESSABLES
 using UnityEngine.ResourceManagement.AsyncOperations;
+#endif 
 using Yarn;
 
 /// <summary>
