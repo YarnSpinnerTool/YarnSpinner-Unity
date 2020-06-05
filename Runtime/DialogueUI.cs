@@ -31,7 +31,6 @@ using System.Text;
 using System.Collections.Generic;
 
 namespace Yarn.Unity {
-    
     /// <summary>
     /// Displays dialogue lines to the player, and sends user choices back
     /// to the dialogue system.
@@ -46,9 +45,8 @@ namespace Yarn.Unity {
     /// to the next line.
     /// </remarks>
     /// <seealso cref="DialogueRunner"/>
-    public class DialogueUI : Yarn.Unity.DialogueUIBehaviour
+    public class DialogueUI : Yarn.Unity.DialogueViewBase
     {
-
         /// <summary>
         /// The object that contains the dialogue and the options.
         /// </summary>
@@ -80,9 +78,11 @@ namespace Yarn.Unity {
         /// </remarks>
         public List<Button> optionButtons;
 
-        // When true, the user has indicated that they want to proceed to
-        // the next line.
-        private bool userRequestedNextLine = false;
+        /// <summary>
+        /// When true, the Runner has signaled to finish the current line
+        /// asap.
+        /// </summary>
+        private bool finishCurrentLine = false;
 
         // The method that we should call when the user has chosen an
         // option. Externally provided by the DialogueRunner.
@@ -90,7 +90,7 @@ namespace Yarn.Unity {
 
         // When true, the DialogueRunner is waiting for the user to press
         // one of the option buttons.
-        private bool waitingForOptionSelection = false;     
+        private bool waitingForOptionSelection = false;
 
         /// <summary>
         /// A <see cref="UnityEngine.Events.UnityEvent"/> that is called
@@ -111,7 +111,7 @@ namespace Yarn.Unity {
         /// Use this event to disable any dialogue-related UI and gameplay
         /// elements, and enable any non-dialogue UI and gameplay elements.
         /// </remarks>
-        public UnityEngine.Events.UnityEvent onDialogueEnd;  
+        public UnityEngine.Events.UnityEvent onDialogueEnd;
 
         /// <summary>
         /// A <see cref="UnityEngine.Events.UnityEvent"/> that is called
@@ -138,6 +138,17 @@ namespace Yarn.Unity {
         /// <seealso cref="onLineUpdate"/>
         /// <seealso cref="MarkLineComplete"/>
         public UnityEngine.Events.UnityEvent onLineFinishDisplaying;
+
+        /// <summary>
+        /// A <see cref="UnityEngine.Events.UnityEvent"/> that is called
+        /// when a line has finished being delivered not just on this
+        /// View but on all Views registered on the <see cref="DialogueRunner"/>.
+        /// </summary>
+        /// <remarks>
+        /// Use this method to display UI elements like a "continue" button
+        /// in sync with other Views like voice over playback.
+        /// </remarks>
+        public UnityEngine.Events.UnityEvent onLineFinishDisplayingOnAllViews;
 
         /// <summary>
         /// A <see cref="DialogueRunner.StringUnityEvent"/> that is called
@@ -172,7 +183,7 @@ namespace Yarn.Unity {
         /// <seealso cref="textSpeed"/>
         /// <seealso cref="onLineFinishDisplaying"/>
         public DialogueRunner.StringUnityEvent onLineUpdate;
-        
+
         /// <summary>
         /// A <see cref="UnityEngine.Events.UnityEvent"/> that is called
         /// when a line has finished displaying, and should be removed from
@@ -191,7 +202,6 @@ namespace Yarn.Unity {
         /// <summary>
         /// A <see cref="UnityEngine.Events.UnityEvent"/> that is called
         /// when an <see cref="OptionSet"/> has been displayed to the user.
-        /// 
         /// </summary>
         /// <remarks>
         /// Before this method is called, the <see cref="Button"/>s in <see
@@ -205,7 +215,7 @@ namespace Yarn.Unity {
         /// object that they're contained in.
         /// </remarks>
         public UnityEngine.Events.UnityEvent onOptionsStart;
-        
+
         /// <summary>
         /// A <see cref="UnityEngine.Events.UnityEvent"/> that is called
         /// when an option has been selected, and the <see
@@ -222,38 +232,10 @@ namespace Yarn.Unity {
         /// </remarks>
         public UnityEngine.Events.UnityEvent onOptionsEnd;
 
-        /// <summary>
-        /// A <see cref="DialogueRunner.StringUnityEvent"/> that is called
-        /// when a <see cref="Command"/> is received.
-        /// </summary>
-        /// <remarks>
-        /// Use this method to dispatch a command to other parts of your game.
-        /// 
-        /// This method is only called if the <see cref="Command"/> has not
-        /// been handled by a command handler that has been added to the
-        /// <see cref="DialogueRunner"/>, or by a method on a <see
-        /// cref="MonoBehaviour"/> in the scene with the attribute <see
-        /// cref="YarnCommandAttribute"/>.
-        /// 
-        /// {{|note|}}
-        /// When a command is delivered in this way, the <see cref="DialogueRunner"/> will not pause execution. If you want a command to make the DialogueRunner pause execution, see <see cref="DialogueRunner.AddCommandHandler(string,
-        /// DialogueRunner.BlockingCommandHandler)"/>.
-        /// {{|/note|}}
-        ///
-        /// This method receives the full text of the command, as it appears between
-        /// the `<![CDATA[<<]]>` and `<![CDATA[>>]]>` markers.
-        /// </remarks>
-        /// <seealso cref="DialogueRunner.AddCommandHandler(string,
-        /// DialogueRunner.CommandHandler)"/> 
-        /// <seealso cref="DialogueRunner.AddCommandHandler(string,
-        /// DialogueRunner.BlockingCommandHandler)"/> 
-        /// <seealso cref="YarnCommandAttribute"/>
-        public DialogueRunner.StringUnityEvent onCommand;
-        
         internal void Awake ()
         {
             // Start by hiding the container
-            if (dialogueContainer != null)
+            if (dialogueContainer)
                 dialogueContainer.SetActive(false);
 
             foreach (var button in optionButtons) {
@@ -261,28 +243,28 @@ namespace Yarn.Unity {
             }
         }
 
-        /// Runs a line.
-        /// <inheritdoc/>
-        public override Dialogue.HandlerExecutionType RunLine (Yarn.Line line, ILineLocalisationProvider localisationProvider, System.Action onLineComplete)
-        {
-            // Start displaying the line; it will call onComplete later
-            // which will tell the dialogue to continue
-            StartCoroutine(DoRunLine(line, localisationProvider, onLineComplete));
-            return Dialogue.HandlerExecutionType.PauseExecution;
-        }
-
-        /// Show a line of dialogue, gradually        
-        private IEnumerator DoRunLine(Yarn.Line line, ILineLocalisationProvider localisationProvider, System.Action onComplete) {
+        /// Show a line of dialogue, gradually
+        protected override IEnumerator RunLine(LocalizedLine dialogueLine) {
             onLineStart?.Invoke();
 
-            userRequestedNextLine = false;
-            
+            finishCurrentLine = false;
+
             // The final text we'll be showing for this line.
-            string text = localisationProvider.GetLocalisedTextForLine(line);
+            string text = dialogueLine.TextLocalized;
+
+            // Now that we know the localised string for this line, we
+            // can go ahead and inject this line's substitutions.
+            for (int i = 0; i < dialogueLine.Substitutions.Length; i++) {
+                string substitution = dialogueLine.Substitutions[i];
+                text = text.Replace("{" + i + "}", substitution);
+            }
+
+            // Apply in-line format functions
+            text = Dialogue.ExpandFormatFunctions(text, Preferences.TextLanguage);
 
             if (text == null) {
-                Debug.LogWarning($"Line {line.ID} doesn't have any localised text.");
-                text = line.ID;
+                Debug.LogWarning($"Line {dialogueLine.TextID} doesn't have any localised text.");
+                text = dialogueLine.TextID;
             }
 
             if (textSpeed > 0.0f) {
@@ -292,7 +274,7 @@ namespace Yarn.Unity {
                 foreach (char c in text) {
                     stringBuilder.Append (c);
                     onLineUpdate?.Invoke(stringBuilder.ToString ());
-                    if (userRequestedNextLine) {
+                    if (finishCurrentLine) {
                         // We've requested a skip of the entire line.
                         // Display all of the text immediately.
                         onLineUpdate?.Invoke(text);
@@ -305,38 +287,30 @@ namespace Yarn.Unity {
                 onLineUpdate?.Invoke(text);
             }
 
-            // We're now waiting for the player to move on to the next line
-            userRequestedNextLine = false;
-
             // Indicate to the rest of the game that the line has finished being delivered
             onLineFinishDisplaying?.Invoke();
+        }
 
-            while (userRequestedNextLine == false) {
-                yield return null;
-            }
-
+        protected override IEnumerator EndCurrentLine() {
             // Avoid skipping lines if textSpeed == 0
             yield return new WaitForEndOfFrame();
 
             // Hide the text and prompt
             onLineEnd?.Invoke();
-
-            onComplete();
-
         }
 
         /// Runs a set of options.
         /// <inheritdoc/>
-        public override void RunOptions (Yarn.OptionSet optionSet, ILineLocalisationProvider localisationProvider, System.Action<int> onOptionSelected) {
-            StartCoroutine(DoRunOptions(optionSet, localisationProvider, onOptionSelected));
+        public override void RunOptions (DialogueOption[] dialogueOptions, System.Action<int> onOptionSelected) {
+            StartCoroutine(DoRunOptions(dialogueOptions, onOptionSelected));
         }
 
         /// Show a list of options, and wait for the player to make a
         /// selection.
-        private  IEnumerator DoRunOptions (Yarn.OptionSet optionsCollection, ILineLocalisationProvider localisationProvider, System.Action<int> selectOption)
+        private  IEnumerator DoRunOptions (DialogueOption[] dialogueOptions, System.Action<int> selectOption)
         {
             // Do a little bit of safety checking
-            if (optionsCollection.Options.Length > optionButtons.Count) {
+            if (dialogueOptions.Length > optionButtons.Count) {
                 Debug.LogWarning("There are more options to present than there are" +
                                  "buttons to present them in. This will cause problems.");
             }
@@ -347,19 +321,19 @@ namespace Yarn.Unity {
             waitingForOptionSelection = true;
 
             currentOptionSelectionHandler = selectOption;
-            
-            foreach (var optionString in optionsCollection.Options) {
+
+            foreach (var dialogueOption in dialogueOptions) {
                 optionButtons [i].gameObject.SetActive (true);
 
                 // When the button is selected, tell the dialogue about it
                 optionButtons [i].onClick.RemoveAllListeners();
-                optionButtons [i].onClick.AddListener(() => SelectOption(optionString.ID));
+                optionButtons [i].onClick.AddListener(() => SelectOption(dialogueOption.DialogueOptionID));
 
-                var optionText = localisationProvider.GetLocalisedTextForLine(optionString.Line);
+                var optionText = dialogueOption.TextLocalized;
 
                 if (optionText == null) {
-                    Debug.LogWarning($"Option {optionString.Line.ID} doesn't have any localised text");
-                    optionText = optionString.Line.ID;
+                    Debug.LogWarning($"Option {dialogueOption.TextID} doesn't have any localised text");
+                    optionText = dialogueOption.TextID;
                 }
 
                 var unityText = optionButtons [i].GetComponentInChildren<Text> ();
@@ -382,27 +356,12 @@ namespace Yarn.Unity {
                 yield return null;
             }
 
-            
             // Hide all the buttons
             foreach (var button in optionButtons) {
                 button.gameObject.SetActive (false);
             }
 
             onOptionsEnd?.Invoke();
-
-        }
-
-        /// Runs a command.
-        /// <inheritdoc/>
-        public override Dialogue.HandlerExecutionType RunCommand (Yarn.Command command, System.Action onCommandComplete) {
-            // Dispatch this command via the 'On Command' handler.
-            onCommand?.Invoke(command.Text);
-
-            // Signal to the DialogueRunner that it should continue
-            // executing. (This implementation of RunCommand always signals
-            // that execution should continue, and never calls
-            // onCommandComplete.)
-            return Dialogue.HandlerExecutionType.ContinueExecution;
         }
 
         /// Called when the dialogue system has started running.
@@ -410,10 +369,10 @@ namespace Yarn.Unity {
         public override void DialogueStarted ()
         {
             // Enable the dialogue controls.
-            if (dialogueContainer != null)
+            if (dialogueContainer)
                 dialogueContainer.SetActive(true);
 
-            onDialogueStart?.Invoke();            
+            onDialogueStart?.Invoke();
         }
 
         /// Called when the dialogue system has finished running.
@@ -423,29 +382,8 @@ namespace Yarn.Unity {
             onDialogueEnd?.Invoke();
 
             // Hide the dialogue interface.
-            if (dialogueContainer != null)
+            if (dialogueContainer)
                 dialogueContainer.SetActive(false);
-            
-        }
-
-        /// <summary>
-        /// Signals that the user has finished with a line, or wishes to
-        /// skip to the end of the current line.
-        /// </summary>
-        /// <remarks>
-        /// This method is generally called by a "continue" button, and
-        /// causes the DialogueUI to signal the <see
-        /// cref="DialogueRunner"/> to proceed to the next piece of
-        /// content.
-        ///
-        /// If this method is called before the line has finished appearing
-        /// (that is, before <see cref="onLineFinishDisplaying"/> is
-        /// called), the DialogueUI immediately displays the entire line
-        /// (via the <see cref="onLineUpdate"/> method), and then calls
-        /// <see cref="onLineFinishDisplaying"/>.
-        /// </remarks>
-        public void MarkLineComplete() {
-            userRequestedNextLine = true;
         }
 
         /// <summary>
@@ -460,7 +398,7 @@ namespace Yarn.Unity {
         /// <param name="optionID">The <see cref="OptionSet.Option.ID"/> of
         /// the <see cref="OptionSet.Option"/> that was selected.</param>
         public void SelectOption(int optionID) {
-            if (waitingForOptionSelection == false) {
+            if (!waitingForOptionSelection) {
                 Debug.LogWarning("An option was selected, but the dialogue UI was not expecting it.");
                 return;
             }
@@ -468,6 +406,14 @@ namespace Yarn.Unity {
             currentOptionSelectionHandler?.Invoke(optionID);
         }
 
-    }
+        /// <inheritdoc/>
+        protected override void FinishCurrentLine() {
+            finishCurrentLine = true;
+        }
 
+        /// <inheritdoc/>
+        protected internal override void OnFinishedLineOnAllViews() {
+            onLineFinishDisplayingOnAllViews?.Invoke();
+        }
+    }
 }

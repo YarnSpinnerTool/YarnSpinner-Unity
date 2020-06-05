@@ -30,8 +30,9 @@ using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using CsvHelper;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Yarn.Unity
 {
@@ -42,7 +43,7 @@ namespace Yarn.Unity
     /// the interface between your game and Yarn Spinner.
     /// </summary>
     [AddComponentMenu("Scripts/Yarn Spinner/Dialogue Runner")]
-    public class DialogueRunner : MonoBehaviour, ILineLocalisationProvider
+    public class DialogueRunner : MonoBehaviour
     {
         /// <summary>
         /// The <see cref="YarnProgram"/> assets that should be loaded on
@@ -50,27 +51,15 @@ namespace Yarn.Unity
         /// </summary>
         public YarnProgram[] yarnScripts;
 
-         
-
-        /// <summary>
-        /// The language code used to select a string table.
-        /// </summary>
-        /// <remarks>
-        /// This must be an IETF BCP-47 language code, like "en" or "de".
-        /// 
-        /// This value is used to select a string table from the <see cref="YarnProgram.localizations"/>, for each of the <see cref="YarnProgram"/>s in <see cref="yarnScripts"/>.
-        /// </remarks>
-        public string textLanguage;
-
         /// <summary>
         /// The variable storage object.
         /// </summary>
         public VariableStorageBehaviour variableStorage;
 
         /// <summary>
-        /// The object that will handle the actual display and user input.
+        /// The View classes that will present the dialogue to the user.
         /// </summary>
-        public DialogueUIBehaviour dialogueUI;
+        public DialogueViewBase[] dialogueViews;
 
         /// <summary>The name of the node to start from.</summary>
         /// <remarks>
@@ -87,6 +76,21 @@ namespace Yarn.Unity
         /// The node specified by <see cref="startNode"/> will be used.
         /// </remarks>
         public bool startAutomatically = true;
+
+        /// <summary>
+        /// Whether the DialogueRunner should automatically proceed to the
+        /// next line once a line has been finished.
+        /// </summary>
+        public bool continueNextLineOnLineFinished;
+
+#if ADDRESSABLES
+        /// <summary>
+        /// Whether the DialogueRunner should wait for the linked 
+        /// Addressable voice over AudioClips to finish loading (true)
+        /// or not (false).
+        /// </summary>
+        public bool waitForAddressablesLoaded = true;
+#endif
 
         /// <summary>
         /// Gets a value that indicates if the dialogue is actively running.
@@ -143,91 +147,52 @@ namespace Yarn.Unity
         public Dialogue Dialogue => dialogue ?? (dialogue = CreateDialogueInstance());
 
         /// <summary>
+        /// A <see cref="StringUnityEvent"/> that is called when a <see cref="Command"/> 
+        /// is received.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Use this method to dispatch a command to other parts of your game.
+        /// This method is only called if the <see cref="Command"/> has not
+        /// been handled by a command handler that has been added to the
+        /// <see cref="DialogueRunner"/>, or by a method on a <see
+        /// cref="MonoBehaviour"/> in the scene with the attribute <see
+        /// cref="YarnCommandAttribute"/>.
+        /// {{|note|}}
+        /// When a command is delivered in this way, the <see cref="DialogueRunner"/> 
+        /// will not pause execution. If you want a command to make the DialogueRunner 
+        /// pause execution, see <see cref="AddCommandHandler(string, BlockingCommandHandler)"/>.
+        /// {{|/note|}}
+        /// </para>
+        /// <para>
+        /// This method receives the full text of the command, as it appears between
+        /// the `<![CDATA[<<]]>` and `<![CDATA[>>]]>` markers.
+        /// </para>
+        /// </remarks>
+        /// <seealso cref="AddCommandHandler(string, CommandHandler)"/>
+        /// <seealso cref="AddCommandHandler(string, BlockingCommandHandler)"/>
+        /// <seealso cref="YarnCommandAttribute"/>
+        public StringUnityEvent onCommand;
+
+        /// <summary>
         /// Adds a program, and parses and adds the contents of the
         /// program's string table to the DialogueRunner's combined string table.
         /// </summary>
         /// <remarks>This method calls <see
-        /// cref="AddStringTable(YarnProgram)"/> to load the string table
+        /// cref="AddDialogueLines(YarnProgram)"/> to load the string table
         /// for the current localisation. It selects the appropriate string
-        /// table based on the value of <see
-        /// cref="textLanguage"/>.</remarks>
-        /// <param name="scriptToLoad">The <see cref="YarnProgram"/> to
-        /// load.</param>
+        /// table based on the value of set in the Preferences dialogue.
         public void Add(YarnProgram scriptToLoad)
         {
             Dialogue.AddProgram(scriptToLoad.GetProgram());
-            AddStringTable(scriptToLoad);
+            AddDialogueLines(scriptToLoad);
+            
+            // Keep reference to loaded script so we can reload upon language changes
+            var additionalYarnScripts = yarnScripts.ToList();
+            additionalYarnScripts.Add(scriptToLoad);
+            yarnScripts = additionalYarnScripts.ToArray();
         }
 
-        /// <summary>
-        /// Parses and adds the contents of a string table from a yarn
-        /// asset to the DialogueRunner's combined string table.
-        /// </summary>
-        /// <remarks>
-        /// <see cref="YarnProgram"/>s contain at least one string table,
-        /// stored in <see
-        /// cref="YarnProgram.baseLocalisationStringTable"/>. String tables
-        /// are <see cref="TextAsset"/>s that contain comma-separated value
-        /// formatted text.
-        ///
-        /// A <see cref="YarnProgram"/> may have more string tables beyond
-        /// the base localisation in its <see
-        /// cref="YarnProgram.localizations"/>. 
-        ///
-        /// The specific string table that this method uses is determined
-        /// by the value of <see cref="textLanguage"/>. If this is empty or
-        /// null, <see cref="YarnProgram.baseLocalisationStringTable"/> is
-        /// used.
-        /// </remarks>
-        /// <param name="yarnScript">The <see cref="YarnProgram"/> to get
-        /// the string table from.</param>
-        public void AddStringTable(YarnProgram yarnScript)
-        {
-            var textToLoad = new TextAsset();
-
-            if (yarnScript.localizations != null || yarnScript.localizations.Length > 0) {
-                textToLoad = Array.Find(yarnScript.localizations, element => element.languageName == textLanguage)?.text;
-            }
-
-            if (textToLoad == null || string.IsNullOrEmpty(textToLoad.text)) {
-                textToLoad = yarnScript.baseLocalisationStringTable;
-            }
-
-            // Use the invariant culture when parsing the CSV
-            var configuration = new CsvHelper.Configuration.Configuration(
-                System.Globalization.CultureInfo.InvariantCulture
-            );
-
-            using (var reader = new System.IO.StringReader(textToLoad.text))
-            using (var csv = new CsvReader(reader, configuration)) {
-                csv.Read();
-                csv.ReadHeader();
-
-                while (csv.Read())
-                {
-                    strings.Add(csv.GetField("id"), csv.GetField("text"));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Adds entries to the DialogueRunner's combined string table.
-        /// </summary>
-        /// <remarks>
-        /// This method may be used to directly add <see
-        /// cref="Yarn.Compiler.StringInfo"/> entries into the combined string table,
-        /// instead of accessing them via a <see cref="YarnProgram"/>.
-        /// </remarks>
-        /// <param name="stringTable">A dictionary mapping string IDs to
-        /// <see cref="Yarn.Compiler.StringInfo"/> values.</param>
-        public void AddStringTable(IDictionary<string, Yarn.Compiler.StringInfo> stringTable)
-        {
-            foreach (var line in stringTable) {
-                strings.Add(line.Key, line.Value.text);
-            }
-        }
-
-        
         /// <summary>
         /// Starts running dialogue. The node specified by <see
         /// cref="startNode"/> will start running.
@@ -242,7 +207,9 @@ namespace Yarn.Unity
         public void StartDialogue(string startNode)
         {
             // Stop any processes that might be running already
-            dialogueUI.StopAllCoroutines();
+            foreach (var dialogueView in dialogueViews) {
+                dialogueView.StopAllCoroutines();
+            }
 
             // Get it going
             RunDialogue();
@@ -252,11 +219,22 @@ namespace Yarn.Unity
                 IsDialogueRunning = true;
 
                 // Signal that we're starting up.
-                dialogueUI.DialogueStarted();
+                foreach (var dialogueView in dialogueViews) {
+                    dialogueView.DialogueStarted();
+                }
 
                 Dialogue.SetNode(startNode);
-
-                ContinueDialogue();
+#if ADDRESSABLES
+                if (waitForAddressablesLoaded) {
+                    if (WaitForAddressablesLoadedCoroutine == null) {
+                        WaitForAddressablesLoadedCoroutine = StartCoroutine(CheckAddressablesLoaded(ContinueDialogue));
+                    }
+                } else {
+#endif
+                    ContinueDialogue();
+#if ADDRESSABLES
+                }
+#endif
             }
         }
 
@@ -462,7 +440,7 @@ namespace Yarn.Unity
 
         #region Private Properties/Variables/Procedures
 
-        Action continueAction;
+        List<DialogueViewBase> lineCurrentlyRunOnDialogueViews = new List<DialogueViewBase>();
         Action<int> selectAction;
 
         /// <summary>
@@ -500,8 +478,14 @@ namespace Yarn.Unity
         Dictionary<string, CommandHandler> commandHandlers = new Dictionary<string, CommandHandler>();
         Dictionary<string, BlockingCommandHandler> blockingCommandHandlers = new Dictionary<string, BlockingCommandHandler>();
 
-        // Maps string IDs received from Yarn Spinner to user-facing text
-        Dictionary<string, string> strings = new Dictionary<string, string>();
+        /// <summary>
+        /// Collection of dialogue lines linked with their corresponding Yarn linetags.
+        /// </summary>
+        Dictionary<string, string> localizedText = new Dictionary<string, string>();
+        /// <summary>
+        /// Collection of voice over AudioClips linked with their corresponding Yarn linetags.
+        /// </summary>
+        Dictionary<string, AudioClip> localizedAudio = new Dictionary<string, AudioClip>();
 
         // A flag used to note when we call into a blocking command
         // handler, but it calls its complete handler immediately -
@@ -513,6 +497,22 @@ namespace Yarn.Unity
         // handler, then the Dialogue is not told to pause.
         bool wasCompleteCalled = false;
 
+        /// <summary>
+        /// A flag caching if a View has communicated the user's intent to proceed to the next line
+        /// </summary>
+        bool userIntendedNextLine = false;
+
+        /// <summary>
+        /// List of Addressable voice over AudioClips being currently loaded.
+        /// </summary>
+        private List<Task> addressableVoiceOverLoadingTasks = new List<Task>();
+
+        /// <summary>
+        /// Instance of coroutine checking whether all Addressable loading tasks finished.
+        /// </summary>
+        private Coroutine WaitForAddressablesLoadedCoroutine;
+
+
         /// Our conversation engine
         /** Automatically created on first access
          */
@@ -521,7 +521,7 @@ namespace Yarn.Unity
         /// Start the dialogue
         void Start()
         {
-            Assert.IsNotNull(dialogueUI, "Implementation was not set! Can't run the dialogue!");
+            Assert.IsNotNull(dialogueViews, "No View class (like DialogueUI) was given! Can't run the dialogue without a View class!");
             Assert.IsNotNull(variableStorage, "Variable storage was not set! Can't run the dialogue!");
 
             // Ensure that the variable storage has the right stuff in it
@@ -545,6 +545,87 @@ namespace Yarn.Unity
                 StartDialogue();
             }
         }
+
+        private void OnEnable() {
+            Preferences.LanguagePreferencesChanged += OnLanguagePreferencesChanged;
+        }
+
+        private void OnDisable() {
+            Preferences.LanguagePreferencesChanged -= OnLanguagePreferencesChanged;
+        }
+
+        /// <summary>
+        /// Parses and adds the contents of a string table from a yarn
+        /// asset to the DialogueRunner's combined string table.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="YarnProgram"/>s contain at least one string table,
+        /// stored in <see
+        /// cref="YarnProgram.baseLocalisationStringTable"/>. String tables
+        /// are <see cref="TextAsset"/>s that contain comma-separated value
+        /// formatted text.
+        ///
+        /// A <see cref="YarnProgram"/> may have more string tables beyond
+        /// the base localisation in its <see
+        /// cref="YarnProgram.localizations"/>. 
+        ///
+        /// </remarks>
+        /// <param name="yarnScript">The <see cref="YarnProgram"/> to get
+        /// the string table from.</param>
+        private void AddDialogueLines(YarnProgram yarnScript) {
+            foreach (var yarnLine in yarnScript.GetStringTable()) {
+                localizedText.Add(yarnLine.Key, yarnLine.Value);
+            }
+
+#if ADDRESSABLES
+            if (ProjectSettings.AddressableVoiceOverAudioClips) {
+                if (waitForAddressablesLoaded) {
+                    addressableVoiceOverLoadingTasks.Add(yarnScript.GetVoiceOversOfLanguageAsync(GetVoiceOversCallback));
+                } else {
+#pragma warning disable CS4014 // Don't await or save the returned Tasks because the user set the option waitForAddressablesLoaded to false
+                    yarnScript.GetVoiceOversOfLanguageAsync(GetVoiceOversCallback);
+#pragma warning restore CS4014
+                }
+            } else {
+#endif
+                foreach (var voiceOver in yarnScript.GetVoiceOversOfLanguage()) {
+                    localizedAudio.Add(voiceOver.Key, voiceOver.Value);
+                }
+#if ADDRESSABLES
+            }
+#endif
+        }
+
+#if ADDRESSABLES
+        /// <summary>
+        /// Link a voice over AudioClip with a Yarn linetag.
+        /// </summary>
+        /// <param name="linetag">The linetag of the line.</param>
+        /// <param name="voiceOver">The voice over AudioClip of the line.</param>
+        private void GetVoiceOversCallback(string linetag, AudioClip voiceOver) {
+            localizedAudio[linetag] = voiceOver;
+        }
+
+        /// <summary>
+        /// Check if all Addressable load tasks are finished and invoke the given
+        /// action.
+        /// </summary>
+        /// <param name="onAddressablesLoaded">Action invoked after all Addressables are loaded.</param>
+        /// <returns></returns>
+        private IEnumerator CheckAddressablesLoaded(Action onAddressablesLoaded) {
+            while (waitForAddressablesLoaded && addressableVoiceOverLoadingTasks.Count > 0) {
+                for (int i = addressableVoiceOverLoadingTasks.Count - 1; i >= 0; i--) {
+                    // Remove task if not active anymore
+                    if ((int)addressableVoiceOverLoadingTasks[i].Status > 3) {
+                        addressableVoiceOverLoadingTasks.RemoveAt(i);
+                    }
+                }
+                yield return 0;
+            }
+            WaitForAddressablesLoadedCoroutine = null;
+            onAddressablesLoaded?.Invoke();
+        }
+#endif
 
         Dialogue CreateDialogueInstance()
         {
@@ -581,10 +662,9 @@ namespace Yarn.Unity
             AddCommandHandler("wait", HandleWaitCommand);
 
             foreach (var yarnScript in yarnScripts) {
-                AddStringTable(yarnScript);
+                AddDialogueLines(yarnScript);
             }
 
-            continueAction = ContinueDialogue;
             selectAction = SelectedOption;
 
             return dialogue;
@@ -616,12 +696,26 @@ namespace Yarn.Unity
                 }
             }
 
-            void HandleOptions(OptionSet options) => dialogueUI.RunOptions(options, this, selectAction);
+            void HandleOptions(OptionSet options) {
+                DialogueOption[] optionSet = new DialogueOption[options.Options.Length];
+                for (int i = 0; i < options.Options.Length; i++) {
+                    optionSet[i] = new DialogueOption {
+                        TextID = options.Options[i].Line.ID,
+                        DialogueOptionID = options.Options[i].ID,
+                        TextLocalized = localizedText[options.Options[i].Line.ID]
+                    };
+                }
+                foreach (var dialogueView in dialogueViews) {
+                    dialogueView.RunOptions(optionSet, selectAction);
+                }
+            }
 
             void HandleDialogueComplete()
             {
                 IsDialogueRunning = false;
-                dialogueUI.DialogueComplete();
+                foreach (var dialogueView in dialogueViews) {
+                    dialogueView.DialogueComplete();
+                }
                 onDialogueComplete.Invoke();
             }
 
@@ -637,7 +731,7 @@ namespace Yarn.Unity
                 // immediately called _continue
                 wasCompleteCalled = false;
 
-                (wasValidCommand, executionType) = DispatchCommandToRegisteredHandlers(command, continueAction);
+                (wasValidCommand, executionType) = DispatchCommandToRegisteredHandlers(command, () => ContinueDialogue());
 
                 if (wasValidCommand) {
 
@@ -667,14 +761,36 @@ namespace Yarn.Unity
                     return executionType;
                 }
 
-                // We didn't find a method in our C# code to invoke. Pass it to
-                // the UI to handle; it will determine whether we pause or
-                // continue.
-                return dialogueUI.RunCommand(command, continueAction);
+                // We didn't find a method in our C# code to invoke. Try invoking on the 
+                // publicly exposed UnityEvent.
+                onCommand?.Invoke(command.Text);
+                return Dialogue.HandlerExecutionType.ContinueExecution;
             }
 
             /// Forward the line to the dialogue UI.
-            Dialogue.HandlerExecutionType HandleLine(Line line) => dialogueUI.RunLine(line, this, continueAction);
+            Dialogue.HandlerExecutionType HandleLine(Line line)
+            {
+                // Update lines to current state before sending them to the view classes
+                var substitutions = GetInlineExpressions(line);
+                var text = localizedText.ContainsKey(line.ID) ? localizedText[line.ID] : string.Empty;
+                var audio = localizedAudio.ContainsKey(line.ID) ? localizedAudio[line.ID] : null;
+                var localizedLine = new LocalizedLine() {
+                    TextID = line.ID,
+                    TextLocalized = text,
+                    VoiceOverLocalized = audio,
+                    Substitutions = substitutions
+                };
+
+                // First register current dialogue views for line complete calls
+                foreach (var dialogueView in dialogueViews) {
+                    lineCurrentlyRunOnDialogueViews.Add(dialogueView);
+                }
+                // Send line to available dialogue views
+                foreach (var dialogueView in dialogueViews) {
+                    dialogueView.RunLine(localizedLine, () => OnDialogueLineFinished());
+                }
+                return Dialogue.HandlerExecutionType.PauseExecution;
+            }
 
             /// Indicates to the DialogueRunner that the user has selected an option
             void SelectedOption(int obj)
@@ -905,64 +1021,166 @@ namespace Yarn.Unity
             }
         }
 
+        void OnLanguagePreferencesChanged(object sender, EventArgs e) {
+            localizedAudio.Clear();
+            localizedText.Clear();
+            foreach (var yarnScript in yarnScripts) {
+                AddDialogueLines(yarnScript);
+            }
+        }
+
         void ContinueDialogue()
         {
+            lineCurrentlyRunOnDialogueViews.Clear();
             wasCompleteCalled = true;
+            userIntendedNextLine = false;
             Dialogue.Continue();
         }
 
-        /// <inheritdoc />
-        string ILineLocalisationProvider.GetLocalisedTextForLine(Line line)
-        {
-            if (!strings.TryGetValue(line.ID, out var result)) return null;
+        /// <summary>
+        /// Called by a <see cref="DialogueViewBase"/> derived class from <see cref="dialogueViews"/>
+        /// to inform the <see cref="DialogueRunner"/> that the user intents to proceed to the next
+        /// line.
+        /// </summary>
+        internal void OnViewUserIntentNextLine() {
+            userIntendedNextLine = true;
 
-            // Now that we know the localised string for this line, we
-            // can go ahead and inject this line's substitutions.
-            for (int i = 0; i < line.Substitutions.Length; i++) {
-                string substitution = line.Substitutions[i];
-                result = result.Replace("{" + i + "}", substitution);
+            switch (GetLowestLineStatus()) {
+                case DialogueViewBase.DialogueLineStatus.Running:
+                    FinishLineCurrentlyRunningOnViews();
+                    break;
+                case DialogueViewBase.DialogueLineStatus.Finished:
+                    EndLineCurrentlyFinishedOnViews();
+                    break;
+                default:
+                    break;
             }
 
-            // Apply in-line format functions
-            result = Dialogue.ExpandFormatFunctions(result, textLanguage);
-
-            return result;
+            if (CheckDialogueViewsForCommonLineStatus(DialogueViewBase.DialogueLineStatus.Ended) && (continueNextLineOnLineFinished || userIntendedNextLine)) {
+                ContinueDialogue();
+            }
         }
 
+        /// <summary>
+        /// Called by a <see cref="DialogueViewBase"/> derived class from <see cref="dialogueViews"/>
+        /// to inform the <see cref="DialogueRunner"/> that the user intents to finish the current
+        /// line.
+        /// </summary>
+        internal void OnViewUserIntentFinishLine() {
+            FinishLineCurrentlyRunningOnViews();
+        }
+
+        /// <summary>
+        /// Called by a <see cref="DialogueViewBase"/> derived class from <see cref="dialogueViews"/>
+        /// to inform the <see cref="DialogueRunner"/> that it has finished presenting a line.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Checks and informs all <see cref="dialogueViews"/> if they have all finished a line.
+        /// Also proceeds to the next line if the option 
+        /// <see cref="continueNextLineOnLineFinished"/> is true or if the user
+        /// expressed that intent on one of the <see cref="dialogueViews"/> in which case
+        /// the corresponding view called <see cref="OnViewUserIntentNextLine"/>.
+        /// </para>
+        /// </remarks>
+        void OnDialogueLineFinished() {
+            if (CheckDialogueViewsForCommonLineStatus(DialogueViewBase.DialogueLineStatus.Finished)) {
+                LineFinishedOnAllViews();
+
+                if (continueNextLineOnLineFinished || userIntendedNextLine) {
+                    EndLineCurrentlyFinishedOnViews();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Instructs the <see cref="DialogueRunner"/> to check all <see cref="dialogueViews"/> if
+        /// they have all ended the current line and proceeds with the next line in that case.
+        /// </summary>
+        void OnDialogueLineCompleted() {
+            if (CheckDialogueViewsForCommonLineStatus(DialogueViewBase.DialogueLineStatus.Ended)) {
+                ContinueDialogue();
+            }
+        }
+
+        /// <summary>
+        /// Informs all <see cref="dialogueViews"/> that they have finished a line by calling
+        /// <see cref="DialogueViewBase.OnFinishedLineOnAllViews"/> on them.
+        /// </summary>
+        private void LineFinishedOnAllViews() {
+            foreach (var dialogueView in dialogueViews) {
+                dialogueView.OnFinishedLineOnAllViews();
+            }
+        }
+
+        /// <summary>
+        /// Instructs all <see cref="dialogueViews"/> to end the current line by calling
+        /// <see cref="DialogueViewBase.EndCurrentLine(Action)"/> on all of them.
+        /// </summary>
+        private void EndLineCurrentlyFinishedOnViews() {
+            foreach (var dialogueView in dialogueViews) {
+                if (dialogueView.dialogueLineStatus == DialogueViewBase.DialogueLineStatus.Finished) {
+                    StartCoroutine(dialogueView.EndCurrentLine(OnDialogueLineCompleted));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Instructs all <see cref="dialogueViews"/> to go to the end of the current line by calling
+        /// <see cref="DialogueViewBase.FinishRunningCurrentLine"/> on all of them.
+        /// </summary>
+        private void FinishLineCurrentlyRunningOnViews() {
+            foreach (var dialogueView in dialogueViews) {
+                if (dialogueView.dialogueLineStatus == DialogueViewBase.DialogueLineStatus.Running) {
+                    dialogueView.FinishRunningCurrentLine();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Check the <see cref="DialogueViewBase.DialogueLineStatus"/> on all <see cref="dialogueViews"/> and get the status with the lowest
+        /// int representation.
+        /// </summary>
+        /// <returns></returns>
+        DialogueViewBase.DialogueLineStatus GetLowestLineStatus() {
+            var lowestStatus = DialogueViewBase.DialogueLineStatus.Ended;
+            foreach (var dialogueView in dialogueViews) {
+                if (dialogueView.dialogueLineStatus < lowestStatus) {
+                    lowestStatus = dialogueView.dialogueLineStatus;
+                }
+            }
+            return lowestStatus;
+        }
+
+        /// <summary>
+        /// Return true if all <see cref="dialogueViews"/> have the same <see cref="DialogueViewBase.DialogueLineStatus"/>.
+        /// </summary>
+        /// <param name="commonStatusToCheck"></param>
+        /// <returns></returns>
+        private bool CheckDialogueViewsForCommonLineStatus (DialogueViewBase.DialogueLineStatus commonStatusToCheck) {
+            foreach (var dialogueView in dialogueViews) {
+                if (dialogueView.dialogueLineStatus != commonStatusToCheck) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        string[] GetInlineExpressions (Line line) {
+            if (!localizedText.ContainsKey(line.ID)) return Array.Empty<string>();
+
+            List<string> substitutions = new List<string>();
+
+            foreach (string substitution in line.Substitutions) {
+                substitutions.Add(substitution);
+            }
+
+            return substitutions.ToArray();
+        }
         #endregion
     }
 
     #region Class/Interface
-
-    /// <summary>
-    /// Provides a mechanism for determining the user-facing localised content for a <see cref="Line"/>.
-    /// </summary>
-    /// <seealso cref="DialogueRunner"/>
-    public interface ILineLocalisationProvider
-    {
-        /// <summary>
-        /// Returns the user-facing text for a given <see cref="Line"/>.
-        /// </summary>
-        /// <remarks>
-        /// This method determines the final text to deliver to the user,
-        /// given a <see cref="Line"/>. Classes that implement this method
-        /// should use the Line's <see cref="Line.ID"/> to look up the
-        /// user-facing text in a string table, replace any substitutions
-        /// in the text, and then expand any format functions by calling
-        /// <see cref="Dialogue.ExpandFormatFunctions"/>.
-        ///
-        /// See the <seealso cref="Line"/> class's documentation for more
-        /// information on how to prepare a Line for delivery to the user.
-        /// </remarks>
-        /// <param name="line">The <see cref="Line"/> to get the text
-        /// for.</param>
-        /// <returns>The text to show the user, or `null` if the
-        /// user-facing text cannot be found.</returns>
-        /// <seealso cref="Line"/>
-        /// <seealso cref="Dialogue.ExpandFormatFunctions(string,
-        /// string)"/>
-        string GetLocalisedTextForLine(Line line);
-    }
 
     /// <summary>
     /// An attribute that marks a method on a <see cref="MonoBehaviour"/>
@@ -1083,112 +1301,6 @@ namespace Yarn.Unity
 
         public YarnCommandAttribute(string commandString) => CommandString = commandString;
     }
-
-    /// <summary>
-    /// A <see cref="MonoBehaviour"/> that can display lines, options and commands to the user, and receive input regarding their choices.
-    /// </summary>
-    /// <remarks>
-    /// The <see cref="DialogueRunner"/> uses subclasses of this type to relay information to and from the user, and to pause and resume the execution of the Yarn program.
-    /// </remarks>
-    /// <seealso cref="DialogueRunner.dialogueUI"/>
-    /// <seealso cref="DialogueUI"/>
-    public abstract class DialogueUIBehaviour : MonoBehaviour
-    {
-        /// <summary>Signals that a conversation has started.</summary>
-        public virtual void DialogueStarted()
-        {
-            // Default implementation does nothing.
-        }
-
-        /// <summary>
-        /// Called by the <see cref="DialogueRunner"/> to signal that a line should be displayed to the user.
-        /// </summary>
-        /// <remarks>
-        /// If this method returns <see
-        /// cref="Dialogue.HandlerExecutionType.ContinueExecution"/>, it
-        /// should not not call the <paramref name="onLineComplete"/>
-        /// method.
-        /// </remarks>
-        /// <param name="line">The line that should be displayed to the
-        /// user.</param>
-        /// <param name="localisationProvider">The object that should be
-        /// used to get the localised text of the line.</param>
-        /// <param name="onLineComplete">A method that should be called to
-        /// indicate that the line has finished being delivered.</param>
-        /// <returns><see
-        /// cref="Dialogue.HandlerExecutionType.PauseExecution"/> if
-        /// dialogue should wait until the completion handler is
-        /// called before continuing execution; <see
-        /// cref="Dialogue.HandlerExecutionType.ContinueExecution"/> if
-        /// dialogue should immediately continue running after calling this
-        /// method.</returns>
-        public abstract Dialogue.HandlerExecutionType RunLine(Line line, ILineLocalisationProvider localisationProvider, Action onLineComplete);
-
-        /// <summary>
-        /// Called by the <see cref="DialogueRunner"/> to signal that a set of options should be displayed to the user.
-        /// </summary>
-        /// <remarks>
-        /// When this method is called, the <see cref="DialogueRunner"/>
-        /// will pause execution until the `onOptionSelected` method is
-        /// called.
-        /// </remarks>
-        /// <param name="optionSet">The set of options that should be
-        /// displayed to the user.</param>
-        /// <param name="localisationProvider">The object that should be
-        /// used to get the localised text of each of the options.</param>
-        /// <param name="onOptionSelected">A method that should be called
-        /// when the user has made a selection.</param>
-        public abstract void RunOptions(OptionSet optionSet, ILineLocalisationProvider localisationProvider, Action<int> onOptionSelected);
-
-        /// <summary>
-        /// Called by the <see cref="DialogueRunner"/> to signal that a command should be executed.
-        /// </summary>
-        /// <remarks>
-        /// This method will only be invoked if the <see cref="Command"/>
-        /// could not be handled by the <see cref="DialogueRunner"/>.
-        ///
-        /// If this method returns <see
-        /// cref="Dialogue.HandlerExecutionType.ContinueExecution"/>, it
-        /// should not call the <paramref name="onCommandComplete"/>
-        /// method.
-        /// </remarks>
-        /// <param name="command">The command to be executed.</param>
-        /// <param name="onCommandComplete">A method that should be called
-        /// to indicate that the DialogueRunner should continue
-        /// execution.</param>
-        /// <inheritdoc cref="RunLine(Line, ILineLocalisationProvider, Action)"/>
-        public abstract Dialogue.HandlerExecutionType RunCommand(Command command, Action onCommandComplete);
-
-        /// <summary>
-        /// Called by the <see cref="DialogueRunner"/> to signal that the end of a node has been reached.
-        /// </summary>
-        /// <remarks>
-        /// This method may be called multiple times before <see cref="DialogueComplete"/> is called.
-        /// 
-        /// If this method returns <see
-        /// cref="Dialogue.HandlerExecutionType.ContinueExecution"/>, do
-        /// not call the <paramref name="onComplete"/> method.
-        /// </remarks>
-        /// <param name="nextNode">The name of the next node that is being entered.</param>
-        /// <param name="onComplete">A method that should be called to
-        /// indicate that the DialogueRunner should continue executing.</param>
-        /// <inheritdoc cref="RunLine(Line, ILineLocalisationProvider, Action)"/>
-        public virtual Dialogue.HandlerExecutionType NodeComplete(string nextNode, Action onComplete)
-        {
-            // Default implementation does nothing.
-
-            return Dialogue.HandlerExecutionType.ContinueExecution;
-        }
-
-        /// <summary>
-        /// Called by the <see cref="DialogueRunner"/> to signal that the dialogue has ended.
-        /// </summary>
-        public virtual void DialogueComplete()
-        {
-            // Default implementation does nothing.
-        }
-    }
-
     
     /// <summary>
     /// A <see cref="MonoBehaviour"/> that a <see cref="DialogueRunner"/>
@@ -1233,6 +1345,40 @@ namespace Yarn.Unity
         /// present.
         /// </remarks>
         public abstract void ResetToDefaults();
+    }
+
+    public class LocalizedLine {
+        /// <summary>
+        /// DialogueLine's ID
+        /// </summary>
+        public string TextID;
+        /// <summary>
+        /// DialogueLine's inline expression's substitution
+        /// </summary>
+        public string[] Substitutions;
+        /// <summary>
+        /// DialogueLine's text
+        /// </summary>
+        public string TextLocalized;
+        /// <summary>
+        /// DialogueLine's voice over clip
+        /// </summary>
+        public AudioClip VoiceOverLocalized;
+    }
+
+    public class DialogueOption {
+        /// <summary>
+        /// The ID of this dialogue option
+        /// </summary>
+        public int DialogueOptionID;
+        /// <summary>
+        /// The ID of the dialogue option's text
+        /// </summary>
+        public string TextID;
+        /// <summary>
+        /// The text of this dialogue option
+        /// </summary>
+        public string TextLocalized;
     }
 
     #endregion

@@ -7,7 +7,10 @@ using System.Globalization;
 using Yarn;
 using Yarn.Compiler;
 
-[ScriptedImporter(1, new[] {"yarn", "yarnc"})]
+/// <summary>
+/// A <see cref="ScriptedImporter"/> for Yarn assets. The actual asset used and referenced at runtime and in the editor will be a <see cref="YarnProgram"/>, which this class wraps around creating the asset's corresponding meta file.
+/// </summary>
+[ScriptedImporter(2, new[] {"yarn", "yarnc"})]
 public class YarnImporter : ScriptedImporter
 {    
     // culture identifiers like en-US
@@ -26,10 +29,19 @@ public class YarnImporter : ScriptedImporter
 
     public TextAsset baseLanguage;
     public YarnTranslation[] localizations = new YarnTranslation[0];
+    public LinetagToLanguage[] voiceOvers = new LinetagToLanguage[0];
+    public YarnProgram programContainer = default;
 
     private void OnValidate() {
-        if (baseLanguageID == null) {
-            baseLanguageID = CultureInfo.CurrentCulture.Name;
+        if (string.IsNullOrEmpty(baseLanguageID)) {
+            // If the user has added project wide text languages in the settings 
+            // dialogue, we default to the first text language as base language
+            if (ProjectSettings.TextProjectLanguages.Count > 0) {
+                baseLanguageID = ProjectSettings.TextProjectLanguages[0];
+            // Otherwrise use system's language as base language
+            } else {
+                baseLanguageID = CultureInfo.CurrentCulture.Name;
+            }
         }
     }
 
@@ -42,7 +54,7 @@ public class YarnImporter : ScriptedImporter
 
     public override void OnImportAsset(AssetImportContext ctx)
     {
-
+        OnValidate();
         var extension = System.IO.Path.GetExtension(ctx.assetPath);
 
         // Clear the list of strings, in case this compilation fails
@@ -60,6 +72,24 @@ public class YarnImporter : ScriptedImporter
         }
     }
 
+#if ADDRESSABLES
+    /// <summary>
+    /// Remove all voice over audio clip references or addressable references on this yarn asset.
+    /// </summary>
+    /// <param name="removeDirectReferences">True if direct audio clip references should be deleted and false if Addressable references should be deleted.</param>
+    public void RemoveAllVoiceOverReferences(bool removeDirectReferences) {
+        foreach (var linetag in voiceOvers) {
+            foreach (var language in linetag.languageToAudioclip) {
+                if (removeDirectReferences) {
+                    language.audioClip = null;
+                } else {
+                    language.audioClipAddressable = null;
+                }
+            }
+        }
+    }
+#endif
+
     private void ImportYarn(AssetImportContext ctx)
     {
         var sourceText = File.ReadAllText(ctx.assetPath);
@@ -72,7 +102,7 @@ public class YarnImporter : ScriptedImporter
             compilationStatus = Compiler.CompileString(sourceText, fileName, out var compiledProgram, out var stringTable);
 
             // Create a container for storing the bytes
-            var programContainer = ScriptableObject.CreateInstance<YarnProgram>();                
+            programContainer = ScriptableObject.CreateInstance<YarnProgram>();
 
             using (var memoryStream = new MemoryStream())
             using (var outputStream = new Google.Protobuf.CodedOutputStream(memoryStream))
@@ -136,16 +166,59 @@ public class YarnImporter : ScriptedImporter
                         ctx.AddObjectToAsset("Strings", textAsset);
 
                         programContainer.baseLocalisationStringTable = textAsset;
+                        programContainer.baseLocalizationId = baseLanguageID;
                         baseLanguage = textAsset;
                         programContainer.localizations = localizations;
+                        programContainer.baseLocalizationId = baseLanguageID;
                     }
 
                     stringIDs = lines.Select(l => l.id).ToArray();
 
+                    var voiceOversList = voiceOvers.ToList();
+                    // Init voice overs by writing all linetags of this yarn program for every available translation
+                    foreach (var textEntry in stringIDs) {
+                        if (voiceOversList.Find(element => element.linetag == textEntry) == null) {
+                            voiceOversList.Add(new LinetagToLanguage(textEntry));
+                        }
+
+                        var languageToAudioclipList = voiceOversList.Find(element => element.linetag == textEntry).languageToAudioclip.ToList();
+                        foreach (var localization in localizations) {
+                            if (!ProjectSettings.AudioProjectLanguages.Contains(localization.languageName)) {
+                                continue;
+                            }
+
+                            if (languageToAudioclipList.Find(element => element.language == localization.languageName) == null) {
+                                languageToAudioclipList.Add(new LanguageToAudioclip(localization.languageName));
+                            }
+                        }
+
+                        // Also initialize for base language ID
+                        if (!string.IsNullOrEmpty(baseLanguageID) && languageToAudioclipList.Find(element => element.language == baseLanguageID) == null) {
+                            languageToAudioclipList.Add(new LanguageToAudioclip(baseLanguageID));
+                        }
+
+                        // Remove empty entries; shouldn't be necessary though
+                        if (languageToAudioclipList.Find(element => string.IsNullOrEmpty(element.language)) != null) {
+                            languageToAudioclipList.Remove(languageToAudioclipList.Find(element => string.IsNullOrEmpty(element.language)));
+                        }
+
+                        voiceOversList.Find(element => element.linetag == textEntry).languageToAudioclip = languageToAudioclipList.ToArray();
+                    }
+
+                    // Check if previously stored linetags have been removed and remove them from the voice over collection
+                    for (int i = voiceOversList.Count - 1; i >= 0; i--)
+                    {
+                        LinetagToLanguage voiceOver = voiceOversList[i];
+                        if (!stringIDs.Contains(voiceOver.linetag))
+                        {
+                            voiceOversList.Remove(voiceOver);
+                        }
+                    }
+
+                    voiceOvers = voiceOversList.ToArray();
+                    programContainer.voiceOvers = voiceOvers;
                 }
             }
-
-
         }
         catch (Yarn.Compiler.ParseException e)
         {
