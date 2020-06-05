@@ -16,5 +16,12 @@
     "url": "https://github.com/YarnSpinnerTool/YarnSpinner"
   },
   "hideInEditor": false,
-  "type": "tool"
+  "type": "tool",
+  "samples": [
+    {
+      "displayName": "Space",
+      "description": "A side-scrolling conversation.",
+      "path": "Samples~/Space"
+    }
+  ]
 }
