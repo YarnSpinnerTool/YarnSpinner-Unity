@@ -1,18 +1,111 @@
 fileFormatVersion: 2
 guid: 6b44f042c1cbdef40bdfd6ac1be41890
 ScriptedImporter:
-  internalIDToNameTable: []
+  fileIDToRecycleName:
+    4900000: Strings
+    11400000: Program
   externalObjects: {}
-  serializedVersion: 2
   userData: 
   assetBundleName: 
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 94073015eacc34c1d8fc6786e43d60ca, type: 3}
   baseLanguageID: en-US
-  stringIDs: []
-  compilationStatus: 0
-  isSuccesfullyCompiled: 0
+  stringIDs:
+  - VNExampleDialogue-Start-0
+  - VNExampleDialogue-Start-1
+  - VNExampleDialogue-Start-2
+  - VNExampleDialogue-Start-3
+  - VNExampleDialogue-Start-4
+  - VNExampleDialogue-Start-5
+  - VNExampleDialogue-Start-6
+  - VNExampleDialogue-Start-7
+  - VNExampleDialogue-Start-8
+  - VNExampleDialogue-Start-9
+  - VNExampleDialogue-Start-10
+  - VNExampleDialogue-Start-11
+  - VNExampleDialogue-Start-12
+  - VNExampleDialogue-Start-13
+  - VNExampleDialogue-Start-14
+  - VNExampleDialogue-Start-15
+  - VNExampleDialogue-Start-16
+  - VNExampleDialogue-Start-17
+  compilationStatus: 1
+  isSuccesfullyCompiled: 1
   compilationErrorMessage: "Error on line 1 at position 1:\nextraneous input '\\n'
     expecting 'title:'\r\n\r\n^"
   baseLanguage: {instanceID: 0}
   localizations: []
+  voiceOvers:
+  - linetag: VNExampleDialogue-Start-0
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-1
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-2
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-3
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-4
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-5
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-6
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-7
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-8
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-9
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-10
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-11
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-12
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-13
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-14
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-15
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-16
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  - linetag: VNExampleDialogue-Start-17
+    languageToAudioclip:
+    - language: en-US
+      audioClip: {instanceID: 0}
+  programContainer: {instanceID: 0}
