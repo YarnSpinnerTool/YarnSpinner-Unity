@@ -444,7 +444,18 @@ namespace Yarn.Unity
 
         #region Private Properties/Variables/Procedures
 
-        List<DialogueViewBase> lineCurrentlyRunOnDialogueViews = new List<DialogueViewBase>();
+        /// <summary>
+        /// The <see cref="LocalizedLine"/> currently being displayed on
+        /// the dialogue views.
+        /// </summary>
+        internal LocalizedLine CurrentLine {get;private set;}
+
+        /// <summary>
+        ///  The collection of dialogue views that are currently either
+        ///  delivering a line, or dismissing a line from being on screen.
+        /// </summary>
+        private readonly HashSet<DialogueViewBase> ActiveDialogueViews = new HashSet<DialogueViewBase>();
+
         Action<int> selectAction;
 
         /// <summary>
@@ -505,12 +516,6 @@ namespace Yarn.Unity
         // is called. If it's true after calling a blocking command
         // handler, then the Dialogue is not told to pause.
         bool wasCompleteCalled = false;
-
-        /// <summary>
-        /// A flag caching if a View has communicated the user's intent to
-        /// proceed to the next line
-        /// </summary>
-        bool userIntendedNextLine = false;
 
         /// <summary>
         /// List of Addressable voice over AudioClips being currently
@@ -790,21 +795,32 @@ namespace Yarn.Unity
                 var substitutions = GetInlineExpressions(line);
                 var text = localizedText.ContainsKey(line.ID) ? localizedText[line.ID] : string.Empty;
                 var audio = localizedAudio.ContainsKey(line.ID) ? localizedAudio[line.ID] : null;
-                var localizedLine = new LocalizedLine() {
+
+                CurrentLine = new LocalizedLine()
+                {
                     TextID = line.ID,
                     TextLocalized = text,
                     VoiceOverLocalized = audio,
-                    Substitutions = substitutions
+                    Substitutions = substitutions,
+                    Status = LineStatus.Running
                 };
 
-                // First register current dialogue views for line complete
-                // calls
-                foreach (var dialogueView in dialogueViews) {
-                    lineCurrentlyRunOnDialogueViews.Add(dialogueView);
-                }
+                // Clear the set of active dialogue views, just in case
+                ActiveDialogueViews.Clear();
+
                 // Send line to available dialogue views
                 foreach (var dialogueView in dialogueViews) {
-                    dialogueView.RunLine(localizedLine, () => OnDialogueLineFinished());
+                    // Mark this dialogue view as active                
+                    ActiveDialogueViews.Add(dialogueView);
+                    dialogueView.controllingDialogueRunner = this;
+                    dialogueView.RunLine(new LocalizedLine()
+                    {
+                        TextID = line.ID,
+                        TextLocalized = text,
+                        VoiceOverLocalized = audio,
+                        Substitutions = substitutions,
+                        Status = LineStatus.Running
+                    }, () => DialogueViewCompletedDelivery(dialogueView));
                 }
                 return Dialogue.HandlerExecutionType.PauseExecution;
             }
@@ -1041,6 +1057,53 @@ namespace Yarn.Unity
             }
         }
 
+        /// <summary>
+        /// Called when a <see cref="DialogueViewBase"/> has finished
+        /// delivering its line. When all views in <see
+        /// cref="ActiveDialogueViews"/> have called this method, the
+        /// line's status will change to <see
+        /// cref="LineStatus.Delivered"/>.
+        /// </summary>
+        /// <param name="dialogueView">The view that finished delivering
+        /// the line.</param>
+        private void DialogueViewCompletedDelivery(DialogueViewBase dialogueView)
+        {
+            // A dialogue view just completed its delivery. Remove it from
+            // the set of active views.
+            ActiveDialogueViews.Remove(dialogueView);
+
+            // Have all of the views completed? 
+            if (ActiveDialogueViews.Count == 0) {
+                UpdateLineStatus(CurrentLine, LineStatus.Delivered);
+            }
+
+            // TODO: have a flag to automatically proceed to the next line
+            // when the line becomes Delivered?
+        }
+
+        /// <summary>
+        /// Updates a <see cref="LocalizedLine"/>'s status to <paramref
+        /// name="newStatus"/>, and notifies all dialogue views that the
+        /// line about the state change.
+        /// </summary>
+        /// <param name="line">The line whose state is changing.</param>
+        /// <param name="newStatus">The <see
+        /// cref="LineStatus"/> that the line now
+        /// has.</param>
+        private void UpdateLineStatus(LocalizedLine line, LineStatus newStatus)
+        {
+            var previousStatus = line.Status;
+
+            Debug.Log($"Line \"{line.TextLocalized}\" changed state to {newStatus}");
+
+            // Update the state of the line and let the views know.
+            line.Status = newStatus;
+
+            foreach (var view in dialogueViews) {
+                view.OnLineStatusChanged(line, previousStatus, newStatus);
+            }
+        }
+
         void OnLanguagePreferencesChanged(object sender, EventArgs e) {
             localizedAudio.Clear();
             localizedText.Clear();
@@ -1051,9 +1114,8 @@ namespace Yarn.Unity
 
         void ContinueDialogue()
         {
-            lineCurrentlyRunOnDialogueViews.Clear();
             wasCompleteCalled = true;
-            userIntendedNextLine = false;
+            CurrentLine = null;
             Dialogue.Continue();
         }
 
@@ -1063,140 +1125,88 @@ namespace Yarn.Unity
         /// to inform the <see cref="DialogueRunner"/> that the user
         /// intents to proceed to the next line.
         /// </summary>
-        internal void OnViewUserIntentNextLine() {
-            userIntendedNextLine = true;
-
-            switch (GetLowestLineStatus()) {
-                case DialogueViewBase.DialogueLineStatus.Running:
-                    FinishLineCurrentlyRunningOnViews();
-                    break;
-                case DialogueViewBase.DialogueLineStatus.Finished:
-                    EndLineCurrentlyFinishedOnViews();
-                    break;
-                default:
-                    break;
+        public void OnViewUserIntentNextLine() {
+            
+            if (CurrentLine == null) {
+                // There's no active line, so there's nothing that can be
+                // done here.
+                Debug.LogWarning($"{nameof(OnViewUserIntentNextLine)} was called, but no line was running.");
+                return;
             }
 
-            if (CheckDialogueViewsForCommonLineStatus(DialogueViewBase.DialogueLineStatus.Ended) && (continueNextLineOnLineFinished || userIntendedNextLine)) {
+            switch (CurrentLine.Status)
+            {
+                case LineStatus.Running:
+                    // The line has been Interrupted. Dialogue views should
+                    // proceed to finish the delivery of the line as
+                    // quickly as they can. (When all views have finished
+                    // their expedited delivery, they call their completion
+                    // handler as normal, and the line becomes Delivered.)
+                    UpdateLineStatus(CurrentLine, LineStatus.Interrupted);
+                    break;
+                case LineStatus.Interrupted:
+                    // The line was already interrupted, and the user has
+                    // requested the next line again. We interpret this as
+                    // the user being insistent. This means the line is now
+                    // Ended, and the dialogue views must dismiss the line
+                    // immediately.
+                    UpdateLineStatus(CurrentLine, LineStatus.Ended);
+                    break;
+                case LineStatus.Delivered:
+                    // The line had finished delivery (either normally or
+                    // because it was Interrupted), and the user has
+                    // indicated they want to proceed to the next line. The
+                    // line is therefore Ended.
+                    UpdateLineStatus(CurrentLine, LineStatus.Ended);
+                    break;
+                case LineStatus.Ended:
+                    // The line has already been ended, so there's nothing
+                    // further for the views to do. (This will only happen
+                    // during the interval of time between a line becoming
+                    // Ended and the next line appearing.)
+                    break;                
+            }    
+
+            if (CurrentLine.Status == LineStatus.Ended) {
+                // This line is Ended, so we need to tell the dialogue
+                // views to dismiss it. 
+                DismissLineFromViews(dialogueViews);
+            }
+            
+        }
+
+        private void DismissLineFromViews(IEnumerable<DialogueViewBase> dialogueViews)
+        {
+            ActiveDialogueViews.Clear();
+
+            foreach (var view in dialogueViews) {
+                // we do this in two passes - first by adding each
+                // dialogueView into ActiveDialogueViews, then by asking
+                // them to dismiss the line - because calling
+                // view.DismissLine might immediately call its completion
+                // handler (which means that we'd be repeatedly returning
+                // to zero active dialogue views, which means
+                // DialogueViewCompletedDismissal will mark the line as
+                // entirely done)
+                ActiveDialogueViews.Add(view);
+            }
+                
+            foreach (var view in dialogueViews) {
+                view.DismissLine(() => DialogueViewCompletedDismissal(view));
+            }
+        }
+
+        private void DialogueViewCompletedDismissal(DialogueViewBase dialogueView)
+        {
+            // A dialogue view just completed dismissing its line. Remove
+            // it from the set of active views.
+            ActiveDialogueViews.Remove(dialogueView);
+
+            // Have all of the views completed dismissal? 
+            if (ActiveDialogueViews.Count == 0) {
+                // Then we're ready to continue to the next piece of content.
                 ContinueDialogue();
-            }
-        }
-
-        /// <summary>
-        /// Called by a <see cref="DialogueViewBase"/> derived class from
-        /// <see cref="dialogueViews"/>
-        /// to inform the <see cref="DialogueRunner"/> that the user
-        /// intents to finish the current line.
-        /// </summary>
-        internal void OnViewUserIntentFinishLine() {
-            FinishLineCurrentlyRunningOnViews();
-        }
-
-        /// <summary>
-        /// Called by a <see cref="DialogueViewBase"/> derived class from
-        /// <see cref="dialogueViews"/>
-        /// to inform the <see cref="DialogueRunner"/> that it has finished
-        /// presenting a line.
-        /// </summary>
-        /// <remarks>
-        /// Checks and informs all <see cref="dialogueViews"/> if they have
-        /// all finished a line. Also proceeds to the next line if the
-        /// option 
-        /// <see cref="continueNextLineOnLineFinished"/> is true or if the
-        /// user expressed that intent on one of the <see
-        /// cref="dialogueViews"/> in which case the corresponding view
-        /// called <see cref="OnViewUserIntentNextLine"/>.
-        /// </remarks>
-        void OnDialogueLineFinished() {
-            if (CheckDialogueViewsForCommonLineStatus(DialogueViewBase.DialogueLineStatus.Finished)) {
-                LineFinishedOnAllViews();
-
-                if (continueNextLineOnLineFinished || userIntendedNextLine) {
-                    EndLineCurrentlyFinishedOnViews();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Instructs the <see cref="DialogueRunner"/> to check all <see
-        /// cref="dialogueViews"/> if they have all ended the current line
-        /// and proceeds with the next line in that case.
-        /// </summary>
-        void OnDialogueLineCompleted() {
-            if (CheckDialogueViewsForCommonLineStatus(DialogueViewBase.DialogueLineStatus.Ended)) {
-                ContinueDialogue();
-            }
-        }
-
-        /// <summary>
-        /// Informs all <see cref="dialogueViews"/> that they have finished
-        /// a line by calling
-        /// <see cref="DialogueViewBase.OnFinishedLineOnAllViews"/> on
-        /// them.
-        /// </summary>
-        private void LineFinishedOnAllViews() {
-            foreach (var dialogueView in dialogueViews) {
-                dialogueView.OnFinishedLineOnAllViews();
-            }
-        }
-
-        /// <summary>
-        /// Instructs all <see cref="dialogueViews"/> to end the current
-        /// line by calling
-        /// <see cref="DialogueViewBase.EndCurrentLine(Action)"/> on all of
-        /// them.
-        /// </summary>
-        private void EndLineCurrentlyFinishedOnViews() {
-            foreach (var dialogueView in dialogueViews) {
-                if (dialogueView.dialogueLineStatus == DialogueViewBase.DialogueLineStatus.Finished) {
-                    StartCoroutine(dialogueView.EndCurrentLine(OnDialogueLineCompleted));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Instructs all <see cref="dialogueViews"/> to go to the end of
-        /// the current line by calling
-        /// <see cref="DialogueViewBase.FinishRunningCurrentLine"/> on all
-        /// of them.
-        /// </summary>
-        private void FinishLineCurrentlyRunningOnViews() {
-            foreach (var dialogueView in dialogueViews) {
-                if (dialogueView.dialogueLineStatus == DialogueViewBase.DialogueLineStatus.Running) {
-                    dialogueView.FinishRunningCurrentLine();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Check the <see cref="DialogueViewBase.DialogueLineStatus"/> on
-        /// all <see cref="dialogueViews"/> and get the status with the
-        /// lowest int representation.
-        /// </summary>
-        /// <returns></returns>
-        DialogueViewBase.DialogueLineStatus GetLowestLineStatus() {
-            var lowestStatus = DialogueViewBase.DialogueLineStatus.Ended;
-            foreach (var dialogueView in dialogueViews) {
-                if (dialogueView.dialogueLineStatus < lowestStatus) {
-                    lowestStatus = dialogueView.dialogueLineStatus;
-                }
-            }
-            return lowestStatus;
-        }
-
-        /// <summary>
-        /// Return true if all <see cref="dialogueViews"/> have the same
-        /// <see cref="DialogueViewBase.DialogueLineStatus"/>.
-        /// </summary>
-        /// <param name="commonStatusToCheck"></param>
-        /// <returns></returns>
-        private bool CheckDialogueViewsForCommonLineStatus (DialogueViewBase.DialogueLineStatus commonStatusToCheck) {
-            foreach (var dialogueView in dialogueViews) {
-                if (dialogueView.dialogueLineStatus != commonStatusToCheck) {
-                    return false;
-                }
-            }
-            return true;
+            }            
         }
 
         string[] GetInlineExpressions (Line line) {
@@ -1379,6 +1389,42 @@ namespace Yarn.Unity
         public abstract void ResetToDefaults();
     }
 
+    /// <summary>
+    /// The presentation status of a <see cref="LocalizedLine"/>.
+    /// </summary>
+    public enum LineStatus
+    {
+        /// <summary>
+        /// The line is being build up and shown to the user.
+        /// </summary>
+        Running,
+        /// <summary>
+        /// The line got interrupted while being build up and should
+        /// complete showing the line asap. View classes should get to the
+        /// end of the line as fast as possible. A view class showing text
+        /// would stop building up the text and immediately show the entire
+        /// line and a view class playing voice over clips would do a very
+        /// quick fade out and stop playback afterwards.
+        /// </summary>
+        Interrupted,
+        /// <summary>
+        /// The line has been fully presented to the user. A view class
+        /// presenting the line as text would be showing the entire line
+        /// and a view class playing voice over clips would be silent now.
+        /// </summary>
+        /// <remarks>
+        /// A line that was previously <see cref="LineStatus.Interrupted"/>
+        /// will become <see cref="LineStatus.Delivered"/> once the <see
+        /// cref="DialogueViewBase"/> has completed the interruption
+        /// process.
+        /// </remarks>
+        Delivered,
+        /// <summary>
+        /// The line is not being presented anymore in any way to the user.
+        /// </summary>
+        Ended
+    }
+
     public class LocalizedLine {
         /// <summary>
         /// DialogueLine's ID
@@ -1396,6 +1442,10 @@ namespace Yarn.Unity
         /// DialogueLine's voice over clip
         /// </summary>
         public AudioClip VoiceOverLocalized;
+        /// <summary>
+        /// The line's delivery status.
+        /// </summary>
+        public LineStatus Status;
     }
 
     public class DialogueOption {

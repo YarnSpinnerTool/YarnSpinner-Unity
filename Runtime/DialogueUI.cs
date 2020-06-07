@@ -125,31 +125,30 @@ namespace Yarn.Unity {
 
         /// <summary>
         /// A <see cref="UnityEngine.Events.UnityEvent"/> that is called
-        /// when a line has finished being delivered.
+        /// when a line's text has finished being displayed.
         /// </summary>
         /// <remarks>
         /// This method is called after <see cref="onLineUpdate"/>. Use
-        /// this method to display UI elements like a "continue" button.
+        /// this method to display UI elements like a "continue" button. 
         ///
-        /// When this method has been called, the Dialogue UI will wait for
-        /// the <see cref="MarkLineComplete"/> method to be called, which
-        /// signals that the line should be dismissed.
+        /// If there are multiple views displaying this line, this method
+        /// may be called some time before <see
+        /// cref="onLineFinishDisplaying"/>
+        /// is called.
         /// </remarks>
         /// <seealso cref="onLineUpdate"/>
         /// <seealso cref="MarkLineComplete"/>
-        public UnityEngine.Events.UnityEvent onLineFinishDisplaying;
+        public UnityEngine.Events.UnityEvent onTextFinishDisplaying;
 
         /// <summary>
         /// A <see cref="UnityEngine.Events.UnityEvent"/> that is called
-        /// when a line has finished being delivered not just on this View
-        /// but on all Views registered on the <see
-        /// cref="DialogueRunner"/>.
+        /// when a line has finished being delivered on all views.
         /// </summary>
         /// <remarks>
         /// Use this method to display UI elements like a "continue" button
         /// in sync with other Views like voice over playback.
         /// </remarks>
-        public UnityEngine.Events.UnityEvent onLineFinishDisplayingOnAllViews;
+        public UnityEngine.Events.UnityEvent onLineFinishDisplaying;
 
         /// <summary>
         /// A <see cref="DialogueRunner.StringUnityEvent"/> that is called
@@ -167,9 +166,10 @@ namespace Yarn.Unity {
         /// with more text; the final call to <see cref="onLineUpdate"/>
         /// will have the entire text of the line.
         ///
-        /// If <see cref="MarkLineComplete"/> is called before the line has
-        /// finished displaying, which indicates that the user has
-        /// requested that the Dialogue UI skip to the end of the line,
+        /// If the line's Status becomes <see
+        /// cref="LineStatus.Interrupted"/>, which indicates
+        /// that the user has requested that the Dialogue UI skip to the
+        /// end of the line,
         /// <see cref="onLineUpdate"/> will be called once more, to display
         /// the entire text.
         ///
@@ -178,10 +178,12 @@ namespace Yarn.Unity {
         /// once.
         ///
         /// After the final call to <see cref="onLineUpdate"/>, <see
-        /// cref="onLineFinishDisplaying"/> will be called to indicate that
-        /// the line has finished appearing.
+        /// cref="onTextFinishDisplaying"/> will be called to indicate that
+        /// the line has finished appearing, followed by <see
+        /// cref="onLineFinishDisplaying"/>.
         /// </remarks>
         /// <seealso cref="textSpeed"/>
+        /// <seealso cref="onTextFinishDisplaying"/>
         /// <seealso cref="onLineFinishDisplaying"/>
         public DialogueRunner.StringUnityEvent onLineUpdate;
 
@@ -191,9 +193,10 @@ namespace Yarn.Unity {
         /// the screen.
         /// </summary>
         /// <remarks>
-        /// This method is called after the <see cref="MarkLineComplete"/>
-        /// has been called. Use this method to dismiss the line's UI
-        /// elements.
+        /// This method is called after the line's <see
+        /// cref="LocalizedLine.Status"/>
+        /// has changed to <see cref="LineStatus.Ended"/>.
+        /// Use this method to dismiss the line's UI elements.
         ///
         /// After this method is called, the next piece of dialogue content
         /// will be presented, or the dialogue will end.
@@ -243,9 +246,20 @@ namespace Yarn.Unity {
                 button.gameObject.SetActive (false);
             }
         }
+        
+        /// <inheritdoc/>
+        public override void RunLine(LocalizedLine dialogueLine, System.Action onDialogueLineFinished) {
+            StartCoroutine(DoRunLine(dialogueLine, onDialogueLineFinished));
+        }
 
-        /// Show a line of dialogue, gradually
-        protected override IEnumerator RunLine(LocalizedLine dialogueLine) {
+        /// <summary>
+        /// Shows a line of dialogue, gradually.
+        /// </summary>
+        /// <param name="dialogueLine">The line to deliver.</param>
+        /// <param name="onDialogueLineFinished">A callback to invoke when
+        /// the text has finished appearing.</param>
+        /// <returns></returns>
+        protected IEnumerator DoRunLine(LocalizedLine dialogueLine, System.Action onDialogueLineFinished) {
             onLineStart?.Invoke();
 
             finishCurrentLine = false;
@@ -288,16 +302,45 @@ namespace Yarn.Unity {
                 onLineUpdate?.Invoke(text);
             }
 
-            // Indicate to the rest of the game that the line has finished being delivered
-            onLineFinishDisplaying?.Invoke();
+            
+            // Indicate to the rest of the game that the text has finished
+            // being delivered
+            onTextFinishDisplaying?.Invoke();
+
+            // Indicate to the dialogue runner that we're done delivering
+            // the line here
+            onDialogueLineFinished();
         }
 
-        protected override IEnumerator EndCurrentLine() {
-            // Avoid skipping lines if textSpeed == 0
-            yield return new WaitForEndOfFrame();
+        public override void OnLineStatusChanged(LocalizedLine dialogueLine, LineStatus previousStatus, LineStatus newStatus) {
 
-            // Hide the text and prompt
-            onLineEnd?.Invoke();
+            switch (newStatus)
+            {
+                case LineStatus.Running:
+                    // No-op; this line is running
+                    break;
+                case LineStatus.Interrupted:
+                    // The line is now interrupted, and we need to hurry up
+                    // in our delivery
+                    finishCurrentLine = true;
+                    break;
+                case LineStatus.Delivered:
+                    // The line has now finished its delivery across all
+                    // views, so we can signal call our UnityEvent for it
+                    onLineFinishDisplaying?.Invoke();
+                    break;
+                case LineStatus.Ended:
+                    // The line has now Ended. DismissLine will be called
+                    // shortly.
+                    onLineEnd?.Invoke();
+                    break;
+            }
+        }
+
+        public override void DismissLine(System.Action onDismissalComplete) {
+            // This view doesn't need any extra time to dismiss its view,
+            // so it can just call onDismissalComplete immediately.
+            onDismissalComplete();
         }
 
         /// Runs a set of options.
@@ -407,14 +450,6 @@ namespace Yarn.Unity {
             currentOptionSelectionHandler?.Invoke(optionID);
         }
 
-        /// <inheritdoc/>
-        protected override void FinishCurrentLine() {
-            finishCurrentLine = true;
-        }
-
-        /// <inheritdoc/>
-        protected internal override void OnFinishedLineOnAllViews() {
-            onLineFinishDisplayingOnAllViews?.Invoke();
-        }
+        
     }
 }

@@ -137,7 +137,13 @@ namespace Yarn.Unity {
             return FMOD.RESULT.OK;
         }
 
-        protected override IEnumerator RunLine(LocalizedLine dialogueLine) {
+        public override void RunLine(LocalizedLine dialogueLine, System.Action onDialogueDeliveryComplete) {
+
+            StartCoroutine(DoRunLine(dialogueLine, onDialogueDeliveryComplete));
+        }
+        
+        private IEnumerator DoRunLine(LocalizedLine dialogueLine, System.Action onDialogueDeliveryComplete) {
+
             finishCurrentLine = false;
 
             // Check if this instance is currently playing back another
@@ -175,21 +181,40 @@ namespace Yarn.Unity {
             }
         }
 
-        protected override void FinishCurrentLine() {
-            finishCurrentLine = true;
-        }
-
-        protected override IEnumerator EndCurrentLine() {
-            // Avoid skipping lines if textSpeed == 0
-            yield return new WaitForEndOfFrame();
-        }
-
         public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected) {
             // Do nothing
         }
 
-        internal override void OnFinishedLineOnAllViews() {
-            // Do nothing
+        public override void OnLineStatusChanged(LocalizedLine dialogueLine, LineStatus previousStatus, LineStatus newStatus)
+        {
+            switch (newStatus)
+            {
+                case LineStatus.Running:
+                    // Nothing to do here - continue running.
+                    break;
+                case LineStatus.Interrupted:
+                    // The user wants us to wrap up the audio quickly. The
+                    // DoPlayback coroutine will apply the fade out defined
+                    // by fadeOutTimeOnLineFinish.
+                    finishCurrentLine = true;
+                    break;
+                case LineStatus.Delivered:
+                    // The line has finished delivery on all views. Nothing
+                    // left to do for us, since the audio will have already
+                    // finished playing out.
+                    break;
+                case LineStatus.Ended:
+                    // The line is being dismissed; ensure that we
+                    // interrupt the FMOD instance.
+                    finishCurrentLine = true;
+                    break;
+            }
+        }
+
+        public override void DismissLine(Action onDismissalComplete)
+        {
+            // Nothing to do here - the audio will have already finished.
+            onDismissalComplete();
         }
     }
 }

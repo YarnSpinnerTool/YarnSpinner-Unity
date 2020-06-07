@@ -29,55 +29,9 @@ namespace Yarn.Unity
     public abstract class DialogueViewBase : MonoBehaviour
     {
         /// <summary>
-        /// The status of the <see cref="LocalizedLine"/> currently handled
-        /// by this <see cref="DialogueViewBase"/> instance.
-        /// </summary>
-        public enum DialogueLineStatus {
-            /// <summary>
-            /// The line is being build up and shown to the user.
-            /// </summary>
-            Running,
-            /// <summary>
-            /// The line got interrupted while being build up and should
-            /// complete showing the line asap. View classes should get to
-            /// the end of the line as fast as possible. A view class
-            /// showing text would stop building up the text and
-            /// immediately show the entire line and a view class playing
-            /// voice over clips would do a very quick fade out and stop
-            /// playback afterwards.
-            /// </summary>
-            Interrupted,
-            /// <summary>
-            /// The line has been fully presented to the user. A view class
-            /// presenting the line as text would be showing the entire
-            /// line and a view class playing voice over clips would be
-            /// silent now.
-            /// </summary>
-            /// <remarks>
-            /// A line that was previously <see
-            /// cref="DialogueLineStatus.Interrupted"/> will become <see
-            /// cref="DialogueLineStatus.Finished"/> once the <see
-            /// cref="DialogueViewBase"/> has completed the interruption
-            /// process.
-            /// </remarks>
-            Finished,
-            /// <summary>
-            /// The line is about to go away. A view class presenting the
-            /// line as text would stop showing the line to the user.
-            /// </summary>
-            Ending,
-            /// <summary>
-            /// The line is not being presented anymore in any way to the
-            /// user.
-            /// </summary>
-            Ended
-        }
-        internal DialogueLineStatus dialogueLineStatus;
-
-        /// <summary>
         /// The instance of the current line's DialogueRunner
         /// </summary>
-        internal DialogueRunner dialogueRunnerCurrentLine;
+        internal DialogueRunner controllingDialogueRunner;
 
         /// <summary>Signals that a conversation has started.</summary>
         public virtual void DialogueStarted()
@@ -109,96 +63,38 @@ namespace Yarn.Unity
         /// FIXME: If this method is expected to be called only from the
         /// DialogueRunner then this should be converted into a coroutine
         /// and merged with RunLineWithCallback();
-        public void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished) {
-            StartCoroutine(RunLineWithCallback(dialogueLine, onDialogueLineFinished));
-        }
-        /// <summary>
-        /// Run the given <see cref="LocalizedLine"/> on the derived class.
-        /// The implementation will take care of presenting the line to the
-        /// user e.g. by showing the text or playing the voice over.
-        /// </summary>
-        /// <param name="dialogueLine">The content of the current line that
-        /// should be presented to the user.</param>
-        /// <returns></returns>
-        protected abstract IEnumerator RunLine(LocalizedLine dialogueLine);
-
-        private IEnumerator RunLineWithCallback (LocalizedLine dialogueLine, Action onDialogueLineFinished) {
-            dialogueRunnerCurrentLine = onDialogueLineFinished.Target as DialogueRunner;
-            dialogueLineStatus = DialogueLineStatus.Running;
-
-            yield return StartCoroutine(RunLine(dialogueLine));
-
-            dialogueLineStatus = DialogueLineStatus.Finished;
-            onDialogueLineFinished();
-        }
+        public abstract void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished);
 
         /// <summary>
-        /// Finish presenting the current <see cref="LocalizedLine"/>.
+        /// Called by the DialogueRunner to indicate that the line that
+        /// this view is delivering has changed state.
         /// </summary>
         /// <remarks>
-        /// Called if the <see cref="DialogueRunner"/> has received the
-        /// user's request on one of the 
-        /// <see cref="DialogueRunner.dialogueViews"/> classes derived from
-        /// <see cref="DialogueViewBase"/> to finish presenting the current
-        /// line.
+        /// Subclasses of <see cref="DialogueViewBase"/> should override
+        /// this method to be notified when a line has become interrupted,
+        /// and when the line has finished being delivered by all views.
+        ///
+        /// The default implementation does nothing.
         /// </remarks>
-        internal void FinishRunningCurrentLine() {
-            dialogueLineStatus = DialogueLineStatus.Interrupted;
-            FinishCurrentLine();
+        /// <param name="dialogueLine">The <see cref="LocalizedLine"/> that
+        /// has changed state.</param>
+        /// <param name="previousStatus">The status that the line used to
+        /// have.</param>
+        /// <param name="newStatus">The status that the line now
+        /// has.</param>
+        /// <seealso cref="LineStatus"/>
+        public virtual void OnLineStatusChanged(LocalizedLine dialogueLine, LineStatus previousStatus, LineStatus newStatus) {
+            // default implementation is a no-op
         }
 
         /// <summary>
-        /// Finish presenting the current <see cref="LocalizedLine"/> on
-        /// the derived class.
+        /// Called by the <see cref="DialogueRunner"/> to signal that the
+        /// view should dismiss its current line from display, and clean
+        /// up.
         /// </summary>
-        /// <remarks>
-        /// It is OK to apply quick fade outs. Because this is not a
-        /// coroutine, it is advisable to do that inside of the active <see
-        /// cref="DialogueViewBase.RunLine(LocalizedLine)"/> coroutine on
-        /// the derived class. In that case, this method should only inform
-        /// the active coroutine on the derived class to quickly finish
-        /// presenting the current line.
-        /// </remarks>
-        protected abstract void FinishCurrentLine();
-
-        /// <summary>
-        /// Called by the <see cref="DialogueRunner"/> to inform all
-        /// classes inheriting from <see cref="DialogueViewBase"/> that
-        /// they all finished presenting the current <see
-        /// cref="LocalizedLine"/> to the user.
-        /// </summary>
-        /// <remarks>
-        /// This can be used to trigger sounds in sync when a line has been
-        /// fully presented or to show the user a prompt to go to the next
-        /// line.
-        /// </remarks>
-        protected internal abstract void OnFinishedLineOnAllViews();
-
-        /// <summary>
-        /// End the current <see cref="LocalizedLine"/>.
-        /// </summary>
-        /// <remarks>
-        /// This should only be called from  the <see
-        /// cref="DialogueRunner"/> if all <see
-        /// cref="DialogueRunner.dialogueViews"/> have finished presenting
-        /// the current line (e.g. finished quick fade outs).
-        /// </remarks>
-        /// <param name="onDialogueLineCompleted"></param>
-        /// <returns></returns>
-        internal IEnumerator EndCurrentLine(Action onDialogueLineCompleted) {
-            dialogueRunnerCurrentLine = onDialogueLineCompleted.Target as DialogueRunner;
-            dialogueLineStatus = DialogueLineStatus.Ending;
-
-            yield return StartCoroutine(EndCurrentLine());
-
-            dialogueLineStatus = DialogueLineStatus.Ended;
-            onDialogueLineCompleted();
-        }
-        /// <summary>
-        /// End the current <see cref="LocalizedLine"/> on the derived class.
-        /// </summary>
-        /// <returns></returns>
-        protected abstract IEnumerator EndCurrentLine();
+        /// <param name="onDismissalComplete">The method that should be
+        /// called when the view has finished dismissing the line.</param>
+        public abstract void DismissLine(Action onDismissalComplete);
 
         /// <summary>
         /// Called by the <see cref="DialogueRunner"/> to signal that a set
@@ -224,6 +120,8 @@ namespace Yarn.Unity
         /// cref="DialogueComplete"/> is called. If this method returns
         /// <see cref="Dialogue.HandlerExecutionType.ContinueExecution"/>,
         /// do not call the <paramref name="onComplete"/> method.
+        /// 
+        /// The default implementation does nothing.
         /// </remarks>
         /// <param name="nextNode">The name of the next node that is being
         /// entered.</param>
@@ -241,8 +139,11 @@ namespace Yarn.Unity
 
         /// <summary>
         /// Called by the <see cref="DialogueRunner"/> to signal that the
-        /// dialogue has ended.
+        /// dialogue has ended, and no more lines will be delivered.
         /// </summary>
+        /// <remarks>
+        /// The default implementation does nothing.
+        /// </remarks>
         public virtual void DialogueComplete()
         {
             // Default implementation does nothing.
@@ -258,28 +159,15 @@ namespace Yarn.Unity
         /// content.
         ///
         /// If this method is called before the line has finished appearing
-        /// (that is, before the status changes to 
-        /// <see cref="DialogueLineStatus.Finished"/>), the 
-        /// <see cref="DialogueRunner"/> will call <see
-        /// cref="FinishRunningCurrentLine"/> 
-        /// on all <see cref="DialogueViewBase"/> derived classes and wait
-        /// for them to finish before calling <see
-        /// cref="EndCurrentLine(Action)"/> on all of them.
+        /// (that is, before the line's status changes to 
+        /// <see cref="LineStatus.Delivered"/>), the line's status will
+        /// change to <see cref="LineStatus.Interrupted"/>, and <see
+        /// cref="OnLineStatusChanged"/> will be called to notify the view.
         /// </remarks>
         public void MarkLineComplete()
         {
-            if (dialogueRunnerCurrentLine) {
-                dialogueRunnerCurrentLine.OnViewUserIntentNextLine();
-            }
-        }
-
-        /// <summary>
-        /// Signals that the user wants to go to the end of the current
-        /// line.
-        /// </summary>
-        public void FinishLine() {
-            if (dialogueRunnerCurrentLine) {
-                dialogueRunnerCurrentLine.OnViewUserIntentFinishLine();
+            if (controllingDialogueRunner) {
+                controllingDialogueRunner.OnViewUserIntentNextLine();
             }
         }
     }

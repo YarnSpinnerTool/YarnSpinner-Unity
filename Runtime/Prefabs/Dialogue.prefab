@@ -1124,13 +1124,19 @@ MonoBehaviour:
   variableStorage: {fileID: 5935829475398715335}
   dialogueViews:
   - {fileID: 5935829475398715334}
-  _voiceOverPlayback: {fileID: 0}
   startNode: 
   startAutomatically: 0
+  continueNextLineOnLineFinished: 0
+  onNodeStart:
+    m_PersistentCalls:
+      m_Calls: []
   onNodeComplete:
     m_PersistentCalls:
       m_Calls: []
   onDialogueComplete:
+    m_PersistentCalls:
+      m_Calls: []
+  onCommand:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &5935829475398715334
@@ -1183,6 +1189,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  onTextFinishDisplaying:
+    m_PersistentCalls:
+      m_Calls: []
   onLineFinishDisplaying:
     m_PersistentCalls:
       m_Calls:
@@ -1240,9 +1249,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   onOptionsEnd:
-    m_PersistentCalls:
-      m_Calls: []
-  onCommand:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &5935829475398715335
