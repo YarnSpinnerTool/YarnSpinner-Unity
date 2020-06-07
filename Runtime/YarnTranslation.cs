@@ -13,7 +13,8 @@ public class YarnTranslation
     }
 
     /// <summary>
-    /// Name of the language of this <see cref="YarnTranslation"/> in RFC 4646.
+    /// Name of the language of this <see cref="YarnTranslation"/> in RFC
+    /// 4646.
     /// </summary>
     public string languageName;
 

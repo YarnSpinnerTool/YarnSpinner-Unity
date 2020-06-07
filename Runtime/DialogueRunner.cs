@@ -85,9 +85,9 @@ namespace Yarn.Unity
 
 #if ADDRESSABLES
         /// <summary>
-        /// Whether the DialogueRunner should wait for the linked 
-        /// Addressable voice over AudioClips to finish loading (true)
-        /// or not (false).
+        /// Whether the DialogueRunner should wait for the linked
+        /// Addressable voice over AudioClips to finish loading (true) or
+        /// not (false).
         /// </summary>
         public bool waitForAddressablesLoaded = true;
 #endif
@@ -147,36 +147,38 @@ namespace Yarn.Unity
         public Dialogue Dialogue => dialogue ?? (dialogue = CreateDialogueInstance());
 
         /// <summary>
-        /// A <see cref="StringUnityEvent"/> that is called when a <see cref="Command"/> 
+        /// A <see cref="StringUnityEvent"/> that is called when a <see
+        /// cref="Command"/> 
         /// is received.
         /// </summary>
         /// <remarks>
-        /// <para>
-        /// Use this method to dispatch a command to other parts of your game.
-        /// This method is only called if the <see cref="Command"/> has not
-        /// been handled by a command handler that has been added to the
+        /// Use this method to dispatch a command to other parts of your
+        /// game. This method is only called if the <see cref="Command"/>
+        /// has not been handled by a command handler that has been added
+        /// to the
         /// <see cref="DialogueRunner"/>, or by a method on a <see
         /// cref="MonoBehaviour"/> in the scene with the attribute <see
-        /// cref="YarnCommandAttribute"/>.
-        /// {{|note|}}
-        /// When a command is delivered in this way, the <see cref="DialogueRunner"/> 
-        /// will not pause execution. If you want a command to make the DialogueRunner 
-        /// pause execution, see <see cref="AddCommandHandler(string, BlockingCommandHandler)"/>.
+        /// cref="YarnCommandAttribute"/>. {{|note|}} When a command is
+        /// delivered in this way, the <see cref="DialogueRunner"/> 
+        /// will not pause execution. If you want a command to make the
+        /// DialogueRunner pause execution, see <see
+        /// cref="AddCommandHandler(string, BlockingCommandHandler)"/>.
         /// {{|/note|}}
-        /// </para>
-        /// <para>
-        /// This method receives the full text of the command, as it appears between
-        /// the `<![CDATA[<<]]>` and `<![CDATA[>>]]>` markers.
-        /// </para>
+        /// 
+        /// This method receives the full text of the command, as it
+        /// appears between the `<![CDATA[<<]]>` and `<![CDATA[>>]]>`
+        /// markers.
         /// </remarks>
         /// <seealso cref="AddCommandHandler(string, CommandHandler)"/>
-        /// <seealso cref="AddCommandHandler(string, BlockingCommandHandler)"/>
+        /// <seealso cref="AddCommandHandler(string,
+        /// BlockingCommandHandler)"/>
         /// <seealso cref="YarnCommandAttribute"/>
         public StringUnityEvent onCommand;
 
         /// <summary>
         /// Adds a program, and parses and adds the contents of the
-        /// program's string table to the DialogueRunner's combined string table.
+        /// program's string table to the DialogueRunner's combined string
+        /// table.
         /// </summary>
         /// <remarks>This method calls <see
         /// cref="AddDialogueLines(YarnProgram)"/> to load the string table
@@ -269,7 +271,8 @@ namespace Yarn.Unity
         /// Returns `true` when a node named `nodeName` has been loaded.
         /// </summary>
         /// <param name="nodeName">The name of the node.</param>
-        /// <returns>`true` if the node is loaded, `false` otherwise/</returns>
+        /// <returns>`true` if the node is loaded, `false`
+        /// otherwise/</returns>
         public bool NodeExists(string nodeName) => Dialogue.NodeExists(nodeName);
 
         /// <summary>
@@ -282,23 +285,23 @@ namespace Yarn.Unity
         public IEnumerable<string> GetTagsForNode(String nodeName) => Dialogue.GetTagsForNode(nodeName);
 
         /// <summary>
-        /// Adds a command handler. Dialogue will continue running after the command is called.
+        /// Adds a command handler. Dialogue will continue running after
+        /// the command is called.
         /// </summary>
         /// <remarks>
         /// When this command handler has been added, it can be called from
         /// your Yarn scripts like so:
         ///
-        /// <![CDATA[
-        /// ```yarn
+        /// <![CDATA[```yarn
         /// <<commandName param1 param2>>
-        /// ```
-        /// ]]>
+        /// ```]]>
         ///
         /// When this command handler is called, the DialogueRunner will
         /// not stop executing code.
         /// </remarks>
         /// <param name="commandName">The name of the command.</param>
-        /// <param name="handler">The <see cref="CommandHandler"/> that will be invoked when the command is called.</param>
+        /// <param name="handler">The <see cref="CommandHandler"/> that
+        /// will be invoked when the command is called.</param>
         public void AddCommandHandler(string commandName, CommandHandler handler)
         {
             if (commandHandlers.ContainsKey(commandName) || blockingCommandHandlers.ContainsKey(commandName)) {
@@ -431,7 +434,8 @@ namespace Yarn.Unity
         /// Remove a registered function.
         /// </summary>
         /// <remarks>
-        /// After a function has been removed, it cannot be called from Yarn scripts.
+        /// After a function has been removed, it cannot be called from
+        /// Yarn scripts.
         /// </remarks>
         /// <param name="name">The name of the function to remove.</param>
         /// <seealso cref="AddFunction(string, int, Function)"/>
@@ -469,9 +473,11 @@ namespace Yarn.Unity
         /// </remarks>
         /// <param name="parameters">The list of parameters that this
         /// command was invoked with.</param>
-        /// <param name="onComplete">The method to call when the DialogueRunner should continue executing code.</param>
+        /// <param name="onComplete">The method to call when the
+        /// DialogueRunner should continue executing code.</param>
         /// <seealso cref="AddCommandHandler(string, CommandHandler)"/>
-        /// <seealso cref="AddCommandHandler(string, BlockingCommandHandler)"/>
+        /// <seealso cref="AddCommandHandler(string,
+        /// BlockingCommandHandler)"/>
         public delegate void BlockingCommandHandler(string[] parameters, Action onComplete);
 
         /// Maps the names of commands to action delegates.
@@ -479,11 +485,14 @@ namespace Yarn.Unity
         Dictionary<string, BlockingCommandHandler> blockingCommandHandlers = new Dictionary<string, BlockingCommandHandler>();
 
         /// <summary>
-        /// Collection of dialogue lines linked with their corresponding Yarn linetags.
+        /// Collection of dialogue lines linked with their corresponding
+        /// Yarn linetags.
         /// </summary>
         Dictionary<string, string> localizedText = new Dictionary<string, string>();
+        
         /// <summary>
-        /// Collection of voice over AudioClips linked with their corresponding Yarn linetags.
+        /// Collection of voice over AudioClips linked with their
+        /// corresponding Yarn linetags.
         /// </summary>
         Dictionary<string, AudioClip> localizedAudio = new Dictionary<string, AudioClip>();
 
@@ -498,17 +507,20 @@ namespace Yarn.Unity
         bool wasCompleteCalled = false;
 
         /// <summary>
-        /// A flag caching if a View has communicated the user's intent to proceed to the next line
+        /// A flag caching if a View has communicated the user's intent to
+        /// proceed to the next line
         /// </summary>
         bool userIntendedNextLine = false;
 
         /// <summary>
-        /// List of Addressable voice over AudioClips being currently loaded.
+        /// List of Addressable voice over AudioClips being currently
+        /// loaded.
         /// </summary>
         private List<Task> addressableVoiceOverLoadingTasks = new List<Task>();
 
         /// <summary>
-        /// Instance of coroutine checking whether all Addressable loading tasks finished.
+        /// Instance of coroutine checking whether all Addressable loading
+        /// tasks finished.
         /// </summary>
         private Coroutine WaitForAddressablesLoadedCoroutine;
 
@@ -601,16 +613,18 @@ namespace Yarn.Unity
         /// Link a voice over AudioClip with a Yarn linetag.
         /// </summary>
         /// <param name="linetag">The linetag of the line.</param>
-        /// <param name="voiceOver">The voice over AudioClip of the line.</param>
+        /// <param name="voiceOver">The voice over AudioClip of the
+        /// line.</param>
         private void GetVoiceOversCallback(string linetag, AudioClip voiceOver) {
             localizedAudio[linetag] = voiceOver;
         }
 
         /// <summary>
-        /// Check if all Addressable load tasks are finished and invoke the given
-        /// action.
+        /// Check if all Addressable load tasks are finished and invoke the
+        /// given action.
         /// </summary>
-        /// <param name="onAddressablesLoaded">Action invoked after all Addressables are loaded.</param>
+        /// <param name="onAddressablesLoaded">Action invoked after all
+        /// Addressables are loaded.</param>
         /// <returns></returns>
         private IEnumerator CheckAddressablesLoaded(Action onAddressablesLoaded) {
             while (waitForAddressablesLoaded && addressableVoiceOverLoadingTasks.Count > 0) {
@@ -724,21 +738,21 @@ namespace Yarn.Unity
                 bool wasValidCommand;
                 Dialogue.HandlerExecutionType executionType;
 
-                // Try looking in the command handlers first, which is a lot
-                // cheaper than crawling the game object hierarchy.
+                // Try looking in the command handlers first, which is a
+                // lot cheaper than crawling the game object hierarchy.
 
-                // Set a flag that we can use to tell if the dispatched command
-                // immediately called _continue
+                // Set a flag that we can use to tell if the dispatched
+                // command immediately called _continue
                 wasCompleteCalled = false;
 
                 (wasValidCommand, executionType) = DispatchCommandToRegisteredHandlers(command, () => ContinueDialogue());
 
                 if (wasValidCommand) {
 
-                    // This was a valid command. It returned either continue,
-                    // or pause; if it returned pause, there's a chance that
-                    // the command handler immediately called _continue, in
-                    // which case we should not pause.
+                    // This was a valid command. It returned either
+                    // continue, or pause; if it returned pause, there's a
+                    // chance that the command handler immediately called
+                    // _continue, in which case we should not pause.
                     if (wasCompleteCalled) {
                         return Dialogue.HandlerExecutionType.ContinueExecution;
                     }
@@ -749,20 +763,21 @@ namespace Yarn.Unity
                     }
                 }
 
-                // We didn't find it in the comand handlers. Try looking in the game objects.
+                // We didn't find it in the comand handlers. Try looking in
+                // the game objects.
                 (wasValidCommand, executionType) = DispatchCommandToGameObject(command);
 
                 if (wasValidCommand) {
                     // We found an object and method to invoke as a Yarn
-                    // command. It may or may not have been a coroutine; if it
-                    // was a coroutine, executionType will be
+                    // command. It may or may not have been a coroutine; if
+                    // it was a coroutine, executionType will be
                     // HandlerExecutionType.Pause, and we'll wait for it to
                     // complete before resuming execution.
                     return executionType;
                 }
 
-                // We didn't find a method in our C# code to invoke. Try invoking on the 
-                // publicly exposed UnityEvent.
+                // We didn't find a method in our C# code to invoke. Try
+                // invoking on the publicly exposed UnityEvent.
                 onCommand?.Invoke(command.Text);
                 return Dialogue.HandlerExecutionType.ContinueExecution;
             }
@@ -770,7 +785,8 @@ namespace Yarn.Unity
             /// Forward the line to the dialogue UI.
             Dialogue.HandlerExecutionType HandleLine(Line line)
             {
-                // Update lines to current state before sending them to the view classes
+                // Update lines to current state before sending them to the
+                // view classes
                 var substitutions = GetInlineExpressions(line);
                 var text = localizedText.ContainsKey(line.ID) ? localizedText[line.ID] : string.Empty;
                 var audio = localizedAudio.ContainsKey(line.ID) ? localizedAudio[line.ID] : null;
@@ -781,7 +797,8 @@ namespace Yarn.Unity
                     Substitutions = substitutions
                 };
 
-                // First register current dialogue views for line complete calls
+                // First register current dialogue views for line complete
+                // calls
                 foreach (var dialogueView in dialogueViews) {
                     lineCurrentlyRunOnDialogueViews.Add(dialogueView);
                 }
@@ -792,7 +809,8 @@ namespace Yarn.Unity
                 return Dialogue.HandlerExecutionType.PauseExecution;
             }
 
-            /// Indicates to the DialogueRunner that the user has selected an option
+            /// Indicates to the DialogueRunner that the user has selected
+            /// an option
             void SelectedOption(int obj)
             {
                 Dialogue.SetSelectedOption(obj);
@@ -815,8 +833,8 @@ namespace Yarn.Unity
                 if (commandHandlers.ContainsKey(firstWord) == false &&
                     blockingCommandHandlers.ContainsKey(firstWord) == false) {
 
-                    // We don't have a registered handler for this command, but
-                    // some other part of the game might.
+                    // We don't have a registered handler for this command,
+                    // but some other part of the game might.
                     return (false, Dialogue.HandlerExecutionType.ContinueExecution);
                 }
 
@@ -848,13 +866,14 @@ namespace Yarn.Unity
                 }
             }
 
-            /// commands that can be automatically dispatched look like this:
-            /// COMMANDNAME OBJECTNAME <param> <param> <param> ...
+            /// commands that can be automatically dispatched look like
+            /// this: COMMANDNAME OBJECTNAME <param> <param> <param> ...
             /** We can dispatch this command if:
              * 1. it has at least 2 words
              * 2. the second word is the name of an object
              * 3. that object has components that have methods with the
-             *    YarnCommand attribute that have the correct commandString set
+             *    YarnCommand attribute that have the correct commandString
+             *    set
              */
             (bool methodFound, Dialogue.HandlerExecutionType executionType) DispatchCommandToGameObject(Command command)
             {
@@ -902,8 +921,8 @@ namespace Yarn.Unity
                         // Find the YarnCommand attributes on this method
                         var attributes = (YarnCommandAttribute[])method.GetCustomAttributes(typeof(YarnCommandAttribute), true);
 
-                        // Find the YarnCommand whose commandString is equal to
-                        // the command name
+                        // Find the YarnCommand whose commandString is
+                        // equal to the command name
                         foreach (var attribute in attributes) {
                             if (attribute.CommandString == commandName) {
 
@@ -931,7 +950,8 @@ namespace Yarn.Unity
                                     paramsMatch = true;
 
                                 }
-                                // Otherwise, verify that this method has the right number of parameters
+                                // Otherwise, verify that this method has
+                                // the right number of parameters
                                 else if (methodParameters.Length == parameters.Count) {
                                     paramsMatch = true;
                                     foreach (var paramInfo in methodParameters) {
@@ -944,9 +964,9 @@ namespace Yarn.Unity
                                     if (paramsMatch) {
                                         // Cool, we can send the command!
 
-                                        // If this is a coroutine, start it,
-                                        // and set a flag so that we know to
-                                        // wait for it to finish
+                                        // If this is a coroutine, start
+                                        // it, and set a flag so that we
+                                        // know to wait for it to finish
                                         if (method.ReturnType == typeof(IEnumerator)) {
                                             StartCoroutine(DoYarnCommand(component, method, parameters.ToArray()));
                                             startedCoroutine = true;
@@ -959,8 +979,8 @@ namespace Yarn.Unity
                                 }
                                 //parameters are invalid, but name matches.
                                 if (!paramsMatch) {
-                                    //save this error in case a matching
-                                    //command is never found.
+                                    // save this error in case a matching
+                                    // command is never found.
                                     errorValues.Add(new string[] { method.Name, commandName, methodParameters.Length.ToString(), parameters.Count.ToString() });
                                 }
                             }
@@ -968,15 +988,15 @@ namespace Yarn.Unity
                     }
                 }
 
-                // Warn if we found multiple things that could respond to this
-                // command.
+                // Warn if we found multiple things that could respond to
+                // this command.
                 if (numberOfMethodsFound > 1) {
                     Debug.LogWarningFormat(sceneObject, "The command \"{0}\" found {1} targets. " +
                         "You should only have one - check your scripts.", command, numberOfMethodsFound);
                 }
                 else if (numberOfMethodsFound == 0) {
-                    //list all of the near-miss methods only if a proper match
-                    //is not found, but correctly-named methods are.
+                    // list all of the near-miss methods only if a proper
+                    // match is not found, but correctly-named methods are.
                     foreach (string[] errorVal in errorValues) {
                         Debug.LogErrorFormat(sceneObject, "Method \"{0}\" wants to respond to Yarn command \"{1}\", but it has a different number of parameters ({2}) to those provided ({3}), or is not a string array!", errorVal[0], errorVal[1], errorVal[2], errorVal[3]);
                     }
@@ -1038,9 +1058,10 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Called by a <see cref="DialogueViewBase"/> derived class from <see cref="dialogueViews"/>
-        /// to inform the <see cref="DialogueRunner"/> that the user intents to proceed to the next
-        /// line.
+        /// Called by a <see cref="DialogueViewBase"/> derived class from
+        /// <see cref="dialogueViews"/>
+        /// to inform the <see cref="DialogueRunner"/> that the user
+        /// intents to proceed to the next line.
         /// </summary>
         internal void OnViewUserIntentNextLine() {
             userIntendedNextLine = true;
@@ -1062,26 +1083,29 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Called by a <see cref="DialogueViewBase"/> derived class from <see cref="dialogueViews"/>
-        /// to inform the <see cref="DialogueRunner"/> that the user intents to finish the current
-        /// line.
+        /// Called by a <see cref="DialogueViewBase"/> derived class from
+        /// <see cref="dialogueViews"/>
+        /// to inform the <see cref="DialogueRunner"/> that the user
+        /// intents to finish the current line.
         /// </summary>
         internal void OnViewUserIntentFinishLine() {
             FinishLineCurrentlyRunningOnViews();
         }
 
         /// <summary>
-        /// Called by a <see cref="DialogueViewBase"/> derived class from <see cref="dialogueViews"/>
-        /// to inform the <see cref="DialogueRunner"/> that it has finished presenting a line.
+        /// Called by a <see cref="DialogueViewBase"/> derived class from
+        /// <see cref="dialogueViews"/>
+        /// to inform the <see cref="DialogueRunner"/> that it has finished
+        /// presenting a line.
         /// </summary>
         /// <remarks>
-        /// <para>
-        /// Checks and informs all <see cref="dialogueViews"/> if they have all finished a line.
-        /// Also proceeds to the next line if the option 
-        /// <see cref="continueNextLineOnLineFinished"/> is true or if the user
-        /// expressed that intent on one of the <see cref="dialogueViews"/> in which case
-        /// the corresponding view called <see cref="OnViewUserIntentNextLine"/>.
-        /// </para>
+        /// Checks and informs all <see cref="dialogueViews"/> if they have
+        /// all finished a line. Also proceeds to the next line if the
+        /// option 
+        /// <see cref="continueNextLineOnLineFinished"/> is true or if the
+        /// user expressed that intent on one of the <see
+        /// cref="dialogueViews"/> in which case the corresponding view
+        /// called <see cref="OnViewUserIntentNextLine"/>.
         /// </remarks>
         void OnDialogueLineFinished() {
             if (CheckDialogueViewsForCommonLineStatus(DialogueViewBase.DialogueLineStatus.Finished)) {
@@ -1094,8 +1118,9 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Instructs the <see cref="DialogueRunner"/> to check all <see cref="dialogueViews"/> if
-        /// they have all ended the current line and proceeds with the next line in that case.
+        /// Instructs the <see cref="DialogueRunner"/> to check all <see
+        /// cref="dialogueViews"/> if they have all ended the current line
+        /// and proceeds with the next line in that case.
         /// </summary>
         void OnDialogueLineCompleted() {
             if (CheckDialogueViewsForCommonLineStatus(DialogueViewBase.DialogueLineStatus.Ended)) {
@@ -1104,8 +1129,10 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Informs all <see cref="dialogueViews"/> that they have finished a line by calling
-        /// <see cref="DialogueViewBase.OnFinishedLineOnAllViews"/> on them.
+        /// Informs all <see cref="dialogueViews"/> that they have finished
+        /// a line by calling
+        /// <see cref="DialogueViewBase.OnFinishedLineOnAllViews"/> on
+        /// them.
         /// </summary>
         private void LineFinishedOnAllViews() {
             foreach (var dialogueView in dialogueViews) {
@@ -1114,8 +1141,10 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Instructs all <see cref="dialogueViews"/> to end the current line by calling
-        /// <see cref="DialogueViewBase.EndCurrentLine(Action)"/> on all of them.
+        /// Instructs all <see cref="dialogueViews"/> to end the current
+        /// line by calling
+        /// <see cref="DialogueViewBase.EndCurrentLine(Action)"/> on all of
+        /// them.
         /// </summary>
         private void EndLineCurrentlyFinishedOnViews() {
             foreach (var dialogueView in dialogueViews) {
@@ -1126,8 +1155,10 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Instructs all <see cref="dialogueViews"/> to go to the end of the current line by calling
-        /// <see cref="DialogueViewBase.FinishRunningCurrentLine"/> on all of them.
+        /// Instructs all <see cref="dialogueViews"/> to go to the end of
+        /// the current line by calling
+        /// <see cref="DialogueViewBase.FinishRunningCurrentLine"/> on all
+        /// of them.
         /// </summary>
         private void FinishLineCurrentlyRunningOnViews() {
             foreach (var dialogueView in dialogueViews) {
@@ -1138,8 +1169,9 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Check the <see cref="DialogueViewBase.DialogueLineStatus"/> on all <see cref="dialogueViews"/> and get the status with the lowest
-        /// int representation.
+        /// Check the <see cref="DialogueViewBase.DialogueLineStatus"/> on
+        /// all <see cref="dialogueViews"/> and get the status with the
+        /// lowest int representation.
         /// </summary>
         /// <returns></returns>
         DialogueViewBase.DialogueLineStatus GetLowestLineStatus() {
@@ -1153,7 +1185,8 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Return true if all <see cref="dialogueViews"/> have the same <see cref="DialogueViewBase.DialogueLineStatus"/>.
+        /// Return true if all <see cref="dialogueViews"/> have the same
+        /// <see cref="DialogueViewBase.DialogueLineStatus"/>.
         /// </summary>
         /// <param name="commonStatusToCheck"></param>
         /// <returns></returns>
@@ -1184,7 +1217,8 @@ namespace Yarn.Unity
 
     /// <summary>
     /// An attribute that marks a method on a <see cref="MonoBehaviour"/>
-    /// as a [command](<![CDATA[ {{<ref "/docs/unity/working-with-commands">}}]]>).
+    /// as a [command](<![CDATA[ {{<ref
+    /// "/docs/unity/working-with-commands">}}]]>).
     /// </summary>
     /// <remarks>
     /// When a <see cref="DialogueRunner"/> receives a <see
@@ -1204,7 +1238,7 @@ namespace Yarn.Unity
     /// * If the method takes a single <see cref="string"/>[] parameter,
     /// the method is called, and will be passed an array containing all
     /// words in the command after the first two.
-    /// 
+    ///
     /// * If the method takes a number of <see cref="string"/> parameters
     /// equal to the number of words in the command after the first two, it
     /// will be called with those words as parameters.
@@ -1212,15 +1246,13 @@ namespace Yarn.Unity
     /// * Otherwise, it will not be called, and a warning will be issued.
     ///
     /// ### `YarnCommand`s and Coroutines
-    /// 
+    ///
     /// This attribute may be attached to a coroutine. 
-    /// 
-    /// {{|note|}}
-    /// The <see
-    /// cref="DialogueRunner"/> determines if the method is a coroutine if
-    /// the method returns <see cref="IEnumerator"/>.
-    /// {{|/note|}}
-    /// 
+    ///
+    /// {{|note|}} The <see cref="DialogueRunner"/> determines if the
+    /// method is a coroutine if the method returns <see
+    /// cref="IEnumerator"/>. {{|/note|}}
+    ///
     /// If the method is a coroutine, the DialogueRunner will pause
     /// execution until the coroutine ends.
     /// </remarks>

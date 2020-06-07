@@ -141,8 +141,9 @@ namespace Yarn.Unity {
 
         /// <summary>
         /// A <see cref="UnityEngine.Events.UnityEvent"/> that is called
-        /// when a line has finished being delivered not just on this
-        /// View but on all Views registered on the <see cref="DialogueRunner"/>.
+        /// when a line has finished being delivered not just on this View
+        /// but on all Views registered on the <see
+        /// cref="DialogueRunner"/>.
         /// </summary>
         /// <remarks>
         /// Use this method to display UI elements like a "continue" button

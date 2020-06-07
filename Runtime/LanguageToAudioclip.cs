@@ -26,8 +26,8 @@ public class LanguageToAudioclip {
 #if ADDRESSABLES
     /// <summary>
     /// The <see cref="AudioClip"/> stored as <see cref="AssetReference"/> 
-    /// associated with the <see cref="language"/> ID. Needs to be part of an 
-    /// Addressable group and will be loaded asynchronously.
+    /// associated with the <see cref="language"/> ID. Needs to be part of
+    /// an Addressable group and will be loaded asynchronously.
     /// </summary>
     public AssetReference audioClipAddressable;
 #endif

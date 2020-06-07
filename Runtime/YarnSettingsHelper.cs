@@ -3,7 +3,8 @@ using System.IO;
 using UnityEngine;
 
 /// <summary>
-/// Provides methods for loading and saving a <see cref="ScriptableObject"/> class used for settings.
+/// Provides methods for loading and saving a <see
+/// cref="ScriptableObject"/> class used for settings.
 /// </summary>
 public static class YarnSettingsHelper {
     /// <summary>
@@ -13,8 +14,9 @@ public static class YarnSettingsHelper {
         // Check file's existence
         bool fileExists = File.Exists(storagePath);
         if (!fileExists) {
-            // Wen don't throw an error since during OnEnable() all values will be initialized with 
-            // the system's default and create a new file once this class get's out of scope
+            // Wen don't throw an error since during OnEnable() all values
+            // will be initialized with the system's default and create a
+            // new file once this class get's out of scope
             Debug.LogFormat("No previous Yarn Spinner preferences have been found in {0}.", storagePath);
             OnReadError?.Invoke();
             return;
@@ -38,15 +40,18 @@ public static class YarnSettingsHelper {
     /// Creates a class from a JSON string representing it's state.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <param name="settingsClass">The type of the class to be created.</param>
-    /// <param name="json">The state of the class to be created described as JSON formatted string.</param>
+    /// <param name="settingsClass">The type of the class to be
+    /// created.</param>
+    /// <param name="json">The state of the class to be created described
+    /// as JSON formatted string.</param>
     /// <param name="OnReadError">The action to call on an error.</param>
     public static void ReadJsonFromString<T>(T settingsClass, string json, Action OnReadError = null) {
         // Parse json to *this* ScriptableObject
         try {
             JsonUtility.FromJsonOverwrite(json, settingsClass);
         } catch (Exception) {
-            // No big deal since we'll initialize all values during OnEnable()
+            // No big deal since we'll initialize all values during
+            // OnEnable()
             Debug.Log("Error parsing Yarn Spinner preferences from JSON.");
             OnReadError?.Invoke();
             return;
