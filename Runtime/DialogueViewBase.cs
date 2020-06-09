@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -80,12 +80,8 @@ namespace Yarn.Unity
         /// </remarks>
         /// <param name="dialogueLine">The <see cref="LocalizedLine"/> that
         /// has changed state.</param>
-        /// <param name="previousStatus">The status that the line used to
-        /// have.</param>
-        /// <param name="newStatus">The status that the line now
-        /// has.</param>
         /// <seealso cref="LineStatus"/>
-        public virtual void OnLineStatusChanged(LocalizedLine dialogueLine, LineStatus previousStatus, LineStatus newStatus) {
+        public virtual void OnLineStatusChanged(LocalizedLine dialogueLine) {
             // default implementation is a no-op
         }
 

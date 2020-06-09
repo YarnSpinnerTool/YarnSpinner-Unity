@@ -312,9 +312,9 @@ namespace Yarn.Unity {
             onDialogueLineFinished();
         }
 
-        public override void OnLineStatusChanged(LocalizedLine dialogueLine, LineStatus previousStatus, LineStatus newStatus) {
+        public override void OnLineStatusChanged(LocalizedLine dialogueLine) {
 
-            switch (newStatus)
+            switch (dialogueLine.Status)
             {
                 case LineStatus.Running:
                     // No-op; this line is running

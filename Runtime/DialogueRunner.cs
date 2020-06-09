@@ -1,4 +1,4 @@
-/*
+﻿/*
 
 The MIT License (MIT)
 
@@ -1113,7 +1113,7 @@ namespace Yarn.Unity
             line.Status = newStatus;
 
             foreach (var view in dialogueViews) {
-                view.OnLineStatusChanged(line, previousStatus, newStatus);
+                view.OnLineStatusChanged(line);
             }
         }
 

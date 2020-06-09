@@ -25,7 +25,7 @@ public class DialogueRunnerMockUI : Yarn.Unity.DialogueViewBase
         onDismissalComplete();
     }
 
-    public override void OnLineStatusChanged(LocalizedLine dialogueLine, LineStatus previousStatus, LineStatus newStatus)
+    public override void OnLineStatusChanged(LocalizedLine dialogueLine)
     {
         // Do nothing in response to lines changing status
     }
