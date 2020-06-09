@@ -27,5 +27,10 @@ public class DialogueRunnerTests
         dialogueUI.MarkLineComplete();
         
         Assert.That(string.Equals(dialogueUI.CurrentLine, "NPC: Klar und deutlich."));
+        dialogueUI.MarkLineComplete();
+
+        Assert.AreEqual(2, dialogueUI.CurrentOptions.Count);
+        Assert.AreEqual("Mir reicht es.", dialogueUI.CurrentOptions[0]);
+        Assert.AreEqual("Nochmal!", dialogueUI.CurrentOptions[1]);
     }
 }
