@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
@@ -10,8 +10,12 @@ using Yarn.Unity;
 public class DialogueUITests
 {
 
-    DialogueRunner runner;
-    DialogueUI ui;
+    // Getters for the various components in the scene that we're working
+    // with
+    DialogueRunner Runner => GameObject.FindObjectOfType<DialogueRunner>();
+    DialogueUI UI => GameObject.FindObjectOfType<DialogueUI>();
+    Text TextCanvas => UI.dialogueContainer.transform.GetComponentsInChildren<Text>()
+                                                     .First(element => element.gameObject.name == "Text");
 
     [UnitySetUp]
     public IEnumerator SetUp () {
@@ -21,46 +25,40 @@ public class DialogueUITests
         {
             loaded = true;
         };
-        yield return new WaitUntil(() => loaded);
-
-        runner = GameObject.FindObjectOfType<DialogueRunner>();
-        ui = GameObject.FindObjectOfType<DialogueUI>();
-        
+        yield return new WaitUntil(() => loaded);        
     }
 
     [UnityTest]
     public IEnumerator RunLine_OnValidYarnLine_ShowCorrectText()
     {
         // Arrange
-        Text textCanvas = ui.dialogueContainer.transform.GetComponentsInChildren<Text>().First(element => element.gameObject.name == "Text");
-
-        runner.StartDialogue();
+        Runner.StartDialogue();
         float startTime;
         startTime = Time.time;
-        while (Time.time - startTime < 10 && !string.Equals(textCanvas.text, "Spieler: Kannst du mich hören?"))
+        while (Time.time - startTime < 10 && !string.Equals(TextCanvas.text, "Spieler: Kannst du mich hören?"))
         {
             yield return null;
         }
 
-        Assert.That(string.Equals(textCanvas.text, "Spieler: Kannst du mich hören?"));
+        Assert.That(string.Equals(TextCanvas.text, "Spieler: Kannst du mich hören?"));
 
         // Arrange for second line
         yield return null;
-        ui.MarkLineComplete();
+        UI.MarkLineComplete();
 
         startTime = Time.time;
-        while (Time.time - startTime < 10 && !string.Equals(textCanvas.text, "NPC: Klar und deutlich."))
+        while (Time.time - startTime < 10 && !string.Equals(TextCanvas.text, "NPC: Klar und deutlich."))
         {
             yield return null;
         }
 
-        Assert.That(string.Equals(textCanvas.text, "NPC: Klar und deutlich."));
+        Assert.That(string.Equals(TextCanvas.text, "NPC: Klar und deutlich."));
 
         // Cleanup
         yield return null;
-        ui.MarkLineComplete();
+        UI.MarkLineComplete();
         yield return null;
-        ui.SelectOption(0);
+        UI.SelectOption(0);
         yield return null;
     }
 }
