@@ -125,7 +125,7 @@ namespace Yarn.Unity {
 
         /// <summary>
         /// A <see cref="UnityEngine.Events.UnityEvent"/> that is called
-        /// when a line's text has finished being displayed.
+        /// when the line has finished being displayed by this view.
         /// </summary>
         /// <remarks>
         /// This method is called after <see cref="onLineUpdate"/>. Use
@@ -137,6 +137,7 @@ namespace Yarn.Unity {
         /// is called.
         /// </remarks>
         /// <seealso cref="onLineUpdate"/>
+        /// <seealso cref="onLineFinishDisplaying"/>
         /// <seealso cref="MarkLineComplete"/>
         public UnityEngine.Events.UnityEvent onTextFinishDisplaying;
 
@@ -146,8 +147,12 @@ namespace Yarn.Unity {
         /// </summary>
         /// <remarks>
         /// Use this method to display UI elements like a "continue" button
-        /// in sync with other Views like voice over playback.
+        /// in sync with other <see cref="DialogueViewBase"/> objects, like
+        /// voice over playback.
         /// </remarks>
+        /// <seealso cref="onLineUpdate"/>
+        /// <seealso cref="onTextFinishDisplaying"/>
+        /// <seealso cref="MarkLineComplete"/>        
         public UnityEngine.Events.UnityEvent onLineFinishDisplaying;
 
         /// <summary>
