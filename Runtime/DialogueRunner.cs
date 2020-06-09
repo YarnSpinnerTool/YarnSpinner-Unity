@@ -85,9 +85,9 @@ namespace Yarn.Unity
 
 #if ADDRESSABLES
         /// <summary>
-        /// Whether the DialogueRunner should wait for the linked 
-        /// Addressable voice over AudioClips to finish loading (true)
-        /// or not (false).
+        /// Whether the DialogueRunner should wait for the linked
+        /// Addressable voice over AudioClips to finish loading (true) or
+        /// not (false).
         /// </summary>
         public bool waitForAddressablesLoaded = true;
 #endif
@@ -147,36 +147,38 @@ namespace Yarn.Unity
         public Dialogue Dialogue => dialogue ?? (dialogue = CreateDialogueInstance());
 
         /// <summary>
-        /// A <see cref="StringUnityEvent"/> that is called when a <see cref="Command"/> 
+        /// A <see cref="StringUnityEvent"/> that is called when a <see
+        /// cref="Command"/> 
         /// is received.
         /// </summary>
         /// <remarks>
-        /// <para>
-        /// Use this method to dispatch a command to other parts of your game.
-        /// This method is only called if the <see cref="Command"/> has not
-        /// been handled by a command handler that has been added to the
+        /// Use this method to dispatch a command to other parts of your
+        /// game. This method is only called if the <see cref="Command"/>
+        /// has not been handled by a command handler that has been added
+        /// to the
         /// <see cref="DialogueRunner"/>, or by a method on a <see
         /// cref="MonoBehaviour"/> in the scene with the attribute <see
-        /// cref="YarnCommandAttribute"/>.
-        /// {{|note|}}
-        /// When a command is delivered in this way, the <see cref="DialogueRunner"/> 
-        /// will not pause execution. If you want a command to make the DialogueRunner 
-        /// pause execution, see <see cref="AddCommandHandler(string, BlockingCommandHandler)"/>.
+        /// cref="YarnCommandAttribute"/>. {{|note|}} When a command is
+        /// delivered in this way, the <see cref="DialogueRunner"/> 
+        /// will not pause execution. If you want a command to make the
+        /// DialogueRunner pause execution, see <see
+        /// cref="AddCommandHandler(string, BlockingCommandHandler)"/>.
         /// {{|/note|}}
-        /// </para>
-        /// <para>
-        /// This method receives the full text of the command, as it appears between
-        /// the `<![CDATA[<<]]>` and `<![CDATA[>>]]>` markers.
-        /// </para>
+        /// 
+        /// This method receives the full text of the command, as it
+        /// appears between the `<![CDATA[<<]]>` and `<![CDATA[>>]]>`
+        /// markers.
         /// </remarks>
         /// <seealso cref="AddCommandHandler(string, CommandHandler)"/>
-        /// <seealso cref="AddCommandHandler(string, BlockingCommandHandler)"/>
+        /// <seealso cref="AddCommandHandler(string,
+        /// BlockingCommandHandler)"/>
         /// <seealso cref="YarnCommandAttribute"/>
         public StringUnityEvent onCommand;
 
         /// <summary>
         /// Adds a program, and parses and adds the contents of the
-        /// program's string table to the DialogueRunner's combined string table.
+        /// program's string table to the DialogueRunner's combined string
+        /// table.
         /// </summary>
         /// <remarks>This method calls <see
         /// cref="AddDialogueLines(YarnProgram)"/> to load the string table
@@ -269,7 +271,8 @@ namespace Yarn.Unity
         /// Returns `true` when a node named `nodeName` has been loaded.
         /// </summary>
         /// <param name="nodeName">The name of the node.</param>
-        /// <returns>`true` if the node is loaded, `false` otherwise/</returns>
+        /// <returns>`true` if the node is loaded, `false`
+        /// otherwise/</returns>
         public bool NodeExists(string nodeName) => Dialogue.NodeExists(nodeName);
 
         /// <summary>
@@ -282,23 +285,23 @@ namespace Yarn.Unity
         public IEnumerable<string> GetTagsForNode(String nodeName) => Dialogue.GetTagsForNode(nodeName);
 
         /// <summary>
-        /// Adds a command handler. Dialogue will continue running after the command is called.
+        /// Adds a command handler. Dialogue will continue running after
+        /// the command is called.
         /// </summary>
         /// <remarks>
         /// When this command handler has been added, it can be called from
         /// your Yarn scripts like so:
         ///
-        /// <![CDATA[
-        /// ```yarn
+        /// <![CDATA[```yarn
         /// <<commandName param1 param2>>
-        /// ```
-        /// ]]>
+        /// ```]]>
         ///
         /// When this command handler is called, the DialogueRunner will
         /// not stop executing code.
         /// </remarks>
         /// <param name="commandName">The name of the command.</param>
-        /// <param name="handler">The <see cref="CommandHandler"/> that will be invoked when the command is called.</param>
+        /// <param name="handler">The <see cref="CommandHandler"/> that
+        /// will be invoked when the command is called.</param>
         public void AddCommandHandler(string commandName, CommandHandler handler)
         {
             if (commandHandlers.ContainsKey(commandName) || blockingCommandHandlers.ContainsKey(commandName)) {
@@ -431,7 +434,8 @@ namespace Yarn.Unity
         /// Remove a registered function.
         /// </summary>
         /// <remarks>
-        /// After a function has been removed, it cannot be called from Yarn scripts.
+        /// After a function has been removed, it cannot be called from
+        /// Yarn scripts.
         /// </remarks>
         /// <param name="name">The name of the function to remove.</param>
         /// <seealso cref="AddFunction(string, int, Function)"/>
@@ -440,7 +444,18 @@ namespace Yarn.Unity
 
         #region Private Properties/Variables/Procedures
 
-        List<DialogueViewBase> lineCurrentlyRunOnDialogueViews = new List<DialogueViewBase>();
+        /// <summary>
+        /// The <see cref="LocalizedLine"/> currently being displayed on
+        /// the dialogue views.
+        /// </summary>
+        internal LocalizedLine CurrentLine {get;private set;}
+
+        /// <summary>
+        ///  The collection of dialogue views that are currently either
+        ///  delivering a line, or dismissing a line from being on screen.
+        /// </summary>
+        private readonly HashSet<DialogueViewBase> ActiveDialogueViews = new HashSet<DialogueViewBase>();
+
         Action<int> selectAction;
 
         /// <summary>
@@ -469,9 +484,11 @@ namespace Yarn.Unity
         /// </remarks>
         /// <param name="parameters">The list of parameters that this
         /// command was invoked with.</param>
-        /// <param name="onComplete">The method to call when the DialogueRunner should continue executing code.</param>
+        /// <param name="onComplete">The method to call when the
+        /// DialogueRunner should continue executing code.</param>
         /// <seealso cref="AddCommandHandler(string, CommandHandler)"/>
-        /// <seealso cref="AddCommandHandler(string, BlockingCommandHandler)"/>
+        /// <seealso cref="AddCommandHandler(string,
+        /// BlockingCommandHandler)"/>
         public delegate void BlockingCommandHandler(string[] parameters, Action onComplete);
 
         /// Maps the names of commands to action delegates.
@@ -479,11 +496,14 @@ namespace Yarn.Unity
         Dictionary<string, BlockingCommandHandler> blockingCommandHandlers = new Dictionary<string, BlockingCommandHandler>();
 
         /// <summary>
-        /// Collection of dialogue lines linked with their corresponding Yarn linetags.
+        /// Collection of dialogue lines linked with their corresponding
+        /// Yarn linetags.
         /// </summary>
         Dictionary<string, string> localizedText = new Dictionary<string, string>();
+        
         /// <summary>
-        /// Collection of voice over AudioClips linked with their corresponding Yarn linetags.
+        /// Collection of voice over AudioClips linked with their
+        /// corresponding Yarn linetags.
         /// </summary>
         Dictionary<string, AudioClip> localizedAudio = new Dictionary<string, AudioClip>();
 
@@ -498,17 +518,14 @@ namespace Yarn.Unity
         bool wasCompleteCalled = false;
 
         /// <summary>
-        /// A flag caching if a View has communicated the user's intent to proceed to the next line
-        /// </summary>
-        bool userIntendedNextLine = false;
-
-        /// <summary>
-        /// List of Addressable voice over AudioClips being currently loaded.
+        /// List of Addressable voice over AudioClips being currently
+        /// loaded.
         /// </summary>
         private List<Task> addressableVoiceOverLoadingTasks = new List<Task>();
 
         /// <summary>
-        /// Instance of coroutine checking whether all Addressable loading tasks finished.
+        /// Instance of coroutine checking whether all Addressable loading
+        /// tasks finished.
         /// </summary>
         private Coroutine WaitForAddressablesLoadedCoroutine;
 
@@ -523,6 +540,14 @@ namespace Yarn.Unity
         {
             Assert.IsNotNull(dialogueViews, "No View class (like DialogueUI) was given! Can't run the dialogue without a View class!");
             Assert.IsNotNull(variableStorage, "Variable storage was not set! Can't run the dialogue!");
+
+            // Give each dialogue view the continuation action, which
+            // they'll call to pass on the user intent to move on to the
+            // next line (or interrupt the current one).
+            System.Action continueAction = OnViewUserIntentNextLine;
+            foreach (var dialogueView in dialogueViews) {
+                dialogueView.onUserWantsLineContinuation = continueAction;
+            }
 
             // Ensure that the variable storage has the right stuff in it
             variableStorage.ResetToDefaults();
@@ -601,16 +626,18 @@ namespace Yarn.Unity
         /// Link a voice over AudioClip with a Yarn linetag.
         /// </summary>
         /// <param name="linetag">The linetag of the line.</param>
-        /// <param name="voiceOver">The voice over AudioClip of the line.</param>
+        /// <param name="voiceOver">The voice over AudioClip of the
+        /// line.</param>
         private void GetVoiceOversCallback(string linetag, AudioClip voiceOver) {
             localizedAudio[linetag] = voiceOver;
         }
 
         /// <summary>
-        /// Check if all Addressable load tasks are finished and invoke the given
-        /// action.
+        /// Check if all Addressable load tasks are finished and invoke the
+        /// given action.
         /// </summary>
-        /// <param name="onAddressablesLoaded">Action invoked after all Addressables are loaded.</param>
+        /// <param name="onAddressablesLoaded">Action invoked after all
+        /// Addressables are loaded.</param>
         /// <returns></returns>
         private IEnumerator CheckAddressablesLoaded(Action onAddressablesLoaded) {
             while (waitForAddressablesLoaded && addressableVoiceOverLoadingTasks.Count > 0) {
@@ -724,21 +751,21 @@ namespace Yarn.Unity
                 bool wasValidCommand;
                 Dialogue.HandlerExecutionType executionType;
 
-                // Try looking in the command handlers first, which is a lot
-                // cheaper than crawling the game object hierarchy.
+                // Try looking in the command handlers first, which is a
+                // lot cheaper than crawling the game object hierarchy.
 
-                // Set a flag that we can use to tell if the dispatched command
-                // immediately called _continue
+                // Set a flag that we can use to tell if the dispatched
+                // command immediately called _continue
                 wasCompleteCalled = false;
 
                 (wasValidCommand, executionType) = DispatchCommandToRegisteredHandlers(command, () => ContinueDialogue());
 
                 if (wasValidCommand) {
 
-                    // This was a valid command. It returned either continue,
-                    // or pause; if it returned pause, there's a chance that
-                    // the command handler immediately called _continue, in
-                    // which case we should not pause.
+                    // This was a valid command. It returned either
+                    // continue, or pause; if it returned pause, there's a
+                    // chance that the command handler immediately called
+                    // _continue, in which case we should not pause.
                     if (wasCompleteCalled) {
                         return Dialogue.HandlerExecutionType.ContinueExecution;
                     }
@@ -749,20 +776,21 @@ namespace Yarn.Unity
                     }
                 }
 
-                // We didn't find it in the comand handlers. Try looking in the game objects.
+                // We didn't find it in the comand handlers. Try looking in
+                // the game objects.
                 (wasValidCommand, executionType) = DispatchCommandToGameObject(command);
 
                 if (wasValidCommand) {
                     // We found an object and method to invoke as a Yarn
-                    // command. It may or may not have been a coroutine; if it
-                    // was a coroutine, executionType will be
+                    // command. It may or may not have been a coroutine; if
+                    // it was a coroutine, executionType will be
                     // HandlerExecutionType.Pause, and we'll wait for it to
                     // complete before resuming execution.
                     return executionType;
                 }
 
-                // We didn't find a method in our C# code to invoke. Try invoking on the 
-                // publicly exposed UnityEvent.
+                // We didn't find a method in our C# code to invoke. Try
+                // invoking on the publicly exposed UnityEvent.
                 onCommand?.Invoke(command.Text);
                 return Dialogue.HandlerExecutionType.ContinueExecution;
             }
@@ -770,29 +798,36 @@ namespace Yarn.Unity
             /// Forward the line to the dialogue UI.
             Dialogue.HandlerExecutionType HandleLine(Line line)
             {
-                // Update lines to current state before sending them to the view classes
+                // Update lines to current state before sending them to the
+                // view classes
                 var substitutions = GetInlineExpressions(line);
                 var text = localizedText.ContainsKey(line.ID) ? localizedText[line.ID] : string.Empty;
                 var audio = localizedAudio.ContainsKey(line.ID) ? localizedAudio[line.ID] : null;
-                var localizedLine = new LocalizedLine() {
+
+                CurrentLine = new LocalizedLine()
+                {
                     TextID = line.ID,
                     TextLocalized = text,
                     VoiceOverLocalized = audio,
-                    Substitutions = substitutions
+                    Substitutions = substitutions,
+                    Status = LineStatus.Running
                 };
 
-                // First register current dialogue views for line complete calls
-                foreach (var dialogueView in dialogueViews) {
-                    lineCurrentlyRunOnDialogueViews.Add(dialogueView);
-                }
+                // Clear the set of active dialogue views, just in case
+                ActiveDialogueViews.Clear();
+
                 // Send line to available dialogue views
                 foreach (var dialogueView in dialogueViews) {
-                    dialogueView.RunLine(localizedLine, () => OnDialogueLineFinished());
+                    // Mark this dialogue view as active                
+                    ActiveDialogueViews.Add(dialogueView);
+                    dialogueView.RunLine(CurrentLine, 
+                        () => DialogueViewCompletedDelivery(dialogueView));
                 }
                 return Dialogue.HandlerExecutionType.PauseExecution;
             }
 
-            /// Indicates to the DialogueRunner that the user has selected an option
+            /// Indicates to the DialogueRunner that the user has selected
+            /// an option
             void SelectedOption(int obj)
             {
                 Dialogue.SetSelectedOption(obj);
@@ -815,8 +850,8 @@ namespace Yarn.Unity
                 if (commandHandlers.ContainsKey(firstWord) == false &&
                     blockingCommandHandlers.ContainsKey(firstWord) == false) {
 
-                    // We don't have a registered handler for this command, but
-                    // some other part of the game might.
+                    // We don't have a registered handler for this command,
+                    // but some other part of the game might.
                     return (false, Dialogue.HandlerExecutionType.ContinueExecution);
                 }
 
@@ -848,13 +883,14 @@ namespace Yarn.Unity
                 }
             }
 
-            /// commands that can be automatically dispatched look like this:
-            /// COMMANDNAME OBJECTNAME <param> <param> <param> ...
+            /// commands that can be automatically dispatched look like
+            /// this: COMMANDNAME OBJECTNAME <param> <param> <param> ...
             /** We can dispatch this command if:
              * 1. it has at least 2 words
              * 2. the second word is the name of an object
              * 3. that object has components that have methods with the
-             *    YarnCommand attribute that have the correct commandString set
+             *    YarnCommand attribute that have the correct commandString
+             *    set
              */
             (bool methodFound, Dialogue.HandlerExecutionType executionType) DispatchCommandToGameObject(Command command)
             {
@@ -902,8 +938,8 @@ namespace Yarn.Unity
                         // Find the YarnCommand attributes on this method
                         var attributes = (YarnCommandAttribute[])method.GetCustomAttributes(typeof(YarnCommandAttribute), true);
 
-                        // Find the YarnCommand whose commandString is equal to
-                        // the command name
+                        // Find the YarnCommand whose commandString is
+                        // equal to the command name
                         foreach (var attribute in attributes) {
                             if (attribute.CommandString == commandName) {
 
@@ -931,7 +967,8 @@ namespace Yarn.Unity
                                     paramsMatch = true;
 
                                 }
-                                // Otherwise, verify that this method has the right number of parameters
+                                // Otherwise, verify that this method has
+                                // the right number of parameters
                                 else if (methodParameters.Length == parameters.Count) {
                                     paramsMatch = true;
                                     foreach (var paramInfo in methodParameters) {
@@ -944,9 +981,9 @@ namespace Yarn.Unity
                                     if (paramsMatch) {
                                         // Cool, we can send the command!
 
-                                        // If this is a coroutine, start it,
-                                        // and set a flag so that we know to
-                                        // wait for it to finish
+                                        // If this is a coroutine, start
+                                        // it, and set a flag so that we
+                                        // know to wait for it to finish
                                         if (method.ReturnType == typeof(IEnumerator)) {
                                             StartCoroutine(DoYarnCommand(component, method, parameters.ToArray()));
                                             startedCoroutine = true;
@@ -959,8 +996,8 @@ namespace Yarn.Unity
                                 }
                                 //parameters are invalid, but name matches.
                                 if (!paramsMatch) {
-                                    //save this error in case a matching
-                                    //command is never found.
+                                    // save this error in case a matching
+                                    // command is never found.
                                     errorValues.Add(new string[] { method.Name, commandName, methodParameters.Length.ToString(), parameters.Count.ToString() });
                                 }
                             }
@@ -968,15 +1005,15 @@ namespace Yarn.Unity
                     }
                 }
 
-                // Warn if we found multiple things that could respond to this
-                // command.
+                // Warn if we found multiple things that could respond to
+                // this command.
                 if (numberOfMethodsFound > 1) {
                     Debug.LogWarningFormat(sceneObject, "The command \"{0}\" found {1} targets. " +
                         "You should only have one - check your scripts.", command, numberOfMethodsFound);
                 }
                 else if (numberOfMethodsFound == 0) {
-                    //list all of the near-miss methods only if a proper match
-                    //is not found, but correctly-named methods are.
+                    // list all of the near-miss methods only if a proper
+                    // match is not found, but correctly-named methods are.
                     foreach (string[] errorVal in errorValues) {
                         Debug.LogErrorFormat(sceneObject, "Method \"{0}\" wants to respond to Yarn command \"{1}\", but it has a different number of parameters ({2}) to those provided ({3}), or is not a string array!", errorVal[0], errorVal[1], errorVal[2], errorVal[3]);
                     }
@@ -1021,6 +1058,65 @@ namespace Yarn.Unity
             }
         }
 
+        /// <summary>
+        /// Called when a <see cref="DialogueViewBase"/> has finished
+        /// delivering its line. When all views in <see
+        /// cref="ActiveDialogueViews"/> have called this method, the
+        /// line's status will change to <see
+        /// cref="LineStatus.Delivered"/>.
+        /// </summary>
+        /// <param name="dialogueView">The view that finished delivering
+        /// the line.</param>
+        private void DialogueViewCompletedDelivery(DialogueViewBase dialogueView)
+        {
+            // A dialogue view just completed its delivery. Remove it from
+            // the set of active views.
+            ActiveDialogueViews.Remove(dialogueView);
+
+            // Have all of the views completed? 
+            if (ActiveDialogueViews.Count == 0) {
+                UpdateLineStatus(CurrentLine, LineStatus.Delivered);
+            }
+
+            // Should the line automatically become Ended as soon as it's
+            // Delivered?
+            if (continueNextLineOnLineFinished) {
+                // Go ahead and notify the views. 
+                UpdateLineStatus(CurrentLine, LineStatus.Ended);
+
+                // Additionally, tell the views to dismiss the line from
+                // presentation. When each is done, it will notify this
+                // dialogue runner to call DialogueViewCompletedDismissal;
+                // when all have finished, this dialogue runner will tell
+                // the Dialogue to Continue() when all lines are done
+                // dismissing the line.
+                DismissLineFromViews(dialogueViews);                
+            }
+        }
+
+        /// <summary>
+        /// Updates a <see cref="LocalizedLine"/>'s status to <paramref
+        /// name="newStatus"/>, and notifies all dialogue views that the
+        /// line about the state change.
+        /// </summary>
+        /// <param name="line">The line whose state is changing.</param>
+        /// <param name="newStatus">The <see
+        /// cref="LineStatus"/> that the line now
+        /// has.</param>
+        private void UpdateLineStatus(LocalizedLine line, LineStatus newStatus)
+        {
+            var previousStatus = line.Status;
+
+            Debug.Log($"Line \"{line.TextLocalized}\" changed state to {newStatus}");
+
+            // Update the state of the line and let the views know.
+            line.Status = newStatus;
+
+            foreach (var view in dialogueViews) {
+                view.OnLineStatusChanged(line);
+            }
+        }
+
         void OnLanguagePreferencesChanged(object sender, EventArgs e) {
             localizedAudio.Clear();
             localizedText.Clear();
@@ -1031,139 +1127,99 @@ namespace Yarn.Unity
 
         void ContinueDialogue()
         {
-            lineCurrentlyRunOnDialogueViews.Clear();
             wasCompleteCalled = true;
-            userIntendedNextLine = false;
+            CurrentLine = null;
             Dialogue.Continue();
         }
 
         /// <summary>
-        /// Called by a <see cref="DialogueViewBase"/> derived class from <see cref="dialogueViews"/>
-        /// to inform the <see cref="DialogueRunner"/> that the user intents to proceed to the next
-        /// line.
+        /// Called by a <see cref="DialogueViewBase"/> derived class from
+        /// <see cref="dialogueViews"/>
+        /// to inform the <see cref="DialogueRunner"/> that the user
+        /// intents to proceed to the next line.
         /// </summary>
-        internal void OnViewUserIntentNextLine() {
-            userIntendedNextLine = true;
-
-            switch (GetLowestLineStatus()) {
-                case DialogueViewBase.DialogueLineStatus.Running:
-                    FinishLineCurrentlyRunningOnViews();
-                    break;
-                case DialogueViewBase.DialogueLineStatus.Finished:
-                    EndLineCurrentlyFinishedOnViews();
-                    break;
-                default:
-                    break;
+        public void OnViewUserIntentNextLine() {
+            
+            if (CurrentLine == null) {
+                // There's no active line, so there's nothing that can be
+                // done here.
+                Debug.LogWarning($"{nameof(OnViewUserIntentNextLine)} was called, but no line was running.");
+                return;
             }
 
-            if (CheckDialogueViewsForCommonLineStatus(DialogueViewBase.DialogueLineStatus.Ended) && (continueNextLineOnLineFinished || userIntendedNextLine)) {
+            switch (CurrentLine.Status)
+            {
+                case LineStatus.Running:
+                    // The line has been Interrupted. Dialogue views should
+                    // proceed to finish the delivery of the line as
+                    // quickly as they can. (When all views have finished
+                    // their expedited delivery, they call their completion
+                    // handler as normal, and the line becomes Delivered.)
+                    UpdateLineStatus(CurrentLine, LineStatus.Interrupted);
+                    break;
+                case LineStatus.Interrupted:
+                    // The line was already interrupted, and the user has
+                    // requested the next line again. We interpret this as
+                    // the user being insistent. This means the line is now
+                    // Ended, and the dialogue views must dismiss the line
+                    // immediately.
+                    UpdateLineStatus(CurrentLine, LineStatus.Ended);
+                    break;
+                case LineStatus.Delivered:
+                    // The line had finished delivery (either normally or
+                    // because it was Interrupted), and the user has
+                    // indicated they want to proceed to the next line. The
+                    // line is therefore Ended.
+                    UpdateLineStatus(CurrentLine, LineStatus.Ended);
+                    break;
+                case LineStatus.Ended:
+                    // The line has already been ended, so there's nothing
+                    // further for the views to do. (This will only happen
+                    // during the interval of time between a line becoming
+                    // Ended and the next line appearing.)
+                    break;                
+            }    
+
+            if (CurrentLine.Status == LineStatus.Ended) {
+                // This line is Ended, so we need to tell the dialogue
+                // views to dismiss it. 
+                DismissLineFromViews(dialogueViews);
+            }
+            
+        }
+
+        private void DismissLineFromViews(IEnumerable<DialogueViewBase> dialogueViews)
+        {
+            ActiveDialogueViews.Clear();
+
+            foreach (var view in dialogueViews) {
+                // we do this in two passes - first by adding each
+                // dialogueView into ActiveDialogueViews, then by asking
+                // them to dismiss the line - because calling
+                // view.DismissLine might immediately call its completion
+                // handler (which means that we'd be repeatedly returning
+                // to zero active dialogue views, which means
+                // DialogueViewCompletedDismissal will mark the line as
+                // entirely done)
+                ActiveDialogueViews.Add(view);
+            }
+                
+            foreach (var view in dialogueViews) {
+                view.DismissLine(() => DialogueViewCompletedDismissal(view));
+            }
+        }
+
+        private void DialogueViewCompletedDismissal(DialogueViewBase dialogueView)
+        {
+            // A dialogue view just completed dismissing its line. Remove
+            // it from the set of active views.
+            ActiveDialogueViews.Remove(dialogueView);
+
+            // Have all of the views completed dismissal? 
+            if (ActiveDialogueViews.Count == 0) {
+                // Then we're ready to continue to the next piece of content.
                 ContinueDialogue();
-            }
-        }
-
-        /// <summary>
-        /// Called by a <see cref="DialogueViewBase"/> derived class from <see cref="dialogueViews"/>
-        /// to inform the <see cref="DialogueRunner"/> that the user intents to finish the current
-        /// line.
-        /// </summary>
-        internal void OnViewUserIntentFinishLine() {
-            FinishLineCurrentlyRunningOnViews();
-        }
-
-        /// <summary>
-        /// Called by a <see cref="DialogueViewBase"/> derived class from <see cref="dialogueViews"/>
-        /// to inform the <see cref="DialogueRunner"/> that it has finished presenting a line.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// Checks and informs all <see cref="dialogueViews"/> if they have all finished a line.
-        /// Also proceeds to the next line if the option 
-        /// <see cref="continueNextLineOnLineFinished"/> is true or if the user
-        /// expressed that intent on one of the <see cref="dialogueViews"/> in which case
-        /// the corresponding view called <see cref="OnViewUserIntentNextLine"/>.
-        /// </para>
-        /// </remarks>
-        void OnDialogueLineFinished() {
-            if (CheckDialogueViewsForCommonLineStatus(DialogueViewBase.DialogueLineStatus.Finished)) {
-                LineFinishedOnAllViews();
-
-                if (continueNextLineOnLineFinished || userIntendedNextLine) {
-                    EndLineCurrentlyFinishedOnViews();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Instructs the <see cref="DialogueRunner"/> to check all <see cref="dialogueViews"/> if
-        /// they have all ended the current line and proceeds with the next line in that case.
-        /// </summary>
-        void OnDialogueLineCompleted() {
-            if (CheckDialogueViewsForCommonLineStatus(DialogueViewBase.DialogueLineStatus.Ended)) {
-                ContinueDialogue();
-            }
-        }
-
-        /// <summary>
-        /// Informs all <see cref="dialogueViews"/> that they have finished a line by calling
-        /// <see cref="DialogueViewBase.OnFinishedLineOnAllViews"/> on them.
-        /// </summary>
-        private void LineFinishedOnAllViews() {
-            foreach (var dialogueView in dialogueViews) {
-                dialogueView.OnFinishedLineOnAllViews();
-            }
-        }
-
-        /// <summary>
-        /// Instructs all <see cref="dialogueViews"/> to end the current line by calling
-        /// <see cref="DialogueViewBase.EndCurrentLine(Action)"/> on all of them.
-        /// </summary>
-        private void EndLineCurrentlyFinishedOnViews() {
-            foreach (var dialogueView in dialogueViews) {
-                if (dialogueView.dialogueLineStatus == DialogueViewBase.DialogueLineStatus.Finished) {
-                    StartCoroutine(dialogueView.EndCurrentLine(OnDialogueLineCompleted));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Instructs all <see cref="dialogueViews"/> to go to the end of the current line by calling
-        /// <see cref="DialogueViewBase.FinishRunningCurrentLine"/> on all of them.
-        /// </summary>
-        private void FinishLineCurrentlyRunningOnViews() {
-            foreach (var dialogueView in dialogueViews) {
-                if (dialogueView.dialogueLineStatus == DialogueViewBase.DialogueLineStatus.Running) {
-                    dialogueView.FinishRunningCurrentLine();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Check the <see cref="DialogueViewBase.DialogueLineStatus"/> on all <see cref="dialogueViews"/> and get the status with the lowest
-        /// int representation.
-        /// </summary>
-        /// <returns></returns>
-        DialogueViewBase.DialogueLineStatus GetLowestLineStatus() {
-            var lowestStatus = DialogueViewBase.DialogueLineStatus.Ended;
-            foreach (var dialogueView in dialogueViews) {
-                if (dialogueView.dialogueLineStatus < lowestStatus) {
-                    lowestStatus = dialogueView.dialogueLineStatus;
-                }
-            }
-            return lowestStatus;
-        }
-
-        /// <summary>
-        /// Return true if all <see cref="dialogueViews"/> have the same <see cref="DialogueViewBase.DialogueLineStatus"/>.
-        /// </summary>
-        /// <param name="commonStatusToCheck"></param>
-        /// <returns></returns>
-        private bool CheckDialogueViewsForCommonLineStatus (DialogueViewBase.DialogueLineStatus commonStatusToCheck) {
-            foreach (var dialogueView in dialogueViews) {
-                if (dialogueView.dialogueLineStatus != commonStatusToCheck) {
-                    return false;
-                }
-            }
-            return true;
+            }            
         }
 
         string[] GetInlineExpressions (Line line) {
@@ -1184,7 +1240,8 @@ namespace Yarn.Unity
 
     /// <summary>
     /// An attribute that marks a method on a <see cref="MonoBehaviour"/>
-    /// as a [command](<![CDATA[ {{<ref "/docs/unity/working-with-commands">}}]]>).
+    /// as a [command](<![CDATA[ {{<ref
+    /// "/docs/unity/working-with-commands">}}]]>).
     /// </summary>
     /// <remarks>
     /// When a <see cref="DialogueRunner"/> receives a <see
@@ -1204,7 +1261,7 @@ namespace Yarn.Unity
     /// * If the method takes a single <see cref="string"/>[] parameter,
     /// the method is called, and will be passed an array containing all
     /// words in the command after the first two.
-    /// 
+    ///
     /// * If the method takes a number of <see cref="string"/> parameters
     /// equal to the number of words in the command after the first two, it
     /// will be called with those words as parameters.
@@ -1212,15 +1269,13 @@ namespace Yarn.Unity
     /// * Otherwise, it will not be called, and a warning will be issued.
     ///
     /// ### `YarnCommand`s and Coroutines
-    /// 
+    ///
     /// This attribute may be attached to a coroutine. 
-    /// 
-    /// {{|note|}}
-    /// The <see
-    /// cref="DialogueRunner"/> determines if the method is a coroutine if
-    /// the method returns <see cref="IEnumerator"/>.
-    /// {{|/note|}}
-    /// 
+    ///
+    /// {{|note|}} The <see cref="DialogueRunner"/> determines if the
+    /// method is a coroutine if the method returns <see
+    /// cref="IEnumerator"/>. {{|/note|}}
+    ///
     /// If the method is a coroutine, the DialogueRunner will pause
     /// execution until the coroutine ends.
     /// </remarks>
@@ -1347,6 +1402,42 @@ namespace Yarn.Unity
         public abstract void ResetToDefaults();
     }
 
+    /// <summary>
+    /// The presentation status of a <see cref="LocalizedLine"/>.
+    /// </summary>
+    public enum LineStatus
+    {
+        /// <summary>
+        /// The line is being build up and shown to the user.
+        /// </summary>
+        Running,
+        /// <summary>
+        /// The line got interrupted while being build up and should
+        /// complete showing the line asap. View classes should get to the
+        /// end of the line as fast as possible. A view class showing text
+        /// would stop building up the text and immediately show the entire
+        /// line and a view class playing voice over clips would do a very
+        /// quick fade out and stop playback afterwards.
+        /// </summary>
+        Interrupted,
+        /// <summary>
+        /// The line has been fully presented to the user. A view class
+        /// presenting the line as text would be showing the entire line
+        /// and a view class playing voice over clips would be silent now.
+        /// </summary>
+        /// <remarks>
+        /// A line that was previously <see cref="LineStatus.Interrupted"/>
+        /// will become <see cref="LineStatus.Delivered"/> once the <see
+        /// cref="DialogueViewBase"/> has completed the interruption
+        /// process.
+        /// </remarks>
+        Delivered,
+        /// <summary>
+        /// The line is not being presented anymore in any way to the user.
+        /// </summary>
+        Ended
+    }
+
     public class LocalizedLine {
         /// <summary>
         /// DialogueLine's ID
@@ -1364,6 +1455,10 @@ namespace Yarn.Unity
         /// DialogueLine's voice over clip
         /// </summary>
         public AudioClip VoiceOverLocalized;
+        /// <summary>
+        /// The line's delivery status.
+        /// </summary>
+        public LineStatus Status;
     }
 
     public class DialogueOption {

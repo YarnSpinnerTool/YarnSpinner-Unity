@@ -2,7 +2,8 @@
 using UnityEngine;
 
 /// <summary>
-/// Yarn's project wide settings that will automatically be included in a build and not altered after that.
+/// Yarn's project wide settings that will automatically be included in a
+/// build and not altered after that.
 /// </summary>
 [System.Serializable]
 public class ProjectSettings : ScriptableObject {
@@ -11,12 +12,15 @@ public class ProjectSettings : ScriptableObject {
     /// </summary>
     [SerializeField]
     private List<string> _textProjectLanguages = new List<string>();
+
     /// <summary>
     /// Project wide available text languages
     /// </summary>
     public static List<string> TextProjectLanguages => Instance._textProjectLanguages;
+
     /// <summary>
-    /// Project wide default text language. Returns null if no default languages exists.
+    /// Project wide default text language. Returns null if no default
+    /// languages exists.
     /// </summary>
     public static string TextProjectLanguageDefault => TextProjectLanguages.Count > 0 ? TextProjectLanguages[0] : null;
 
@@ -25,12 +29,15 @@ public class ProjectSettings : ScriptableObject {
     /// </summary>
     [SerializeField]
     private List<string> _audioProjectLanguages = new List<string>();
+
     /// <summary>
     /// Project wide available audio voice over languages
     /// </summary>
     public static List<string> AudioProjectLanguages => Instance._audioProjectLanguages;
+    
     /// <summary>
-    /// Project wide default audio language. Returns null if no default languages exists.
+    /// Project wide default audio language. Returns null if no default
+    /// languages exists.
     /// </summary>
     public static string AudioProjectLanguageDefault => AudioProjectLanguages.Count > 0 ? AudioProjectLanguages[0] : null;
 
@@ -49,16 +56,16 @@ public class ProjectSettings : ScriptableObject {
     private bool _addressableVoiceOverAudioClips = false;
 
     /// <summary>
-    /// False (default) when VoiceOver AudioClip should be directly 
-    /// referenced and loaded. True if the Addressable system 
-    /// should be used.
+    /// False (default) when VoiceOver AudioClip should be directly
+    /// referenced and loaded. True if the Addressable system should be
+    /// used.
     /// </summary>
     public static bool AddressableVoiceOverAudioClips { get => Instance._addressableVoiceOverAudioClips; set => Instance._addressableVoiceOverAudioClips = value; }
 #endif
 
     /// <summary>
-    /// Makes sure that there's always an instance of this
-    /// class alive upon access.
+    /// Makes sure that there's always an instance of this class alive upon
+    /// access.
     /// </summary>
     private static ProjectSettings Instance {
         get {

@@ -4,32 +4,29 @@ using Yarn.Unity;
 
 public class DialogueRunnerMockUI : Yarn.Unity.DialogueViewBase
 {
+    // The text of the most recently received line that we've been given
     public string CurrentLine { get; private set; } = default;
 
-    protected override IEnumerator RunLine(LocalizedLine dialogueLine)
+    public override void RunLine(LocalizedLine dialogueLine, Action onLineDeliveryComplete)
     {
+        // Store the localised text in our CurrentLine property and
+        // immediately signal that we're done "delivering" the line
         CurrentLine = dialogueLine.TextLocalized;
-        yield break;
+        onLineDeliveryComplete();
     }
 
     public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
     {
-        // Do nothing
+        // Do nothing in response to options becoming available
     }
 
-    protected override void FinishCurrentLine()
-    {
-        // Do nothing
+    public override void DismissLine(Action onDismissalComplete) {
+        // Immediately indicate that we're done 'dismissing' the line.
+        onDismissalComplete();
     }
 
-    protected override IEnumerator EndCurrentLine()
+    public override void OnLineStatusChanged(LocalizedLine dialogueLine)
     {
-        // Do nothing
-        yield break;
-    }
-
-    protected override void OnFinishedLineOnAllViews()
-    {
-        // Do nothing
+        // Do nothing in response to lines changing status
     }
 }

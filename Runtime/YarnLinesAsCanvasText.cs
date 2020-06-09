@@ -23,8 +23,8 @@ namespace Yarn.Unity {
         }
 
         /// <summary>
-        /// Reload the string table and update the UI elements.
-        /// Useful if the languages preferences were changed.
+        /// Reload the string table and update the UI elements. Useful if
+        /// the languages preferences were changed.
         /// </summary>
         public void OnTextLanguagePreferenceChanged () {
             LoadStringTable();
@@ -44,7 +44,8 @@ namespace Yarn.Unity {
         }
 
         /// <summary>
-        /// Update all UI components to the yarn lines loaded from yarnScript.
+        /// Update all UI components to the yarn lines loaded from
+        /// yarnScript.
         /// </summary>
         private void UpdateTextOnUiElements() {
             var index = 0;
