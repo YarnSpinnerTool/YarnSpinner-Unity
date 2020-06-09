@@ -1,0 +1,7 @@
+# Ignore the Samples symlink, which links to Samples~. This symlink exists
+# so that the distributed package ships its samples in a folder called
+# Samples~ (which Unity will ignore, and users can import into their projects
+# when they want to), while the sameples are visible in the package when
+# developing.
+Samples
+Samples.meta

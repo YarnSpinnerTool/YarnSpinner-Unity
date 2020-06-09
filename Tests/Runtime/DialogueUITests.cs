@@ -9,49 +9,81 @@ using Yarn.Unity;
 
 public class DialogueUITests
 {
-    [UnityTest]
-    public IEnumerator RunLine_OnValidYarnLine_ShowCorrectText()
-    {
+
+    // Getters for the various components in the scene that we're working
+    // with
+    DialogueRunner Runner => GameObject.FindObjectOfType<DialogueRunner>();
+    DialogueUI UI => GameObject.FindObjectOfType<DialogueUI>();
+    Text TextCanvas => UI.dialogueContainer.transform.GetComponentsInChildren<Text>()
+                                                     .First(element => element.gameObject.name == "Text");
+
+    [UnitySetUp]
+    public IEnumerator SetUp () {
         SceneManager.LoadScene("DialogueUITests");
         bool loaded = false;
         SceneManager.sceneLoaded += (index, mode) =>
         {
             loaded = true;
         };
-        yield return new WaitUntil(() => loaded);
+        yield return new WaitUntil(() => loaded);        
+    }
 
-        var runner = GameObject.FindObjectOfType<DialogueRunner>();
-        DialogueUI ui = GameObject.FindObjectOfType<DialogueUI>();
-        Text textCanvas = ui.dialogueContainer.transform.GetComponentsInChildren<Text>().First(element => element.gameObject.name == "Text");
-
+    [UnityTest]
+    public IEnumerator RunLine_OnValidYarnLine_ShowCorrectText()
+    {
         // Arrange
-        runner.StartDialogue();
+        Runner.StartDialogue();
         float startTime;
         startTime = Time.time;
-        while (Time.time - startTime < 10 && !string.Equals(textCanvas.text, "Spieler: Kannst du mich hören?"))
+        while (Time.time - startTime < 10 && !string.Equals(TextCanvas.text, "Spieler: Kannst du mich hören?"))
         {
             yield return null;
         }
 
-        Assert.That(string.Equals(textCanvas.text, "Spieler: Kannst du mich hören?"));
+        Assert.That(string.Equals(TextCanvas.text, "Spieler: Kannst du mich hören?"));
 
         // Arrange for second line
         yield return null;
-        ui.MarkLineComplete();
+        UI.MarkLineComplete();
 
         startTime = Time.time;
-        while (Time.time - startTime < 10 && !string.Equals(textCanvas.text, "NPC: Klar und deutlich."))
+        while (Time.time - startTime < 10 && !string.Equals(TextCanvas.text, "NPC: Klar und deutlich."))
         {
             yield return null;
         }
 
-        Assert.That(string.Equals(textCanvas.text, "NPC: Klar und deutlich."));
+        Assert.That(string.Equals(TextCanvas.text, "NPC: Klar und deutlich."));
 
         // Cleanup
         yield return null;
-        ui.MarkLineComplete();
+        UI.MarkLineComplete();
         yield return null;
-        ui.SelectOption(0);
+        UI.SelectOption(0);
         yield return null;
+    }
+
+    [UnityTest]
+    public IEnumerator RunLine_OnValidYarnLine_LinesCanBeInterrupted() {
+        
+        Runner.StartDialogue();
+        
+        var expectedFinalText = "Spieler: Kannst du mich hören?";
+
+        // Wait a few frames - enough for there to be some text on screen,
+        // but not all of it
+        var waitFrameCount = 3;
+        while (waitFrameCount > 0) {
+            yield return null;
+            waitFrameCount -= 1;            
+        }
+
+        Assert.AreNotEqual(expectedFinalText, TextCanvas.text, "Dialogue view should not yet have delivered all of the text.");
+
+        // Signal an interruption
+        UI.MarkLineComplete();
+        yield return null;
+
+        Assert.AreEqual(expectedFinalText, TextCanvas.text, "Dialogue view should be displaying all text after interruption.");
+
     }
 }

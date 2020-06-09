@@ -3,7 +3,8 @@ using System;
 using System.Globalization;
 
 /// <summary>
-/// Yarn preferences made by the user that should not be stored in a project or in a build.
+/// Yarn preferences made by the user that should not be stored in a
+/// project or in a build.
 /// </summary>
 [Serializable]
 public class Preferences : ScriptableObject {
@@ -31,8 +32,8 @@ public class Preferences : ScriptableObject {
     private string _preferencesPath;
 
     /// <summary>
-    /// The text language preference that was read from disk.
-    /// Used to detect changes to reduce writing to disk.
+    /// The text language preference that was read from disk. Used to
+    /// detect changes to reduce writing to disk.
     /// </summary>
     private string _textLanguageFromDisk;
 
