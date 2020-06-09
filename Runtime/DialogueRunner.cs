@@ -1,4 +1,4 @@
-﻿/*
+/*
 
 The MIT License (MIT)
 
@@ -812,15 +812,8 @@ namespace Yarn.Unity
                 foreach (var dialogueView in dialogueViews) {
                     // Mark this dialogue view as active                
                     ActiveDialogueViews.Add(dialogueView);
-                    dialogueView.controllingDialogueRunner = this;
-                    dialogueView.RunLine(new LocalizedLine()
-                    {
-                        TextID = line.ID,
-                        TextLocalized = text,
-                        VoiceOverLocalized = audio,
-                        Substitutions = substitutions,
-                        Status = LineStatus.Running
-                    }, () => DialogueViewCompletedDelivery(dialogueView));
+                    dialogueView.RunLine(CurrentLine, 
+                        () => DialogueViewCompletedDelivery(dialogueView));
                 }
                 return Dialogue.HandlerExecutionType.PauseExecution;
             }
