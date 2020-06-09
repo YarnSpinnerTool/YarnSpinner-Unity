@@ -1078,8 +1078,20 @@ namespace Yarn.Unity
                 UpdateLineStatus(CurrentLine, LineStatus.Delivered);
             }
 
-            // TODO: have a flag to automatically proceed to the next line
-            // when the line becomes Delivered?
+            // Should the line automatically become Ended as soon as it's
+            // Delivered?
+            if (continueNextLineOnLineFinished) {
+                // Go ahead and notify the views. 
+                UpdateLineStatus(CurrentLine, LineStatus.Ended);
+
+                // Additionally, tell the views to dismiss the line from
+                // presentation. When each is done, it will notify this
+                // dialogue runner to call DialogueViewCompletedDismissal;
+                // when all have finished, this dialogue runner will tell
+                // the Dialogue to Continue() when all lines are done
+                // dismissing the line.
+                DismissLineFromViews(dialogueViews);                
+            }
         }
 
         /// <summary>
