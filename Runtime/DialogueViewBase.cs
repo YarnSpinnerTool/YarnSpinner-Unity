@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,9 +29,11 @@ namespace Yarn.Unity
     public abstract class DialogueViewBase : MonoBehaviour
     {
         /// <summary>
-        /// The instance of the current line's DialogueRunner
+        /// Represents the method that should be called when this view
+        /// wants the line to be interrupted or to proceed to the next
+        /// line.
         /// </summary>
-        internal DialogueRunner controllingDialogueRunner;
+        internal System.Action onUserWantsLineContinuation;
 
         /// <summary>Signals that a conversation has started.</summary>
         public virtual void DialogueStarted()
@@ -166,9 +168,8 @@ namespace Yarn.Unity
         /// </remarks>
         public void MarkLineComplete()
         {
-            if (controllingDialogueRunner) {
-                controllingDialogueRunner.OnViewUserIntentNextLine();
-            }
+            // Call the continuation callback, if we have it.
+            onUserWantsLineContinuation?.Invoke();
         }
     }
 }

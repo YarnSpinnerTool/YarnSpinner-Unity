@@ -541,6 +541,14 @@ namespace Yarn.Unity
             Assert.IsNotNull(dialogueViews, "No View class (like DialogueUI) was given! Can't run the dialogue without a View class!");
             Assert.IsNotNull(variableStorage, "Variable storage was not set! Can't run the dialogue!");
 
+            // Give each dialogue view the continuation action, which
+            // they'll call to pass on the user intent to move on to the
+            // next line (or interrupt the current one).
+            System.Action continueAction = OnViewUserIntentNextLine;
+            foreach (var dialogueView in dialogueViews) {
+                dialogueView.onUserWantsLineContinuation = continueAction;
+            }
+
             // Ensure that the variable storage has the right stuff in it
             variableStorage.ResetToDefaults();
 
