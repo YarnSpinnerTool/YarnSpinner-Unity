@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
@@ -60,5 +60,30 @@ public class DialogueUITests
         yield return null;
         UI.SelectOption(0);
         yield return null;
+    }
+
+    [UnityTest]
+    public IEnumerator RunLine_OnValidYarnLine_LinesCanBeInterrupted() {
+        
+        Runner.StartDialogue();
+        
+        var expectedFinalText = "Spieler: Kannst du mich hören?";
+
+        // Wait a few frames - enough for there to be some text on screen,
+        // but not all of it
+        var waitFrameCount = 3;
+        while (waitFrameCount > 0) {
+            yield return null;
+            waitFrameCount -= 1;            
+        }
+
+        Assert.AreNotEqual(expectedFinalText, TextCanvas.text, "Dialogue view should not yet have delivered all of the text.");
+
+        // Signal an interruption
+        UI.MarkLineComplete();
+        yield return null;
+
+        Assert.AreEqual(expectedFinalText, TextCanvas.text, "Dialogue view should be displaying all text after interruption.");
+
     }
 }
