@@ -9,9 +9,12 @@ using Yarn.Unity;
 
 public class DialogueUITests
 {
-    [UnityTest]
-    public IEnumerator RunLine_OnValidYarnLine_ShowCorrectText()
-    {
+
+    DialogueRunner runner;
+    DialogueUI ui;
+
+    [UnitySetUp]
+    public IEnumerator SetUp () {
         SceneManager.LoadScene("DialogueUITests");
         bool loaded = false;
         SceneManager.sceneLoaded += (index, mode) =>
@@ -20,11 +23,17 @@ public class DialogueUITests
         };
         yield return new WaitUntil(() => loaded);
 
-        var runner = GameObject.FindObjectOfType<DialogueRunner>();
-        DialogueUI ui = GameObject.FindObjectOfType<DialogueUI>();
+        runner = GameObject.FindObjectOfType<DialogueRunner>();
+        ui = GameObject.FindObjectOfType<DialogueUI>();
+        
+    }
+
+    [UnityTest]
+    public IEnumerator RunLine_OnValidYarnLine_ShowCorrectText()
+    {
+        // Arrange
         Text textCanvas = ui.dialogueContainer.transform.GetComponentsInChildren<Text>().First(element => element.gameObject.name == "Text");
 
-        // Arrange
         runner.StartDialogue();
         float startTime;
         startTime = Time.time;
