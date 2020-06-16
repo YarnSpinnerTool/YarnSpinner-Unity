@@ -270,15 +270,7 @@ namespace Yarn.Unity {
             finishCurrentLine = false;
 
             // The final text we'll be showing for this line.
-            string text = dialogueLine.RawText;
-
-            // Now that we know the localised string for this line, we
-            // can go ahead and inject this line's substitutions.
-            for (int i = 0; i < dialogueLine.Substitutions.Length; i++) {
-                string substitution = dialogueLine.Substitutions[i];
-                text = text.Replace("{" + i + "}", substitution);
-            }
-
+            string text = dialogueLine.Text.Text;
 
             if (textSpeed > 0.0f) {
                 // Display the line one character at a time

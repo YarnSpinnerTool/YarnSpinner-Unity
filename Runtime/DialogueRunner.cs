@@ -1,4 +1,4 @@
-/*
+﻿/*
 
 The MIT License (MIT)
 
@@ -809,10 +809,14 @@ namespace Yarn.Unity
                     text = $"<no localized text for line {line.ID}>";
                 }
 
+                // Render the markup
+                var markup = Dialogue.ParseMarkup(text);
+
                 CurrentLine = new LocalizedLine()
                 {
                     TextID = line.ID,
-                    RawText = text,                    
+                    RawText = text,
+                    Text = markup,
                     AudioClip = audio,
                     Substitutions = substitutions,
                     Status = LineStatus.Running
@@ -1464,6 +1468,8 @@ namespace Yarn.Unity
         /// The line's delivery status.
         /// </summary>
         public LineStatus Status;
+
+        public MarkupParsing.MarkupParseResult Text { get; internal set; }
     }
 
     public class DialogueOption {
