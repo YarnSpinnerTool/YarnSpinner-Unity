@@ -346,7 +346,8 @@ namespace Yarn.Unity {
             // Do a little bit of safety checking
             if (dialogueOptions.Length > optionButtons.Count) {
                 Debug.LogWarning("There are more options to present than there are" +
-                                 "buttons to present them in. This will cause problems.");
+                                 "buttons to present them in. Only the first " + 
+                                 $"{optionButtons.Count} options will be shown.");
             }
 
             // Display each option in a button, and make it visible
