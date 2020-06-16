@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Experimental.AssetImporters;
@@ -151,7 +153,8 @@ public class YarnImporter : ScriptedImporter
         {
             isSuccesfullyCompiled = false;
             compilationErrorMessage = e.Message;
-            ctx.LogImportError(e.Message);
+            var message = FormatError(sourceText, compilationErrorMessage);
+            Debug.LogError(message);
             return;
         }
     }
@@ -178,5 +181,42 @@ public class YarnImporter : ScriptedImporter
         // what the user interacts with in Unity
         ctx.AddObjectToAsset("Program", programContainer);
         ctx.SetMainObject(programContainer);
+    }
+    
+    private static string FormatError(string source, string message) {
+        // Get only first line of error message, for place it at first line of our error message;
+        var messageFirstLine = message.Substring(0, message.IndexOf("\n", StringComparison.Ordinal));
+
+        // Hack for get line number
+        // We divide message by spaces and take 4th word, and split 7th word by ":", and take left half
+        // By this hacky way we get line number and position at where error symbol placed at. In the future
+        // if possible, need to add this data as public variable to ParseException.
+        var messageBySpaces = message.Split(' ');
+        var lineIndex = int.Parse(messageBySpaces[3]) - 1; // Line number in file for human, we need -1 for index
+        
+        var semicolonPosition = messageBySpaces[6].IndexOf(":", StringComparison.Ordinal);
+        var position = int.Parse(messageBySpaces[6].Substring(0, semicolonPosition));
+
+        // Split file for lines, to find lines before line that contain error
+        var lines = source.Split('\n');
+
+        // Here we split line into two halves.
+        var errorLine = lines[lineIndex];
+        // Left contains Yarn code before error
+        var left = errorLine.Substring(0, position - 1);
+        // Right contains error and remaining line
+        var right = errorLine.Substring(position - 1, errorLine.Length - position + 1);
+        
+        return $"<b>[YarnImporter]</b> {messageFirstLine}\n" +
+               GetErrorLineAbove(lines, lineIndex, 3) +
+               GetErrorLineAbove(lines, lineIndex, 2) +
+               GetErrorLineAbove(lines, lineIndex, 1) +
+               $"<b>{lineIndex + 1:0000}:</b><color=green>{left}</color><color=red>{right}</color> <-- {message}";
+    }
+
+    // To make format method clearer, we put some logic in additional method
+    private static string GetErrorLineAbove(IReadOnlyList<string> lines, int index, int offset) {
+        return index - offset < 0 ? "" : // make sure index will not go out of bounds of array
+            $"<b>{(index - offset + 1):0000}:</b>{lines[index - offset]}\n";
     }
 }
