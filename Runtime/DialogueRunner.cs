@@ -801,14 +801,23 @@ namespace Yarn.Unity
                 // Update lines to current state before sending them to the
                 // view classes
                 var substitutions = GetInlineExpressions(line);
-                var text = localizedText.ContainsKey(line.ID) ? localizedText[line.ID] : string.Empty;
+                var text = localizedText.ContainsKey(line.ID) ? localizedText[line.ID] : null;
                 var audio = localizedAudio.ContainsKey(line.ID) ? localizedAudio[line.ID] : null;
+
+                if (text == null) {
+                    Debug.LogWarning($"No localized text found for line ID {line.ID}. Have you provided the {nameof(DialogueRunner)} with the string table for this line?");
+                    text = $"<no localized text for line {line.ID}>";
+                }
+
+                // Render the markup
+                var markup = Dialogue.ParseMarkup(text);
 
                 CurrentLine = new LocalizedLine()
                 {
                     TextID = line.ID,
-                    TextLocalized = text,
-                    VoiceOverLocalized = audio,
+                    RawText = text,
+                    Text = markup,
+                    AudioClip = audio,
                     Substitutions = substitutions,
                     Status = LineStatus.Running
                 };
@@ -1107,7 +1116,7 @@ namespace Yarn.Unity
         {
             var previousStatus = line.Status;
 
-            Debug.Log($"Line \"{line.TextLocalized}\" changed state to {newStatus}");
+            Debug.Log($"Line \"{line.RawText}\" changed state to {newStatus}");
 
             // Update the state of the line and let the views know.
             line.Status = newStatus;
@@ -1450,15 +1459,17 @@ namespace Yarn.Unity
         /// <summary>
         /// DialogueLine's text
         /// </summary>
-        public string TextLocalized;
+        public string RawText;
         /// <summary>
         /// DialogueLine's voice over clip
         /// </summary>
-        public AudioClip VoiceOverLocalized;
+        public AudioClip AudioClip;
         /// <summary>
         /// The line's delivery status.
         /// </summary>
         public LineStatus Status;
+
+        public MarkupParsing.MarkupParseResult Text { get; internal set; }
     }
 
     public class DialogueOption {

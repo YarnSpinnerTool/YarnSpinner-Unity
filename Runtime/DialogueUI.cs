@@ -270,22 +270,7 @@ namespace Yarn.Unity {
             finishCurrentLine = false;
 
             // The final text we'll be showing for this line.
-            string text = dialogueLine.TextLocalized;
-
-            // Now that we know the localised string for this line, we
-            // can go ahead and inject this line's substitutions.
-            for (int i = 0; i < dialogueLine.Substitutions.Length; i++) {
-                string substitution = dialogueLine.Substitutions[i];
-                text = text.Replace("{" + i + "}", substitution);
-            }
-
-            // Apply in-line format functions
-            text = Dialogue.ExpandFormatFunctions(text, Preferences.TextLanguage);
-
-            if (text == null) {
-                Debug.LogWarning($"Line {dialogueLine.TextID} doesn't have any localised text.");
-                text = dialogueLine.TextID;
-            }
+            string text = dialogueLine.Text.Text;
 
             if (textSpeed > 0.0f) {
                 // Display the line one character at a time
@@ -361,7 +346,8 @@ namespace Yarn.Unity {
             // Do a little bit of safety checking
             if (dialogueOptions.Length > optionButtons.Count) {
                 Debug.LogWarning("There are more options to present than there are" +
-                                 "buttons to present them in. This will cause problems.");
+                                 "buttons to present them in. Only the first " + 
+                                 $"{optionButtons.Count} options will be shown.");
             }
 
             // Display each option in a button, and make it visible

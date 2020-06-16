@@ -40,7 +40,7 @@ namespace Yarn.Unity {
             finishCurrentLine = false;
 
             // Get the localized voice over audio clip
-            var voiceOverClip = dialogueLine.VoiceOverLocalized;
+            var voiceOverClip = dialogueLine.AudioClip;
 
             if (!voiceOverClip) {
                 Debug.Log("Playing voice over failed since the AudioClip of the voice over audio language or the base language was null.", gameObject);

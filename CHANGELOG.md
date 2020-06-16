@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Nicer error messages when the localized text for a line of dialogue can't be found.
+
 ### Removed
 
 ## [v1.2.0] 2020-05-04
