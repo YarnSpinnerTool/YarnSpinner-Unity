@@ -801,8 +801,13 @@ namespace Yarn.Unity
                 // Update lines to current state before sending them to the
                 // view classes
                 var substitutions = GetInlineExpressions(line);
-                var text = localizedText.ContainsKey(line.ID) ? localizedText[line.ID] : string.Empty;
+                var text = localizedText.ContainsKey(line.ID) ? localizedText[line.ID] : null;
                 var audio = localizedAudio.ContainsKey(line.ID) ? localizedAudio[line.ID] : null;
+
+                if (text == null) {
+                    Debug.LogWarning($"No localized text found for line ID {line.ID}. Have you provided the {nameof(DialogueRunner)} with the string table for this line?");
+                    text = $"<no localized text for line {line.ID}>";
+                }
 
                 CurrentLine = new LocalizedLine()
                 {

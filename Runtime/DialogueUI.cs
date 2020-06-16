@@ -279,10 +279,6 @@ namespace Yarn.Unity {
                 text = text.Replace("{" + i + "}", substitution);
             }
 
-            if (text == null) {
-                Debug.LogWarning($"Line {dialogueLine.TextID} doesn't have any localised text.");
-                text = dialogueLine.TextID;
-            }
 
             if (textSpeed > 0.0f) {
                 // Display the line one character at a time
