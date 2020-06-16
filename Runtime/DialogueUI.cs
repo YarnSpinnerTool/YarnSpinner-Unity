@@ -270,7 +270,7 @@ namespace Yarn.Unity {
             finishCurrentLine = false;
 
             // The final text we'll be showing for this line.
-            string text = dialogueLine.TextLocalized;
+            string text = dialogueLine.RawText;
 
             // Now that we know the localised string for this line, we
             // can go ahead and inject this line's substitutions.
@@ -278,9 +278,6 @@ namespace Yarn.Unity {
                 string substitution = dialogueLine.Substitutions[i];
                 text = text.Replace("{" + i + "}", substitution);
             }
-
-            // Apply in-line format functions
-            text = Dialogue.ExpandFormatFunctions(text, Preferences.TextLanguage);
 
             if (text == null) {
                 Debug.LogWarning($"Line {dialogueLine.TextID} doesn't have any localised text.");

@@ -1,4 +1,4 @@
-﻿/*
+/*
 
 The MIT License (MIT)
 
@@ -807,8 +807,8 @@ namespace Yarn.Unity
                 CurrentLine = new LocalizedLine()
                 {
                     TextID = line.ID,
-                    TextLocalized = text,
-                    VoiceOverLocalized = audio,
+                    RawText = text,                    
+                    AudioClip = audio,
                     Substitutions = substitutions,
                     Status = LineStatus.Running
                 };
@@ -1107,7 +1107,7 @@ namespace Yarn.Unity
         {
             var previousStatus = line.Status;
 
-            Debug.Log($"Line \"{line.TextLocalized}\" changed state to {newStatus}");
+            Debug.Log($"Line \"{line.RawText}\" changed state to {newStatus}");
 
             // Update the state of the line and let the views know.
             line.Status = newStatus;
@@ -1450,11 +1450,11 @@ namespace Yarn.Unity
         /// <summary>
         /// DialogueLine's text
         /// </summary>
-        public string TextLocalized;
+        public string RawText;
         /// <summary>
         /// DialogueLine's voice over clip
         /// </summary>
-        public AudioClip VoiceOverLocalized;
+        public AudioClip AudioClip;
         /// <summary>
         /// The line's delivery status.
         /// </summary>
