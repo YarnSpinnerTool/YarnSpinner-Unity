@@ -81,9 +81,7 @@ namespace Yarn.Unity
         /// <param name="dialogueLine">The <see cref="LocalizedLine"/> that
         /// has changed state.</param>
         /// <seealso cref="LineStatus"/>
-        public virtual void OnLineStatusChanged(LocalizedLine dialogueLine) {
-            // default implementation is a no-op
-        }
+        public abstract void OnLineStatusChanged(LocalizedLine dialogueLine);
 
         /// <summary>
         /// Called by the <see cref="DialogueRunner"/> to signal that the
