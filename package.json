@@ -22,6 +22,11 @@
       "displayName": "Space",
       "description": "A side-scrolling conversation.",
       "path": "Samples~/Space"
+    },
+    {
+      "displayName": "Visual Novel",
+      "description": "A template for creating a visual novel.",
+      "path": "Samples~/VisualNovel"
     }
   ]
 }
