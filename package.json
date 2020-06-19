@@ -27,6 +27,11 @@
       "displayName": "Visual Novel",
       "description": "A template for creating a visual novel.",
       "path": "Samples~/VisualNovel"
+    },
+    {
+      "displayName": "Third Person 3D",
+      "description": "Code for positioning speech bubbles dynamically above characters in a 3D (or 2D) game world.",
+      "path": "Samples~/3D"
     }
   ]
 }

@@ -1,0 +1,35 @@
+﻿title: Start
+tags:
+---
+Alice: Hey Bob.
+Bob: Hey Alice.
+Alice: This is an example of using Yarn Spinner for a 3D RPG type game with NPCs.
+Alice: Like in A Short Hike! Have you played that game, Bob?
+Bob: ...
+
+Alice: Bob, are you OK?
+Bob: I feel so dizzy. I think I have to get off soon...
+Alice: No, you have to keep spinning!
+Alice: You're a great example of 3D speech bubbles following moving characters.
+
+Bob: I'm gonna barf...
+Alice: And notice how the speech bubble doesn't get cut off, even if Bob goes off-screen?
+Alice: Check out /Samples/3D/Scripts/YarnCharacterView.cs to see how that works.
+
+Bob: Alice.
+Alice: WHAT???
+Bob: Are you OK? Who are you talking to?
+
+-> ... the Unity user.
+    Alice: I'm talking to the Unity user.
+    Bob: What the heck is a Unity user?
+-> ... no one.
+    Alice: I'm talking to... no one.
+
+Alice: (wink)
+Bob: Why did you say "wink" up at the sky?
+Alice: (winks again)
+
+THE END.
+
+===
