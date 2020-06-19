@@ -25,8 +25,13 @@
     },
     {
       "displayName": "Visual Novel",
-      "description": "A template for creating a visual novel.",
+      "description": "A template for creating a visual novel with extensive use of Yarn Commands.",
       "path": "Samples~/VisualNovel"
+    },
+    {
+      "displayName": "Phone Chat",
+      "description": "A text message style phone conversation template.",
+      "path": "Samples~/PhoneChat"
     }
   ]
 }
