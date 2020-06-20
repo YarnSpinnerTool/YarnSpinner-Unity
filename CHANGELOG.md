@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Added an explicit reference to YarnSpinner.dll in YarnSpinnerTests.asmdef, fixing compiler issues in Unity 2019.3+
+
 ### Removed
 
 ## [v1.2.0] 2020-05-04

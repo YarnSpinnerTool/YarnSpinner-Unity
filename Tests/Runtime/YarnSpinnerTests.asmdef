@@ -10,7 +10,12 @@
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
-    "precompiledReferences": [],
+    
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "YarnSpinner.dll"
+    ],
+    
     "autoReferenced": true,
     "defineConstraints": []
 }
