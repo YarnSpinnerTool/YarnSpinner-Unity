@@ -1,0 +1,140 @@
+fileFormatVersion: 2
+guid: 28be40ad14f5bf446bbc09afbd3ebcdb
+ScriptedImporter:
+  fileIDToRecycleName:
+    4900000: Strings
+    11400000: Program
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 94073015eacc34c1d8fc6786e43d60ca, type: 3}
+  baseLanguageID: en
+  stringIDs:
+  - 3dSampleDialogue-Start-0
+  - 3dSampleDialogue-Start-1
+  - 3dSampleDialogue-Start-2
+  - 3dSampleDialogue-Start-3
+  - 3dSampleDialogue-Start-4
+  - 3dSampleDialogue-Start-5
+  - 3dSampleDialogue-Start-6
+  - 3dSampleDialogue-Start-7
+  - 3dSampleDialogue-Start-8
+  - 3dSampleDialogue-Start-9
+  - 3dSampleDialogue-Start-10
+  - 3dSampleDialogue-Start-11
+  - 3dSampleDialogue-Start-12
+  - 3dSampleDialogue-Start-13
+  - 3dSampleDialogue-Start-14
+  - 3dSampleDialogue-Start-15
+  - 3dSampleDialogue-Start-16
+  - 3dSampleDialogue-Start-17
+  - 3dSampleDialogue-Start-18
+  - 3dSampleDialogue-Start-19
+  - 3dSampleDialogue-Start-20
+  - 3dSampleDialogue-Start-21
+  - 3dSampleDialogue-Start-22
+  - 3dSampleDialogue-Start-23
+  compilationStatus: 1
+  isSuccesfullyCompiled: 1
+  compilationErrorMessage: 
+  baseLanguage: {instanceID: 0}
+  localizations: []
+  voiceOvers:
+  - linetag: 3dSampleDialogue-Start-0
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-1
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-2
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-3
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-4
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-5
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-6
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-7
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-8
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-9
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-10
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-11
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-12
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-13
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-14
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-15
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-16
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-17
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-18
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-19
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-20
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-21
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-22
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  - linetag: 3dSampleDialogue-Start-23
+    languageToAudioclip:
+    - language: en
+      audioClip: {instanceID: 0}
+  programContainer: {instanceID: 0}
