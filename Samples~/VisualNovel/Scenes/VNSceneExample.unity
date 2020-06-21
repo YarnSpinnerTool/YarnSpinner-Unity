@@ -123,6 +123,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: VisualNovelPrefab
       objectReference: {fileID: 0}
+    - target: {fileID: 1086358475575568, guid: 9e0841b82a4ebcd438730d23886e17e6, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1515087920938002, guid: 9e0841b82a4ebcd438730d23886e17e6, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -318,8 +322,44 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 6b44f042c1cbdef40bdfd6ac1be41890,
         type: 3}
+    - target: {fileID: 4034489572841062405, guid: 9e0841b82a4ebcd438730d23886e17e6,
+        type: 3}
+      propertyPath: onNameNotPresent.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034489572841062405, guid: 9e0841b82a4ebcd438730d23886e17e6,
+        type: 3}
+      propertyPath: onNameNotPresent.m_PersistentCalls.m_Calls.Array.data[1].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034489572841062405, guid: 9e0841b82a4ebcd438730d23886e17e6,
+        type: 3}
+      propertyPath: onNameNotPresent.m_PersistentCalls.m_Calls.Array.data[1].m_Target
+      value: 
+      objectReference: {fileID: 484263811}
+    - target: {fileID: 4034489572841062405, guid: 9e0841b82a4ebcd438730d23886e17e6,
+        type: 3}
+      propertyPath: onNameNotPresent.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
+      value: SetActive
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034489572841062405, guid: 9e0841b82a4ebcd438730d23886e17e6,
+        type: 3}
+      propertyPath: onNameNotPresent.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034489572841062405, guid: 9e0841b82a4ebcd438730d23886e17e6,
+        type: 3}
+      propertyPath: onNameNotPresent.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_BoolArgument
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9e0841b82a4ebcd438730d23886e17e6, type: 3}
+--- !u!1 &484263811 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1308810924048604, guid: 9e0841b82a4ebcd438730d23886e17e6,
+    type: 3}
+  m_PrefabInstance: {fileID: 484263810}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1082465090
 GameObject:
   m_ObjectHideFlags: 0

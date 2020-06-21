@@ -9,9 +9,26 @@ namespace Yarn.Unity
 {
     public class DialogueCharacterNameView : Yarn.Unity.DialogueViewBase
     {
+        /// <summary>
+        /// Invoked when a line is received that contains a character name.
+        /// The name is given as the parameter.
+        /// </summary>
+        /// <seealso cref="onNameNotPresent"/>
         public DialogueRunner.StringUnityEvent onNameUpdate;
+        
+        /// <summary>
+        /// Invoked when the dialogue is started.
+        /// </summary>
         public UnityEvent onDialogueStarted;
-        public UnityEvent onNamePresent;
+
+        /// <summary>
+        /// Invoked when a line is received that doesn't contain a
+        /// character name.
+        /// </summary>
+        /// <remarks>
+        /// Games can use this event to hide the name UI.
+        /// </remarks>
+        /// <seealso cref="onNameUpdate"/>
         public UnityEvent onNameNotPresent;
 
         public override void DialogueStarted() {
@@ -41,8 +58,7 @@ namespace Yarn.Unity
             {
                 // Then notify the rest of the scene about it. This generally
                 // involves updating a text view and making it visible.
-                onNameUpdate?.Invoke(characterAttribute.Properties["name"].StringValue);
-                onNamePresent?.Invoke();
+                onNameUpdate?.Invoke(characterAttribute.Properties["name"].StringValue);                
             }
             else
             {
