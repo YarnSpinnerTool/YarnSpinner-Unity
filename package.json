@@ -25,13 +25,18 @@
     },
     {
       "displayName": "Visual Novel",
-      "description": "A template for creating a visual novel.",
+      "description": "A template for creating a visual novel with extensive use of Yarn Commands.",
       "path": "Samples~/VisualNovel"
     },
     {
       "displayName": "3D Speech Bubble",
       "description": "Code for positioning speech bubbles dynamically above characters in a 3D (or 2D) game world.",
       "path": "Samples~/3D"
+    },
+    {
+      "displayName": "Phone Chat",
+      "description": "A text message style phone conversation template.",
+      "path": "Samples~/PhoneChat"
     }
   ]
 }
