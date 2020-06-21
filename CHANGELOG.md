@@ -10,9 +10,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
-- Added an explicit reference to YarnSpinner.dll in YarnSpinnerTests.asmdef, fixing compiler issues in Unity 2019.3+
-
 ### Removed
+
+## [v1.2.6]
+
+Note: Versions 1.2.1 through 1.2.5 are identical to v1.2.0; they were version number bumps while we were diagnosing an issue in OpenUPM.
+
+### Changed
+
+- Fixed compiler issues in Unity 2019.3 and later by adding an explicit reference to YarnSpinner.dll in YarnSpinnerTests.asmdef
 
 ## [v1.2.0] 2020-05-04
 
