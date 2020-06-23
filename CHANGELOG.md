@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Added a visual novel template. (@radiatoryang)
 - Added support for voice overs. (@Schroedingers-Cat)
 - Added a new API for presenting and managing lines of dialogue.
+- Added an option to DialogueUI to allow hiding character names.
 
 ### Changed
 
