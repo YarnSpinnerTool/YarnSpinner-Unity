@@ -133,6 +133,8 @@ namespace Yarn.Unity
             this.titleContent.text = "Yarn Spinner";
             this.titleContent.image = Icons.windowIcon;
 
+            this.YarnSpinnerVersion = typeof(DialogueRunner).Assembly.GetName().Version.ToString();
+
             // Update the list of scripts known to the window
             if(isJSONRootPathChosen)
                 UpdateYarnScriptList();
@@ -226,6 +228,8 @@ namespace Yarn.Unity
             Analysis
         }
         SelectedMode selectedMode = 0;
+        
+        private string YarnSpinnerVersion;
 
         void OnGUI() {
             var modes = System.Enum.GetNames( typeof( SelectedMode ) );
@@ -254,6 +258,10 @@ namespace Yarn.Unity
             titleLabel.fontSize = 20;
             titleLabel.alignment = TextAnchor.MiddleCenter;
 
+            GUIStyle versionLabel = new GUIStyle(EditorStyles.largeLabel);
+            versionLabel.fontSize = 12;
+            versionLabel.alignment = TextAnchor.MiddleCenter;
+
             GUIStyle creditsLabel = new GUIStyle(EditorStyles.wordWrappedLabel);
             creditsLabel.alignment = TextAnchor.MiddleCenter;
             creditsLabel.richText = true;
@@ -264,6 +272,9 @@ namespace Yarn.Unity
                 using (new EditorGUILayout.VerticalScope()) {
                     GUILayout.Label(new GUIContent(Icons.logo), GUILayout.Width(logoSize), GUILayout.Height(logoSize));
                     GUILayout.Label("Yarn Spinner", titleLabel);
+                    GUILayout.Label(YarnSpinnerVersion, versionLabel);
+                    GUILayout.Space(10);
+                    
                     if (GUILayout.Button("Documentation")) {
                         Application.OpenURL(DocumentationURL);                        
                     }
