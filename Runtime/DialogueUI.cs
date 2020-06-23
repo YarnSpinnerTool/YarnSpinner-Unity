@@ -79,6 +79,18 @@ namespace Yarn.Unity {
         public List<Button> optionButtons;
 
         /// <summary>
+        /// Indicates whether lines should display character names, if
+        /// present.
+        /// </summary>
+        /// <remarks>
+        /// When this value is <see langword="false"/>, this class will
+        /// check to see if the line contains any text with the `character`
+        /// attribute. If such text exists, it will be removed from the
+        /// text that is passed to the <see cref="onLineUpdate"/> event.
+        /// </remarks>
+        public bool showCharacterName = true;
+
+        /// <summary>
         /// When true, the Runner has signaled to finish the current line
         /// asap.
         /// </summary>
@@ -270,7 +282,22 @@ namespace Yarn.Unity {
             finishCurrentLine = false;
 
             // The final text we'll be showing for this line.
-            string text = dialogueLine.Text.Text;
+            string text = string.Empty;            
+
+            // Are we hiding the character name?
+            if (showCharacterName == false) {
+
+                // First, check to see if we have it
+                var hasCharacterAttribute = dialogueLine.Text.TryGetAttributeWithName("character", out var characterAttribute);
+                
+                // If we do, remove it from the markup, and use the
+                // resulting text
+                if (hasCharacterAttribute) {
+                    text = dialogueLine.Text.DeleteRange(characterAttribute).Text;
+                }
+            } else {
+                text = dialogueLine.Text.Text; 
+            }
 
             if (textSpeed > 0.0f) {
                 // Display the line one character at a time

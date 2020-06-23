@@ -63,6 +63,24 @@ public class DialogueUITests
     }
 
     [UnityTest]
+    public IEnumerator RunLine_OnValidYarnLine_CanHideCharacterName()
+    {
+        // Arrange
+        UI.showCharacterName = false;
+
+        Runner.StartDialogue();
+        float startTime;
+        startTime = Time.time;
+        while (Time.time - startTime < 10 && !string.Equals(TextCanvas.text, "Kannst du mich hören?"))
+        {
+            yield return null;
+        }
+
+        // Character name in this line ("Spieler: ") should be removed
+        Assert.That(string.Equals(TextCanvas.text, "Kannst du mich hören?"));
+    }
+
+    [UnityTest]
     public IEnumerator RunLine_OnValidYarnLine_LinesCanBeInterrupted() {
         
         Runner.StartDialogue();
