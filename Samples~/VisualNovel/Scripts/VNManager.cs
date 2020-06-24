@@ -46,8 +46,9 @@ namespace Yarn.Unity.Example {
 		void Awake () {
 			runner = GetComponent<DialogueRunner>();
 
-			// manually add all Yarn command handlers, so that we don't have to type out game object names in Yarn scripts
-			// (also gives us a performance increase by avoiding GameObject.Find)
+			// manually add all Yarn command handlers, so that we don't
+			// have to type out game object names in Yarn scripts (also
+			// gives us a performance increase by avoiding GameObject.Find)
 			runner.AddCommandHandler("Scene", DoSceneChange );
 			runner.AddCommandHandler("Act", SetActor );
 			runner.AddCommandHandler("Draw", SetSpriteYarn );
@@ -68,8 +69,10 @@ namespace Yarn.Unity.Example {
 			runner.AddCommandHandler("FadeIn", SetFadeIn );
 			runner.AddCommandHandler("CamOffset", SetCameraOffset );
 
-			// adds all Resources to internal lists / one big pile... it will scan inside all subfolders too!
-			// note: but when referencing sprites in the Yarn script, just use the file name and omit folder names
+			// adds all Resources to internal lists / one big pile... it
+			// will scan inside all subfolders too! note: but when
+			// referencing sprites in the Yarn script, just use the file
+			// name and omit folder names
 			if ( useResourcesFolders ) {
 				var allSpritesInResources = Resources.LoadAll<Sprite>("");
 				loadSprites.AddRange( allSpritesInResources );
@@ -86,8 +89,9 @@ namespace Yarn.Unity.Example {
 			bgImage.sprite = FetchAsset<Sprite>( par[0] );
 		}
 
-		/// <summary> SetActor(actorName,spriteName,positionX,positionY,color)
-		/// main function for moving / adjusting characters</summary>
+		/// <summary>
+		/// SetActor(actorName,spriteName,positionX,positionY,color) main
+		/// function for moving / adjusting characters</summary>
 		public void SetActor(params string[] parameters) {
 			// get parameter data
 			var par = CleanParams( parameters );
@@ -100,7 +104,8 @@ namespace Yarn.Unity.Example {
 				return;
 			}
 
-			// have to use SetSprite() because par[2] and par[3] might be keywords (e.g. "left", "right")
+			// have to use SetSprite() because par[2] and par[3] might be
+			// keywords (e.g. "left", "right")
 			var newActor = SetSpriteUnity( string.Format("{0},{1},{2}", spriteName, par.Length > 2 ? par[2] : "", par.Length > 3 ? par[3] : "" ) );
 
 			// define text label BG color
@@ -109,16 +114,19 @@ namespace Yarn.Unity.Example {
 				Debug.LogErrorFormat(this, "VN Manager can't parse [{0}] as an HTML color (e.g. [#FFFFFF] or certain keywords like [white])", par[4]);
 			}
 
-			// if the actor is using a sprite already, then clone any persisting data, and destroy it (just to be safe)
+			// if the actor is using a sprite already, then clone any
+			// persisting data, and destroy it (just to be safe)
 			if ( actors.ContainsKey(actorName)) {
-				// if any missing position params, assume the actor position should stay the same
+				// if any missing position params, assume the actor
+				// position should stay the same
 				var newPos = newActor.rectTransform.anchoredPosition;
 				if ( par.Length == 2 ) { // missing 2 params, override both x and y
 					newPos = actors[actorName].rectTransform.anchoredPosition;
 				} else if ( par.Length == 3) { // missing 1 param, override y
 					newPos.y = actors[actorName].rectTransform.anchoredPosition.y;
 				}
-				// if any missing color params, then assume actor color should stay the same
+				// if any missing color params, then assume actor color
+				// should stay the same
 				if ( par.Length <= 4 ) {
 					actorColor = actors[actorName].actorColor;
 				}
@@ -133,8 +141,8 @@ namespace Yarn.Unity.Example {
 			actors.Add( actorName, new VNActor( newActor, actorColor) );
 		}
 
-		///<summary> Draw(spriteName,positionX,positionY)
-		/// generic function for sprite drawing</summary>
+		///<summary> Draw(spriteName,positionX,positionY) generic function
+		///for sprite drawing</summary>
 		public void SetSpriteYarn(params string[] parameters) {
 			SetSpriteUnity( parameters );
 		}
@@ -158,7 +166,9 @@ namespace Yarn.Unity.Example {
 			return SetSpriteActual( spriteName, pos );
 		}
 
-		///<summary>Hide(spriteName). "spriteName" can use wildcards, e.g. HideSprite(Sally*) will hide both SallyIdle and Sally_Happy</summary>
+		///<summary>Hide(spriteName). "spriteName" can use wildcards, e.g.
+		///HideSprite(Sally*) will hide both SallyIdle and
+		///Sally_Happy</summary>
 		public void HideSprite(params string[] parameters) {
 			var par = CleanParams( parameters );
 			var wildcard = new Wildcard(par[0]);
@@ -211,10 +221,10 @@ namespace Yarn.Unity.Example {
 			SetFadeIn("0");
 		}
 
-		// move a sprite
-		// usage: <<Move actorOrspriteName, screenPosX=0.5, screenPosY=0.5, moveTime=1.0>>
-		// screenPosX and screenPosY are normalized screen coordinates (0.0 - 1.0)
-		// moveTime is the time in seconds it will take to reach that position
+		// move a sprite usage: <<Move actorOrspriteName, screenPosX=0.5,
+		// screenPosY=0.5, moveTime=1.0>> screenPosX and screenPosY are
+		// normalized screen coordinates (0.0 - 1.0) moveTime is the time
+		// in seconds it will take to reach that position
 		public void MoveSprite(params string[] parameters) {
 			var pars = CleanParams( parameters );
 
@@ -238,8 +248,8 @@ namespace Yarn.Unity.Example {
 			StartCoroutine( MoveCoroutine( image.GetComponent<RectTransform>(), Vector2.Scale(newPos, screenSize), moveTime) );
 		}
 
-		/// <summary>flip a sprite, or force the sprite to face a direction<
-		/// Move(actorOrSpriteName, xDirection=toggle)</sprite>
+		/// <summary>flip a sprite, or force the sprite to face a
+		/// direction< Move(actorOrSpriteName, xDirection=toggle)</sprite>
 		public void FlipSprite(params string[] parameters) {
 			var pars = CleanParams(parameters);
 
@@ -268,9 +278,11 @@ namespace Yarn.Unity.Example {
 			}
 		}
 
-		/// <summary>PlayAudio( soundName,volume,"loop" )...  PlayAudio(soundName,1.0) plays soundName once at 100% volume... if third parameter was word "loop" it would loop
-		/// "volume" is a number from 0.0 to 1.0
-		/// "loop" is the word "loop" (or "true"), which tells the sound to loop over and over</summary>
+		/// <summary>PlayAudio( soundName,volume,"loop" )...
+		/// PlayAudio(soundName,1.0) plays soundName once at 100% volume...
+		/// if third parameter was word "loop" it would loop "volume" is a
+		/// number from 0.0 to 1.0 "loop" is the word "loop" (or "true"),
+		/// which tells the sound to loop over and over</summary>
 		public void PlayAudio(params string[] parameters) {
 			var pars = CleanParams( parameters );
 
@@ -290,7 +302,9 @@ namespace Yarn.Unity.Example {
 				shouldLoop = true;
 			}
 			
-			// instantiate AudioSource and configure it (don't use AudioSource.PlayOneShot because we also want the option to use <<StopAudio>> and interrupt it)
+			// instantiate AudioSource and configure it (don't use
+			// AudioSource.PlayOneShot because we also want the option to
+			// use <<StopAudio>> and interrupt it)
 			var newAudioSource = Instantiate<AudioSource>( genericAudioSource, genericAudioSource.transform.parent );
 			newAudioSource.name = audioClip.name;
 			newAudioSource.clip = audioClip;
@@ -305,12 +319,14 @@ namespace Yarn.Unity.Example {
 			}
 		}
 
-		/// <summary>stops sound playback based on sound name, whether it's looping or not</summary>
+		/// <summary>stops sound playback based on sound name, whether it's
+		/// looping or not</summary>
 		public void StopAudio(params string[] parameters) {
 			var pars = CleanParams( parameters );
 			string soundName = pars[0];
 
-			// let's just do this in a sloppy way for now, and also assume there's only one object like it
+			// let's just do this in a sloppy way for now, and also assume
+			// there's only one object like it
 			AudioSource toDestroy = null;
 			foreach ( var audioObject in sounds ) {
 				if (audioObject.name == soundName) {
@@ -319,7 +335,8 @@ namespace Yarn.Unity.Example {
 				}
 			}
 
-			// double-check there's any audioSource to destroy tho, because it might have been destroyed already
+			// double-check there's any audioSource to destroy tho, because
+			// it might have been destroyed already
 			if ( toDestroy != null ) {
 				CleanDestroy<AudioSource>( toDestroy.gameObject );
 			} else {
@@ -327,7 +344,8 @@ namespace Yarn.Unity.Example {
 			}
 		}
 
-		/// <summary>stops all currently playing sounds, doesn't actually take any parameters</summary>
+		/// <summary>stops all currently playing sounds, doesn't actually
+		/// take any parameters</summary>
 		public void StopAudioAll(params string[] parameters) {
 			var toStop = new List<AudioSource>();
 			foreach (var audioSrc in sounds ) {
@@ -338,8 +356,9 @@ namespace Yarn.Unity.Example {
 			}
 		}
 
-		/// <summary>typical screen fade effect, good for transitions? 
-		/// usage: Fade( #hexcolor, startAlpha, endAlpha, fadeTime )</summary>
+		/// <summary>typical screen fade effect, good for transitions?
+		/// usage: Fade( #hexcolor, startAlpha, endAlpha, fadeTime
+		/// )</summary>
 		public void SetFade(params string[] parameters) {
 			var pars = CleanParams( parameters );
 
@@ -368,7 +387,8 @@ namespace Yarn.Unity.Example {
 			StartCoroutine( FadeCoroutine( fadeColor, startAlpha, endAlpha, fadeTime ) );
 		}
 
-		/// <summary>convenient for an easy fade in, no matter what the previous fade color or alpha was</summary>
+		/// <summary>convenient for an easy fade in, no matter what the
+		/// previous fade color or alpha was</summary>
 		public void SetFadeIn(params string[] parameters) {
 			var pars = CleanParams( parameters );
 			string fadeTime = pars[0];
@@ -383,7 +403,8 @@ namespace Yarn.Unity.Example {
 			StartCoroutine( FadeCoroutine( fadeBG.color, -1f, 0f, fadeTimeReal ) );
 		}
 
-		/// <summary>pan the camera. Usage: CameraOffset(xPos, yPos, moveTime)</summary>
+		/// <summary>pan the camera. Usage: CameraOffset(xPos, yPos,
+		/// moveTime)</summary>
 		/// 0, 0 is center default
 		public void SetCameraOffset(params string[] parameters) {
 			parameters = CleanParams( parameters );
@@ -401,8 +422,9 @@ namespace Yarn.Unity.Example {
 				moveTime = 0.25f;
 			}
 
-			// because we're using UI overlays, there's no actual "camera" exactly
-			// so we do a fake camera scroll by moving the "Sprites" game object container
+			// because we're using UI overlays, there's no actual "camera"
+			// exactly so we do a fake camera scroll by moving the
+			// "Sprites" game object container
 			var parent = genericSprite.transform.parent.GetComponent<RectTransform>();
 			var newPos = Vector2.Scale( new Vector2(0.5f, 0.5f) - newOffset, screenSize );
 			StartCoroutine( MoveCoroutine( parent, newPos, moveTime ) );
@@ -428,7 +450,8 @@ namespace Yarn.Unity.Example {
 		// called by HighlightSprite
 		IEnumerator HighlightSpriteCoroutine (Image highlightedSprite) {
 			float t = 0f;
-			// over time, gradually change sprites to be "normal" or "highlighted"
+			// over time, gradually change sprites to be "normal" or
+			// "highlighted"
 			while ( t < 1f ) {
 				t += Time.deltaTime / 2f;
 				foreach ( var spr in sprites ) {
@@ -510,7 +533,9 @@ namespace Yarn.Unity.Example {
 			thingToShake.anchoredPosition = startPos;
 		}
 
-		// timed destroy... can't use Destroy( gameObject, timeDelay ) because it might get destroyed earlier via <<StopAudio>> or something, and we want to remove the reference from the list too
+		// timed destroy... can't use Destroy( gameObject, timeDelay )
+		// because it might get destroyed earlier via <<StopAudio>> or
+		// something, and we want to remove the reference from the list too
 		IEnumerator SetDestroyTime(AudioSource destroyThis, float timeDelay) {
 			float timer = timeDelay;
 			while ( timer > 0f ) {
@@ -525,7 +550,8 @@ namespace Yarn.Unity.Example {
 			}
 		}
 
-		// CleanDestroy also removes any references to the gameObject from sprites or sounds
+		// CleanDestroy also removes any references to the gameObject from
+		// sprites or sounds
 		void CleanDestroy<T>( GameObject destroyThis ) {
 			if ( typeof(T) == typeof(AudioSource) ) {
 				sounds.Remove( destroyThis.GetComponent<AudioSource>() );
@@ -536,8 +562,10 @@ namespace Yarn.Unity.Example {
 			Destroy( destroyThis );
 		}
 
-		// utility function to clean and combine params
-		// this is necessary because if the Yarn author forgets to separate parameters with a space, then they all get sent as 1 string that we'll have to split
+		// utility function to clean and combine params this is necessary
+		// because if the Yarn author forgets to separate parameters with a
+		// space, then they all get sent as 1 string that we'll have to
+		// split
 		string[] CleanParams(string[] parameters) {
 			var cleanPars = new List<string>();
 			foreach (var par in parameters) {
@@ -547,9 +575,11 @@ namespace Yarn.Unity.Example {
 			return cleanPars.ToArray();
 		}
 
-		// utility function to convert words like "left" or "right" into equivalent position numbers
+		// utility function to convert words like "left" or "right" into
+		// equivalent position numbers
 		float ConvertCoordinates(string coordinate) {
-			// first, is anyone named after this coordinate? we'll use the X position
+			// first, is anyone named after this coordinate? we'll use the
+			// X position
 			if ( actors.ContainsKey(coordinate) ) {
 				return actors[coordinate].rectTransform.anchoredPosition.x / screenSize.x;
 			}
@@ -582,7 +612,8 @@ namespace Yarn.Unity.Example {
 				    return 1.33f;
 			}
 
-			// if none of those worked, then let's try parsing it as a number
+			// if none of those worked, then let's try parsing it as a
+			// number
             float x;
             if (float.TryParse(coordinate, out x))
             {
@@ -596,9 +627,12 @@ namespace Yarn.Unity.Example {
 
         }
 
-		// utility function to find an asset, whether it's in \Resources\ or manually loaded via an array
+		// utility function to find an asset, whether it's in \Resources\
+		// or manually loaded via an array
 		T FetchAsset<T>( string assetName ) where T : UnityEngine.Object {
-			// first, check to see if it's a manully loaded asset, with manual array checks... it's messy but I can't think of a better way to do this
+			// first, check to see if it's a manully loaded asset, with
+			// manual array checks... it's messy but I can't think of a
+			// better way to do this
 			if ( typeof(T) == typeof(Sprite) ) {
 				foreach ( var spr in loadSprites ) {
 					if (spr.name == assetName) {
@@ -613,12 +647,12 @@ namespace Yarn.Unity.Example {
 				}
 			}
 
-			// by default, we load all Resources assets into the asset arrays already, but if you don't want that, then uncomment this, etc.
-			// if ( useResourcesFolders ) {
-			// 	var newAsset = Resources.Load<T>(assetName);
-			// 	if ( newAsset != null ) {
-			// 		return newAsset;
-			// 	}
+			// by default, we load all Resources assets into the asset
+			// arrays already, but if you don't want that, then uncomment
+			// this, etc. if ( useResourcesFolders ) {var newAsset =
+			// Resources.Load<T>(assetName); if ( newAsset != null )
+			// {return newAsset;
+			//  }
 			// }
 
 			Debug.LogErrorFormat(this, "VN Manager can't find asset [{0}]... maybe it is misspelled, or isn't imported as {1}?", assetName, typeof(T).ToString() );
@@ -630,7 +664,8 @@ namespace Yarn.Unity.Example {
     } // end class
 
 	/// <summary>
-	/// stores data for actors (sprite reference and color), can be expanded if necessary
+	/// stores data for actors (sprite reference and color), can be
+	/// expanded if necessary
 	/// </summary>
 	[System.Serializable]
 	public class VNActor {
@@ -645,7 +680,9 @@ namespace Yarn.Unity.Example {
 		}
 	}
 
-	// from https://www.codeproject.com/Articles/11556/Converting-Wildcards-to-Regexes by Rei Miyasaka
+	// from
+	// https://www.codeproject.com/Articles/11556/Converting-Wildcards-to-Regexes
+	// by Rei Miyasaka
     class Wildcard : Regex {
         public Wildcard(string pattern) : base(WildcardToRegex(pattern)) { }
 

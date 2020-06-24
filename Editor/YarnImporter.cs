@@ -8,70 +8,79 @@ using System.Collections.Generic;
 using Yarn;
 using Yarn.Compiler;
 
-/// <summary>
-/// A <see cref="ScriptedImporter"/> for Yarn assets. The actual asset used and referenced at runtime and in the editor will be a <see cref="YarnProgram"/>, which this class wraps around creating the asset's corresponding meta file.
-/// </summary>
-[ScriptedImporter(2, new[] {"yarn", "yarnc"})]
-public class YarnImporter : ScriptedImporter
-{    
-    // culture identifiers like en-US
-    public string baseLanguageID;
+namespace Yarn.Unity
+{
+    /// <summary>
+    /// A <see cref="ScriptedImporter"/> for Yarn assets. The actual asset used and referenced at runtime and in the editor will be a <see cref="YarnProgram"/>, which this class wraps around creating the asset's corresponding meta file.
+    /// </summary>
+    [ScriptedImporter(2, new[] { "yarn", "yarnc" })]
+    public class YarnImporter : ScriptedImporter
+    {
+        // culture identifiers like en-US
+        public string baseLanguageID;
 
-    public string[] stringIDs;
+        public string[] stringIDs;
 
-    public bool AnyImplicitStringIDs => compilationStatus == Status.SucceededUntaggedStrings;
-    public bool StringsAvailable => stringIDs?.Length > 0;
+        public bool AnyImplicitStringIDs => compilationStatus == Status.SucceededUntaggedStrings;
+        public bool StringsAvailable => stringIDs?.Length > 0;
 
-    public Status compilationStatus;
-    
-    public bool isSuccesfullyCompiled = false;
+        public Status compilationStatus;
 
-    public string compilationErrorMessage = null;
+        public bool isSuccesfullyCompiled = false;
 
-    public TextAsset baseLanguage;
-    public YarnTranslation[] localizations = new YarnTranslation[0];
-    public LinetagToLanguage[] voiceOvers = new LinetagToLanguage[0];
-    public YarnProgram programContainer = default;
+        public string compilationErrorMessage = null;
 
-    private void OnValidate() {
-        if (string.IsNullOrEmpty(baseLanguageID)) {
-            // If the user has added project wide text languages in the settings 
-            // dialogue, we default to the first text language as base language
-            if (ProjectSettings.TextProjectLanguages.Count > 0) {
-                baseLanguageID = ProjectSettings.TextProjectLanguages[0];
-            // Otherwrise use system's language as base language
-            } else {
-                baseLanguageID = CultureInfo.CurrentCulture.Name;
+        public TextAsset baseLanguage;
+        public YarnTranslation[] localizations = new YarnTranslation[0];
+        public LinetagToLanguage[] voiceOvers = new LinetagToLanguage[0];
+        public YarnProgram programContainer = default;
+
+        private void OnValidate()
+        {
+            if (string.IsNullOrEmpty(baseLanguageID))
+            {
+                // If the user has added project wide text languages in the settings 
+                // dialogue, we default to the first text language as base language
+                if (ProjectSettings.TextProjectLanguages.Count > 0)
+                {
+                    baseLanguageID = ProjectSettings.TextProjectLanguages[0];
+                    // Otherwrise use system's language as base language
+                }
+                else
+                {
+                    baseLanguageID = CultureInfo.CurrentCulture.Name;
+                }
             }
         }
-    }
 
-    public override bool SupportsRemappedAssetType(System.Type type) {
-        if (type.IsAssignableFrom(typeof(TextAsset))) {
-            return true;
-        }
-        return false;
-    }
-
-    public override void OnImportAsset(AssetImportContext ctx)
-    {
-        OnValidate();
-        var extension = System.IO.Path.GetExtension(ctx.assetPath);
-
-        // Clear the list of strings, in case this compilation fails
-        stringIDs = new string[] {};
-
-        isSuccesfullyCompiled = false;
-
-        if (extension == ".yarn")
+        public override bool SupportsRemappedAssetType(System.Type type)
         {
-            ImportYarn(ctx);
+            if (type.IsAssignableFrom(typeof(TextAsset)))
+            {
+                return true;
+            }
+            return false;
         }
-        else if (extension == ".yarnc")
+
+        public override void OnImportAsset(AssetImportContext ctx)
         {
-            ImportCompiledYarn(ctx);
+            OnValidate();
+            var extension = System.IO.Path.GetExtension(ctx.assetPath);
+
+            // Clear the list of strings, in case this compilation fails
+            stringIDs = new string[] { };
+
+            isSuccesfullyCompiled = false;
+
+            if (extension == ".yarn")
+            {
+                ImportYarn(ctx);
+            }
+            else if (extension == ".yarnc")
+            {
+                ImportCompiledYarn(ctx);
+            }
         }
-    }
 
 #if ADDRESSABLES
     /// <summary>
@@ -91,180 +100,185 @@ public class YarnImporter : ScriptedImporter
     }
 #endif
 
-    private void ImportYarn(AssetImportContext ctx)
-    {
-        var sourceText = File.ReadAllText(ctx.assetPath);
-        string fileName = System.IO.Path.GetFileNameWithoutExtension(ctx.assetPath);
-
-        Yarn.Program compiledProgram;
-        IDictionary<string, Yarn.Compiler.StringInfo> stringTable;
-
-        compilationErrorMessage = null;
-
-        try
+        private void ImportYarn(AssetImportContext ctx)
         {
-            // Compile the source code into a compiled Yarn program (or
-            // generate a parse error)
-            compilationStatus = Compiler.CompileString(sourceText, fileName, out compiledProgram, out stringTable);
+            var sourceText = File.ReadAllText(ctx.assetPath);
+            string fileName = System.IO.Path.GetFileNameWithoutExtension(ctx.assetPath);
+
+            Yarn.Program compiledProgram;
+            IDictionary<string, Yarn.Compiler.StringInfo> stringTable;
+
+            compilationErrorMessage = null;
+
+            try
+            {
+                // Compile the source code into a compiled Yarn program (or
+                // generate a parse error)
+                compilationStatus = Yarn.Compiler.Compiler.CompileString(sourceText, fileName, out compiledProgram, out stringTable);
+            }
+            catch (Yarn.Compiler.ParseException e)
+            {
+                isSuccesfullyCompiled = false;
+                compilationErrorMessage = e.Message;
+                ctx.LogImportError(e.Message);
+                return;
+            }
+
+            // Create a container for storing the bytes
+            programContainer = ScriptableObject.CreateInstance<YarnProgram>();
+
+            using (var memoryStream = new MemoryStream())
+            using (var outputStream = new Google.Protobuf.CodedOutputStream(memoryStream))
+            {
+
+                // Serialize the compiled program to memory
+                compiledProgram.WriteTo(outputStream);
+                outputStream.Flush();
+
+                byte[] compiledBytes = memoryStream.ToArray();
+
+                programContainer.compiledProgram = compiledBytes;
+
+                // Add this container to the imported asset; it will be
+                // what the user interacts with in Unity
+                ctx.AddObjectToAsset("Program", programContainer, YarnEditorUtility.GetYarnDocumentIconTexture());
+                ctx.SetMainObject(programContainer);
+
+                isSuccesfullyCompiled = true;
+
+                // var outPath = Path.ChangeExtension(ctx.assetPath, ".yarnc");
+                // File.WriteAllBytes(outPath, compiledBytes);
+            }
+
+            if (stringTable.Count > 0)
+            {
+                using (var memoryStream = new MemoryStream())
+                using (var textWriter = new StreamWriter(memoryStream))
+                {
+                    // Generate the localised .csv file
+
+                    // Use the invariant culture when writing the CSV
+                    var configuration = new CsvHelper.Configuration.Configuration(
+                        System.Globalization.CultureInfo.InvariantCulture
+                    );
+
+                    var csv = new CsvHelper.CsvWriter(
+                        textWriter, // write into this stream
+                        configuration // use this configuration
+                        );
+
+                    var lines = stringTable.Select(x => new
+                    {
+                        id = x.Key,
+                        text = x.Value.text,
+                        file = x.Value.fileName,
+                        node = x.Value.nodeName,
+                        lineNumber = x.Value.lineNumber
+                    });
+
+                    csv.WriteRecords(lines);
+
+                    textWriter.Flush();
+
+                    memoryStream.Position = 0;
+
+                    using (var reader = new StreamReader(memoryStream))
+                    {
+                        var textAsset = new TextAsset(reader.ReadToEnd());
+                        textAsset.name = $"{fileName} ({baseLanguageID})";
+
+                        ctx.AddObjectToAsset("Strings", textAsset);
+
+                        programContainer.baseLocalisationStringTable = textAsset;
+                        programContainer.baseLocalizationId = baseLanguageID;
+                        baseLanguage = textAsset;
+                        programContainer.localizations = localizations;
+                        programContainer.baseLocalizationId = baseLanguageID;
+                    }
+
+                    stringIDs = lines.Select(l => l.id).ToArray();
+
+                    var voiceOversList = voiceOvers.ToList();
+                    // Init voice overs by writing all linetags of this yarn program for every available translation
+                    foreach (var textEntry in stringIDs)
+                    {
+                        if (voiceOversList.Find(element => element.linetag == textEntry) == null)
+                        {
+                            voiceOversList.Add(new LinetagToLanguage(textEntry));
+                        }
+
+                        var languageToAudioclipList = voiceOversList.Find(element => element.linetag == textEntry).languageToAudioclip.ToList();
+                        foreach (var localization in localizations)
+                        {
+                            if (!ProjectSettings.AudioProjectLanguages.Contains(localization.languageName))
+                            {
+                                continue;
+                            }
+
+                            if (languageToAudioclipList.Find(element => element.language == localization.languageName) == null)
+                            {
+                                languageToAudioclipList.Add(new LanguageToAudioclip(localization.languageName));
+                            }
+                        }
+
+                        // Also initialize for base language ID
+                        if (!string.IsNullOrEmpty(baseLanguageID) && languageToAudioclipList.Find(element => element.language == baseLanguageID) == null)
+                        {
+                            languageToAudioclipList.Add(new LanguageToAudioclip(baseLanguageID));
+                        }
+
+                        // Remove empty entries; shouldn't be necessary though
+                        if (languageToAudioclipList.Find(element => string.IsNullOrEmpty(element.language)) != null)
+                        {
+                            languageToAudioclipList.Remove(languageToAudioclipList.Find(element => string.IsNullOrEmpty(element.language)));
+                        }
+
+                        voiceOversList.Find(element => element.linetag == textEntry).languageToAudioclip = languageToAudioclipList.ToArray();
+                    }
+
+                    // Check if previously stored linetags have been removed and remove them from the voice over collection
+                    for (int i = voiceOversList.Count - 1; i >= 0; i--)
+                    {
+                        LinetagToLanguage voiceOver = voiceOversList[i];
+                        if (!stringIDs.Contains(voiceOver.linetag))
+                        {
+                            voiceOversList.Remove(voiceOver);
+                        }
+                    }
+
+                    voiceOvers = voiceOversList.ToArray();
+                    programContainer.voiceOvers = voiceOvers;
+                }
+            }
+
         }
-        catch (Yarn.Compiler.ParseException e)
-        {
-            isSuccesfullyCompiled = false;
-            compilationErrorMessage = e.Message;
-            ctx.LogImportError(e.Message);
-            return;
-        }
 
-        // Create a container for storing the bytes
-        programContainer = ScriptableObject.CreateInstance<YarnProgram>();
-
-        using (var memoryStream = new MemoryStream())
-        using (var outputStream = new Google.Protobuf.CodedOutputStream(memoryStream))
+        private void ImportCompiledYarn(AssetImportContext ctx)
         {
 
-            // Serialize the compiled program to memory
-            compiledProgram.WriteTo(outputStream);
-            outputStream.Flush();
+            var bytes = File.ReadAllBytes(ctx.assetPath);
 
-            byte[] compiledBytes = memoryStream.ToArray();
-
-            programContainer.compiledProgram = compiledBytes;
-
-            // Add this container to the imported asset; it will be
-            // what the user interacts with in Unity
-            ctx.AddObjectToAsset("Program", programContainer, YarnEditorUtility.GetYarnDocumentIconTexture());
-            ctx.SetMainObject(programContainer);
+            try
+            {
+                // Validate that this can be parsed as a Program protobuf
+                var _ = Program.Parser.ParseFrom(bytes);
+            }
+            catch (Google.Protobuf.InvalidProtocolBufferException)
+            {
+                ctx.LogImportError("Invalid compiled yarn file. Please re-compile the source code.");
+                return;
+            }
 
             isSuccesfullyCompiled = true;
 
-            // var outPath = Path.ChangeExtension(ctx.assetPath, ".yarnc");
-            // File.WriteAllBytes(outPath, compiledBytes);
+            // Create a container for storing the bytes
+            var programContainer = ScriptableObject.CreateInstance<YarnProgram>();
+            programContainer.compiledProgram = bytes;
+
+            // Add this container to the imported asset; it will be
+            // what the user interacts with in Unity
+            ctx.AddObjectToAsset("Program", programContainer);
+            ctx.SetMainObject(programContainer);
         }
-
-        if (stringTable.Count > 0)
-        {
-            using (var memoryStream = new MemoryStream())
-            using (var textWriter = new StreamWriter(memoryStream))
-            {
-                // Generate the localised .csv file
-
-                // Use the invariant culture when writing the CSV
-                var configuration = new CsvHelper.Configuration.Configuration(
-                    System.Globalization.CultureInfo.InvariantCulture
-                );
-
-                var csv = new CsvHelper.CsvWriter(
-                    textWriter, // write into this stream
-                    configuration // use this configuration
-                    );
-
-                var lines = stringTable.Select(x => new
-                {
-                    id = x.Key,
-                    text = x.Value.text,
-                    file = x.Value.fileName,
-                    node = x.Value.nodeName,
-                    lineNumber = x.Value.lineNumber
-                });
-
-                csv.WriteRecords(lines);
-
-                textWriter.Flush();
-
-                memoryStream.Position = 0;
-
-                using (var reader = new StreamReader(memoryStream))
-                {
-                    var textAsset = new TextAsset(reader.ReadToEnd());
-                    textAsset.name = $"{fileName} ({baseLanguageID})";
-
-                    ctx.AddObjectToAsset("Strings", textAsset);
-
-                    programContainer.baseLocalisationStringTable = textAsset;
-                    programContainer.baseLocalizationId = baseLanguageID;
-                    baseLanguage = textAsset;
-                    programContainer.localizations = localizations;
-                    programContainer.baseLocalizationId = baseLanguageID;
-                }
-
-                stringIDs = lines.Select(l => l.id).ToArray();
-
-                var voiceOversList = voiceOvers.ToList();
-                // Init voice overs by writing all linetags of this yarn program for every available translation
-                foreach (var textEntry in stringIDs)
-                {
-                    if (voiceOversList.Find(element => element.linetag == textEntry) == null)
-                    {
-                        voiceOversList.Add(new LinetagToLanguage(textEntry));
-                    }
-
-                    var languageToAudioclipList = voiceOversList.Find(element => element.linetag == textEntry).languageToAudioclip.ToList();
-                    foreach (var localization in localizations)
-                    {
-                        if (!ProjectSettings.AudioProjectLanguages.Contains(localization.languageName))
-                        {
-                            continue;
-                        }
-
-                        if (languageToAudioclipList.Find(element => element.language == localization.languageName) == null)
-                        {
-                            languageToAudioclipList.Add(new LanguageToAudioclip(localization.languageName));
-                        }
-                    }
-
-                    // Also initialize for base language ID
-                    if (!string.IsNullOrEmpty(baseLanguageID) && languageToAudioclipList.Find(element => element.language == baseLanguageID) == null)
-                    {
-                        languageToAudioclipList.Add(new LanguageToAudioclip(baseLanguageID));
-                    }
-
-                    // Remove empty entries; shouldn't be necessary though
-                    if (languageToAudioclipList.Find(element => string.IsNullOrEmpty(element.language)) != null)
-                    {
-                        languageToAudioclipList.Remove(languageToAudioclipList.Find(element => string.IsNullOrEmpty(element.language)));
-                    }
-
-                    voiceOversList.Find(element => element.linetag == textEntry).languageToAudioclip = languageToAudioclipList.ToArray();
-                }
-
-                // Check if previously stored linetags have been removed and remove them from the voice over collection
-                for (int i = voiceOversList.Count - 1; i >= 0; i--)
-                {
-                    LinetagToLanguage voiceOver = voiceOversList[i];
-                    if (!stringIDs.Contains(voiceOver.linetag))
-                    {
-                        voiceOversList.Remove(voiceOver);
-                    }
-                }
-
-                voiceOvers = voiceOversList.ToArray();
-                programContainer.voiceOvers = voiceOvers;
-            }
-        }
-
-    }
-
-    private void ImportCompiledYarn(AssetImportContext ctx) {
-
-        var bytes = File.ReadAllBytes(ctx.assetPath);
-
-        try {
-            // Validate that this can be parsed as a Program protobuf
-            var _ = Program.Parser.ParseFrom(bytes);
-        } catch (Google.Protobuf.InvalidProtocolBufferException) {
-            ctx.LogImportError("Invalid compiled yarn file. Please re-compile the source code.");
-            return;
-        }
-
-        isSuccesfullyCompiled = true;        
-
-        // Create a container for storing the bytes
-        var programContainer = ScriptableObject.CreateInstance<YarnProgram>();
-        programContainer.compiledProgram = bytes;
-
-        // Add this container to the imported asset; it will be
-        // what the user interacts with in Unity
-        ctx.AddObjectToAsset("Program", programContainer);
-        ctx.SetMainObject(programContainer);
     }
 }

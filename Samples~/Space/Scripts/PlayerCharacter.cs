@@ -45,10 +45,12 @@ namespace Yarn.Unity.Example {
         void OnDrawGizmosSelected() {
             Gizmos.color = Color.blue;
 
-            // Flatten the sphere into a disk, which looks nicer in 2D games
+            // Flatten the sphere into a disk, which looks nicer in 2D
+            // games
             Gizmos.matrix = Matrix4x4.TRS(transform.position, Quaternion.identity, new Vector3(1,1,0));
 
-            // Need to draw at position zero because we set position in the line above
+            // Need to draw at position zero because we set position in the
+            // line above
             Gizmos.DrawWireSphere(Vector3.zero, interactionRadius);
         }
 
@@ -60,8 +62,8 @@ namespace Yarn.Unity.Example {
                 return;
             }
 
-            // Move the player, clamping them to within the boundaries 
-            // of the level.
+            // Move the player, clamping them to within the boundaries of
+            // the level.
             var movement = Input.GetAxis("Horizontal");
             movement += movementFromButtons;
             movement *= (moveSpeed * Time.deltaTime);
@@ -83,8 +85,8 @@ namespace Yarn.Unity.Example {
         }
 
         /// Find all DialogueParticipants
-        /** Filter them to those that have a Yarn start node and are in range; 
-         * then start a conversation with the first one
+        /** Filter them to those that have a Yarn start node and are in
+         * range; then start a conversation with the first one
          */
         public void CheckForNearbyNPC ()
         {

@@ -37,15 +37,15 @@ namespace Yarn.Unity
 
         public override void DismissLine(Action onDismissalComplete)
         {
-            // Dismissing a line takes no time, so call the completion handler
-            // immediately
+            // Dismissing a line takes no time, so call the completion
+            // handler immediately
             onDismissalComplete();
         }
 
         public override void OnLineStatusChanged(LocalizedLine dialogueLine)
         {
-            // We don't need to do anything when the line status changes for
-            // this view
+            // We don't need to do anything when the line status changes
+            // for this view
         }
 
         public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
@@ -56,14 +56,16 @@ namespace Yarn.Unity
             // Did we find one?
             if (hasCharacterName)
             {
-                // Then notify the rest of the scene about it. This generally
-                // involves updating a text view and making it visible.
+                // Then notify the rest of the scene about it. This
+                // generally involves updating a text view and making it
+                // visible.
                 onNameUpdate?.Invoke(characterAttribute.Properties["name"].StringValue);                
             }
             else
             {
                 // Otherwise, notify the scene about not finding it. This
-                // generally involves making the name text view not visible.
+                // generally involves making the name text view not
+                // visible.
                 onNameNotPresent?.Invoke();
             }
 
