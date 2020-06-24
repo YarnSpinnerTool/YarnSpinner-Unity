@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +7,22 @@ using Yarn.Unity;
 
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// A subclass of <see cref="DialogueViewBase"/> that displays
+    /// character names.
+    /// </summary>
+    /// <remarks>
+    /// This class uses the `character` attribute on lines that it receives
+    /// to determine its content. When the view's <see cref="RunLine"/>
+    /// method is called with a line whose <see cref="LocalizedLine.Text"/>
+    /// contains a `character` attribute, the <see cref="onNameUpdate"/>
+    /// event is fired. If the line does not contain such an attribute, the
+    /// <see cref="onNameNotPresent"/> event is fired instead.
+    ///
+    /// This view does not present any options or handle commands. It's
+    /// intended to be used alongside other subclasses of DialogueViewBase.
+    /// </remarks>
+    /// <seealso cref="DialogueUI"/>
     public class DialogueCharacterNameView : Yarn.Unity.DialogueViewBase
     {
         /// <summary>
