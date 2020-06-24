@@ -68,3 +68,6 @@ Temporary Items
 
 ## Yarn Spinner for Unity
 
+# .NET symbols files, for debugging
+*.pdb
+*.pdb.meta 
