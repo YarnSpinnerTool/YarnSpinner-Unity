@@ -1,4 +1,4 @@
-﻿/*
+/*
 
 The MIT License (MIT)
 
@@ -33,53 +33,8 @@ namespace Yarn.Unity
 {
     public class YarnSpinnerEditorWindow : EditorWindow {
 
-        class CheckerResult {
-            public enum State {
-                NotTested,
-                Passed,
-                Failed
-            }
-
-            public State state;
-            public TextAsset script;
-
-            public ValidationMessage[] messages = new ValidationMessage[0];
-
-            public override bool Equals (object obj)
-            {
-                if (obj is CheckerResult && ((CheckerResult)obj).script == this.script)
-                    return true;
-                else
-                    return false;
-            }
-
-            public override int GetHashCode ()
-            {
-                return this.script.GetHashCode();
-            }
-
-            public CheckerResult(TextAsset script) {
-                this.script = script;
-                this.state = State.NotTested;
-            }
-        }
-
-        // The list of files that we know about, and their status.
-        private List<CheckerResult> checkResults = new List<CheckerResult>();
-
-        // The list of analysis results that were made as a result of checking
-        // all scripts
-        private List<Yarn.Analysis.Diagnosis> diagnoses = new List<Yarn.Analysis.Diagnosis>();
-
         // Current scrolling position
         Vector2 scrollPos;
-
-        // Root folder to search for json files
-        private static string jsonRootPath;
-        private static bool isJSONRootPathChosen = false;
-
-        // Seconds before the progress bar appears during checking
-        const float timeBeforeProgressBar = 0.1f;
 
         // The URL for the text document containing supporter information
         private const string SupportersURL = "https://yarnspinner.dev/supporters.txt";
@@ -93,33 +48,7 @@ namespace Yarn.Unity
 
         // The dynamically fetched text to show in the About page.
         static string supportersText = null;
-
-        // Updates the list of all scripts that should be checked.
-        void UpdateYarnScriptList() {
-
-            // Clear the list of files
-            checkResults.Clear();
-
-            // Clear the list of diagnoses
-            diagnoses = new List<Yarn.Analysis.Diagnosis>();
-
-            // Find all TextAssets
-            var list = AssetDatabase.FindAssets("t:textasset", new [] {jsonRootPath});
-
-            foreach (var guid in list) {
-
-                // Filter the list to only include .json files
-                var path = AssetDatabase.GUIDToAssetPath(guid);
-                if (path.EndsWith(".yarn.txt")) {
-                    var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
-
-                    var newResult = new CheckerResult(asset);
-
-                    checkResults.Add(newResult);
-                }
-            }
-        }
-
+        
         // Shows the window.
         [MenuItem("Window/Yarn Spinner %#y", false, 2000)]
         static void ShowWindow() {
@@ -135,10 +64,6 @@ namespace Yarn.Unity
 
             this.YarnSpinnerVersion = typeof(DialogueRunner).Assembly.GetName().Version.ToString();
 
-            // Update the list of scripts known to the window
-            if(isJSONRootPathChosen)
-                UpdateYarnScriptList();
-            
             if (supportersText == null) {
                 RequestSupporterText();                
             }
@@ -182,50 +107,8 @@ namespace Yarn.Unity
             EditorApplication.update += EditorUpdate;              
         }
 
-        void RefreshAllResults() {
-            // Start checking all files.
-
-            // First, record when we started - we need
-            // to know if it's time to show a progress
-            // dialogue
-            var startTime = EditorApplication.timeSinceStartup;
-
-            // Have we presented a progress bar?
-            var progressBarVisible = false;
-
-            // Start checking all files; the delegate will be called
-            // after each file has been checked
-            CheckAllFiles(delegate(int complete, int total) {
-
-                // How long have we been at this?
-                var timeSinceStart = EditorApplication.timeSinceStartup - startTime;
-
-                // If longer than 'timeBeforeProgressBar', show the progress bar
-                if (timeSinceStart > timeBeforeProgressBar) {
-
-                    // Figure out how much of the progress bar should be filled
-                    var progress = (float)complete / (float)total;
-
-                    // Describe what we're doing
-                    var info = string.Format("Checking file {0} of {1}...", complete, total);
-
-                    // Display or update the bar
-                    EditorUtility.DisplayProgressBar("Checking Yarn Files", info, progress);
-
-                    // Record that we need to clear this bar
-                    progressBarVisible = true;
-                }
-            });
-
-            // All done. Get rid of the progress bar if needed.
-            if (progressBarVisible) {
-                EditorUtility.ClearProgressBar();
-            }
-        }
-
         enum SelectedMode {
-            About,
-            Analysis
+            About,            
         }
         SelectedMode selectedMode = 0;
         
@@ -238,10 +121,7 @@ namespace Yarn.Unity
             switch (selectedMode) {
                 case SelectedMode.About:
                     DrawAboutGUI();
-                    break;
-                case  SelectedMode.Analysis:
-                    DrawAnalysisGUI();
-                    break;
+                    break;                
             }
 
         }
@@ -251,8 +131,7 @@ namespace Yarn.Unity
             float logoSize = Mathf.Min(EditorGUIUtility.currentViewWidth, 200);
 
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos);                         
-            EditorGUILayout.BeginVertical (EditorStyles.inspectorDefaultMargins);
-            
+            EditorGUILayout.BeginVertical (EditorStyles.inspectorDefaultMargins);            
 
             GUIStyle titleLabel = new GUIStyle(EditorStyles.largeLabel);
             titleLabel.fontSize = 20;
@@ -304,306 +183,6 @@ namespace Yarn.Unity
             EditorGUILayout.EndScrollView();
             
          }
-
-        void DrawAnalysisGUI() {
-            using (new EditorGUILayout.VerticalScope()) {
-                EditorGUILayout.Space();
-
-                // Show list of folders
-                GUILayout.Label("Root folder for scripts - Will search recursively", EditorStyles.boldLabel);
-                GUILayout.BeginHorizontal();
-                string pathLabelTxt = isJSONRootPathChosen ? jsonRootPath : "***Select Path***";
-                GUILayout.Label(pathLabelTxt, EditorStyles.helpBox);
-                if(GUILayout.Button("Choose Yarn Script Root Path"))
-                {
-                    string folderPath = EditorUtility.OpenFolderPanel("Yarn Script Root Path", "", "");
-
-                    // Parse folder
-                    jsonRootPath = folderPath.Substring(Application.dataPath.ToCharArray().Length-6);                    
-                    
-                    UpdateYarnScriptList();
-                    isJSONRootPathChosen = true;                    
-                }
-                GUILayout.EndHorizontal();
-
-                // Return if no path selected
-                if (!isJSONRootPathChosen)
-                    return;
-
-                //EditorGUILayout.BeginHorizontal();
-                if (GUILayout.Button("Refresh")) {
-                    RefreshAllResults();
-                }
-                
-                EditorGUILayout.Space();
-
-                using (var scroll = new EditorGUILayout.ScrollViewScope(scrollPos)) {
-                    scrollPos = scroll.scrollPosition;
-
-                    foreach (var result in checkResults) {
-                        DrawScriptGUI (result);
-                    }
-
-                    // Draw any diagnoses that resulted
-                    foreach (var diagnosis in diagnoses) {
-
-                        MessageType messageType;
-
-                        switch (diagnosis.severity) {
-                        case Yarn.Analysis.Diagnosis.Severity.Error:
-                            messageType = MessageType.Error;
-                            break;
-                        case Yarn.Analysis.Diagnosis.Severity.Warning:
-                            messageType = MessageType.Warning;
-                            break;
-                        case Yarn.Analysis.Diagnosis.Severity.Note:
-                            messageType = MessageType.Info;
-                            break;
-                        default:
-                            throw new System.ArgumentOutOfRangeException ();
-                        }
-
-                        EditorGUILayout.HelpBox(diagnosis.ToString(showSeverity:false), messageType);
-                    }
-
-                }
-
-            }
-        }
-
-        static void DrawScriptGUI (CheckerResult result)
-        {
-            using (new EditorGUILayout.HorizontalScope()) {
-                // What icon should we use for this script?
-                Texture image;
-                switch (result.state) {
-                case CheckerResult.State.NotTested:
-                    image = Icons.notTestedIcon;
-                    break;
-                case CheckerResult.State.Passed:
-                    image = Icons.successIcon;
-                    break;
-                case CheckerResult.State.Failed:
-                    image = Icons.failedIcon;
-                    break;
-                default:
-                    throw new System.ArgumentOutOfRangeException ();
-                }
-
-                // Draw the image and the label name
-                EditorGUILayout.LabelField (new GUIContent (image), GUILayout.Width (20));
-                EditorGUILayout.LabelField (result.script.name);
-
-            }
-
-            // Draw any messages resulting from this script
-            if (result.messages.Length > 0) {
-
-                EditorGUI.indentLevel += 2;
-
-                foreach (var message in result.messages) {
-
-                    EditorGUILayout.HelpBox(message.message, message.type);
-
-                }
-
-                EditorGUI.indentLevel -= 2;
-            }
-
-        }
-
-        // Finds all .JSON files, and validates them.
-        delegate void GUICallback(int complete, int total);
-        void CheckAllFiles (GUICallback callback = null)
-        {
-
-            // The shared context for all script analysis.
-            var analysisContext = new Yarn.Analysis.Context();
-
-            // We shouldn't try to perform program analysis if
-            // any of the files fails to compile, because that
-            // analysis would be performed on incomplete data.
-            bool shouldPerformAnalysis = true;
-
-            // How many files have we finished checking?
-            int complete = 0;
-
-            // Let's get started!
-
-            // First, ensure that we're looking at all of the scripts.
-            UpdateYarnScriptList();
-
-            // Next, compile each one.
-            foreach (var result in checkResults) {
-
-                // Attempt to compile the file. Record any compiler messages.
-                CheckerResult.State state;
-
-                var messages = ValidateFile(result.script, analysisContext, out state);
-
-                result.state = state;
-                result.messages = messages;
-
-                // Don't perform whole-program analysis if any file failed to compile
-                if (result.state != CheckerResult.State.Passed) {
-                    shouldPerformAnalysis = false;
-                }
-
-                // We're done with it; if we have a callback to call after
-                // each file is validated, do so.
-                complete++;
-
-                if (callback != null)
-                    callback(complete, checkResults.Count);
-
-            }
-
-            var results = new List<Yarn.Analysis.Diagnosis>();
-
-            if (shouldPerformAnalysis) {
-                var scriptAnalyses = analysisContext.FinishAnalysis ();
-                results.AddRange (scriptAnalyses);
-            }
-
-
-            var environmentAnalyses = AnalyseEnvironment ();
-            results.AddRange (environmentAnalyses);
-
-            diagnoses = results;
-
-        }
-
-
-
-        // Validates a single script.
-        ValidationMessage[] ValidateFile(TextAsset script, Analysis.Context analysisContext, out CheckerResult.State result) {
-
-            // The list of messages we got from the compiler.
-            var messageList = new List<ValidationMessage>();
-
-            // A dummy variable storage; it won't be used, but Dialogue
-            // needs it.
-            var variableStorage = new Yarn.MemoryVariableStore();
-
-            // The Dialog object is the compiler.
-            var dialog = new Dialogue(variableStorage);
-
-            // Whether compilation failed or not; this will be
-            // set to true if any error messages are returned.
-            bool failed = false;
-
-            // Called when we get an error message. Convert this
-            // message into a ValidationMessage and store it;
-            // additionally, mark that this file failed compilation
-            dialog.LogErrorMessage = delegate (string message) {
-                var msg = new ValidationMessage();
-                msg.type = MessageType.Error;
-                msg.message = message;
-                messageList.Add(msg);
-
-                // any errors means this validation failed
-                failed = true;
-            };
-
-            // Called when we get an error message. Convert this
-            // message into a ValidationMessage and store it
-            dialog.LogDebugMessage = delegate (string message) {
-                var msg = new ValidationMessage();
-                msg.type = MessageType.Info;
-                msg.message = message;
-                messageList.Add(msg);
-            };
-
-            // Attempt to compile this script. Any exceptions will result
-            // in an error message
-            try {
-                // TODO: update for Yarn 1.0
-                //dialog.LoadString(script.text,script.name);
-            } catch (System.Exception e) {
-                dialog.LogErrorMessage(e.Message);
-            }
-
-            // Once compilation has finished, run the analysis on it
-            dialog.Analyse(analysisContext);
-
-            // Did it succeed or not?
-            if (failed) {
-                result = CheckerResult.State.Failed;
-            } else {
-                result = CheckerResult.State.Passed;
-            }
-
-            // All done.
-            return messageList.ToArray();
-
-        }
-
-        // A result from validation.
-        struct ValidationMessage {
-            public string message;
-
-            public MessageType type;
-        }
-
-        struct Deprecation {
-            public System.Type type;
-            public string methodName;
-            public string usageNotes;
-
-            public Deprecation (System.Type type, string methodName, string usageNotes)
-            {
-                this.type = type;
-                this.methodName = methodName;
-                this.usageNotes = usageNotes;
-            }
-
-        }
-
-        IEnumerable<Yarn.Analysis.Diagnosis> AnalyseEnvironment ()
-        {
-
-            var deprecations = new List<Deprecation>();
-
-            deprecations.Add(new Deprecation(
-                typeof(Yarn.Unity.VariableStorageBehaviour),
-                "SetNumber",
-                "This method is obsolete, and will not be called in future " +
-                "versions of Yarn Spinner. Use SetValue instead."
-            ));
-
-            deprecations.Add(new Deprecation(
-                typeof(Yarn.Unity.VariableStorageBehaviour),
-                "GetNumber",
-                "This method is obsolete, and will not be called in future " +
-                "versions of Yarn Spinner. Use GetValue instead."
-            ));
-
-            var results = new List<Yarn.Analysis.Diagnosis>();
-
-            var assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
-
-
-            foreach (var assembly in assemblies) {
-                foreach (var type in assembly.GetTypes()) {
-
-                    foreach (var deprecation in deprecations) {
-                        if (!type.IsSubclassOf (deprecation.type))
-                            continue;
-
-                        foreach (var method in type.GetMethods ()) {
-                            if (method.Name == deprecation.methodName && method.DeclaringType == type) {
-                                var message = "{0} implements the {1} method. {2}";
-                                message = string.Format (message, type.Name, deprecation.methodName, deprecation.usageNotes);
-                                var diagnosis = new Yarn.Analysis.Diagnosis (message, Yarn.Analysis.Diagnosis.Severity.Warning);
-                                results.Add (diagnosis);
-                            }
-                        }
-
-                    }
-                }
-            }
-            return results;
-        }
 
     }
 
