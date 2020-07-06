@@ -169,64 +169,69 @@ namespace Yarn.Unity
 
             float logoSize = Mathf.Min(EditorGUIUtility.currentViewWidth, 200);
 
-            scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
-            EditorGUILayout.BeginVertical(EditorStyles.inspectorDefaultMargins);
-
-            GUIStyle titleLabel = new GUIStyle(EditorStyles.largeLabel);
-            titleLabel.fontSize = 20;
-            titleLabel.alignment = TextAnchor.MiddleCenter;
-
-            GUIStyle versionLabel = new GUIStyle(EditorStyles.largeLabel);
-            versionLabel.fontSize = 12;
-            versionLabel.alignment = TextAnchor.MiddleCenter;
-
-            GUIStyle creditsLabel = new GUIStyle(EditorStyles.wordWrappedLabel);
-            creditsLabel.alignment = TextAnchor.MiddleCenter;
-            creditsLabel.richText = true;
-
-            using (new EditorGUILayout.HorizontalScope(GUILayout.Height(logoSize)))
+            using (var scroll = new EditorGUILayout.ScrollViewScope(scrollPos))
+            using (new EditorGUILayout.VerticalScope(EditorStyles.inspectorDefaultMargins))
             {
-                GUILayout.FlexibleSpace();
-                using (new EditorGUILayout.VerticalScope())
-                {
-                    GUILayout.Label(new GUIContent(Icons.Logo), GUILayout.Width(logoSize), GUILayout.Height(logoSize));
-                    GUILayout.Label("Yarn Spinner", titleLabel);
-                    GUILayout.Label(YarnSpinnerVersion, versionLabel);
-                    GUILayout.Space(10);
+                scrollPos = scroll.scrollPosition;
 
-                    if (GUILayout.Button("Documentation"))
+                GUIStyle titleLabel = new GUIStyle(EditorStyles.largeLabel)
+                {
+                    fontSize = 20,
+                    alignment = TextAnchor.MiddleCenter
+                };
+
+                GUIStyle versionLabel = new GUIStyle(EditorStyles.largeLabel)
+                {
+                    fontSize = 12,
+                    alignment = TextAnchor.MiddleCenter
+                };
+
+                GUIStyle creditsLabel = new GUIStyle(EditorStyles.wordWrappedLabel)
+                {
+                    alignment = TextAnchor.MiddleCenter,
+                    richText = true
+                };
+
+                using (new EditorGUILayout.HorizontalScope(GUILayout.Height(logoSize)))
+                {
+                    GUILayout.FlexibleSpace();
+                    using (new EditorGUILayout.VerticalScope())
                     {
-                        Application.OpenURL(DocumentationURL);
+                        GUILayout.Label(new GUIContent(Icons.Logo), GUILayout.Width(logoSize), GUILayout.Height(logoSize));
+                        GUILayout.Label("Yarn Spinner", titleLabel);
+                        GUILayout.Label(YarnSpinnerVersion, versionLabel);
+                        GUILayout.Space(10);
+
+                        if (GUILayout.Button("Documentation"))
+                        {
+                            Application.OpenURL(DocumentationURL);
+                        }
+                        if (GUILayout.Button("Support Us On Patreon"))
+                        {
+                            Application.OpenURL(PatreonURL);
+                        }
                     }
-                    if (GUILayout.Button("Support Us On Patreon"))
+                    GUILayout.FlexibleSpace();
+                }
+
+                GUILayout.Space(20);
+                GUILayout.Label("Yarn Spinner is made possible thanks to our wonderful supporters on Patreon.", creditsLabel);
+                GUILayout.Space(20);
+
+                using (new EditorGUILayout.VerticalScope(GUILayout.Width(EditorGUIUtility.currentViewWidth - 40)))
+                {
+                    if (supportersText == null)
                     {
-                        Application.OpenURL(PatreonURL);
+                        // We're still waiting for supporters text to finish
+                        // arriving (or error out)
+                        GUILayout.Label("Loading supporters...", creditsLabel);
+                    }
+                    else
+                    {
+                        GUILayout.Label(supportersText, creditsLabel);
                     }
                 }
-                GUILayout.FlexibleSpace();
             }
-
-            GUILayout.Space(20);
-            GUILayout.Label("Yarn Spinner is made possible thanks to our wonderful supporters on Patreon.", creditsLabel);
-            GUILayout.Space(20);
-
-            using (new EditorGUILayout.VerticalScope(GUILayout.Width(EditorGUIUtility.currentViewWidth - 40)))
-            {
-                if (supportersText == null)
-                {
-                    // We're still waiting for supporters text to finish
-                    // arriving (or error out)
-                    GUILayout.Label("Loading supporters...", creditsLabel);
-                }
-                else
-                {
-                    GUILayout.Label(supportersText, creditsLabel);
-                }
-            }
-
-            EditorGUILayout.EndVertical();
-            EditorGUILayout.EndScrollView();
-
         }
 
         private void DrawUpgradeGUI()
