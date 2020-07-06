@@ -24,10 +24,13 @@ DEALINGS IN THE SOFTWARE.
 
 */
 
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
-using System.Collections.Generic;
 using UnityEngine.Networking;
+using Yarn.Compiler.Upgrader;
 
 namespace Yarn.Unity
 {
@@ -36,6 +39,10 @@ namespace Yarn.Unity
 
         // Current scrolling position
         Vector2 scrollPos;
+
+        // The list of Yarn scripts in the project. Updated by the
+        // UpgradeProgram method.
+        List<YarnProgram> yarnProgramList = new  List<YarnProgram>();
 
         // The URL for the text document containing supporter information
         private const string SupportersURL = "https://yarnspinner.dev/supporters.txt";
@@ -71,6 +78,18 @@ namespace Yarn.Unity
             {
                 RequestSupporterText();
             }
+
+            // Subscribe to be notified of asset changes - we'll use them
+            // to refresh our asset list
+            EditorApplication.projectChanged += RefreshYarnProgramList;
+
+            // Also refresh the list right
+            RefreshYarnProgramList();
+        }
+
+        private void OnDisable() {
+            // Tidy up our update-list delegate when we're going away
+            EditorApplication.projectChanged -= RefreshYarnProgramList;
         }
 
         private static void EditorUpdate()
@@ -117,6 +136,7 @@ namespace Yarn.Unity
         enum SelectedMode
         {
             About,
+            UpgradeScripts,
         }
         
         SelectedMode selectedMode = 0;
@@ -125,13 +145,19 @@ namespace Yarn.Unity
 
         void OnGUI()
         {
-            var modes = System.Enum.GetNames(typeof(SelectedMode));
+            var modes = System.Enum.GetNames(typeof(SelectedMode))
+                                   .Select((x) => ObjectNames.NicifyVariableName(x))
+                                   .ToArray();
+
             selectedMode = (SelectedMode)GUILayout.Toolbar((int)selectedMode, modes);
 
             switch (selectedMode)
             {
                 case SelectedMode.About:
                     DrawAboutGUI();
+                    break;
+                case SelectedMode.UpgradeScripts:
+                    DrawUpgradeGUI();
                     break;
             }
 
@@ -156,7 +182,6 @@ namespace Yarn.Unity
             GUIStyle creditsLabel = new GUIStyle(EditorStyles.wordWrappedLabel);
             creditsLabel.alignment = TextAnchor.MiddleCenter;
             creditsLabel.richText = true;
-
 
             using (new EditorGUILayout.HorizontalScope(GUILayout.Height(logoSize)))
             {
@@ -204,6 +229,106 @@ namespace Yarn.Unity
 
         }
 
+        private void DrawUpgradeGUI()
+        {
+            // Show some introductory UI to explain the purpose of this
+            // page
+            GUILayout.Label("Upgrade your Yarn scripts from version 1 to version 2.");
+            EditorGUILayout.HelpBox("Upgrading a script that's already in version 2 may throw an error, but won't modify your file.", MessageType.Info);
+
+            // Show the list of scripts we can upgrade
+            foreach (var script in yarnProgramList)
+            {
+                EditorGUILayout.BeginHorizontal();
+
+                // Show the object field - disabled so people won't try and
+                // replace items in the list with other scripts, which
+                // won't work
+                EditorGUI.BeginDisabledGroup(true);
+                EditorGUILayout.ObjectField(script, typeof(YarnProgram), false);
+                EditorGUI.EndDisabledGroup();
+
+                // A little "upgrade this specific script" button
+                if (GUILayout.Button("Upgrade"))
+                {
+                    UpgradeProgram(script, UpgradeType.Version1to2);
+                }
+                EditorGUILayout.EndHorizontal();
+            }
+
+            // If we have any scripts, show an Upgrade All button
+            if (yarnProgramList.Count > 0)
+            {
+                if (GUILayout.Button("Upgrade All"))
+                {
+                    foreach (var script in yarnProgramList)
+                    {
+                        UpgradeProgram(script, UpgradeType.Version1to2);
+                    }
+                }
+            }
+        }
+
+        private void UpgradeProgram(YarnProgram script, UpgradeType upgradeMode)
+        {
+            // Get the path for this asset
+            var path = AssetDatabase.GetAssetPath(script);
+            string fileName = Path.GetFileName(path);
+
+            // Get the text from the path
+            var originalText = File.ReadAllText(path);
+
+            // Run it through the upgrader
+            string upgradedText;
+            try
+            {
+
+                upgradedText = LanguageUpgrader.UpgradeScript(
+                    originalText,
+                    fileName,
+                    upgradeMode,
+                    out var replacements);
+
+                if (replacements.Count() == 0)
+                {
+                    Debug.Log($"No upgrades required for {fileName}", script);
+
+                    // Exit here - we won't need to modify the file on
+                    // disk, so we can save some effort by returning at
+                    // this point
+                    return;
+                }
+
+                // Log some diagnostics about what changes we're making
+                foreach (var replacement in replacements)
+                {
+                    Debug.Log($@"{fileName}:{replacement.StartLine}: ""{replacement.OriginalText}"" -> ""{replacement.ReplacementText}""", script);
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Failed to upgrade {fileName}: {e.GetType()} {e.Message}", script);
+                return;
+            }
+
+            // Save the text back to disk
+            File.WriteAllText(path, upgradedText);
+
+            // Re-import the asset
+            AssetDatabase.ImportAsset(path);
+        }
+
+        private void RefreshYarnProgramList()
+        {
+            // Search for all Yarn scripts, and load them into the list.
+            yarnProgramList = AssetDatabase.FindAssets($"t:{nameof(YarnProgram)}")
+                                           .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
+                                           .Select(path => AssetDatabase.LoadAssetAtPath<YarnProgram>(path))
+                                           .ToList();
+
+            // Repaint to ensure that any changes to the list are visible
+            Repaint();
+        }
     }
 
     // Icons used by this editor window.
