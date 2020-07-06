@@ -42,7 +42,7 @@ namespace Yarn.Unity
 
         // The list of Yarn scripts in the project. Updated by the
         // UpgradeProgram method.
-        List<YarnProgram> yarnProgramList = new  List<YarnProgram>();
+        List<YarnProgram> yarnProgramList = new List<YarnProgram>();
 
         // The URL for the text document containing supporter information
         private const string SupportersURL = "https://yarnspinner.dev/supporters.txt";
@@ -70,7 +70,7 @@ namespace Yarn.Unity
 
             // Set the window title
             this.titleContent.text = "Yarn Spinner";
-            this.titleContent.image = Icons.windowIcon;
+            this.titleContent.image = Icons.WindowIcon;
 
             this.YarnSpinnerVersion = typeof(DialogueRunner).Assembly.GetName().Version.ToString();
 
@@ -87,7 +87,8 @@ namespace Yarn.Unity
             RefreshYarnProgramList();
         }
 
-        private void OnDisable() {
+        private void OnDisable()
+        {
             // Tidy up our update-list delegate when we're going away
             EditorApplication.projectChanged -= RefreshYarnProgramList;
         }
@@ -138,7 +139,7 @@ namespace Yarn.Unity
             About,
             UpgradeScripts,
         }
-        
+
         SelectedMode selectedMode = 0;
 
         private string YarnSpinnerVersion;
@@ -188,7 +189,7 @@ namespace Yarn.Unity
                 GUILayout.FlexibleSpace();
                 using (new EditorGUILayout.VerticalScope())
                 {
-                    GUILayout.Label(new GUIContent(Icons.logo), GUILayout.Width(logoSize), GUILayout.Height(logoSize));
+                    GUILayout.Label(new GUIContent(Icons.Logo), GUILayout.Width(logoSize), GUILayout.Height(logoSize));
                     GUILayout.Label("Yarn Spinner", titleLabel);
                     GUILayout.Label(YarnSpinnerVersion, versionLabel);
                     GUILayout.Space(10);
@@ -201,7 +202,6 @@ namespace Yarn.Unity
                     {
                         Application.OpenURL(PatreonURL);
                     }
-
                 }
                 GUILayout.FlexibleSpace();
             }
@@ -346,7 +346,7 @@ namespace Yarn.Unity
         }
 
         static Texture _successIcon;
-        public static Texture successIcon
+        public static Texture SuccessIcon
         {
             get
             {
@@ -359,7 +359,7 @@ namespace Yarn.Unity
         }
 
         static Texture _failedIcon;
-        public static Texture failedIcon
+        public static Texture FailedIcon
         {
             get
             {
@@ -372,7 +372,7 @@ namespace Yarn.Unity
         }
 
         static Texture _notTestedIcon;
-        public static Texture notTestedIcon
+        public static Texture NotTestedIcon
         {
             get
             {
@@ -385,7 +385,7 @@ namespace Yarn.Unity
         }
 
         static Texture _windowIcon;
-        public static Texture windowIcon
+        public static Texture WindowIcon
         {
             get
             {
@@ -398,7 +398,7 @@ namespace Yarn.Unity
         }
 
         static Texture _logo;
-        public static Texture logo
+        public static Texture Logo
         {
             get
             {
