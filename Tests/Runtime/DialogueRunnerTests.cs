@@ -5,10 +5,27 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using Yarn.Unity;
 
+#if UNITY_EDITOR
+#endif
+
 namespace Yarn.Unity.Tests
 {
-    public class DialogueRunnerTests
+
+    [TestFixture]
+    public class DialogueRunnerTests: IPrebuildSetup, IPostBuildCleanup
     {
+        const string DialogueRunnerTestSceneGUID = "a04d7174042154a47a29ac4f924e0474";
+
+        public void Setup()
+        {
+            RuntimeTestUtility.AddSceneToBuild(DialogueRunnerTestSceneGUID);
+        }
+
+        public void Cleanup()
+        {
+            RuntimeTestUtility.RemoveSceneFromBuild(DialogueRunnerTestSceneGUID);
+        }
+
         [UnityTest]
         public IEnumerator HandleLine_OnValidYarnFile_SendCorrectLinesToUI()
         {
@@ -36,5 +53,7 @@ namespace Yarn.Unity.Tests
             Assert.AreEqual("Mir reicht es.", dialogueUI.CurrentOptions[0]);
             Assert.AreEqual("Nochmal!", dialogueUI.CurrentOptions[1]);
         }
+
+        
     }
 }

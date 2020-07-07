@@ -9,8 +9,19 @@ using Yarn.Unity;
 
 namespace Yarn.Unity.Tests
 {
-    public class DialogueUITests
+    public class DialogueUITests : IPrebuildSetup, IPostBuildCleanup
     {
+        public void Setup()
+        {
+            RuntimeTestUtility.AddSceneToBuild(DialogueUITestsSceneGUID);
+        }
+
+        public void Cleanup()
+        {
+            RuntimeTestUtility.RemoveSceneFromBuild(DialogueUITestsSceneGUID);
+        }
+
+        const string DialogueUITestsSceneGUID = "6ddb3fe00f2d33e4e982dd435382ea97";
 
         // Getters for the various components in the scene that we're
         // working with
