@@ -21,8 +21,6 @@ namespace Yarn.Unity
         public ProjectSettingsProvider(string path, SettingsScope scope = SettingsScope.Project) : base(path, scope) { }
 
         // Variables used for the project-wide settings
-        private const string buttonTextDeleteAllDirectReferences = "Delete all direct AudioClip references";
-        private const string buttonTextDeleteAllAddressableReferences = "Delete all addressable AudioClip references";
         private static SerializedObject _projectSettings;
         private ReorderableList _textLanguagesReorderableList;
         private int _textLanguagesListIndex;
@@ -67,7 +65,7 @@ namespace Yarn.Unity
             _textLanguagesReorderableList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
                 var languageId = _textLanguagesReorderableList.serializedProperty.GetArrayElementAtIndex(index);
-                var displayName = Cultures.LanguageNamesToDisplayNames(languageId.stringValue);
+                var displayName = Cultures.GetCultures().FirstOrDefault(c => c.Name == languageId.stringValue).DisplayName ?? "<no display name>";
                 rect.y += 2;
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width * 0.7f, EditorGUIUtility.singleLineHeight), displayName);
                 var textLanguageOnAudio = ProjectSettings.AudioProjectLanguages.Contains(languageId.stringValue);
@@ -112,8 +110,8 @@ namespace Yarn.Unity
             // Text languages
             var textLanguagesProp = _projectSettings.FindProperty("_textProjectLanguages");
             var textLanguages = ProjectSettings.TextProjectLanguages;
-            var remainingTextLanguages = Cultures.AvailableCulturesNames.Except(textLanguages).ToArray();
-            var remainingTextLanguagesDisplayNames = Cultures.LanguageNamesToDisplayNames(remainingTextLanguages);
+            var remainingTextLanguages = Cultures.GetCultures().Where(c => textLanguages.Contains(c.NativeName) == false).ToArray();
+            var remainingTextLanguagesDisplayNames = remainingTextLanguages.Select(c => c.DisplayName).ToArray();
             // Button and Dropdown List for adding a language
             GUILayout.BeginHorizontal();
             if (remainingTextLanguages.Length < 1)
@@ -127,7 +125,7 @@ namespace Yarn.Unity
                 if (GUILayout.Button("Add language to project"))
                 {
                     textLanguagesProp.InsertArrayElementAtIndex(textLanguagesProp.arraySize);
-                    textLanguagesProp.GetArrayElementAtIndex(textLanguagesProp.arraySize - 1).stringValue = remainingTextLanguages[_textLanguagesListIndex];
+                    textLanguagesProp.GetArrayElementAtIndex(textLanguagesProp.arraySize - 1).stringValue = remainingTextLanguages[_textLanguagesListIndex].Name;
                     _textLanguagesListIndex = 0;
                 }
             }
@@ -150,24 +148,6 @@ namespace Yarn.Unity
                     audioLanguagesProp.DeleteArrayElementAtIndex(i);
                 }
             }
-
-#if ADDRESSABLES
-        GUILayout.Label("Voice Over Asset Handling", EditorStyles.boldLabel);
-        var addressableVoiceOverAudioClipsProp = _projectSettings.FindProperty("_addressableVoiceOverAudioClips");
-        EditorGUILayout.PropertyField(addressableVoiceOverAudioClipsProp, new GUIContent("Use Addressables"));
-
-        GUILayout.BeginHorizontal();
-        GUI.enabled = addressableVoiceOverAudioClipsProp.boolValue;
-        if (GUILayout.Button(buttonTextDeleteAllDirectReferences)) {
-            RemoveVoiceOverReferences(true);
-        }
-        GUI.enabled = !addressableVoiceOverAudioClipsProp.boolValue;
-        if (GUILayout.Button(buttonTextDeleteAllAddressableReferences)) {
-            RemoveVoiceOverReferences(false);
-        }
-        GUI.enabled = true;
-        GUILayout.EndHorizontal();
-#endif
 
             _projectSettings.ApplyModifiedProperties();
 
@@ -248,7 +228,7 @@ namespace Yarn.Unity
                 // Assign default language in case the currently selected language has become invalid
                 selectedLanguageIndex = 0;
             }
-            string[] languagesDisplayNamesAvailableForSelection = Cultures.LanguageNamesToDisplayNames(languagesNamesAvailableForSelection);
+            string[] languagesDisplayNamesAvailableForSelection = languagesNamesAvailableForSelection.Select(name => Cultures.GetCultures().FirstOrDefault(c => c.Name == name).DisplayName).ToArray();
             // Disable popup and show message box in case the project languages have been defined yet
             if (languagesNamesAvailableForSelection.Length == 0)
             {
@@ -281,26 +261,7 @@ namespace Yarn.Unity
             AudioLanguage
         }
 
-#if ADDRESSABLES
-    /// <summary>
-    /// Remove all voice over audio clip references or addressable references on all yarn assets.
-    /// </summary>
-    /// <param name="removeDirectReferences">True if direct audio clip references should be deleted and false if Addressable references should be deleted.</param>
-    private static void RemoveVoiceOverReferences(bool removeDirectReferences) {
-        if (removeDirectReferences) {
-            Debug.Log("Removing all direct AudioClip references on all yarn assets!");
-        } else {
-            Debug.Log("Removing all Adressable references on all yarn assets!");
-        }
 
-        foreach (var yarnProgram in AssetDatabase.FindAssets("t:YarnProgram")) {
-            var yarnImporter = ScriptedImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(yarnProgram)) as YarnImporter;
-            yarnImporter.RemoveAllVoiceOverReferences(removeDirectReferences);
-            EditorUtility.SetDirty(yarnImporter);
-            yarnImporter.SaveAndReimport();
-        }
-    }
-#endif
 
         /// <summary>
         /// Register YarnSpinner's UI for project settings and user preferences in the "Project Settings" window.

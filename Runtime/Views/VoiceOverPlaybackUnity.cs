@@ -39,8 +39,14 @@ namespace Yarn.Unity {
         public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished) {
             finishCurrentLine = false;
 
+            if (!(dialogueLine is AudioLocalizedLine audioLine)) {
+                Debug.LogError($"Playing voice over failed because {nameof(RunLine)} expected to receive an {nameof(AudioLocalizedLine)}, but instead received a {dialogueLine.GetType()}. Is your {nameof(DialogueRunner)} set up to use a {nameof(AudioLineProvider)}?", gameObject);
+                onDialogueLineFinished();
+                return;
+            }
+
             // Get the localized voice over audio clip
-            var voiceOverClip = dialogueLine.AudioClip;
+            var voiceOverClip = audioLine.AudioClip;
 
             if (!voiceOverClip) {
                 Debug.Log("Playing voice over failed since the AudioClip of the voice over audio language or the base language was null.", gameObject);

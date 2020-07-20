@@ -25,8 +25,10 @@ namespace Yarn.Unity
         [HideInInspector]
         public byte[] compiledProgram;
 
-        [SerializeField]
-        public TextAsset baseLocalisationStringTable;
+        public LocalizationDatabase localizationDatabase;
+
+        [Obsolete("Remove uses of this method")]
+        public TextAsset baseLocalisationStringTable => GetStringTableAsset(this.baseLocalizationId)?.text;
 
         /// <summary>
         /// The language ID (e.g. "en" or "de") of the base language (the
@@ -36,10 +38,33 @@ namespace Yarn.Unity
         public string baseLocalizationId;
 
         /// <summary>
+        /// Maps a language ID to a TextAsset.
+        /// </summary>
+        [Serializable]
+        public class YarnTranslation
+        {
+            public YarnTranslation(string LanguageName, TextAsset Text = null) {
+                languageName = LanguageName;
+                text = Text;
+            }
+
+            /// <summary>
+            /// Name of the language of this <see cref="YarnTranslation"/> in RFC
+            /// 4646.
+            /// </summary>
+            public string languageName;
+
+            /// <summary>
+            /// The csv string table containing the translated text.
+            /// </summary>
+            public TextAsset text;
+        }
+
+        /// <summary>
         /// Available localizations of this <see cref="YarnProgram"/>.
         /// </summary>
         [SerializeField]
-        [HideInInspector]
+        //[HideInInspector]
         public YarnTranslation[] localizations = new YarnTranslation[0];
 
         /// <summary>
@@ -78,6 +103,15 @@ namespace Yarn.Unity
             }
 
             return GetStringTable(textToLoad);
+        }
+
+        public YarnTranslation  GetStringTableAsset(string languageCode) {
+            foreach (var localisation in this.localizations) {
+                if (localisation.languageName == languageCode) {
+                    return localisation;
+                }
+            }
+            return null;
         }
 
         /// <summary>

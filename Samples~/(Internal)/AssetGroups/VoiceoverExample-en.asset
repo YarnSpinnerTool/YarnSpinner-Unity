@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Voiceovers-en
+  m_EditorClassIdentifier: 
+  m_GroupName: Voiceovers-en
+  m_Data:
+    m_SerializedData: []
+  m_GUID: dbf66620f821b411a8b1c79b0a3f7ce3
+  m_SerializeEntries: []
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: abac200019b1b4b89ac2d4729409c65c, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: a957497a6db664e1ba6e9267a4d7f209, type: 2}
+    - {fileID: 11400000, guid: e6021ba3f1cb54c57b88a3ec0f7d8655, type: 2}

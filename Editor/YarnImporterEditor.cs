@@ -11,327 +11,100 @@ using UnityEngine.AddressableAssets;
 using System.Collections.Generic;
 using Yarn.Unity;
 
-/// <summary>
-/// Custom inspector for a Yarn asset imported via the <see cref="ScriptedImporter"/>.
-/// </summary>
 [CustomEditor(typeof(YarnImporter))]
-public class YarnImporterEditor : ScriptedImporterEditor {
-
-    int selectedLanguageIndex;
-
-    int selectedNewTranslationLanguageIndex;
-
-    /// <summary>
-    /// Index of the currently selected voice over language.
-    /// Only show voice overs for one language.
-    /// </summary>
-    int selectedVoiceoverLanguageIndex;
-
-    /// <summary>
-    /// Foldout bool for voice over list.
-    /// </summary>
-    bool showVoiceovers = false;
-
-    SerializedProperty baseLanguageIdProperty;
-
-    private Culture[] _culturesAvailable;
-
-    /// <summary>
-    /// Contains all yarn lines in all available languages on this asset. Used for line hinting on the voice overs list.
-    /// </summary>
-    Dictionary<string, Dictionary<string, string>> _allLanguagesStringTable = new Dictionary<string, Dictionary<string, string>>();
-
-    private const string _audioVoiceOverInitializeHelpBox = "Hit 'Apply' to initialize the currently selected voice over language!";
-    private const string _audioVoiceOverNoYarnLinesOnAsset = "No yarn lines found on this asset so no voice overs can be linked to lines.";
+#if UNITY_2019_1_OR_NEWER
+[CanEditMultipleObjects]
+#endif
+public class YarnImporterEditor : ScriptedImporterEditor
+{
+    private SerializedProperty baseLanguageIdProperty;
+    private SerializedProperty baseLanguageProperty;
+    private SerializedProperty localizationDatabaseProperty;
+    private SerializedProperty isSuccessfullyCompiledProperty;
+    private SerializedProperty compilationErrorMessageProperty;
+    private SerializedProperty localizationsProperty;
 
     public override void OnEnable() {
         base.OnEnable();
+
         baseLanguageIdProperty = serializedObject.FindProperty("baseLanguageID");
-        _culturesAvailable = Cultures.AvailableCultures;
-
-        // Check for situations where we don't want to apply the project settings (for instance, if no settings have been made at all ...)
-        if (ProjectSettings.TextProjectLanguages.Count > 0 && (string.IsNullOrEmpty(baseLanguageIdProperty.stringValue) || ProjectSettings.TextProjectLanguages.Contains(baseLanguageIdProperty.stringValue))) {
-            // Reduce the available languages to the list defined on the project settings
-            _culturesAvailable = Cultures.LanguageNamesToCultures(ProjectSettings.TextProjectLanguages.ToArray());
-        }
-        if (string.IsNullOrEmpty(baseLanguageIdProperty.stringValue)) {
-            if (ProjectSettings.TextProjectLanguages.Count > 0) {
-                // Use first language from project settings as base language
-                selectedLanguageIndex = 0;
-            } else {
-                // Use system's language as base language if no project settings are defined
-                selectedLanguageIndex = _culturesAvailable.
-                    Select((culture, index) => new { culture, index })
-                    .FirstOrDefault(element => element.culture.Name == CultureInfo.CurrentCulture.Name)
-                    .index;
-            }
-        } else {
-            // Get index from previously stored base language setting
-            selectedLanguageIndex = _culturesAvailable.Select((culture, index) => new { culture, index })
-                .FirstOrDefault(pair => pair.culture.Name == baseLanguageIdProperty.stringValue)
-                .index;
-        }
-
-        // Assets imported with older code should be reimported so we have a reference to the YarnProgram
-        if (serializedObject.FindProperty("programContainer").objectReferenceValue == null) {
-            (target as YarnImporter).SaveAndReimport();
-            serializedObject.Update();
-        }
-        // Get all yarn lines of all languages so we can line hint them on the voice overs list
-        var _yarnProgram = serializedObject.FindProperty("programContainer").objectReferenceValue as YarnProgram;
-        if (_yarnProgram) {
-            _allLanguagesStringTable.Add(baseLanguageIdProperty.stringValue, _yarnProgram.GetStringTable(baseLanguageIdProperty.stringValue));
-            foreach (var language in _yarnProgram.localizations) {
-                _allLanguagesStringTable.Add(language.languageName, _yarnProgram.GetStringTable(language.languageName));
-            }
-        }
+        baseLanguageProperty = serializedObject.FindProperty("baseLanguage");
+        localizationDatabaseProperty = serializedObject.FindProperty("localizationDatabase");
+        isSuccessfullyCompiledProperty = serializedObject.FindProperty("isSuccesfullyCompiled");
+        compilationErrorMessageProperty = serializedObject.FindProperty("compilationErrorMessage");
+        localizationsProperty = serializedObject.FindProperty("localizations");
     }
 
     public override void OnDisable() {
         base.OnDisable();
     }
 
-
     public override void OnInspectorGUI() {
         serializedObject.Update();
         EditorGUILayout.Space();
-        YarnImporter yarnImporter = (target as YarnImporter);
-        bool workaroundIsDirty = false;
 
-        // All text languages on this asset (translations and  base language)
-        var textLanguageNamesOnAsset = yarnImporter.localizations.
-            Select(element => element.languageName).
-            Append(_culturesAvailable[selectedLanguageIndex].Name).
-            OrderBy(element => element).
-            ToArray();
-        var audioLanguageNamesOnAsset = ProjectSettings.AudioProjectLanguages.Count > 0 ?
-            ProjectSettings.AudioProjectLanguages.ToArray() :
-            textLanguageNamesOnAsset;
-
-        selectedLanguageIndex = EditorGUILayout.Popup("Base Language", selectedLanguageIndex, Cultures.CulturesToDisplayNames(_culturesAvailable));
-        baseLanguageIdProperty.stringValue = _culturesAvailable[selectedLanguageIndex].Name;
-
-        if (yarnImporter.isSuccesfullyCompiled == false) {
-            EditorGUILayout.HelpBox(yarnImporter.compilationErrorMessage, MessageType.Error);
-            return;
-        }
-
-        EditorGUILayout.Space();
-
-        var canCreateLocalisation = yarnImporter.StringsAvailable == true && yarnImporter.AnyImplicitStringIDs == false;
-
-        using (new EditorGUI.DisabledScope(!canCreateLocalisation))
-        using (new EditorGUILayout.HorizontalScope()) {
-
-            var culturesAvailableNotOnAsset = _culturesAvailable.Except(Cultures.LanguageNamesToCultures(textLanguageNamesOnAsset)).ToArray();
-            audioLanguageNamesOnAsset = audioLanguageNamesOnAsset.Except(Cultures.CulturesToNames(culturesAvailableNotOnAsset)).ToArray();
-
-            if (culturesAvailableNotOnAsset.Length > 0) {
-                selectedNewTranslationLanguageIndex = EditorGUILayout.Popup(selectedNewTranslationLanguageIndex, Cultures.CulturesToDisplayNames(culturesAvailableNotOnAsset));
-
-                if (GUILayout.Button("Create New Localisation", EditorStyles.miniButton)) {
-                    var stringsTableText = AssetDatabase
-                        .LoadAllAssetsAtPath(yarnImporter.assetPath)
-                        .OfType<TextAsset>()
-                        .FirstOrDefault()?
-                        .text ?? "";
-
-                    var selectedCulture = culturesAvailableNotOnAsset[selectedNewTranslationLanguageIndex];
-
-                    var assetDirectory = Path.GetDirectoryName(yarnImporter.assetPath);
-
-                    var newStringsTablePath = $"{assetDirectory}/{Path.GetFileNameWithoutExtension(yarnImporter.assetPath)} ({selectedCulture.Name}).csv";
-                    newStringsTablePath = AssetDatabase.GenerateUniqueAssetPath(newStringsTablePath);
-
-                    var writer = File.CreateText(newStringsTablePath);
-                    writer.Write(stringsTableText);
-                    writer.Close();
-
-                    AssetDatabase.ImportAsset(newStringsTablePath);
-
-                    var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(newStringsTablePath);
-
-                    EditorGUIUtility.PingObject(asset);
-
-                    // Automatically add newly created translation csv file to yarn program
-                    var localizationsIndex = System.Array.FindIndex(yarnImporter.localizations, element => element.languageName == selectedCulture.Name);
-                    var localizationSerializedProperty = serializedObject.FindProperty("localizations");
-                    if (localizationsIndex != -1) {
-                        localizationSerializedProperty.GetArrayElementAtIndex(localizationsIndex).FindPropertyRelative("text").objectReferenceValue = asset;
-                    } else {
-                        localizationSerializedProperty.InsertArrayElementAtIndex(localizationSerializedProperty.arraySize);
-                        localizationSerializedProperty.GetArrayElementAtIndex(localizationSerializedProperty.arraySize - 1).FindPropertyRelative("text").objectReferenceValue = asset;
-                        localizationSerializedProperty.GetArrayElementAtIndex(localizationSerializedProperty.arraySize - 1).FindPropertyRelative("languageName").stringValue = selectedCulture.Name;
-                    }
-                }
+        // If there's a compilation error in any of the selected objects,
+        // show an error and then stop.
+        if (isSuccessfullyCompiledProperty.boolValue == false) {
+            if (serializedObject.isEditingMultipleObjects) {
+                EditorGUILayout.HelpBox("Some of the selected scripts have errors.", MessageType.Error);
             } else {
-                EditorGUILayout.HelpBox("Go to Project Settings if you want to add more translations.", MessageType.Info);
-            }
-
+                EditorGUILayout.HelpBox($"Error in script:\n{compilationErrorMessageProperty.stringValue}", MessageType.Error);
+            }      
+            return;      
         }
 
-        if (yarnImporter.StringsAvailable == false) {
-            EditorGUILayout.HelpBox("This file doesn't contain any localisable lines or options.", MessageType.Info);
-        }
-
-        if (yarnImporter.AnyImplicitStringIDs) {
-            EditorGUILayout.HelpBox("Add #line: tags to all lines and options to enable creating new localisations. Either add them manually, or click Add Line Tags to automatically add tags. Note that this will modify your files on disk, and cannot be undone.", MessageType.Info);
-            if (GUILayout.Button("Add Line Tags")) {
-                AddLineTagsToFile(yarnImporter.assetPath);
-            }
-        }
-        // Only update localizations if line tags exist and localizations exist
-        else if (yarnImporter .localizations.Length > 0)
-        {
-            if (GUILayout.Button("Update Localizations"))
-            {
-                UpdateLocalizations(AssetDatabase
-                        .LoadAllAssetsAtPath(yarnImporter.assetPath)
-                        .OfType<TextAsset>()
-                        .FirstOrDefault()?
-                        .text ?? "");
-            }
-        }
-
-        // Localization list
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("localizations"), true);
+        EditorGUILayout.PropertyField(baseLanguageIdProperty);
 
         EditorGUILayout.Space();
 
-        // Automatically find voice over assets based on the linetag and the language id
-        // Note: this could be expanded to multiple search patterns via actions or 
-        // delegates returning their results, comparing these results and selecting the 
-        // result that returns exactly one matching asset.
-        // Possible alternative search patterns: 
-        // * search for $linetag but return asset with parent directory matching $language
-        // * search for "$linetag-$language"
-        // * search for "$language-$linetag"
-        if (GUILayout.Button("Import Voice Over Audio Files")) {
-            // For every linetag of this yarn asset
-            for (int i = 0; i < yarnImporter.voiceOvers.Length; i++) {
-                LinetagToLanguage linetagToLanguage = yarnImporter.voiceOvers[i];
-                var linetag = linetagToLanguage.linetag.Remove(0, 5);
-                // For every language of this yarn asset
-                for (int j = 0; j < linetagToLanguage.languageToAudioclip.Length; j++) {
-                    LanguageToAudioclip languageToAudioclip = linetagToLanguage.languageToAudioclip[j];
+        // We can do localization work if all of the selected objects have
+        // strings, and none of them have implicitly-created strings.
+        var canCreateLocalization = serializedObject.targetObjects.Cast<YarnImporter>().All(importer => importer.StringsAvailable && importer.AnyImplicitStringIDs == false);
 
-                    var language = languageToAudioclip.language;
-                    string[] results = Yarn.Unity.FindVoiceOver.GetMatchingVoiceOverAudioClip(linetag, language);
-
-                    // Write found AudioClip into voice overs array
-                    if (results.Length != 0) {
-                        var voiceOversProp = serializedObject.FindProperty("voiceOvers");
-                        var linetagProp = voiceOversProp.GetArrayElementAtIndex(i).FindPropertyRelative("linetag");
-                        var languagetoAudioClipProp = voiceOversProp.GetArrayElementAtIndex(i).FindPropertyRelative("languageToAudioclip");
-                        var audioclipProp = languagetoAudioClipProp.GetArrayElementAtIndex(j).FindPropertyRelative("audioClip");
-#if ADDRESSABLES
-                        if (ProjectSettings.AddressableVoiceOverAudioClips) {
-                            // Assign address to found asset if it has been added to the project's Addressables
-                            UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings.FindAssetEntry(results[0])?.SetAddress(linetag + "-" + language);
-                            // Do not overwrite existing content
-                            if (!yarnImporter.voiceOvers[i].languageToAudioclip[j].audioClipAddressable.RuntimeKeyIsValid()) {
-                                yarnImporter.voiceOvers[i].languageToAudioclip[j].audioClipAddressable = new AssetReference(results[0]);
-                                workaroundIsDirty = true;
-                            }
-                        } else {
-#endif
-
-                            // Do not overwrite existing content
-                            if (audioclipProp.objectReferenceValue == null) {
-                                audioclipProp.objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(AssetDatabase.GUIDToAssetPath(results[0]));
-                            }
-#if ADDRESSABLES
-                        }
-#endif
-                    }
-
-                    // Return info if the search results were ambiguous or there was not result
-                    if (results.Length > 1) {
-                        Debug.LogWarning("More than one asset found matching the linetag " + linetag + "  and the language " + language + ".");
-                    } else if (results.Length == 0) {
-                        Debug.LogWarning("No asset found matching the linetag '" + linetag + "' and the language '" + language + "'.");
-                    }
-                }
+        if (canCreateLocalization) {
+            DrawLocalizationGUI();
+        } else {
+            var message = new System.Text.StringBuilder();
+            message.Append("The selected ");
+            if (serializedObject.isEditingMultipleObjects) {
+                message.Append("scripts");
+            } else {
+                message.Append("script");
             }
+            message.Append(" can't be localized, because not every line has a line tag. Click Add Line Tags to add them, or add them yourself in a text editor.");
 
-        }
-        // Voice over list. Reduced to one language.
-        showVoiceovers = EditorGUILayout.Foldout(showVoiceovers, "Voice Overs"); // FIXME: Clicking on the foldout triangle doesn't open/close the foldout
-        if (showVoiceovers) {
-            EditorGUI.indentLevel++;
-            // Language selected here will reduce the visual representation of the voice over data structure
-            selectedVoiceoverLanguageIndex = EditorGUILayout.Popup(selectedVoiceoverLanguageIndex, Cultures.LanguageNamesToDisplayNames(audioLanguageNamesOnAsset), GUILayout.MaxWidth(96));
-            // Bound-check (f.g. currently selected voice over language has been removed from the available translations on this asset)
-            selectedVoiceoverLanguageIndex = Mathf.Min(audioLanguageNamesOnAsset.Length - 1, selectedVoiceoverLanguageIndex);
-            var selectedVoiceOverLanguageExists = false;
-            // Only draw AudioClips from selected language
-            for (int i = 0; i < yarnImporter.voiceOvers.Length; i++) {
-                LinetagToLanguage linetagToLanguage = yarnImporter.voiceOvers[i];
-                for (int j = 0; j < linetagToLanguage.languageToAudioclip.Length; j++) {
-                    LanguageToAudioclip languageToAudioclip = linetagToLanguage.languageToAudioclip[j];
-                    if (languageToAudioclip.language == audioLanguageNamesOnAsset[selectedVoiceoverLanguageIndex]) {
-                        selectedVoiceOverLanguageExists = true;
-                        var voiceOversProp = serializedObject.FindProperty("voiceOvers");
-                        var linetagProp = voiceOversProp.GetArrayElementAtIndex(i).FindPropertyRelative("linetag");
-                        var languagetoAudioClipProp = voiceOversProp.GetArrayElementAtIndex(i).FindPropertyRelative("languageToAudioclip");
-                        var languageProp = languagetoAudioClipProp.GetArrayElementAtIndex(j).FindPropertyRelative("language");
-                        var audioclipProp = languagetoAudioClipProp.GetArrayElementAtIndex(j).FindPropertyRelative("audioClip");
-                        var label = linetagProp.stringValue;
-                        if (_allLanguagesStringTable.ContainsKey(languageProp.stringValue) && _allLanguagesStringTable[languageProp.stringValue].ContainsKey(linetagProp.stringValue)) {
-                            label = linetagProp.stringValue + " ('" + _allLanguagesStringTable[languageProp.stringValue][linetagProp.stringValue] + "')";
-                    	}
-#if ADDRESSABLES
-                        if (ProjectSettings.AddressableVoiceOverAudioClips) {
-                            // Draw the assetref. Seems to ignore the label (https://forum.unity.com/threads/custom-inspector-for-a-list-of-addressables.575086/)
-                            // Maybe this could help: https://docs.unity3d.com/Packages/com.unity.addressables@1.8/api/UnityEngine.AddressableAssets.AssetLabelReference.html
-                            var audioclipAddressableProp = languagetoAudioClipProp.GetArrayElementAtIndex(j).FindPropertyRelative("audioClipAddressable");
-                            EditorGUILayout.LabelField(label);
-                            EditorGUILayout.PropertyField(audioclipAddressableProp);
-                            EditorGUILayout.Space();
-                        } else {
-#endif
-                            EditorGUILayout.BeginHorizontal();
-                            EditorGUILayout.LabelField(label);
-                            EditorGUILayout.PropertyField(audioclipProp, new GUIContent(""));
-                            EditorGUILayout.EndHorizontal();
-#if ADDRESSABLES
-                        }
-#endif
-                    }
-                }
+            EditorGUILayout.HelpBox(message.ToString(), MessageType.Info);
+
+            if (GUILayout.Button("Add Line Tags")) {
+                AddLineTagsToSelectedObject();
             }
-            if (!selectedVoiceOverLanguageExists) {
-                if (YarnProgram.GetStringTable(yarnImporter.baseLanguage).Count > 0) {
-                    EditorGUILayout.HelpBox(_audioVoiceOverInitializeHelpBox, MessageType.Info);
-                } else {
-                    EditorGUILayout.HelpBox(_audioVoiceOverNoYarnLinesOnAsset, MessageType.Info);
-                }
-            }
-            EditorGUI.indentLevel--;
         }
 
-        var success = serializedObject.ApplyModifiedProperties();
+        var hadChanges = serializedObject.ApplyModifiedProperties();
+
 #if UNITY_2018
-        if (success) {
-            WriteChangesToDisk();
+        // Unity 2018's ApplyRevertGUI is buggy, and doesn't automatically
+        // detect changes to the importer's serializedObject. This means
+        // that we'd need to track the state of the importer, and don't
+        // have a way to present a Revert button. Rather than offer a
+        // broken experience, on 2018 we immediately reimport the changes.
+        if (hadChanges)
+        {
+            // Manually perform the same tasks as the 'Apply' button would
+            ApplyAndImport();
         }
 #endif
-        if (workaroundIsDirty) {
-            WriteChangesToDisk();
-        }
+
 #if UNITY_2019_1_OR_NEWER
+        // On Unity 2019 and newer, we can use an ApplyRevertGUI that works
+        // identically to the built-in importer inspectors.
         ApplyRevertGUI();
 #endif
     }
 
-    private void WriteChangesToDisk() {
-        EditorUtility.SetDirty(target);
-        AssetDatabase.WriteImportSettingsIfDirty(AssetDatabase.GetAssetPath(target));
-        AssetDatabase.ForceReserializeAssets(new string[] { AssetDatabase.GetAssetPath(target) }, ForceReserializeAssetsOptions.ReserializeAssetsAndMetadata);
-        AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
-    }
-
-    private void AddLineTagsToFile(string assetPath) {
+    private void AddLineTagsToSelectedObject()
+    {
         // First, gather all existing line tags, so that we don't
         // accidentally overwrite an existing one. Do this by finding _all_
         // YarnPrograms, and by extension their importers, and get the
@@ -341,304 +114,470 @@ public class YarnImporterEditor : ScriptedImporterEditor {
             .Select(asset => AssetDatabase.GetAssetOrScenePath(asset)) // get the path on disk
             .Select(path => AssetImporter.GetAtPath(path)) // get the asset importer for that path
             .OfType<YarnImporter>() // ensure that they're all YarnImporters
-            .SelectMany(importer => importer.stringIDs)
-            .ToList(); // get all string IDs, flattened into one list            
+            .SelectMany(importer => importer.stringIDs) // Get all of the string IDs in the base localization
+            .ToList(); // get all string IDs, flattened into one list 
 
-        var contents = File.ReadAllText(assetPath);
-        var taggedVersion = Yarn.Compiler.Utility.AddTagsToLines(contents, allLineTags);
+        var modifiedFiles = new List<string>();
 
-        File.WriteAllText(assetPath, taggedVersion);
+        foreach (var importer in serializedObject.targetObjects.Cast<YarnImporter>())
+        {
+            var assetPath = importer.assetPath;
+            var contents = File.ReadAllText(assetPath);
 
-        AssetDatabase.ImportAsset(assetPath);
+            // Produce a version of this file that contains line tags added
+            // where they're needed.
+            var taggedVersion = Yarn.Compiler.Utility.AddTagsToLines(contents, allLineTags);
+
+            // If this produced a modified version of the file, write it out and re-import it.
+            if (contents != taggedVersion)
+            {
+                modifiedFiles.Add(Path.GetFileNameWithoutExtension(assetPath));
+
+                File.WriteAllText(assetPath, taggedVersion);
+
+                AssetDatabase.ImportAsset(assetPath);
+            }
+        }
+
+        // Report on the work we did.
+        if (modifiedFiles.Count > 0)
+        {
+            Debug.Log($"Updated the following files: {string.Join(", ", modifiedFiles)}");            
+        }
+        else
+        {
+            Debug.Log("No files needed updating.");
+        }
+
     }
 
-    void UpdateLocalizations(string newBaseCsv)
+    private void DrawLocalizationGUI()
     {
-        // Goes through each localization string table csv file and merges it with the new base string table
-        YarnImporter yarnImporter = (target as YarnImporter);
-
-        for (int i = 0; i < yarnImporter.localizations.Length; i++)
+        using (var changed = new EditorGUI.ChangeCheckScope())
         {
-            // Feeds the merge function with the old localized string table, the new base string table and the current file name in case it has changed.
-            string merged = MergeStringTables(yarnImporter.localizations[i].text.text, newBaseCsv, Path.GetFileNameWithoutExtension(yarnImporter.assetPath));
+            var previousLocalizationDatabase = localizationDatabaseProperty.objectReferenceValue as LocalizationDatabase;
 
-            // Save the merged csv to file (copied from the "Create New Localisation" button).
-            var assetDirectory = Path.GetDirectoryName(yarnImporter.assetPath);
+            // Show the 'localization database' property
+            EditorGUILayout.PropertyField(localizationDatabaseProperty);
 
-            string language = yarnImporter.localizations[i].languageName;
-            var newStringsTablePath = $"{assetDirectory}/{Path.GetFileNameWithoutExtension(yarnImporter.assetPath)} ({language}).csv";
-            newStringsTablePath = AssetDatabase.GenerateUniqueAssetPath(newStringsTablePath);
+            // If this changed to a valid value, update that database so
+            // that it tracks all selected programs
+            if (changed.changed)
+            {
+                var newObjectReference = localizationDatabaseProperty.objectReferenceValue;
 
-            var writer = File.CreateText(newStringsTablePath);
-            writer.Write(merged);
-            writer.Close();
+                if (previousLocalizationDatabase != null && previousLocalizationDatabase != newObjectReference ) {
+                    // The property used to refer to a localization
+                    // database, but that's changed. Tell the previous
+                    // value to stop tracking this program.                    
+                    foreach (YarnImporter importer in serializedObject.targetObjects)
+                    {
+                        if (importer.programContainer == null)
+                        {
+                            continue;
+                        }
+                        previousLocalizationDatabase.RemoveTrackedProgram(importer.programContainer);
+                    }
+                }
 
-            AssetDatabase.ImportAsset(newStringsTablePath);
+                if (newObjectReference is LocalizationDatabase database)
+                {
+                    foreach (YarnImporter importer in serializedObject.targetObjects)
+                    {
+                        if (importer.programContainer == null)
+                        {
+                            continue;
+                        }
+                        database.AddTrackedProgram(importer.programContainer);
+                    }
+                } 
 
-            var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(newStringsTablePath);
+            }
+        }
 
-            EditorGUIUtility.PingObject(asset);
+        // If no localization database is provided, offer a button that
+        // will create a new one that 1. tracks this script 2. has a
+        // localization set to this script's base language
+        if (localizationDatabaseProperty.objectReferenceValue == null)
+        {
+            if (GUILayout.Button("Create New Localization Database"))
+            {
+                CreateNewLocalizationDatabase();
+            }
+        }
+
+        // For every localization in the localization database:
+        // - If we have a TextAsset for it, show it here
+        // - If we don't, create a button that creates one
+        //
+        // We only do this if we're editing a single object, because each
+        // separate script will have its own translations.
+
+        if (serializedObject.isEditingMultipleObjects == false && localizationDatabaseProperty.objectReferenceValue != null)
+        {
+            EditorGUI.indentLevel += 1;
+            var importer = serializedObject.targetObject as YarnImporter;
+            var localizationDatabase = localizationDatabaseProperty.objectReferenceValue as LocalizationDatabase;
+
+            var languagesList = new List<string>();
+            languagesList.Add(importer.baseLanguageID);
+
+            // Expose the base language asset, but disable it because it's
+            // always a derived sub-asset
+            using (new EditorGUI.DisabledScope(true))
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.PropertyField(baseLanguageProperty, new GUIContent(importer.baseLanguageID));
+
+                // Not actually used, but makes this base language item
+                // visually consistent with the additional ones below
+                GUILayout.Button("-", EditorStyles.miniButton, GUILayout.ExpandWidth(false));
+            }
+
+
+            foreach (SerializedProperty localization in localizationsProperty)
+            {
+                var nameProperty = localization.FindPropertyRelative("languageName");
+                var assetReferenceProperty = localization.FindPropertyRelative("text");
+                var languageName = nameProperty.stringValue;
+                var languageDisplayName = Cultures.GetCulture(languageName).DisplayName;
+
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.PropertyField(assetReferenceProperty, new GUIContent(languageDisplayName));
+
+                    if (GUILayout.Button("-", EditorStyles.miniButton, GUILayout.ExpandWidth(false)))
+                    {
+                        localization.DeleteCommand();
+                        localization.DeleteCommand();
+                    }
+                }
+
+
+                // Mark that we've seen this language name
+                languagesList.Add(languageName);
+            }
+
+            // For each language that's present in the localization
+            // database but not present in this script, offer buttons that
+            // create a CSV for that language
+            var languagesMissing = localizationDatabase.GetLocalizationLanguages().Except(languagesList);
+
+            foreach (var language in languagesMissing)
+            {
+                if (GUILayout.Button($"Create {language} Localization"))
+                {
+                    CreateLocalizationForLanguageInCurrentObject(language);
+                }
+            }
+
+            // Show a warning for any languages that the script has a
+            // localization for, but that the database doesn't call for
+            var languagesExtraneous = languagesList.Except(localizationDatabase.GetLocalizationLanguages());
+
+            if (languagesExtraneous.Count() > 0)
+            {
+                EditorGUILayout.HelpBox($"This script has localizations for the following languages, but the localization database isn't set up to use them: {string.Join(", ", languagesExtraneous)}", MessageType.Warning);
+            }
+
+            // TODO: is it possible to interleave the property fields for
+            // existing localisations with buttons, in alphabetical order
+            // of language code?
+
+            EditorGUI.indentLevel -= 1;
+
+            if (GUILayout.Button("Update Localizations"))
+            {
+                UpdateLocalizationCSVs();
+            }
+
+            EditorGUILayout.HelpBox("To add a new localization, select the Localization Database, and click Create New Localization.", MessageType.Info);
         }
     }
 
-    string MergeStringTables(string oldLocalizedCsv, string newBaseCsv, string outputFileName)
+    private void UpdateLocalizationCSVs()
     {
-        // Use the CsvHelper to convert the two csvs to lists so they are easy to work with
-        List<CsvEntry> oldEntries = new List<CsvEntry>();
-        List<CsvEntry> newEntries = new List<CsvEntry>();
+        // Update every .CSV file associated with this .yarn file:
+        // - Insert new entries if they're present in the base localization
+        //   and not in the translated localization
+        // - Remove entries if they're present in the translated
+        //   localization and not in the base localization
+        // - Detect if a line in the base localization has changed its Lock
+        //   value from when the translated localization was created, and
+        //   update its Comment
 
-        using (var oldReader = new StringReader(oldLocalizedCsv))
-        using (var newReader = new StringReader(newBaseCsv))
-        {
-            CsvHelper.CsvReader oldParser = new CsvHelper.CsvReader(oldReader, new CsvHelper.Configuration.Configuration(CultureInfo.InvariantCulture));
-            CsvHelper.CsvReader newParser = new CsvHelper.CsvReader(newReader, new CsvHelper.Configuration.Configuration(CultureInfo.InvariantCulture));
-
-            oldParser.Read();
-            newParser.Read();
-
-            oldParser.ReadHeader();
-            newParser.ReadHeader();
-
-            while (oldParser.Read())
-            {
-                oldEntries.Add(
-                    new CsvEntry
-                    {
-                        id = oldParser.GetField("id"),
-                        text = oldParser.GetField("text"),
-                        file = oldParser.GetField("file"),
-                        node = oldParser.GetField("node"),
-                        lineNumber = oldParser.GetField<int>("lineNumber"),
-                    }
-                );
-            }
-
-            while (newParser.Read())
-            {
-                newEntries.Add(
-                    new CsvEntry
-                    {
-                        id = newParser.GetField("id"),
-                        text = newParser.GetField("text"),
-                        file = newParser.GetField("file"),
-                        node = newParser.GetField("node"),
-                        lineNumber = newParser.GetField<int>("lineNumber"),
-                    }
-                );
-            }
-
+        if (serializedObject.isEditingMultipleObjects) {
+            Debug.LogError($"Can't update localization CSVs: multiple objects are being edited.");
+            return;
         }
+        
+        var baseLocalizationStrings = GetBaseLanguageStringsForSelectedObject();
 
+        var localizations = (serializedObject.targetObject as YarnImporter).localizations;
 
-        // This is where we merge the two string tables. Here's what's happening:
-        // Use CsvParser to parse new base string table and old localized string table
-        // The strategy is to use the fact that the two string tables look alike to optimize.
-        // The algorithm goes through the string tables side by side. Imagine two fingers running
-        // through the entries. At each line there are four different scenarios that we test for:
-        //   scenario 1: The lines match (matching tags)
-        //   scenario 2: The line in the new string table exists in the old string table but has been moved from somewhere else
-        //   scenario 3: The line in the new string table is completely new (no line tags in old string table match it)
-        //   scenario 4: The line in the old string table has been deleted (no line tags in new string table match it)
+        var modifiedFiles = new List<TextAsset>();
 
-        //Go line by line:
-        //1.If line tags are the same: add old localized with new line number and node. Increase index of both. (s1: matching lines)
-        //2.Else if line tags are different:
-        //  a. Search forward in the old string table for that line tag
-        //    i. if we find it: add old localized with new line number and node. Remove from old. Increase new index. (s2: old line moved)
-        //    ii. If we don't find it: Search forward in new string table for that line tag
-        //      I. if we find it: add the one new line we are on. Increase new index. (s3: line is new)
-        //      II. if we don't find it: ignore line. Increase old index. (s4: line has been deleted)
-        int oldIndex = 0;
-        int newIndex = 0;
-
-        List<CsvEntry> mergedEntries = new List<CsvEntry>();
-
-        // Mark new lines as new so they are easy to spot
-        string newlineMarker = " (((NEW LINE)))";
-
-        while (true)
-        {
-            // If no more entries in old: add the rest of the new entries and break
-            if (oldEntries.Count <= oldIndex)
-            {
-                for (int i = newIndex; i < newEntries.Count; i++)
-                {
-                    CsvEntry entry = newEntries[i];
-                    entry.text += newlineMarker;
-                    mergedEntries.Add(entry);
-                }
-                break;
-            }
-
-            // If no more entries in new: all additional old entries must have been deleted so break
-            if (newEntries.Count <= newIndex)
-            {
-                break;
-            }
-
-            //1. If line tags are the same: add old localized with new line number. Increase index of both.
-            if (oldEntries[oldIndex].id == newEntries[newIndex].id)
-            {
-                CsvEntry entry = oldEntries[oldIndex];
-                entry.lineNumber = newEntries[newIndex].lineNumber;
-                entry.node = newEntries[newIndex].node;
-                mergedEntries.Add(entry);
-                oldIndex++;
-                newIndex++;
-                continue;
-            }
-            //2. Else if line tags are different:
-            else
-            {
-                // a. Search forward in the old string table for that line tag
-                bool didFindInOld = false;
-                for (int i = oldIndex + 1; i < oldEntries.Count; i++)
-                {
-                    // i. if we find it: add old localized with new line number. Remove from old. Increase index of new. (old line moved)
-                    if (oldEntries[i].id == newEntries[newIndex].id)
-                    {
-                        CsvEntry entry = oldEntries[i];
-                        entry.lineNumber = newEntries[newIndex].lineNumber;
-                        entry.node = newEntries[newIndex].node;
-                        mergedEntries.Add(entry);
-                        oldEntries.RemoveAt(i);
-                        didFindInOld = true;
-                        newIndex++;
-                        break;
-                    }
-                }
-                if (didFindInOld)
-                {
-                    continue;
-                }
-
-                // ii.If we don't find it: Search forward in new string table for that line tag
-                bool didFindInNew = false;
-                for (int i = newIndex + 1; i < newEntries.Count; i++)
-                {
-                    // I. if we find it: add the one new line we are on. Increase index of new. (line is new)
-                    if (oldEntries[oldIndex].id == newEntries[i].id)
-                    {
-                        CsvEntry entry = newEntries[newIndex];
-                        entry.text += newlineMarker;
-                        mergedEntries.Add(entry);
-                        newIndex++;
-                        didFindInNew = true;
-                        break;
-                    }
-                }
-                // II. if we don't find it: ignore line. Increase index of old. (line has been deleted)
-                if (!didFindInNew)
-                {
-                    oldIndex++;
-                }
+        foreach (var loc in localizations) {
+            var fileWasChanged  = UpdateLocalizationFile(baseLocalizationStrings, loc.languageName, loc.text);
+            
+            if (fileWasChanged) {
+                modifiedFiles.Add(loc.text);
             }
         }
 
-        // Entries are not necessarily added in the correct order and have to be sorted
-        mergedEntries.Sort((a, b) => a.lineNumber.CompareTo(b.lineNumber));
-
-        // Create new Csv file
-        using (var memoryStream = new MemoryStream())
-        using (var textWriter = new StreamWriter(memoryStream))
-        {
-            // Generate the localised .csv file
-            var csv = new CsvHelper.CsvWriter(textWriter, new CsvHelper.Configuration.Configuration(CultureInfo.InvariantCulture));
-
-            var lines = mergedEntries.Select(x => new
-            {
-                id = x.id,
-                text = x.text,
-                file = outputFileName,
-                node = x.node,
-                lineNumber = x.lineNumber
-            });
-
-            csv.WriteRecords(lines);
-
-            textWriter.Flush();
-
-            memoryStream.Position = 0;
-
-            using (var reader = new StreamReader(memoryStream))
-            {
-                return reader.ReadToEnd();
+        if (modifiedFiles.Count > 0) {
+            Debug.Log($"Updated the following files: {string.Join(", ", modifiedFiles.Select(f => f.name))}");
+        } else {
+            Debug.Log($"No files needed updating.");
+            // Update our corresponding localization database.
+            if (localizationDatabaseProperty.objectReferenceValue is LocalizationDatabase database) {
+                LocalizationDatabaseEditor.UpdateContents(database);
             }
         }
     }
-    
-    struct CsvEntry
-    {
-        public string id;
-        public string text;
-        public string file;
-        public string node;
-        public int lineNumber;
-    }
-}
 
-namespace Yarn.Unity
-{
     /// <summary>
-    /// Provides methods for finding voice over <see cref="AudioClip"/>s in the project matching a Yarn linetag/string ID and a language ID.
+    /// Verifies the TextAsset referred to by <paramref name="loc"/>, and
+    /// updates it if necessary.
     /// </summary>
-    internal static class FindVoiceOver
+    /// <param name="baseLocalizationStrings">A collection of <see cref="StringTableEntry"/></param>
+    /// <param name="language">The language that <paramref
+    /// name="loc"/> provides strings for.false</param>
+    /// <param name="loc">A TextAsset containing localized strings in CSV
+    /// format.</param>
+    /// <returns>Whether <paramref name="loc"/> was modified.</returns>
+    private bool UpdateLocalizationFile(IEnumerable<StringTableEntry> baseLocalizationStrings, string language, TextAsset loc)
     {
-        /// <summary>
-        /// Finds all voice over <see cref="AudioClip"/>s in the project with a filename matching a Yarn linetag and a language ID.
-        /// </summary>
-        /// <param name="linetag">The linetag/string ID the voice over filename should match.</param>
-        /// <param name="language">The language ID the voice over filename should match.</param>
-        /// <returns>A string array with GUIDs of all matching <see cref="AudioClip"/>s.</returns>
-        internal static string[] GetMatchingVoiceOverAudioClip(string linetag, string language)
+        var translatedStrings = StringTableEntry.ParseFromCSV(loc.text);
+
+        // Convert both enumerables to dictionaries, for easier lookup
+        var baseDictionary = baseLocalizationStrings.ToDictionary(entry => entry.ID);
+        var translatedDictionary = translatedStrings.ToDictionary(entry => entry.ID);
+
+        // The list of line IDs present in each localisation
+        var baseIDs = baseLocalizationStrings.Select(entry => entry.ID);
+        var translatedIDs = translatedStrings.Select(entry => entry.ID);
+
+        // The list of line IDs that are ONLY present in each localisation
+        var onlyInBaseIDs = baseIDs.Except(translatedIDs);
+        var onlyInTranslatedIDs = translatedIDs.Except(baseIDs);
+
+        // Tracks if the translated localisation needed modifications
+        // (either new lines added, old lines removed, or changed lines
+        // flagged)
+        var modificationsNeeded = false;
+
+        // Remove every entry whose ID is only present in the translated
+        // set. This entry has been removed from the base localization.
+        foreach (var id in onlyInTranslatedIDs.ToList())
         {
-            string[] result = null;
-            string[] searchPatterns = new string[] {
-                $"t:AudioClip {linetag} ({language})",
-                $"t:AudioClip {linetag}  {language}",
-                $"t:AudioClip {linetag}"
+            translatedDictionary.Remove(id);
+            modificationsNeeded = true;
+        }
+
+        // Conversely, for every entry that is only present in the base
+        // localisation, we need to create a new entry for it.
+        foreach (var id in onlyInBaseIDs)
+        {
+            StringTableEntry baseEntry = baseDictionary[id];
+            var newEntry = new StringTableEntry(baseEntry)
+            {
+                // Empty this text, so that it's apparent that a translated
+                // version needs to be provided.
+                Text = string.Empty,
             };
-
-            foreach (var searchPattern in searchPatterns)
-            {
-                result = SearchAssetDatabase(searchPattern, language);
-                if (result.Length > 0)
-                {
-                    return result;
-                }
-            }
-
-            return result;
+            translatedDictionary.Add(id, newEntry);
+            modificationsNeeded = true;
         }
 
-        private static string[] SearchAssetDatabase(string searchPattern, string language)
+        // Finally, we need to check for any entries in the translated
+        // localisation that 1. have the same line ID as one in the base
+        // but 2. have a different Lock (the hash of the text), which
+        // indicates that the base text has changed.
+
+        // First, get the list of IDs that are in both base and translated,
+        // and then filter this list to any where the lock values differ
+        var outOfDateLockIDs = baseDictionary.Keys
+            .Intersect(translatedDictionary.Keys)
+            .Where(id => baseDictionary[id].Lock != translatedDictionary[id].Lock);
+
+        // Now loop over all of these, and update our translated dictionary
+        // to include a note that it needs attention
+        foreach (var id in outOfDateLockIDs)
         {
-            var result = AssetDatabase.FindAssets(searchPattern);
-            // Check if result is ambiguous and try to improve the situation
-            if (result.Length > 1)
-            {
-                var assetsInMatchingLanguageDirectory = GetAsseetsInMatchingLanguageDirectory(result, language);
-                // Check if this improved the situation
-                if (assetsInMatchingLanguageDirectory.Length == 1 || (assetsInMatchingLanguageDirectory.Length != 0 && assetsInMatchingLanguageDirectory.Length < result.Length))
-                {
-                    result = assetsInMatchingLanguageDirectory;
-                }
-            }
-            return result;
+            // Get the translated entry as it currently exists
+            var entry = translatedDictionary[id];
+
+            // Include a note that this entry is out of date
+            entry.Text = $"(NEEDS UPDATE) {entry.Text}";
+
+            // Update the lock to match the new one
+            entry.Lock = baseDictionary[id].Lock;
+
+            // Put this modified entry back in the table
+            translatedDictionary[id] = entry;
+
+            modificationsNeeded = true;
         }
 
-        private static string[] GetAsseetsInMatchingLanguageDirectory (string[] result, string language)
+        // We're all done!
+
+        if (modificationsNeeded == false)
         {
-            var list = new List<string>();
-            foreach (var assetId in result)
+            // No changes needed to be done to the translated string table
+            // entries. Stop here.
+            return false;
+        }
+
+        // We need to produce a replacement CSV file for the translated
+        // entries.
+
+        var outputStringEntries = translatedDictionary.Values
+            .OrderBy(entry => entry.File)
+            .ThenBy(entry => int.Parse(entry.LineNumber));
+
+        var outputCSV = StringTableEntry.CreateCSV(outputStringEntries);
+
+        // Write out the replacement text to this existing file, replacing
+        // its existing contents
+        var outputFile = AssetDatabase.GetAssetPath(loc);
+        File.WriteAllText(outputFile, outputCSV);
+
+        // Tell the asset database that the file needs to be reimported
+        AssetDatabase.ImportAsset(outputFile);
+
+        // Signal that the file was changed
+        return true;
+    }
+
+    private void CreateLocalizationForLanguageInCurrentObject(string language)
+    {
+        if (serializedObject.isEditingMultipleObjects)
+        {
+            Debug.LogError($"{nameof(CreateLocalizationForLanguageInCurrentObject)} was called, but multiple objects were selected. Select a single object and try again.");
+            return;
+        }
+
+        IEnumerable<StringTableEntry> baseLanguageStrings = GetBaseLanguageStringsForSelectedObject();
+
+        // Produce a new version of these string entries, but with
+        // different languages
+        var translatedStringTable = baseLanguageStrings.Select(s =>
+        {
+            // Copy the entry, but mark the new language
+            return new StringTableEntry(s)
             {
-                var testPath = AssetDatabase.GUIDToAssetPath(assetId);
-                if (AssetDatabase.GUIDToAssetPath(assetId).Contains($"/{language}/"))
+                Language = language
+            };
+        });
+
+        // Convert this new list to a CSV
+        string generatedCSV;
+        try
+        {
+            generatedCSV = StringTableEntry.CreateCSV(translatedStringTable);
+        }
+        catch (CsvHelper.CsvHelperException e)
+        {
+            Debug.LogError($"Error creating {language} CSV: {e}");
+            return;
+        }
+
+        // Write out this CSV to a file
+        var path = AssetDatabase.GetAssetPath(serializedObject.targetObject);
+        var directory = Path.GetDirectoryName(path);
+        var csvFileName = $"{Path.GetFileNameWithoutExtension(path)} ({language}).csv";
+        var destinationPath = Path.Combine(directory, csvFileName);
+        destinationPath = AssetDatabase.GenerateUniqueAssetPath(destinationPath);        
+        File.WriteAllText(destinationPath, generatedCSV);
+        
+        // Import this file as a TextAsset object
+        AssetDatabase.ImportAsset(destinationPath);
+        var newTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(destinationPath);
+
+        // Store this TextAsset in the importer, at the end of the
+        // localizations array
+        ArrayUtility.Add(ref (target as YarnImporter).localizations,  new YarnProgram.YarnTranslation(language, newTextAsset));
+
+        // Mark that we just changed the target object
+        EditorUtility.SetDirty(target);
+    }
+
+    private IEnumerable<StringTableEntry> GetBaseLanguageStringsForSelectedObject()
+    {
+        // Get the TextAsset that contains the base string table CSV
+        TextAsset textAsset = baseLanguageProperty.objectReferenceValue as TextAsset;
+
+        if (textAsset == null)
+        {
+            throw new System.NullReferenceException($"The base language table asset for {serializedObject.targetObject.name} is either null or not a TextAsset. Did the script fail to compile?");
+            
+        }
+
+        var baseLanguageTableText = textAsset.text;
+
+        // Parse this CSV into StringTableEntry structs
+        return StringTableEntry.ParseFromCSV(baseLanguageTableText)
+                               .OrderBy(entry => entry.File)
+                               .ThenBy(entry => int.Parse(entry.LineNumber));
+    }
+
+    // Creates a new localization database asset adjacent to one of the
+    // selected objects, and configures all selected objects to use it.
+    private void CreateNewLocalizationDatabase()
+    {
+        var target = serializedObject.targetObjects[0];
+
+        // Figure out where on disk this asset is
+        var path = AssetDatabase.GetAssetPath(target);
+        var directory = Path.GetDirectoryName(path);
+
+        // Figure out a new, unique path for the localization we're
+        // creating
+        var databaseFileName = $"LocalizationDatabase.asset";
+        var destinationPath = Path.Combine(directory, databaseFileName);
+        destinationPath = AssetDatabase.GenerateUniqueAssetPath(destinationPath);
+
+        // Create the asset and set it up
+        var localizationDatabaseAsset = CreateInstance<LocalizationDatabase>();
+
+        // Attach all selected programs to this new database
+        foreach (YarnImporter importer in serializedObject.targetObjects)
+        {
+            if (importer.programContainer != null)
+            {
+                localizationDatabaseAsset.AddTrackedProgram(importer.programContainer);
+
+                // If this database doesn't currently have a localization
+                // for the currently selected program, add one
+                var theLanguage = importer.baseLanguageID;
+
+                if (localizationDatabaseAsset.HasLocalization(theLanguage) == false)
                 {
-                    list.Add(assetId);
+                    var localizationPath = Path.Combine(directory, $"{Path.GetFileNameWithoutExtension(databaseFileName)}-{theLanguage}.asset");
+                    localizationPath = AssetDatabase.GenerateUniqueAssetPath(localizationPath);
+
+                    // Create the asset and set it up
+                    var localizationAsset = CreateInstance<Localization>();
+                    localizationAsset.LocaleCode = theLanguage;
+
+                    AssetDatabase.CreateAsset(localizationAsset, localizationPath);
+
+                    localizationDatabaseAsset.AddLocalization(localizationAsset);
                 }
             }
-            return list.ToArray();
         }
+
+        // Populate the database's contents
+        LocalizationDatabaseEditor.UpdateContents(localizationDatabaseAsset);
+
+        // Save it to disk
+        AssetDatabase.CreateAsset(localizationDatabaseAsset, destinationPath);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.ImportAsset(destinationPath);
+
+        // Associate this localization database with the object.
+        localizationDatabaseProperty.objectReferenceValue = localizationDatabaseAsset;
     }
 }
+

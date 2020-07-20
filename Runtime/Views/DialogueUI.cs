@@ -45,7 +45,7 @@ namespace Yarn.Unity {
     /// to the next line.
     /// </remarks>
     /// <seealso cref="DialogueRunner"/>
-    public class DialogueUI : Yarn.Unity.DialogueViewBase
+    public class DialogueUI : DialogueViewBase
     {
         /// <summary>
         /// The object that contains the dialogue and the options.
@@ -391,7 +391,7 @@ namespace Yarn.Unity {
                 optionButtons [i].onClick.RemoveAllListeners();
                 optionButtons [i].onClick.AddListener(() => SelectOption(dialogueOption.DialogueOptionID));
 
-                var optionText = dialogueOption.TextLocalized;
+                var optionText = dialogueOption.Line.Text.Text;
 
                 if (optionText == null) {
                     Debug.LogWarning($"Option {dialogueOption.TextID} doesn't have any localised text");

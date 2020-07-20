@@ -121,7 +121,7 @@ namespace Yarn.Unity
                 // Assign default language in case the currently selected language has become invalid
                 selectedLanguageIndex = 0;
             }
-            string[] languagesDisplayNamesAvailableForSelection = Cultures.LanguageNamesToDisplayNames(languagesNamesAvailableForSelection);
+            string[] languagesDisplayNamesAvailableForSelection = languagesNamesAvailableForSelection.Select(name => Cultures.GetCulture(name).DisplayName).ToArray();
             // Disable popup and show message box in case the project languages have been defined yet
             if (languagesNamesAvailableForSelection.Length == 0)
             {

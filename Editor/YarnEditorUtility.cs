@@ -76,7 +76,8 @@ public static class YarnEditorUtility {
         // Figure out the 'file name' that the user entered
         var scriptName = Path.GetFileNameWithoutExtension(pathName);
 
-        // Replace any spaces with underscores
+        // Replace any spaces with underscores - these aren't allowed in
+        // node names
         scriptName = scriptName.Replace(" ", "_");
 
         // Replace the placeholder with the script name
