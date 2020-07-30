@@ -33,7 +33,7 @@ using System.Runtime.InteropServices;
 using System.Collections;
 
 namespace Yarn.Unity {
-    class VoiceOverPlaybackFmod : DialogueViewBase {
+    public class VoiceOverPlaybackFmod : DialogueViewBase {
         FMOD.Studio.EVENT_CALLBACK dialogueCallback;
 
         /// <summary>
