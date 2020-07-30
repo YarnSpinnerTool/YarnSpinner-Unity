@@ -119,7 +119,7 @@ namespace Yarn.Unity {
                                 Marshal.StructureToPtr(parameter, parameterPtr, false);
                             }
                         }
-                    }
+                }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.DESTROY_PROGRAMMER_SOUND: {
                         var parameter = (FMOD.Studio.PROGRAMMER_SOUND_PROPERTIES)Marshal.PtrToStructure(parameterPtr, typeof(FMOD.Studio.PROGRAMMER_SOUND_PROPERTIES));
