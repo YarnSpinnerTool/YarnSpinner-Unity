@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Added a phone chat sample. (@radiatoryang)
 - Added a visual novel template. (@radiatoryang)
 - Added support for voice overs. (@Schroedingers-Cat)
+- Added a dedicated voice over example scene which supports Unity's audio system and FMOD (@Schroedingers-Cat)
+- Added voice overs to the space ship example scene (Stefanie Enge and @Schroedingers-Cat)
 - Added a new API for presenting and managing lines of dialogue.
 - Added an option to DialogueUI to allow hiding character names.
 - The Yarn Spinner Window (Window -> Yarn Spinner) now shows the current version of Yarn Spinner.
@@ -19,7 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Changed
 
 - Nicer error messages when the localized text for a line of dialogue can't be found.
-- DialogueUI is now a subclass of DialogueViewBase.
+- DialogueUI is now a subclass of DialogueViewBase. (@desplesda and @Schroedingers-Cat)
 - Moved Yarn Spinner classes into the `Yarn.Unity` namespace, or one of its children, depending on its purpose.
 
 ### Removed
