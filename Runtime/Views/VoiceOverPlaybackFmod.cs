@@ -179,6 +179,9 @@ namespace Yarn.Unity {
             if (dialogueInstance.isValid()) {
                 dialogueInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
             }
+
+            // Playback finished (done or interrupted). Signal line delivery has finished.
+            onDialogueDeliveryComplete();
         }
 
         public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected) {
