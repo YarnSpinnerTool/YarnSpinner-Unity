@@ -13,7 +13,10 @@ namespace Yarn.Unity
 
         public override LocalizedLine GetLocalizedLine(Line line)
         {
-            
+            if (string.IsNullOrWhiteSpace(CurrentAudioLanguageCode)) {
+                throw new System.InvalidOperationException($"Can't get audio for line {line.ID}: {nameof(CurrentAudioLanguageCode)} is not set");                
+            }
+
             Localization audioLocalization = localizationDatabase.GetLocalization(CurrentAudioLanguageCode);
 
             Localization textLocalization;

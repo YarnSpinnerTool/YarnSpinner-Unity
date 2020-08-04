@@ -27,6 +27,10 @@ namespace Yarn.Unity
 
         public override LocalizedLine GetLocalizedLine(Line line)
         {
+            if (string.IsNullOrWhiteSpace(CurrentAudioLanguageCode)) {
+                throw new System.InvalidOperationException($"Can't get audio for line {line.ID}: {nameof(CurrentAudioLanguageCode)} is not set");                
+            }
+            
             Localization localization = localizationDatabase.GetLocalization(CurrentAudioLanguageCode);
 
             var text = localization.GetLocalizedString(line.ID);
@@ -46,6 +50,10 @@ namespace Yarn.Unity
 
         public override void PrepareForLines(IEnumerable<string> lineIDs)
         {
+            if (string.IsNullOrWhiteSpace(CurrentAudioLanguageCode)) {
+                throw new System.InvalidOperationException($"Can't get audio for lines {string.Join(", ", lineIDs)}: {nameof(CurrentAudioLanguageCode)} is not set");                
+            }            
+
             if (AssetLoadCompleteAction == null) {
                 // Cache the completion handler as a one-time operation
                 AssetLoadCompleteAction = AssetLoadComplete;
