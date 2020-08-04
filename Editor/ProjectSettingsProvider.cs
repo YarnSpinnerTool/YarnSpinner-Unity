@@ -166,6 +166,16 @@ namespace Yarn.Unity
             // Audio language popup related things
             SerializedProperty audioLanguageProp = DrawLanguagePreference(LanguagePreference.AudioLanguage);
 
+#if ADDRESSABLES
+            GUILayout.Label("Voice Over Asset Handling", EditorStyles.boldLabel);
+            var addressableVoiceOverAudioClipsProp = _projectSettings.FindProperty("_addressableVoiceOverAudioClips");
+            EditorGUILayout.PropertyField(addressableVoiceOverAudioClipsProp, new GUIContent("Use Addressables"));
+
+            EditorGUILayout.HelpBox($"This project has the Addressable Assets package installed. When this option is selected, {ObjectNames.NicifyVariableName(nameof(LocalizationDatabase)).ToLowerInvariant()}s will use addressable asset references to refer to assets that belong to lines, rather than directly referencing the asset.", MessageType.Info);
+            
+            _projectSettings.ApplyModifiedProperties();
+#endif
+
             _preferences.ApplyModifiedProperties();
 
             // Trigger events in case the preferences have been changed

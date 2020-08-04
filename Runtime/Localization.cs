@@ -233,6 +233,19 @@ namespace Yarn.Unity
             _addressTable.Clear();
 #endif
         }
+
+        /// <summary>
+        /// Gets the line IDs present in this localization.
+        /// </summary>
+        /// <remarks>
+        /// The line IDs can be used to access the localized text or asset
+        /// associated with a line.
+        /// </remarks>
+        /// <returns>The line IDs.</returns>
+        public IEnumerable<string> GetLineIDs()
+        {
+            return _stringTable.Keys;
+        }
     }
 }
 
