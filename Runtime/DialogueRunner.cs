@@ -1,4 +1,4 @@
-/*
+﻿/*
 
 The MIT License (MIT)
 
@@ -1057,27 +1057,26 @@ namespace Yarn.Unity
             ActiveDialogueViews.Remove(dialogueView);
 
             // Have all of the views completed? 
-            if (ActiveDialogueViews.Count == 0) {
+            if (ActiveDialogueViews.Count == 0)
+            {
                 UpdateLineStatus(CurrentLine, LineStatus.Delivered);
-            }
 
-            // Should the line automatically become Ended as soon as it's
-            // Delivered?
-            if (continueNextLineOnLineFinished) {
-                // Go ahead and notify the views. 
+                // Should the line automatically become Ended as soon as
+                // it's Delivered?
+                if (continueNextLineOnLineFinished)
+                {
                     // Go ahead and notify the views. 
-                // Go ahead and notify the views. 
-                UpdateLineStatus(CurrentLine, LineStatus.Ended);
+                    UpdateLineStatus(CurrentLine, LineStatus.Ended);
 
-                // Additionally, tell the views to dismiss the line from
-                // presentation. When each is done, it will notify this
-                // dialogue runner to call DialogueViewCompletedDismissal;
-                // when all have finished, this dialogue runner will tell
-                // the Dialogue to Continue() when all lines are done
-                // dismissing the line.
-                DismissLineFromViews(dialogueViews);                
+                    // Additionally, tell the views to dismiss the line
+                    // from presentation. When each is done, it will notify
+                    // this dialogue runner to call
+                    // DialogueViewCompletedDismissal; when all have
+                    // finished, this dialogue runner will tell the
+                    // Dialogue to Continue() when all lines are done
+                    // dismissing the line.
                     DismissLineFromViews(dialogueViews);
-                DismissLineFromViews(dialogueViews);                
+                }
             }
         }
 
