@@ -52,6 +52,17 @@ namespace Yarn.Unity
         public LineStatus Status;
 
         public MarkupParsing.MarkupParseResult Text { get; internal set; }
+
+        public MarkupParsing.MarkupParseResult TextWithoutCharacterName {
+            get {
+                // If a 'character' attribute is present, remove its text
+                if (Text.TryGetAttributeWithName("character", out var characterNameAttribute)) {
+                    return Text.DeleteRange(characterNameAttribute);                    
+                } else {
+                    return Text;
+                }
+            }
+        }
     }
 
     public class AudioLocalizedLine : LocalizedLine {
