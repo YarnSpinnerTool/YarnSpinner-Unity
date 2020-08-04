@@ -1,4 +1,4 @@
-﻿/*
+/*
 
 The MIT License (MIT)
 
@@ -82,6 +82,11 @@ namespace Yarn.Unity
         /// next line once a line has been finished.
         /// </summary>
         public bool continueNextLineOnLineFinished;
+
+        /// <summary>
+        /// If true, when an option is selected, it's as though it were a line.
+        /// </summary>
+        public bool runSelectedOptionAsLine;
 
         public LineProviderBehaviour lineProvider;
 
@@ -522,6 +527,10 @@ namespace Yarn.Unity
         // Calls to Add() should insert line content into it.
         private bool lineProviderIsTemporary = false;
 
+        // The current set of options that we're presenting. Null if we're
+        // not currently presenting options.
+        private OptionSet currentOptions;
+
         void Awake() {
             if (lineProvider == null) {
                 // If we don't have a line provider, we don't have a way to
@@ -677,6 +686,8 @@ namespace Yarn.Unity
             }
 
             void HandleOptions(OptionSet options) {
+                currentOptions = options;
+
                 DialogueOption[] optionSet = new DialogueOption[options.Options.Length];
                 for (int i = 0; i < options.Options.Length; i++) {
 
@@ -781,8 +792,24 @@ namespace Yarn.Unity
             /// an option
             void SelectedOption(int obj)
             {
+                // Mark that this is the currently selected option in the
+                // Dialogue
                 Dialogue.SetSelectedOption(obj);
-                ContinueDialogue();
+
+                if (runSelectedOptionAsLine) {
+                    foreach (var option in currentOptions.Options) {
+                        if (option.ID == obj) {
+                            HandleLine(option.Line);
+                            return;
+                        }
+                    }
+
+                    Debug.LogError($"Can't run selected option ({obj}) as a line: couldn't find the option's associated {nameof(Line)} object");
+                    ContinueDialogue();
+                } else {
+                    ContinueDialogue();
+                }
+                
             }
 
             (bool commandWasFound, Dialogue.HandlerExecutionType executionType) DispatchCommandToRegisteredHandlers(Command command, Action onComplete)
@@ -1038,6 +1065,8 @@ namespace Yarn.Unity
             // Delivered?
             if (continueNextLineOnLineFinished) {
                 // Go ahead and notify the views. 
+                    // Go ahead and notify the views. 
+                // Go ahead and notify the views. 
                 UpdateLineStatus(CurrentLine, LineStatus.Ended);
 
                 // Additionally, tell the views to dismiss the line from
@@ -1046,6 +1075,8 @@ namespace Yarn.Unity
                 // when all have finished, this dialogue runner will tell
                 // the Dialogue to Continue() when all lines are done
                 // dismissing the line.
+                DismissLineFromViews(dialogueViews);                
+                    DismissLineFromViews(dialogueViews);
                 DismissLineFromViews(dialogueViews);                
             }
         }
