@@ -14,6 +14,18 @@ namespace Yarn.Unity {
         /// </summary>
         public float fadeOutTimeOnLineFinish = 0.05f;
 
+        /// <summary>
+        /// The amount of time to wait before starting playback of the
+        /// line.
+        /// </summary>
+        public float waitTimeBeforeLineStart = 0f;
+
+        /// <summary>
+        /// The amount of time after playback has completed before this
+        /// view reports that it's finished delivering the line.
+        /// </summary>
+        public float waitTimeAfterLineComplete = 0f;
+
         [SerializeField]
         private AudioSource audioSource;
 
@@ -58,24 +70,30 @@ namespace Yarn.Unity {
                 // DialogueRunner finishes and ends a line first
                 audioSource.Stop();
             }
-            audioSource.PlayOneShot(voiceOverClip);
 
-            StartCoroutine(DoPlayback(onDialogueLineFinished));
+            StartCoroutine(DoPlayback(voiceOverClip, onDialogueLineFinished));
             
         }
 
-        private IEnumerator DoPlayback(Action onDialogueLineFinished) {
+        private IEnumerator DoPlayback(AudioClip voiceOverClip, Action onDialogueLineFinished) {
 
-            // The audioSource started playing before this coroutine
-            // started, so as long as the line hasn't been interrupted, we
-            // don't need to do anything except wait.
+            // If we need to wait before starting playback, do this now
+            if (waitTimeBeforeLineStart > 0) {
+                yield return new WaitForSeconds(waitTimeBeforeLineStart);
+            }
+
+            // Start playing the audio.
+            audioSource.PlayOneShot(voiceOverClip);
+
+            // Wait until either the audio source finishes playing, or the
+            // interruption flag is set.
             while (audioSource.isPlaying && !finishCurrentLine) {
                 yield return null;
             }
-
-            // But if the line _does_ become interrupted, we need to wrap
-            // up the playback as quickly as we can. We do this here with a
-            // fade-out to zero over fadeOutTimeOnLineFinish seconds.
+            
+            // If the line was interrupted, we need to wrap up the playback
+            // as quickly as we can. We do this here with a fade-out to
+            // zero over fadeOutTimeOnLineFinish seconds.
             if (audioSource.isPlaying && finishCurrentLine) {
                 // Fade out voice over clip            
                 float lerpPosition = 0f;
@@ -92,8 +110,15 @@ namespace Yarn.Unity {
             }
 
             // We've finished our playback at this point, either by waiting
-            // normally or by interrupting it with a fadeout. We can now
-            // signal that the line delivery has finished.
+            // normally or by interrupting it with a fadeout. If we have
+            // additional time to wait after the audio finishes, wait now.
+
+            if (waitTimeAfterLineComplete > 0)
+            {
+                yield return new WaitForSeconds(waitTimeAfterLineComplete);
+            }
+
+            // We can now signal that the line delivery has finished.
             onDialogueLineFinished();
         }
 
