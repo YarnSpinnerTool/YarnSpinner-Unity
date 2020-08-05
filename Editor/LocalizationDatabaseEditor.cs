@@ -3,10 +3,8 @@ using UnityEditor;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using CsvHelper;
 
 #if ADDRESSABLES
-using UnityEngine.AddressableAssets;
 using UnityEditor.AddressableAssets;
 #endif
 
@@ -101,7 +99,7 @@ namespace Yarn.Unity
 
         /// <summary>
         /// Creates a new localization asset with the given language, and
-        /// adds it to the 
+        /// adds it to the localization database.
         /// </summary>
         /// <param name="language">The locale code for the language to add.
         /// This parameter must be a <see cref="string"/>.</param>
@@ -149,8 +147,6 @@ namespace Yarn.Unity
 
         public override void OnInspectorGUI()
         {
-            //base.OnInspectorGUI();
-
             // If true, at least one of the Localizations in the selected
             // LocalizationDatabases are null references; in this case, the
             // Add New Localization button will be disabled (it will be
