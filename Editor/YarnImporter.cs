@@ -321,59 +321,7 @@ namespace Yarn.Unity
                 programContainer.baseLocalizationId = baseLanguageID;
 
                 stringIDs = lines.Select(l => l.ID).ToArray();
-
-                /*
-                var voiceOversList = voiceOvers.ToList();
-                // Init voice overs by writing all linetags of this yarn program for every available translation
-                foreach (var textEntry in stringIDs)
-                {
-                    if (voiceOversList.Find(element => element.linetag == textEntry) == null)
-                    {
-                        voiceOversList.Add(new LinetagToLanguage(textEntry));
-                    }
-
-                    var languageToAudioclipList = voiceOversList.Find(element => element.linetag == textEntry).languageToAudioclip.ToList();
-                    foreach (var localization in localizations)
-                    {
-                        if (!ProjectSettings.AudioProjectLanguages.Contains(localization.languageName))
-                        {
-                            continue;
-                        }
-
-                        if (languageToAudioclipList.Find(element => element.language == localization.languageName) == null)
-                        {
-                            languageToAudioclipList.Add(new LanguageToAudioclip(localization.languageName));
-                        }
-                    }
-
-                    // Also initialize for base language ID
-                    if (!string.IsNullOrEmpty(baseLanguageID) && languageToAudioclipList.Find(element => element.language == baseLanguageID) == null)
-                    {
-                        languageToAudioclipList.Add(new LanguageToAudioclip(baseLanguageID));
-                    }
-
-                    // Remove empty entries; shouldn't be necessary though
-                    if (languageToAudioclipList.Find(element => string.IsNullOrEmpty(element.language)) != null)
-                    {
-                        languageToAudioclipList.Remove(languageToAudioclipList.Find(element => string.IsNullOrEmpty(element.language)));
-                    }
-
-                    voiceOversList.Find(element => element.linetag == textEntry).languageToAudioclip = languageToAudioclipList.ToArray();
-                }
-
-                // Check if previously stored linetags have been removed and remove them from the voice over collection
-                for (int i = voiceOversList.Count - 1; i >= 0; i--)
-                {
-                    LinetagToLanguage voiceOver = voiceOversList[i];
-                    if (!stringIDs.Contains(voiceOver.linetag))
-                    {
-                        voiceOversList.Remove(voiceOver);
-                    }
-                }
-
-                voiceOvers = voiceOversList.ToArray();
-                programContainer.voiceOvers = voiceOvers;
-                */
+                
             }
         }
 
