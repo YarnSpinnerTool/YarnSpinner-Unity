@@ -7,6 +7,7 @@ namespace Yarn.Unity
     public struct StringTableEntry
     {
         [Name("language")]
+        [Optional] // added in v2.0; will not be present in files generated in earlier versions
         public string Language;
 
         [Name("id")]
