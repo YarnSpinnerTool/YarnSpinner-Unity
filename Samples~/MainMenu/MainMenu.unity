@@ -725,22 +725,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   yarnScript: {fileID: 11400000, guid: 8e3b0eabc14eb4e4cb5da356b457ab83, type: 3}
-  textCanvases:
-  - {fileID: 572921156}
-  - {fileID: 1819006488}
-  - {fileID: 1172188912}
-  - {fileID: 1064689208}
-  - {fileID: 1225752379}
-  - {fileID: 1565884155}
-  - {fileID: 0}
-  textMeshProCanvases:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  localizationDatabase: {fileID: 11400000, guid: 97b74ba4989424dc19afeaa3dc8a00cc,
+    type: 2}
+  stringsToViews:
+    keys:
+    - line:01bbe32
+    - line:0ff5d85
+    - line:02d8e0d
+    - line:0cabcd2
+    - line:0718c80
+    - line:05073d5
+    - line:071d8ad
+    values:
+    - {fileID: 572921156}
+    - {fileID: 1819006488}
+    - {fileID: 1172188912}
+    - {fileID: 1064689208}
+    - {fileID: 1225752379}
+    - {fileID: 1565884155}
+    - {fileID: 0}
   _useTextMeshPro: 0
 --- !u!114 &233232045
 MonoBehaviour:
