@@ -143,7 +143,6 @@ namespace Yarn.Unity
 
         public TextAsset baseLanguage;
         public YarnProgram.YarnTranslation[] localizations = new YarnProgram.YarnTranslation[0];
-        public LinetagToLanguage[] voiceOvers = new LinetagToLanguage[0];
         public YarnProgram programContainer = default;
 
         public LocalizationDatabase localizationDatabase;
@@ -194,24 +193,6 @@ namespace Yarn.Unity
                 ImportCompiledYarn(ctx);
             }
         }
-
-#if ADDRESSABLES
-    /// <summary>
-    /// Remove all voice over audio clip references or addressable references on this yarn asset.
-    /// </summary>
-    /// <param name="removeDirectReferences">True if direct audio clip references should be deleted and false if Addressable references should be deleted.</param>
-    public void RemoveAllVoiceOverReferences(bool removeDirectReferences) {
-        foreach (var linetag in voiceOvers) {
-            foreach (var language in linetag.languageToAudioclip) {
-                if (removeDirectReferences) {
-                    language.audioClip = null;
-                } else {
-                    language.audioClipAddressable = null;
-                }
-            }
-        }
-    }
-#endif
 
         /// <summary>
         /// Returns a byte array containing a SHA-256 hash of <paramref

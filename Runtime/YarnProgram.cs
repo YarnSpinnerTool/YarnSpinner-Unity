@@ -75,13 +75,6 @@ namespace Yarn.Unity
         public YarnTranslation[] localizations = new YarnTranslation[0];
 
         /// <summary>
-        /// Available voice over audio clips of this <see cref="YarnProgram"/>.
-        /// </summary>
-        [SerializeField]
-        [HideInInspector]
-        public LinetagToLanguage[] voiceOvers = new LinetagToLanguage[0];
-
-        /// <summary>
         /// Deserializes a compiled Yarn program from the stored bytes in this
         /// object.
         /// </summary>
