@@ -143,6 +143,10 @@ namespace Yarn.Unity
 
             // And we're done!
             serializedObject.ApplyModifiedProperties();
+
+            // Finally, update this localization database so that this new
+            // localization has content.
+            UpdateContents(serializedObject.targetObject as LocalizationDatabase);
         }
 
         public override void OnInspectorGUI()
