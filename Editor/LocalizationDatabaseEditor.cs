@@ -415,7 +415,10 @@ namespace Yarn.Unity
                     AddLineEntryToLocalization(localization, record);
                 }
 
+                EditorUtility.SetDirty(localization);
             }
+
+            AssetDatabase.SaveAssets();
         }
 
         private static void AddLineEntryToLocalization(Localization localization, StringTableEntry entry)
@@ -484,6 +487,7 @@ namespace Yarn.Unity
             }
         }
 
+#if ADDRESSABLES
         private static void AddAddressableAssetReferenceToLocalization(Localization localization, StringTableEntry entry, string assetGUID)
         {
             if (AddressableAssetSettingsDefaultObject.SettingsExists == false)
@@ -508,6 +512,7 @@ namespace Yarn.Unity
 
             localization.AddLocalizedObjectAddress(entry.ID, assetReference);
         }
+#endif
 
         private static void AddAssetReferenceToLocalization(Localization localization, StringTableEntry entry, string assetGUID)
         {
