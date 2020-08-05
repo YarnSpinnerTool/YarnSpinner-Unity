@@ -29,6 +29,10 @@ namespace Yarn.Unity
         private static SerializedObject _preferences;
         private const string _emptyTextLanguageMessage = "To set a preference for text language, add one or more languages to 'Project Setting->Yarn Spinner' first.";
         private const string _emptyAudioLanguageMessage = "To set a preference for audio language, add one or more languages to 'Project Setting->Yarn Spinner' first.";
+
+        // TODO: replace with final URL when available
+        private const string AddressableAssetsDocumentationURL = "https://yarnspinner.dev";
+
         private List<string> _textLanguages = new List<string>();
         private List<string> _audioLanguage = new List<string>();
         private string _textLanguageLastFrame;
@@ -171,7 +175,20 @@ namespace Yarn.Unity
             var addressableVoiceOverAudioClipsProp = _projectSettings.FindProperty("_addressableVoiceOverAudioClips");
             EditorGUILayout.PropertyField(addressableVoiceOverAudioClipsProp, new GUIContent("Use Addressables"));
 
-            EditorGUILayout.HelpBox($"This project has the Addressable Assets package installed. When this option is selected, {ObjectNames.NicifyVariableName(nameof(LocalizationDatabase)).ToLowerInvariant()}s will use addressable asset references to refer to assets that belong to lines, rather than directly referencing the asset.", MessageType.Info);
+            string message = $"This project has the Addressable Assets package installed. When this option is selected, {ObjectNames.NicifyVariableName(nameof(LocalizationDatabase)).ToLowerInvariant()}s will use addressable asset references to refer to assets that belong to lines, rather than directly referencing the asset. This allows for better performance during steps that have a large amount of dependencies.\n\nFor more information, click this box to open the Yarn Spinner documentation.";
+
+            EditorGUILayout.HelpBox(message, MessageType.Info);
+
+            // Make the HelpBox that we just rendered have a link cursor
+            var lastRect = GUILayoutUtility.GetLastRect();
+            EditorGUIUtility.AddCursorRect(lastRect, MouseCursor.Link);
+
+            // And also detect clicks on it; open the documentation when
+            // this happens
+            if (Event.current.type == EventType.MouseUp
+                && lastRect.Contains(Event.current.mousePosition)) {
+                Application.OpenURL(AddressableAssetsDocumentationURL);
+            }
             
             _projectSettings.ApplyModifiedProperties();
 #endif
