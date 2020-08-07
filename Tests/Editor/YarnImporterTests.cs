@@ -69,7 +69,14 @@ private static List<StringTableEntry> GetExpectedStrings(string fileName)
             };
         }
 
+        // The files that a test created, stored as paths. These files are
+        // deleted in TearDown.
         List<string> createdFilePaths = new List<string>();
+
+        [SetUp]
+        public void Setup() {
+            createdFilePaths.Clear();
+        }
 
         [TearDown]
         public void TearDown() {
