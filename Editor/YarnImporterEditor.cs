@@ -203,7 +203,9 @@ public class YarnImporterEditor : ScriptedImporterEditor
 
         // If no localization database is provided, offer a button that
         // will create a new one that 1. tracks this script 2. has a
-        // localization set to this script's base language
+        // localization set to this script's base language 3. and also we
+        // make sure that this project's language list includes this
+        // program's base language.
         if (localizationDatabaseProperty.objectReferenceValue == null)
         {
             if (GUILayout.Button("Create New Localization Database"))
@@ -538,9 +540,16 @@ public class YarnImporterEditor : ScriptedImporterEditor
     }
 
     // Creates a new localization database asset adjacent to one of the
-    // selected objects, and configures all selected objects to use it.
+    // selected objects, configures all selected objects to use it, and
+    // ensures that the project's text language list includes this
+    // program's base language.
     private void CreateNewLocalizationDatabase()
     {
+        if (serializedObject.isEditingMultipleObjects) {
+            throw new System.InvalidOperationException($"Cannot invoke {nameof(CreateNewLocalizationDatabase)} when editing multiple objects");
+        }
+
+
         var target = serializedObject.targetObjects[0];
 
         // Figure out where on disk this asset is
@@ -555,6 +564,10 @@ public class YarnImporterEditor : ScriptedImporterEditor
 
         // Create the asset and set it up
         var localizationDatabaseAsset = CreateInstance<LocalizationDatabase>();
+
+        // The list of languages we needed to add to the project's text language
+        // list
+        var languagesAddedToProject = new List<string>();
 
         // Attach all selected programs to this new database
         foreach (YarnImporter importer in serializedObject.targetObjects)
@@ -580,7 +593,19 @@ public class YarnImporterEditor : ScriptedImporterEditor
 
                     localizationDatabaseAsset.AddLocalization(localizationAsset);
                 }
+
+                // Add this language to the project's text language list if
+                // we need to, and remember that we did so
+                if (ProjectSettings.TextProjectLanguages.Contains(importer.baseLanguageID) == false) {
+                    ProjectSettings.TextProjectLanguages.Add(importer.baseLanguageID);
+                    languagesAddedToProject.Add(importer.baseLanguageID);                                        
+                }
             }
+        }
+
+        // Log if we needed to update the project text language list
+        if (languagesAddedToProject.Count > 0) {
+            Debug.Log($"The following {(languagesAddedToProject.Count == 1 ? "language was" : "languages were")} added to the project's text language list: {string.Join(", ", languagesAddedToProject)}. To review this list, choose Edit > Project Settings > Yarn Spinner.");
         }
 
         // Populate the database's contents
