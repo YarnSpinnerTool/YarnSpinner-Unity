@@ -3,16 +3,13 @@ using UnityEditor;
 using UnityEditor.Experimental.AssetImporters;
 using System.Linq;
 using System.IO;
-using System.Globalization;
-
-#if ADDRESSABLES
-using UnityEngine.AddressableAssets;
-#endif
 using System.Collections.Generic;
 using Yarn.Unity;
 
 [CustomEditor(typeof(YarnImporter))]
 #if UNITY_2019_1_OR_NEWER
+// Only permit editing multiple objects on Unity 2019 to avoid some Unity
+// 2018 bugs
 [CanEditMultipleObjects]
 #endif
 public class YarnImporterEditor : ScriptedImporterEditor
@@ -33,10 +30,6 @@ public class YarnImporterEditor : ScriptedImporterEditor
         isSuccessfullyCompiledProperty = serializedObject.FindProperty("isSuccesfullyCompiled");
         compilationErrorMessageProperty = serializedObject.FindProperty("compilationErrorMessage");
         localizationsProperty = serializedObject.FindProperty("localizations");
-    }
-
-    public override void OnDisable() {
-        base.OnDisable();
     }
 
     public override void OnInspectorGUI() {
@@ -60,19 +53,17 @@ public class YarnImporterEditor : ScriptedImporterEditor
 
         // We can do localization work if all of the selected objects have
         // strings, and none of them have implicitly-created strings.
-        var canCreateLocalization = serializedObject.targetObjects.Cast<YarnImporter>().All(importer => importer.StringsAvailable && importer.AnyImplicitStringIDs == false);
+        var canCreateLocalization = serializedObject.targetObjects
+            .Cast<YarnImporter>()
+            .All(importer => importer.StringsAvailable && importer.AnyImplicitStringIDs == false);
 
         if (canCreateLocalization) {
+            // We can work with localizations! Draw our
+            // localization-related UI!
             DrawLocalizationGUI();
         } else {
             var message = new System.Text.StringBuilder();
-            message.Append("The selected ");
-            if (serializedObject.isEditingMultipleObjects) {
-                message.Append("scripts");
-            } else {
-                message.Append("script");
-            }
-            message.Append(" can't be localized, because not every line has a line tag. Click Add Line Tags to add them, or add them yourself in a text editor.");
+            message.Append($"The selected {(serializedObject.isEditingMultipleObjects ? "scripts" : "script")} can't be localized, because not every line has a line tag. Click Add Line Tags to add them, or add them yourself in a text editor.");
 
             EditorGUILayout.HelpBox(message.ToString(), MessageType.Info);
 
@@ -87,8 +78,12 @@ public class YarnImporterEditor : ScriptedImporterEditor
         // Unity 2018's ApplyRevertGUI is buggy, and doesn't automatically
         // detect changes to the importer's serializedObject. This means
         // that we'd need to track the state of the importer, and don't
-        // have a way to present a Revert button. Rather than offer a
-        // broken experience, on 2018 we immediately reimport the changes.
+        // have a way to present a Revert button. 
+        //
+        // Rather than offer a broken experience, on Unity 2018 we
+        // immediately reimport the changes. This is slow (we're
+        // serializing and writing the asset to disk on every property
+        // change!) but ensures that the writes are done.
         if (hadChanges)
         {
             // Manually perform the same tasks as the 'Apply' button would
@@ -180,10 +175,13 @@ public class YarnImporterEditor : ScriptedImporterEditor
                     }
                 }
 
+                // Tell the new database that it should track us
                 if (newObjectReference is LocalizationDatabase database)
                 {
                     foreach (YarnImporter importer in serializedObject.targetObjects)
                     {
+                        // If we don't actually have a program (because of
+                        // a compile error), there's nothing to do here
                         if (importer.programContainer == null)
                         {
                             continue;
@@ -212,7 +210,6 @@ public class YarnImporterEditor : ScriptedImporterEditor
         //
         // We only do this if we're editing a single object, because each
         // separate script will have its own translations.
-
         if (serializedObject.isEditingMultipleObjects == false && localizationDatabaseProperty.objectReferenceValue != null)
         {
             EditorGUI.indentLevel += 1;
@@ -222,8 +219,8 @@ public class YarnImporterEditor : ScriptedImporterEditor
             var languagesList = new List<string>();
             languagesList.Add(importer.baseLanguageID);
 
-            // Expose the base language asset, but disable it because it's
-            // always a derived sub-asset
+            // Expose the base language asset in the inspector, but disable
+            // it because it's always a derived sub-asset
             using (new EditorGUI.DisabledScope(true))
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -248,6 +245,14 @@ public class YarnImporterEditor : ScriptedImporterEditor
 
                     if (GUILayout.Button("-", EditorStyles.miniButton, GUILayout.ExpandWidth(false)))
                     {
+                        // We delete this property twice:
+                        // - once to clear the value from the array entry
+                        // - again to remove the cleared entry from the
+                        //   array 
+                        //
+                        // (If the entry is already empty, the first delete
+                        // will remove it; the second delete appears to be
+                        // a no-op, so it's safe.)
                         localization.DeleteCommand();
                         localization.DeleteCommand();
                     }
@@ -340,9 +345,10 @@ public class YarnImporterEditor : ScriptedImporterEditor
     /// Verifies the TextAsset referred to by <paramref name="loc"/>, and
     /// updates it if necessary.
     /// </summary>
-    /// <param name="baseLocalizationStrings">A collection of <see cref="StringTableEntry"/></param>
-    /// <param name="language">The language that <paramref
-    /// name="loc"/> provides strings for.false</param>
+    /// <param name="baseLocalizationStrings">A collection of <see
+    /// cref="StringTableEntry"/></param>
+    /// <param name="language">The language that <paramref name="loc"/>
+    /// provides strings for.false</param>
     /// <param name="loc">A TextAsset containing localized strings in CSV
     /// format.</param>
     /// <returns>Whether <paramref name="loc"/> was modified.</returns>
@@ -391,9 +397,10 @@ public class YarnImporterEditor : ScriptedImporterEditor
         }
 
         // Finally, we need to check for any entries in the translated
-        // localisation that 1. have the same line ID as one in the base
-        // but 2. have a different Lock (the hash of the text), which
-        // indicates that the base text has changed.
+        // localisation that:
+        // 1. have the same line ID as one in the base, but
+        // 2. have a different Lock (the hash of the text), which indicates
+        //    that the base text has changed.
 
         // First, get the list of IDs that are in both base and translated,
         // and then filter this list to any where the lock values differ
