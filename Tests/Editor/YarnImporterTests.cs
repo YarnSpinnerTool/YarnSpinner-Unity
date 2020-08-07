@@ -12,6 +12,63 @@ namespace Yarn.Unity.Tests
 {
     public class YarnImporterTests
     {
+        // A sample Yarn script that we'll store in an asset as part of
+        // these tests
+        private const string TestYarnScriptSource = @"title: Start
+tags:
+colorID: 0
+position: 0,0
+--- 
+Spieler: Kannst du mich hören? #line:0e3dc4b
+NPC: Klar und deutlich. #line:0967160
+[[Mir reicht es.| Exit]] #line:04e806e
+[[Nochmal!|Start]] #line:0901fb2
+===
+title: Exit
+tags: 
+colorID: 0
+position: 0,0
+--- 
+===";
+
+private static List<StringTableEntry> GetExpectedStrings(string fileName)
+        {
+            return new List<StringTableEntry>() {
+                new StringTableEntry {
+                    Language = YarnImporter.DefaultLocalizationName,
+                    ID = "line:0e3dc4b",
+                    Text = "Spieler: Kannst du mich hören?",
+                    File = fileName,
+                    Node = "Start",
+                    LineNumber = "6",
+                },
+                new StringTableEntry {
+                    Language = YarnImporter.DefaultLocalizationName,
+                    ID = "line:0967160",
+                    Text = "NPC: Klar und deutlich.",
+                    File = fileName,
+                    Node = "Start",
+                    LineNumber = "7",
+                },
+                new StringTableEntry {
+                    Language = YarnImporter.DefaultLocalizationName,
+                    ID = "line:04e806e",
+                    Text = "Mir reicht es.",
+                    File = fileName,
+                    Node = "Start",
+                    LineNumber = "8",
+                },
+                new StringTableEntry {
+                    Language = YarnImporter.DefaultLocalizationName,
+                    ID = "line:0901fb2",
+                    Text = "Nochmal!",
+                    File = fileName,
+                    Node = "Start",
+                    LineNumber = "9",
+                }
+            };
+        }
+
         List<string> createdFilePaths = new List<string>();
 
         [TearDown]
@@ -30,13 +87,12 @@ namespace Yarn.Unity.Tests
         [Test]
         public void YarnImporter_OnValidYarnFile_ShouldCompile()
         {
-            const string textYarnAsset = "title: Start\ntags:\ncolorID: 0\nposition: 0,0\n--- \nSpieler: Kannst du mich hören? #line:0e3dc4b\nNPC: Klar und deutlich. #line:0967160\n[[Mir reicht es.| Exit]] #line:04e806e\n[[Nochmal!|Start]] #line:0901fb2\n===\ntitle: Exit\ntags: \ncolorID: 0\nposition: 0,0\n--- \n===";
             string fileName = Path.GetRandomFileName();
 
             var path = Application.dataPath + "/" + fileName + ".yarn";
             createdFilePaths.Add(path);
 
-            File.WriteAllText(path, textYarnAsset);
+            File.WriteAllText(path, TestYarnScriptSource);
             AssetDatabase.Refresh();
             var result = ScriptedImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
@@ -65,48 +121,13 @@ namespace Yarn.Unity.Tests
         [Test]
         public void YarnImporter_OnValidYarnFile_GetExpectedStrings()
         {
-            const string textYarnAsset = "title: Start\ntags:\ncolorID: 0\nposition: 0,0\n--- \nSpieler: Kannst du mich hören? #line:0e3dc4b\nNPC: Klar und deutlich. #line:0967160\n[[Mir reicht es.| Exit]] #line:04e806e\n[[Nochmal!|Start]] #line:0901fb2\n===\ntitle: Exit\ntags: \ncolorID: 0\nposition: 0,0\n--- \n===";
             string fileName = Path.GetRandomFileName();
-
-            var expectedStrings = new List<StringTableEntry>() {
-                new StringTableEntry {
-                    Language = YarnImporter.DefaultLocalizationName,
-                    ID = "line:0e3dc4b",
-                    Text = "Spieler: Kannst du mich hören?",
-                    File = fileName,
-                    Node = "Start",
-                    LineNumber = "6",                    
-                },
-                new StringTableEntry {
-                    Language = YarnImporter.DefaultLocalizationName,
-                    ID = "line:0967160",
-                    Text = "NPC: Klar und deutlich.",
-                    File = fileName,
-                    Node = "Start",
-                    LineNumber = "7",                    
-                },
-                new StringTableEntry {
-                    Language = YarnImporter.DefaultLocalizationName,
-                    ID = "line:04e806e",
-                    Text = "Mir reicht es.",
-                    File = fileName,
-                    Node = "Start",
-                    LineNumber = "8",                    
-                },
-                new StringTableEntry {
-                    Language = YarnImporter.DefaultLocalizationName,
-                    ID = "line:0901fb2",
-                    Text = "Nochmal!",
-                    File = fileName,
-                    Node = "Start",
-                    LineNumber = "9",                    
-                }
-            };
+            List<StringTableEntry> expectedStrings = GetExpectedStrings(fileName);
 
             string path = Application.dataPath + "/" + fileName + ".yarn";
             createdFilePaths.Add(path);
 
-            File.WriteAllText(path, textYarnAsset);
+            File.WriteAllText(path, TestYarnScriptSource);
             AssetDatabase.Refresh();
             var result = ScriptedImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
