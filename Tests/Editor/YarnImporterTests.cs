@@ -94,12 +94,13 @@ private static List<StringTableEntry> GetExpectedStrings(string fileName)
         [Test]
         public void YarnImporter_OnValidYarnFile_ShouldCompile()
         {
+            const string textYarnAsset = "title: Start\ntags:\ncolorID: 0\nposition: 0,0\n--- \nSpieler: Kannst du mich hören? #line:0e3dc4b\nNPC: Klar und deutlich. #line:0967160\n[[Mir reicht es.| Exit]] #line:04e806e\n[[Nochmal!|Start]] #line:0901fb2\n===\ntitle: Exit\ntags: \ncolorID: 0\nposition: 0,0\n--- \n===";
             string fileName = Path.GetRandomFileName();
 
             var path = Application.dataPath + "/" + fileName + ".yarn";
             createdFilePaths.Add(path);
 
-            File.WriteAllText(path, TestYarnScriptSource);
+            File.WriteAllText(path, textYarnAsset);
             AssetDatabase.Refresh();
             var result = ScriptedImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
