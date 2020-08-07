@@ -118,5 +118,22 @@ namespace Yarn.Unity
                 return textWriter.ToString();
             }
         }
+
+        public override string ToString() {
+            return $"StringTableEntry: lang={Language} id={ID} text=\"{Text}\" file={File} node={Node} line={LineNumber} lock={Lock} comment={Comment}";
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is StringTableEntry entry &&
+                   Language == entry.Language &&
+                   ID == entry.ID &&
+                   Text == entry.Text &&
+                   File == entry.File &&
+                   Node == entry.Node &&
+                   LineNumber == entry.LineNumber &&
+                   Lock == entry.Lock &&
+                   Comment == entry.Comment;
+        }
     }
 }
