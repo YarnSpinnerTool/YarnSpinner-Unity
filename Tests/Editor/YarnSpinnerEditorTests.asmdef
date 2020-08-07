@@ -1,5 +1,5 @@
 {
-    "name": "YarnSpinnerEditorTests",
+    "name": "YarnSpinner.Editor.Tests",
     "references": [
         "YarnSpinner.Unity",
         "YarnSpinner.Unity.Editor"
