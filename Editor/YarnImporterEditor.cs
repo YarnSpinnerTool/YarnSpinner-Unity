@@ -172,6 +172,10 @@ public class YarnImporterEditor : ScriptedImporterEditor
                             continue;
                         }
                         previousLocalizationDatabase.RemoveTrackedProgram(importer.programContainer);
+                        
+                        // Mark that the localization database has changed,
+                        // so needs to be saved
+                        EditorUtility.SetDirty(previousLocalizationDatabase);
                     }
                 }
 
@@ -187,6 +191,10 @@ public class YarnImporterEditor : ScriptedImporterEditor
                             continue;
                         }
                         database.AddTrackedProgram(importer.programContainer);
+
+                        // Mark that the localization database should save
+                        // changes
+                        EditorUtility.SetDirty(previousLocalizationDatabase);
                     }
                 } 
 
