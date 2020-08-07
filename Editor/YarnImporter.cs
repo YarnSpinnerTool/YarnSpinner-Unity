@@ -151,16 +151,31 @@ namespace Yarn.Unity
         {
             if (string.IsNullOrEmpty(baseLanguageID))
             {
+                baseLanguageID = DefaultLocalizationName;
+            }
+        }
+
+        /// <summary>
+        /// Returns the locale name to use as the base localization ID for
+        /// a newly created Yarn script. This will be either the first
+        /// entry in <see cref="ProjectSettings.TextProjectLanguages"/>, or
+        /// if this is not set, the user's current culture.
+        /// </summary>
+        public static string DefaultLocalizationName
+        {
+            get
+            {
                 // If the user has added project wide text languages in the settings 
                 // dialogue, we default to the first text language as base language
                 if (ProjectSettings.TextProjectLanguages.Count > 0)
                 {
-                    baseLanguageID = ProjectSettings.TextProjectLanguages[0];
-                    // Otherwrise use system's language as base language
+                    return ProjectSettings.TextProjectLanguages[0];
+                    
                 }
                 else
                 {
-                    baseLanguageID = CultureInfo.CurrentCulture.Name;
+                    // Otherwrise use system's language as base language
+                    return CultureInfo.CurrentCulture.Name;
                 }
             }
         }
