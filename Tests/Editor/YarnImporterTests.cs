@@ -156,32 +156,41 @@ private static List<StringTableEntry> GetExpectedStrings(string fileName)
 
         [Test]
         public void YarnImporterUtility_CanCreateNewLocalizationDatabase() {
-            // Import a yarn script, and then create a new localization
-            // database. Verify that the new localization database exists,
+            // Arrange: Import a yarn script
+            
+            // Act: create a new localization database. 
+            
+            // Assert: Verify that the new localization database exists,
             // and contains a single localization, and that localization
-            // contains the string table entries we expect. 
+            // contains the string table entries we expect.
             throw new System.NotImplementedException();
         }
 
         [Test]
         public void YarnImporterUtility_CanCreateLocalizationInLocalizationDatabase() {
-            // Run YarnImporterUtility_CanCreateNewLocalizationDatabase),
-            // create a new localization for a new language, and verify
-            // that it exists, contains the string table entries we expect,
-            // and has the language we expect.
+            // Arrange: Run YarnImporterUtility_CanCreateNewLocalizationDatabase)
+
+            // Act: Create a new localization for a new language
+            
+            // Assert: Verify that it exists, contains the string table
+            // entries we expect, and has the language we expect.
+
             throw new System.NotImplementedException();
         }
 
         [Test]
         public void YarnImporterUtility_CanUpdateLocalizedCSVs_WhenBaseScriptChanges() {
-            // Run
+            // Arrange: Run
             // YarnImporterUtility_CanCreateLocalizationInLocalizationDatabase,
             // modify the imported script so that lines are added, changed
-            // and deleted, reimport, update the localized CSV
-            // programmatically, verify the base language string table
-            // contains the string table entries we expect, verify the
-            // localized string table contains the string table entries we
-            // expect
+            // and deleted, reimport
+            
+            // Act: update the localized CSV programmatically
+            
+            // Assert: verify the base language string table contains the
+            // string table entries we expect, verify the localized string
+            // table contains the string table entries we expect
+            
             throw new System.NotImplementedException();
         }
 
