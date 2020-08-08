@@ -1,83 +1,165 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using TMPro;
 
 namespace Yarn.Unity {
     [CustomEditor(typeof(YarnLinesAsCanvasText))]
     public class YarnLinesAsCanvasTextEditor : Editor {
-        private YarnProgram _yarnProgram = default;
+        
+        private SerializedProperty stringsToViews;
         private SerializedProperty _yarnProgramProperty = default;
-        private Dictionary<string, string> _yarnStringTable = new Dictionary<string, string>();
-        private SerializedProperty _textObjectsProperty = default;
-        private SerializedProperty _textMeshProObjectsProperty = default;
+        private SerializedProperty _localizationDatabaseProperty;
+        
         private SerializedProperty _useTextMeshProProperty = default;
+
+        Dictionary<string, Object> idsToTexts = new Dictionary<string, Object>();
+        private SerializedProperty _stringsToViewsProperty;
         private bool _showTextUiComponents = true;
         private const string _textUiComponentsLabel = "Text UI Components";
         private string _lastLanguageId = default;
         private GUIStyle _headerStyle;
 
-        private void OnEnable() {
+        private void OnEnable()
+        {
             _headerStyle = new GUIStyle() { fontStyle = FontStyle.Bold };
             _lastLanguageId = Preferences.TextLanguage;
 
             _yarnProgramProperty = serializedObject.FindProperty("yarnScript");
-            if (_yarnProgramProperty.objectReferenceValue == null) {
+            _localizationDatabaseProperty = serializedObject.FindProperty("localizationDatabase");
+            
+            _stringsToViewsProperty = serializedObject.FindProperty("stringsToViews");
+
+            _useTextMeshProProperty = serializedObject.FindProperty("_useTextMeshPro");
+
+            UpdateTargetObjectMappingTable();
+
+        }
+
+        private void UpdateTargetObjectMappingTable()
+        {
+            
+            var canvasText = serializedObject.targetObject as YarnLinesAsCanvasText;
+
+            if (!(_yarnProgramProperty.objectReferenceValue is YarnProgram yarnProgram)) {
+                // No program means no strings available, so clear it and
+                // bail out
+
+                if (canvasText.stringsToViews.Count != 0) {
+                    // Modify the dictionary directly, to make Unity
+                    // realise that the property is dirty
+                    _stringsToViewsProperty.FindPropertyRelative("keys").ClearArray();
+
+                    // And clear the in-memory representation as well
+                    canvasText.stringsToViews.Clear();
+
+                    serializedObject.ApplyModifiedProperties();           
+                }                
+                
                 return;
             }
+            
 
-            _yarnProgram = _yarnProgramProperty.objectReferenceValue as YarnProgram;
+            var stringTableAsset = yarnProgram.baseLocalisationStringTable.text;
+            var stringIDs = StringTableEntry.ParseFromCSV(stringTableAsset)
+                .Select(e => e.ID);
 
-            _yarnStringTable.Clear();
-            foreach (var line in _yarnProgram.GetStringTable()) {
-                _yarnStringTable.Add(line.Key, line.Value);
+            var extraneousIDs = canvasText.stringsToViews.Keys.Except(stringIDs).ToList();
+            var missingIDs = stringIDs.Except(canvasText.stringsToViews.Keys).ToList();
+
+            foreach (var id in extraneousIDs)
+            {
+                canvasText.stringsToViews.Remove(id);
             }
 
-            _textObjectsProperty = serializedObject.FindProperty("textCanvases");
-            _textMeshProObjectsProperty = serializedObject.FindProperty("textMeshProCanvases");
-            _useTextMeshProProperty = serializedObject.FindProperty("_useTextMeshPro");
+            foreach (var id in missingIDs)
+            {
+                canvasText.stringsToViews.Add(id, null);
+            }
         }
 
         public override void OnInspectorGUI() {
             serializedObject.Update();
 
-            EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(_yarnProgramProperty);
-            // Rebuild the string table if the yarn asset or the language preference has changed
-            if (EditorGUI.EndChangeCheck() || _lastLanguageId != Preferences.TextLanguage) {
-                OnEnable();
-            }
+            using (var change = new EditorGUI.ChangeCheckScope()) {
+                EditorGUILayout.PropertyField(_yarnProgramProperty);
+                EditorGUILayout.PropertyField(_localizationDatabaseProperty);
 
+                if (change.changed) {
+                    // Rebuild the string table if the yarn asset or the language preference has changed
+                    UpdateTargetObjectMappingTable();
+                }
+            
+            }
+            
             EditorGUILayout.PropertyField(_useTextMeshProProperty);
 
-            if (_yarnProgramProperty.objectReferenceValue == null) {
-                EditorGUILayout.HelpBox("This component needs a yarn asset.", MessageType.Info);
-            } else {
+            if (!(_yarnProgramProperty.objectReferenceValue is YarnProgram)) {
+                EditorGUILayout.HelpBox("This component needs a yarn script.", MessageType.Info);
+            } else if (!(_localizationDatabaseProperty.objectReferenceValue is LocalizationDatabase localizationDatabase)) {
+                EditorGUILayout.HelpBox("This component needs a localization database.", MessageType.Info);
+             } else {
                 _showTextUiComponents = EditorGUILayout.Foldout(_showTextUiComponents, _textUiComponentsLabel);
                 if (_showTextUiComponents) {
-                    if (_yarnStringTable.Count == 0) {
+
+                    var keysProperty = _stringsToViewsProperty.FindPropertyRelative("keys");
+                    var valuesProperty = _stringsToViewsProperty.FindPropertyRelative("values");
+
+                    if (keysProperty.arraySize == 0) {
                         EditorGUILayout.HelpBox("Couldn't find any text lines on the referenced Yarn asset.", MessageType.Info);
                     } else {
-                        // Header
-                        EditorGUILayout.BeginHorizontal();
-                        EditorGUILayout.LabelField("Yarn Text Lines", _headerStyle);
-                        EditorGUILayout.LabelField("UI Canvas", _headerStyle);
-                        EditorGUILayout.EndHorizontal();
 
-                        // The referenced Canvas Text components
-                        var i = 0;
-                        foreach (var stringTableEntry in _yarnStringTable) {
-                            if (_textObjectsProperty.arraySize <= i) {
-                                _textObjectsProperty.InsertArrayElementAtIndex(i);
-                            }
-                            if (_textMeshProObjectsProperty.arraySize <= i) {
-                                _textMeshProObjectsProperty.InsertArrayElementAtIndex(i);
-                            }
+                        EditorGUI.indentLevel += 1;
+                        
+                        for (int i = 0; i < keysProperty.arraySize; i++) {
+
+                            // Get properties for the elements in this dictionary
+                            var keyProperty = keysProperty.GetArrayElementAtIndex(i);
+                            var valueProperty = valuesProperty.GetArrayElementAtIndex(i);
+
                             // Draw the actual content of the yarn line as lable so the user knows what text 
                             // will placed on the referenced component
-                            GUIContent label = new GUIContent() { text = "'" + stringTableEntry.Value + "'" };
-                            EditorGUILayout.PropertyField(_useTextMeshProProperty.boolValue ? _textMeshProObjectsProperty.GetArrayElementAtIndex(i) : _textObjectsProperty.GetArrayElementAtIndex(i), label);
-                            i++;
+                            string key = keyProperty.stringValue;
+
+                            // Retrieve the localized text
+                            var localisedText = localizationDatabase.GetLocalization(Preferences.TextLanguage)?.GetLocalizedString(key) ?? $"<no localization for '{Preferences.TextLanguage}'>";
+
+
+                            GUIContent label = new GUIContent() { 
+                                text = $"'{localisedText}'"
+                            };
+                            System.Type textType;
+                            if (_useTextMeshProProperty.boolValue) {
+                                textType = typeof(TMPro.TextMeshProUGUI);                                
+                            } else {
+                                textType = typeof(UnityEngine.UI.Text);
+                            }
+
+                            // Is the current object in this value of the
+                            // correct type? (e.g. if we're in TMP mode, is
+                            // it a textmeshpro text object?)
+                            bool objectTextTypeIsValid = valueProperty.objectReferenceValue?.GetType().IsAssignableFrom(textType) ?? false;
+
+                            // Get a reference to it is, and get null if
+                            // it's not
+                            var displayedObject = objectTextTypeIsValid ? valueProperty.objectReferenceValue : null;
+
+                            using (var change = new EditorGUI.ChangeCheckScope()) {
+                                // Only modify valueProperty's
+                                // objectReferenceValue if the field
+                                // actually changed, because we don't want
+                                // to throw away its contents if the user
+                                // just clicks on 'use textmesh pro'
+                                var newReference = EditorGUILayout.ObjectField(label, displayedObject, textType, true);
+
+                                if (change.changed) {
+                                    valueProperty.objectReferenceValue = newReference;        
+                                }
+                            }
                         }
+                        
+                        EditorGUI.indentLevel -= 1;
                     }
                 }
             }

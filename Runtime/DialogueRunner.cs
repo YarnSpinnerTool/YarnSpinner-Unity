@@ -83,14 +83,12 @@ namespace Yarn.Unity
         /// </summary>
         public bool continueNextLineOnLineFinished;
 
-#if ADDRESSABLES
         /// <summary>
-        /// Whether the DialogueRunner should wait for the linked
-        /// Addressable voice over AudioClips to finish loading (true) or
-        /// not (false).
+        /// If true, when an option is selected, it's as though it were a line.
         /// </summary>
-        public bool waitForAddressablesLoaded = true;
-#endif
+        public bool runSelectedOptionAsLine;
+
+        public LineProviderBehaviour lineProvider;
 
         /// <summary>
         /// Gets a value that indicates if the dialogue is actively running.
@@ -186,13 +184,17 @@ namespace Yarn.Unity
         /// table based on the value of set in the Preferences dialogue.
         public void Add(YarnProgram scriptToLoad)
         {
-            Dialogue.AddProgram(scriptToLoad.GetProgram());
-            AddDialogueLines(scriptToLoad);
-            
-            // Keep reference to loaded script so we can reload upon language changes
-            var additionalYarnScripts = yarnScripts.ToList();
-            additionalYarnScripts.Add(scriptToLoad);
-            yarnScripts = additionalYarnScripts.ToArray();
+            Dialogue.AddProgram(scriptToLoad.GetProgram());         
+
+            if (lineProviderIsTemporary) {
+                var stringTableAsset = scriptToLoad.baseLocalisationStringTable;
+                if (stringTableAsset == null) {
+                    Debug.LogWarning($"Yarn script {scriptToLoad.name} doesn't have a base localization string table. This dialogue runner should be set up to use the {nameof(LocalizationDatabase)} that the Yarn scripts are associated with instead.");
+                    return;
+                }
+                var stringTableEntries = StringTableEntry.ParseFromCSV(scriptToLoad.baseLocalisationStringTable.text);
+                lineProvider.localizationDatabase.GetLocalization(scriptToLoad.baseLocalizationId).AddLocalizedStrings(stringTableEntries);
+            }   
         }
 
         /// <summary>
@@ -229,19 +231,30 @@ namespace Yarn.Unity
                     dialogueView.DialogueStarted();
                 }
 
+                // Request that the dialogue select the current node. This
+                // will prepare the dialogue for running; as a side effect,
+                // our prepareForLines delegate may be called.
                 Dialogue.SetNode(startNode);
-#if ADDRESSABLES
-                if (waitForAddressablesLoaded) {
-                    if (WaitForAddressablesLoadedCoroutine == null) {
-                        WaitForAddressablesLoadedCoroutine = StartCoroutine(CheckAddressablesLoaded(ContinueDialogue));
-                    }
+                
+                if (lineProvider.LinesAvailable == false) {
+                    // The line provider isn't ready to give us our lines
+                    // yet. We need to start a coroutine that waits for
+                    // them to finish loading, and then runs the dialogue.
+                    StartCoroutine(ContinueDialogueWhenLinesAvailable());
                 } else {
-#endif
                     ContinueDialogue();
-#if ADDRESSABLES
                 }
-#endif
             }
+        }
+
+        private IEnumerator ContinueDialogueWhenLinesAvailable() {
+            // Wait until lineProvider.LinesAvailable becomes true
+            while (lineProvider.LinesAvailable == false) {
+                yield return null;
+            }
+
+            // And then run our dialogue.
+            ContinueDialogue();
         }
 
         /// <summary>
@@ -499,18 +512,6 @@ namespace Yarn.Unity
         Dictionary<string, CommandHandler> commandHandlers = new Dictionary<string, CommandHandler>();
         Dictionary<string, BlockingCommandHandler> blockingCommandHandlers = new Dictionary<string, BlockingCommandHandler>();
 
-        /// <summary>
-        /// Collection of dialogue lines linked with their corresponding
-        /// Yarn linetags.
-        /// </summary>
-        Dictionary<string, string> localizedText = new Dictionary<string, string>();
-        
-        /// <summary>
-        /// Collection of voice over AudioClips linked with their
-        /// corresponding Yarn linetags.
-        /// </summary>
-        Dictionary<string, AudioClip> localizedAudio = new Dictionary<string, AudioClip>();
-
         // A flag used to note when we call into a blocking command
         // handler, but it calls its complete handler immediately -
         // _before_ the Dialogue is told to pause. This out-of-order
@@ -521,23 +522,70 @@ namespace Yarn.Unity
         // handler, then the Dialogue is not told to pause.
         bool wasCompleteCalled = false;
 
-        /// <summary>
-        /// List of Addressable voice over AudioClips being currently
-        /// loaded.
-        /// </summary>
-        private List<Task> addressableVoiceOverLoadingTasks = new List<Task>();
-
-        /// <summary>
-        /// Instance of coroutine checking whether all Addressable loading
-        /// tasks finished.
-        /// </summary>
-        private Coroutine WaitForAddressablesLoadedCoroutine;
-
-
         /// Our conversation engine
         /** Automatically created on first access
          */
         Dialogue dialogue;
+
+        // If true, lineProvider was created at runtime, and will be empty.
+        // Calls to Add() should insert line content into it.
+        private bool lineProviderIsTemporary = false;
+
+        // The current set of options that we're presenting. Null if we're
+        // not currently presenting options.
+        private OptionSet currentOptions;
+
+        void Awake() {
+            if (lineProvider == null) {
+                // If we don't have a line provider, we don't have a way to
+                // access a LocalizationDatabase and fetch information for
+                // other localizations, or to fetch localized assets like
+                // audio clips for voiceover. In this situation, we'll fall
+                // back to a really simple setup: we'll create a temporary
+                // TextLineProvider, create a temporary
+                // LocalizationDatabase, and set it up with the
+                // YarnPrograms we know about.
+
+                // TODO: decide what to do about determining the
+                // localization of runtime-provided YarnPrograms. Make it a
+                // parameter on an AddCompiledProgram method?
+
+                // Create the temporary line provider and the localization database
+                lineProvider = gameObject.AddComponent<TextLineProvider>();
+                lineProvider.localizationDatabase = ScriptableObject.CreateInstance<LocalizationDatabase>();
+                var runtimeLocalization = lineProvider.localizationDatabase.CreateLocalization(Preferences.TextLanguage);
+
+                lineProviderIsTemporary = true;
+
+                // Let the user know what we're doing.
+                Debug.Log("Dialogue Runner has no LineProvider; setting a temporary one up with the base text found inside the scripts.");
+
+                // Fill the localization database with the lines found in the scripts
+                foreach (var program in yarnScripts) {
+                    
+                    // In order to get the text of the base localization
+                    // for this script, we need to parse the base
+                    // localization CSV text asset associated with this
+                    // script. (The text asset will only be included in the
+                    // build if the YarnImporter determines that the
+                    // YarnProgram has no LocalizationDatabase assigned.)
+
+                    if (program.baseLocalisationStringTable == null) {
+                        Debug.LogWarning($"No base localization string table was included for the Yarn script {program.name}. It may be connected to a {nameof(LocalizationDatabase)}. You should set this {nameof(DialogueRunner)} up with a Line Provider, and connect the Line Provider to the LocalizationDatabase.");
+                        continue;
+                    }
+
+                    // Extract the text for the base localization.
+                    var text = program.baseLocalisationStringTable.text;
+
+                    // Parse it into string table entries.
+                    var parsedStringTableEntries = StringTableEntry.ParseFromCSV(text);
+
+                    // Add it to the runtime localization.
+                    runtimeLocalization.AddLocalizedStrings(parsedStringTableEntries);
+                }
+            }
+        }
 
         /// Start the dialogue
         void Start()
@@ -581,89 +629,6 @@ namespace Yarn.Unity
             }
         }
 
-        private void OnEnable() {
-            Preferences.LanguagePreferencesChanged += OnLanguagePreferencesChanged;
-        }
-
-        private void OnDisable() {
-            Preferences.LanguagePreferencesChanged -= OnLanguagePreferencesChanged;
-        }
-
-        /// <summary>
-        /// Parses and adds the contents of a string table from a yarn
-        /// asset to the DialogueRunner's combined string table.
-        /// </summary>
-        /// <remarks>
-        /// <see cref="YarnProgram"/>s contain at least one string table,
-        /// stored in <see
-        /// cref="YarnProgram.baseLocalisationStringTable"/>. String tables
-        /// are <see cref="TextAsset"/>s that contain comma-separated value
-        /// formatted text.
-        ///
-        /// A <see cref="YarnProgram"/> may have more string tables beyond
-        /// the base localisation in its <see
-        /// cref="YarnProgram.localizations"/>. 
-        ///
-        /// </remarks>
-        /// <param name="yarnScript">The <see cref="YarnProgram"/> to get
-        /// the string table from.</param>
-        private void AddDialogueLines(YarnProgram yarnScript) {
-            foreach (var yarnLine in yarnScript.GetStringTable()) {
-                localizedText.Add(yarnLine.Key, yarnLine.Value);
-            }
-
-#if ADDRESSABLES
-            if (ProjectSettings.AddressableVoiceOverAudioClips) {
-                if (waitForAddressablesLoaded) {
-                    addressableVoiceOverLoadingTasks.Add(yarnScript.GetVoiceOversOfLanguageAsync(GetVoiceOversCallback));
-                } else {
-#pragma warning disable CS4014 // Don't await or save the returned Tasks because the user set the option waitForAddressablesLoaded to false
-                    yarnScript.GetVoiceOversOfLanguageAsync(GetVoiceOversCallback);
-#pragma warning restore CS4014
-                }
-            } else {
-#endif
-                foreach (var voiceOver in yarnScript.GetVoiceOversOfLanguage()) {
-                    localizedAudio.Add(voiceOver.Key, voiceOver.Value);
-                }
-#if ADDRESSABLES
-            }
-#endif
-        }
-
-#if ADDRESSABLES
-        /// <summary>
-        /// Link a voice over AudioClip with a Yarn linetag.
-        /// </summary>
-        /// <param name="linetag">The linetag of the line.</param>
-        /// <param name="voiceOver">The voice over AudioClip of the
-        /// line.</param>
-        private void GetVoiceOversCallback(string linetag, AudioClip voiceOver) {
-            localizedAudio[linetag] = voiceOver;
-        }
-
-        /// <summary>
-        /// Check if all Addressable load tasks are finished and invoke the
-        /// given action.
-        /// </summary>
-        /// <param name="onAddressablesLoaded">Action invoked after all
-        /// Addressables are loaded.</param>
-        /// <returns></returns>
-        private IEnumerator CheckAddressablesLoaded(Action onAddressablesLoaded) {
-            while (waitForAddressablesLoaded && addressableVoiceOverLoadingTasks.Count > 0) {
-                for (int i = addressableVoiceOverLoadingTasks.Count - 1; i >= 0; i--) {
-                    // Remove task if not active anymore
-                    if ((int)addressableVoiceOverLoadingTasks[i].Status > 3) {
-                        addressableVoiceOverLoadingTasks.RemoveAt(i);
-                    }
-                }
-                yield return 0;
-            }
-            WaitForAddressablesLoadedCoroutine = null;
-            onAddressablesLoaded?.Invoke();
-        }
-#endif
-
         Dialogue CreateDialogueInstance()
         {
             // Create the main Dialogue runner, and pass our
@@ -689,7 +654,8 @@ namespace Yarn.Unity
                     onNodeComplete?.Invoke(node);
                     return Dialogue.HandlerExecutionType.ContinueExecution;
                 },
-                dialogueCompleteHandler = HandleDialogueComplete
+                dialogueCompleteHandler = HandleDialogueComplete,
+                prepareForLinesHandler = PrepareForLines,
             };
 
             // Yarn Spinner defines two built-in commands: "wait",
@@ -697,10 +663,6 @@ namespace Yarn.Unity
             // Machine (the compiler traps it and makes it a
             // special case.) Wait is defined here in Unity.
             AddCommandHandler("wait", HandleWaitCommand);
-
-            foreach (var yarnScript in yarnScripts) {
-                AddDialogueLines(yarnScript);
-            }
 
             selectAction = SelectedOption;
 
@@ -734,12 +696,19 @@ namespace Yarn.Unity
             }
 
             void HandleOptions(OptionSet options) {
+                currentOptions = options;
+
                 DialogueOption[] optionSet = new DialogueOption[options.Options.Length];
                 for (int i = 0; i < options.Options.Length; i++) {
+
+                    // Localize the line associated with the option
+                    var localisedLine = lineProvider.GetLocalizedLine(options.Options[i].Line);
+                    localisedLine.Text = Dialogue.ParseMarkup(localisedLine.RawText);
+
                     optionSet[i] = new DialogueOption {
                         TextID = options.Options[i].Line.ID,
                         DialogueOptionID = options.Options[i].ID,
-                        TextLocalized = localizedText[options.Options[i].Line.ID]
+                        Line = localisedLine,
                     };
                 }
                 foreach (var dialogueView in dialogueViews) {
@@ -812,29 +781,13 @@ namespace Yarn.Unity
             /// Forward the line to the dialogue UI.
             Dialogue.HandlerExecutionType HandleLine(Line line)
             {
-                // Update lines to current state before sending them to the
-                // view classes
-                var substitutions = GetInlineExpressions(line);
-                var text = localizedText.ContainsKey(line.ID) ? localizedText[line.ID] : null;
-                var audio = localizedAudio.ContainsKey(line.ID) ? localizedAudio[line.ID] : null;
-
-                if (text == null) {
-                    Debug.LogWarning($"No localized text found for line ID {line.ID}. Have you provided the {nameof(DialogueRunner)} with the string table for this line?");
-                    text = $"<no localized text for line {line.ID}>";
-                }
+                // Get the localized line from our line provider
+                CurrentLine = lineProvider.GetLocalizedLine(line);
 
                 // Render the markup
-                var markup = Dialogue.ParseMarkup(text);
+                CurrentLine.Text = Dialogue.ParseMarkup(CurrentLine.RawText);
 
-                CurrentLine = new LocalizedLine()
-                {
-                    TextID = line.ID,
-                    RawText = text,
-                    Text = markup,
-                    AudioClip = audio,
-                    Substitutions = substitutions,
-                    Status = LineStatus.Running
-                };
+                CurrentLine.Status = LineStatus.Running;
 
                 // Clear the set of active dialogue views, just in case
                 ActiveDialogueViews.Clear();
@@ -855,8 +808,24 @@ namespace Yarn.Unity
             /// an option
             void SelectedOption(int obj)
             {
+                // Mark that this is the currently selected option in the
+                // Dialogue
                 Dialogue.SetSelectedOption(obj);
-                ContinueDialogue();
+
+                if (runSelectedOptionAsLine) {
+                    foreach (var option in currentOptions.Options) {
+                        if (option.ID == obj) {
+                            HandleLine(option.Line);
+                            return;
+                        }
+                    }
+
+                    Debug.LogError($"Can't run selected option ({obj}) as a line: couldn't find the option's associated {nameof(Line)} object");
+                    ContinueDialogue();
+                } else {
+                    ContinueDialogue();
+                }
+                
             }
 
             (bool commandWasFound, Dialogue.HandlerExecutionType executionType) DispatchCommandToRegisteredHandlers(Command command, Action onComplete)
@@ -1083,6 +1052,11 @@ namespace Yarn.Unity
             }
         }
 
+        private void PrepareForLines(IEnumerable<string> lineIDs)
+        {
+            lineProvider.PrepareForLines(lineIDs);
+        }
+
         /// <summary>
         /// Called when a <see cref="DialogueViewBase"/> has finished
         /// delivering its line. When all views in <see
@@ -1099,23 +1073,26 @@ namespace Yarn.Unity
             ActiveDialogueViews.Remove(dialogueView);
 
             // Have all of the views completed? 
-            if (ActiveDialogueViews.Count == 0) {
+            if (ActiveDialogueViews.Count == 0)
+            {
                 UpdateLineStatus(CurrentLine, LineStatus.Delivered);
-            }
 
-            // Should the line automatically become Ended as soon as it's
-            // Delivered?
-            if (continueNextLineOnLineFinished) {
-                // Go ahead and notify the views. 
-                UpdateLineStatus(CurrentLine, LineStatus.Ended);
+                // Should the line automatically become Ended as soon as
+                // it's Delivered?
+                if (continueNextLineOnLineFinished)
+                {
+                    // Go ahead and notify the views. 
+                    UpdateLineStatus(CurrentLine, LineStatus.Ended);
 
-                // Additionally, tell the views to dismiss the line from
-                // presentation. When each is done, it will notify this
-                // dialogue runner to call DialogueViewCompletedDismissal;
-                // when all have finished, this dialogue runner will tell
-                // the Dialogue to Continue() when all lines are done
-                // dismissing the line.
-                DismissLineFromViews(dialogueViews);                
+                    // Additionally, tell the views to dismiss the line
+                    // from presentation. When each is done, it will notify
+                    // this dialogue runner to call
+                    // DialogueViewCompletedDismissal; when all have
+                    // finished, this dialogue runner will tell the
+                    // Dialogue to Continue() when all lines are done
+                    // dismissing the line.
+                    DismissLineFromViews(dialogueViews);
+                }
             }
         }
 
@@ -1141,14 +1118,6 @@ namespace Yarn.Unity
                 if (dialogueView == null) continue;
 
                 dialogueView.OnLineStatusChanged(line);
-            }
-        }
-
-        void OnLanguagePreferencesChanged(object sender, EventArgs e) {
-            localizedAudio.Clear();
-            localizedText.Clear();
-            foreach (var yarnScript in yarnScripts) {
-                AddDialogueLines(yarnScript);
             }
         }
 
@@ -1250,18 +1219,6 @@ namespace Yarn.Unity
                 // Then we're ready to continue to the next piece of content.
                 ContinueDialogue();
             }            
-        }
-
-        string[] GetInlineExpressions (Line line) {
-            if (!localizedText.ContainsKey(line.ID)) return Array.Empty<string>();
-
-            List<string> substitutions = new List<string>();
-
-            foreach (string substitution in line.Substitutions) {
-                substitutions.Add(substitution);
-            }
-
-            return substitutions.ToArray();
         }
         #endregion
     }
@@ -1468,30 +1425,7 @@ namespace Yarn.Unity
         Ended
     }
 
-    public class LocalizedLine {
-        /// <summary>
-        /// DialogueLine's ID
-        /// </summary>
-        public string TextID;
-        /// <summary>
-        /// DialogueLine's inline expression's substitution
-        /// </summary>
-        public string[] Substitutions;
-        /// <summary>
-        /// DialogueLine's text
-        /// </summary>
-        public string RawText;
-        /// <summary>
-        /// DialogueLine's voice over clip
-        /// </summary>
-        public AudioClip AudioClip;
-        /// <summary>
-        /// The line's delivery status.
-        /// </summary>
-        public LineStatus Status;
-
-        public MarkupParsing.MarkupParseResult Text { get; internal set; }
-    }
+    
 
     public class DialogueOption {
         /// <summary>
@@ -1503,9 +1437,9 @@ namespace Yarn.Unity
         /// </summary>
         public string TextID;
         /// <summary>
-        /// The text of this dialogue option
+        /// The line for this dialogue option
         /// </summary>
-        public string TextLocalized;
+        public LocalizedLine Line;
     }
 
     #endregion

@@ -201,3 +201,5 @@ ScriptedImporter:
         assetGUID: 
         subObjectName: 
   programContainer: {fileID: 11400000, guid: 24f22b038d584445ba4f43344cc5733d, type: 3}
+  localizationDatabase: {fileID: 11400000, guid: 93d5bc4e054ac4572a2da48fa49ea322,
+    type: 2}

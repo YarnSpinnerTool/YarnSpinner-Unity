@@ -1,0 +1,137 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff34614f4518d409d9e35af62a22851c, type: 3}
+  m_Name: LocalizationDatabase-en
+  m_EditorClassIdentifier: 
+  _LocaleCode: en
+  assetSourceFolder: {fileID: 102900000, guid: cb6ecdd5e5d504a7aa1028582daa5b62, type: 3}
+  _stringTable:
+    keys:
+    - line:5837f2
+    - line:ship09
+    - line:ship10
+    - line:ship11
+    - line:ship12
+    - line:ship13
+    - line:ship01
+    - line:ship03
+    - line:ship04
+    - line:ship05
+    - line:ship06
+    - line:ship07
+    - line:794945
+    - line:2dc39b
+    - line:34de2f
+    - line:dcc2bc
+    - line:a8e70c
+    - line:305cde
+    - line:5d7a7c
+    - line:0a7e39
+    - line:0facf7
+    - line:8c3f98
+    - line:24c418
+    - line:df4eaf
+    - line:1fea6c
+    - line:5df323
+    - line:60c282
+    - line:d7df49
+    values:
+    - 'Ship: Hey, friend.'
+    - 'Player: Hi, Ship.'
+    - 'Player: How''s space?'
+    - 'Ship: Oh, man.'
+    - 'Ship: It''s HUGE!'
+    - 'Ship: Hey!!'
+    - 'Player: Sally said you wanted to see me?'
+    - 'Ship: She totally did!!'
+    - 'Ship: She wanted me to tell you...'
+    - 'Ship: If you ever go off-watch without resetting the console again...'
+    - 'Ship: She''ll flay you alive!'
+    - 'Player: Uh.'
+    - 'Player: Hey, Sally.'
+    - 'Sally: Uah!'
+    - 'Sally: You snuck up on me.'
+    - 'Sally: Don''t do that.'
+    - 'Player: Hey.'
+    - 'Sally: Hi.'
+    - Anything exciting happen on your watch?
+    - Sorry about the console.
+    - See you later.
+    - 'Sally: Not really.'
+    - 'Sally: Same old nebula, doing the same old thing.'
+    - 'Sally: Oh, Ship wanted to see you. Go say hi to it.'
+    - 'Player: Already done!'
+    - 'Sally: Go say hi again.'
+    - 'Sally: Bye.'
+    - 'Sally: Yeah. Don''t do it again.'
+  _assetTable:
+    keys:
+    - line:5837f2
+    - line:ship09
+    - line:ship10
+    - line:ship11
+    - line:ship12
+    - line:ship13
+    - line:ship01
+    - line:ship03
+    - line:ship04
+    - line:ship05
+    - line:ship06
+    - line:ship07
+    - line:794945
+    - line:2dc39b
+    - line:34de2f
+    - line:dcc2bc
+    - line:a8e70c
+    - line:305cde
+    - line:5d7a7c
+    - line:0a7e39
+    - line:0facf7
+    - line:8c3f98
+    - line:24c418
+    - line:df4eaf
+    - line:1fea6c
+    - line:5df323
+    - line:60c282
+    - line:d7df49
+    values:
+    - {fileID: 8300000, guid: d1ca6ee2065f253419c7965d712635cc, type: 3}
+    - {fileID: 8300000, guid: 5cb11c66e0442634bba32b194b16055f, type: 3}
+    - {fileID: 8300000, guid: bbf44e7a8dbe9c74da9802c5705b613d, type: 3}
+    - {fileID: 8300000, guid: f8ac10829878c184da12d1e550125eb2, type: 3}
+    - {fileID: 8300000, guid: 7b8f384ea6122bf4c90b38bd65f56b6d, type: 3}
+    - {fileID: 8300000, guid: 10e15d5dc43f59548ac14e5c30d16dda, type: 3}
+    - {fileID: 8300000, guid: 26fab58a5315dca428880962a812a807, type: 3}
+    - {fileID: 8300000, guid: 2acfb0f4e4a2cb444af8e147d05aadd3, type: 3}
+    - {fileID: 8300000, guid: 8ef90c8eee7f5964dbd376d850610a6b, type: 3}
+    - {fileID: 8300000, guid: d50f246020ffd7247888c37b42456d26, type: 3}
+    - {fileID: 8300000, guid: 92a28aa542307314caacdc659b65fb74, type: 3}
+    - {fileID: 8300000, guid: f2f7ea27634e10b48ac0685700ddf412, type: 3}
+    - {fileID: 8300000, guid: d653c16cf588ded429931e16ec9c74b3, type: 3}
+    - {fileID: 8300000, guid: 5f7416fd7f797094a93810d4bd11f610, type: 3}
+    - {fileID: 8300000, guid: deadb062b242e014b9cec9340b3038f1, type: 3}
+    - {fileID: 8300000, guid: 4625990170b1626498d0c892c35edeb9, type: 3}
+    - {fileID: 8300000, guid: b7eb695f38de3174db0cb4ab6234baf9, type: 3}
+    - {fileID: 8300000, guid: 2c5b41533e5b21e45a1b045258ec3451, type: 3}
+    - {fileID: 8300000, guid: 9c402b246285d354badce194db156645, type: 3}
+    - {fileID: 8300000, guid: ca075f0c4b186c746bfb48ddba4a0ab2, type: 3}
+    - {fileID: 8300000, guid: 108436843461c3c4c88a10399c3d802a, type: 3}
+    - {fileID: 8300000, guid: d87321b69120e4d488257dc44f0ffb5a, type: 3}
+    - {fileID: 8300000, guid: fc8096c914b4aa843a5495d1677f803c, type: 3}
+    - {fileID: 8300000, guid: 0a2acb28a540a4e46aee3f17434734e0, type: 3}
+    - {fileID: 8300000, guid: 24ba34d3a21de0746923b4b580853eb6, type: 3}
+    - {fileID: 8300000, guid: 1aaab19050495d249a00b4f9143e0ecf, type: 3}
+    - {fileID: 8300000, guid: 42259fd68e0107d4eafc514734c404af, type: 3}
+    - {fileID: 8300000, guid: 8da1547987e83ce48a53cba0adba0e8a, type: 3}
+  _addressTable:
+    keys: []
+    values: []

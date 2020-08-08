@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5834b5087d578d24c926ce20cd31e6d6, type: 3}
-  m_Name: VoiceOverExample-en_ContentUpdateGroupSchema
+  m_Name: Voiceovers-en_ContentUpdateGroupSchema
   m_EditorClassIdentifier: 
-  m_Group: {fileID: 11400000, guid: 675ab720c0f0ba64dba0c61dda62fa91, type: 2}
+  m_Group: {fileID: 11400000, guid: de802084fdb964e7888ee7bba778c21d, type: 2}
   m_StaticContent: 0

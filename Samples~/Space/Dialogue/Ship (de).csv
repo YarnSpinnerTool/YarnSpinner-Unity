@@ -1,13 +1,13 @@
-id,text,file,node,lineNumber
-line:5837f2,"Schiff: Hey Kumpel.  ",Ship,Ship,7
-line:ship09,"Spieler: Hey Schiff. ",Ship,Ship,8
-line:ship10,"Spieler: Wie geht's dem Weltraum? ",Ship,Ship,9
-line:ship11,"Schiff: Oh man. ",Ship,Ship,10
-line:ship12,"Schiff: Der ist RIESIG! ",Ship,Ship,12
-line:ship13,"Schiff: Hey! ",Ship,Ship,16
-line:ship01,"Spieler: Sally hat mir gesagt, dass du mich sehen willst? ",Ship,Ship,21
-line:ship03,"Schiff: Aber wie! ",Ship,Ship,23
-line:ship04,"Schiff: Ich soll dir von ihr ausrichten: ",Ship,Ship,25
-line:ship05,"Schiff: Wenn du nochmal deine Schicht verlässt ohne die Konsole zurückzusetzen ...",Ship,Ship,26
-line:ship06,"Schiff: Wird sie dich lebendig zerhackstückeln! ",Ship,Ship,28
-line:ship07,"Spieler: Oh. ",Ship,Ship,31
+language,id,text,file,node,lineNumber,lock,comment
+de,line:5837f2,Schiff: Hey Kumpel.  ,Ship,Ship,7,b709c42e,
+de,line:ship09,Spieler: Hey Schiff. ,Ship,Ship,8,0f857079,
+de,line:ship10,Spieler: Wie geht's dem Weltraum? ,Ship,Ship,9,a741d6b2,
+de,line:ship11,Schiff: Oh man. ,Ship,Ship,10,778a5a83,
+de,line:ship12,Schiff: Der ist RIESIG! ,Ship,Ship,12,88f3fb99,
+de,line:ship13,Schiff: Hey! ,Ship,Ship,16,5a889e0a,
+de,line:ship01,"Spieler: Sally hat mir gesagt, dass du mich sehen willst? ",Ship,Ship,21,be6b00c6,
+de,line:ship03,Schiff: Aber wie! ,Ship,Ship,23,171196c4,
+de,line:ship04,Schiff: Ich soll dir von ihr ausrichten: ,Ship,Ship,25,e1980146,
+de,line:ship05,Schiff: Wenn du nochmal deine Schicht verlässt ohne die Konsole zurückzusetzen ...,Ship,Ship,26,b6808e22,
+de,line:ship06,Schiff: Wird sie dich lebendig zerhackstückeln! ,Ship,Ship,28,c1c63254,
+de,line:ship07,Spieler: Oh. ,Ship,Ship,31,727bb97b,

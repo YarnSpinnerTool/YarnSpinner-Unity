@@ -8,15 +8,15 @@ namespace Yarn.Unity {
     /// </summary>
     public class YarnLinesAsCanvasText : MonoBehaviour {
         public YarnProgram yarnScript;
-        public UnityEngine.UI.Text[] textCanvases;
-        public TextMeshProUGUI[] textMeshProCanvases;
+
+        public LocalizationDatabase localizationDatabase;
+
+        [System.Serializable]
+        public class StringObjectDictionary : SerializedDictionary<string, Object> {}
+
+        [SerializeField] public StringObjectDictionary stringsToViews = new StringObjectDictionary();
+
         [SerializeField] bool _useTextMeshPro = default;
-
-        private Dictionary<string, string> _yarnStringTable = new Dictionary<string, string>();
-
-        private void Awake() {
-            LoadStringTable();
-        }
 
         void Start() {
             UpdateTextOnUiElements();
@@ -27,20 +27,7 @@ namespace Yarn.Unity {
         /// the languages preferences were changed.
         /// </summary>
         public void OnTextLanguagePreferenceChanged () {
-            LoadStringTable();
             UpdateTextOnUiElements();
-        }
-
-        /// <summary>
-        /// Load all strings from the yarn file into memory.
-        /// </summary>
-        private void LoadStringTable() {
-            if (yarnScript != null) {
-                _yarnStringTable.Clear();
-                foreach (var line in yarnScript.GetStringTable()) {
-                    _yarnStringTable.Add(line.Key, line.Value);
-                }
-            }
         }
 
         /// <summary>
@@ -48,17 +35,19 @@ namespace Yarn.Unity {
         /// yarnScript.
         /// </summary>
         private void UpdateTextOnUiElements() {
-            var index = 0;
-            foreach (var line in _yarnStringTable) {
-                if (!_useTextMeshPro && index < textCanvases.Length && textCanvases[index]) {
-                    textCanvases[index].text = line.Value;
-                }
+            var loc = localizationDatabase.GetLocalization(Preferences.TextLanguage);
+            
+            foreach (var line in stringsToViews) {
 
-                if (_useTextMeshPro && index < textMeshProCanvases.Length && textMeshProCanvases[index]) {
-                    textMeshProCanvases[index].text = line.Value;
-                }
+                var localizedString = loc.GetLocalizedString(line.Key);
 
-                index++;
+                var view = line.Value;
+
+                if (_useTextMeshPro && view is TextMeshProUGUI tmpText) {
+                    tmpText.text = localizedString;
+                } else if (view is UnityEngine.UI.Text text) {
+                    text.text = localizedString;
+                }
             }
         }
     }

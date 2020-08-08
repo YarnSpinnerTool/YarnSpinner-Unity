@@ -28,7 +28,7 @@ namespace Yarn.Unity.Tests
         {
 #if UNITY_EDITOR
             // Filter the list to remove any scene with this GUID
-            EditorBuildSettings.scenes = EditorBuildSettings.scenes.Where(x => x.guid.ToString() == GUID).ToArray();
+            EditorBuildSettings.scenes = EditorBuildSettings.scenes.Where(x => x.guid.ToString() != GUID).ToArray();
 #endif
         }
     }

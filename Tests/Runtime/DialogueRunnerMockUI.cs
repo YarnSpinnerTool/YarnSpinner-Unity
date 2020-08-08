@@ -73,7 +73,7 @@ namespace Yarn.Unity.Tests
             CurrentOptions.Clear();
             foreach (var option in dialogueOptions)
             {
-                CurrentOptions.Add(option.TextLocalized);
+                CurrentOptions.Add(option.Line.Text.Text);
             }
         }
 

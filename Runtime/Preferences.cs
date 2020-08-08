@@ -135,11 +135,16 @@ namespace Yarn.Unity
 
         private void OnEnable()
         {
-            if (string.IsNullOrEmpty(Array.Find(Cultures.AvailableCulturesNames, element => element == _textLanguage)) || !ProjectSettings.TextProjectLanguages.Contains(_textLanguage))
+            // If the cultures list or the project text languages list
+            // doesn't have our text language, reset it to the default
+            if (Cultures.HasCulture(_textLanguage) == false || !ProjectSettings.TextProjectLanguages.Contains(_textLanguage))
             {
                 _textLanguage = GetDefaultTextLanguage();
             }
-            if (string.IsNullOrEmpty(Array.Find(Cultures.AvailableCulturesNames, element => element == _audioLanguage)) || !ProjectSettings.AudioProjectLanguages.Contains(_audioLanguage))
+
+            // If the cultures list or the project audio languages list
+            // doesn't have our audio language, reset it to the default
+            if (Cultures.HasCulture(_audioLanguage) == false || !ProjectSettings.AudioProjectLanguages.Contains(_audioLanguage))
             {
                 _audioLanguage = GetDefaultAudioLanguage();
             }
@@ -172,7 +177,7 @@ namespace Yarn.Unity
         /// <summary>
         /// Read the user's language preferences from disk.
         /// </summary>
-        /// /// <param name="useJson">If true, settings will be read from JSON file (default). If false, settings will be read from Unity's PlayerPrefs.</param>
+        /// <param name="useJson">If true, settings will be read from JSON file (default). If false, settings will be read from Unity's PlayerPrefs.</param>
         private void ReadPreferencesFromDisk(bool useJson = true)
         {
             if (useJson)
@@ -189,10 +194,13 @@ namespace Yarn.Unity
             if (!string.IsNullOrEmpty(_textLanguage))
             {
                 // Keep the value read from disk to be able to tell if this class has been modified during runtime
-                _textLanguageFromDisk = Array.Find(Cultures.AvailableCulturesNames, element => element == _textLanguage);
-                if (string.IsNullOrEmpty(_textLanguageFromDisk))
+                _textLanguageFromDisk = _textLanguage;
+
+                if (Cultures.HasCulture(_textLanguageFromDisk))
                 {
                     // Language ID from JSON was not found in available Cultures so try to reset with current culture or the project's default language
+                    _textLanguageFromDisk = null;
+                    
                     _textLanguage = ProjectSettings.TextProjectLanguages.Contains(CultureInfo.CurrentCulture.Name) ? CultureInfo.CurrentCulture.Name : ProjectSettings.TextProjectLanguageDefault;
                 }
             }
@@ -201,10 +209,12 @@ namespace Yarn.Unity
             if (!string.IsNullOrEmpty(_audioLanguage))
             {
                 // Keep the value read from disk to be able to tell if this class has been modified during runtime
-                _audioLanguageFromDisk = Array.Find(Cultures.AvailableCulturesNames, element => element == _audioLanguage);
-                if (string.IsNullOrEmpty(_audioLanguageFromDisk))
+                _audioLanguageFromDisk = _audioLanguage;
+                if (Cultures.HasCulture(_audioLanguageFromDisk))
                 {
                     // Language ID from JSON was not found in available Cultures so try to reset with current culture or the project's default language
+                    _audioLanguageFromDisk = null;
+
                     _audioLanguage = ProjectSettings.AudioProjectLanguages.Contains(CultureInfo.CurrentCulture.Name) ? CultureInfo.CurrentCulture.Name : ProjectSettings.AudioProjectLanguageDefault;
                 }
             }

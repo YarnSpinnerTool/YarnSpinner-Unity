@@ -51,16 +51,27 @@ public class ProjectSettings : ScriptableObject {
     /// </summary>
     private static ProjectSettings _instance;
 
-#if ADDRESSABLES
-    [SerializeField]
-    private bool _addressableVoiceOverAudioClips = false;
-
     /// <summary>
-    /// False (default) when VoiceOver AudioClip should be directly
-    /// referenced and loaded. True if the Addressable system should be
-    /// used.
+    /// False when VoiceOver AudioClip should be directly referenced and
+    /// loaded. True (default) if the Addressable system should be used.
+    /// This property is always false when the Addressable Assets package
+    /// is not present.
     /// </summary>
-    public static bool AddressableVoiceOverAudioClips { get => Instance._addressableVoiceOverAudioClips; set => Instance._addressableVoiceOverAudioClips = value; }
+#if ADDRESSABLES    
+    public static bool AddressableVoiceOverAudioClips
+    {
+        get => Instance._addressableVoiceOverAudioClips; 
+        set => Instance._addressableVoiceOverAudioClips = value; 
+    }
+
+    [SerializeField]
+    private bool _addressableVoiceOverAudioClips = true;
+#else
+    // Make this property available when the addressables package is not
+    // present, but make it always return false. (This means that code can
+    // check for whether addressables should be used without having to wrap
+    // it all in an #ifdef ADDRESSABLES block.)
+    public static bool AddressableVoiceOverAudioClips => false;
 #endif
 
     /// <summary>
@@ -125,5 +136,26 @@ public class ProjectSettings : ScriptableObject {
     /// </summary>
     public static void WriteProjectSettingsToDisk() {
         YarnSettingsHelper.WritePreferencesToDisk(Instance, _settingsPath);
+    }
+
+    /// <summary>
+    /// Adds a new language to the <see cref="TextProjectLanguages"/>.
+    /// </summary>
+    /// <remarks>
+    /// Calling this method has the same effect as opening the Yarn Spinner
+    /// project settings in Unity, and adding a language there.
+    /// </remarks>
+    /// <param name="localeCode">The locale code for the languge to
+    /// add.</param>
+    /// <throws cref="ArgumentException">Thrown when <paramref
+    /// name="localeCode"/> is not a valid locale code (that is, it's not
+    /// known to the <see cref="Yarn.Unity.Cultures"/> class.)</throws>
+    public static void AddNewTextLanguage(string localeCode) {
+
+        if (Yarn.Unity.Cultures.HasCulture(localeCode)) {
+            Instance._textProjectLanguages.Add(localeCode);
+        } else {
+            throw new System.ArgumentException($"{localeCode} is not a valid locale code.", localeCode);
+        }
     }
 }

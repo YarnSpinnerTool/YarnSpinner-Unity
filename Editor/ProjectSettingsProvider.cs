@@ -21,8 +21,6 @@ namespace Yarn.Unity
         public ProjectSettingsProvider(string path, SettingsScope scope = SettingsScope.Project) : base(path, scope) { }
 
         // Variables used for the project-wide settings
-        private const string buttonTextDeleteAllDirectReferences = "Delete all direct AudioClip references";
-        private const string buttonTextDeleteAllAddressableReferences = "Delete all addressable AudioClip references";
         private static SerializedObject _projectSettings;
         private ReorderableList _textLanguagesReorderableList;
         private int _textLanguagesListIndex;
@@ -31,6 +29,10 @@ namespace Yarn.Unity
         private static SerializedObject _preferences;
         private const string _emptyTextLanguageMessage = "To set a preference for text language, add one or more languages to 'Project Setting->Yarn Spinner' first.";
         private const string _emptyAudioLanguageMessage = "To set a preference for audio language, add one or more languages to 'Project Setting->Yarn Spinner' first.";
+
+        // TODO: replace with final URL when available
+        private const string AddressableAssetsDocumentationURL = "https://yarnspinner.dev";
+
         private List<string> _textLanguages = new List<string>();
         private List<string> _audioLanguage = new List<string>();
         private string _textLanguageLastFrame;
@@ -67,7 +69,7 @@ namespace Yarn.Unity
             _textLanguagesReorderableList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
                 var languageId = _textLanguagesReorderableList.serializedProperty.GetArrayElementAtIndex(index);
-                var displayName = Cultures.LanguageNamesToDisplayNames(languageId.stringValue);
+                var displayName = Cultures.GetCultures().FirstOrDefault(c => c.Name == languageId.stringValue).DisplayName ?? "<no display name>";
                 rect.y += 2;
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width * 0.7f, EditorGUIUtility.singleLineHeight), displayName);
                 var textLanguageOnAudio = ProjectSettings.AudioProjectLanguages.Contains(languageId.stringValue);
@@ -112,8 +114,8 @@ namespace Yarn.Unity
             // Text languages
             var textLanguagesProp = _projectSettings.FindProperty("_textProjectLanguages");
             var textLanguages = ProjectSettings.TextProjectLanguages;
-            var remainingTextLanguages = Cultures.AvailableCulturesNames.Except(textLanguages).ToArray();
-            var remainingTextLanguagesDisplayNames = Cultures.LanguageNamesToDisplayNames(remainingTextLanguages);
+            var remainingTextLanguages = Cultures.GetCultures().Where(c => textLanguages.Contains(c.NativeName) == false).ToArray();
+            var remainingTextLanguagesDisplayNames = remainingTextLanguages.Select(c => c.DisplayName).ToArray();
             // Button and Dropdown List for adding a language
             GUILayout.BeginHorizontal();
             if (remainingTextLanguages.Length < 1)
@@ -127,7 +129,7 @@ namespace Yarn.Unity
                 if (GUILayout.Button("Add language to project"))
                 {
                     textLanguagesProp.InsertArrayElementAtIndex(textLanguagesProp.arraySize);
-                    textLanguagesProp.GetArrayElementAtIndex(textLanguagesProp.arraySize - 1).stringValue = remainingTextLanguages[_textLanguagesListIndex];
+                    textLanguagesProp.GetArrayElementAtIndex(textLanguagesProp.arraySize - 1).stringValue = remainingTextLanguages[_textLanguagesListIndex].Name;
                     _textLanguagesListIndex = 0;
                 }
             }
@@ -151,24 +153,6 @@ namespace Yarn.Unity
                 }
             }
 
-#if ADDRESSABLES
-        GUILayout.Label("Voice Over Asset Handling", EditorStyles.boldLabel);
-        var addressableVoiceOverAudioClipsProp = _projectSettings.FindProperty("_addressableVoiceOverAudioClips");
-        EditorGUILayout.PropertyField(addressableVoiceOverAudioClipsProp, new GUIContent("Use Addressables"));
-
-        GUILayout.BeginHorizontal();
-        GUI.enabled = addressableVoiceOverAudioClipsProp.boolValue;
-        if (GUILayout.Button(buttonTextDeleteAllDirectReferences)) {
-            RemoveVoiceOverReferences(true);
-        }
-        GUI.enabled = !addressableVoiceOverAudioClipsProp.boolValue;
-        if (GUILayout.Button(buttonTextDeleteAllAddressableReferences)) {
-            RemoveVoiceOverReferences(false);
-        }
-        GUI.enabled = true;
-        GUILayout.EndHorizontal();
-#endif
-
             _projectSettings.ApplyModifiedProperties();
 
             // User's language preferences
@@ -185,6 +169,29 @@ namespace Yarn.Unity
 
             // Audio language popup related things
             SerializedProperty audioLanguageProp = DrawLanguagePreference(LanguagePreference.AudioLanguage);
+
+#if ADDRESSABLES
+            GUILayout.Label("Voice Over Asset Handling", EditorStyles.boldLabel);
+            var addressableVoiceOverAudioClipsProp = _projectSettings.FindProperty("_addressableVoiceOverAudioClips");
+            EditorGUILayout.PropertyField(addressableVoiceOverAudioClipsProp, new GUIContent("Use Addressables"));
+
+            string message = $"This project has the Addressable Assets package installed. When this option is selected, {ObjectNames.NicifyVariableName(nameof(LocalizationDatabase)).ToLowerInvariant()}s will use addressable asset references to refer to assets that belong to lines, rather than directly referencing the asset. This allows for better performance during steps that have a large amount of dependencies.\n\nFor more information, click this box to open the Yarn Spinner documentation.";
+
+            EditorGUILayout.HelpBox(message, MessageType.Info);
+
+            // Make the HelpBox that we just rendered have a link cursor
+            var lastRect = GUILayoutUtility.GetLastRect();
+            EditorGUIUtility.AddCursorRect(lastRect, MouseCursor.Link);
+
+            // And also detect clicks on it; open the documentation when
+            // this happens
+            if (Event.current.type == EventType.MouseUp
+                && lastRect.Contains(Event.current.mousePosition)) {
+                Application.OpenURL(AddressableAssetsDocumentationURL);
+            }
+            
+            _projectSettings.ApplyModifiedProperties();
+#endif
 
             _preferences.ApplyModifiedProperties();
 
@@ -248,7 +255,7 @@ namespace Yarn.Unity
                 // Assign default language in case the currently selected language has become invalid
                 selectedLanguageIndex = 0;
             }
-            string[] languagesDisplayNamesAvailableForSelection = Cultures.LanguageNamesToDisplayNames(languagesNamesAvailableForSelection);
+            string[] languagesDisplayNamesAvailableForSelection = languagesNamesAvailableForSelection.Select(name => Cultures.GetCultures().FirstOrDefault(c => c.Name == name).DisplayName).ToArray();
             // Disable popup and show message box in case the project languages have been defined yet
             if (languagesNamesAvailableForSelection.Length == 0)
             {
@@ -281,26 +288,7 @@ namespace Yarn.Unity
             AudioLanguage
         }
 
-#if ADDRESSABLES
-    /// <summary>
-    /// Remove all voice over audio clip references or addressable references on all yarn assets.
-    /// </summary>
-    /// <param name="removeDirectReferences">True if direct audio clip references should be deleted and false if Addressable references should be deleted.</param>
-    private static void RemoveVoiceOverReferences(bool removeDirectReferences) {
-        if (removeDirectReferences) {
-            Debug.Log("Removing all direct AudioClip references on all yarn assets!");
-        } else {
-            Debug.Log("Removing all Adressable references on all yarn assets!");
-        }
 
-        foreach (var yarnProgram in AssetDatabase.FindAssets("t:YarnProgram")) {
-            var yarnImporter = ScriptedImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(yarnProgram)) as YarnImporter;
-            yarnImporter.RemoveAllVoiceOverReferences(removeDirectReferences);
-            EditorUtility.SetDirty(yarnImporter);
-            yarnImporter.SaveAndReimport();
-        }
-    }
-#endif
 
         /// <summary>
         /// Register YarnSpinner's UI for project settings and user preferences in the "Project Settings" window.

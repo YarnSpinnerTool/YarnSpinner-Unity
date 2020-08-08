@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff34614f4518d409d9e35af62a22851c, type: 3}
+  m_Name: MainMenu-de
+  m_EditorClassIdentifier: 
+  _LocaleCode: de
+  assetSourceFolder: {fileID: 0}
+  _stringTable:
+    keys:
+    - line:01bbe32
+    - line:0ff5d85
+    - line:02d8e0d
+    - line:0cabcd2
+    - line:0718c80
+    - line:05073d5
+    - line:071d8ad
+    values:
+    - "Beispiel Erz\xE4hlung"
+    - Beispiel Sprachausgabe
+    - Optionen
+    - Textsprache
+    - Tonsprache
+    - "Zur\xFCck"
+    - Anwenden
+  _assetTable:
+    keys: []
+    values: []
+  _addressTable:
+    keys: []
+    values: []
