@@ -81,6 +81,7 @@ private static List<StringTableEntry> GetExpectedStrings(string fileName)
         [TearDown]
         public void TearDown() {
             foreach (var path in createdFilePaths) {
+                Debug.Log($"Cleanup: Deleting {path}");
                 File.Delete(path);
 
                 string metaFilePath = path + ".meta";
@@ -89,6 +90,8 @@ private static List<StringTableEntry> GetExpectedStrings(string fileName)
                     File.Delete(metaFilePath);
                 }
             }
+
+            AssetDatabase.Refresh();
         }
 
         [Test]
@@ -102,7 +105,7 @@ private static List<StringTableEntry> GetExpectedStrings(string fileName)
 
             File.WriteAllText(path, textYarnAsset);
             AssetDatabase.Refresh();
-            var result = ScriptedImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
+            var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
             Assert.That(result.isSuccesfullyCompiled);
 
@@ -121,7 +124,7 @@ private static List<StringTableEntry> GetExpectedStrings(string fileName)
             LogAssert.ignoreFailingMessages = true;
             AssetDatabase.Refresh();
             LogAssert.ignoreFailingMessages = false;
-            var result = ScriptedImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
+            var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
             Assert.That(!result.isSuccesfullyCompiled);
         }
@@ -137,7 +140,7 @@ private static List<StringTableEntry> GetExpectedStrings(string fileName)
 
             File.WriteAllText(path, TestYarnScriptSource);
             AssetDatabase.Refresh();
-            var result = ScriptedImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
+            var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
             // Importing this Yarn script will have produced a CSV
             // TextAsset containing the string table extracted from this
@@ -157,13 +160,40 @@ private static List<StringTableEntry> GetExpectedStrings(string fileName)
         [Test]
         public void YarnImporterUtility_CanCreateNewLocalizationDatabase() {
             // Arrange: Import a yarn script
+            string fileName = Path.GetRandomFileName();
+
+            string path = Application.dataPath + "/" + fileName + ".yarn";
+            createdFilePaths.Add(path);
+
+            File.WriteAllText(path, TestYarnScriptSource);
+            AssetDatabase.Refresh();
+            var importer = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
+            var serializedObject =  new SerializedObject(importer);
+
+            var localizationDatabaseAfterImport = importer.localizationDatabase;
+
+            var expectedStringIDs = GetExpectedStrings(fileName);
             
             // Act: create a new localization database. 
+            YarnImporterUtility.CreateNewLocalizationDatabase(serializedObject);
             
             // Assert: Verify that the new localization database exists,
             // and contains a single localization, and that localization
             // contains the string table entries we expect.
-            throw new System.NotImplementedException();
+            Assert.NotNull(importer.localizationDatabase, "Importer should have a localization database");
+            createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.localizationDatabase));            
+
+            var db = importer.localizationDatabase;
+            Assert.AreEqual(1, db.Localizations.Count(), "Localization database should have a single localization");
+            createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.localizationDatabase.Localizations.First()));
+            
+            Assert.Null(localizationDatabaseAfterImport, "The script should not have a localization database after initial creation");
+
+            var localization = db.Localizations.First();
+            Assert.AreEqual(localization.LocaleCode, importer.baseLanguageID, "Localization locale should match script's language");
+
+            Assert.Contains(importer.baseLanguageID, ProjectSettings.TextProjectLanguages, "Script language should be present in the project language settings");
+
         }
 
         [Test]
