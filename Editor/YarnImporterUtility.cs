@@ -95,6 +95,8 @@ internal static class YarnImporterUtility
 
         // Associate this localization database with the object.
         localizationDatabaseProperty.objectReferenceValue = localizationDatabaseAsset;
+
+        serializedObject.ApplyModifiedProperties();
     }
 
     /// <summary>
