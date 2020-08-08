@@ -96,11 +96,10 @@ position: 0,0
         List<string> createdFilePaths = new List<string>();
 
         // Gets a locale code for a language that is not the current base.
-        
-        private string AlternateLocaleCode => 
+
+        private string AlternateLocaleCode =>
                     new string[] { "en", "de", "zh-cn" } // some languages
-                    .Where(s => s != Preferences.TextLanguage) // that are not the current one
-                    .First(); // pick one
+                    .First(s => s != Preferences.TextLanguage); // that are not the current one
 
         [SetUp]
         public void Setup()
@@ -130,17 +129,16 @@ position: 0,0
         [Test]
         public void YarnImporter_OnValidYarnFile_ShouldCompile()
         {
-            const string textYarnAsset = "title: Start\ntags:\ncolorID: 0\nposition: 0,0\n--- \nSpieler: Kannst du mich hören? #line:0e3dc4b\nNPC: Klar und deutlich. #line:0967160\n[[Mir reicht es.| Exit]] #line:04e806e\n[[Nochmal!|Start]] #line:0901fb2\n===\ntitle: Exit\ntags: \ncolorID: 0\nposition: 0,0\n--- \n===";
             string fileName = Path.GetRandomFileName();
 
             var path = Application.dataPath + "/" + fileName + ".yarn";
             createdFilePaths.Add(path);
 
-            File.WriteAllText(path, textYarnAsset);
+            File.WriteAllText(path, TestYarnScriptSource);
             AssetDatabase.Refresh();
             var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
-            Assert.That(result.isSuccesfullyCompiled);
+            Assert.True(result.isSuccesfullyCompiled);
 
         }
 
@@ -159,7 +157,7 @@ position: 0,0
             LogAssert.ignoreFailingMessages = false;
             var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
-            Assert.That(!result.isSuccesfullyCompiled);
+            Assert.False(result.isSuccesfullyCompiled);
         }
 
         [Test]
@@ -196,7 +194,7 @@ position: 0,0
             // Arrange: Import a yarn script
             string fileName = Path.GetRandomFileName();
 
-            string path = Path.Combine( "Assets", fileName + ".yarn");
+            string path = Path.Combine("Assets", fileName + ".yarn");
             createdFilePaths.Add(path);
 
             File.WriteAllText(path, TestYarnScriptSource);
@@ -237,18 +235,16 @@ position: 0,0
             // Arrange: Import a yarn script and create a localization
             // database for it
             string fileName = Path.GetRandomFileName();
-
             string path = Path.Combine("Assets", fileName + ".yarn");
             createdFilePaths.Add(path);
-
             File.WriteAllText(path, TestYarnScriptSource);
             AssetDatabase.Refresh();
             var importer = AssetImporter.GetAtPath(path) as YarnImporter;
             var importerSerializedObject = new SerializedObject(importer);
-            
+
             YarnImporterUtility.CreateNewLocalizationDatabase(importerSerializedObject);
             createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.localizationDatabase));
-            
+
             var databaseSerializedObject = new SerializedObject(importer.localizationDatabase);
 
             // Act: Create a new localization CSV file for some new language
@@ -271,7 +267,7 @@ position: 0,0
             // entries we expect, and has the language we expect.
             var expectedLanguages = new HashSet<string> { importer.baseLanguageID, AlternateLocaleCode }.OrderBy(n => n);
             var foundLanguages = importer.programContainer.localizations.Select(l => l.languageName).OrderBy(n => n);
-            Assert.That(foundLanguages, Is.EquivalentTo(expectedLanguages), $"The locales should be what we expect to see");
+            CollectionAssert.AreEquivalent(expectedLanguages, foundLanguages, $"The locales should be what we expect to see");
         }
 
         [Test]
@@ -286,15 +282,15 @@ position: 0,0
             AssetDatabase.Refresh();
             var importer = AssetImporter.GetAtPath(path) as YarnImporter;
             var importerSerializedObject = new SerializedObject(importer);
-            
+
             YarnImporterUtility.CreateNewLocalizationDatabase(importerSerializedObject);
             var localizationDatabaseSerializedObject = new SerializedObject(importer.localizationDatabase);
             LocalizationDatabaseUtility.CreateLocalizationWithLanguage(localizationDatabaseSerializedObject, AlternateLocaleCode);
 
             YarnImporterUtility.CreateLocalizationForLanguageInProgram(importerSerializedObject, AlternateLocaleCode);
 
-            var unmodifiedBaseStringsTable = StringTableEntry.ParseFromCSV( (importerSerializedObject.targetObject as YarnImporter).baseLanguage.text);
-            var unmodifiedLocalizedStringsTable = StringTableEntry.ParseFromCSV( (importerSerializedObject.targetObject as YarnImporter).localizations.First(l => l.languageName == AlternateLocaleCode).text.text);
+            var unmodifiedBaseStringsTable = StringTableEntry.ParseFromCSV((importerSerializedObject.targetObject as YarnImporter).baseLanguage.text);
+            var unmodifiedLocalizedStringsTable = StringTableEntry.ParseFromCSV((importerSerializedObject.targetObject as YarnImporter).localizations.First(l => l.languageName == AlternateLocaleCode).text.text);
 
             // Act: modify the imported script so that lines are added,
             // changed and deleted, and then update the localized CSV
@@ -302,10 +298,10 @@ position: 0,0
 
             File.WriteAllText(path, TestYarnScriptSourceModified);
             AssetDatabase.Refresh();
-            YarnImporterUtility.UpdateLocalizationCSVs(importerSerializedObject);   
+            YarnImporterUtility.UpdateLocalizationCSVs(importerSerializedObject);
 
-            var modifiedBaseStringsTable = StringTableEntry.ParseFromCSV( (importerSerializedObject.targetObject as YarnImporter).baseLanguage.text);
-            var modifiedLocalizedStringsTable = StringTableEntry.ParseFromCSV( (importerSerializedObject.targetObject as YarnImporter).localizations.First(l => l.languageName == AlternateLocaleCode).text.text);
+            var modifiedBaseStringsTable = StringTableEntry.ParseFromCSV((importerSerializedObject.targetObject as YarnImporter).baseLanguage.text);
+            var modifiedLocalizedStringsTable = StringTableEntry.ParseFromCSV((importerSerializedObject.targetObject as YarnImporter).localizations.First(l => l.languageName == AlternateLocaleCode).text.text);
 
             // Assert: verify the base language string table contains the
             // string table entries we expect, verify the localized string
@@ -323,13 +319,14 @@ position: 0,0
             // for the unmodified pair, and the same for the modified pair,
             // but different between unmodified and modified (because lines
             // have been added, removed and changed)
-            foreach (var test in tests) {
+            foreach (var test in tests)
+            {
                 CollectionAssert.AreEquivalent(unmodifiedBaseStringsTable.Select(test.test), unmodifiedLocalizedStringsTable.Select(test.test), $"The unmodified string table {test.name}s should be equivalent");
 
                 CollectionAssert.AreEquivalent(modifiedBaseStringsTable.Select(test.test), modifiedLocalizedStringsTable.Select(test.test), $"The modified string table {test.name}s should be equivalent");
 
                 CollectionAssert.AreNotEquivalent(unmodifiedBaseStringsTable.Select(test.test), modifiedBaseStringsTable.Select(test.test), $"The unmodified and modified string table {test.name}s should not be equivalent");
-            }       
+            }
         }
 
         [Test]
