@@ -51,9 +51,9 @@ namespace Yarn.Unity
         /// </summary>
         public LineStatus Status;
 
-        public MarkupParsing.MarkupParseResult Text { get; internal set; }
+        public Markup.MarkupParseResult Text { get; internal set; }
 
-        public MarkupParsing.MarkupParseResult TextWithoutCharacterName {
+        public Markup.MarkupParseResult TextWithoutCharacterName {
             get {
                 // If a 'character' attribute is present, remove its text
                 if (Text.TryGetAttributeWithName("character", out var characterNameAttribute)) {
