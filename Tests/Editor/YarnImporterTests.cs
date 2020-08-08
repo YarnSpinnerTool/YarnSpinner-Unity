@@ -31,6 +31,28 @@ position: 0,0
 --- 
 ===";
 
+        // A modified version of TestYarnScriptSource, with the following
+        // changes:
+        // - A line has been added
+        // - A line has been modified
+        // - A line has been removed
+        private const string TestYarnScriptSourceModified = @"title: Start
+tags:
+colorID: 0
+position: 0,0
+--- 
+Spieler: Kannst du mich hören? This line was modified. #line:0e3dc4b
+[[Mir reicht es.| Exit]] #line:04e806e
+[[Nochmal!|Start]] #line:0901fb2
+This line was added. #line:a1b2c3
+===
+title: Exit
+tags: 
+colorID: 0
+position: 0,0
+--- 
+===";
+
         private static List<StringTableEntry> GetExpectedStrings(string fileName)
         {
             return new List<StringTableEntry>() {
@@ -255,18 +277,59 @@ position: 0,0
         [Test]
         public void YarnImporterUtility_CanUpdateLocalizedCSVs_WhenBaseScriptChanges()
         {
-            // Arrange: Run
-            // YarnImporterUtility_CanCreateLocalizationInLocalizationDatabase,
-            // modify the imported script so that lines are added, changed
-            // and deleted, reimport
+            // Arrange: Import a yarn script and create a localization
+            // database for it, create an alternate localization for it
+            string fileName = Path.GetRandomFileName();
+            string path = Path.Combine("Assets", fileName + ".yarn");
+            createdFilePaths.Add(path);
+            File.WriteAllText(path, TestYarnScriptSource);
+            AssetDatabase.Refresh();
+            var importer = AssetImporter.GetAtPath(path) as YarnImporter;
+            var importerSerializedObject = new SerializedObject(importer);
+            
+            YarnImporterUtility.CreateNewLocalizationDatabase(importerSerializedObject);
+            var localizationDatabaseSerializedObject = new SerializedObject(importer.localizationDatabase);
+            LocalizationDatabaseUtility.CreateLocalizationWithLanguage(localizationDatabaseSerializedObject, AlternateLocaleCode);
 
-            // Act: update the localized CSV programmatically
+            YarnImporterUtility.CreateLocalizationForLanguageInProgram(importerSerializedObject, AlternateLocaleCode);
+
+            var unmodifiedBaseStringsTable = StringTableEntry.ParseFromCSV( (importerSerializedObject.targetObject as YarnImporter).baseLanguage.text);
+            var unmodifiedLocalizedStringsTable = StringTableEntry.ParseFromCSV( (importerSerializedObject.targetObject as YarnImporter).localizations.First(l => l.languageName == AlternateLocaleCode).text.text);
+
+            // Act: modify the imported script so that lines are added,
+            // changed and deleted, and then update the localized CSV
+            // programmatically
+
+            File.WriteAllText(path, TestYarnScriptSourceModified);
+            AssetDatabase.Refresh();
+            YarnImporterUtility.UpdateLocalizationCSVs(importerSerializedObject);   
+
+            var modifiedBaseStringsTable = StringTableEntry.ParseFromCSV( (importerSerializedObject.targetObject as YarnImporter).baseLanguage.text);
+            var modifiedLocalizedStringsTable = StringTableEntry.ParseFromCSV( (importerSerializedObject.targetObject as YarnImporter).localizations.First(l => l.languageName == AlternateLocaleCode).text.text);
 
             // Assert: verify the base language string table contains the
             // string table entries we expect, verify the localized string
             // table contains the string table entries we expect
 
-            throw new System.NotImplementedException();
+            System.Func<StringTableEntry, string> CompareIDs = t => t.ID;
+            System.Func<StringTableEntry, string> CompareLocks = t => t.Lock;
+
+            var tests = new[] {
+                (name: "ID", test:CompareIDs),
+                (name: "lock", test:CompareLocks),
+            };
+
+            // We want to check that both the ID and the lock are the same
+            // for the unmodified pair, and the same for the modified pair,
+            // but different between unmodified and modified (because lines
+            // have been added, removed and changed)
+            foreach (var test in tests) {
+                CollectionAssert.AreEquivalent(unmodifiedBaseStringsTable.Select(test.test), unmodifiedLocalizedStringsTable.Select(test.test), $"The unmodified string table {test.name}s should be equivalent");
+
+                CollectionAssert.AreEquivalent(modifiedBaseStringsTable.Select(test.test), modifiedLocalizedStringsTable.Select(test.test), $"The modified string table {test.name}s should be equivalent");
+
+                CollectionAssert.AreNotEquivalent(unmodifiedBaseStringsTable.Select(test.test), modifiedBaseStringsTable.Select(test.test), $"The unmodified and modified string table {test.name}s should not be equivalent");
+            }       
         }
 
         [Test]
