@@ -222,17 +222,22 @@ position: 0,0
             File.WriteAllText(path, TestYarnScriptSource);
             AssetDatabase.Refresh();
             var importer = AssetImporter.GetAtPath(path) as YarnImporter;
-            var serializedObject = new SerializedObject(importer);
-
-            YarnImporterUtility.CreateNewLocalizationDatabase(serializedObject);
+            var importerSerializedObject = new SerializedObject(importer);
+            
+            YarnImporterUtility.CreateNewLocalizationDatabase(importerSerializedObject);
             createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.localizationDatabase));
+            
+            var databaseSerializedObject = new SerializedObject(importer.localizationDatabase);
+
+            // Act: Create a new localization CSV file for some new language
+            LocalizationDatabaseUtility.CreateLocalizationWithLanguage(databaseSerializedObject, AlternateLocaleCode);
+            YarnImporterUtility.CreateLocalizationForLanguageInProgram(importerSerializedObject, AlternateLocaleCode);
+
             foreach (var loc in importer.localizationDatabase.Localizations)
             {
                 createdFilePaths.Add(AssetDatabase.GetAssetPath(loc));
             }
 
-            // Act: Create a new localization CSV file for some new language
-            YarnImporterUtility.CreateLocalizationForLanguageInProgram(serializedObject, AlternateLocaleCode);
             foreach (var loc in importer.localizations)
             {
                 createdFilePaths.Add(AssetDatabase.GetAssetPath(loc.text));
