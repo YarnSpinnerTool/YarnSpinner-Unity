@@ -18,7 +18,7 @@ internal static class YarnImporterUtility
     /// program's base language.
     /// </summary>
     /// <param name="serializedObject">A serialized object that represents
-    /// a <see cref="YarnProgram"/>.</param>
+    /// a <see cref="YarnImporter"/>.</param>
     internal static void CreateNewLocalizationDatabase(SerializedObject serializedObject)
     {
         if (serializedObject.isEditingMultipleObjects) {
@@ -95,8 +95,8 @@ internal static class YarnImporterUtility
 
         // Associate this localization database with the object.
         localizationDatabaseProperty.objectReferenceValue = localizationDatabaseAsset;
-
-        serializedObject.ApplyModifiedProperties();
+        
+        serializedObject.ApplyModifiedProperties();        
     }
 
     /// <summary>
@@ -104,7 +104,7 @@ internal static class YarnImporterUtility
     /// the given language.
     /// </summary>
     /// <param name="serializedObject">A serialized object that represents
-    /// a <see cref="YarnProgram"/>.</param>
+    /// a <see cref="YarnImporter"/>.</param>
     /// <param name="language">The language to generate a localization CSV
     /// for.</param>
     internal static void CreateLocalizationForLanguageInProgram(SerializedObject serializedObject, string language)
@@ -180,7 +180,7 @@ internal static class YarnImporterUtility
     /// its Comment
     /// </remarks>
     /// <param name="serializedObject">A serialized object that represents
-    /// a <see cref="YarnProgram"/>.</param>
+    /// a <see cref="YarnImporter"/>.</param>
     internal static void UpdateLocalizationCSVs(SerializedObject serializedObject)
     {
         var localizationDatabaseProperty = serializedObject.FindProperty("localizationDatabase");
