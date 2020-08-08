@@ -31,7 +31,7 @@ position: 0,0
 --- 
 ===";
 
-private static List<StringTableEntry> GetExpectedStrings(string fileName)
+        private static List<StringTableEntry> GetExpectedStrings(string fileName)
         {
             return new List<StringTableEntry>() {
                 new StringTableEntry {
@@ -74,19 +74,23 @@ private static List<StringTableEntry> GetExpectedStrings(string fileName)
         List<string> createdFilePaths = new List<string>();
 
         [SetUp]
-        public void Setup() {
+        public void Setup()
+        {
             createdFilePaths.Clear();
         }
 
         [TearDown]
-        public void TearDown() {
-            foreach (var path in createdFilePaths) {
+        public void TearDown()
+        {
+            foreach (var path in createdFilePaths)
+            {
                 Debug.Log($"Cleanup: Deleting {path}");
                 File.Delete(path);
 
                 string metaFilePath = path + ".meta";
 
-                if (File.Exists(metaFilePath)) {
+                if (File.Exists(metaFilePath))
+                {
                     File.Delete(metaFilePath);
                 }
             }
@@ -154,11 +158,12 @@ private static List<StringTableEntry> GetExpectedStrings(string fileName)
             var simpleResult = expectedStrings.Select(simplifier);
             var simpleExpected = generatedStringsTable.Select(simplifier);
 
-            Assert.AreEqual(simpleExpected, simpleResult);            
+            Assert.AreEqual(simpleExpected, simpleResult);
         }
 
         [Test]
-        public void YarnImporterUtility_CanCreateNewLocalizationDatabase() {
+        public void YarnImporterUtility_CanCreateNewLocalizationDatabase()
+        {
             // Arrange: Import a yarn script
             string fileName = Path.GetRandomFileName();
 
@@ -168,25 +173,25 @@ private static List<StringTableEntry> GetExpectedStrings(string fileName)
             File.WriteAllText(path, TestYarnScriptSource);
             AssetDatabase.Refresh();
             var importer = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
-            var serializedObject =  new SerializedObject(importer);
+            var serializedObject = new SerializedObject(importer);
 
             var localizationDatabaseAfterImport = importer.localizationDatabase;
 
             var expectedStringIDs = GetExpectedStrings(fileName);
-            
+
             // Act: create a new localization database. 
             YarnImporterUtility.CreateNewLocalizationDatabase(serializedObject);
-            
+
             // Assert: Verify that the new localization database exists,
             // and contains a single localization, and that localization
             // contains the string table entries we expect.
             Assert.NotNull(importer.localizationDatabase, "Importer should have a localization database");
-            createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.localizationDatabase));            
+            createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.localizationDatabase));
 
             var db = importer.localizationDatabase;
             Assert.AreEqual(1, db.Localizations.Count(), "Localization database should have a single localization");
             createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.localizationDatabase.Localizations.First()));
-            
+
             Assert.Null(localizationDatabaseAfterImport, "The script should not have a localization database after initial creation");
 
             var localization = db.Localizations.First();
@@ -197,11 +202,12 @@ private static List<StringTableEntry> GetExpectedStrings(string fileName)
         }
 
         [Test]
-        public void YarnImporterUtility_CanCreateLocalizationInLocalizationDatabase() {
+        public void YarnImporterUtility_CanCreateLocalizationInLocalizationDatabase()
+        {
             // Arrange: Run YarnImporterUtility_CanCreateNewLocalizationDatabase)
 
             // Act: Create a new localization for a new language
-            
+
             // Assert: Verify that it exists, contains the string table
             // entries we expect, and has the language we expect.
 
@@ -209,18 +215,19 @@ private static List<StringTableEntry> GetExpectedStrings(string fileName)
         }
 
         [Test]
-        public void YarnImporterUtility_CanUpdateLocalizedCSVs_WhenBaseScriptChanges() {
+        public void YarnImporterUtility_CanUpdateLocalizedCSVs_WhenBaseScriptChanges()
+        {
             // Arrange: Run
             // YarnImporterUtility_CanCreateLocalizationInLocalizationDatabase,
             // modify the imported script so that lines are added, changed
             // and deleted, reimport
-            
+
             // Act: update the localized CSV programmatically
-            
+
             // Assert: verify the base language string table contains the
             // string table entries we expect, verify the localized string
             // table contains the string table entries we expect
-            
+
             throw new System.NotImplementedException();
         }
 
