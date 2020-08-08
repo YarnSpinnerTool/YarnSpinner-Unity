@@ -73,6 +73,13 @@ position: 0,0
         // deleted in TearDown.
         List<string> createdFilePaths = new List<string>();
 
+        // Gets a locale code for a language that is not the current base.
+        
+        private string AlternateLocaleCode => 
+                    new string[] { "en", "de", "zh-cn" } // some languages
+                    .Where(s => s != Preferences.TextLanguage) // that are not the current one
+                    .First(); // pick one
+
         [SetUp]
         public void Setup()
         {
@@ -167,32 +174,33 @@ position: 0,0
             // Arrange: Import a yarn script
             string fileName = Path.GetRandomFileName();
 
-            string path = Application.dataPath + "/" + fileName + ".yarn";
+            string path = Path.Combine( "Assets", fileName + ".yarn");
             createdFilePaths.Add(path);
 
             File.WriteAllText(path, TestYarnScriptSource);
+            AssetDatabase.ImportAsset(path);
             AssetDatabase.Refresh();
-            var importer = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
+            var importer = AssetImporter.GetAtPath(path) as YarnImporter;
             var serializedObject = new SerializedObject(importer);
 
             var localizationDatabaseAfterImport = importer.localizationDatabase;
 
-            var expectedStringIDs = GetExpectedStrings(fileName);
-
             // Act: create a new localization database. 
             YarnImporterUtility.CreateNewLocalizationDatabase(serializedObject);
+
+            importer.SaveAndReimport();
 
             // Assert: Verify that the new localization database exists,
             // and contains a single localization, and that localization
             // contains the string table entries we expect.
+            Assert.Null(localizationDatabaseAfterImport, "The script should not have a localization database after initial creation");
+
             Assert.NotNull(importer.localizationDatabase, "Importer should have a localization database");
             createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.localizationDatabase));
 
             var db = importer.localizationDatabase;
             Assert.AreEqual(1, db.Localizations.Count(), "Localization database should have a single localization");
             createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.localizationDatabase.Localizations.First()));
-
-            Assert.Null(localizationDatabaseAfterImport, "The script should not have a localization database after initial creation");
 
             var localization = db.Localizations.First();
             Assert.AreEqual(localization.LocaleCode, importer.baseLanguageID, "Localization locale should match script's language");
@@ -204,14 +212,39 @@ position: 0,0
         [Test]
         public void YarnImporterUtility_CanCreateLocalizationInLocalizationDatabase()
         {
-            // Arrange: Run YarnImporterUtility_CanCreateNewLocalizationDatabase)
+            // Arrange: Import a yarn script and create a localization
+            // database for it
+            string fileName = Path.GetRandomFileName();
 
-            // Act: Create a new localization for a new language
+            string path = Path.Combine("Assets", fileName + ".yarn");
+            createdFilePaths.Add(path);
+
+            File.WriteAllText(path, TestYarnScriptSource);
+            AssetDatabase.Refresh();
+            var importer = AssetImporter.GetAtPath(path) as YarnImporter;
+            var serializedObject = new SerializedObject(importer);
+
+            YarnImporterUtility.CreateNewLocalizationDatabase(serializedObject);
+            createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.localizationDatabase));
+            foreach (var loc in importer.localizationDatabase.Localizations)
+            {
+                createdFilePaths.Add(AssetDatabase.GetAssetPath(loc));
+            }
+
+            // Act: Create a new localization CSV file for some new language
+            YarnImporterUtility.CreateLocalizationForLanguageInProgram(serializedObject, AlternateLocaleCode);
+            foreach (var loc in importer.localizations)
+            {
+                createdFilePaths.Add(AssetDatabase.GetAssetPath(loc.text));
+            }
+
+            importer.SaveAndReimport();
 
             // Assert: Verify that it exists, contains the string table
             // entries we expect, and has the language we expect.
-
-            throw new System.NotImplementedException();
+            var expectedLanguages = new HashSet<string> { importer.baseLanguageID, AlternateLocaleCode }.OrderBy(n => n);
+            var foundLanguages = importer.programContainer.localizations.Select(l => l.languageName).OrderBy(n => n);
+            Assert.That(foundLanguages, Is.EquivalentTo(expectedLanguages), $"The locales should be what we expect to see");
         }
 
         [Test]
