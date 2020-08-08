@@ -13,8 +13,6 @@ position: 524,111
     Sally: Hi. #line:305cde
 <<endif>>
 
-wow #line:0a19165
-
 <<if not visited("Sally.Watch")>>
     [[Anything exciting happen on your watch?|Sally.Watch]] #line:5d7a7c
 <<endif>>
