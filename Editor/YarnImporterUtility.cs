@@ -86,7 +86,7 @@ internal static class YarnImporterUtility
         }
 
         // Populate the database's contents
-        LocalizationDatabaseEditor.UpdateContents(localizationDatabaseAsset);
+        LocalizationDatabaseUtility.UpdateContents(localizationDatabaseAsset);
 
         // Save it to disk
         AssetDatabase.CreateAsset(localizationDatabaseAsset, destinationPath);
@@ -210,7 +210,7 @@ internal static class YarnImporterUtility
             Debug.Log($"No files needed updating.");
             // Update our corresponding localization database.
             if (localizationDatabaseProperty.objectReferenceValue is LocalizationDatabase database) {
-                LocalizationDatabaseEditor.UpdateContents(database);
+                LocalizationDatabaseUtility.UpdateContents(database);
             }
         }
     }

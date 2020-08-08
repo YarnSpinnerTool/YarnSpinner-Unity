@@ -108,7 +108,7 @@ namespace Yarn.Unity
                 foreach (var db in impactedDatabases)
                 {
                     // Make the database update its contents
-                    LocalizationDatabaseEditor.UpdateContents(db);
+                    LocalizationDatabaseUtility.UpdateContents(db);
                 }
 
                 // Save any changed localization databases. (This will trigger
