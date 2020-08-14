@@ -373,11 +373,7 @@ namespace Yarn.Unity
         /// Add a new function that returns a value, so that it can be
         /// called from Yarn scripts.
         /// </summary>        
-        /// <inheritdoc cref="AddFunction(string, int, Function)"/>
         /// <remarks>
-        /// If `parameterCount` is -1, the function expects any number of
-        /// parameters.
-        ///
         /// When this function has been registered, it can be called from
         /// your Yarn scripts like so:
         /// 
@@ -397,54 +393,45 @@ namespace Yarn.Unity
         /// ```
         /// ]]>    
         /// </remarks>
-        /// <param name="implementation">The <see cref="ReturningFunction"/>
+        /// <param name="implementation">The <see cref="Delegate"/>
         /// that should be invoked when this function is called.</param>
-        /// <seealso cref="AddFunction(string, int, Function)"/>
-        /// <seealso cref="AddFunction(string, int, ReturningFunction)"/>
         /// <seealso cref="Library"/> 
-        /// <inheritdoc cref="AddFunction(string, int, Function)"/>       
-        public void AddFunction(string name, int parameterCount, ReturningFunction implementation)
+        public void AddFunction(string name, Delegate implementation)
         {
             if (Dialogue.library.FunctionExists(name)) {
-                Debug.LogError($"Cannot add function {name} one already exists");
+                Debug.LogError($"Cannot add function {name}: one already exists");
                 return;
             }
 
-            Dialogue.library.RegisterFunction(name, parameterCount, implementation);
+            Dialogue.library.RegisterFunction(name, implementation);
         }
 
-        /// <summary>
-        /// Add a new function, so that it can be called from Yarn scripts.
-        /// </summary>
-        /// <remarks>
-        /// If `parameterCount` is -1, the function expects any number of
-        /// parameters.
-        ///
-        /// When this function has been registered, it can be invoked using
-        /// the `call` command:
-        ///
-        /// <![CDATA[
-        /// ```yarn
-        /// <<call myFunction(1, 2)>>
-        /// ```
-        /// ]]>    
-        /// </remarks>
-        /// <param name="name">The name of the function to add.</param>
-        /// <param name="parameterCount">The number of parameters that this
-        /// function expects.</param>
-        /// <param name="implementation">The <see cref="Function"/>
-        /// that should be invoked when this function is called.</param>
-        /// <seealso cref="AddFunction(string, int, Function)"/>
-        /// <seealso cref="AddFunction(string, int, ReturningFunction)"/>
-        /// <seealso cref="Library"/>        
-        public void AddFunction(string name, int parameterCount, Function implementation)
-        {
-            if (Dialogue.library.FunctionExists(name)) {
-                Debug.LogError($"Cannot add function {name} one already exists");
-                return;
-            }
+        public void AddFunction<TResult>(string name, System.Func<TResult> implementation) {
+            AddFunction(name, (Delegate) implementation);
+        }
 
-            Dialogue.library.RegisterFunction(name, parameterCount, implementation);
+        public void AddFunction<TResult, T1>(string name, System.Func<TResult, T1> implementation) {
+            AddFunction(name, (Delegate) implementation);
+        }
+
+        public void AddFunction<TResult, T1, T2>(string name, System.Func<TResult, T1, T2> implementation) {
+            AddFunction(name, (Delegate) implementation);
+        }
+
+        public void AddFunction<TResult, T1, T2, T3>(string name, System.Func<TResult, T1, T2, T3> implementation) {
+            AddFunction(name, (Delegate) implementation);
+        }
+
+        public void AddFunction<TResult, T1, T2, T3, T4>(string name, System.Func<TResult, T1, T2, T3, T4> implementation) {
+            AddFunction(name, (Delegate) implementation);
+        }
+
+        public void AddFunction<TResult, T1, T2, T3, T4, T5>(string name, System.Func<TResult, T1, T2, T3, T4, T5> implementation) {
+            AddFunction(name, (Delegate) implementation);
+        }
+
+        public void AddFunction<TResult, T1, T2, T3, T4, T5, T6>(string name, System.Func<TResult, T1, T2, T3, T4, T5, T6> implementation) {
+            AddFunction(name, (Delegate) implementation);
         }
 
         /// <summary>

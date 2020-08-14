@@ -137,14 +137,6 @@ namespace Yarn.Unity {
                     value = b;
                     break;
 
-                case Yarn.Value.Type.Variable:
-                    // We don't support assigning default variables from
-                    // other variables yet
-                    Debug.LogErrorFormat("Can't set variable {0} to {1}: You can't " +
-                        "set a default variable to be another variable, because it " +
-                        "may not have been initialised yet.", variable.name, variable.value);
-                    continue;
-
                 case Yarn.Value.Type.Null:
                     value = null;
                     break;

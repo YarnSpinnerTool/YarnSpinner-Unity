@@ -23,10 +23,9 @@ namespace Yarn.Unity.Example
         {
             // Register a function on startup called "visited" that lets
             // Yarn scripts query to see if a node has been run before.
-            dialogueRunner.AddFunction("visited", 1, delegate (Yarn.Value[] parameters)
+            dialogueRunner.AddFunction("visited", delegate (string nodeName)
             {
-                var nodeName = parameters[0];
-                return _visitedNodes.Contains(nodeName.AsString);
+                return _visitedNodes.Contains(nodeName);
             });
 
         }

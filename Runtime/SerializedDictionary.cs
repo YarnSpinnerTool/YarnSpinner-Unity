@@ -20,6 +20,7 @@ namespace Yarn.Unity
     /// dictionary.</typeparam>
     /// <typeparam name="TValue">The type of value used in the
     /// dictionary.</typeparam>
+    /// <inheritdoc cref="IDictionary{TKey, TValue}"/>
     [System.Serializable]
     public class SerializedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
