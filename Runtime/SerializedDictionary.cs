@@ -5,6 +5,21 @@ using UnityEngine;
 
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// An <see cref="IDictionary{TKey,TValue}"/> that can be serialized as
+    /// part of a Unity object.
+    /// </summary>
+    /// <remarks>
+    /// Prior to Unity 2020, dictionaries cannot be directly serialized by
+    /// Unity. This class is a workaround; it provides an API identical to
+    /// <see cref="Dictionary{TKey, TValue}"/>, and stores its contents as
+    /// two <see cref="List{T}"/>s: one for <typeparamref name="TKey"/>,
+    /// and one for <typeparamref name="TValue"/>.
+    /// </remarks>
+    /// <typeparam name="TKey">The type of key used in the
+    /// dictionary.</typeparam>
+    /// <typeparam name="TValue">The type of value used in the
+    /// dictionary.</typeparam>
     [System.Serializable]
     public class SerializedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
