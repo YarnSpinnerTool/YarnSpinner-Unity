@@ -35,7 +35,6 @@ using System;
 
 namespace Yarn.Unity
 {
-
     /// <summary>
     /// The [DialogueRunner]({{|ref
     /// "/docs/unity/components/dialogue-runner.md"|}}) component acts as
@@ -49,8 +48,6 @@ namespace Yarn.Unity
         /// scene start.
         /// </summary>
         public YarnProgram[] yarnScripts;
-
-         
 
         /// <summary>
         /// The language code used to select a string table.
@@ -275,6 +272,7 @@ namespace Yarn.Unity
         public void Clear()
         {
             Assert.IsFalse(IsDialogueRunning, "You cannot clear the dialogue system while a dialogue is running.");
+            strings.Clear();
             Dialogue.UnloadAll();
         }
 
