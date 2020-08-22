@@ -40,7 +40,6 @@ namespace Yarn.Unity.Example {
 		// store sprite references for "actors" (characters, etc.)
 		[HideInInspector] public Dictionary<string, VNActor> actors = new Dictionary<string, VNActor>(); // tracks names to sprites
 
-		static string[] separ = new string[] {","}; // stores the separator value, usually a comma, but you can put a custom one in here
 		static Vector2 screenSize = new Vector2( 1280f, 720f); // needed for position calcuations, e.g. what does "left" mean?
 
 		void Awake () {
@@ -49,25 +48,25 @@ namespace Yarn.Unity.Example {
 			// manually add all Yarn command handlers, so that we don't
 			// have to type out game object names in Yarn scripts (also
 			// gives us a performance increase by avoiding GameObject.Find)
-			runner.AddCommandHandler("Scene", DoSceneChange );
-			runner.AddCommandHandler("Act", SetActor );
-			runner.AddCommandHandler("Draw", SetSpriteYarn );
+			runner.AddCommandHandler<string>("Scene", DoSceneChange );
+			runner.AddCommandHandler<string,string,string,string,string>("Act", SetActor );
+			runner.AddCommandHandler<string,string,string>("Draw", SetSpriteYarn );
 
-			runner.AddCommandHandler("Hide", HideSprite );
+			runner.AddCommandHandler<string>("Hide", HideSprite );
 			runner.AddCommandHandler("HideAll", HideAllSprites );
 			runner.AddCommandHandler("Reset", ResetScene );
 
-			runner.AddCommandHandler("Move", MoveSprite );
-			runner.AddCommandHandler("Flip", FlipSprite );
-			runner.AddCommandHandler("Shake", ShakeSprite );
+			runner.AddCommandHandler<string,string,string,float>("Move", MoveSprite );
+			runner.AddCommandHandler<string,string>("Flip", FlipSprite );
+			runner.AddCommandHandler<string,float>("Shake", ShakeSprite );
 
-			runner.AddCommandHandler("PlayAudio", PlayAudio );
-			runner.AddCommandHandler("StopAudio", StopAudio );
+			runner.AddCommandHandler<string,float,string>("PlayAudio", PlayAudio );
+			runner.AddCommandHandler<string>("StopAudio", StopAudio );
 			runner.AddCommandHandler("StopAudioAll", StopAudioAll );
 
-			runner.AddCommandHandler("Fade", SetFade );
-			runner.AddCommandHandler("FadeIn", SetFadeIn );
-			runner.AddCommandHandler("CamOffset", SetCameraOffset );
+            runner.AddCommandHandler<string,float,float,float>("Fade", SetFade );
+			runner.AddCommandHandler<float>("FadeIn", SetFadeIn );
+			runner.AddCommandHandler<string,string,float>("CamOffset", SetCameraOffset );
 
 			// adds all Resources to internal lists / one big pile... it
 			// will scan inside all subfolders too! note: but when
@@ -84,34 +83,23 @@ namespace Yarn.Unity.Example {
 		#region YarnCommands
 
 		/// <summary>changes background image</summary>
-		public void DoSceneChange(string[] parameters) {
-			var par = CleanParams( parameters );
-			bgImage.sprite = FetchAsset<Sprite>( par[0] );
+		public void DoSceneChange(string spriteName) {
+			bgImage.sprite = FetchAsset<Sprite>( spriteName );
 		}
 
 		/// <summary>
 		/// SetActor(actorName,spriteName,positionX,positionY,color) main
 		/// function for moving / adjusting characters</summary>
-		public void SetActor(params string[] parameters) {
-			// get parameter data
-			var par = CleanParams( parameters );
-			var actorName = par[0];
-			var spriteName = "";
-			if ( par.Length > 1 ) {
-				spriteName = par[1];
-			} else {
-				Debug.LogErrorFormat(this, "VN Manager tried to <<SetActor {0}>> but there aren't enough parameters to work with; it needs at least 2, like <<SetActor @ actorName, spriteName>>", par[0] );
-				return;
-			}
+		public void SetActor(string actorName, string spriteName, string positionX = "", string positionY = "", string colorHex = "" ) {
 
 			// have to use SetSprite() because par[2] and par[3] might be
 			// keywords (e.g. "left", "right")
-			var newActor = SetSpriteUnity( string.Format("{0},{1},{2}", spriteName, par.Length > 2 ? par[2] : "", par.Length > 3 ? par[3] : "" ) );
+			var newActor = SetSpriteUnity( spriteName, positionX, positionY );
 
 			// define text label BG color
-			var actorColor = Color.black;
-			if ( par.Length > 4 && ColorUtility.TryParseHtmlString( par[4], out actorColor )==false ) {
-				Debug.LogErrorFormat(this, "VN Manager can't parse [{0}] as an HTML color (e.g. [#FFFFFF] or certain keywords like [white])", par[4]);
+            var actorColor = Color.black;
+			if (colorHex != string.Empty && ColorUtility.TryParseHtmlString( colorHex, out actorColor ) ==false ) {
+				Debug.LogErrorFormat(this, "VN Manager can't parse [{0}] as an HTML color (e.g. [#FFFFFF] or certain keywords like [white])", colorHex);
 			}
 
 			// if the actor is using a sprite already, then clone any
@@ -120,14 +108,14 @@ namespace Yarn.Unity.Example {
 				// if any missing position params, assume the actor
 				// position should stay the same
 				var newPos = newActor.rectTransform.anchoredPosition;
-				if ( par.Length == 2 ) { // missing 2 params, override both x and y
+				if ( positionX == string.Empty && positionY == string.Empty ) { // missing 2 params, override both x and y
 					newPos = actors[actorName].rectTransform.anchoredPosition;
-				} else if ( par.Length == 3) { // missing 1 param, override y
+				} else if ( positionY == string.Empty ) { // missing 1 param, override y
 					newPos.y = actors[actorName].rectTransform.anchoredPosition.y;
 				}
 				// if any missing color params, then assume actor color
 				// should stay the same
-				if ( par.Length <= 4 ) {
+				if ( colorHex == string.Empty ) {
 					actorColor = actors[actorName].actorColor;
 				}
 				newActor.rectTransform.anchoredPosition = newPos;
@@ -143,25 +131,23 @@ namespace Yarn.Unity.Example {
 
 		///<summary> Draw(spriteName,positionX,positionY) generic function
 		///for sprite drawing</summary>
-		public void SetSpriteYarn(params string[] parameters) {
-			SetSpriteUnity( parameters );
+		public void SetSpriteYarn(string spriteName, string positionX = "", string positionY = "") {
+			SetSpriteUnity( spriteName, positionX, positionY );
 		}
 
-		public Image SetSpriteUnity(params string[] parameters) {
-			var par = CleanParams( parameters );
-
-			// set sprite
-			var spriteName = par[0];
-
+		public Image SetSpriteUnity(string spriteName, string positionX = "", string positionY = "") {
+			
 			// position sprite
 			var pos = new Vector2(0.5f, 0.5f);
-			if ( par.Length > 1 ) {
-				pos.x = ConvertCoordinates(par[1]);
-			}
-			if ( par.Length > 2 ) {
-				pos.y = ConvertCoordinates(par[2]);
-			}
 
+            if (positionX != string.Empty) {
+                pos.x = ConvertCoordinates(positionX);
+            }
+            
+            if (positionY != string.Empty) {
+                pos.y = ConvertCoordinates(positionY);
+            }
+        
 			// actually instantiate and draw sprite now
 			return SetSpriteActual( spriteName, pos );
 		}
@@ -169,9 +155,9 @@ namespace Yarn.Unity.Example {
 		///<summary>Hide(spriteName). "spriteName" can use wildcards, e.g.
 		///HideSprite(Sally*) will hide both SallyIdle and
 		///Sally_Happy</summary>
-		public void HideSprite(params string[] parameters) {
-			var par = CleanParams( parameters );
-			var wildcard = new Wildcard(par[0]);
+		public void HideSprite(string spriteName) {
+			
+			var wildcard = new Wildcard(spriteName);
 
 			// generate lists of things to remove
 
@@ -208,40 +194,33 @@ namespace Yarn.Unity.Example {
 		}
 
 		/// <summary>HideAll doesn't actually use any parameters</summary>
-		public void HideAllSprites(params string[] parameters) {
+		public void HideAllSprites() {
 			HideSprite( "*" );
 			actors.Clear();
 			sprites.Clear();
 		}
 
 		/// <summary>Reset doesn't actually use any parameters</summary>
-		public void ResetScene(params string[] parameters) {
+		public void ResetScene() {
 			bgImage.sprite = null;
 			HideAllSprites();
-			SetFadeIn("0");
+			SetFadeIn(0);
 		}
 
 		// move a sprite usage: <<Move actorOrspriteName, screenPosX=0.5,
 		// screenPosY=0.5, moveTime=1.0>> screenPosX and screenPosY are
 		// normalized screen coordinates (0.0 - 1.0) moveTime is the time
 		// in seconds it will take to reach that position
-		public void MoveSprite(params string[] parameters) {
-			var pars = CleanParams( parameters );
-
-			var image = FindActorOrSprite( pars[0] );
+		public void MoveSprite(string actorOrSpriteName, string screenPosX="0.5", string screenPosY="0.5", float moveTime = 1) {
+			
+			var image = FindActorOrSprite( actorOrSpriteName );
 
 			// get new screen position
 			Vector2 newPos = new Vector2(0.5f, 0.5f);
-			if ( pars.Length > 2 ) {
-				newPos = new Vector2( ConvertCoordinates(pars[1]), ConvertCoordinates(pars[2]) );
-			} else if ( pars.Length == 2) {
-				newPos.x = ConvertCoordinates(pars[1]);
-			}
-
-			// get move speed, with error handling
-			float moveTime = 1f;
-			if ( pars.Length > 3 && float.TryParse( pars[3], out moveTime ) == false ) {
-				Debug.LogErrorFormat(this, "VN Manager <<Move>> couldn't parse moveSpeed [{0}] as a number", pars[3] );
+			if ( screenPosX != string.Empty && screenPosY != string.Empty) {
+				newPos = new Vector2( ConvertCoordinates(screenPosX), ConvertCoordinates(screenPosY) );
+			} else if ( screenPosX != string.Empty ) {
+				newPos.x = ConvertCoordinates(screenPosX);
 			}
 
 			// actually do the moving now
@@ -250,29 +229,31 @@ namespace Yarn.Unity.Example {
 
 		/// <summary>flip a sprite, or force the sprite to face a
 		/// direction< Move(actorOrSpriteName, xDirection=toggle)</sprite>
-		public void FlipSprite(params string[] parameters) {
-			var pars = CleanParams(parameters);
+		public void FlipSprite(string actorOrSpriteName, string xDirection = "") {
+			
+			var image = FindActorOrSprite( actorOrSpriteName );
 
-			var image = FindActorOrSprite( pars[0] );
 
-			float direction = pars.Length > 1 ? Mathf.Sign(ConvertCoordinates(pars[1]) - 0.5f) : Mathf.Sign(image.rectTransform.localScale.x) * -1f;
-			image.rectTransform.localScale = new Vector3( direction * Mathf.Abs(image.rectTransform.localScale.x), image.rectTransform.localScale.y, image.rectTransform.localScale.z );
+            float direction;
+
+            if (xDirection != string.Empty) {
+                direction = Mathf.Sign(ConvertCoordinates(xDirection) - 0.5f);
+            }
+            else {
+                direction = Mathf.Sign(image.rectTransform.localScale.x) * -1f;
+            }
+
+			image.rectTransform.localScale = new Vector3( 
+                direction * Mathf.Abs(image.rectTransform.localScale.x), 
+                image.rectTransform.localScale.y, 
+                image.rectTransform.localScale.z 
+            );
 		}
 
 		/// <summary>Shake(actorName or spriteName, strength=0.5)</summary>
-		public void ShakeSprite(params string[] parameters) {
-			var pars = CleanParams( parameters );
-
-			// detect shakeStrength setting
-			float shakeStrength = 0.5f;
-			if ( pars.Length > 1 ) {
-				if ( float.TryParse( pars[1], out shakeStrength ) == false ) {
-					shakeStrength = 0.5f;
-				}
-			}
-
-			// actually shake the thing now
-			var findShakeTarget = FindActorOrSprite( pars[0] );
+		public void ShakeSprite(string actorOrSpriteName, float shakeStrength = 0.5f) {
+			
+			var findShakeTarget = FindActorOrSprite( actorOrSpriteName );
 			if ( findShakeTarget != null ) {
 				StartCoroutine( SetShake( findShakeTarget.rectTransform, shakeStrength ) );
 			}
@@ -283,24 +264,17 @@ namespace Yarn.Unity.Example {
 		/// if third parameter was word "loop" it would loop "volume" is a
 		/// number from 0.0 to 1.0 "loop" is the word "loop" (or "true"),
 		/// which tells the sound to loop over and over</summary>
-		public void PlayAudio(params string[] parameters) {
-			var pars = CleanParams( parameters );
-
-			var audioClip = FetchAsset<AudioClip>(pars[0]);
+		public void PlayAudio(string soundName, float volume = 1, string loop = "") {
+			
+			var audioClip = FetchAsset<AudioClip>(soundName);
 			// detect volume setting
-			float volume = 1f;
-			if ( pars.Length > 1 ) { // if parsing fails or second parameter isn't present, default to 100% volume
-				if ( float.TryParse( pars[1], out volume ) == false ) {
-					volume = 1f;
-				} else if ( volume <= 0.01f ) {
-					Debug.LogWarningFormat(this, "VN Manager is playing sound {0} at very low volume ({1}), just so you know", pars[0], pars[1] );
-				}
-			}
+			
+            if ( volume <= 0.01f ) {
+                Debug.LogWarningFormat(this, "VN Manager is playing sound {0} at very low volume ({1}), just so you know", soundName, volume );
+            }
+			
 			// detect loop setting
-			bool shouldLoop = false;
-			if ( pars.Length > 2 && (pars[2].Contains("loop") || pars[2].Contains("true") ) ) {
-				shouldLoop = true;
-			}
+			bool shouldLoop = loop.Contains("loop") || loop.Contains("true");			
 			
 			// instantiate AudioSource and configure it (don't use
 			// AudioSource.PlayOneShot because we also want the option to
@@ -321,10 +295,8 @@ namespace Yarn.Unity.Example {
 
 		/// <summary>stops sound playback based on sound name, whether it's
 		/// looping or not</summary>
-		public void StopAudio(params string[] parameters) {
-			var pars = CleanParams( parameters );
-			string soundName = pars[0];
-
+		public void StopAudio(string soundName) {
+			
 			// let's just do this in a sloppy way for now, and also assume
 			// there's only one object like it
 			AudioSource toDestroy = null;
@@ -346,7 +318,7 @@ namespace Yarn.Unity.Example {
 
 		/// <summary>stops all currently playing sounds, doesn't actually
 		/// take any parameters</summary>
-		public void StopAudioAll(params string[] parameters) {
+		public void StopAudioAll() {
 			var toStop = new List<AudioSource>();
 			foreach (var audioSrc in sounds ) {
 				toStop.Add( audioSrc );
@@ -359,28 +331,12 @@ namespace Yarn.Unity.Example {
 		/// <summary>typical screen fade effect, good for transitions?
 		/// usage: Fade( #hexcolor, startAlpha, endAlpha, fadeTime
 		/// )</summary>
-		public void SetFade(params string[] parameters) {
-			var pars = CleanParams( parameters );
-
+		public void SetFade(string fadeColorHex, float startAlpha = 0, float endAlpha = 1, float fadeTime = 1) {
 			// grab the color
-			Color fadeColor = Color.black;
-			if ( pars.Length > 0 && ColorUtility.TryParseHtmlString( pars[0], out fadeColor ) == false ) {
-				Debug.LogErrorFormat( this, "VN Manager <<Fade>> couldn't parse [{0}] as an HTML hex color... it should look like [#FFFFFF] or [##FFCC00FF], or a small number of keywords work too, like [black] or [red]", pars[0] );
+			
+            if (ColorUtility.TryParseHtmlString( fadeColorHex, out var fadeColor ) == false ) {
+				Debug.LogErrorFormat( this, "VN Manager <<Fade>> couldn't parse [{0}] as an HTML hex color... it should look like [#FFFFFF] or [##FFCC00FF], or a small number of keywords work too, like [black] or [red]", fadeColorHex );
 				fadeColor = Color.magenta;
-			}
-
-			// load other fade vars
-			float startAlpha = 0f;
-			float endAlpha = 1f;
-			float fadeTime = 1f;
-			if ( pars.Length > 1 && float.TryParse( pars[1], out startAlpha )==false ) {
-				Debug.LogErrorFormat( this, "VN Manager <<Fade>> couldn't parse startAlpha [{0}] as a number", pars[1] );
-			}
-			if ( pars.Length > 2 && float.TryParse( pars[2], out endAlpha )==false ) {
-				Debug.LogErrorFormat( this, "VN Manager <<Fade>> couldn't parse endAlpha [{0}] as a number", pars[1] );
-			}
-			if ( pars.Length > 3 && float.TryParse( pars[3], out fadeTime )==false ) {
-				Debug.LogErrorFormat( this, "VN Manager <<Fade>> couldn't parse fadeTime [{0}] as a number", pars[1] );
 			}
 
 			// do the fade
@@ -389,37 +345,22 @@ namespace Yarn.Unity.Example {
 
 		/// <summary>convenient for an easy fade in, no matter what the
 		/// previous fade color or alpha was</summary>
-		public void SetFadeIn(params string[] parameters) {
-			var pars = CleanParams( parameters );
-			string fadeTime = pars[0];
-
-			float fadeTimeReal = 1f;
-			if ( fadeTime.Length > 0 && float.TryParse(fadeTime, out fadeTimeReal ) == false ) {
-				Debug.LogErrorFormat( this, "VN Manager <<Fade>> couldn't parse fadeTime [{0}] as a number", fadeTime );
-				fadeTimeReal = 1f;
-			}
-
+		public void SetFadeIn(float fadeTime = 1) {
+			
 			// do the fade in
-			StartCoroutine( FadeCoroutine( fadeBG.color, -1f, 0f, fadeTimeReal ) );
+			StartCoroutine( FadeCoroutine( fadeBG.color, -1f, 0f, fadeTime ) );
 		}
 
 		/// <summary>pan the camera. Usage: CameraOffset(xPos, yPos,
 		/// moveTime)</summary>
 		/// 0, 0 is center default
-		public void SetCameraOffset(params string[] parameters) {
-			parameters = CleanParams( parameters );
-
+		public void SetCameraOffset(string xPos = "", string yPos = "", float moveTime = 0.25f) {
+			
 			Vector2 newOffset = Vector2.zero;
-			if ( parameters.Length >= 2 ) {
-				newOffset = new Vector2( ConvertCoordinates(parameters[0]) - 0.5f, ConvertCoordinates(parameters[1]) - 0.5f);
-			} else if ( parameters.Length >= 1) {
-				newOffset.x = ConvertCoordinates(parameters[0]) - 0.5f;
-			}
-
-			float moveTime = 0.25f;
-			if ( parameters.Length >= 3 && float.TryParse(parameters[2], out moveTime) == false) {
-				Debug.LogErrorFormat( this, "VN Manager <<CamOffset>> couldn't parse moveTime [{0}] as a number", parameters[2]);
-				moveTime = 0.25f;
+			if ( xPos != string.Empty && yPos != string.Empty ) {
+				newOffset = new Vector2( ConvertCoordinates(xPos) - 0.5f, ConvertCoordinates(xPos) - 0.5f);
+			} else if ( xPos != string.Empty ) {
+				newOffset.x = ConvertCoordinates(xPos) - 0.5f;
 			}
 
 			// because we're using UI overlays, there's no actual "camera"
@@ -560,19 +501,6 @@ namespace Yarn.Unity.Example {
 			}
 
 			Destroy( destroyThis );
-		}
-
-		// utility function to clean and combine params this is necessary
-		// because if the Yarn author forgets to separate parameters with a
-		// space, then they all get sent as 1 string that we'll have to
-		// split
-		string[] CleanParams(string[] parameters) {
-			var cleanPars = new List<string>();
-			foreach (var par in parameters) {
-				var fromCSV = par.Split( separ, System.StringSplitOptions.RemoveEmptyEntries);
-				cleanPars.AddRange( fromCSV );
-			}
-			return cleanPars.ToArray();
 		}
 
 		// utility function to convert words like "left" or "right" into

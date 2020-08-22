@@ -127,10 +127,9 @@ namespace Yarn.Unity
         /// <inheritdoc cref="RunLine(Line, ILineLocalisationProvider,
         /// Action)"/>
         /// FIXME: This doesn't seem to be called anymore ...?
-        public virtual Dialogue.HandlerExecutionType NodeComplete(string nextNode, Action onComplete)
+        public virtual void NodeComplete(string nextNode, Action onComplete)
         {
-            // Default implementation does nothing.
-            return Dialogue.HandlerExecutionType.ContinueExecution;
+            // Default implementation does nothing.            
         }
 
         /// <summary>

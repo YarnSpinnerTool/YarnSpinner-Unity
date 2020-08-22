@@ -31,14 +31,14 @@ namespace Yarn.Unity.Example {
         }
 
         // YarnCommand <<Me>>, but does not use YarnCommand C# attribute, registers in Awake() instead
-        public void SetSenderMe(string[] parameters) {
+        public void SetSenderMe() {
             isRightAlignment = true;
             currentBGColor = Color.blue;
             currentTextColor = Color.white;
         }
 
         // YarnCommand <<Them>> does not use YarnCommand C# attribute, registers in Awake() instead
-        public void SetSenderThem(string[] parameters) {
+        public void SetSenderThem() {
             isRightAlignment = false;
             currentBGColor = Color.white;
             currentTextColor = Color.black;

@@ -98,24 +98,20 @@ namespace Yarn.Unity.Tests
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
 
             LogAssert.Expect(LogType.Log, expectedLogResult);
-            var (methodFound, executionType) = runner.DispatchCommandToGameObject(test);
+            var methodFound = runner.DispatchCommandToGameObject(test);
 
-            Assert.True(methodFound);
-            Assert.AreEqual(Dialogue.HandlerExecutionType.ContinueExecution, executionType);
-        
+            Assert.True(methodFound);        
         }
 
         [UnityTest]
         public IEnumerator HandleCommand_DispatchedCommands_StartCoroutines() {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
 
-            var currentFrameNumber = Time.frameCount;
-
             var framesToWait = 5;
 
             runner.DispatchCommandToGameObject($"testCommandCoroutine DialogueRunner {framesToWait}");
 
-            LogAssert.Expect(LogType.Log, $"success {currentFrameNumber + framesToWait}");
+            LogAssert.Expect(LogType.Log, $"success {Time.frameCount + framesToWait}");
 
             // After framesToWait frames, we should have seen the log
             while (framesToWait > 0) {
@@ -141,6 +137,48 @@ namespace Yarn.Unity.Tests
 
             LogAssert.Expect(LogType.Error, new Regex("can't convert parameter"));
             runner.DispatchCommandToGameObject("testCommandInteger DialogueRunner 1 not_an_integer");
+        }
+
+        [Test]
+        public void AddCommandHandler_RegistersCommands() {
+            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+
+            runner.AddCommandHandler("test1", () => { Debug.Log("success 1"); } );
+            runner.AddCommandHandler("test2", (int val) => { Debug.Log($"success {val}"); } );
+
+            LogAssert.Expect(LogType.Log, "success 1");
+            LogAssert.Expect(LogType.Log, "success 2");
+
+            runner.DispatchCommandToRegisteredHandlers("test1");
+            runner.DispatchCommandToRegisteredHandlers("test2 2");
+        }
+
+        [UnityTest]
+        public IEnumerator AddCommandHandler_RegistersCoroutineCommands() {
+            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+
+             IEnumerator TestCommandCoroutine(int frameDelay) {
+                // Wait the specified number of frames
+                while (frameDelay > 0) {
+                    frameDelay -= 1;
+                    yield return null;
+                }
+                Debug.Log($"success {Time.frameCount}");
+            }
+
+            var framesToWait = 5;
+
+            runner.AddCommandHandler("test", () => runner.StartCoroutine(TestCommandCoroutine(framesToWait)));
+
+            LogAssert.Expect(LogType.Log, $"success {Time.frameCount + framesToWait}");
+
+            runner.DispatchCommandToRegisteredHandlers("test");
+
+            // After framesToWait frames, we should have seen the log
+            while (framesToWait > 0) {
+                framesToWait -= 1;
+                yield return null;
+            }
         }
     }
 }
