@@ -1,4 +1,4 @@
-﻿/*
+/*
 
 The MIT License (MIT)
 
@@ -1069,14 +1069,14 @@ namespace Yarn.Unity
             {
                 if (parameters.Length < requiredParameters || parameters.Length > (requiredParameters + optionalParameters))
                 {
-                    throw new ArgumentException($"{methodInfo.Name} requires between {requiredParameters} and {requiredParameters + optionalParameters} parameters, but {parameters.Length} were provided.");                    
+                    throw new ArgumentException($"{methodInfo.Name} requires between {requiredParameters} and {requiredParameters + optionalParameters} parameters, but {parameters.Length} {(parameters.Length == 1 ? "was" : "were")} provided.");                    
                 }
             }
             else
             {
                 if (parameters.Length != requiredParameters)
                 {
-                    throw new ArgumentException($"{methodInfo.Name} requires {requiredParameters} parameters, but {parameters.Length} were provided.");          
+                    throw new ArgumentException($"{methodInfo.Name} requires {requiredParameters} parameters, but {parameters.Length} {(parameters.Length == 1 ? "was" : "were")} provided.");          
                 }
             }
 
