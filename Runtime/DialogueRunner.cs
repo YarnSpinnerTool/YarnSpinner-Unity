@@ -377,11 +377,11 @@ namespace Yarn.Unity
         /// will be invoked when the command is called.</param>
         private void AddCommandHandler(string commandName, Delegate handler)
         {
-            if (blockingCommandHandlers.ContainsKey(commandName)) {
+            if (commandHandlers.ContainsKey(commandName)) {
                 Debug.LogError($"Cannot add a command handler for {commandName}: one already exists");
                 return;
             }
-            blockingCommandHandlers.Add(commandName, handler);
+            commandHandlers.Add(commandName, handler);
         }
 
         public void AddCommandHandler(string commandHandler, System.Func<Coroutine> handler) {
@@ -411,7 +411,6 @@ namespace Yarn.Unity
         public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandHandler, System.Func<T1, T2, T3, T4, T5, T6, Coroutine> handler) {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
-
 
         public void AddCommandHandler(string commandHandler, System.Action handler) {
             AddCommandHandler(commandHandler, (Delegate)handler);
@@ -448,7 +447,7 @@ namespace Yarn.Unity
         /// <param name="commandName">The name of the command to remove.</param>
         public void RemoveCommandHandler(string commandName)
         {
-            blockingCommandHandlers.Remove(commandName);
+            commandHandlers.Remove(commandName);
         }
 
         /// <summary>
@@ -524,8 +523,7 @@ namespace Yarn.Unity
         /// Yarn scripts.
         /// </remarks>
         /// <param name="name">The name of the function to remove.</param>
-        /// <seealso cref="AddFunction(string, int, Function)"/>
-        /// <seealso cref="AddFunction(string, int, ReturningFunction)"/>
+        /// <seealso cref="AddFunction{TResult}(string, Func{TResult})"/>
         public void RemoveFunction(string name) => Dialogue.library.DeregisterFunction(name);
 
         #region Private Properties/Variables/Procedures
@@ -545,7 +543,7 @@ namespace Yarn.Unity
         Action<int> selectAction;
 
         /// Maps the names of commands to action delegates.
-        Dictionary<string, Delegate> blockingCommandHandlers = new Dictionary<string, Delegate>();
+        Dictionary<string, Delegate> commandHandlers = new Dictionary<string, Delegate>();
 
         /// Our conversation engine
         /** Automatically created on first access
@@ -750,9 +748,6 @@ namespace Yarn.Unity
                 if (wasValidCommand) {
                     // We found an object and method to invoke as a Yarn
                     // command. 
-
-                    // TODO: if a coroutine, don't call continue; if a
-                    // coroutine, call continue
                     return;
                 }
 
@@ -830,9 +825,8 @@ namespace Yarn.Unity
 
             var firstWord = commandTokens[0];
 
-            if (blockingCommandHandlers.ContainsKey(firstWord) == false)
+            if (commandHandlers.ContainsKey(firstWord) == false)
             {
-
                 // We don't have a registered handler for this command,
                 // but some other part of the game might.
                 return false;
@@ -841,7 +835,7 @@ namespace Yarn.Unity
             // Get all tokens after the name of the command
             var remainingWords = new string[commandTokens.Length - 1];
 
-            var @delegate = blockingCommandHandlers[firstWord];
+            var @delegate = commandHandlers[firstWord];
             var methodInfo = @delegate.Method;
 
             // Copy everything except the first word from the array
@@ -866,8 +860,9 @@ namespace Yarn.Unity
 
             if (typeof(YieldInstruction).IsAssignableFrom(methodInfo.ReturnType))
             {
-                // This delegate returns a YieldInstruction. Run it, and
-                // wait for it to finish before calling ContinueDialogue.
+                // This delegate returns a YieldInstruction of some kind
+                // (e.g. a Coroutine). Run it, and wait for it to finish
+                // before calling ContinueDialogue.
                 StartCoroutine(WaitForYieldInstruction(@delegate, finalParameters));
             }
             else if (typeof(void) == methodInfo.ReturnType)
@@ -879,7 +874,7 @@ namespace Yarn.Unity
             }
             else
             {
-                Debug.LogError($"Cannot run command {firstWord}: the provided delegate does not return a valid type (permitted return types are YieldInstruction, IEnumerator, or void)");
+                Debug.LogError($"Cannot run command {firstWord}: the provided delegate does not return a valid type (permitted return types are YieldInstruction or void)");
                 return false;
             }
 
@@ -901,16 +896,13 @@ namespace Yarn.Unity
 
 
         /// <summary>
-        /// Parses the command string inside <paramref
-        /// name="command"/>, attempts to locate a suitable method on a
-        /// suitable game object, and the invokes the method.
+        /// Parses the command string inside <paramref name="command"/>,
+        /// attempts to locate a suitable method on a suitable game object,
+        /// and the invokes the method.
         /// </summary>
-        /// <param name="command">The <see cref="Command"/> to
-        /// run.</param>
-        /// <returns>A 2-tuple: the first component is true if a method
-        /// was invoked, and the second component indicates whether the
-        /// Dialogue should suspend execution or continue
-        /// executing.</returns>
+        /// <param name="command">The <see cref="Command"/> to run.</param>
+        /// <returns>True if the command was dispatched to a game object;
+        /// false otherwise.</returns>
         internal bool DispatchCommandToGameObject(Command command)
         {
             // Call out to the string version of this method, because
