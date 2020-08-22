@@ -31,7 +31,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Yarn.Unity
@@ -172,6 +171,62 @@ namespace Yarn.Unity
         /// BlockingCommandHandler)"/>
         /// <seealso cref="YarnCommandAttribute"/>
         public StringUnityEvent onCommand;
+
+        /// <summary>
+        /// The collection of registered YarnCommand-tagged methods.
+        /// Populated in the <see cref="InitializeClass"/> method.
+        /// </summary>
+        private static Dictionary<string, MethodInfo> _yarnCommands = new Dictionary<string, MethodInfo>();
+        
+        /// <summary>
+        /// Finds all MonoBehaviour types in the loaded assemblies, and
+        /// looks for all methods that are tagged with YarnCommand.
+        /// </summary>
+        [RuntimeInitializeOnLoadMethod]
+        static void InitializeClass() {
+
+            // Find all assemblies
+            var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+            // In each assembly, find all types that descend from MonoBehaviour
+            foreach (var assembly in allAssemblies) {
+                foreach (var type in assembly.GetTypes()) {
+
+                    // We only care about MonoBehaviours
+                    if (typeof(MonoBehaviour).IsAssignableFrom(type) == false) {
+                        continue;
+                    }
+
+                    // Find all methods on each type that have the YarnCommand attribute
+                    foreach (var method in type.GetMethods()) {
+                        var attributes = new List<YarnCommandAttribute>(method.GetCustomAttributes<YarnCommandAttribute>());
+                        
+                        if (attributes.Count > 0) {
+                            // This method has the YarnCommand attribute!
+                            // The compiler enforces a single attribute of
+                            // this type on each members, so if we have n >
+                            // 0, n == 1.
+                            var att = attributes[0];
+
+                            var name = att.CommandString;
+
+                            Debug.Log($"Registered command {name} to {method.DeclaringType.FullName}.{method.Name}");
+
+                            try
+                            {
+                                // Cache the methodinfo
+                                _yarnCommands.Add(name, method);
+                            }
+                            catch (ArgumentException)
+                            {
+                                MethodInfo existingDefinition = _yarnCommands[name];
+                                Debug.LogError($"Can't add {method.DeclaringType.FullName}.{method.Name} for command {name} because it's already defined on {existingDefinition.DeclaringType.FullName}.{existingDefinition.Name}");
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Adds a program, and parses and adds the contents of the
@@ -863,179 +918,235 @@ namespace Yarn.Unity
                     return (true, Dialogue.HandlerExecutionType.PauseExecution);
                 }
             }
+        }
 
-            /// commands that can be automatically dispatched look like
-            /// this: COMMANDNAME OBJECTNAME <param> <param> <param> ...
-            /** We can dispatch this command if:
-             * 1. it has at least 2 words
-             * 2. the second word is the name of an object
-             * 3. that object has components that have methods with the
-             *    YarnCommand attribute that have the correct commandString
-             *    set
-             */
-            (bool methodFound, Dialogue.HandlerExecutionType executionType) DispatchCommandToGameObject(Command command)
+        /// <summary>
+        /// Parses the command string inside <paramref
+        /// name="command"/>, attempts to locate a suitable method on a
+        /// suitable game object, and the invokes the method.
+        /// </summary>
+        /// <param name="command">The <see cref="Command"/> to
+        /// run.</param>
+        /// <returns>A 2-tuple: the first component is true if a method
+        /// was invoked, and the second component indicates whether the
+        /// Dialogue should suspend execution or continue
+        /// executing.</returns>
+        internal (bool methodFound, Dialogue.HandlerExecutionType executionType) DispatchCommandToGameObject(Command command)
+        {
+            // Call out to the string version of this method, because
+            // Yarn.Command's constructor is only accessible from inside
+            // Yarn Spinner, but we want to be able to unit test. So, we
+            // extract it, and call the underlying implementation, which is
+            // testable.
+            return DispatchCommandToGameObject(command.Text);
+        }
+
+        /// <inheritdoc cref="DispatchCommandToGameObject(Command)"/>
+        /// <param name="command">The text of the command to dispatch.</param>
+        internal (bool methodFound, Dialogue.HandlerExecutionType executionType) DispatchCommandToGameObject(string command)
+        {
+        
+            // Start by splitting our command string by spaces.
+            var words = command.Split(' ');
+
+            // We need 2 parameters in order to have both a command
+            // name, and the name of an object to find.
+            if (words.Length < 2)
             {
-                var words = command.Text.Split(' ');
+                // Don't log an error, because the dialogue views might
+                // handle this command.
+                return (false, Dialogue.HandlerExecutionType.ContinueExecution);
+            }
 
-                // need 2 parameters in order to have both a command name
-                // and the name of an object to find
-                if (words.Length < 2) {
+            // Get our command name and object name.
+            var commandName = words[0];
+            var objectName = words[1];
+
+            if (_yarnCommands.ContainsKey(commandName) == false)
+            {
+                // We didn't find a MethodInfo to invoke for this
+                // command, so we can't dispatch it. Don't log an error
+                // for it, because this command may be handled by our
+                // DialogueViews.
+                return (false, Dialogue.HandlerExecutionType.ContinueExecution);
+            }
+
+            // Attempt to find the object with this name.
+            var sceneObject = GameObject.Find(objectName);
+
+            if (sceneObject == null)
+            {
+                // If we can't find an object, we can't dispatch a
+                // command. Log an error here, because this command has
+                // been registered with the YarnCommand system, but the
+                // object the script calls for doesn't exist.
+                Debug.LogError($"Can't run command {commandName} on {objectName}: an object with that name doesn't exist in the scene.");
+
+                return (false, Dialogue.HandlerExecutionType.ContinueExecution);
+            }
+
+            var methodInfo = _yarnCommands[commandName];
+
+            // If sceneObject has a component whose type matches the
+            // methodInfo, we can invoke that method on it.
+            var target = sceneObject.GetComponent(methodInfo.DeclaringType) as MonoBehaviour;
+
+            if (target == null)
+            {
+                Debug.LogError($"Can't run command {commandName} on {objectName}: the command is only defined on {methodInfo.DeclaringType.FullName} components, but {objectName} doesn't have one.");
+                return (false, Dialogue.HandlerExecutionType.ContinueExecution);
+            }
+
+            // Next test: was the right number of parameters provided?
+            ParameterInfo[] methodParameters = methodInfo.GetParameters();
+            List<string> parameters;
+
+            if (words.Length > 2)
+            {
+                parameters = new List<string>(words);
+                // remove the first two - they're the command name and
+                // the object name
+                parameters.RemoveRange(0, 2);
+            }
+            else
+            {
+                // No words in the command beyond the first two, which
+                // aren't counted as parameters, so just use an empty
+                // list
+                parameters = new List<string>();
+            }
+
+            var requiredParameters = 0;
+            var optionalParameters = 0;
+
+            // How many optional and non-optional parameters does the
+            // method have?
+            foreach (var parameter in methodParameters)
+            {
+                if (parameter.IsOptional)
+                {
+                    optionalParameters += 1;
+                }
+                else
+                {
+                    requiredParameters += 1;
+                }
+            }
+
+            bool anyOptional = optionalParameters > 0;
+
+            // We can't run the command if we didn't supply the right
+            // number of parameters.
+            if (anyOptional)
+            {
+                if (parameters.Count < requiredParameters || parameters.Count > (requiredParameters + optionalParameters))
+                {
+                    Debug.LogError($"Can't run command {commandName}: {methodInfo.Name} requires between {requiredParameters} and {requiredParameters + optionalParameters} parameters, but {parameters.Count} were provided.");
                     return (false, Dialogue.HandlerExecutionType.ContinueExecution);
                 }
-
-                var commandName = words[0];
-
-                var objectName = words[1];
-
-                var sceneObject = GameObject.Find(objectName);
-
-                // If we can't find an object, we can't dispatch a command
-                if (sceneObject == null) {
+            }
+            else
+            {
+                if (parameters.Count != requiredParameters)
+                {
+                    Debug.LogError($"Can't run command {commandName}: {methodInfo.Name} requires {requiredParameters} parameters, but {parameters.Count} were provided.");
                     return (false, Dialogue.HandlerExecutionType.ContinueExecution);
                 }
+            }
 
-                int numberOfMethodsFound = 0;
-                List<string[]> errorValues = new List<string[]>();
+            // Make a list of objects that we'll supply as parameters
+            // to the method when we invoke it.
+            var finalParameters = new object[requiredParameters + optionalParameters];
 
-                List<string> parameters;
+            // Final check: convert each supplied parameter from a
+            // string to the expected type.
+            for (int i = 0; i < finalParameters.Length; i++)
+            {
 
-                if (words.Length > 2) {
-                    parameters = new List<string>(words);
-                    parameters.RemoveRange(0, 2);
+                if (i >= parameters.Count) {
+                    // We didn't supply a parameter here, so supply
+                    // Type.Missing to make it use the default value
+                    // instead.
+                    finalParameters[i] = System.Type.Missing;
+                    continue;
                 }
-                else {
-                    parameters = new List<string>();
+
+                var expectedType = methodParameters[i].ParameterType;
+
+                // Two special case: if the method expects a GameObject
+                // or a Component (or Component-derived type), locate
+                // that object and supply it. The object, or the object
+                // the desired component is on, must be active. If this
+                // fails, supply null.
+                if (typeof(GameObject).IsAssignableFrom(expectedType))
+                {
+                    finalParameters[i] = GameObject.Find(parameters[i]);
                 }
-
-                var startedCoroutine = false;
-
-                // Find every MonoBehaviour (or subclass) on the object
-                foreach (var component in sceneObject.GetComponents<MonoBehaviour>()) {
-                    var type = component.GetType();
-
-                    // Find every method in this component
-                    foreach (var method in type.GetMethods()) {
-
-                        // Find the YarnCommand attributes on this method
-                        var attributes = (YarnCommandAttribute[])method.GetCustomAttributes(typeof(YarnCommandAttribute), true);
-
-                        // Find the YarnCommand whose commandString is
-                        // equal to the command name
-                        foreach (var attribute in attributes) {
-                            if (attribute.CommandString == commandName) {
-
-                                var methodParameters = method.GetParameters();
-                                bool paramsMatch = false;
-                                // Check if this is a params array
-                                if (methodParameters.Length == 1 &&
-                                    methodParameters[0].ParameterType.IsAssignableFrom(typeof(string[]))) {
-                                    // Cool, we can send the command!
-
-                                    // If this is a coroutine, start it,
-                                    // and set a flag so that we know to
-                                    // wait for it to finish
-                                    string[][] paramWrapper = new string[1][];
-                                    paramWrapper[0] = parameters.ToArray();
-                                    if (method.ReturnType == typeof(IEnumerator)) {
-                                        StartCoroutine(DoYarnCommandParams(component, method, paramWrapper));
-                                        startedCoroutine = true;
-                                    }
-                                    else {
-                                        method.Invoke(component, paramWrapper);
-
-                                    }
-                                    numberOfMethodsFound++;
-                                    paramsMatch = true;
-
-                                }
-                                // Otherwise, verify that this method has
-                                // the right number of parameters
-                                else if (methodParameters.Length == parameters.Count) {
-                                    paramsMatch = true;
-                                    foreach (var paramInfo in methodParameters) {
-                                        if (!paramInfo.ParameterType.IsAssignableFrom(typeof(string))) {
-                                            Debug.LogErrorFormat(sceneObject, "Method \"{0}\" wants to respond to Yarn command \"{1}\", but not all of its parameters are strings!", method.Name, commandName);
-                                            paramsMatch = false;
-                                            break;
-                                        }
-                                    }
-                                    if (paramsMatch) {
-                                        // Cool, we can send the command!
-
-                                        // If this is a coroutine, start
-                                        // it, and set a flag so that we
-                                        // know to wait for it to finish
-                                        if (method.ReturnType == typeof(IEnumerator)) {
-                                            StartCoroutine(DoYarnCommand(component, method, parameters.ToArray()));
-                                            startedCoroutine = true;
-                                        }
-                                        else {
-                                            method.Invoke(component, parameters.ToArray());
-                                        }
-                                        numberOfMethodsFound++;
-                                    }
-                                }
-                                //parameters are invalid, but name matches.
-                                if (!paramsMatch) {
-                                    // save this error in case a matching
-                                    // command is never found.
-                                    errorValues.Add(new string[] { method.Name, commandName, methodParameters.Length.ToString(), parameters.Count.ToString() });
-                                }
-                            }
-                        }
+                else if (typeof(Component).IsAssignableFrom(expectedType))
+                {
+                    // Find the game object with the component we're
+                    // looking for
+                    var go = GameObject.Find(parameters[i]);
+                    if (go != null)
+                    {
+                        // Find the component on this game object (or
+                        // null)
+                        var c = go.GetComponentInChildren(expectedType);
+                        finalParameters[i] = c;
                     }
                 }
-
-                // Warn if we found multiple things that could respond to
-                // this command.
-                if (numberOfMethodsFound > 1) {
-                    Debug.LogWarningFormat(sceneObject, "The command \"{0}\" found {1} targets. " +
-                        "You should only have one - check your scripts.", command, numberOfMethodsFound);
-                }
-                else if (numberOfMethodsFound == 0) {
-                    // list all of the near-miss methods only if a proper
-                    // match is not found, but correctly-named methods are.
-                    foreach (string[] errorVal in errorValues) {
-                        Debug.LogErrorFormat(sceneObject, "Method \"{0}\" wants to respond to Yarn command \"{1}\", but it has a different number of parameters ({2}) to those provided ({3}), or is not a string array!", errorVal[0], errorVal[1], errorVal[2], errorVal[3]);
+                else
+                {
+                    // Attempt to perform a straight conversion, using
+                    // the invariant culture. The parameter type must
+                    // implement IConvertible.
+                    try {
+                        finalParameters[i] = Convert.ChangeType(parameters[i], expectedType, System.Globalization.CultureInfo.InvariantCulture);
+                    } catch (Exception e) {
+                        Debug.LogError($"Can't run command \"{command}\": can't convert parameter {i+1} (\"{parameters[i]}\") to {expectedType}: {e}");
+                        return (false, Dialogue.HandlerExecutionType.ContinueExecution);
                     }
+                    
                 }
+            }
 
-                var wasValidCommand = numberOfMethodsFound > 0;
+            // We're finally ready to invoke the method on the object!
 
-                if (wasValidCommand == false) {
-                    return (false, Dialogue.HandlerExecutionType.ContinueExecution);
-                }
+            // Before we invoke it, we need to know if this is a
+            // coroutine. It's a coroutine if the method returns an
+            // IEnumerator.
 
-                if (startedCoroutine) {
-                    // Signal to the Dialogue that execution should wait. 
-                    return (true, Dialogue.HandlerExecutionType.PauseExecution);
-                }
-                else {
-                    // This wasn't a coroutine, so no need to wait for it.
-                    return (true, Dialogue.HandlerExecutionType.ContinueExecution);
-                }
+            var isCoroutine = methodInfo.ReturnType == typeof(IEnumerator);
 
-                IEnumerator DoYarnCommandParams(MonoBehaviour component,
-                                                MethodInfo method,
-                                                string[][] localParameters)
-                {
-                    // Wait for this command coroutine to complete
-                    yield return StartCoroutine((IEnumerator)method.Invoke(component, localParameters));
+            if (isCoroutine)
+            {
+                // Start the coroutine.
+                StartCoroutine(DoYarnCommand(target, methodInfo, finalParameters));
 
-                    // And then continue running dialogue
-                    ContinueDialogue();
-                }
+                // Indicate that we ran a command, and should pause
+                // execution. DoYarnCommand will call Continue() later,
+                // when the coroutine completes.
+                return (true, Dialogue.HandlerExecutionType.PauseExecution);
+            }
+            else
+            {
+                // Invoke it directly.
+                methodInfo.Invoke(target, finalParameters);
 
-                IEnumerator DoYarnCommand(MonoBehaviour component,
-                                          MethodInfo method,
-                                          string[] localParameters)
-                {
-                    // Wait for this command coroutine to complete
-                    yield return StartCoroutine((IEnumerator)method.Invoke(component, localParameters));
+                // Indicate that we ran the command, and should
+                // continue execution.
+                return (true, Dialogue.HandlerExecutionType.ContinueExecution);
+            }
 
-                    // And then continue running dialogue
-                    ContinueDialogue();
-                }
+            IEnumerator DoYarnCommand(MonoBehaviour component,
+                                            MethodInfo method,
+                                            object[] localParameters)
+            {
+                // Wait for this command coroutine to complete
+                yield return StartCoroutine((IEnumerator)method.Invoke(component, localParameters));
+
+                // And then continue running dialogue
+                ContinueDialogue();
             }
         }
 

@@ -23,8 +23,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - DialogueUI is now a subclass of DialogueViewBase.
 - Moved Yarn Spinner classes into the `Yarn.Unity` namespace, or one of its children, depending on its purpose.
 - Dialogue.AddFunction now uses functions that can take multiple parameters. You no longer use a single `Yarn.Value[]` parameter; you can now have up to 5, which can be strings, integers, floats, doubles, bools, or `Yarn.Value`s.
+- Commands registered via the `YarnCommand` attribute can now take parameter types besides strings. Parameters can also be optional. Additionally, these methods are now cached, and are faster to call.
+
 
 ### Removed
+- Commands registered via the `YarnCommand` attribute can no longer accept a `params` array of parameters. If your command takes a variable number of parameters, use optional parameters instead.
 
 ## [v1.2.6]
 

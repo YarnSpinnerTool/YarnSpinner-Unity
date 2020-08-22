@@ -111,5 +111,64 @@ namespace Yarn.Unity.Tests
                     break;
             }
         }
+
+        // A Yarn command that receives integer parameters
+        [YarnCommand("testCommandInteger")]
+        public void TestCommandIntegers(int a, int b) {
+            Debug.Log($"{a+b}");
+        }
+
+        // A Yarn command that receives string parameters
+        [YarnCommand("testCommandString")]
+        public void TestCommandStrings(string a, string b) {
+            Debug.Log($"{a+b}");
+        }
+
+        // A Yarn command that receives a game object parameter
+        [YarnCommand("testCommandGameObject")]
+        public void TestCommandGameObject(GameObject go) {
+            if (go != null) {
+                Debug.Log($"{go.name}");
+            } else {
+                Debug.Log($"(null)");
+            }           
+        }
+
+        // A Yarn command that receives a component parameter
+        [YarnCommand("testCommandComponent")]
+        public void TestCommandComponent(MeshRenderer r) {
+            if (r != null) {
+                Debug.Log($"{r.name}'s MeshRenderer");
+            } else {
+                Debug.Log($"(null)");
+            } 
+        }
+
+        // A Yarn command that has optional parameters
+        [YarnCommand("testCommandOptionalParams")]
+        public void TestCommandOptionalParams(int a, int b = 2) {
+            Debug.Log($"{a + b}");
+        }
+
+        // A Yarn command that receives no parameters
+        [YarnCommand("testCommandNoParameters")]
+        public void TestCommandNoParameters() {
+            Debug.Log($"success");
+        }
+
+        
+
+        // A Yarn command that begins a coroutine
+        [YarnCommand("testCommandCoroutine")]
+        public IEnumerator TestCommandCoroutine(int frameDelay) {
+            // Wait the specified number of frames
+            while (frameDelay > 0) {
+                frameDelay -= 1;
+                yield return null;
+            }
+            Debug.Log($"success {Time.frameCount}");
+        }
+
+        
     }
 }
