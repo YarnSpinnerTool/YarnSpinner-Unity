@@ -974,7 +974,7 @@ namespace Yarn.Unity
             // Do we have any parameters? Parameters are any words in the
             // command after the first two (which are the command name and
             // the object name); we need to remove these two from the start of the list.
-            if (words.Length > 2)
+            if (words.Length >= 2)
             {                
                 parameters.RemoveRange(0, 2);
             }
@@ -1129,7 +1129,8 @@ namespace Yarn.Unity
                     try {
                         finalParameters[i] = Convert.ChangeType(parameters[i], expectedType, System.Globalization.CultureInfo.InvariantCulture);
                     } catch (Exception e) {
-                        throw new ArgumentException($"Can't convert parameter {i+1} (\"{parameters[i]}\") to {expectedType}: {e}");                        
+                        var paramName  = methodParameters[i].Name;
+                        throw new ArgumentException($"can't convert parameter {i+1} (\"{parameters[i]}\") to parameter {paramName} ({expectedType}): {e}");                        
                     }
                     
                 }
