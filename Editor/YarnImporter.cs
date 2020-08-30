@@ -191,6 +191,9 @@ namespace Yarn.Unity
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
+            var stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();            
+            
             OnValidate();
             var extension = System.IO.Path.GetExtension(ctx.assetPath);
 
@@ -207,6 +210,8 @@ namespace Yarn.Unity
             {
                 ImportCompiledYarn(ctx);
             }
+
+            ctx.LogImportWarning($"Compiling {ctx.assetPath} took {stopwatch.Elapsed.TotalMilliseconds:F2}ms");            
         }
 
         /// <summary>
@@ -266,8 +271,43 @@ namespace Yarn.Unity
 
             compilationErrorMessage = null;
 
+            // Get every declaration in every Yarn file apart from this
+            // one. We do this with Directory.EnumerateFiles rather than
+            // the AssetDatabase, because if this is the first import, then
+            // the other scripts may not have been imported yet.
+            var existingYarnScripts = Directory
+                // Get all .yarn files
+                .EnumerateFiles(Directory.GetCurrentDirectory(), "*.yarn", SearchOption.AllDirectories)
+                // Remove the current working directory
+                .Select(s => s.Replace(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar, string.Empty))
+                // Ignore any paths that include a component that ends in ~
+                .Where(s => s.Split(Path.DirectorySeparatorChar).Any(component => component.EndsWith("~")) == false)
+                // Ignore this asset
+                .Where(s => s != ctx.assetPath);                
+            
+            // Get the variable and implicit function declarations from
+            // each script - we need this in case this script refers to a
+            // variable that was declared elsewhere
             var declarations = new List<Declaration>();
 
+            foreach (var file in existingYarnScripts) {
+                var otherSourceText = File.ReadAllText(file);
+                var otherSourceName = file;
+                var declarationExtractionJob = CompilationJob.CreateFromString(otherSourceName, otherSourceText);
+                declarationExtractionJob.CompilationType = CompilationJob.Type.DeclarationsOnly;
+
+                try {
+                    var result = Compiler.Compiler.Compile(declarationExtractionJob);
+                    declarations.AddRange(result.Declarations);
+                } catch (ParseException) {
+                    continue;
+                } catch (TypeException) {
+                    continue;
+                } catch (IOException ex) {
+                    Debug.LogError($"Error when compiling {ctx.assetPath}: IOException thrown when finding type declarations in other scripts. {ex}", this);
+                }
+            }
+            
             try
             {
                 // Compile the source code into a compiled Yarn program (or
