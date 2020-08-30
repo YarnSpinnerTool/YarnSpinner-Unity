@@ -53,3 +53,9 @@ position: 827,439
 ---
 Sally: Yeah. Don't do it again. #line:d7df49
 ===
+title: Declarations
+---
+<<declare $should_see_ship = false>>
+<<declare $sally_warning = false>>
+===
+
