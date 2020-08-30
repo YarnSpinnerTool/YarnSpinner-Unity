@@ -1,4 +1,4 @@
-/*
+﻿/*
 
 The MIT License (MIT)
 
@@ -65,7 +65,7 @@ namespace Yarn.Unity
         /// This value is used to select a node to start from when
         /// <see cref="StartDialogue"/> is called.
         /// </remarks>
-        public string startNode = Yarn.Dialogue.DEFAULT_START;
+        public string startNode = Yarn.Dialogue.DefaultStartNodeName;
 
         /// <summary>
         /// Whether the DialogueRunner should automatically start running
@@ -135,7 +135,7 @@ namespace Yarn.Unity
         /// Gets the name of the current node that is being run.
         /// </summary>
         /// <seealso cref="Dialogue.currentNode"/>
-        public string CurrentNodeName => Dialogue.currentNode;
+        public string CurrentNodeName => Dialogue.CurrentNode;
 
         /// <summary>
         /// Gets the underlying <see cref="Dialogue"/> object that runs the
@@ -313,11 +313,10 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Resets the <see cref="variableStorage"/>, and starts running the dialogue again from the node named <see cref="startNode"/>.
+        /// Starts running the dialogue again from the node named <see cref="startNode"/>.
         /// </summary>        
         public void ResetDialogue()
         {
-            variableStorage.ResetToDefaults();
             StartDialogue();
         }
 
@@ -479,12 +478,12 @@ namespace Yarn.Unity
         /// <seealso cref="Library"/> 
         private void AddFunction(string name, Delegate implementation)
         {
-            if (Dialogue.library.FunctionExists(name)) {
+            if (Dialogue.Library.FunctionExists(name)) {
                 Debug.LogError($"Cannot add function {name}: one already exists");
                 return;
             }
 
-            Dialogue.library.RegisterFunction(name, implementation);
+            Dialogue.Library.RegisterFunction(name, implementation);
         }
 
         public void AddFunction<TResult>(string name, System.Func<TResult> implementation) {
@@ -524,7 +523,7 @@ namespace Yarn.Unity
         /// </remarks>
         /// <param name="name">The name of the function to remove.</param>
         /// <seealso cref="AddFunction{TResult}(string, Func{TResult})"/>
-        public void RemoveFunction(string name) => Dialogue.library.DeregisterFunction(name);
+        public void RemoveFunction(string name) => Dialogue.Library.DeregisterFunction(name);
 
         #region Private Properties/Variables/Procedures
 
@@ -630,9 +629,6 @@ namespace Yarn.Unity
                 dialogueView.onUserWantsLineContinuation = continueAction;
             }
 
-            // Ensure that the variable storage has the right stuff in it
-            variableStorage.ResetToDefaults();
-
             // Combine all scripts together and load them
             if (yarnScripts != null && yarnScripts.Length > 0) {
 
@@ -666,17 +662,17 @@ namespace Yarn.Unity
                     Debug.LogError(message);
                 },
 
-                lineHandler = HandleLine,
-                commandHandler = HandleCommand,
-                optionsHandler = HandleOptions,
-                nodeStartHandler = (node) => {
+                LineHandler = HandleLine,
+                CommandHandler = HandleCommand,
+                OptionsHandler = HandleOptions,
+                NodeStartHandler = (node) => {
                     onNodeStart?.Invoke(node);                    
                 },
-                nodeCompleteHandler = (node) => {
+                NodeCompleteHandler = (node) => {
                     onNodeComplete?.Invoke(node);                     
                 },
-                dialogueCompleteHandler = HandleDialogueComplete,
-                prepareForLinesHandler = PrepareForLines,
+                DialogueCompleteHandler = HandleDialogueComplete,
+                PrepareForLinesHandler = PrepareForLines,
             };
 
             // Yarn Spinner defines two built-in commands: "wait",
@@ -1438,40 +1434,22 @@ namespace Yarn.Unity
     /// which means that subclasses of this class can be attached to <see
     /// cref="GameObject"/>s.
     /// </remarks>
-    public abstract class VariableStorageBehaviour : MonoBehaviour, Yarn.VariableStorage
+    public abstract class VariableStorageBehaviour : MonoBehaviour, Yarn.IVariableStorage
     {
         /// <inheritdoc/>
-        public abstract Value GetValue(string variableName);
-
+        public abstract bool TryGetValue<T>(string variableName, out T result);
+        
         /// <inheritdoc/>
-        public virtual void SetValue(string variableName, float floatValue) => SetValue(variableName, new Yarn.Value(floatValue));
-
+        public abstract void SetValue(string variableName, string stringValue);
+        
         /// <inheritdoc/>
-        public virtual void SetValue(string variableName, bool boolValue) => SetValue(variableName, new Yarn.Value(boolValue));
-
+        public abstract void SetValue(string variableName, float floatValue);
+        
         /// <inheritdoc/>
-        public virtual void SetValue(string variableName, string stringValue) => SetValue(variableName, new Yarn.Value(stringValue));
+        public abstract void SetValue(string variableName, bool boolValue);
 
-        /// <inheritdoc/>
-        public abstract void SetValue(string variableName, Value value);
-
-        /// <inheritdoc/>
-        /// <remarks>
-        /// The implementation in this abstract class throws a <see
-        /// cref="NotImplementedException"/> when called. Subclasses of
-        /// this class must provide their own implementation.
-        /// </remarks>
-        public virtual void Clear() => throw new NotImplementedException();
-
-        /// <summary>
-        /// Resets the VariableStorageBehaviour to its initial state.
-        /// </summary>
-        /// <remarks>
-        /// This is similar to <see cref="Clear"/>, but additionally allows
-        /// subclasses to restore any default values that should be
-        /// present.
-        /// </remarks>
-        public abstract void ResetToDefaults();
+        /// <inheritdoc/>        
+        public abstract void Clear();
     }
 
     /// <summary>

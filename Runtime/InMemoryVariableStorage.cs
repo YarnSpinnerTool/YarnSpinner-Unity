@@ -50,11 +50,11 @@ namespace Yarn.Unity {
     /// ]]>
     /// 
     /// </remarks>    
-    public class InMemoryVariableStorage : VariableStorageBehaviour, IEnumerable<KeyValuePair<string, Yarn.Value>>
+    public class InMemoryVariableStorage : VariableStorageBehaviour, IEnumerable<KeyValuePair<string, object>>
     {
 
         /// Where we actually keeping our variables
-        private Dictionary<string, Yarn.Value> variables = new Dictionary<string, Yarn.Value> ();
+        private Dictionary<string, object> variables = new Dictionary<string, object> ();
 
         /// <summary>
         /// A default value to apply when the object wakes up, or when
@@ -84,7 +84,7 @@ namespace Yarn.Unity {
             /// <summary>
             /// The type of the variable.
             /// </summary>
-            public Yarn.Value.Type type;
+            public Yarn.Type type;
         }
 
         /// <summary>
@@ -99,69 +99,19 @@ namespace Yarn.Unity {
         [SerializeField] 
         internal UnityEngine.UI.Text debugTextView = null;
 
-        /// Reset to our default values when the game starts
-        internal void Awake ()
+        public override void SetValue(string variableName, string stringValue)
         {
-            ResetToDefaults ();
+            variables[variableName] = stringValue;
         }
 
-        /// <summary>
-        /// Removes all variables, and replaces them with the variables
-        /// defined in <see cref="defaultVariables"/>.
-        /// </summary>
-        public override void ResetToDefaults ()
+        public override void SetValue(string variableName, float floatValue)
         {
-            Clear ();
-
-            // For each default variable that's been defined, parse the
-            // string that the user typed in in Unity and store the
-            // variable
-            foreach (var variable in defaultVariables) {
-                
-                object value;
-
-                switch (variable.type) {
-                case Yarn.Value.Type.Number:
-                    float f = 0.0f;
-                    float.TryParse(variable.value, out f);
-                    value = f;
-                    break;
-
-                case Yarn.Value.Type.String:
-                    value = variable.value;
-                    break;
-
-                case Yarn.Value.Type.Bool:
-                    bool b = false;
-                    bool.TryParse(variable.value, out b);
-                    value = b;
-                    break;
-
-                case Yarn.Value.Type.Null:
-                    value = null;
-                    break;
-
-                default:
-                    throw new System.ArgumentOutOfRangeException ();
-
-                }
-
-                var v = new Yarn.Value(value);
-
-                SetValue ("$" + variable.name, v);
-            }
+            variables[variableName] = floatValue;
         }
 
-        /// <summary>
-        /// Stores a <see cref="Value"/>.
-        /// </summary>
-        /// <param name="variableName">The name to associate with this
-        /// variable.</param>
-        /// <param name="value">The value to store.</param>
-        public override void SetValue (string variableName, Value value)
+        public override void SetValue(string variableName, bool boolValue)
         {
-            // Copy this value into our list
-            variables[variableName] = new Yarn.Value(value);
+            variables[variableName] = boolValue;
         }
 
         /// <summary>
@@ -172,14 +122,26 @@ namespace Yarn.Unity {
         /// <returns>The <see cref="Value"/>. If a variable by the name of
         /// <paramref name="variableName"/> is not present, returns a value
         /// representing `null`.</returns>
-        public override Value GetValue (string variableName)
+        public override bool TryGetValue<T>(string variableName, out T result)
         {
             // If we don't have a variable with this name, return the null
             // value
             if (variables.ContainsKey(variableName) == false)
-                return Yarn.Value.NULL;
+            {
+                result = default;
+                return false;
+            }
+
+            var resultObject = variables [variableName];
             
-            return variables [variableName];
+            if (typeof(T).IsAssignableFrom(resultObject.GetType())) {
+                result = (T)resultObject;
+                return true;
+            } else {
+                throw new System.InvalidCastException($"Variable {variableName} exists, but is the wrong type (expected {typeof(T)}, got {resultObject.GetType()}");             
+            }
+            
+            
         }
 
         /// <summary>
@@ -195,29 +157,10 @@ namespace Yarn.Unity {
         {
             if (debugTextView != null) {
                 var stringBuilder = new System.Text.StringBuilder ();
-                foreach (KeyValuePair<string,Yarn.Value> item in variables) {
-                    string debugDescription;
-                    switch (item.Value.type) {
-                        case Value.Type.Bool:
-                            debugDescription = item.Value.AsBool.ToString();
-                            break;
-                        case Value.Type.Null:
-                            debugDescription = "null";
-                            break;
-                        case Value.Type.Number:
-                            debugDescription = item.Value.AsNumber.ToString();
-                            break;
-                        case Value.Type.String:
-                            debugDescription = $@"""{item.Value.AsString}""";
-                            break;
-                        default:
-                            debugDescription = "<unknown>";
-                            break;
-
-                    }
+                foreach (KeyValuePair<string,object> item in variables) {
                     stringBuilder.AppendLine (string.Format ("{0} = {1}",
                                                             item.Key,
-                                                            debugDescription));
+                                                            item.Value.ToString()));
                 }
                 debugTextView.text = stringBuilder.ToString ();
                 debugTextView.SetAllDirty();
@@ -229,9 +172,9 @@ namespace Yarn.Unity {
         /// variables in this object.
         /// </summary>
         /// <returns>An iterator over the variables.</returns>
-        IEnumerator<KeyValuePair<string, Value>> IEnumerable<KeyValuePair<string, Yarn.Value>>.GetEnumerator()
+        IEnumerator<KeyValuePair<string, object>> IEnumerable<KeyValuePair<string, object>>.GetEnumerator()
         {
-            return ((IEnumerable<KeyValuePair<string, Value>>)variables).GetEnumerator();
+            return ((IEnumerable<KeyValuePair<string, object>>)variables).GetEnumerator();
         }
 
         /// <summary>
@@ -241,7 +184,9 @@ namespace Yarn.Unity {
         /// <returns>An iterator over the variables.</returns>        
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable<KeyValuePair<string, Value>>)variables).GetEnumerator();
+            return ((IEnumerable<KeyValuePair<string, object>>)variables).GetEnumerator();
         }
+
+        
     }
 }

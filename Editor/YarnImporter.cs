@@ -132,10 +132,10 @@ namespace Yarn.Unity
 
         public string[] stringIDs;
 
-        public bool AnyImplicitStringIDs => compilationStatus == Status.SucceededUntaggedStrings;
+        public bool AnyImplicitStringIDs => compilationStatus == CompilationStatus.SucceededUntaggedStrings;
         public bool StringsAvailable => stringIDs?.Length > 0;
 
-        public Status compilationStatus;
+        public CompilationStatus compilationStatus;
 
         public bool isSuccesfullyCompiled = false;
 
@@ -266,18 +266,32 @@ namespace Yarn.Unity
 
             compilationErrorMessage = null;
 
+            var declarations = new List<Declaration>();
+
             try
             {
                 // Compile the source code into a compiled Yarn program (or
                 // generate a parse error)
-                compilationStatus = Yarn.Compiler.Compiler.CompileString(sourceText, fileName, out compiledProgram, out stringTable);
+                var compilationJob = CompilationJob.CreateFromString(fileName,  sourceText, null);
+                compilationJob.VariableDeclarations = declarations;
+
+                var result = Yarn.Compiler.Compiler.Compile(compilationJob);
+                compilationStatus = result.Status;
+                stringTable = result.StringTable;
                 isSuccesfullyCompiled = true;
                 compilationErrorMessage = string.Empty;
+            }
+            catch (Yarn.Compiler.TypeException e)
+            {
+                isSuccesfullyCompiled = false;
+                compilationErrorMessage = e.Message;
+                ctx.LogImportError($"Error importing {ctx.assetPath}: {e.Message}");
             }
             catch (Yarn.Compiler.ParseException e)
             {
                 isSuccesfullyCompiled = false;
                 compilationErrorMessage = e.Message;
+                ctx.LogImportError($"Error importing {ctx.assetPath}: {e.Message}");
                 ctx.LogImportError(e.Message);                
             }
 
