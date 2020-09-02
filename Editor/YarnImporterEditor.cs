@@ -93,9 +93,7 @@ public class YarnImporterEditor : ScriptedImporterEditor {
                 var newStringsTablePath = $"{assetDirectory}/{Path.GetFileNameWithoutExtension(yarnImporter.assetPath)} ({selectedCulture.Name}).csv";
                 newStringsTablePath = AssetDatabase.GenerateUniqueAssetPath(newStringsTablePath);
 
-                var writer = File.CreateText(newStringsTablePath);
-                writer.Write(stringsTableText);
-                writer.Close();
+                File.WriteAllText(newStringsTablePath, stringsTableText, System.Text.Encoding.UTF8);
 
                 AssetDatabase.ImportAsset(newStringsTablePath);
 
