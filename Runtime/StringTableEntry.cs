@@ -1,28 +1,22 @@
 using System.Collections.Generic;
 using CsvHelper;
-using CsvHelper.Configuration.Attributes;
+using CsvHelper.Configuration;
 
 namespace Yarn.Unity
 {
     public struct StringTableEntry
     {
-        [Name("language")]
         [Optional] // added in v2.0; will not be present in files generated in earlier versions
         public string Language;
 
-        [Name("id")]
         public string ID;
 
-        [Name("text")]
         public string Text;
 
-        [Name("file")]
         public string File;
 
-        [Name("node")]
         public string Node;
 
-        [Name("lineNumber")]
         public string LineNumber;
 
         /// <summary>
@@ -44,14 +38,12 @@ namespace Yarn.Unity
         /// lock and translated lock differ, the translated line is out of
         /// date, and needs to be updated.
         /// </remarks>
-        [Name("lock")]
         [Optional]
         public string Lock;
 
         /// <summary>
         /// A comment used to describe this line to translators.
         /// </summary>
-        [Name("comment")]
         [Optional]
         public string Comment;
 
@@ -97,7 +89,30 @@ namespace Yarn.Unity
             using (var stringReader = new System.IO.StringReader(sourceText))
             using (var csv = new CsvReader(stringReader, GetConfiguration()))
             {
-                return new List<StringTableEntry>(csv.GetRecords<StringTableEntry>());
+                /*
+                Do the below instead of GetRecords<T> due to incompatibility with IL2CPP
+                See more: https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/36#issuecomment-691489913
+                */
+                var records = new List<StringTableEntry>();
+                csv.Read();
+                csv.ReadHeader();
+                while (csv.Read())
+                {
+                    var record = new StringTableEntry
+                    {
+                        Language = csv.GetField<string>("language"),
+                        ID = csv.GetField<string>("id"),
+                        Text = csv.GetField<string>("text"),
+                        File = csv.GetField<string>("file"),
+                        Node = csv.GetField<string>("node"),
+                        LineNumber = csv.GetField<string>("lineNumber"),
+                        Lock = csv.GetField<string>("lock"),
+                        Comment = csv.GetField<string>("comment"),
+                    };
+                    records.Add(record);
+                }
+
+                return records;
             }
         }
 
@@ -119,7 +134,8 @@ namespace Yarn.Unity
             }
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return $"StringTableEntry: lang={Language} id={ID} text=\"{Text}\" file={File} node={Node} line={LineNumber} lock={Lock} comment={Comment}";
         }
 
@@ -137,3 +153,4 @@ namespace Yarn.Unity
         }
     }
 }
+
