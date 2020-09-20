@@ -22,7 +22,7 @@ namespace Yarn.Unity
         private void OnEnable()
         {
             localizationsProperty = serializedObject.FindProperty("_localizations");
-            trackedProgramsProperty = serializedObject.FindProperty("_trackedPrograms");
+            trackedProgramsProperty = serializedObject.FindProperty("_trackedScripts");
         }
 
         /// <summary>
@@ -336,58 +336,5 @@ namespace Yarn.Unity
         }
 
         
-    }
-
-    public class LocalizationDatabaseUpdaterPostProcessor : AssetPostprocessor
-    {
-        public static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
-        {
-            // TODO: The eventual intent here is to have a system that
-            // detects when a YarnProgram, or a .csv TextAsset that it's
-            // produced, is updated or deleted, and signals a relevant
-            // LocalizationDatabase to update. 
-            //
-            // In the meantime, LocalizationDatabases are manually updated.
-
-            return;
-
-            var allLocalizationDatabases = AssetDatabase.FindAssets($"t:{nameof(LocalizationDatabase)}")
-                                                        .Select(path => AssetDatabase.LoadAssetAtPath<LocalizationDatabase>(path));
-
-            if (allLocalizationDatabases.Count() == 0)
-            {
-                // No databases to update! Early out here.
-                return;
-            }
-
-            IEnumerable<string> GetEntriesOfType<T>(string[] paths) where T : UnityEngine.Object
-            {
-                return paths.Where(path => AssetDatabase.GetMainAssetTypeAtPath(path)?.IsAssignableFrom(typeof(T)) ?? false);
-            }
-
-            var allImportedTextDocuments = GetEntriesOfType<TextAsset>(importedAssets);
-
-            var allImportedYarnPrograms = GetEntriesOfType<YarnProgram>(importedAssets);
-
-            if (deletedAssets.Length == 0 && allImportedTextDocuments.Count() == 0 && allImportedYarnPrograms.Count() == 0)
-            {
-                // No items were deleted, and no TextAssets or YarnPrograms
-                // were created or modified. Nothing to do!
-                return;
-            }
-
-            // Ok, we've modified a TextAsset or YarnProgram, or deleted an
-            // asset. We need to check our localized databases and update
-            // their contents.
-
-
-            // Deletion: We can't find the type of assets that no longer
-            // exist, so we need to check all localization databases to see
-            // if an asset they were referring to has been deleted. If it
-            // has, it needs to rebuild its tables.
-
-
-
-        }
     }
 }

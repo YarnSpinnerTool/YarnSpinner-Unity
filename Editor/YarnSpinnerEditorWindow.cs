@@ -42,7 +42,7 @@ namespace Yarn.Unity
 
         // The list of Yarn scripts in the project. Updated by the
         // UpgradeProgram method.
-        List<YarnProgram> yarnProgramList = new List<YarnProgram>();
+        List<TextAsset> yarnProgramList = new List<TextAsset>();
 
         // The URL for the text document containing supporter information
         private const string SupportersURL = "https://yarnspinner.dev/supporters.txt";
@@ -250,7 +250,7 @@ namespace Yarn.Unity
                 // replace items in the list with other scripts, which
                 // won't work
                 EditorGUI.BeginDisabledGroup(true);
-                EditorGUILayout.ObjectField(script, typeof(YarnProgram), false);
+                EditorGUILayout.ObjectField(script, typeof(TextAsset), false);
                 EditorGUI.EndDisabledGroup();
 
                 // A little "upgrade this specific script" button
@@ -274,7 +274,7 @@ namespace Yarn.Unity
             }
         }
 
-        private void UpgradeProgram(YarnProgram script, UpgradeType upgradeMode)
+        private void UpgradeProgram(TextAsset script, UpgradeType upgradeMode)
         {
             // Get the path for this asset
             var path = AssetDatabase.GetAssetPath(script);
@@ -326,9 +326,8 @@ namespace Yarn.Unity
         private void RefreshYarnProgramList()
         {
             // Search for all Yarn scripts, and load them into the list.
-            yarnProgramList = AssetDatabase.FindAssets($"t:{nameof(YarnProgram)}")
-                                           .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
-                                           .Select(path => AssetDatabase.LoadAssetAtPath<YarnProgram>(path))
+            yarnProgramList = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.yarn")
+                                           .Select(path => AssetDatabase.LoadAssetAtPath<TextAsset>(path))
                                            .ToList();
 
             // Repaint to ensure that any changes to the list are visible

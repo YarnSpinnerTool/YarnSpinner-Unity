@@ -1077,6 +1077,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 28be40ad14f5bf446bbc09afbd3ebcdb,
         type: 3}
+    - target: {fileID: 3741743096958657521, guid: 8d6c09a6f35ab93498a17f1a2b9375a9,
+        type: 3}
+      propertyPath: yarnProgram
+      value: 
+      objectReference: {fileID: 11400000, guid: 7695ad157ec234e088ab1de2389cbc9c,
+        type: 3}
     - target: {fileID: 3741743097515535677, guid: 8d6c09a6f35ab93498a17f1a2b9375a9,
         type: 3}
       propertyPath: m_AnchorMin.y

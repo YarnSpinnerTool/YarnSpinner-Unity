@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Yarn.Unity {
     /// <summary>
     /// Handles playback of voice over <see cref="AudioClip"/>s referenced
-    /// on <see cref="YarnProgram"/>s.
+    /// on <see cref="YarnScript"/>s.
     /// </summary>
     public class VoiceOverPlaybackUnity : DialogueViewBase {
         /// <summary>

@@ -256,7 +256,7 @@ position: 0,0
                 createdFilePaths.Add(AssetDatabase.GetAssetPath(loc));
             }
 
-            foreach (var loc in importer.localizations)
+            foreach (var loc in importer.ExternalLocalizations)
             {
                 createdFilePaths.Add(AssetDatabase.GetAssetPath(loc.text));
             }
@@ -266,7 +266,9 @@ position: 0,0
             // Assert: Verify that it exists, contains the string table
             // entries we expect, and has the language we expect.
             var expectedLanguages = new HashSet<string> { importer.baseLanguageID, AlternateLocaleCode }.OrderBy(n => n);
-            var foundLanguages = importer.programContainer.localizations.Select(l => l.languageName).OrderBy(n => n);
+            
+            var foundLanguages = importer.AllLocalizations.Select(l => l.languageName).OrderBy(n => n);
+            
             CollectionAssert.AreEquivalent(expectedLanguages, foundLanguages, $"The locales should be what we expect to see");
         }
 
@@ -290,7 +292,7 @@ position: 0,0
             YarnImporterUtility.CreateLocalizationForLanguageInProgram(importerSerializedObject, AlternateLocaleCode);
 
             var unmodifiedBaseStringsTable = StringTableEntry.ParseFromCSV((importerSerializedObject.targetObject as YarnImporter).baseLanguage.text);
-            var unmodifiedLocalizedStringsTable = StringTableEntry.ParseFromCSV((importerSerializedObject.targetObject as YarnImporter).localizations.First(l => l.languageName == AlternateLocaleCode).text.text);
+            var unmodifiedLocalizedStringsTable = StringTableEntry.ParseFromCSV((importerSerializedObject.targetObject as YarnImporter).AllLocalizations.First(l => l.languageName == AlternateLocaleCode).text.text);
 
             // Act: modify the imported script so that lines are added,
             // changed and deleted, and then update the localized CSV
@@ -301,7 +303,7 @@ position: 0,0
             YarnImporterUtility.UpdateLocalizationCSVs(importerSerializedObject);
 
             var modifiedBaseStringsTable = StringTableEntry.ParseFromCSV((importerSerializedObject.targetObject as YarnImporter).baseLanguage.text);
-            var modifiedLocalizedStringsTable = StringTableEntry.ParseFromCSV((importerSerializedObject.targetObject as YarnImporter).localizations.First(l => l.languageName == AlternateLocaleCode).text.text);
+            var modifiedLocalizedStringsTable = StringTableEntry.ParseFromCSV((importerSerializedObject.targetObject as YarnImporter).AllLocalizations.First(l => l.languageName == AlternateLocaleCode).text.text);
 
             // Assert: verify the base language string table contains the
             // string table entries we expect, verify the localized string

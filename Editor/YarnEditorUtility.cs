@@ -61,6 +61,13 @@ public static class YarnEditorUtility {
         ProjectWindowUtil.StartNameEditingIfProjectWindowExists(0, ScriptableObject.CreateInstance<DoCreateYarnScriptAsset>(), "NewYarnScript.yarn", GetYarnDocumentIconTexture(), templatePath);
     }
 
+    [MenuItem("Assets/Create/TEMP - Yarn Program", false, 102)]
+    public static void CreateYarnProgram() {
+        const string path = "NewProgram.yarnprogram";
+        File.Create("Assets/"+path);
+        AssetDatabase.ImportAsset(path);
+    }
+
     internal static Object CreateYarnScriptAssetFromTemplate(string pathName, string resourceFile)
     {
         // Read the contents of the template file

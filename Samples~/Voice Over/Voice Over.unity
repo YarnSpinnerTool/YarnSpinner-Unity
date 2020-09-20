@@ -484,6 +484,17 @@ PrefabInstance:
       propertyPath: dialogueViews.Array.data[1]
       value: 
       objectReference: {fileID: 2086818859}
+    - target: {fileID: 5935829475398715329, guid: 4ec3df5875e7347beb6176b545b8fb39,
+        type: 3}
+      propertyPath: yarnProgram
+      value: 
+      objectReference: {fileID: 11400000, guid: ddcfd1feee1fa432d8ca6b9cbf8ef935,
+        type: 3}
+    - target: {fileID: 5935829475398715329, guid: 4ec3df5875e7347beb6176b545b8fb39,
+        type: 3}
+      propertyPath: lineProvider
+      value: 
+      objectReference: {fileID: 2086818864}
     - target: {fileID: 5935829475522760372, guid: 4ec3df5875e7347beb6176b545b8fb39,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -586,3 +597,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fadeOutTimeOnLineFinish: 0.05
   audioSource: {fileID: 0}
+--- !u!114 &2086818864
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2086818858}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3eecab994ec244f02810459f368074ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  localizationDatabase: {fileID: 11400000, guid: 5685610a778bf4596b1426586e3f506c,
+    type: 2}

@@ -10,12 +10,13 @@ namespace Yarn.Unity {
         
         private SerializedProperty stringsToViews;
         private SerializedProperty _yarnProgramProperty = default;
+        private SerializedProperty _useLinesFromProperty;
         private SerializedProperty _localizationDatabaseProperty;
+        private SerializedProperty _stringsToViewsProperty;
         
         private SerializedProperty _useTextMeshProProperty = default;
 
         Dictionary<string, Object> idsToTexts = new Dictionary<string, Object>();
-        private SerializedProperty _stringsToViewsProperty;
         private bool _showTextUiComponents = true;
         private const string _textUiComponentsLabel = "Text UI Components";
         private string _lastLanguageId = default;
@@ -26,7 +27,8 @@ namespace Yarn.Unity {
             _headerStyle = new GUIStyle() { fontStyle = FontStyle.Bold };
             _lastLanguageId = Preferences.TextLanguage;
 
-            _yarnProgramProperty = serializedObject.FindProperty("yarnScript");
+            _yarnProgramProperty = serializedObject.FindProperty("yarnProgram");
+            _useLinesFromProperty = serializedObject.FindProperty("useLinesFromScript");
             _localizationDatabaseProperty = serializedObject.FindProperty("localizationDatabase");
             
             _stringsToViewsProperty = serializedObject.FindProperty("stringsToViews");
@@ -37,33 +39,42 @@ namespace Yarn.Unity {
 
         }
 
+        private void ClearMappingTable(YarnLinesAsCanvasText canvasText)
+        {
+            if (canvasText.stringsToViews.Count != 0)
+            {
+                // Modify the dictionary directly, to make Unity
+                // realise that the property is dirty
+                _stringsToViewsProperty.FindPropertyRelative("keys").ClearArray();
+
+                // And clear the in-memory representation as well
+                canvasText.stringsToViews.Clear();
+
+                serializedObject.ApplyModifiedProperties();
+            }
+        }
+
         private void UpdateTargetObjectMappingTable()
         {
-            
-            var canvasText = serializedObject.targetObject as YarnLinesAsCanvasText;
 
-            if (!(_yarnProgramProperty.objectReferenceValue is YarnProgram yarnProgram)) {
+            var canvasText = serializedObject.targetObject as YarnLinesAsCanvasText;
+            var useLinesFromTextAsset = _useLinesFromProperty.objectReferenceValue;
+
+            if (!(_yarnProgramProperty.objectReferenceValue is YarnProgram yarnProgram))
+            {
                 // No program means no strings available, so clear it and
                 // bail out
-
-                if (canvasText.stringsToViews.Count != 0) {
-                    // Modify the dictionary directly, to make Unity
-                    // realise that the property is dirty
-                    _stringsToViewsProperty.FindPropertyRelative("keys").ClearArray();
-
-                    // And clear the in-memory representation as well
-                    canvasText.stringsToViews.Clear();
-
-                    serializedObject.ApplyModifiedProperties();           
-                }                
-                
+                ClearMappingTable(canvasText);
                 return;
             }
-            
 
-            var stringTableAsset = yarnProgram.baseLocalisationStringTable.text;
-            var stringIDs = StringTableEntry.ParseFromCSV(stringTableAsset)
-                .Select(e => e.ID);
+            if (!(AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(useLinesFromTextAsset)) is YarnImporter yarnImporter))
+            {
+                ClearMappingTable(canvasText);
+                return;
+            }
+
+            var stringIDs = yarnImporter.stringIDs;
 
             var extraneousIDs = canvasText.stringsToViews.Keys.Except(stringIDs).ToList();
             var missingIDs = stringIDs.Except(canvasText.stringsToViews.Keys).ToList();
@@ -84,6 +95,7 @@ namespace Yarn.Unity {
 
             using (var change = new EditorGUI.ChangeCheckScope()) {
                 EditorGUILayout.PropertyField(_yarnProgramProperty);
+                EditorGUILayout.PropertyField(_useLinesFromProperty);
                 EditorGUILayout.PropertyField(_localizationDatabaseProperty);
 
                 if (change.changed) {

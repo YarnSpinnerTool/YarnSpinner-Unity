@@ -16,6 +16,7 @@ public class YarnImporterEditor : ScriptedImporterEditor
 {
     private SerializedProperty baseLanguageIdProperty;
     private SerializedProperty baseLanguageProperty;
+    private SerializedProperty destinationProgramProperty;
     private SerializedProperty localizationDatabaseProperty;
     private SerializedProperty isSuccessfullyCompiledProperty;
     private SerializedProperty compilationErrorMessageProperty;
@@ -26,6 +27,7 @@ public class YarnImporterEditor : ScriptedImporterEditor
 
         baseLanguageIdProperty = serializedObject.FindProperty("baseLanguageID");
         baseLanguageProperty = serializedObject.FindProperty("baseLanguage");
+        destinationProgramProperty = serializedObject.FindProperty("destinationProgram");
         localizationDatabaseProperty = serializedObject.FindProperty("localizationDatabase");
         isSuccessfullyCompiledProperty = serializedObject.FindProperty("isSuccesfullyCompiled");
         compilationErrorMessageProperty = serializedObject.FindProperty("compilationErrorMessage");
@@ -33,21 +35,56 @@ public class YarnImporterEditor : ScriptedImporterEditor
     }
 
     public override void OnInspectorGUI() {
+        
         serializedObject.Update();
         EditorGUILayout.Space();
 
         // If there's a compilation error in any of the selected objects,
-        // show an error and then stop.
+        // show an error.
         if (isSuccessfullyCompiledProperty.boolValue == false) {
             if (serializedObject.isEditingMultipleObjects) {
                 EditorGUILayout.HelpBox("Some of the selected scripts have errors.", MessageType.Error);
             } else {
                 EditorGUILayout.HelpBox($"Error in script:\n{compilationErrorMessageProperty.stringValue}", MessageType.Error);
-            }      
-            return;      
+            }                  
         }
 
         EditorGUILayout.PropertyField(baseLanguageIdProperty);
+
+        // +Show
+        using (var change = new EditorGUI.ChangeCheckScope())
+        {
+            // Cache the previous destination program, in case the user is
+            // about to change it
+            var previousDestination = destinationProgramProperty.objectReferenceValue;
+
+            EditorGUILayout.PropertyField(destinationProgramProperty);
+
+            if (change.changed && previousDestination)
+            {
+                // Force the previous destination program we had to reimport, so that it removes us from its list
+                string previousProgramPath = AssetDatabase.GetAssetPath(previousDestination);
+                var previousProgramImporter = AssetImporter.GetAtPath(previousProgramPath) as YarnProgramImporter;
+
+                // Remove the selected importers from the previous program
+                previousProgramImporter.sourceScripts = previousProgramImporter.sourceScripts
+                    .Except(serializedObject.targetObjects.Cast<YarnImporter>())
+                    .ToList();
+
+                EditorUtility.SetDirty(previousProgramImporter);
+
+                previousProgramImporter.SaveAndReimport();
+            }
+        }
+        
+
+
+        if (serializedObject.isEditingMultipleObjects == false && destinationProgramProperty.objectReferenceValue == null) {
+            EditorGUILayout.HelpBox("This script is not currently part of a Yarn Program. Either add one in the field above, or click Create New Yarn Program.", MessageType.Info);
+            if (GUILayout.Button("Create New Yarn Program")) {
+                YarnImporterUtility.CreateNewYarnProgram(serializedObject);
+            }
+        }
 
         EditorGUILayout.Space();
 
@@ -70,6 +107,8 @@ public class YarnImporterEditor : ScriptedImporterEditor
             if (GUILayout.Button("Add Line Tags")) {
                 AddLineTagsToSelectedObject();
             }
+
+            
         }
 
         var hadChanges = serializedObject.ApplyModifiedProperties();
@@ -105,8 +144,7 @@ public class YarnImporterEditor : ScriptedImporterEditor
         // YarnPrograms, and by extension their importers, and get the
         // string tags that they found.
 
-        var allLineTags = Resources.FindObjectsOfTypeAll<YarnProgram>() // get all yarn programs that have been imported
-            .Select(asset => AssetDatabase.GetAssetOrScenePath(asset)) // get the path on disk
+        var allLineTags = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.yarn") // get all yarn programs 
             .Select(path => AssetImporter.GetAtPath(path)) // get the asset importer for that path
             .OfType<YarnImporter>() // ensure that they're all YarnImporters
             .SelectMany(importer => importer.stringIDs) // Get all of the string IDs in the base localization
@@ -167,11 +205,9 @@ public class YarnImporterEditor : ScriptedImporterEditor
                     // value to stop tracking this program.                    
                     foreach (YarnImporter importer in serializedObject.targetObjects)
                     {
-                        if (importer.programContainer == null)
-                        {
-                            continue;
-                        }
-                        previousLocalizationDatabase.RemoveTrackedProgram(importer.programContainer);
+                        var guid = AssetDatabase.AssetPathToGUID(importer.assetPath);
+                        
+                        previousLocalizationDatabase.RemoveTrackedProgram(guid);
                         
                         // Mark that the localization database has changed,
                         // so needs to be saved
@@ -184,17 +220,15 @@ public class YarnImporterEditor : ScriptedImporterEditor
                 {
                     foreach (YarnImporter importer in serializedObject.targetObjects)
                     {
-                        // If we don't actually have a program (because of
-                        // a compile error), there's nothing to do here
-                        if (importer.programContainer == null)
-                        {
-                            continue;
-                        }
-                        database.AddTrackedProgram(importer.programContainer);
+                        var guid = AssetDatabase.AssetPathToGUID(importer.assetPath);
+                        database.AddTrackedProgram(guid);
 
                         // Mark that the localization database should save
                         // changes
-                        EditorUtility.SetDirty(previousLocalizationDatabase);
+                        if (previousLocalizationDatabase != null)
+                        {
+                            EditorUtility.SetDirty(previousLocalizationDatabase);
+                        }
                     }
                 } 
 

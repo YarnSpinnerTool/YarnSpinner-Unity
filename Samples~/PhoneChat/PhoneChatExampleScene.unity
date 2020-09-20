@@ -326,6 +326,17 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1491846708296685272, guid: 22c9338f64478424d919c074ea5bcf48,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1491846708831241277, guid: 22c9338f64478424d919c074ea5bcf48,
+        type: 3}
+      propertyPath: yarnProgram
+      value: 
+      objectReference: {fileID: 11400000, guid: ba013fcce07ad48a383403726b73fcca,
+        type: 3}
     - target: {fileID: 1491846708852952392, guid: 22c9338f64478424d919c074ea5bcf48,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -474,7 +485,7 @@ PrefabInstance:
     - target: {fileID: 5439978927204955441, guid: 22c9338f64478424d919c074ea5bcf48,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.000029917555
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5439978927653840844, guid: 22c9338f64478424d919c074ea5bcf48,
         type: 3}

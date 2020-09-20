@@ -15,6 +15,7 @@ MonoBehaviour:
   _localizations:
   - {fileID: 11400000, guid: baa84a961dd69489faff8b5f55e98e72, type: 2}
   - {fileID: 11400000, guid: 5a0a51e67313849179075f556ec70997, type: 2}
-  _trackedPrograms:
-  - {fileID: 11400000, guid: 24f22b038d584445ba4f43344cc5733d, type: 3}
-  - {fileID: 11400000, guid: 8b6ae1e8d32e840f0b3fd0b033e52253, type: 3}
+  _trackedScripts:
+  - {fileID: 4900002, guid: 8b6ae1e8d32e840f0b3fd0b033e52253, type: 3}
+  - {fileID: 4900002, guid: 24f22b038d584445ba4f43344cc5733d, type: 3}
+  _recentlyUpdatedScriptGUIDs: []

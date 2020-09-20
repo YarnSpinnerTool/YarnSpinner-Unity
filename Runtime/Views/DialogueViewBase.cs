@@ -10,7 +10,7 @@ namespace Yarn.Unity
     /// dialogue executed by a <see cref="DialogueRunner"/> to the user.
     /// The <see cref="DialogueRunner"/> uses subclasses of this type to
     /// relay information to and from the user, and to pause and resume the
-    /// execution of the <see cref="YarnProgram"/>.
+    /// execution of the <see cref="YarnScript"/>.
     /// </summary>
     /// <remarks>
     /// The term "view" is meant in the broadest sense, e.g. a view on the

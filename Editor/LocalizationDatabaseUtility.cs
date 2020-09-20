@@ -57,14 +57,61 @@ internal static class LocalizationDatabaseUtility {
 
     public static void UpdateContents(LocalizationDatabase database)
     {
-        var allTextAssets = database.TrackedPrograms
-            .SelectMany(p => p.localizations)
+        // First, get all scripts whose importers are configured to use
+        // this database - we need to add them to our TrackedPrograms list
+        
+        foreach (var updatedGUID in database.RecentlyUpdatedGUIDs) {
+            var path = AssetDatabase.GUIDToAssetPath(updatedGUID);
+
+            if (string.IsNullOrEmpty(path)) {
+                // The corresponding asset can't be found! No-op.
+                continue;
+            }
+
+            var importer = AssetImporter.GetAtPath(path);
+            if (!(importer is YarnImporter yarnImporter)) {
+                Debug.LogWarning($"Yarn Spinner internal error: localization database was told to load asset {path}, but this does not have a {nameof(YarnImporter)}. Ignoring.");
+                continue;
+            }
+
+            var textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
+
+            if (textAsset == null) {
+                Debug.LogWarning($"Yarn Spinner internal error: failed to get a {nameof(TextAsset)} at {path}. Ignoring.");
+                continue;
+            }
+
+            if (yarnImporter.localizationDatabase == database)
+            {
+                // We need to add or update content based on this asset.
+                database.AddTrackedProgram(textAsset);
+            }
+            else
+            {
+                // This asset used to refer to this database, but now no
+                // longer does. Remove the reference.
+                database.RemoveTrackedProgram(textAsset);
+            }
+
+        }
+
+        database.RecentlyUpdatedGUIDs.Clear();
+
+        var allTrackedImporters = database.TrackedScripts
+            .Select(p => AssetDatabase.GetAssetPath(p))
+            .Select(path => AssetImporter.GetAtPath(path) as YarnImporter);
+
+        var allLocalizationAssets = allTrackedImporters
+            .Where(p => p != null)
+            .SelectMany(p => p.AllLocalizations)
             .Select(localization => new
             {
-                localization.languageName,
-                localization.text
+                languageID = localization.languageName,
+                text = localization.text
             });
 
+        // Erase the contents of all localizations, because we're about to
+        // replace them
         foreach (var localization in database.Localizations)
         {
             if (localization == null)
@@ -75,9 +122,9 @@ internal static class LocalizationDatabaseUtility {
             localization.Clear();
         }
 
-        foreach (var localizedTextAsset in allTextAssets)
+        foreach (var localizedTextAsset in allLocalizationAssets)
         {
-            string languageName = localizedTextAsset.languageName;
+            string languageName = localizedTextAsset.languageID;
 
             Localization localization;
 
@@ -90,8 +137,6 @@ internal static class LocalizationDatabaseUtility {
                 Debug.LogWarning($"{localizedTextAsset.text.name} is marked for language {languageName}, but this {nameof(LocalizationDatabase)} isn't set up for that language. TODO: offer a quick way to create one here.");
                 continue;
             }
-
-
 
             TextAsset textAsset = localizedTextAsset.text;
 

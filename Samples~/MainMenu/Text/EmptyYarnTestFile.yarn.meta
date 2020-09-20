@@ -2,7 +2,8 @@ fileFormatVersion: 2
 guid: 6ee7232090ee9194a80bc587744b0f1e
 ScriptedImporter:
   fileIDToRecycleName:
-    11400000: Program
+    4900000: Program
+    2186277476908879412: ImportLogs
   externalObjects: {}
   userData: 
   assetBundleName: 
@@ -10,10 +11,10 @@ ScriptedImporter:
   script: {fileID: 11500000, guid: 94073015eacc34c1d8fc6786e43d60ca, type: 3}
   baseLanguageID: en
   stringIDs: []
-  compilationStatus: 0
+  AnyImplicitStringIDs: 0
   isSuccesfullyCompiled: 1
-  compilationErrorMessage: "Error on line 1 at position 1:\nmismatched input '<EOF>'
-    expecting 'title:'\r\n\r\n"
+  compilationErrorMessage: 
   baseLanguage: {instanceID: 0}
   localizations: []
-  voiceOvers: []
+  destinationProgram: {instanceID: 0}
+  localizationDatabase: {instanceID: 0}

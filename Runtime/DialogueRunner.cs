@@ -48,7 +48,7 @@ namespace Yarn.Unity
         /// The <see cref="YarnProgram"/> assets that should be loaded on
         /// scene start.
         /// </summary>
-        public YarnProgram[] yarnScripts;
+        public YarnProgram yarnProgram;
 
         /// <summary>
         /// The variable storage object.
@@ -229,27 +229,29 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Adds a program, and parses and adds the contents of the
-        /// program's string table to the DialogueRunner's combined string
-        /// table.
+        /// Adds a program at runtime, and adds string table entries to the
+        /// DialogueRunner's combined string table.
         /// </summary>
         /// <remarks>This method calls <see
         /// cref="AddDialogueLines(YarnProgram)"/> to load the string table
         /// for the current localisation. It selects the appropriate string
         /// table based on the value of set in the Preferences dialogue.
-        public void Add(YarnProgram scriptToLoad)
+        public void Add(YarnProgram scriptToLoad, string localizationId = null, IEnumerable<StringTableEntry> stringTableEntries = null)
         {
             Dialogue.AddProgram(scriptToLoad.GetProgram());         
 
             if (lineProviderIsTemporary) {
-                var stringTableAsset = scriptToLoad.baseLocalisationStringTable;
-                if (stringTableAsset == null) {
-                    Debug.LogWarning($"Yarn script {scriptToLoad.name} doesn't have a base localization string table. This dialogue runner should be set up to use the {nameof(LocalizationDatabase)} that the Yarn scripts are associated with instead.");
-                    return;
+                if (localizationId == null || stringTableEntries == null) {
+                    const string dialogueRunnerName = nameof(Unity.DialogueRunner);
+                    const string lineProviderName = nameof(Unity.LineProviderBehaviour);
+                    const string stringTableName = nameof(stringTableEntries);
+                    const string localizationIDName = nameof(localizationId);
+
+                    Debug.LogWarning($"Yarn script {scriptToLoad.name} is being added at runtime, but this {dialogueRunnerName} was not configured to use a {lineProviderName}, and a {localizationIDName} and {stringTableName} weren't provided. Lines from this script will not render correctly.\n\nTo fix this, either configure this {dialogueRunnerName} to use a {lineProviderName}, or provide a {localizationIDName} and {stringTableName}.");
                 }
-                var stringTableEntries = StringTableEntry.ParseFromCSV(scriptToLoad.baseLocalisationStringTable.text);
-                lineProvider.localizationDatabase.GetLocalization(scriptToLoad.baseLocalizationId).AddLocalizedStrings(stringTableEntries);
-            }   
+                
+                lineProvider.localizationDatabase.GetLocalization(localizationId).AddLocalizedStrings(stringTableEntries);
+            }
         }
 
         /// <summary>
@@ -583,22 +585,24 @@ namespace Yarn.Unity
                 Debug.Log("Dialogue Runner has no LineProvider; setting a temporary one up with the base text found inside the scripts.");
 
                 // Fill the localization database with the lines found in the scripts
-                foreach (var program in yarnScripts) {
-                    
-                    // In order to get the text of the base localization
-                    // for this script, we need to parse the base
-                    // localization CSV text asset associated with this
-                    // script. (The text asset will only be included in the
-                    // build if the YarnImporter determines that the
-                    // YarnProgram has no LocalizationDatabase assigned.)
-
-                    if (program.baseLocalisationStringTable == null) {
-                        Debug.LogWarning($"No base localization string table was included for the Yarn script {program.name}. It may be connected to a {nameof(LocalizationDatabase)}. You should set this {nameof(DialogueRunner)} up with a Line Provider, and connect the Line Provider to the LocalizationDatabase.");
-                        continue;
-                    }
-
+                
+                // In order to get the text of the base localization
+                // for this script, we need to parse the base
+                // localization CSV text asset associated with this
+                // script. (The text asset will only be included in the
+                // build if the YarnImporter determines that the
+                // YarnProgram has no LocalizationDatabase assigned.)
+                if (yarnProgram == null) {
+                    Debug.LogWarning($"No Yarn Program was provided. Cannot generate a temporary line provider from script contents.");
+                } else if (yarnProgram.defaultStringTable == null)
+                {
+                    Debug.LogWarning($"No base localization string table was included for the Yarn script {yarnProgram.name}. It may be connected to a {nameof(LocalizationDatabase)}. You should set this {nameof(DialogueRunner)} up with a Line Provider, and connect the Line Provider to the LocalizationDatabase.");
+                    ;
+                }
+                else
+                {
                     // Extract the text for the base localization.
-                    var text = program.baseLocalisationStringTable.text;
+                    var text = yarnProgram.defaultStringTable.text;
 
                     // Parse it into string table entries.
                     var parsedStringTableEntries = StringTableEntry.ParseFromCSV(text);
@@ -629,22 +633,14 @@ namespace Yarn.Unity
                 dialogueView.onUserWantsLineContinuation = continueAction;
             }
 
-            // Combine all scripts together and load them
-            if (yarnScripts != null && yarnScripts.Length > 0) {
+            if (yarnProgram != null)
+            {
+                Dialogue.SetProgram(yarnProgram.GetProgram());
 
-                var compiledPrograms = new List<Program>();
-
-                foreach (var program in yarnScripts) {
-                    compiledPrograms.Add(program.GetProgram());
+                if (startAutomatically)
+                {
+                    StartDialogue();
                 }
-
-                var combinedProgram = Program.Combine(compiledPrograms.ToArray());
-
-                Dialogue.SetProgram(combinedProgram);
-            }
-
-            if (startAutomatically) {
-                StartDialogue();
             }
         }
 

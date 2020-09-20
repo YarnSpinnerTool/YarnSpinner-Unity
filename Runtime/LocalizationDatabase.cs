@@ -77,22 +77,45 @@ namespace Yarn.Unity
         // The list of YarnPrograms that supply this LocalizationDatabase
         // with line content. LocalizationDatabaseEditor uses this to
         // update this database with content.
-        [SerializeField] List<YarnProgram> _trackedPrograms = new List<YarnProgram>();
+        [SerializeField] List<TextAsset> _trackedScripts = new List<TextAsset>();
 
-        public IEnumerable<YarnProgram> TrackedPrograms => _trackedPrograms;
+        // A list of GUIDs for YarnScripts that have recently been
+        // (re-)imported, and are (or previously were) configured to use
+        // this LocalizationDatabase. An AssetPostProcessor will use this
+        // to update its contents, and also update the list of
+        // TrackedPrograms.
+        [SerializeField] List<string> _recentlyUpdatedScriptGUIDs = new List<string>();
 
-        public void AddTrackedProgram(YarnProgram program)
+        public bool NeedsUpdate => _recentlyUpdatedScriptGUIDs.Count > 0;
+
+        public IEnumerable<TextAsset> TrackedScripts => _trackedScripts;
+        public List<string> RecentlyUpdatedGUIDs => _recentlyUpdatedScriptGUIDs;
+
+        public void AddTrackedProgram(string guid)
         {
-            // No-op if we already have this in the list
-            if (_trackedPrograms.Contains(program)) {
-                return;
+            if (_recentlyUpdatedScriptGUIDs.Contains(guid) == false)
+            {
+                _recentlyUpdatedScriptGUIDs.Add(guid);
             }
-            _trackedPrograms.Add(program);
         }
 
-        public void RemoveTrackedProgram(YarnProgram programContainer)
+        public void AddTrackedProgram(TextAsset script)
         {
-            _trackedPrograms.Remove(programContainer);
+            // No-op if we already have this in the list
+            if (_trackedScripts.Contains(script)) {
+                return;
+            }
+            _trackedScripts.Add(script);
+        }
+
+        public void RemoveTrackedProgram(TextAsset script)
+        {
+            _trackedScripts.Remove(script);
+        }
+
+        public void RemoveTrackedProgram(string guid)
+        {
+            _recentlyUpdatedScriptGUIDs.Remove(guid);
         }
 
         public void AddLocalization(Localization localization) {
@@ -100,14 +123,14 @@ namespace Yarn.Unity
         }
 
         private void OnValidate() {
-            var newTrackedProgramList = new List<YarnProgram>();
-            foreach (var entry in _trackedPrograms) {
+            var newTrackedProgramList = new List<TextAsset>();
+            foreach (var entry in _trackedScripts) {
                 if (entry == null) {
                     continue;
                 }
                 newTrackedProgramList.Add(entry);
             }
-            _trackedPrograms = newTrackedProgramList;
+            _trackedScripts = newTrackedProgramList;
         }
 #endif
     }

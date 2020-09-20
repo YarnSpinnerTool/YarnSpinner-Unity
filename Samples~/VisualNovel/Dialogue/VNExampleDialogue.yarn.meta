@@ -3,7 +3,8 @@ guid: 6b44f042c1cbdef40bdfd6ac1be41890
 ScriptedImporter:
   fileIDToRecycleName:
     4900000: Strings
-    11400000: Program
+    4900002: Program
+    2186277476908879412: ImportLogs
   externalObjects: {}
   userData: 
   assetBundleName: 
@@ -11,101 +12,28 @@ ScriptedImporter:
   script: {fileID: 11500000, guid: 94073015eacc34c1d8fc6786e43d60ca, type: 3}
   baseLanguageID: en-US
   stringIDs:
-  - VNExampleDialogue-Start-0
-  - VNExampleDialogue-Start-1
-  - VNExampleDialogue-Start-2
-  - VNExampleDialogue-Start-3
-  - VNExampleDialogue-Start-4
-  - VNExampleDialogue-Start-5
-  - VNExampleDialogue-Start-6
-  - VNExampleDialogue-Start-7
-  - VNExampleDialogue-Start-8
-  - VNExampleDialogue-Start-9
-  - VNExampleDialogue-Start-10
-  - VNExampleDialogue-Start-11
-  - VNExampleDialogue-Start-12
-  - VNExampleDialogue-Start-13
-  - VNExampleDialogue-Start-14
-  - VNExampleDialogue-Start-15
-  - VNExampleDialogue-Start-16
-  - VNExampleDialogue-Start-17
-  compilationStatus: 1
+  - line:VNExampleDialogue-Start-0
+  - line:VNExampleDialogue-Start-1
+  - line:VNExampleDialogue-Start-2
+  - line:VNExampleDialogue-Start-3
+  - line:VNExampleDialogue-Start-4
+  - line:VNExampleDialogue-Start-5
+  - line:VNExampleDialogue-Start-6
+  - line:VNExampleDialogue-Start-7
+  - line:VNExampleDialogue-Start-8
+  - line:VNExampleDialogue-Start-9
+  - line:VNExampleDialogue-Start-10
+  - line:VNExampleDialogue-Start-11
+  - line:VNExampleDialogue-Start-12
+  - line:VNExampleDialogue-Start-13
+  - line:VNExampleDialogue-Start-14
+  - line:VNExampleDialogue-Start-15
+  - line:VNExampleDialogue-Start-16
+  - line:VNExampleDialogue-Start-17
+  AnyImplicitStringIDs: 1
   isSuccesfullyCompiled: 1
-  compilationErrorMessage: "Error on line 1 at position 1:\nextraneous input '\\n'
-    expecting 'title:'\r\n\r\n^"
+  compilationErrorMessage: 
   baseLanguage: {instanceID: 0}
   localizations: []
-  voiceOvers:
-  - linetag: VNExampleDialogue-Start-0
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-1
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-2
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-3
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-4
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-5
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-6
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-7
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-8
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-9
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-10
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-11
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-12
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-13
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-14
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-15
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-16
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  - linetag: VNExampleDialogue-Start-17
-    languageToAudioclip:
-    - language: en-US
-      audioClip: {instanceID: 0}
-  programContainer: {instanceID: 0}
+  destinationProgram: {fileID: 11400000, guid: 6573e22e697ab4619b968b6ce2f80243, type: 3}
+  localizationDatabase: {instanceID: 0}

@@ -3,7 +3,8 @@ guid: e97694a934236874ca36566028366c88
 ScriptedImporter:
   fileIDToRecycleName:
     4900000: Strings
-    11400000: Program
+    4900002: Program
+    2186277476908879412: ImportLogs
   externalObjects: {}
   userData: 
   assetBundleName: 
@@ -11,32 +12,35 @@ ScriptedImporter:
   script: {fileID: 11500000, guid: 94073015eacc34c1d8fc6786e43d60ca, type: 3}
   baseLanguageID: en-AU
   stringIDs:
-  - line:794945
-  - line:2dc39b
-  - line:34de2f
-  - line:dcc2bc
-  - line:a8e70c
-  - line:305cde
-  - line:5d7a7c
-  - line:0a7e39
-  - line:0facf7
-  - line:8c3f98
-  - line:24c418
-  - line:df4eaf
-  - line:1fea6c
-  - line:5df323
-  - line:60c282
-  - line:d7df49
-  compilationStatus: 0
+  - line:PhoneChatDialogue-Start-0
+  - line:PhoneChatDialogue-Start-1
+  - line:PhoneChatDialogue-Start-2
+  - line:PhoneChatDialogue-Start-3
+  - line:PhoneChatDialogue-Start-4
+  - line:PhoneChatDialogue-Start-5
+  - line:PhoneChatDialogue-Start-6
+  - line:PhoneChatDialogue-Start-7
+  - line:PhoneChatDialogue-Start-8
+  - line:PhoneChatDialogue-Start-9
+  - line:PhoneChatDialogue-Start-10
+  - line:PhoneChatDialogue-Start-11
+  - line:PhoneChatDialogue-Start-12
+  - line:PhoneChatDialogue-Start-13
+  - line:PhoneChatDialogue-Start-14
+  - line:PhoneChatDialogue-Start-15
+  - line:PhoneChatDialogue-Start-16
+  - line:PhoneChatDialogue-Start-17
+  - line:PhoneChatDialogue-Start-18
+  - line:PhoneChatDialogue-Start-19
+  - line:PhoneChatDialogue-Start-20
+  - line:PhoneChatDialogue-Bye-21
+  - line:PhoneChatDialogue-Bye-22
+  AnyImplicitStringIDs: 1
   isSuccesfullyCompiled: 1
-  compilationErrorMessage: 'Error on line 23 at position 1:
-
-    missing COMMAND_ENDIF at ''===''
-
-    ===
-
-    ^^^'
-  baseLanguage: {fileID: 4900000, guid: 8b6ae1e8d32e840f0b3fd0b033e52253, type: 3}
+  compilationErrorMessage: 
+  baseLanguage: {instanceID: 0}
   localizations:
   - languageName: de
     text: {fileID: 4900000, guid: 816b6de293b849a4fad13d5caca52524, type: 3}
+  destinationProgram: {fileID: 11400000, guid: ba013fcce07ad48a383403726b73fcca, type: 3}
+  localizationDatabase: {instanceID: 0}

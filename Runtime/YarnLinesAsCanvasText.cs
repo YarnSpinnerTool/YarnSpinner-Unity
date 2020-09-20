@@ -7,7 +7,10 @@ namespace Yarn.Unity {
     /// Shows Yarn lines on Canvas Text components.
     /// </summary>
     public class YarnLinesAsCanvasText : MonoBehaviour {
-        public YarnProgram yarnScript;
+        [UnityEngine.Serialization.FormerlySerializedAs("yarnScript")]
+        public YarnProgram yarnProgram;
+        
+        public TextAsset useLinesFromScript;
 
         public LocalizationDatabase localizationDatabase;
 

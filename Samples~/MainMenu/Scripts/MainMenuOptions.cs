@@ -65,7 +65,7 @@ namespace Yarn.Unity.Example
 
         private void LoadTextLanguagesIntoDropdowns()
         {
-            /*if (textLanguagesDropdown || textLanguagesTMPDropdown)
+            if (textLanguagesDropdown || textLanguagesTMPDropdown)
             {
                 var textLanguageList = new List<string>();
 
@@ -83,45 +83,45 @@ namespace Yarn.Unity.Example
                 
 
                 PopulateLanguagesListToDropdown(textLanguageList, textLanguagesTMPDropdown, textLanguagesDropdown, ref textLanguageSelected, PreferencesSetting.TextLanguage);
-            }*/
+            }
         }
 
         private void LoadAudioLanguagesIntoDropdowns()
         {
-            /*
+            
             if (audioLanguagesDropdown || audioLanguagesTMPDropdown)
             {
-                var audioLanguagesList = new List<Culture>();
+                var audioLanguagesList = new List<string>();
                 if (ProjectSettings.AudioProjectLanguages.Count == 0) {
                     // If no project settings have been defined, show all available cultures                    
                     foreach (var culture in Cultures.GetCultures()) {
-                        audioLanguagesList.Add(culture);
+                        audioLanguagesList.Add(culture.Name);
                     }                        
                 } else {
                     foreach (var language in ProjectSettings.AudioProjectLanguages) {
-                        audioLanguagesList.Add(Cultures.GetCulture(language));
+                        audioLanguagesList.Add(language);
                     }
                 }
                 PopulateLanguagesListToDropdown(audioLanguagesList, audioLanguagesTMPDropdown, audioLanguagesDropdown, ref audioLanguageSelected, PreferencesSetting.AudioLanguage);
-            }*/
+            }
         }
 
-        private void PopulateLanguagesListToDropdown(List<Culture> languageList, TMP_Dropdown tmpDropdown, Dropdown dropdown, ref int selectedLanguageIndex, PreferencesSetting setting)
+        private void PopulateLanguagesListToDropdown(List<string> languageList, TMP_Dropdown tmpDropdown, Dropdown dropdown, ref int selectedLanguageIndex, PreferencesSetting setting)
         {
-            /*
+            
             switch (setting)
             {
                 case PreferencesSetting.TextLanguage:
-                    selectedLanguageIndex = languageList.IndexOf(Cultures.GetCulture(Preferences.TextLanguage));
+                    selectedLanguageIndex = languageList.IndexOf(Preferences.TextLanguage);
                     break;
                 case PreferencesSetting.AudioLanguage:
-                    selectedLanguageIndex = languageList.IndexOf(Cultures.GetCulture(Preferences.AudioLanguage));
+                    selectedLanguageIndex = languageList.IndexOf(Preferences.AudioLanguage);
                     break;
             }
 
             var displayNames = new List<string>();
             foreach (var culture in languageList) {
-                displayNames.Add(culture.NativeName);
+                displayNames.Add(Cultures.GetCulture(culture).NativeName);
             }
 
             if (dropdown)
@@ -144,21 +144,21 @@ namespace Yarn.Unity.Example
 #else
                 tmpDropdown.value = selectedLanguageIndex;
 #endif
-            }*/
+            }
         }
 
         private void ApplyChangedValueToPreferences(int value, TMP_Dropdown tmpDropdown, Dropdown dropdown, PreferencesSetting setting)
         {
-            /*
+            
             string language = default;
 
             if (dropdown)
             {
-                language = Cultures.AvailableCultures.First(element => element.NativeName == dropdown.options[value].text).Name;
+                language = Cultures.GetCultures().First(element => element.NativeName == dropdown.options[value].text).Name;
             }
             if (tmpDropdown)
             {
-                language = Cultures.AvailableCultures.First(element => element.NativeName == tmpDropdown.options[value].text).Name;
+                language = Cultures.GetCultures().First(element => element.NativeName == tmpDropdown.options[value].text).Name;
             }
 
             switch (setting)
@@ -170,7 +170,7 @@ namespace Yarn.Unity.Example
                     Preferences.AudioLanguage = language;
                     break;
             }
-            */
+            
         }
 
         private enum PreferencesSetting

@@ -273,7 +273,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterName: Sally
   talkToNode: Sally
-  scriptToLoad: {fileID: 11400000, guid: 8b6ae1e8d32e840f0b3fd0b033e52253, type: 3}
 --- !u!212 &463211627
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -897,7 +896,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterName: Character Name
   talkToNode: 
-  scriptToLoad: {fileID: 0}
 --- !u!212 &924307001
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1475,7 +1473,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterName: Ship
   talkToNode: Ship
-  scriptToLoad: {fileID: 11400000, guid: 24f22b038d584445ba4f43344cc5733d, type: 3}
 --- !u!1 &2027769761
 GameObject:
   m_ObjectHideFlags: 0
@@ -1840,6 +1837,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5935829475398715329, guid: 4ec3df5875e7347beb6176b545b8fb39,
         type: 3}
+      propertyPath: yarnScripts.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5935829475398715329, guid: 4ec3df5875e7347beb6176b545b8fb39,
+        type: 3}
       propertyPath: onNodeComplete.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
       value: 0
       objectReference: {fileID: 0}
@@ -1903,6 +1905,18 @@ PrefabInstance:
       propertyPath: lineProvider
       value: 
       objectReference: {fileID: 1231901711}
+    - target: {fileID: 5935829475398715329, guid: 4ec3df5875e7347beb6176b545b8fb39,
+        type: 3}
+      propertyPath: yarnScripts.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: 27f0c430fc5774761bc0addeb98b2e1d,
+        type: 3}
+    - target: {fileID: 5935829475398715329, guid: 4ec3df5875e7347beb6176b545b8fb39,
+        type: 3}
+      propertyPath: yarnProgram
+      value: 
+      objectReference: {fileID: 11400000, guid: 27f0c430fc5774761bc0addeb98b2e1d,
+        type: 3}
     - target: {fileID: 5935829475398715334, guid: 4ec3df5875e7347beb6176b545b8fb39,
         type: 3}
       propertyPath: onDialogueStart.m_PersistentCalls.m_Calls.Array.size
