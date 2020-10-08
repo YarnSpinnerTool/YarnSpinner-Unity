@@ -33,7 +33,7 @@ namespace Yarn.Unity {
         /// When true, the <see cref="DialogueRunner"/> has signaled to
         /// finish the current line asap.
         /// </summary>
-        private bool finishCurrentLine = false;
+        private bool interrupted = false;
 
         private void Awake() {
             if (!audioSource) {
@@ -49,7 +49,7 @@ namespace Yarn.Unity {
         /// <param name="dialogueLine"></param>
         /// <returns></returns>
         public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished) {
-            finishCurrentLine = false;
+            interrupted = false;
 
             if (!(dialogueLine is AudioLocalizedLine audioLine)) {
                 Debug.LogError($"Playing voice over failed because {nameof(RunLine)} expected to receive an {nameof(AudioLocalizedLine)}, but instead received a {dialogueLine?.GetType().ToString() ?? "null"}. Is your {nameof(DialogueRunner)} set up to use a {nameof(AudioLineProvider)}?", gameObject);
@@ -87,14 +87,14 @@ namespace Yarn.Unity {
 
             // Wait until either the audio source finishes playing, or the
             // interruption flag is set.
-            while (audioSource.isPlaying && !finishCurrentLine) {
+            while (audioSource.isPlaying && !interrupted) {
                 yield return null;
             }
             
             // If the line was interrupted, we need to wrap up the playback
             // as quickly as we can. We do this here with a fade-out to
             // zero over fadeOutTimeOnLineFinish seconds.
-            if (audioSource.isPlaying && finishCurrentLine) {
+            if (audioSource.isPlaying && interrupted) {
                 // Fade out voice over clip            
                 float lerpPosition = 0f;
                 float volumeFadeStart = audioSource.volume;
@@ -143,7 +143,7 @@ namespace Yarn.Unity {
                     // The user wants us to wrap up the audio quickly. The
                     // DoPlayback coroutine will apply the fade out defined
                     // by fadeOutTimeOnLineFinish.
-                    finishCurrentLine = true;
+                    interrupted = true;
                     break;
                 case LineStatus.Delivered:
                     // The line has finished delivery on all views. Nothing
