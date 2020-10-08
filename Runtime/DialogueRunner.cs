@@ -35,7 +35,6 @@ using System.Threading.Tasks;
 
 namespace Yarn.Unity
 {
-
     /// <summary>
     /// The [DialogueRunner]({{|ref
     /// "/docs/unity/components/dialogue-runner.md"|}}) component acts as
