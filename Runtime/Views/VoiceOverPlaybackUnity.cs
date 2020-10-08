@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -52,7 +52,7 @@ namespace Yarn.Unity {
             finishCurrentLine = false;
 
             if (!(dialogueLine is AudioLocalizedLine audioLine)) {
-                Debug.LogError($"Playing voice over failed because {nameof(RunLine)} expected to receive an {nameof(AudioLocalizedLine)}, but instead received a {dialogueLine.GetType()}. Is your {nameof(DialogueRunner)} set up to use a {nameof(AudioLineProvider)}?", gameObject);
+                Debug.LogError($"Playing voice over failed because {nameof(RunLine)} expected to receive an {nameof(AudioLocalizedLine)}, but instead received a {dialogueLine?.GetType().ToString() ?? "null"}. Is your {nameof(DialogueRunner)} set up to use a {nameof(AudioLineProvider)}?", gameObject);
                 onDialogueLineFinished();
                 return;
             }
