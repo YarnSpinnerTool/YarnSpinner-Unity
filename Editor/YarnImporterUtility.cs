@@ -189,7 +189,7 @@ internal static class YarnImporterUtility
         var csvFileName = $"{Path.GetFileNameWithoutExtension(path)} ({language}).csv";
         var destinationPath = Path.Combine(directory, csvFileName);
         destinationPath = AssetDatabase.GenerateUniqueAssetPath(destinationPath);        
-        File.WriteAllText(destinationPath, generatedCSV);
+        File.WriteAllText(destinationPath, generatedCSV, System.Text.Encoding.UTF8);
         
         // Import this file as a TextAsset object
         AssetDatabase.ImportAsset(destinationPath);
@@ -396,7 +396,7 @@ internal static class YarnImporterUtility
         // Write out the replacement text to this existing file, replacing
         // its existing contents
         var outputFile = AssetDatabase.GetAssetPath(loc);
-        File.WriteAllText(outputFile, outputCSV);
+        File.WriteAllText(outputFile, outputCSV, System.Text.Encoding.UTF8);
 
         // Tell the asset database that the file needs to be reimported
         AssetDatabase.ImportAsset(outputFile);

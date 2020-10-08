@@ -317,7 +317,7 @@ namespace Yarn.Unity
             }
 
             // Save the text back to disk
-            File.WriteAllText(path, upgradedText);
+            File.WriteAllText(path, upgradedText, System.Text.Encoding.UTF8);
 
             // Re-import the asset
             AssetDatabase.ImportAsset(path);

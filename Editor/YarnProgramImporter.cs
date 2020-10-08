@@ -379,7 +379,7 @@ namespace Yarn.Unity
             var output = Yarn.Compiler.Utility.GenerateYarnFileWithDeclarations(thisProgramDeclarations, "Program");
 
             var importer = target as YarnProgramImporter;
-            File.WriteAllText(importer.assetPath, output);
+            File.WriteAllText(importer.assetPath, output, System.Text.Encoding.UTF8);
             AssetDatabase.ImportAsset(importer.assetPath);            
         }
     }

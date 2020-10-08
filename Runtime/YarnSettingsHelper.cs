@@ -64,7 +64,7 @@ public static class YarnSettingsHelper {
     public static void WritePreferencesToDisk<T>(T settingsClass, string storagePath) {
         string settingsJson = JsonUtility.ToJson(settingsClass, true);
         try {
-            File.WriteAllText(storagePath, settingsJson);
+            File.WriteAllText(storagePath, settingsJson, System.Text.Encoding.UTF8);
         } catch (Exception) {
             Debug.LogError("Saving Yarn Spinner preferences to disk failed!");
         }

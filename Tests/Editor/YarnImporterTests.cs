@@ -134,7 +134,7 @@ position: 0,0
             var path = Application.dataPath + "/" + fileName + ".yarn";
             createdFilePaths.Add(path);
 
-            File.WriteAllText(path, TestYarnScriptSource);
+            File.WriteAllText(path, TestYarnScriptSource, System.Text.Encoding.UTF8);
             AssetDatabase.Refresh();
             var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
@@ -150,7 +150,7 @@ position: 0,0
 
             string path = Application.dataPath + "/" + fileName + ".yarn";
             createdFilePaths.Add(path);
-            File.WriteAllText(path, textYarnAsset);
+            File.WriteAllText(path, textYarnAsset, System.Text.Encoding.UTF8);
 
             LogAssert.ignoreFailingMessages = true;
             AssetDatabase.Refresh();
@@ -169,7 +169,7 @@ position: 0,0
             string path = Application.dataPath + "/" + fileName + ".yarn";
             createdFilePaths.Add(path);
 
-            File.WriteAllText(path, TestYarnScriptSource);
+            File.WriteAllText(path, TestYarnScriptSource, System.Text.Encoding.UTF8);
             AssetDatabase.Refresh();
             var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
@@ -197,7 +197,7 @@ position: 0,0
             string path = Path.Combine("Assets", fileName + ".yarn");
             createdFilePaths.Add(path);
 
-            File.WriteAllText(path, TestYarnScriptSource);
+            File.WriteAllText(path, TestYarnScriptSource, System.Text.Encoding.UTF8);
             AssetDatabase.ImportAsset(path);
             AssetDatabase.Refresh();
             var importer = AssetImporter.GetAtPath(path) as YarnImporter;
@@ -237,7 +237,7 @@ position: 0,0
             string fileName = Path.GetRandomFileName();
             string path = Path.Combine("Assets", fileName + ".yarn");
             createdFilePaths.Add(path);
-            File.WriteAllText(path, TestYarnScriptSource);
+            File.WriteAllText(path, TestYarnScriptSource, System.Text.Encoding.UTF8);
             AssetDatabase.Refresh();
             var importer = AssetImporter.GetAtPath(path) as YarnImporter;
             var importerSerializedObject = new SerializedObject(importer);
@@ -280,7 +280,7 @@ position: 0,0
             string fileName = Path.GetRandomFileName();
             string path = Path.Combine("Assets", fileName + ".yarn");
             createdFilePaths.Add(path);
-            File.WriteAllText(path, TestYarnScriptSource);
+            File.WriteAllText(path, TestYarnScriptSource, System.Text.Encoding.UTF8);
             AssetDatabase.Refresh();
             var importer = AssetImporter.GetAtPath(path) as YarnImporter;
             var importerSerializedObject = new SerializedObject(importer);
@@ -298,7 +298,7 @@ position: 0,0
             // changed and deleted, and then update the localized CSV
             // programmatically
 
-            File.WriteAllText(path, TestYarnScriptSourceModified);
+            File.WriteAllText(path, TestYarnScriptSourceModified, System.Text.Encoding.UTF8);
             AssetDatabase.Refresh();
             YarnImporterUtility.UpdateLocalizationCSVs(importerSerializedObject);
 

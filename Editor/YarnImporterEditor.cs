@@ -205,7 +205,7 @@ public class YarnImporterEditor : ScriptedImporterEditor
             {
                 modifiedFiles.Add(Path.GetFileNameWithoutExtension(assetPath));
 
-                File.WriteAllText(assetPath, taggedVersion);
+                File.WriteAllText(assetPath, taggedVersion, System.Text.Encoding.UTF8);
 
                 AssetDatabase.ImportAsset(assetPath);
             }
