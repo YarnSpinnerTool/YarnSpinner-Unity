@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _localizations:
   - {fileID: 11400000, guid: 767a2b70f96fb4d3a8cb4a9c34b50bd6, type: 2}
-  _trackedPrograms:
-  - {fileID: 11400000, guid: aa20c0d0a35724fbab9776c4c18234ba, type: 3}
+  _trackedScripts:
+  - {fileID: 4900002, guid: aa20c0d0a35724fbab9776c4c18234ba, type: 3}
+  _recentlyUpdatedScriptGUIDs: []

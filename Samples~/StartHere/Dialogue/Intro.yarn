@@ -38,5 +38,6 @@ Anne: That's ok! This will all go away in a moment. #line:tutorial-anne-6 // rea
 Tom: What?! #line:tutorial-tom-11 // surprised, confused 
 
 // the game suddenly quits
+<<quit>>
 ===
 

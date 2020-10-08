@@ -10082,6 +10082,7 @@ GameObject:
   - component: {fileID: 1290606829}
   - component: {fileID: 1290606834}
   - component: {fileID: 1290606833}
+  - component: {fileID: 1290606835}
   m_Layer: 0
   m_Name: Dialogue Runner
   m_TagString: Untagged
@@ -10132,8 +10133,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bec29c0a230741bdac901dba8da47ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  yarnScripts:
-  - {fileID: 11400000, guid: aa20c0d0a35724fbab9776c4c18234ba, type: 3}
+  yarnProgram: {fileID: 11400000, guid: 55636a520881a41289ff66b8d06e2a3f, type: 3}
   variableStorage: {fileID: 1290606830}
   dialogueViews:
   - {fileID: 1290606829}
@@ -10199,6 +10199,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   localizationDatabase: {fileID: 11400000, guid: fa5a21f6812564c2d9f6b54dd9ed7ef8,
     type: 2}
+--- !u!114 &1290606835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1290606828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4fc9a5327a9c4624bf62b35cd917bb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1480895762
 GameObject:
   m_ObjectHideFlags: 0

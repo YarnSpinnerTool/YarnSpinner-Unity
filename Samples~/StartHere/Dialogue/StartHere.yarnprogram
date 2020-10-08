@@ -1,0 +1,4 @@
+title: Program
+---
+<<declare $knows_anne_name = false "Does Tom know the name of the person he's talking to?">>
+===
