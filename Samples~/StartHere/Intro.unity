@@ -10234,6 +10234,12 @@ MonoBehaviour:
   fadeTime: 0.25
   optionButtonTemplate: {fileID: 868029867}
   optionContainer: {fileID: 859463802}
+  characters:
+  - name: Tom
+    color: {r: 1, g: 0.8352941, b: 0.41568628, a: 1}
+  - name: Anne
+    color: {r: 0.41568625, g: 1, b: 0.94345075, a: 1}
+  optionsColor: {r: 1, g: 0.8352941, b: 0.41568628, a: 1}
 --- !u!114 &1290606830
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -9,6 +9,12 @@ namespace Yarn.Unity.Example
 {
     public class FadingLineView : Yarn.Unity.DialogueViewBase
     {
+        [System.Serializable]
+        public struct Character {
+            public string name;
+            public Color color;
+        }
+
         [SerializeField] CanvasGroup contentContainer;
         [SerializeField] Text lineText;
 
@@ -20,6 +26,19 @@ namespace Yarn.Unity.Example
         [SerializeField] RectTransform optionContainer;
 
         List<GameObject> currentOptionButtons = new List<GameObject>();
+
+        [SerializeField] List<Character> characters = new List<Character>();
+        [SerializeField] Color optionsColor = Color.white;
+
+        Color GetColorForCharacter(string name) {
+            foreach (var character in characters) {
+                if (character.name.Equals(name, StringComparison.InvariantCultureIgnoreCase)) {
+                    return character.color;
+                }
+            }
+            Debug.LogWarning($"Unknown character {name}");
+            return Color.white;
+        }
 
         IEnumerator FadeContent(float from, float to, Action onComplete = null)
         {
@@ -76,6 +95,13 @@ namespace Yarn.Unity.Example
             interrupt = false;
 
             lineText.text = dialogueLine.TextWithoutCharacterName.Text;
+
+            string characterName = dialogueLine.CharacterName;
+
+            if (characterName != null) {
+                lineText.color = GetColorForCharacter(characterName);
+            }
+
             StartCoroutine(FadeContent(0, 1, onDialogueLineFinished));
         }
 
@@ -95,6 +121,8 @@ namespace Yarn.Unity.Example
 
                 var text = newOption.GetComponentInChildren<Text>();
                 text.text = option.Line.TextWithoutCharacterName.Text;
+
+                text.color = optionsColor;
 
                 currentOptionButtons.Add(newOption);
             }
