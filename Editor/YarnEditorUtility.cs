@@ -33,14 +33,14 @@ public static class YarnEditorUtility {
     /// </summary>
     /// <returns>A path to a file to use in the Unity editor for creating
     /// new Yarn scripts.</returns>
-    /// <remarks>If the file can't be found, this method returns
-    /// null.</remarks>
+    /// <throws cref="FileNotFoundException">Thrown if the template text
+    /// file cannot be found.</throws>
     public static string GetTemplateYarnScriptPath()
     {
-        var path = AssetDatabase.GUIDToAssetPath(IconTextureGUID);
+        var path = AssetDatabase.GUIDToAssetPath(TemplateFileGUID);
         if (string.IsNullOrEmpty(path))
         {
-            return null;
+            throw new System.IO.FileNotFoundException($"Template file for new Yarn scripts couldn't be found. Have the .meta files for Yarn Spinner been modified or deleted? Try re-importing the Yarn Spinner package to fix this error.");
         }
         return path;
     }
@@ -51,24 +51,41 @@ public static class YarnEditorUtility {
     /// </summary>    
     [MenuItem("Assets/Create/Yarn Script", false, 101)]
     public static void CreateYarnAsset() {
-        
-        // GUID for YarnSpinner/Editor/YarnScriptTemplate.txt
-        var templatePath = AssetDatabase.GUIDToAssetPath(TemplateFileGUID);
 
         // This method call is undocumented, but public. It's defined in
         // ProjectWindowUtil, and used by other parts of the editor to
         // create other kinds of assets (scripts, textures, etc).
-        ProjectWindowUtil.StartNameEditingIfProjectWindowExists(0, ScriptableObject.CreateInstance<DoCreateYarnScriptAsset>(), "NewYarnScript.yarn", GetYarnDocumentIconTexture(), templatePath);
+        ProjectWindowUtil.StartNameEditingIfProjectWindowExists(
+            0,
+            ScriptableObject.CreateInstance<DoCreateYarnScriptAsset>(),
+            "NewYarnScript.yarn",
+            GetYarnDocumentIconTexture(),
+            GetTemplateYarnScriptPath());
     }
 
-    [MenuItem("Assets/Create/TEMP - Yarn Program", false, 102)]
+    [MenuItem("Assets/Create/Yarn Spinner/Yarn Program", false, 101)]
     public static void CreateYarnProgram() {
-        const string path = "NewProgram.yarnprogram";
-        File.Create("Assets/"+path);
-        AssetDatabase.ImportAsset(path);
+        // This method call is undocumented, but public. It's defined in
+        // ProjectWindowUtil, and used by other parts of the editor to
+        // create other kinds of assets (scripts, textures, etc).
+        ProjectWindowUtil.StartNameEditingIfProjectWindowExists(
+            0,
+            ScriptableObject.CreateInstance<DoCreateYarnScriptAsset>(),
+            "NewProgram.yarnprogram",
+            GetYarnDocumentIconTexture(),
+            GetTemplateYarnScriptPath());
     }
 
-    internal static Object CreateYarnScriptAssetFromTemplate(string pathName, string resourceFile)
+    /// <summary>
+    /// Creates a new Yarn script at the given path, using the default
+    /// template.
+    /// </summary>
+    /// <param name="path">The path at which to create the script.</param>
+    public static void CreateYarnAsset(string path) {
+        CreateYarnScriptAssetFromTemplate(path, GetTemplateYarnScriptPath());
+    }
+
+    private static Object CreateYarnScriptAssetFromTemplate(string pathName, string resourceFile)
     {
         // Read the contents of the template file
         string templateContent;
@@ -81,7 +98,15 @@ public static class YarnEditorUtility {
         } 
         
         // Figure out the 'file name' that the user entered
-        var scriptName = Path.GetFileNameWithoutExtension(pathName);
+        string scriptName;
+        if (Path.GetExtension(pathName).Equals("yarnprogram", System.StringComparison.InvariantCultureIgnoreCase)) {
+            // This is a .yarnprogram file; the script "name" is always
+            // "Program".
+            scriptName = "Program";
+        } else {
+            // The script name is the name of the file, sans extension.
+            scriptName = Path.GetFileNameWithoutExtension(pathName);
+        } 
 
         // Replace any spaces with underscores - these aren't allowed in
         // node names
@@ -126,14 +151,9 @@ public static class YarnEditorUtility {
         // new, empty Yarn script)
         AssetDatabase.ImportAsset(pathName);
 
-        // This code generates the source code to what _should_ be a valid
-        // Yarn program, but there's a chance that the name the user
-        // provided somehow ended up generating invalid code. This will
-        // cause the Yarn importer to fail, and will make this
-        // LoadAssetAtPath to fail. _THAT_ will cause the Editor to not
-        // highlight the asset. We don't hugely care about the details of
-        // the object anyway (we just wanted to ensure that it's imported
-        // as at least an asset), so we'll return it as an Object here.
+        // We don't hugely care about the details of the object anyway (we
+        // just wanted to ensure that it's imported as at least an asset),
+        // so we'll return it as an Object here.
         return AssetDatabase.LoadAssetAtPath<Object>(pathName);
     }
 
