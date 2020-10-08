@@ -19,6 +19,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Individual `.yarn` scripts are now combined into a single 'Yarn Program', which is what you provide to your `DialogueRunner`. You no longer add multiple `.yarn` files to a DialogueRunner. To create a new Yarn Program, open the Asset menu, and choose Create -> Yarn Spinner -> Yarn Program. You can also create a new Yarn Program by selecting a Yarn Script, and clicking Create New Yarn Program.
+- Version 2 of the Yarn language requires variables to be declared. You can declare them in your .yarn scripts, or you can declare them in the Inspector for your Yarn Program.
+  - Variables must always have a defined type, and aren't allowed to change type. This means, for example, that you can't store a string inside a variable that was declared as a number.
+  - Variables also have a default value. As a result, variables are never allowed to be `null`.
+  - Variable declarations can be in any part of a Yarn script. As long as they're somewhere in the file, they'll be used.
+  - Variable declarations don't have to be in the same file as where they're used. If the Yarn Program contains a script that has a variable declaration, other scripts in that Program can use the variable.
+  - To declare a variable on a Yarn Program, select it, and click the `+` button to create the new variable. 
+  - To declare a variable in a script, use the following syntax:
+  
+```
+<<declare $variable_name = "hello">> // declares a string
+<<declare $variable_name = 123>> // declares a number
+<<declare $variable_name = true>> // declares a boolean
+```
+
 - Nicer error messages when the localized text for a line of dialogue can't be found.
 - DialogueUI is now a subclass of DialogueViewBase.
 - Moved Yarn Spinner classes into the `Yarn.Unity` namespace, or one of its children, depending on its purpose.
