@@ -1,0 +1,42 @@
+title: Start
+---
+// Setting:
+// - Floating in space. Distant stars and nebulas. Nothing else is visible
+//   on screen.
+//
+// Characters:
+// - Tom: male, 20s-40s, a confused person. Has zero context for any of
+//   this.
+// - Anne: female, 20s-40s, someone who seems to know what's going on.
+//   Bright, confident, doing her best to be helpful.
+
+<<wait 2>>
+
+Tom: Uh.. hello? #line:tutorial-tom-1 // tentative 
+Tom: Is anyone there? #line:tutorial-tom-2
+Anne: Hi there! #line:tutorial-anne-1 // chirpy 
+-> Tom: Who are you? #line:tutorial-tom-3 // surprised, emphasis on "you" 
+    Tom: And where are you? #line:tutorial-tom-4 // emphasis on "where" 
+    Anne: I'm Anne! I'm right here! #line:tutorial-anne-2 // trying to be helpful 
+    <<set $knows_anne_name to true>>
+-> Tom: Where am I? #line:tutorial-tom-5 // a little panicked 
+    Anne: You're floating in a featureless void! #line:tutorial-anne-3 // as though this is a perfectly reasonable explanation 
+    Tom: I can see that.. #line:tutorial-tom-6 // dubious 
+
+Tom: How did I get here? #line:tutorial-tom-7
+Anne: Oh, a writer put you here. This is a test conversation for Yarn Spinner! #line:tutorial-anne-4
+Tom: What's Yarn Spinner? #line:tutorial-tom-8
+Anne: Don't worry about it! #line:tutorial-anne-5 // breezy 
+
+<<if $knows_anne_name>>
+    Tom: This is weird, Anne. #line:tutorial-tom-9
+<<else>>
+    Tom: This is really confusing. #line:tutorial-tom-10
+<<endif>>
+
+Anne: That's ok! This will all go away in a moment. #line:tutorial-anne-6 // reassuring 
+Tom: What?! #line:tutorial-tom-11 // surprised, confused 
+
+// the game suddenly quits
+===
+

@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff34614f4518d409d9e35af62a22851c, type: 3}
+  m_Name: IntroLocalizationDatabase-en
+  m_EditorClassIdentifier: 
+  _LocaleCode: en
+  assetSourceFolder: {fileID: 102900000, guid: 34865a6c44c3a4f9d8c586b0830b3b2d, type: 3}
+  _stringTable:
+    keys:
+    - line:tutorial-tom-1
+    - line:tutorial-tom-2
+    - line:tutorial-anne-1
+    - line:tutorial-tom-3
+    - line:tutorial-tom-4
+    - line:tutorial-anne-2
+    - line:tutorial-tom-5
+    - line:tutorial-anne-3
+    - line:tutorial-tom-6
+    - line:tutorial-tom-7
+    - line:tutorial-anne-4
+    - line:tutorial-tom-8
+    - line:tutorial-anne-5
+    - line:tutorial-tom-9
+    - line:tutorial-tom-10
+    - line:tutorial-anne-6
+    - line:tutorial-tom-11
+    values:
+    - 'Tom: Uh.. hello?'
+    - 'Tom: Is anyone there?'
+    - 'Anne: Hi there!'
+    - 'Tom: Who are you?'
+    - 'Tom: And where are you?'
+    - 'Anne: I''m Anne! I''m right here!'
+    - 'Tom: Where am I?'
+    - 'Anne: You''re floating in a featureless void!'
+    - 'Tom: I can see that..'
+    - 'Tom: How did I get here?'
+    - 'Anne: Oh, a writer put you here. This is a test conversation for Yarn Spinner!'
+    - 'Tom: What''s Yarn Spinner?'
+    - 'Anne: Don''t worry about it!'
+    - 'Tom: This is weird, Anne.'
+    - 'Tom: This is really confusing.'
+    - 'Anne: That''s ok! This will all go away in a moment.'
+    - 'Tom: What?!'
+  _assetTable:
+    keys:
+    - line:tutorial-tom-1
+    - line:tutorial-tom-2
+    - line:tutorial-anne-1
+    - line:tutorial-tom-3
+    - line:tutorial-tom-4
+    - line:tutorial-anne-2
+    - line:tutorial-tom-5
+    - line:tutorial-anne-3
+    - line:tutorial-tom-6
+    - line:tutorial-tom-7
+    - line:tutorial-anne-4
+    - line:tutorial-tom-8
+    - line:tutorial-anne-5
+    - line:tutorial-tom-9
+    - line:tutorial-tom-10
+    - line:tutorial-anne-6
+    - line:tutorial-tom-11
+    values:
+    - {fileID: 8300000, guid: 4a03e2d71bb904eb890f2dec2f956bf9, type: 3}
+    - {fileID: 8300000, guid: a3710c905b2224152b337a2e6a5324b0, type: 3}
+    - {fileID: 8300000, guid: 3da10adc0bb164cf6aced6a9b61651b2, type: 3}
+    - {fileID: 8300000, guid: c90a8bf8e3689466d8fe81fc5e24f78c, type: 3}
+    - {fileID: 8300000, guid: 81617f83c4bf847a3b548ac6c55323f1, type: 3}
+    - {fileID: 8300000, guid: 98434c627eb2c40978dc9a6e6d94324f, type: 3}
+    - {fileID: 8300000, guid: 1f5424b662fda4a50aade0f8ff774ba2, type: 3}
+    - {fileID: 8300000, guid: c13b797e7089e4a3798a22ce24a34066, type: 3}
+    - {fileID: 8300000, guid: 4cee27531bac646e1a308f0db30d5e98, type: 3}
+    - {fileID: 8300000, guid: 85f1a983bf1814fbebee98fc69e638bc, type: 3}
+    - {fileID: 8300000, guid: 2b65b029279504b38ad5b42bef050396, type: 3}
+    - {fileID: 8300000, guid: 5adfa254112a74d1087e28f73bb7263c, type: 3}
+    - {fileID: 8300000, guid: 05b36f8015c244561971cd61e2cb4c6b, type: 3}
+    - {fileID: 8300000, guid: a92ee07d3abab4eae9e633131a9afc8c, type: 3}
+    - {fileID: 8300000, guid: 7471cb9b9f4424824b21adc8546ac585, type: 3}
+    - {fileID: 8300000, guid: 40bef1bded7c94b85b736e9c9111ba56, type: 3}
+    - {fileID: 8300000, guid: 23d8f208f2a08402e8932e1e152a933b, type: 3}
+  _addressTable:
+    keys: []
+    values: []

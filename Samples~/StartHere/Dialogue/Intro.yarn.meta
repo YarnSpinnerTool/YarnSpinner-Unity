@@ -1,0 +1,39 @@
+fileFormatVersion: 2
+guid: aa20c0d0a35724fbab9776c4c18234ba
+ScriptedImporter:
+  fileIDToRecycleName:
+    4900000: Strings
+    11400000: Program
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 94073015eacc34c1d8fc6786e43d60ca, type: 3}
+  baseLanguageID: en
+  stringIDs:
+  - line:0eb1736
+  - line:0d324a3
+  - line:0a1fe55
+  - line:06068e2
+  - line:0e94e17
+  - line:0ea4361
+  - line:036cf7d
+  - line:04e0e4f
+  - line:0819980
+  - line:089149b
+  - line:000652f
+  - line:01981c1
+  - line:02103d2
+  - line:0ea8e2e
+  - line:0056d42
+  - line:06b3b17
+  - line:0d1d26e
+  compilationStatus: 0
+  isSuccesfullyCompiled: 1
+  compilationErrorMessage: 
+  baseLanguage: {fileID: 4900000, guid: aa20c0d0a35724fbab9776c4c18234ba, type: 3}
+  localizations: []
+  voiceOvers: []
+  programContainer: {fileID: 11400000, guid: aa20c0d0a35724fbab9776c4c18234ba, type: 3}
+  localizationDatabase: {fileID: 11400000, guid: fa5a21f6812564c2d9f6b54dd9ed7ef8,
+    type: 2}
