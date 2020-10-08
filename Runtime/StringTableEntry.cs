@@ -139,8 +139,39 @@ namespace Yarn.Unity
                     textWriter, // write into this stream
                     GetConfiguration() // use this configuration
                     );
+                
+                var fieldNames = new[] {
+                    "language",
+                    "id",
+                    "text",
+                    "file",
+                    "node",
+                    "lineNumber",
+                    "lock",
+                    "comment",
+                };
 
-                csv.WriteRecords(entries);
+                foreach (var field in fieldNames) {
+                    csv.WriteField(field);
+                }
+                csv.NextRecord();
+
+                foreach (var entry in entries) {
+                    var values = new [] {
+                        entry.Language,
+                        entry.ID,
+                        entry.Text,
+                        entry.File,
+                        entry.Node,
+                        entry.LineNumber,
+                        entry.Lock,
+                        entry.Comment,
+                    };
+                    foreach (var value in values) {
+                        csv.WriteField(value);
+                    }
+                    csv.NextRecord();
+                }
 
                 return textWriter.ToString();
             }
