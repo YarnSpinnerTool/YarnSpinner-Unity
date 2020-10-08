@@ -127,7 +127,7 @@ position: 0,0
         }
 
         [Test]
-        public void YarnImporter_OnValidYarnFile_ShouldCompile()
+        public void YarnImporter_OnValidYarnFile_ShouldParse()
         {
             string fileName = Path.GetRandomFileName();
 
@@ -138,12 +138,12 @@ position: 0,0
             AssetDatabase.Refresh();
             var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
-            Assert.True(result.isSuccesfullyCompiled);
+            Assert.True(result.isSuccesfullyParsed);
 
         }
 
         [Test]
-        public void YarnImporter_OnInvalidYarnFile_ShouldNotCompile()
+        public void YarnImporter_OnInvalidYarnFile_ShouldNotParse()
         {
             const string textYarnAsset = "This is not a valid yarn file and thus compilation should fail.";
             string fileName = Path.GetRandomFileName();
@@ -157,7 +157,7 @@ position: 0,0
             LogAssert.ignoreFailingMessages = false;
             var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
-            Assert.False(result.isSuccesfullyCompiled);
+            Assert.False(result.isSuccesfullyParsed);
         }
 
         [Test]
