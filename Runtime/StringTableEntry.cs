@@ -6,17 +6,42 @@ namespace Yarn.Unity
 {
     public struct StringTableEntry
     {
-        [Optional] // added in v2.0; will not be present in files generated in earlier versions
+        /// <summary>
+        /// The language that the line is written in.
+        /// </summary>
         public string Language;
 
+        /// <summary>
+        /// The line ID for this line. This value will be the same across
+        /// all localizations.
+        /// </summary>
         public string ID;
 
+        /// <summary>
+        /// The text of this line, in the language specified by <see
+        /// cref="Language"/>.
+        /// </summary>
         public string Text;
 
+        /// <summary>
+        /// The name of the Yarn script in which this line was originally
+        /// found.
+        /// </summary>
         public string File;
 
+        /// <summary>
+        /// The name of the node in which this line was originally found.
+        /// </summary>
+        /// <remarks>
+        /// This node can be found in the file indicated by <see
+        /// cref="File"/>.
+        /// </remarks>
         public string Node;
 
+        /// <summary>
+        /// The line number in the file indicated by <see cref="File"/> at
+        /// which the original version of this line can be found.
+        /// </summary>
         public string LineNumber;
 
         /// <summary>
@@ -38,13 +63,11 @@ namespace Yarn.Unity
         /// lock and translated lock differ, the translated line is out of
         /// date, and needs to be updated.
         /// </remarks>
-        [Optional]
         public string Lock;
 
         /// <summary>
         /// A comment used to describe this line to translators.
         /// </summary>
-        [Optional]
         public string Comment;
 
         public StringTableEntry(StringTableEntry s)
