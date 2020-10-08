@@ -39,8 +39,6 @@ namespace Yarn.Unity.Example
                 yield return null;
             }
 
-            interrupt = false;
-
             contentContainer.alpha = to;
 
             onComplete?.Invoke();
@@ -74,6 +72,8 @@ namespace Yarn.Unity.Example
         {
             lineText.gameObject.SetActive(true);
             contentContainer.gameObject.SetActive(true);
+
+            interrupt = false;
 
             lineText.text = dialogueLine.TextWithoutCharacterName.Text;
             StartCoroutine(FadeContent(0, 1, onDialogueLineFinished));
