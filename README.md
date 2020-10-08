@@ -12,7 +12,7 @@ To get started, you'll need to install Yarn Spinner in your Unity project. Yarn 
 
 To install Yarn Spinner via direct download, follow these steps:
 
-1. Go to the [releases page](https://github.com/YarnSpinner/YarnSpinner-Unity/releases/latest), and download the `.unitypackage`.
+1. Go to the [releases page](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/releases/latest), and download the `.unitypackage`.
 2. Open the `.unitypackage`, and import its contents into your project. 
 
 Yarn Spinner will be installed into the `YarnSpinner` folder in your project's Assets.
