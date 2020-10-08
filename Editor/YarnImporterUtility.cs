@@ -326,6 +326,7 @@ internal static class YarnImporterUtility
                 // Empty this text, so that it's apparent that a translated
                 // version needs to be provided.
                 Text = string.Empty,
+                Language = language,
             };
             translatedDictionary.Add(id, newEntry);
             modificationsNeeded = true;
