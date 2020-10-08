@@ -98,15 +98,26 @@ internal static class YarnImporterUtility
         serializedObject.ApplyModifiedProperties();        
     }
 
-    internal static void CreateNewYarnProgram(SerializedObject serializedObject)
+    /// <summary>
+    /// Creates a new .yarnprogram asset in the same directory as the Yarn
+    /// script represented by serializedObject, and configures the script's
+    /// /// importer to use the new Yarn Program.
+    /// </summary>
+    /// <param name="serializedObject">A serialized object that represents
+    /// a Yarn script.</param>
+    internal static void CreateYarnProgram(SerializedObject serializedObject)
     {
         if (serializedObject.isEditingMultipleObjects) {
-            throw new System.InvalidOperationException($"Cannot invoke {nameof(CreateNewLocalizationDatabase)} when editing multiple objects");
+            throw new System.InvalidOperationException($"Cannot invoke {nameof(CreateYarnProgram)} when editing multiple objects");
         }
 
         var destinationProgramProperty = serializedObject.FindProperty("destinationProgram");
 
-        var target = serializedObject.targetObjects[0];
+        var target = serializedObject.targetObject;
+
+        if (!(target is YarnImporter)) {
+            throw new System.InvalidOperationException($"{serializedObject} does not represent a {nameof(YarnImporter)}");
+        }
 
         // Figure out where on disk this asset is
         var path = AssetDatabase.GetAssetPath(target);
@@ -114,12 +125,13 @@ internal static class YarnImporterUtility
 
         // Figure out a new, unique path for the localization we're
         // creating
-        var databaseFileName = $"Yarn Program.yarnprogram";
+        var databaseFileName = $"Program.yarnprogram";
 
         var destinationPath = Path.Combine(directory, databaseFileName);
         destinationPath = AssetDatabase.GenerateUniqueAssetPath(destinationPath);
 
-        File.Create(destinationPath);
+        // Create the program
+        YarnEditorUtility.CreateYarnAsset(destinationPath);
         
         AssetDatabase.ImportAsset(destinationPath);
         AssetDatabase.SaveAssets();
