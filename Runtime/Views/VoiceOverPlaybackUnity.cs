@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using UnityEngine;
 
@@ -110,10 +110,13 @@ namespace Yarn.Unity {
             }
 
             // We've finished our playback at this point, either by waiting
-            // normally or by interrupting it with a fadeout. If we have
-            // additional time to wait after the audio finishes, wait now.
+            // normally or by interrupting it with a fadeout. If we weren't
+            // interrupted, and we have additional time to wait after the
+            // audio finishes, wait now. (If we were interrupted, we skip
+            // this wait, because the user has already indicated that
+            // they're fine with things moving faster than sounds normal.)
 
-            if (waitTimeAfterLineComplete > 0)
+            if (interrupted == false && waitTimeAfterLineComplete > 0)
             {
                 yield return new WaitForSeconds(waitTimeAfterLineComplete);
             }
