@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 109f262f6d0744479bf69a695f28e224, type: 3}
-  m_Name: LocalizationDatabase
+  m_Name: Space Localization
   m_EditorClassIdentifier: 
   _localizations:
   - {fileID: 11400000, guid: baa84a961dd69489faff8b5f55e98e72, type: 2}

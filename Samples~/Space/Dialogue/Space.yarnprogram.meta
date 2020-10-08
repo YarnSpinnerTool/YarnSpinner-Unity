@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 27f0c430fc5774761bc0addeb98b2e1d
+guid: c39db14a6cc1d44c0ae07dde1eaf16aa
 ScriptedImporter:
   fileIDToRecycleName:
     11400000: Program
@@ -12,3 +12,19 @@ ScriptedImporter:
   sourceScripts:
   - {fileID: 3, guid: 24f22b038d584445ba4f43344cc5733d, type: 3}
   - {fileID: 3, guid: 8b6ae1e8d32e840f0b3fd0b033e52253, type: 3}
+  compileError: 
+  serializedDeclarations:
+  - name: $should_see_ship
+    type: 3
+    defaultValueBool: 0
+    defaultValueNumber: 0
+    defaultValueString: 
+    description: Whether the player knows they should talk to the Ship.
+    sourceYarnAsset: {fileID: 4900002, guid: 8b6ae1e8d32e840f0b3fd0b033e52253, type: 3}
+  - name: $sally_warning
+    type: 3
+    defaultValueBool: 0
+    defaultValueNumber: 0
+    defaultValueString: 
+    description: Whether the player has been given the warning from Sally.
+    sourceYarnAsset: {fileID: 4900002, guid: 8b6ae1e8d32e840f0b3fd0b033e52253, type: 3}

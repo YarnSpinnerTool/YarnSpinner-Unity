@@ -55,7 +55,7 @@ Sally: Yeah. Don't do it again. #line:d7df49
 ===
 title: Declarations
 ---
-<<declare $should_see_ship = false>>
-<<declare $sally_warning = false>>
+<<declare $should_see_ship = false "Whether the player knows they should talk to the Ship.">>
+<<declare $sally_warning = false "Whether the player has been given the warning from Sally.">>
 ===
 
