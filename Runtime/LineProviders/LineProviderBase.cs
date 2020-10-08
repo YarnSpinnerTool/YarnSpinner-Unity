@@ -33,6 +33,10 @@ namespace Yarn.Unity
         public abstract bool LinesAvailable {get;}
     }
 
+    /// <summary>
+    /// Represents a line, ready to be presented to the user in the
+    /// localisation they have specified.
+    /// </summary>
     public class LocalizedLine {
         /// <summary>
         /// DialogueLine's ID
@@ -51,6 +55,10 @@ namespace Yarn.Unity
         /// </summary>
         public LineStatus Status;
 
+        /// <summary>
+        /// The underlying <see cref="Yarn.Markup.MarkupParseResult"/> for
+        /// this line.
+        /// </summary>
         public Markup.MarkupParseResult Text { get; internal set; }
 
         public Markup.MarkupParseResult TextWithoutCharacterName {
