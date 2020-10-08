@@ -290,6 +290,16 @@ namespace Yarn.Unity
 
                 if (serializedObject.isEditingMultipleObjects == false)
                 {
+                    EditorGUILayout.HelpBox("This database will automatically update when the contents of these scripts change. If you modify the .csv files for other translations, modify any locale-specific assets, or if you need to manually update the database, click Update Database.", MessageType.Info);
+
+                    if (GUILayout.Button("Update Database"))
+                    {
+                        foreach (LocalizationDatabase target in serializedObject.targetObjects)
+                        {
+                            LocalizationDatabaseUtility.UpdateContents(target);
+                        }
+                    }
+
                     EditorGUILayout.LabelField("Uses lines from:");
 
                     EditorGUI.indentLevel += 1;
@@ -307,18 +317,12 @@ namespace Yarn.Unity
 
                     EditorGUI.indentLevel -= 1;
 
-                    EditorGUILayout.Space();
+                    
 
-                    EditorGUILayout.HelpBox("This database will automatically update when the contents of these scripts change. If you modify the .csv files for other translations, modify any locale-specific assets, or if you need to manually update the database, click Update Database.", MessageType.Info);
+                    
                 }
 
-                if (GUILayout.Button("Update Database"))
-                {
-                    foreach (LocalizationDatabase target in serializedObject.targetObjects)
-                    {
-                        LocalizationDatabaseUtility.UpdateContents(target);
-                    }
-                }
+                
 
 #if ADDRESSABLES
                 // Give a helpful note if addressables are availalbe, but
