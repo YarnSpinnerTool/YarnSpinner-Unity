@@ -1,28 +1,47 @@
 using System.Collections.Generic;
 using CsvHelper;
-using CsvHelper.Configuration.Attributes;
+using CsvHelper.Configuration;
 
 namespace Yarn.Unity
 {
     public struct StringTableEntry
     {
-        [Name("language")]
-        [Optional] // added in v2.0; will not be present in files generated in earlier versions
+        /// <summary>
+        /// The language that the line is written in.
+        /// </summary>
         public string Language;
 
-        [Name("id")]
+        /// <summary>
+        /// The line ID for this line. This value will be the same across
+        /// all localizations.
+        /// </summary>
         public string ID;
 
-        [Name("text")]
+        /// <summary>
+        /// The text of this line, in the language specified by <see
+        /// cref="Language"/>.
+        /// </summary>
         public string Text;
 
-        [Name("file")]
+        /// <summary>
+        /// The name of the Yarn script in which this line was originally
+        /// found.
+        /// </summary>
         public string File;
 
-        [Name("node")]
+        /// <summary>
+        /// The name of the node in which this line was originally found.
+        /// </summary>
+        /// <remarks>
+        /// This node can be found in the file indicated by <see
+        /// cref="File"/>.
+        /// </remarks>
         public string Node;
 
-        [Name("lineNumber")]
+        /// <summary>
+        /// The line number in the file indicated by <see cref="File"/> at
+        /// which the original version of this line can be found.
+        /// </summary>
         public string LineNumber;
 
         /// <summary>
@@ -44,15 +63,11 @@ namespace Yarn.Unity
         /// lock and translated lock differ, the translated line is out of
         /// date, and needs to be updated.
         /// </remarks>
-        [Name("lock")]
-        [Optional]
         public string Lock;
 
         /// <summary>
         /// A comment used to describe this line to translators.
         /// </summary>
-        [Name("comment")]
-        [Optional]
         public string Comment;
 
         public StringTableEntry(StringTableEntry s)
@@ -97,7 +112,42 @@ namespace Yarn.Unity
             using (var stringReader = new System.IO.StringReader(sourceText))
             using (var csv = new CsvReader(stringReader, GetConfiguration()))
             {
-                return new List<StringTableEntry>(csv.GetRecords<StringTableEntry>());
+                /*
+                Do the below instead of GetRecords<T> due to incompatibility with IL2CPP
+                See more: https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/36#issuecomment-691489913
+                */
+                var records = new List<StringTableEntry>();
+                csv.Read();
+                csv.ReadHeader();
+                while (csv.Read())
+                {
+                    // Fetch values; if they can't be found, they'll be
+                    // defaults.
+                    csv.TryGetField<string>("language", out var language);
+                    csv.TryGetField<string>("lock", out var lockString);
+                    csv.TryGetField<string>("comment", out var comment);
+                    csv.TryGetField<string>("id", out var id);
+                    csv.TryGetField<string>("text", out var text);
+                    csv.TryGetField<string>("file", out var file);
+                    csv.TryGetField<string>("node", out var node);
+                    csv.TryGetField<string>("lineNumber", out var lineNumber);
+                    
+                    var record = new StringTableEntry
+                    {
+                        Language = language ?? string.Empty,
+                        ID = id ?? string.Empty,
+                        Text = text ?? string.Empty,
+                        File = file ?? string.Empty,
+                        Node = node ?? string.Empty,
+                        LineNumber = lineNumber ?? string.Empty,
+                        Lock = lockString ?? string.Empty,
+                        Comment = comment ?? string.Empty,
+                    };
+
+                    records.Add(record);
+                }
+
+                return records;
             }
         }
 
@@ -112,14 +162,46 @@ namespace Yarn.Unity
                     textWriter, // write into this stream
                     GetConfiguration() // use this configuration
                     );
+                
+                var fieldNames = new[] {
+                    "language",
+                    "id",
+                    "text",
+                    "file",
+                    "node",
+                    "lineNumber",
+                    "lock",
+                    "comment",
+                };
 
-                csv.WriteRecords(entries);
+                foreach (var field in fieldNames) {
+                    csv.WriteField(field);
+                }
+                csv.NextRecord();
+
+                foreach (var entry in entries) {
+                    var values = new [] {
+                        entry.Language,
+                        entry.ID,
+                        entry.Text,
+                        entry.File,
+                        entry.Node,
+                        entry.LineNumber,
+                        entry.Lock,
+                        entry.Comment,
+                    };
+                    foreach (var value in values) {
+                        csv.WriteField(value);
+                    }
+                    csv.NextRecord();
+                }
 
                 return textWriter.ToString();
             }
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return $"StringTableEntry: lang={Language} id={ID} text=\"{Text}\" file={File} node={Node} line={LineNumber} lock={Lock} comment={Comment}";
         }
 
@@ -137,3 +219,4 @@ namespace Yarn.Unity
         }
     }
 }
+
