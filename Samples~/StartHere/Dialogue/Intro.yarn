@@ -10,15 +10,29 @@ title: Start
 // - Anne: female, 20s-40s, someone who seems to know what's going on.
 //   Bright, confident, doing her best to be helpful.
 
+// Wait two seconds to let the player see the environment before starting
+// the dialogue.
 <<wait 2>>
 
+// The start of our conversation!
 Tom: Uh.. hello? #line:tutorial-tom-1 // tentative 
 Tom: Is anyone there? #line:tutorial-tom-2
 Anne: Hi there! #line:tutorial-anne-1 // chirpy 
+
+
+// Present a choice to the player: they can either say 'who are you', or
+// 'where am I'. If they choose 'who are you', they'll learn the name of
+// the person they're speaking to.
+
 -> Tom: Who are you? #line:tutorial-tom-3 // surprised, emphasis on "you" 
     Tom: And where are you? #line:tutorial-tom-4 // emphasis on "where" 
     Anne: I'm Anne! I'm right here! #line:tutorial-anne-2 // trying to be helpful 
+    // Set the variable $knows_anne_name to 'true'. This variable is
+    // declared in the Yarn Program, and it's used later in this file. If
+    // this line isn't reached (because the player chooses the other
+    // dialogue option), this will stay at its default value of 'false'.
     <<set $knows_anne_name to true>>
+
 -> Tom: Where am I? #line:tutorial-tom-5 // a little panicked 
     Anne: You're floating in a featureless void! #line:tutorial-anne-3 // as though this is a perfectly reasonable explanation 
     Tom: I can see that.. #line:tutorial-tom-6 // dubious 
@@ -28,6 +42,8 @@ Anne: Oh, a writer put you here. This is a test conversation for Yarn Spinner! #
 Tom: What's Yarn Spinner? #line:tutorial-tom-8
 Anne: Don't worry about it! #line:tutorial-anne-5 // breezy 
 
+// Check to see if the variable was set. The line that Tom says changes
+// depending on whether he knows Anne's name.
 <<if $knows_anne_name>>
     Tom: This is weird, Anne. #line:tutorial-tom-9
 <<else>>
@@ -37,7 +53,9 @@ Anne: Don't worry about it! #line:tutorial-anne-5 // breezy
 Anne: That's ok! This will all go away in a moment. #line:tutorial-anne-6 // reassuring 
 Tom: What?! #line:tutorial-tom-11 // surprised, confused 
 
-// the game suddenly quits
+// The game suddenly quits. The 'quit' command is custom-defined by a
+// script in this demo, in QuitGameCommand.cs.
 <<quit>>
+
 ===
 
