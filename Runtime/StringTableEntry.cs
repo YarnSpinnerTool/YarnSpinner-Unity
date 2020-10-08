@@ -98,17 +98,29 @@ namespace Yarn.Unity
                 csv.ReadHeader();
                 while (csv.Read())
                 {
+                    // Fetch values; if they can't be found, they'll be
+                    // defaults.
+                    csv.TryGetField<string>("language", out var language);
+                    csv.TryGetField<string>("lock", out var lockString);
+                    csv.TryGetField<string>("comment", out var comment);
+                    csv.TryGetField<string>("id", out var id);
+                    csv.TryGetField<string>("text", out var text);
+                    csv.TryGetField<string>("file", out var file);
+                    csv.TryGetField<string>("node", out var node);
+                    csv.TryGetField<string>("lineNumber", out var lineNumber);
+                    
                     var record = new StringTableEntry
                     {
-                        Language = csv.GetField<string>("language"),
-                        ID = csv.GetField<string>("id"),
-                        Text = csv.GetField<string>("text"),
-                        File = csv.GetField<string>("file"),
-                        Node = csv.GetField<string>("node"),
-                        LineNumber = csv.GetField<string>("lineNumber"),
-                        Lock = csv.GetField<string>("lock"),
-                        Comment = csv.GetField<string>("comment"),
+                        Language = language ?? string.Empty,
+                        ID = id ?? string.Empty,
+                        Text = text ?? string.Empty,
+                        File = file ?? string.Empty,
+                        Node = node ?? string.Empty,
+                        LineNumber = lineNumber ?? string.Empty,
+                        Lock = lockString ?? string.Empty,
+                        Comment = comment ?? string.Empty,
                     };
+
                     records.Add(record);
                 }
 
