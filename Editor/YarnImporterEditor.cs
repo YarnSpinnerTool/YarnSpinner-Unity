@@ -29,8 +29,8 @@ public class YarnImporterEditor : ScriptedImporterEditor
         baseLanguageProperty = serializedObject.FindProperty("baseLanguage");
         destinationProgramProperty = serializedObject.FindProperty("destinationProgram");
         localizationDatabaseProperty = serializedObject.FindProperty("localizationDatabase");
-        isSuccessfullyCompiledProperty = serializedObject.FindProperty("isSuccesfullyCompiled");
-        compilationErrorMessageProperty = serializedObject.FindProperty("compilationErrorMessage");
+        isSuccessfullyCompiledProperty = serializedObject.FindProperty("isSuccesfullyParsed");
+        compilationErrorMessageProperty = serializedObject.FindProperty("parseErrorMessage");
         localizationsProperty = serializedObject.FindProperty("localizations");
     }
 
@@ -39,19 +39,26 @@ public class YarnImporterEditor : ScriptedImporterEditor
         serializedObject.Update();
         EditorGUILayout.Space();
 
-        // If there's a compilation error in any of the selected objects,
-        // show an error.
-        if (isSuccessfullyCompiledProperty.boolValue == false) {
+        // If there's a parse error in any of the selected objects, show an
+        // error. If the selected objects have the same destination
+        // program, and there's a compile error in it, show that. 
+        if (string.IsNullOrEmpty(compilationErrorMessageProperty.stringValue) == false) {
             if (serializedObject.isEditingMultipleObjects) {
                 EditorGUILayout.HelpBox("Some of the selected scripts have errors.", MessageType.Error);
             } else {
-                EditorGUILayout.HelpBox($"Error in script:\n{compilationErrorMessageProperty.stringValue}", MessageType.Error);
+                EditorGUILayout.HelpBox(compilationErrorMessageProperty.stringValue, MessageType.Error);
             }                  
+        } else if (destinationProgramProperty.hasMultipleDifferentValues == false && destinationProgramProperty.objectReferenceValue != null) {
+            string programPath = AssetDatabase.GetAssetPath(destinationProgramProperty.objectReferenceValue);
+            var programImporter = AssetImporter.GetAtPath(programPath) as YarnProgramImporter;
+
+            if (string.IsNullOrEmpty(programImporter.compileError) == false) {
+                EditorGUILayout.HelpBox(programImporter.compileError, MessageType.Error);
+            }
         }
 
         EditorGUILayout.PropertyField(baseLanguageIdProperty);
 
-        // +Show
         using (var change = new EditorGUI.ChangeCheckScope())
         {
             // Cache the previous destination program, in case the user is
@@ -79,14 +86,15 @@ public class YarnImporterEditor : ScriptedImporterEditor
         
 
 
-        if (serializedObject.isEditingMultipleObjects == false && destinationProgramProperty.objectReferenceValue == null) {
+        if (destinationProgramProperty.hasMultipleDifferentValues == false && destinationProgramProperty.objectReferenceValue == null) {
             EditorGUILayout.HelpBox("This script is not currently part of a Yarn Program. Either add one in the field above, or click Create New Yarn Program.", MessageType.Info);
             if (GUILayout.Button("Create New Yarn Program")) {
-                YarnImporterUtility.CreateNewYarnProgram(serializedObject);
+                YarnImporterUtility.CreateYarnProgram(serializedObject);
             }
         }
 
         EditorGUILayout.Space();
+
 
         // We can do localization work if all of the selected objects have
         // strings, and none of them have implicitly-created strings.
@@ -94,21 +102,52 @@ public class YarnImporterEditor : ScriptedImporterEditor
             .Cast<YarnImporter>()
             .All(importer => importer.StringsAvailable && importer.AnyImplicitStringIDs == false);
 
-        if (canCreateLocalization) {
+        if (canCreateLocalization)
+        {
             // We can work with localizations! Draw our
             // localization-related UI!
             DrawLocalizationGUI();
-        } else {
-            var message = new System.Text.StringBuilder();
-            message.Append($"The selected {(serializedObject.isEditingMultipleObjects ? "scripts" : "script")} can't be localized, because not every line has a line tag. Click Add Line Tags to add them, or add them yourself in a text editor.");
+        }
+        else if (string.IsNullOrEmpty(compilationErrorMessageProperty.stringValue))
+        {
+            // We have no parse errors. We can offer to add new line tags.
+
+            string message;
+
+            bool showReadOnlyLocalizationUI = false;
+
+            if (localizationDatabaseProperty.objectReferenceValue != null)
+            {
+                // We don't have a line tag for every string, BUT we have a
+                // localization database attached. This can happen when
+                // we've done some loc work, and added new lines, but
+                // haven't tagged those new lines. Draw a read-only view of
+                // the localization database so that it's clear that the
+                // setup hasn't been lost, and offer to update the line
+                // tags.
+
+                message = $"This script is set up to be localized, but not all lines have line tags. Click Add Line Tags to add them.";
+
+                showReadOnlyLocalizationUI = true;
+            }
+            else
+            {
+                // Offer to add line tags.
+                message = $"The selected {(serializedObject.isEditingMultipleObjects ? "scripts" : "script")} can't be localized, because not every line has a line tag. Click Add Line Tags to add them, or add them yourself in a text editor.";
+            }
 
             EditorGUILayout.HelpBox(message.ToString(), MessageType.Info);
 
-            if (GUILayout.Button("Add Line Tags")) {
+            if (GUILayout.Button("Add Line Tags"))
+            {
                 AddLineTagsToSelectedObject();
             }
 
-            
+            if (showReadOnlyLocalizationUI)
+            {
+                EditorGUILayout.Space();
+                DrawLocalizationGUI(true);
+            }
         }
 
         var hadChanges = serializedObject.ApplyModifiedProperties();
@@ -184,7 +223,7 @@ public class YarnImporterEditor : ScriptedImporterEditor
 
     }
 
-    private void DrawLocalizationGUI()
+    private void DrawLocalizationGUI(bool onlyAllowEditingDatabaseField = false)
     {
         using (var changed = new EditorGUI.ChangeCheckScope())
         {
@@ -235,6 +274,8 @@ public class YarnImporterEditor : ScriptedImporterEditor
             }
         }
 
+        EditorGUI.BeginDisabledGroup(onlyAllowEditingDatabaseField);
+
         // If no localization database is provided, offer a button that
         // will create a new one that 1. tracks this script 2. has a
         // localization set to this script's base language 3. and also we
@@ -268,7 +309,9 @@ public class YarnImporterEditor : ScriptedImporterEditor
             using (new EditorGUI.DisabledScope(true))
             using (new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.PropertyField(baseLanguageProperty, new GUIContent(importer.baseLanguageID));
+                var languageDisplayName = $"{Cultures.GetCulture(importer.baseLanguageID).DisplayName} (Base)";
+
+                EditorGUILayout.PropertyField(baseLanguageProperty, new GUIContent(languageDisplayName));
 
                 // Not actually used, but makes this base language item
                 // visually consistent with the additional ones below
@@ -287,8 +330,18 @@ public class YarnImporterEditor : ScriptedImporterEditor
                 {
                     EditorGUILayout.PropertyField(assetReferenceProperty, new GUIContent(languageDisplayName));
 
+                    bool wantsDelete = false;
+
+                    if (assetReferenceProperty.objectReferenceValue == null) {
+                        wantsDelete = true;
+                    }
+
                     if (GUILayout.Button("-", EditorStyles.miniButton, GUILayout.ExpandWidth(false)))
                     {
+                        wantsDelete = true;
+                    }
+
+                    if (wantsDelete) {
                         // We delete this property twice:
                         // - once to clear the value from the array entry
                         // - again to remove the cleared entry from the
@@ -314,10 +367,40 @@ public class YarnImporterEditor : ScriptedImporterEditor
 
             foreach (var language in languagesMissing)
             {
-                if (GUILayout.Button($"Create {language} Localization"))
-                {
-                    YarnImporterUtility.CreateLocalizationForLanguageInProgram(serializedObject, language);
+                var languageName = Cultures.GetCulture(language).DisplayName;
+                
+                using (new EditorGUILayout.HorizontalScope()) {
+                    var rect = EditorGUILayout.GetControlRect();
+                    
+                    var remaining = EditorGUI.PrefixLabel(rect, new GUIContent(languageName));
+                    
+
+                    var leftSide = remaining;
+                    leftSide.width /= 2;
+
+                    var rightSide = remaining;
+                    rightSide.width /= 2;
+                    rightSide.x += leftSide.width;
+
+                    var indent = EditorGUI.indentLevel;
+                    EditorGUI.indentLevel = 0; // ObjectField will try and indent, which we don't want, so temporarily unset it here
+                    var droppedAsset = EditorGUI.ObjectField(leftSide, (Object)null, typeof(TextAsset), allowSceneObjects:false);
+
+                    // Draw an object field on the left hand side
+                    if (droppedAsset != null) {
+                        (serializedObject.targetObject as YarnImporter).AddLocalization(language, droppedAsset as TextAsset);
+                    }
+                    
+                    // Draw a 'create new' button on the right hand side
+                    if (GUI.Button(rightSide, "Create New")) {
+                        YarnImporterUtility.CreateLocalizationForLanguageInProgram(serializedObject, language);
+                    }
+
+                    // Restore cached indent level
+                    EditorGUI.indentLevel = indent;
+
                 }
+                
             }
 
             // Show a warning for any languages that the script has a
@@ -335,13 +418,21 @@ public class YarnImporterEditor : ScriptedImporterEditor
 
             EditorGUI.indentLevel -= 1;
 
-            if (GUILayout.Button("Update Localizations"))
-            {
-                YarnImporterUtility.UpdateLocalizationCSVs(serializedObject);
+            if (localizationsProperty.arraySize > 0) {
+                EditorGUILayout.HelpBox("If you have modified the script, click Update Localizations to update the files for the other languages.", MessageType.Info);
+
+                if (GUILayout.Button("Update Localizations"))
+                {
+                    YarnImporterUtility.UpdateLocalizationCSVs(serializedObject);
+                }
+
             }
 
-            EditorGUILayout.HelpBox("To add a new localization, select the Localization Database, and click Create New Localization.", MessageType.Info);
+
+            EditorGUILayout.HelpBox("To add a localization for a new language, select the Localization Database, and click Create New Localization.", MessageType.Info);
         }
+
+        EditorGUI.EndDisabledGroup();
     }
 
     

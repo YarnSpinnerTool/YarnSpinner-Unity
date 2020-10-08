@@ -69,9 +69,9 @@ namespace Yarn.Unity
         public bool AnyImplicitStringIDs;
         public bool StringsAvailable => stringIDs?.Length > 0;
 
-        public bool isSuccesfullyCompiled = false;
+        public bool isSuccesfullyParsed = false;
 
-        public string compilationErrorMessage = null;
+        public string parseErrorMessage = null;
 
         public TextAsset baseLanguage;
         
@@ -142,7 +142,7 @@ namespace Yarn.Unity
             // Clear the list of strings, in case this compilation fails
             stringIDs = new string[] { };
 
-            isSuccesfullyCompiled = false;
+            isSuccesfullyParsed = false;
 
             if (extension == ".yarn")
             {
@@ -211,7 +211,7 @@ namespace Yarn.Unity
             Yarn.Program compiledProgram = null;
             IDictionary<string, Yarn.Compiler.StringInfo> stringTable = null;
 
-            compilationErrorMessage = null;
+            parseErrorMessage = null;
 
             try
             {
@@ -225,13 +225,13 @@ namespace Yarn.Unity
                 AnyImplicitStringIDs = result.ContainsImplicitStringTags;
                 stringTable = result.StringTable;
                 compiledProgram = result.Program;                
-                isSuccesfullyCompiled = true;
-                compilationErrorMessage = string.Empty;
+                isSuccesfullyParsed = true;
+                parseErrorMessage = string.Empty;
             }
             catch (Yarn.Compiler.ParseException e)
             {
-                isSuccesfullyCompiled = false;
-                compilationErrorMessage = e.Message;
+                isSuccesfullyParsed = false;
+                parseErrorMessage = e.Message;
                 ctx.LogImportError($"Error importing {ctx.assetPath}: {e.Message}");
                 ctx.LogImportError(e.Message);                
             }
@@ -311,7 +311,7 @@ namespace Yarn.Unity
                 return;
             }
 
-            isSuccesfullyCompiled = true;
+            isSuccesfullyParsed = true;
 
             // Create a container for storing the bytes
             var programContainer = new TextAsset("<pre-compiled Yarn program>");
