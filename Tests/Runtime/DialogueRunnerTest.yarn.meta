@@ -17,8 +17,8 @@ ScriptedImporter:
   - line:04e806e
   - line:0901fb2
   AnyImplicitStringIDs: 0
-  isSuccesfullyCompiled: 1
-  compilationErrorMessage: 
+  isSuccesfullyParsed: 1
+  parseErrorMessage: 
   baseLanguage: {instanceID: 0}
   localizations: []
   destinationProgram: {fileID: 11400000, guid: a9b357f08075f43cbad81d8ec757e1f7, type: 3}
