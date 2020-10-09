@@ -1,8 +1,8 @@
 {
   "name": "dev.yarnspinner.unity",
-  "version": "1.2.7",
+  "version": "2.0.0-preview",
   "displayName": "Yarn Spinner",
-  "description": "Yarn is a language that's designed to make it super easy to create interactive dialogue for games. Yarn's similar in style to Twine, so if you already know that, you'll be right at home! If you don't, that's cool - Yarn's syntax is extremely minimal, and there's not much there to learn. The Yarn language is used in a number of cool games, including Night In The Woods and Knights and Bikes.",
+  "description": "Yarn Spinner is the friendly tool for interactive conversations. Write your dialogue in a simple programming language that's designed to be straightforward for writers and powerful for programmers, and then attach it to your scenes to power your conversations.",
   "unity": "2018.4",
   "dependencies": {
     "com.unity.textmeshpro": "1.4.1"
@@ -13,14 +13,14 @@
   ],
   "author": {
     "name": "Secret Lab",
-    "url": "https://github.com/YarnSpinnerTool/YarnSpinner"
+    "url": "https://yarnspinner.dev"
   },
   "hideInEditor": false,
   "type": "tool",
   "samples": [
     {
       "displayName": "Space",
-      "description": "A side-scrolling conversation.",
+      "description": "A side-scrolling conversation that demonstrates localisation and voiceovers.",
       "path": "Samples~/Space"
     },
     {
