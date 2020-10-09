@@ -19,6 +19,11 @@
   "type": "tool",
   "samples": [
     {
+      "displayName": "Start Here",
+      "description": "If you're new to Yarn Spinner, start with this demo. A simple conversation with branching, variables, and voice-over.",
+      "path": "Samples~/StartHere"
+    },
+    {
       "displayName": "Space",
       "description": "A side-scrolling conversation that demonstrates localisation and voiceovers.",
       "path": "Samples~/Space"
