@@ -85,8 +85,6 @@ namespace Yarn.Unity
             ArrayUtility.Add(ref localizations,  new YarnTranslation(languageID, languageAsset));
         }
 
-        public YarnProgram destinationProgram;
-        
         public LocalizationDatabase localizationDatabase;
 
         private void OnValidate()
@@ -119,6 +117,21 @@ namespace Yarn.Unity
                     // Otherwrise use system's language as base language
                     return CultureInfo.CurrentCulture.Name;
                 }
+            }
+        }
+
+        public YarnProgram DestinationProgram {
+            get {
+                var destinationProgramPath = AssetDatabase.FindAssets("t:YarnProgram")
+                    .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
+                    .Select(path => AssetImporter.GetAtPath(path) as YarnProgramImporter)
+                    .FirstOrDefault(importer => importer.sourceScripts.Select(s => AssetDatabase.GetAssetPath(s)).Contains(assetPath))?.assetPath;
+
+                if (destinationProgramPath == null) {
+                    return null;
+                }
+
+                return AssetDatabase.LoadAssetAtPath<YarnProgram>(destinationProgramPath);
             }
         }
 
@@ -243,20 +256,6 @@ namespace Yarn.Unity
             ctx.AddObjectToAsset("Program", text, YarnEditorUtility.GetYarnDocumentIconTexture());
             ctx.SetMainObject(text);
 
-            // Queue the destination program's reimport
-            if (destinationProgram != null) {
-                string path = AssetDatabase.GetAssetPath(destinationProgram);
-
-                var importer = AssetImporter.GetAtPath(path) as YarnProgramImporter;
-
-                this.name = Path.GetFileNameWithoutExtension(ctx.assetPath);
-
-                var scripts = new HashSet<YarnImporter>(importer.sourceScripts);
-                scripts.Add(this);
-                importer.sourceScripts = scripts.ToList();
-                EditorUtility.SetDirty(importer);
-                importer.SaveAndReimport();
-            }        
             
             // If there are lines in this script, generate a string table
             // asset for it

@@ -51,14 +51,15 @@ namespace Yarn.Unity
             }
         }
 
-        public List<YarnImporter> sourceScripts = new List<YarnImporter>();
+        public List<TextAsset> sourceScripts = new List<TextAsset>();
 
         public string compileError;
-        public List<SerializedDeclaration> serializedDeclarations;
+        public List<SerializedDeclaration> serializedDeclarations = new List<SerializedDeclaration>();
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
-            ctx.LogImportWarning($"Imported {ctx.assetPath}");
+            ctx.LogImportWarning($"Importing {ctx.assetPath}");
+
             var program = ScriptableObject.CreateInstance<YarnProgram>();
 
             // Start by creating the asset - no matter what, we need to
@@ -67,13 +68,8 @@ namespace Yarn.Unity
             ctx.AddObjectToAsset("Program", program);
             ctx.SetMainObject(program);
 
-            // Get the collection of scripts that 1. we're tracking 2.
-            // aren't aware that we're tracking them. We'll prune them from
-            // our tracking list.
-            var extraneousSourceScripts = sourceScripts.Where(script => AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(script.destinationProgram)) != this);
-            if (extraneousSourceScripts.Count() > 0) {
-                sourceScripts = sourceScripts.Except(extraneousSourceScripts).ToList();
-                EditorUtility.SetDirty(this);                                
+            foreach (var script in sourceScripts) {
+                ctx.DependsOnSourceAsset(AssetDatabase.GetAssetPath(script));
             }
 
             // Parse declarations 
@@ -84,15 +80,18 @@ namespace Yarn.Unity
 
             compileError = null;
 
-            try {
+            try
+            {
                 var result = Compiler.Compiler.Compile(localDeclarationsCompileJob);
                 localDeclarations = result.Declarations;
-            } catch (ParseException e) {
+            }
+            catch (ParseException e)
+            {
                 ctx.LogImportError($"Error in Yarn Program file:{e.Message}");
                 compileError = $"Error in Yarn Program {ctx.assetPath}: {e.Message}";
                 return;
             }
-            
+
             // Store these so that we can continue displaying them after
             // this import step, in case there are compile errors later.
             // We'll replace this with a more complete list later if
@@ -105,29 +104,34 @@ namespace Yarn.Unity
             // pulled any information out of it that we need to. Now to
             // compile the scripts associated with this program.
 
+            var scriptImporters = sourceScripts.Select(s => AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(s)) as YarnImporter );
+
             // First step: check to see if there's any parse errors in the
             // files.
-            var scriptsWithParseErrors = sourceScripts.Where(script => script.isSuccesfullyParsed == false);
-                
-            if (scriptsWithParseErrors.Count() != 0) {
+            var scriptsWithParseErrors = scriptImporters.Where(script => script.isSuccesfullyParsed == false);
+
+            if (scriptsWithParseErrors.Count() != 0)
+            {
                 // Parse errors! We can't continue.
                 string failingScriptNameList = string.Join("\n", scriptsWithParseErrors.Select(script => script.assetPath));
                 compileError = $"Parse errors exist in the following files:\n{failingScriptNameList}";
                 return;
             }
-            
+
             // Get paths to the scripts we're importing, and also map them to
             // their corresponding importer
-            var pathsToImporters = sourceScripts.ToDictionary(script => script.assetPath, script => script);
+            var pathsToImporters = scriptImporters.ToDictionary(script => script.assetPath, script => script);
 
-            if (pathsToImporters.Count == 0) {
+            if (pathsToImporters.Count == 0)
+            {
+                ctx.LogImportWarning($"Yarn Program {ctx.assetPath} has no source scripts.");
                 return; // nothing further to do here
             }
 
             // We now now compile!
             var job = CompilationJob.CreateFromFiles(pathsToImporters.Keys);
             job.VariableDeclarations = localDeclarations;
-            
+
             CompilationResult compilationResult;
 
             try
@@ -140,9 +144,9 @@ namespace Yarn.Unity
                 compileError = e.Message;
 
                 var importer = pathsToImporters[e.FileName];
-                importer.parseErrorMessage = e.Message; 
+                importer.parseErrorMessage = e.Message;
                 EditorUtility.SetDirty(importer);
-                
+
                 return;
             }
             catch (ParseException e)
@@ -151,8 +155,8 @@ namespace Yarn.Unity
                 compileError = e.Message;
 
                 var importer = pathsToImporters[e.FileName];
-                importer.parseErrorMessage = e.Message;    
-                EditorUtility.SetDirty(importer);            
+                importer.parseErrorMessage = e.Message;
+                EditorUtility.SetDirty(importer);
 
                 return;
             }
@@ -166,20 +170,22 @@ namespace Yarn.Unity
 
             // Clear error messages from all scripts - they've all passed
             // compilation
-            foreach (var importer in pathsToImporters.Values) {
+            foreach (var importer in pathsToImporters.Values)
+            {
                 importer.parseErrorMessage = null;
             }
 
-            var unassignedScripts = sourceScripts.Any(s => s.localizationDatabase == null);
+            var unassignedScripts = scriptImporters.Any(s => s.localizationDatabase == null);
 
-            if (unassignedScripts) {
+            if (unassignedScripts)
+            {
                 // We have scripts in this program whose lines are not
                 // being sent to a localization database. Create a 'default'
                 // string table for this program, so that it can be used by
                 // a DialogueRunner when it creates its temporary line
                 // provider.
 
-                string languageID = sourceScripts.First().baseLanguageID;                    
+                string languageID = scriptImporters.First().baseLanguageID;
 
                 var lines = compilationResult.StringTable
                     .Select(x =>
@@ -212,26 +218,31 @@ namespace Yarn.Unity
                 defaultStringTable.hideFlags = HideFlags.HideInHierarchy;
 
                 ctx.AddObjectToAsset("Strings", defaultStringTable);
-                
+
                 program.defaultStringTable = defaultStringTable;
-            }            
-
-            if (compilationResult.Program != null)
-            {
-                byte[] compiledBytes = null;
-
-                using (var memoryStream = new MemoryStream())
-                using (var outputStream = new Google.Protobuf.CodedOutputStream(memoryStream))
-                {
-                    // Serialize the compiled program to memory
-                    compilationResult.Program.WriteTo(outputStream);
-                    outputStream.Flush();
-
-                    compiledBytes = memoryStream.ToArray();
-                }
-
-                program.compiledYarnProgram = compiledBytes;
             }
+
+            if (compilationResult.Program == null)
+            {
+                ctx.LogImportError("Internal error: Failed to compile: resulting program was null.");
+                return;
+            }
+
+            byte[] compiledBytes = null;
+
+            ctx.LogImportWarning($"Imported nodes: {string.Join(", ", compilationResult.Program.Nodes.Select(n => n.Key))}");
+
+            using (var memoryStream = new MemoryStream())
+            using (var outputStream = new Google.Protobuf.CodedOutputStream(memoryStream))
+            {
+                // Serialize the compiled program to memory
+                compilationResult.Program.WriteTo(outputStream);
+                outputStream.Flush();
+
+                compiledBytes = memoryStream.ToArray();
+            }
+
+            program.compiledYarnProgram = compiledBytes;
         }
     }
 
@@ -239,9 +250,9 @@ namespace Yarn.Unity
     public class YarnProgramImporterEditor : ScriptedImporterEditor
     {
 
-        private SerializedProperty sourceScriptsProperty;
         private SerializedProperty compileErrorProperty;
         private SerializedProperty serializedDeclarationsProperty;
+        private SerializedProperty sourceScriptsProperty;
 
         private ReorderableDeclarationsList serializedDeclarationsList;
 
@@ -268,9 +279,7 @@ namespace Yarn.Unity
                 EditorGUILayout.HelpBox(compileErrorProperty.stringValue, MessageType.Error);
             }
 
-            // var hadDeclarationsChanges = false;
             serializedDeclarationsList.DrawLayout();
-            // hadDeclarationsChanges = serializedObject.ApplyModifiedProperties();
 
             EditorGUILayout.Space();
 
@@ -286,25 +295,10 @@ namespace Yarn.Unity
                 {
                     (serializedObject.targetObject as YarnProgramImporter).SaveAndReimport();
                 }
-
-                showScripts = EditorGUILayout.Foldout(showScripts, "Source Scripts");
-
-                if (showScripts)
-                {
-
-                    using (new EditorGUI.DisabledGroupScope(true))
-                    {
-                        EditorGUI.indentLevel += 1;
-                        foreach (SerializedProperty sourceScriptProperty in sourceScriptsProperty)
-                        {
-                            YarnImporter yarnImporter = sourceScriptProperty.objectReferenceValue as YarnImporter;
-                            var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(yarnImporter.assetPath);
-                            EditorGUILayout.ObjectField(asset, typeof(TextAsset), false);
-                        }
-                        EditorGUI.indentLevel -= 1;
-                    }
-                }
             }
+            EditorGUILayout.PropertyField(sourceScriptsProperty);
+
+
             
             var hadChanges = serializedObject.ApplyModifiedProperties();
 

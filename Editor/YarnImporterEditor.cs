@@ -7,31 +7,42 @@ using System.Collections.Generic;
 using Yarn.Unity;
 
 [CustomEditor(typeof(YarnImporter))]
-#if UNITY_2019_1_OR_NEWER
-// Only permit editing multiple objects on Unity 2019 to avoid some Unity
-// 2018 bugs
-[CanEditMultipleObjects]
-#endif
 public class YarnImporterEditor : ScriptedImporterEditor
 {
     private SerializedProperty baseLanguageIdProperty;
     private SerializedProperty baseLanguageProperty;
-    private SerializedProperty destinationProgramProperty;
     private SerializedProperty localizationDatabaseProperty;
     private SerializedProperty isSuccessfullyCompiledProperty;
     private SerializedProperty compilationErrorMessageProperty;
     private SerializedProperty localizationsProperty;
 
-    public override void OnEnable() {
+    public string DestinationProgramError => destinationYarnProgramImporter?.compileError ?? null;
+
+    private YarnProgram destinationYarnProgram;
+    private YarnProgramImporter destinationYarnProgramImporter;
+
+    public override void OnEnable()
+    {
         base.OnEnable();
 
         baseLanguageIdProperty = serializedObject.FindProperty("baseLanguageID");
         baseLanguageProperty = serializedObject.FindProperty("baseLanguage");
-        destinationProgramProperty = serializedObject.FindProperty("destinationProgram");
         localizationDatabaseProperty = serializedObject.FindProperty("localizationDatabase");
         isSuccessfullyCompiledProperty = serializedObject.FindProperty("isSuccesfullyParsed");
         compilationErrorMessageProperty = serializedObject.FindProperty("parseErrorMessage");
         localizationsProperty = serializedObject.FindProperty("localizations");
+
+        UpdateDestinationProgram();
+    }
+
+    private void UpdateDestinationProgram()
+    {
+        destinationYarnProgram = (target as YarnImporter).DestinationProgram;
+
+        if (destinationYarnProgram != null)
+        {
+            destinationYarnProgramImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(destinationYarnProgram)) as YarnProgramImporter;
+        }
     }
 
     public override void OnInspectorGUI() {
@@ -48,48 +59,25 @@ public class YarnImporterEditor : ScriptedImporterEditor
             } else {
                 EditorGUILayout.HelpBox(compilationErrorMessageProperty.stringValue, MessageType.Error);
             }                  
-        } else if (destinationProgramProperty.hasMultipleDifferentValues == false && destinationProgramProperty.objectReferenceValue != null) {
-            string programPath = AssetDatabase.GetAssetPath(destinationProgramProperty.objectReferenceValue);
-            var programImporter = AssetImporter.GetAtPath(programPath) as YarnProgramImporter;
-
-            if (string.IsNullOrEmpty(programImporter.compileError) == false) {
-                EditorGUILayout.HelpBox(programImporter.compileError, MessageType.Error);
-            }
+        } else if (string.IsNullOrEmpty(DestinationProgramError) == false) {
+            
+            EditorGUILayout.HelpBox(DestinationProgramError, MessageType.Error);
+            
         }
 
         EditorGUILayout.PropertyField(baseLanguageIdProperty);
 
-        using (var change = new EditorGUI.ChangeCheckScope())
-        {
-            // Cache the previous destination program, in case the user is
-            // about to change it
-            var previousDestination = destinationProgramProperty.objectReferenceValue;
-
-            EditorGUILayout.PropertyField(destinationProgramProperty);
-
-            if (change.changed && previousDestination)
-            {
-                // Force the previous destination program we had to reimport, so that it removes us from its list
-                string previousProgramPath = AssetDatabase.GetAssetPath(previousDestination);
-                var previousProgramImporter = AssetImporter.GetAtPath(previousProgramPath) as YarnProgramImporter;
-
-                // Remove the selected importers from the previous program
-                previousProgramImporter.sourceScripts = previousProgramImporter.sourceScripts
-                    .Except(serializedObject.targetObjects.Cast<YarnImporter>())
-                    .ToList();
-
-                EditorUtility.SetDirty(previousProgramImporter);
-
-                previousProgramImporter.SaveAndReimport();
-            }
-        }
-        
-
-
-        if (destinationProgramProperty.hasMultipleDifferentValues == false && destinationProgramProperty.objectReferenceValue == null) {
+        if (destinationYarnProgram == null) {
             EditorGUILayout.HelpBox("This script is not currently part of a Yarn Program. Either add one in the field above, or click Create New Yarn Program.", MessageType.Info);
             if (GUILayout.Button("Create New Yarn Program")) {
-                YarnImporterUtility.CreateYarnProgram(serializedObject);
+                YarnImporterUtility.CreateYarnProgram(target as YarnImporter);
+                
+                UpdateDestinationProgram();
+
+            }
+        } else {
+            using (new EditorGUI.DisabledGroupScope(true)) {
+                EditorGUILayout.ObjectField("Program", destinationYarnProgram, typeof(YarnProgramImporter), false);
             }
         }
 
