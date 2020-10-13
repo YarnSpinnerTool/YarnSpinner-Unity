@@ -346,5 +346,36 @@ position: 0,0
             Assert.IsNotNull(YarnEditorUtility.GetYarnDocumentIconTexture());
             Assert.IsNotNull(YarnEditorUtility.GetTemplateYarnScriptPath());
         }
+
+        [Test]
+        public void YarnImporter_CanCreateYarnProgram()
+        {
+
+            string scriptPath = "NewYarnScript.yarn";
+            string scriptFullPath = $"Assets/{scriptPath}";
+            YarnEditorUtility.CreateYarnAsset(scriptFullPath);
+            createdFilePaths.Add(scriptFullPath);
+            
+            Assert.True(File.Exists(scriptFullPath));
+
+            var scriptImporter = AssetImporter.GetAtPath(scriptFullPath) as YarnImporter;
+            
+            // The script has no destination program after being created
+            Assert.Null(scriptImporter.DestinationProgram);
+
+            // Create a new Yarn Program for this script
+            var programPath = YarnImporterUtility.CreateYarnProgram(scriptImporter);
+            createdFilePaths.Add(programPath);
+
+            // The script now has a destination program
+            Assert.NotNull(scriptImporter.DestinationProgram);
+
+            var programImporter = AssetImporter.GetAtPath(programPath) as YarnProgramImporter;
+
+            var scriptTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(scriptFullPath);
+
+            // The program includes the script importer in its Source Scripts list
+            Assert.Contains(scriptTextAsset, new List<TextAsset>(programImporter.sourceScripts));
+        }
     }
 }
