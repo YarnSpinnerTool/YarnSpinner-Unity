@@ -89,7 +89,7 @@ namespace Yarn.Unity
                 localDeclarations = result.Declarations;
             } catch (ParseException e) {
                 ctx.LogImportError($"Error in Yarn Program file:{e.Message}");
-                compileError = e.Message;
+                compileError = $"Error in Yarn Program {ctx.assetPath}: {e.Message}";
                 return;
             }
             
