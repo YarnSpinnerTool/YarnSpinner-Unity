@@ -217,6 +217,19 @@ namespace Yarn.Unity
                    Lock == entry.Lock &&
                    Comment == entry.Comment;
         }
+
+        public override int GetHashCode()
+        {
+            return
+                Language.GetHashCode() ^
+                ID.GetHashCode() ^
+                Text.GetHashCode() ^
+                File.GetHashCode() ^
+                Node.GetHashCode() ^
+                LineNumber.GetHashCode() ^
+                Lock.GetHashCode() ^
+                Comment.GetHashCode();
+        }
     }
 }
 

@@ -16,7 +16,7 @@ namespace Yarn.Unity
         [SerializeField] private string _LocaleCode;
 
 #if UNITY_EDITOR
-        [SerializeField] DefaultAsset assetSourceFolder;
+        [SerializeField] DefaultAsset assetSourceFolder = null;
         public DefaultAsset AssetSourceFolder => assetSourceFolder;
 #endif
 

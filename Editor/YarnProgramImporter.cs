@@ -256,8 +256,6 @@ namespace Yarn.Unity
 
         private ReorderableDeclarationsList serializedDeclarationsList;
 
-        private bool showScripts = true;
-
         public override void OnEnable()
         {
             base.OnEnable();
@@ -299,7 +297,7 @@ namespace Yarn.Unity
             EditorGUILayout.PropertyField(sourceScriptsProperty);
 
 
-            
+
             var hadChanges = serializedObject.ApplyModifiedProperties();
 
 #if UNITY_2018
@@ -342,8 +340,6 @@ namespace Yarn.Unity
                 var name = decl.FindPropertyRelative("name").stringValue;
 
                 SerializedProperty typeProperty = decl.FindPropertyRelative("type");
-
-                SerializedProperty defaultValueProperty;
 
                 Type type = (Yarn.Type)typeProperty.enumValueIndex;
 

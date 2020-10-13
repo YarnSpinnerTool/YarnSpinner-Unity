@@ -37,11 +37,11 @@ namespace Yarn.Unity.Example
             public Color color;
         }
 
-        [SerializeField] CanvasGroup contentContainer;
-        [SerializeField] Text lineText;
+        [SerializeField] CanvasGroup contentContainer = null;
+        [SerializeField] Text lineText = null;
 
-        [SerializeField] GameObject optionButtonTemplate;
-        [SerializeField] RectTransform optionContainer;
+        [SerializeField] GameObject optionButtonTemplate = null;
+        [SerializeField] RectTransform optionContainer = null;
 
         [SerializeField] float fadeTime = 0.25f;
 
