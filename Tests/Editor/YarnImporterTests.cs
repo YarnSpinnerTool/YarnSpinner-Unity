@@ -283,13 +283,20 @@ position: 0,0
             File.WriteAllText(path, TestYarnScriptSource, System.Text.Encoding.UTF8);
             AssetDatabase.Refresh();
             var importer = AssetImporter.GetAtPath(path) as YarnImporter;
-            var importerSerializedObject = new SerializedObject(importer);
+            var importerSerializedObject = new SerializedObject(importer);            
+            var localizationPaths = YarnImporterUtility.CreateNewLocalizationDatabase(importerSerializedObject);
 
-            YarnImporterUtility.CreateNewLocalizationDatabase(importerSerializedObject);
+            createdFilePaths.AddRange(localizationPaths);
+
             var localizationDatabaseSerializedObject = new SerializedObject(importer.localizationDatabase);
-            LocalizationDatabaseUtility.CreateLocalizationWithLanguage(localizationDatabaseSerializedObject, AlternateLocaleCode);
 
-            YarnImporterUtility.CreateLocalizationForLanguageInProgram(importerSerializedObject, AlternateLocaleCode);
+            var newLocalizationFilePath = LocalizationDatabaseUtility.CreateLocalizationWithLanguage(localizationDatabaseSerializedObject, AlternateLocaleCode);
+
+            createdFilePaths.Add(newLocalizationFilePath);
+
+            var csvPath = YarnImporterUtility.CreateLocalizationForLanguageInProgram(importerSerializedObject, AlternateLocaleCode);
+
+            createdFilePaths.Add(csvPath);
 
             var unmodifiedBaseStringsTable = StringTableEntry.ParseFromCSV((importerSerializedObject.targetObject as YarnImporter).baseLanguage.text);
             var unmodifiedLocalizedStringsTable = StringTableEntry.ParseFromCSV((importerSerializedObject.targetObject as YarnImporter).AllLocalizations.First(l => l.languageName == AlternateLocaleCode).text.text);

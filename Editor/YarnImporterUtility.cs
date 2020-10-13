@@ -15,15 +15,19 @@ internal static class YarnImporterUtility
     /// Creates a new localization database asset adjacent to one of the
     /// selected objects, configures all selected objects to use it, and
     /// ensures that the project's text language list includes this
-    /// program's base language.
+    /// program's base language. A Localization asset will also be created
+    /// for the base language.
     /// </summary>
     /// <param name="serializedObject">A serialized object that represents
     /// a <see cref="YarnImporter"/>.</param>
-    internal static void CreateNewLocalizationDatabase(SerializedObject serializedObject)
+    /// <returns>The paths to the newly created assets.</returns>
+    internal static string[] CreateNewLocalizationDatabase(SerializedObject serializedObject)
     {
         if (serializedObject.isEditingMultipleObjects) {
             throw new System.InvalidOperationException($"Cannot invoke {nameof(CreateNewLocalizationDatabase)} when editing multiple objects");
         }
+
+        var createdPaths = new List<string>();
 
         var localizationDatabaseProperty = serializedObject.FindProperty("localizationDatabase");
 
@@ -38,6 +42,8 @@ internal static class YarnImporterUtility
         var databaseFileName = $"LocalizationDatabase.asset";
         var destinationPath = Path.Combine(directory, databaseFileName);
         destinationPath = AssetDatabase.GenerateUniqueAssetPath(destinationPath);
+
+        createdPaths.Add(destinationPath);
 
         // Create the asset and set it up
         var localizationDatabaseAsset = ScriptableObject.CreateInstance<LocalizationDatabase>();
@@ -67,6 +73,8 @@ internal static class YarnImporterUtility
 
                 AssetDatabase.CreateAsset(localizationAsset, localizationPath);
 
+                createdPaths.Add(localizationPath);
+
                 localizationDatabaseAsset.AddLocalization(localizationAsset);
             }
 
@@ -95,7 +103,9 @@ internal static class YarnImporterUtility
         // Associate this localization database with the object.
         localizationDatabaseProperty.objectReferenceValue = localizationDatabaseAsset;
         
-        serializedObject.ApplyModifiedProperties();        
+        serializedObject.ApplyModifiedProperties(); 
+
+        return createdPaths.ToArray();       
     }
 
     /// <summary>
@@ -104,23 +114,13 @@ internal static class YarnImporterUtility
     /// /// importer to use the new Yarn Program.
     /// </summary>
     /// <param name="serializedObject">A serialized object that represents
-    /// a Yarn script.</param>
-    internal static void CreateYarnProgram(SerializedObject serializedObject)
+    /// a <see cref="YarnImporter"/>.</param>
+    /// <returns>The path to the created asset.</returns>
+    internal static string CreateYarnProgram(YarnImporter initialSourceAsset)
     {
-        if (serializedObject.isEditingMultipleObjects) {
-            throw new System.InvalidOperationException($"Cannot invoke {nameof(CreateYarnProgram)} when editing multiple objects");
-        }
-
-        var destinationProgramProperty = serializedObject.FindProperty("destinationProgram");
-
-        var target = serializedObject.targetObject;
-
-        if (!(target is YarnImporter)) {
-            throw new System.InvalidOperationException($"{serializedObject} does not represent a {nameof(YarnImporter)}");
-        }
-
+        
         // Figure out where on disk this asset is
-        var path = AssetDatabase.GetAssetPath(target);
+        var path = initialSourceAsset.assetPath;
         var directory = Path.GetDirectoryName(path);
 
         // Figure out a new, unique path for the localization we're
@@ -136,9 +136,13 @@ internal static class YarnImporterUtility
         AssetDatabase.ImportAsset(destinationPath);
         AssetDatabase.SaveAssets();
 
-        var program = AssetDatabase.LoadAssetAtPath<YarnProgram>(destinationPath);
+        var programImporter = AssetImporter.GetAtPath(destinationPath) as YarnProgramImporter;
+        programImporter.sourceScripts.Add(AssetDatabase.LoadAssetAtPath<TextAsset>(path));
 
-        destinationProgramProperty.objectReferenceValue = program;
+        EditorUtility.SetDirty(programImporter);
+
+        return destinationPath;
+        
 
     }
 
@@ -150,12 +154,13 @@ internal static class YarnImporterUtility
     /// a <see cref="YarnImporter"/>.</param>
     /// <param name="language">The language to generate a localization CSV
     /// for.</param>
-    internal static void CreateLocalizationForLanguageInProgram(SerializedObject serializedObject, string language)
+    /// <returns>The path to the newly created CSV file, or null if there was an error.</returns>
+    internal static string CreateLocalizationForLanguageInProgram(SerializedObject serializedObject, string language)
     {
         if (serializedObject.isEditingMultipleObjects)
         {
             Debug.LogError($"{nameof(CreateLocalizationForLanguageInProgram)} was called, but multiple objects were selected. Select a single object and try again.");
-            return;
+            return null;
         }
 
         IEnumerable<StringTableEntry> baseLanguageStrings = GetBaseLanguageStringsForSelectedObject(serializedObject);
@@ -180,7 +185,7 @@ internal static class YarnImporterUtility
         catch (CsvHelper.CsvHelperException e)
         {
             Debug.LogError($"Error creating {language} CSV: {e}");
-            return;
+            return null;
         }
 
         // Write out this CSV to a file
@@ -201,6 +206,8 @@ internal static class YarnImporterUtility
         
         // Mark that we just changed the target object
         EditorUtility.SetDirty(serializedObject.targetObject);
+
+        return destinationPath;
     }
 
 

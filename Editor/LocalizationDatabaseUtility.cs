@@ -16,8 +16,8 @@ internal static class LocalizationDatabaseUtility {
     /// adds it to the localization database.
     /// </summary>
     /// <param name="language">The locale code for the language to add.
-    /// </param>
-    internal static void CreateLocalizationWithLanguage(SerializedObject serializedObject, string theLanguage) {
+    /// </param>    
+    internal static string CreateLocalizationWithLanguage(SerializedObject serializedObject, string theLanguage) {
 
         var target = serializedObject.targetObject;
         var localizationsProperty = serializedObject.FindProperty("_localizations");
@@ -53,6 +53,9 @@ internal static class LocalizationDatabaseUtility {
         // Finally, update this localization database so that this new
         // localization has content.
         UpdateContents(serializedObject.targetObject as LocalizationDatabase);
+
+        // Return the path of the file we created.
+        return destinationPath;
     }
 
     public static void UpdateContents(LocalizationDatabase database)
