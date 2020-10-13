@@ -59,8 +59,8 @@ namespace Yarn.Unity
             // Show available text languages to the left and available audio languages to the right
             _textLanguagesReorderableList.drawHeaderCallback = (Rect rect) =>
             {
-                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width * 0.65f, EditorGUIUtility.singleLineHeight), "Text Languages");
-                EditorGUI.LabelField(new Rect(rect.width * 0.65f, rect.y, rect.width * 0.75f, EditorGUIUtility.singleLineHeight), "Audio Languages");
+                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width * 0.65f, EditorGUIUtility.singleLineHeight), "Languages");
+                EditorGUI.LabelField(new Rect(rect.width * 0.65f, rect.y, rect.width * 0.75f, EditorGUIUtility.singleLineHeight), "Has Audio");
             };
             // How an element of the lists should be drawn
             // Text languages will be drawn left as a label with their display name (-> "English")
