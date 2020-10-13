@@ -12,9 +12,8 @@ ScriptedImporter:
   baseLanguageID: en
   stringIDs: []
   AnyImplicitStringIDs: 0
-  isSuccesfullyCompiled: 1
-  compilationErrorMessage: 
+  isSuccesfullyParsed: 1
+  parseErrorMessage: 
   baseLanguage: {instanceID: 0}
   localizations: []
-  destinationProgram: {instanceID: 0}
   localizationDatabase: {instanceID: 0}

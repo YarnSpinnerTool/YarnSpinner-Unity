@@ -17,7 +17,6 @@ MonoBehaviour:
   _stringTable:
     keys:
     - line:794945
-    - line:0037f92
     - line:2dc39b
     - line:34de2f
     - line:dcc2bc
@@ -47,7 +46,6 @@ MonoBehaviour:
     - line:ship07
     values:
     - 'Spieler: Hey Sally. '
-    - 
     - 'Sally: Uah! Hey. '
     - 'Sally: Du hast dich einfach so angeschlichen. '
     - 'Sally: Lass das. '

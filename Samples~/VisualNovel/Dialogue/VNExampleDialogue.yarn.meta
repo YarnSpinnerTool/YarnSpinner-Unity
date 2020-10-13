@@ -31,9 +31,8 @@ ScriptedImporter:
   - line:VNExampleDialogue-Start-16
   - line:VNExampleDialogue-Start-17
   AnyImplicitStringIDs: 1
-  isSuccesfullyCompiled: 1
-  compilationErrorMessage: 
+  isSuccesfullyParsed: 1
+  parseErrorMessage: 
   baseLanguage: {instanceID: 0}
   localizations: []
-  destinationProgram: {fileID: 11400000, guid: 6573e22e697ab4619b968b6ce2f80243, type: 3}
   localizationDatabase: {instanceID: 0}

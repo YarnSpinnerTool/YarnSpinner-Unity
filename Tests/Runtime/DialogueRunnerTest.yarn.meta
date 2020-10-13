@@ -2,8 +2,8 @@ fileFormatVersion: 2
 guid: 40a60c3c28a91d34bbf2088bb0d2824a
 ScriptedImporter:
   fileIDToRecycleName:
-    4900000: Strings
-    4900002: Program
+    4900000: Program
+    4900002: Strings
     2186277476908879412: ImportLogs
   externalObjects: {}
   userData: 
@@ -21,5 +21,4 @@ ScriptedImporter:
   parseErrorMessage: 
   baseLanguage: {instanceID: 0}
   localizations: []
-  destinationProgram: {fileID: 11400000, guid: a9b357f08075f43cbad81d8ec757e1f7, type: 3}
   localizationDatabase: {instanceID: 0}

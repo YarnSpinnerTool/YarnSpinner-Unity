@@ -31,6 +31,5 @@ ScriptedImporter:
   localizations:
   - languageName: de
     text: {fileID: 4900000, guid: c7ccc37b05d57b5449cdae7c315d1646, type: 3}
-  destinationProgram: {fileID: 11400000, guid: c39db14a6cc1d44c0ae07dde1eaf16aa, type: 3}
   localizationDatabase: {fileID: 11400000, guid: 93d5bc4e054ac4572a2da48fa49ea322,
     type: 2}

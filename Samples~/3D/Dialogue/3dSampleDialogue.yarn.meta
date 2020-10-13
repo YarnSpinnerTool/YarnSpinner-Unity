@@ -37,9 +37,8 @@ ScriptedImporter:
   - line:3dSampleDialogue-Start-22
   - line:3dSampleDialogue-Start-23
   AnyImplicitStringIDs: 1
-  isSuccesfullyCompiled: 1
-  compilationErrorMessage: 
+  isSuccesfullyParsed: 1
+  parseErrorMessage: 
   baseLanguage: {instanceID: 0}
   localizations: []
-  destinationProgram: {fileID: 11400000, guid: 7695ad157ec234e088ab1de2389cbc9c, type: 3}
   localizationDatabase: {instanceID: 0}

@@ -36,11 +36,10 @@ ScriptedImporter:
   - line:PhoneChatDialogue-Bye-21
   - line:PhoneChatDialogue-Bye-22
   AnyImplicitStringIDs: 1
-  isSuccesfullyCompiled: 1
-  compilationErrorMessage: 
+  isSuccesfullyParsed: 1
+  parseErrorMessage: 
   baseLanguage: {instanceID: 0}
   localizations:
   - languageName: de
     text: {fileID: 4900000, guid: 816b6de293b849a4fad13d5caca52524, type: 3}
-  destinationProgram: {fileID: 11400000, guid: ba013fcce07ad48a383403726b73fcca, type: 3}
   localizationDatabase: {instanceID: 0}

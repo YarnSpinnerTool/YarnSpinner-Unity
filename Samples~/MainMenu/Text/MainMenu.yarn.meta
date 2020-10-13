@@ -2,8 +2,8 @@ fileFormatVersion: 2
 guid: 8e3b0eabc14eb4e4cb5da356b457ab83
 ScriptedImporter:
   fileIDToRecycleName:
-    4900000: Strings
-    4900002: Program
+    4900000: Program
+    4900002: Strings
     2186277476908879412: ImportLogs
   externalObjects: {}
   userData: 
@@ -20,12 +20,11 @@ ScriptedImporter:
   - line:05073d5
   - line:071d8ad
   AnyImplicitStringIDs: 0
-  isSuccesfullyCompiled: 1
-  compilationErrorMessage: 
+  isSuccesfullyParsed: 1
+  parseErrorMessage: 
   baseLanguage: {instanceID: 0}
   localizations:
   - languageName: de
     text: {fileID: 4900000, guid: a74afbcd340a1134e9a812870eebe8b9, type: 3}
-  destinationProgram: {fileID: 11400000, guid: 49e31cffe6f3b415b9209e525f89341c, type: 3}
   localizationDatabase: {fileID: 11400000, guid: 97b74ba4989424dc19afeaa3dc8a00cc,
     type: 2}

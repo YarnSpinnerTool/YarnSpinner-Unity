@@ -10,7 +10,7 @@ ScriptedImporter:
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 053561912b1654d80a424bb0696a74ae, type: 3}
   sourceScripts:
-  - {fileID: 3, guid: aa20c0d0a35724fbab9776c4c18234ba, type: 3}
+  - {fileID: 4900002, guid: aa20c0d0a35724fbab9776c4c18234ba, type: 3}
   compileError: 
   serializedDeclarations:
   - name: $knows_anne_name
