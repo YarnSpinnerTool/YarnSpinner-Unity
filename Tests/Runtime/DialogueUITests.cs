@@ -54,9 +54,10 @@ namespace Yarn.Unity.Tests
                 yield return null;
             }
 
-            Assert.That(string.Equals(TextCanvas.text, "Spieler: Kannst du mich hören?"));
+            Assert.AreEqual("Spieler: Kannst du mich hören?", TextCanvas.text);
 
             // Arrange for second line
+            yield return null;
             yield return null;
             UI.MarkLineComplete();
 
@@ -66,7 +67,7 @@ namespace Yarn.Unity.Tests
                 yield return null;
             }
 
-            Assert.That(string.Equals(TextCanvas.text, "NPC: Klar und deutlich."));
+            Assert.AreEqual("NPC: Klar und deutlich.", TextCanvas.text);
 
             // Cleanup
             yield return null;
