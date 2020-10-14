@@ -278,7 +278,7 @@ namespace Yarn.Unity
 
             if (sourceScriptsProperty.arraySize == 0)
             {
-                EditorGUILayout.HelpBox("No scripts are currently using this Yarn Program.", MessageType.Info);
+                EditorGUILayout.HelpBox("This Yarn Program has no content. Add Yarn Scripts to it.", MessageType.Warning);
             }
             else
             {
