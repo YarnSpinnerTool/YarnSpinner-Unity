@@ -1182,10 +1182,6 @@ namespace Yarn.Unity
         /// has.</param>
         private void UpdateLineStatus(LocalizedLine line, LineStatus newStatus)
         {
-            var previousStatus = line.Status;
-
-            Debug.Log($"Line \"{line.RawText}\" changed state to {newStatus}");
-
             // Update the state of the line and let the views know.
             line.Status = newStatus;
 
