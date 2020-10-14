@@ -209,8 +209,6 @@ namespace Yarn.Unity
 
                             var name = att.CommandString;
 
-                            Debug.Log($"Registered command {name} to {method.DeclaringType.FullName}.{method.Name}");
-
                             try
                             {
                                 // Cache the methodinfo
