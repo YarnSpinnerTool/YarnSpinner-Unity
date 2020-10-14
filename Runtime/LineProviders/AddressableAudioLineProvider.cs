@@ -1,14 +1,25 @@
-#if ADDRESSABLES
 using System.Collections.Generic;
 using UnityEngine;
 
+#if ADDRESSABLES
 using UnityEngine.ResourceManagement.AsyncOperations;
+#endif
 
 namespace Yarn.Unity
 {
     public class AddressableAudioLineProvider : LineProviderBehaviour
-    {
-        
+    {   
+#if !ADDRESSABLES
+        const string NotCompatibleMessage = nameof(AddressableAudioLineProvider) + " won't work in this project, because the Addressable Assets package is not installed. Either import the package (see https://docs.unity3d.com/Packages/com.unity.addressables@1.16/), or use " + nameof(AudioLineProvider) + " instead.";
+        public override LocalizedLine GetLocalizedLine(Line line) {
+            throw new System.InvalidOperationException(NotCompatibleMessage);
+        }
+        public override void PrepareForLines(IEnumerable<string> lineIDs) {
+            throw new System.InvalidOperationException(NotCompatibleMessage);
+        }
+        public override bool LinesAvailable => throw new System.InvalidOperationException(NotCompatibleMessage);
+#else
+
         // Lines are available if there are no outstanding load operations
         public override bool LinesAvailable => activeLoadOperationsToLineIDs.Count == 0;
 
@@ -98,6 +109,6 @@ namespace Yarn.Unity
                 Debug.LogWarning($"Failed to load audio clip for {stringID}");
             }
         }
+#endif
     }
 }
-#endif
