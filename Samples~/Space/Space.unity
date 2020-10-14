@@ -1157,6 +1157,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fadeOutTimeOnLineFinish: 0.05
+  waitTimeBeforeLineStart: 0
+  waitTimeAfterLineComplete: 0
   audioSource: {fileID: 0}
 --- !u!114 &1231901711
 MonoBehaviour:
@@ -1167,7 +1169,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1231901709}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3eecab994ec244f02810459f368074ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 6b6798449caec4a32a5ad27badb06624, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   localizationDatabase: {fileID: 11400000, guid: 93d5bc4e054ac4572a2da48fa49ea322,
@@ -1915,7 +1917,7 @@ PrefabInstance:
         type: 3}
       propertyPath: yarnProgram
       value: 
-      objectReference: {fileID: 11400000, guid: 27f0c430fc5774761bc0addeb98b2e1d,
+      objectReference: {fileID: 11400000, guid: c39db14a6cc1d44c0ae07dde1eaf16aa,
         type: 3}
     - target: {fileID: 5935829475398715334, guid: 4ec3df5875e7347beb6176b545b8fb39,
         type: 3}

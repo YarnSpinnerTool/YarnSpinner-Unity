@@ -74,9 +74,6 @@ MonoBehaviour:
     - 'Ship: She''ll flay you alive!'
     - 'Player: Uh.'
   _assetTable:
-    keys: []
-    values: []
-  _addressTable:
     keys:
     - line:794945
     - line:2dc39b
@@ -107,59 +104,31 @@ MonoBehaviour:
     - line:ship06
     - line:ship07
     values:
-    - m_AssetGUID: d653c16cf588ded429931e16ec9c74b3
-      m_SubObjectName: 
-    - m_AssetGUID: 5f7416fd7f797094a93810d4bd11f610
-      m_SubObjectName: 
-    - m_AssetGUID: deadb062b242e014b9cec9340b3038f1
-      m_SubObjectName: 
-    - m_AssetGUID: 4625990170b1626498d0c892c35edeb9
-      m_SubObjectName: 
-    - m_AssetGUID: b7eb695f38de3174db0cb4ab6234baf9
-      m_SubObjectName: 
-    - m_AssetGUID: 2c5b41533e5b21e45a1b045258ec3451
-      m_SubObjectName: 
-    - m_AssetGUID: 9c402b246285d354badce194db156645
-      m_SubObjectName: 
-    - m_AssetGUID: ca075f0c4b186c746bfb48ddba4a0ab2
-      m_SubObjectName: 
-    - m_AssetGUID: 108436843461c3c4c88a10399c3d802a
-      m_SubObjectName: 
-    - m_AssetGUID: d87321b69120e4d488257dc44f0ffb5a
-      m_SubObjectName: 
-    - m_AssetGUID: fc8096c914b4aa843a5495d1677f803c
-      m_SubObjectName: 
-    - m_AssetGUID: 0a2acb28a540a4e46aee3f17434734e0
-      m_SubObjectName: 
-    - m_AssetGUID: 24ba34d3a21de0746923b4b580853eb6
-      m_SubObjectName: 
-    - m_AssetGUID: 1aaab19050495d249a00b4f9143e0ecf
-      m_SubObjectName: 
-    - m_AssetGUID: 42259fd68e0107d4eafc514734c404af
-      m_SubObjectName: 
-    - m_AssetGUID: 8da1547987e83ce48a53cba0adba0e8a
-      m_SubObjectName: 
-    - m_AssetGUID: d1ca6ee2065f253419c7965d712635cc
-      m_SubObjectName: 
-    - m_AssetGUID: 5cb11c66e0442634bba32b194b16055f
-      m_SubObjectName: 
-    - m_AssetGUID: bbf44e7a8dbe9c74da9802c5705b613d
-      m_SubObjectName: 
-    - m_AssetGUID: f8ac10829878c184da12d1e550125eb2
-      m_SubObjectName: 
-    - m_AssetGUID: 7b8f384ea6122bf4c90b38bd65f56b6d
-      m_SubObjectName: 
-    - m_AssetGUID: 10e15d5dc43f59548ac14e5c30d16dda
-      m_SubObjectName: 
-    - m_AssetGUID: 26fab58a5315dca428880962a812a807
-      m_SubObjectName: 
-    - m_AssetGUID: 2acfb0f4e4a2cb444af8e147d05aadd3
-      m_SubObjectName: 
-    - m_AssetGUID: 8ef90c8eee7f5964dbd376d850610a6b
-      m_SubObjectName: 
-    - m_AssetGUID: d50f246020ffd7247888c37b42456d26
-      m_SubObjectName: 
-    - m_AssetGUID: 92a28aa542307314caacdc659b65fb74
-      m_SubObjectName: 
-    - m_AssetGUID: f2f7ea27634e10b48ac0685700ddf412
-      m_SubObjectName: 
+    - {fileID: 8300000, guid: d653c16cf588ded429931e16ec9c74b3, type: 3}
+    - {fileID: 8300000, guid: 5f7416fd7f797094a93810d4bd11f610, type: 3}
+    - {fileID: 8300000, guid: deadb062b242e014b9cec9340b3038f1, type: 3}
+    - {fileID: 8300000, guid: 4625990170b1626498d0c892c35edeb9, type: 3}
+    - {fileID: 8300000, guid: b7eb695f38de3174db0cb4ab6234baf9, type: 3}
+    - {fileID: 8300000, guid: 2c5b41533e5b21e45a1b045258ec3451, type: 3}
+    - {fileID: 8300000, guid: 9c402b246285d354badce194db156645, type: 3}
+    - {fileID: 8300000, guid: ca075f0c4b186c746bfb48ddba4a0ab2, type: 3}
+    - {fileID: 8300000, guid: 108436843461c3c4c88a10399c3d802a, type: 3}
+    - {fileID: 8300000, guid: d87321b69120e4d488257dc44f0ffb5a, type: 3}
+    - {fileID: 8300000, guid: fc8096c914b4aa843a5495d1677f803c, type: 3}
+    - {fileID: 8300000, guid: 0a2acb28a540a4e46aee3f17434734e0, type: 3}
+    - {fileID: 8300000, guid: 24ba34d3a21de0746923b4b580853eb6, type: 3}
+    - {fileID: 8300000, guid: 1aaab19050495d249a00b4f9143e0ecf, type: 3}
+    - {fileID: 8300000, guid: 42259fd68e0107d4eafc514734c404af, type: 3}
+    - {fileID: 8300000, guid: 8da1547987e83ce48a53cba0adba0e8a, type: 3}
+    - {fileID: 8300000, guid: d1ca6ee2065f253419c7965d712635cc, type: 3}
+    - {fileID: 8300000, guid: 5cb11c66e0442634bba32b194b16055f, type: 3}
+    - {fileID: 8300000, guid: bbf44e7a8dbe9c74da9802c5705b613d, type: 3}
+    - {fileID: 8300000, guid: f8ac10829878c184da12d1e550125eb2, type: 3}
+    - {fileID: 8300000, guid: 7b8f384ea6122bf4c90b38bd65f56b6d, type: 3}
+    - {fileID: 8300000, guid: 10e15d5dc43f59548ac14e5c30d16dda, type: 3}
+    - {fileID: 8300000, guid: 26fab58a5315dca428880962a812a807, type: 3}
+    - {fileID: 8300000, guid: 2acfb0f4e4a2cb444af8e147d05aadd3, type: 3}
+    - {fileID: 8300000, guid: 8ef90c8eee7f5964dbd376d850610a6b, type: 3}
+    - {fileID: 8300000, guid: d50f246020ffd7247888c37b42456d26, type: 3}
+    - {fileID: 8300000, guid: 92a28aa542307314caacdc659b65fb74, type: 3}
+    - {fileID: 8300000, guid: f2f7ea27634e10b48ac0685700ddf412, type: 3}
