@@ -10231,15 +10231,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   contentContainer: {fileID: 859463807}
   lineText: {fileID: 204235610}
-  fadeTime: 0.25
   optionButtonTemplate: {fileID: 868029867}
   optionContainer: {fileID: 859463802}
+  fadeTime: 0.25
   characters:
   - name: Tom
     color: {r: 1, g: 0.8352941, b: 0.41568628, a: 1}
   - name: Anne
     color: {r: 0.41568625, g: 1, b: 0.94345075, a: 1}
   optionsColor: {r: 1, g: 0.8352941, b: 0.41568628, a: 1}
+  defaultColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1290606830
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10327,7 +10328,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1290606828}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3eecab994ec244f02810459f368074ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 6b6798449caec4a32a5ad27badb06624, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   localizationDatabase: {fileID: 11400000, guid: fa5a21f6812564c2d9f6b54dd9ed7ef8,
