@@ -58,8 +58,6 @@ namespace Yarn.Unity
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
-            ctx.LogImportWarning($"Importing {ctx.assetPath}");
-
             var program = ScriptableObject.CreateInstance<YarnProgram>();
 
             // Start by creating the asset - no matter what, we need to
@@ -124,7 +122,6 @@ namespace Yarn.Unity
 
             if (pathsToImporters.Count == 0)
             {
-                ctx.LogImportWarning($"Yarn Program {ctx.assetPath} has no source scripts.");
                 return; // nothing further to do here
             }
 
@@ -229,8 +226,6 @@ namespace Yarn.Unity
             }
 
             byte[] compiledBytes = null;
-
-            ctx.LogImportWarning($"Imported nodes: {string.Join(", ", compilationResult.Program.Nodes.Select(n => n.Key))}");
 
             using (var memoryStream = new MemoryStream())
             using (var outputStream = new Google.Protobuf.CodedOutputStream(memoryStream))

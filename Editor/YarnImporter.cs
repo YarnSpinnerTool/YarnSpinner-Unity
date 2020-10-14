@@ -165,8 +165,6 @@ namespace Yarn.Unity
             {
                 ImportCompiledYarn(ctx);
             }
-
-            ctx.LogImportWarning($"Compiling {ctx.assetPath} took {stopwatch.Elapsed.TotalMilliseconds:F2}ms");            
         }
 
         /// <summary>
@@ -246,7 +244,7 @@ namespace Yarn.Unity
                 isSuccesfullyParsed = false;
                 parseErrorMessage = e.Message;
                 ctx.LogImportError($"Error importing {ctx.assetPath}: {e.Message}");
-                ctx.LogImportError(e.Message);                
+                return;
             }
 
             var text = new TextAsset(File.ReadAllText( ctx.assetPath));
