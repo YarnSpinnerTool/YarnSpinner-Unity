@@ -219,6 +219,13 @@ namespace Yarn.Unity
             var sourceText = File.ReadAllText(ctx.assetPath);
             string fileName = System.IO.Path.GetFileNameWithoutExtension(ctx.assetPath);
 
+            var text = new TextAsset(File.ReadAllText( ctx.assetPath));
+
+            // Add this container to the imported asset; it will be
+            // what the user interacts with in Unity
+            ctx.AddObjectToAsset("Program", text, YarnEditorUtility.GetYarnDocumentIconTexture());
+            ctx.SetMainObject(text);
+
             Yarn.Program compiledProgram = null;
             IDictionary<string, Yarn.Compiler.StringInfo> stringTable = null;
 
@@ -247,14 +254,6 @@ namespace Yarn.Unity
                 return;
             }
 
-            var text = new TextAsset(File.ReadAllText( ctx.assetPath));
-
-            // Add this container to the imported asset; it will be
-            // what the user interacts with in Unity
-            ctx.AddObjectToAsset("Program", text, YarnEditorUtility.GetYarnDocumentIconTexture());
-            ctx.SetMainObject(text);
-
-            
             // If there are lines in this script, generate a string table
             // asset for it
             if (stringTable?.Count > 0)
