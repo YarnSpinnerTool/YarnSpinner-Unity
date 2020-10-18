@@ -4,7 +4,6 @@ ScriptedImporter:
   fileIDToRecycleName:
     4900000: Strings
     4900002: Program
-    2186277476908879412: ImportLogs
   externalObjects: {}
   userData: 
   assetBundleName: 
@@ -31,7 +30,7 @@ ScriptedImporter:
   AnyImplicitStringIDs: 0
   isSuccesfullyParsed: 1
   parseErrorMessage: 
-  baseLanguage: {instanceID: 0}
+  baseLanguage: {fileID: 4900000, guid: 8b6ae1e8d32e840f0b3fd0b033e52253, type: 3}
   localizations:
   - languageName: de
     text: {fileID: 4900000, guid: 1b0fbbc0a18fb4fcd90b66be99f1c05d, type: 3}

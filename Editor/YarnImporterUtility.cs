@@ -141,6 +141,10 @@ internal static class YarnImporterUtility
 
         EditorUtility.SetDirty(programImporter);
 
+        // Reimport the program to make it generate its default string
+        // table, if needed
+        programImporter.SaveAndReimport();
+
         return destinationPath;
         
 
