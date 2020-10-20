@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [v2.0.0-beta1] 2020-10-19
+
 ### Added
 
 - Added a 3D speech bubble sample, for dynamically positioning a speech bubble above a game character. (@radiatoryang)
