@@ -102,6 +102,69 @@ namespace Yarn.Unity {
         [SerializeField] 
         internal UnityEngine.UI.Text debugTextView = null;
 
+        internal void Start () {
+            if ( setDefaultVariablesOnStart ) {
+                SetDefaultVariables();
+            }
+        }
+
+        /// If we have a debug view, show the list of all variables in it
+        internal void Update ()
+        {
+            if (debugTextView != null) {
+                var stringBuilder = new System.Text.StringBuilder ();
+                foreach (KeyValuePair<string,object> item in variables) {
+                    stringBuilder.AppendLine (string.Format ("{0} = {1}",
+                                                            item.Key,
+                                                            item.Value.ToString()));
+                }
+                debugTextView.text = stringBuilder.ToString ();
+                debugTextView.SetAllDirty();
+            }
+        }
+
+
+        #region Setters
+
+        public void SetDefaultVariables () {
+            foreach ( var defaultVar in defaultVariables ) {
+                SetVariable( defaultVar.name, defaultVar.type, defaultVar.value );
+            }
+        }
+
+        void SetVariable(string name, Yarn.Type type, string value) {
+            switch (type)
+            {
+                case Type.Bool:
+                    bool newBool;
+                    if (bool.TryParse(value, out newBool))
+                    {
+                        SetValue(name, newBool);
+                    }
+                    else
+                    {
+                        throw new System.InvalidCastException($"Couldn't initialize default variable {name} with value {value} as Bool");
+                    }
+                    break;
+                case Type.Number:
+                    float newNumber;
+                    if (float.TryParse(value, out newNumber))
+                    { // TODO: this won't work for different cultures (e.g. French write "0.53" as "0,53")
+                        SetValue(name, newNumber);
+                    }
+                    else
+                    {
+                        throw new System.InvalidCastException($"Couldn't initialize default variable {name} with value {value} as Number (Float)");
+                    }
+                    break;
+                case Type.String:
+                case Type.Undefined:
+                default:
+                    SetValue(name, value); // no special type conversion required
+                    break;
+            }
+        }
+
         public override void SetValue(string variableName, string stringValue)
         {
             variables[variableName] = stringValue;
@@ -166,65 +229,10 @@ namespace Yarn.Unity {
             SetDefaultVariables();
         }
 
-        internal void Start () {
-            if ( setDefaultVariablesOnStart ) {
-                SetDefaultVariables();
-            }
-        }
+        #endregion
+        
 
-        public void SetDefaultVariables () {
-            foreach ( var defaultVar in defaultVariables ) {
-                TrySetVariable( defaultVar.name, defaultVar.type, defaultVar.value );
-            }
-        }
-
-        void TrySetVariable(string name, Yarn.Type type, string value) {
-            switch (type)
-            {
-                case Type.Bool:
-                    bool newBool;
-                    if (bool.TryParse(value, out newBool))
-                    {
-                        SetValue(name, newBool);
-                    }
-                    else
-                    {
-                        throw new System.InvalidCastException($"Couldn't initialize default variable {name} with value {value} as Bool");
-                    }
-                    break;
-                case Type.Number:
-                    float newNumber;
-                    if (float.TryParse(value, out newNumber))
-                    { // TODO: this won't work for different cultures (e.g. French write "0.53" as "0,53")
-                        SetValue(name, newNumber);
-                    }
-                    else
-                    {
-                        throw new System.InvalidCastException($"Couldn't initialize default variable {name} with value {value} as Number (Float)");
-                    }
-                    break;
-                case Type.String:
-                case Type.Undefined:
-                default:
-                    SetValue(name, value); // no special type conversion required
-                    break;
-            }
-        }
-
-        /// If we have a debug view, show the list of all variables in it
-        internal void Update ()
-        {
-            if (debugTextView != null) {
-                var stringBuilder = new System.Text.StringBuilder ();
-                foreach (KeyValuePair<string,object> item in variables) {
-                    stringBuilder.AppendLine (string.Format ("{0} = {1}",
-                                                            item.Key,
-                                                            item.Value.ToString()));
-                }
-                debugTextView.text = stringBuilder.ToString ();
-                debugTextView.SetAllDirty();
-            }
-        }
+        #region Save/Load
 
         static string[] SEPARATOR = new string[] { "/" }; // used for serialization
 
@@ -256,7 +264,7 @@ namespace Yarn.Unity {
                 var jsonType = System.Type.GetType(serializedKey[0]);
                 var jsonKey = serializedKey[1];
                 var jsonValue = variable.Value;
-                TrySetVariable( jsonKey, TypeMappings[jsonType], jsonValue );
+                SetVariable( jsonKey, TypeMappings[jsonType], jsonValue );
             }
         }
 
@@ -317,6 +325,8 @@ namespace Yarn.Unity {
                 { typeof(ulong), Yarn.Type.Number },
                 { typeof(decimal), Yarn.Type.Number },
             };
+        
+        #endregion
 
         /// <summary>
         /// Returns an <see cref="IEnumerator{T}"/> that iterates over all
