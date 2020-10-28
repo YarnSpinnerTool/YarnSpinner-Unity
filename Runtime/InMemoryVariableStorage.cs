@@ -32,31 +32,30 @@ using Yarn.Unity;
 namespace Yarn.Unity {
 
     /// <summary>
-    /// An simple implementation of DialogueUnityVariableStorage, which
-    /// stores everything in memory.
+    /// A simple implementation of VariableStorageBehaviour.
     /// </summary>
     /// <remarks>
-    /// This class does not perform any saving or loading on its own, but
-    /// you can enumerate over the variables by using a `foreach` loop:
+    /// As of v2.0, this class has basic serialization and save/load example functions.
+    /// You can also enumerate over the variables by using a `foreach` loop:
     /// 
     /// <![CDATA[
     /// ```csharp    
     /// // 'storage' is an InMemoryVariableStorage    
     /// foreach (var variable in storage) {
     ///         string name = variable.Key;
-    ///         Yarn.Value value = variable.Value;
+    ///         System.Object value = variable.Value;
     /// }   
     /// ```
     /// ]]>
     /// 
+    /// Note that as of v2.0, this class no longer uses Yarn.Value, to
+    /// enforce static typing of variables within the Yarn Program.
     /// </remarks>    
     public class InMemoryVariableStorage : VariableStorageBehaviour, IEnumerable<KeyValuePair<string, object>>
     {
-
-        /// Where we actually keeping our variables
-        [System.Serializable] class StringDictionary : SerializedDictionary<string, string> {} // serializable dictionary workaround
+        /// Where we're actually keeping our variables
         private Dictionary<string, object> variables = new Dictionary<string, object>();
-        private Dictionary<string, System.Type> variableTypes = new Dictionary<string, System.Type>();
+        private Dictionary<string, System.Type> variableTypes = new Dictionary<string, System.Type>(); // needed for serialization
 
         /// <summary>
         /// A default value to apply when the object wakes up, or when
@@ -230,9 +229,11 @@ namespace Yarn.Unity {
         }
 
         #endregion
-        
+
 
         #region Save/Load
+
+        [System.Serializable] class StringDictionary : SerializedDictionary<string, string> {} // serializable dictionary workaround
 
         static string[] SEPARATOR = new string[] { "/" }; // used for serialization
 
