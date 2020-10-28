@@ -58,24 +58,29 @@ namespace Yarn.Unity {
         private Dictionary<string, System.Type> variableTypes = new Dictionary<string, System.Type>(); // needed for serialization
 
         [Header("Optional debugging tools")]
-        
+        [HideInInspector] public bool showDebug;
         /// A UI.Text that can show the current list of all variables in-game. Optional.
-        [SerializeField] 
+        [SerializeField, Tooltip("(optional) output list of variables and values to Text UI in-game")] 
         internal UnityEngine.UI.Text debugTextView = null;
 
         /// If we have a debug view, show the list of all variables in it
         internal void Update ()
         {
             if (debugTextView != null) {
-                var stringBuilder = new System.Text.StringBuilder ();
-                foreach (KeyValuePair<string,object> item in variables) {
-                    stringBuilder.AppendLine (string.Format ("{0} = {1}",
-                                                            item.Key,
-                                                            item.Value.ToString()));
-                }
-                debugTextView.text = stringBuilder.ToString ();
+                debugTextView.text = GetDebugList();
                 debugTextView.SetAllDirty();
             }
+        }
+
+        public string GetDebugList() {
+            var stringBuilder = new System.Text.StringBuilder ();
+            foreach (KeyValuePair<string,object> item in variables) {
+                stringBuilder.AppendLine (string.Format ("{0} = {1} ({2})",
+                                                        item.Key,
+                                                        item.Value.ToString(),
+                                                        variableTypes[item.Key].ToString().Substring("System.".Length) )); 
+            }
+            return stringBuilder.ToString();
         }
 
 
