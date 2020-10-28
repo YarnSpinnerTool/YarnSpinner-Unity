@@ -25,9 +25,9 @@ namespace Yarn.Unity
                 return;
             }
 
-            var style = EditorGUIUtility.GetBuiltinSkin( EditorSkin.Inspector ).label;
+            var style = EditorStyles.label;
             var list = varStorage.GetDebugList();
-            var height = style.CalcHeight( new GUIContent(list), EditorGUIUtility.currentViewWidth ) - 5;
+            var height = style.CalcHeight( new GUIContent(list), EditorGUIUtility.currentViewWidth );
             EditorGUILayout.SelectableLabel( list, GUILayout.MaxHeight(height), GUILayout.ExpandHeight(true) );
             
         }

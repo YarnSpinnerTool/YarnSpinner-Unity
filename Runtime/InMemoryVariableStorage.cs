@@ -198,7 +198,7 @@ namespace Yarn.Unity {
                 serializableVariables.Add( jsonKey, jsonValue.ToString() );
             }
             var saveData = JsonUtility.ToJson(serializableVariables, prettyPrint);
-            Debug.Log(saveData);
+            // Debug.Log(saveData);
             return saveData;
         }
 
