@@ -49,7 +49,7 @@ namespace Yarn.Unity {
     /// ]]>
     /// 
     /// Note that as of v2.0, this class no longer uses Yarn.Value, to
-    /// enforce static typing of variables within the Yarn Program.
+    /// enforce static typing of declared variables within the Yarn Program.
     /// </remarks>    
     public class InMemoryVariableStorage : VariableStorageBehaviour, IEnumerable<KeyValuePair<string, object>>
     {
@@ -57,55 +57,11 @@ namespace Yarn.Unity {
         private Dictionary<string, object> variables = new Dictionary<string, object>();
         private Dictionary<string, System.Type> variableTypes = new Dictionary<string, System.Type>(); // needed for serialization
 
-        /// <summary>
-        /// A default value to apply when the object wakes up, or when
-        /// ResetToDefaults is called.
-        /// </summary>
-        [System.Serializable]
-        public class DefaultVariable
-        {
-            /// <summary>
-            /// The name of the variable.
-            /// </summary>
-            /// <remarks>
-            /// Do not include the `$` prefix in front of the variable
-            /// name. It will be added for you.
-            /// </remarks>
-            [Tooltip("don't include the $ prefix")] public string name;
-
-            /// <summary>
-            /// The value of the variable, as a string.
-            /// </summary>
-            /// <remarks>
-            /// This string will be converted to the appropriate type,
-            /// depending on the value of <see cref="type"/>.
-            /// </remarks>
-            public string value;
-
-            /// <summary>
-            /// The type of the variable.
-            /// </summary>
-            public Yarn.Type type;
-        }
-
-        /// <summary>
-        /// The list of default variables that should be present in the
-        /// InMemoryVariableStorage when the scene loads.
-        /// </summary>
-        [Tooltip("use DefaultVariables to override the default values of Yarn variables")] public DefaultVariable[] defaultVariables;
-        public bool setDefaultVariablesOnStart = true;
-
         [Header("Optional debugging tools")]
         
-        /// A UI.Text that can show the current list of all variables. Optional.
+        /// A UI.Text that can show the current list of all variables in-game. Optional.
         [SerializeField] 
         internal UnityEngine.UI.Text debugTextView = null;
-
-        internal void Start () {
-            if ( setDefaultVariablesOnStart ) {
-                SetDefaultVariables();
-            }
-        }
 
         /// If we have a debug view, show the list of all variables in it
         internal void Update ()
@@ -124,12 +80,6 @@ namespace Yarn.Unity {
 
 
         #region Setters
-
-        public void SetDefaultVariables () {
-            foreach ( var defaultVar in defaultVariables ) {
-                SetVariable( defaultVar.name, defaultVar.type, defaultVar.value );
-            }
-        }
 
         void SetVariable(string name, Yarn.Type type, string value) {
             switch (type)
@@ -219,13 +169,6 @@ namespace Yarn.Unity {
         {
             variables.Clear();
             variableTypes.Clear();
-        }
-
-        public void ResetToDefaults ()
-        {
-            variables.Clear ();
-            variableTypes.Clear();
-            SetDefaultVariables();
         }
 
         #endregion
