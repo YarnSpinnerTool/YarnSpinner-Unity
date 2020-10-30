@@ -1,0 +1,14 @@
+﻿title: Start
+tags:
+---
+<<declare $stringVar = "hello">>
+<<declare $boolVar = false>>
+<<declare $floatVar = 420.1>>
+Variables have been declared.#line:03d22b8
+
+<<set $stringVar = "hola">>
+<<set $boolVar = true>>
+<<set $floatVar = 1.420>>
+Variables have now been set.#line:0de8b02
+
+===

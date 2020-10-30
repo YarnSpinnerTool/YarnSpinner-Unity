@@ -86,6 +86,9 @@ namespace Yarn.Unity {
 
         #region Setters
 
+        /// <summary>
+        /// Used internally by serialization functions to wrap around the SetValue() methods.
+        /// </summary>
         void SetVariable(string name, Yarn.Type type, string value) {
             switch (type)
             {
@@ -141,7 +144,7 @@ namespace Yarn.Unity {
         /// Retrieves a <see cref="Value"/> by name.
         /// </summary>
         /// <param name="variableName">The name of the variable to retrieve
-        /// the value of.</param>
+        /// the value of. Don't forget to include the "$" at the beginning!</param>
         /// <returns>The <see cref="Value"/>. If a variable by the name of
         /// <paramref name="variableName"/> is not present, returns a value
         /// representing `null`.</returns>
@@ -206,7 +209,7 @@ namespace Yarn.Unity {
         /// Import a JSON string into variable storage, like when loading save game data.
         /// </summary>
         public void DeserializeAllVariablesFromJSON(string jsonData) {
-            Debug.Log(jsonData);
+            // Debug.Log(jsonData);
             var serializedVariables = JsonUtility.FromJson<StringDictionary>( jsonData );
             foreach ( var variable in serializedVariables ) {
                 var serializedKey = variable.Key.Split(SEPARATOR, 2, System.StringSplitOptions.None);
@@ -217,17 +220,25 @@ namespace Yarn.Unity {
             }
         }
 
-        const string PLAYER_PREFS_KEY = "YarnVariableStorage";
+        const string DEFAULT_PLAYER_PREFS_KEY = "DefaultYarnVariableStorage";
 
         /// <summary>
-        /// Serialize all variables to JSON, then save data to Unity's built-in PlayerPrefs with playerPrefsKey.
+        /// Serialize all variables to JSON, then save data to Unity's built-in PlayerPrefs with default playerPrefsKey.
         /// </summary>
         public void SaveToPlayerPrefs() {
-            var saveData = SerializeAllVariablesToJSON();
-            PlayerPrefs.SetString(PLAYER_PREFS_KEY, saveData);
-            PlayerPrefs.Save();
-            Debug.Log("Variables saved to PlayerPrefs.");
+            SaveToPlayerPrefs( DEFAULT_PLAYER_PREFS_KEY );
         }
+
+        /// <summary>
+        /// Serialize all variables to JSON, then save data to Unity's built-in PlayerPrefs under playerPrefsKey parameter.
+        /// </summary>
+        public void SaveToPlayerPrefs(string playerPrefsKey) {
+            var saveData = SerializeAllVariablesToJSON();
+            PlayerPrefs.SetString(playerPrefsKey, saveData);
+            PlayerPrefs.Save();
+            Debug.Log($"Variables saved to PlayerPrefs with key {playerPrefsKey}");
+        }
+
 
         /// <summary>
         /// Serialize all variables to JSON, then write the data to a file.
@@ -235,18 +246,26 @@ namespace Yarn.Unity {
         public void SaveToFile(string filepath) {
             var saveData = SerializeAllVariablesToJSON();
             System.IO.File.WriteAllText(filepath, saveData, System.Text.Encoding.UTF8);
+            Debug.Log($"Variables saved to file {filepath}");
         }
 
         /// <summary>
-        /// Load JSON data from Unity's built-in PlayerPrefs with playerPrefsKey, and deserialize as variables.
+        /// Load JSON data from Unity's built-in PlayerPrefs with default playerPrefsKey, and deserialize as variables.
         /// </summary>
         public void LoadFromPlayerPrefs() {
-            if ( PlayerPrefs.HasKey(PLAYER_PREFS_KEY)) {
-                var saveData = PlayerPrefs.GetString(PLAYER_PREFS_KEY);
+            LoadFromPlayerPrefs( DEFAULT_PLAYER_PREFS_KEY );
+        }
+
+        /// <summary>
+        /// Load JSON data from Unity's built-in PlayerPrefs with defined playerPrefsKey parameter, and deserialize as variables.
+        /// </summary>
+        public void LoadFromPlayerPrefs(string playerPrefsKey) {
+            if ( PlayerPrefs.HasKey(playerPrefsKey)) {
+                var saveData = PlayerPrefs.GetString(playerPrefsKey);
                 DeserializeAllVariablesFromJSON(saveData);
-                Debug.Log("Variables loaded from PlayerPrefs.");
+                Debug.Log($"Variables loaded from PlayerPrefs under key {playerPrefsKey}");
             } else {
-                Debug.LogWarning($"No PlayerPrefs key {PLAYER_PREFS_KEY} found, so no variables loaded.");
+                Debug.LogWarning($"No PlayerPrefs key {playerPrefsKey} found, so no variables loaded.");
             }
         }
 
@@ -256,6 +275,7 @@ namespace Yarn.Unity {
         public void LoadFromFile(string filepath) {
             var saveData = System.IO.File.ReadAllText(filepath, System.Text.Encoding.UTF8);
             DeserializeAllVariablesFromJSON(saveData);
+            Debug.Log($"Variables loaded from file {filepath}");
         }
 
         public static readonly Dictionary<System.Type, Yarn.Type> TypeMappings = new Dictionary<System.Type, Yarn.Type>
