@@ -295,7 +295,7 @@ namespace Yarn.Unity
                     (serializedObject.targetObject as YarnProgramImporter).SaveAndReimport();
                 }
             }
-            EditorGUILayout.PropertyField(sourceScriptsProperty);
+            EditorGUILayout.PropertyField(sourceScriptsProperty, true);
 
 
 
