@@ -67,7 +67,13 @@ namespace Yarn.Unity
             ctx.SetMainObject(program);
 
             foreach (var script in sourceScripts) {
-                ctx.DependsOnSourceAsset(AssetDatabase.GetAssetPath(script));
+                string path = AssetDatabase.GetAssetPath(script);
+                if (string.IsNullOrEmpty(path)) {
+                    // This is, for some reason, not a valid script we can
+                    // use. Don't add a dependency on it.
+                    continue;
+                }
+                ctx.DependsOnSourceAsset(path);
             }
 
             // Parse declarations 
@@ -102,7 +108,7 @@ namespace Yarn.Unity
             // pulled any information out of it that we need to. Now to
             // compile the scripts associated with this program.
 
-            var scriptImporters = sourceScripts.Select(s => AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(s)) as YarnImporter );
+            var scriptImporters = sourceScripts.Where(s => s != null).Select(s => AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(s)) as YarnImporter );
 
             // First step: check to see if there's any parse errors in the
             // files.
