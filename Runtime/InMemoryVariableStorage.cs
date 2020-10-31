@@ -51,6 +51,7 @@ namespace Yarn.Unity {
     /// Note that as of v2.0, this class no longer uses Yarn.Value, to
     /// enforce static typing of declared variables within the Yarn Program.
     /// </remarks>    
+    [HelpURL("https://yarnspinner.dev/docs/unity/components/variable-storage/")]
     public class InMemoryVariableStorage : VariableStorageBehaviour, IEnumerable<KeyValuePair<string, object>>
     {
         /// Where we're actually keeping our variables

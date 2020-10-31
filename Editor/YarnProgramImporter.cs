@@ -10,7 +10,7 @@ using System.Collections;
 
 namespace Yarn.Unity
 {
-    [ScriptedImporter(1, new[] { "yarnprogram" }, 1)]
+    [ScriptedImporter(1, new[] { "yarnprogram" }, 1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
     public class YarnProgramImporter : ScriptedImporter
     {
 

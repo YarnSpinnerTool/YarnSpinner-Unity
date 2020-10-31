@@ -40,7 +40,7 @@ namespace Yarn.Unity
     /// "/docs/unity/components/dialogue-runner.md"|}}) component acts as
     /// the interface between your game and Yarn Spinner.
     /// </summary>
-    [AddComponentMenu("Scripts/Yarn Spinner/Dialogue Runner")]
+    [AddComponentMenu("Scripts/Yarn Spinner/Dialogue Runner"), HelpURL("https://yarnspinner.dev/docs/unity/components/dialogue-runner/")]
     public class DialogueRunner : MonoBehaviour
     {
         /// <summary>

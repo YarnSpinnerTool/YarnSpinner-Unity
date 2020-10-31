@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Yarn.Unity
 {
 
-    [CreateAssetMenu(fileName = "LocalizationDatabase", menuName = "Yarn Spinner/Localization Database", order = 0)]
+    [CreateAssetMenu(fileName = "LocalizationDatabase", menuName = "Yarn Spinner/Localization Database", order = 0), HelpURL("https://yarnspinner.dev/docs/unity/localisation/")]
     public class LocalizationDatabase : ScriptableObject
     {
         [SerializeField] List<Localization> _localizations = new List<Localization>();
