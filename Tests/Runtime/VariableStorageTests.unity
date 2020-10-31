@@ -293,7 +293,7 @@ PrefabInstance:
         type: 3}
       propertyPath: yarnProgram
       value: 
-      objectReference: {fileID: 2480198943629176163, guid: 43f86f87a9e6d454799e66e58df0d6d3,
+      objectReference: {fileID: 11400000, guid: 43f86f87a9e6d454799e66e58df0d6d3,
         type: 3}
     - target: {fileID: 5935829475398715334, guid: 4ec3df5875e7347beb6176b545b8fb39,
         type: 3}
