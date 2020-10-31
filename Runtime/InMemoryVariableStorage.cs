@@ -32,93 +32,119 @@ using Yarn.Unity;
 namespace Yarn.Unity {
 
     /// <summary>
-    /// An simple implementation of DialogueUnityVariableStorage, which
-    /// stores everything in memory.
+    /// A simple implementation of VariableStorageBehaviour.
     /// </summary>
     /// <remarks>
-    /// This class does not perform any saving or loading on its own, but
-    /// you can enumerate over the variables by using a `foreach` loop:
+    /// As of v2.0, this class has basic serialization and save/load example functions.
+    /// You can also enumerate over the variables by using a `foreach` loop:
     /// 
     /// <![CDATA[
     /// ```csharp    
     /// // 'storage' is an InMemoryVariableStorage    
     /// foreach (var variable in storage) {
     ///         string name = variable.Key;
-    ///         Yarn.Value value = variable.Value;
+    ///         System.Object value = variable.Value;
     /// }   
     /// ```
     /// ]]>
     /// 
+    /// Note that as of v2.0, this class no longer uses Yarn.Value, to
+    /// enforce static typing of declared variables within the Yarn Program.
     /// </remarks>    
     public class InMemoryVariableStorage : VariableStorageBehaviour, IEnumerable<KeyValuePair<string, object>>
     {
-
-        /// Where we actually keeping our variables
-        private Dictionary<string, object> variables = new Dictionary<string, object> ();
-
-        /// <summary>
-        /// A default value to apply when the object wakes up, or when
-        /// ResetToDefaults is called.
-        /// </summary>
-        [System.Serializable]
-        public class DefaultVariable
-        {
-            /// <summary>
-            /// The name of the variable.
-            /// </summary>
-            /// <remarks>
-            /// Do not include the `$` prefix in front of the variable
-            /// name. It will be added for you.
-            /// </remarks>
-            public string name;
-
-            /// <summary>
-            /// The value of the variable, as a string.
-            /// </summary>
-            /// <remarks>
-            /// This string will be converted to the appropriate type,
-            /// depending on the value of <see cref="type"/>.
-            /// </remarks>
-            public string value;
-
-            /// <summary>
-            /// The type of the variable.
-            /// </summary>
-            public Yarn.Type type;
-        }
-
-        /// <summary>
-        /// The list of default variables that should be present in the
-        /// InMemoryVariableStorage when the scene loads.
-        /// </summary>
-        public DefaultVariable[] defaultVariables;
+        /// Where we're actually keeping our variables
+        private Dictionary<string, object> variables = new Dictionary<string, object>();
+        private Dictionary<string, System.Type> variableTypes = new Dictionary<string, System.Type>(); // needed for serialization
 
         [Header("Optional debugging tools")]
-        
-        /// A UI.Text that can show the current list of all variables. Optional.
-        [SerializeField] 
+        [HideInInspector] public bool showDebug;
+        /// A UI.Text that can show the current list of all variables in-game. Optional.
+        [SerializeField, Tooltip("(optional) output list of variables and values to Text UI in-game")] 
         internal UnityEngine.UI.Text debugTextView = null;
+
+        /// If we have a debug view, show the list of all variables in it
+        internal void Update ()
+        {
+            if (debugTextView != null) {
+                debugTextView.text = GetDebugList();
+                debugTextView.SetAllDirty();
+            }
+        }
+
+        public string GetDebugList() {
+            var stringBuilder = new System.Text.StringBuilder ();
+            foreach (KeyValuePair<string,object> item in variables) {
+                stringBuilder.AppendLine (string.Format ("{0} = {1} ({2})",
+                                                        item.Key,
+                                                        item.Value.ToString(),
+                                                        variableTypes[item.Key].ToString().Substring("System.".Length) )); 
+            }
+            return stringBuilder.ToString();
+        }
+
+
+        #region Setters
+
+        /// <summary>
+        /// Used internally by serialization functions to wrap around the SetValue() methods.
+        /// </summary>
+        void SetVariable(string name, Yarn.Type type, string value) {
+            switch (type)
+            {
+                case Type.Bool:
+                    bool newBool;
+                    if (bool.TryParse(value, out newBool))
+                    {
+                        SetValue(name, newBool);
+                    }
+                    else
+                    {
+                        throw new System.InvalidCastException($"Couldn't initialize default variable {name} with value {value} as Bool");
+                    }
+                    break;
+                case Type.Number:
+                    float newNumber;
+                    if (float.TryParse(value, out newNumber))
+                    { // TODO: this won't work for different cultures (e.g. French write "0.53" as "0,53")
+                        SetValue(name, newNumber);
+                    }
+                    else
+                    {
+                        throw new System.InvalidCastException($"Couldn't initialize default variable {name} with value {value} as Number (Float)");
+                    }
+                    break;
+                case Type.String:
+                case Type.Undefined:
+                default:
+                    SetValue(name, value); // no special type conversion required
+                    break;
+            }
+        }
 
         public override void SetValue(string variableName, string stringValue)
         {
             variables[variableName] = stringValue;
+            variableTypes[variableName] = typeof(string);
         }
 
         public override void SetValue(string variableName, float floatValue)
         {
             variables[variableName] = floatValue;
+            variableTypes[variableName] = typeof(float);
         }
 
         public override void SetValue(string variableName, bool boolValue)
         {
             variables[variableName] = boolValue;
+            variableTypes[variableName] = typeof(bool);
         }
 
         /// <summary>
         /// Retrieves a <see cref="Value"/> by name.
         /// </summary>
         /// <param name="variableName">The name of the variable to retrieve
-        /// the value of.</param>
+        /// the value of. Don't forget to include the "$" at the beginning!</param>
         /// <returns>The <see cref="Value"/>. If a variable by the name of
         /// <paramref name="variableName"/> is not present, returns a value
         /// representing `null`.</returns>
@@ -149,23 +175,127 @@ namespace Yarn.Unity {
         /// </summary>
         public override void Clear ()
         {
-            variables.Clear ();
+            variables.Clear();
+            variableTypes.Clear();
         }
 
-        /// If we have a debug view, show the list of all variables in it
-        internal void Update ()
-        {
-            if (debugTextView != null) {
-                var stringBuilder = new System.Text.StringBuilder ();
-                foreach (KeyValuePair<string,object> item in variables) {
-                    stringBuilder.AppendLine (string.Format ("{0} = {1}",
-                                                            item.Key,
-                                                            item.Value.ToString()));
-                }
-                debugTextView.text = stringBuilder.ToString ();
-                debugTextView.SetAllDirty();
+        #endregion
+
+
+        #region Save/Load
+
+        [System.Serializable] class StringDictionary : SerializedDictionary<string, string> {} // serializable dictionary workaround
+
+        static string[] SEPARATOR = new string[] { "/" }; // used for serialization
+
+        /// <summary>
+        /// Export variable storage to a JSON string, like when writing save game data.
+        /// </summary>
+        public string SerializeAllVariablesToJSON(bool prettyPrint=false) {
+            // "objects" aren't serializable by JsonUtility... 
+            var serializableVariables = new StringDictionary();
+            foreach ( var variable in variables) {
+                var jsonType = variableTypes[variable.Key];
+                var jsonKey = $"{jsonType}{SEPARATOR[0]}{variable.Key}"; // ... so we have to encode the System.Object type into the JSON key
+                var jsonValue = System.Convert.ChangeType(variable.Value, jsonType); 
+                serializableVariables.Add( jsonKey, jsonValue.ToString() );
+            }
+            var saveData = JsonUtility.ToJson(serializableVariables, prettyPrint);
+            // Debug.Log(saveData);
+            return saveData;
+        }
+
+        /// <summary>
+        /// Import a JSON string into variable storage, like when loading save game data.
+        /// </summary>
+        public void DeserializeAllVariablesFromJSON(string jsonData) {
+            // Debug.Log(jsonData);
+            var serializedVariables = JsonUtility.FromJson<StringDictionary>( jsonData );
+            foreach ( var variable in serializedVariables ) {
+                var serializedKey = variable.Key.Split(SEPARATOR, 2, System.StringSplitOptions.None);
+                var jsonType = System.Type.GetType(serializedKey[0]);
+                var jsonKey = serializedKey[1];
+                var jsonValue = variable.Value;
+                SetVariable( jsonKey, TypeMappings[jsonType], jsonValue );
             }
         }
+
+        const string DEFAULT_PLAYER_PREFS_KEY = "DefaultYarnVariableStorage";
+
+        /// <summary>
+        /// Serialize all variables to JSON, then save data to Unity's built-in PlayerPrefs with default playerPrefsKey.
+        /// </summary>
+        public void SaveToPlayerPrefs() {
+            SaveToPlayerPrefs( DEFAULT_PLAYER_PREFS_KEY );
+        }
+
+        /// <summary>
+        /// Serialize all variables to JSON, then save data to Unity's built-in PlayerPrefs under playerPrefsKey parameter.
+        /// </summary>
+        public void SaveToPlayerPrefs(string playerPrefsKey) {
+            var saveData = SerializeAllVariablesToJSON();
+            PlayerPrefs.SetString(playerPrefsKey, saveData);
+            PlayerPrefs.Save();
+            Debug.Log($"Variables saved to PlayerPrefs with key {playerPrefsKey}");
+        }
+
+
+        /// <summary>
+        /// Serialize all variables to JSON, then write the data to a file.
+        /// </summary>
+        public void SaveToFile(string filepath) {
+            var saveData = SerializeAllVariablesToJSON();
+            System.IO.File.WriteAllText(filepath, saveData, System.Text.Encoding.UTF8);
+            Debug.Log($"Variables saved to file {filepath}");
+        }
+
+        /// <summary>
+        /// Load JSON data from Unity's built-in PlayerPrefs with default playerPrefsKey, and deserialize as variables.
+        /// </summary>
+        public void LoadFromPlayerPrefs() {
+            LoadFromPlayerPrefs( DEFAULT_PLAYER_PREFS_KEY );
+        }
+
+        /// <summary>
+        /// Load JSON data from Unity's built-in PlayerPrefs with defined playerPrefsKey parameter, and deserialize as variables.
+        /// </summary>
+        public void LoadFromPlayerPrefs(string playerPrefsKey) {
+            if ( PlayerPrefs.HasKey(playerPrefsKey)) {
+                var saveData = PlayerPrefs.GetString(playerPrefsKey);
+                DeserializeAllVariablesFromJSON(saveData);
+                Debug.Log($"Variables loaded from PlayerPrefs under key {playerPrefsKey}");
+            } else {
+                Debug.LogWarning($"No PlayerPrefs key {playerPrefsKey} found, so no variables loaded.");
+            }
+        }
+
+        /// <summary>
+        /// Load JSON data from a file, then deserialize as variables.
+        /// </summary>
+        public void LoadFromFile(string filepath) {
+            var saveData = System.IO.File.ReadAllText(filepath, System.Text.Encoding.UTF8);
+            DeserializeAllVariablesFromJSON(saveData);
+            Debug.Log($"Variables loaded from file {filepath}");
+        }
+
+        public static readonly Dictionary<System.Type, Yarn.Type> TypeMappings = new Dictionary<System.Type, Yarn.Type>
+            {
+                { typeof(string), Yarn.Type.String },
+                { typeof(bool), Yarn.Type.Bool },
+                { typeof(int), Yarn.Type.Number },
+                { typeof(float), Yarn.Type.Number },
+                { typeof(double), Yarn.Type.Number },
+                { typeof(sbyte), Yarn.Type.Number },
+                { typeof(byte), Yarn.Type.Number },
+                { typeof(short), Yarn.Type.Number },
+                { typeof(ushort), Yarn.Type.Number },
+                { typeof(uint), Yarn.Type.Number },
+                { typeof(long), Yarn.Type.Number },
+                { typeof(ulong), Yarn.Type.Number },
+                { typeof(decimal), Yarn.Type.Number },
+            };
+        
+        #endregion
 
         /// <summary>
         /// Returns an <see cref="IEnumerator{T}"/> that iterates over all
