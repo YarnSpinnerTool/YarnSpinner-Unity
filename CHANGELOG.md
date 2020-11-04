@@ -6,9 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- InMemoryVariableStorage now shows the current state of variables in the Inspector. (@radiatoryang)
+- InMemoryVariableStorage now supports saving variables to file, and to PlayerPrefs. (@radiatoryang)
+
 ### Changed
 
 - Inline expressions (for example, `One plus one is {1+1}`) are now expanded.
+- Added Help URLs to various classes. (@radiatoryang)
+
+### Removed
+
+- InMemoryVariableStorage no longer manages 'default' variables (this concept has moved to the Yarn Program.) (@radiatoryang)
 
 ## [v2.0.0-beta1] 2020-10-19
 
