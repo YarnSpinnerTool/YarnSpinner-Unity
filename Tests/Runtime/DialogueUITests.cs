@@ -49,12 +49,12 @@ namespace Yarn.Unity.Tests
             Runner.StartDialogue();
             float startTime;
             startTime = Time.time;
-            while (Time.time - startTime < 10 && !string.Equals(TextCanvas.text, "Spieler: Kannst du mich hören?"))
+            while (Time.time - startTime < 10 && !string.Equals(TextCanvas.text, "Spieler: Kannst du mich hören? 2"))
             {
                 yield return null;
             }
 
-            Assert.AreEqual("Spieler: Kannst du mich hören?", TextCanvas.text);
+            Assert.AreEqual("Spieler: Kannst du mich hören? 2", TextCanvas.text);
 
             // Arrange for second line
             yield return null;
@@ -86,13 +86,13 @@ namespace Yarn.Unity.Tests
             Runner.StartDialogue();
             float startTime;
             startTime = Time.time;
-            while (Time.time - startTime < 10 && !string.Equals(TextCanvas.text, "Kannst du mich hören?"))
+            while (Time.time - startTime < 10 && !string.Equals(TextCanvas.text, "Kannst du mich hören? 2"))
             {
                 yield return null;
             }
 
             // Character name in this line ("Spieler: ") should be removed
-            Assert.That(string.Equals(TextCanvas.text, "Kannst du mich hören?"));
+            Assert.That(string.Equals(TextCanvas.text, "Kannst du mich hören? 2"));
         }
 
         [UnityTest]
@@ -101,7 +101,7 @@ namespace Yarn.Unity.Tests
 
             Runner.StartDialogue();
 
-            var expectedFinalText = "Spieler: Kannst du mich hören?";
+            var expectedFinalText = "Spieler: Kannst du mich hören? 2";
 
             // Wait a few frames - enough for there to be some text on
             // screen, but not all of it

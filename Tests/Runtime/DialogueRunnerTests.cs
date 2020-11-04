@@ -48,10 +48,10 @@ namespace Yarn.Unity.Tests
             runner.StartDialogue();
             yield return null;
 
-            Assert.That(string.Equals(dialogueUI.CurrentLine, "Spieler: Kannst du mich hören?"));
+            Assert.AreEqual("Spieler: Kannst du mich hören? 2", dialogueUI.CurrentLine);
             dialogueUI.MarkLineComplete();
 
-            Assert.That(string.Equals(dialogueUI.CurrentLine, "NPC: Klar und deutlich."));
+            Assert.AreEqual("NPC: Klar und deutlich.", dialogueUI.CurrentLine);
             dialogueUI.MarkLineComplete();
 
             Assert.AreEqual(2, dialogueUI.CurrentOptions.Count);
@@ -73,10 +73,10 @@ namespace Yarn.Unity.Tests
             runner.StartDialogue();
             yield return null;
 
-            Assert.That(string.Equals(dialogueUI.CurrentLine, "Spieler: Kannst du mich hören?"));
+            Assert.AreEqual("Spieler: Kannst du mich hören? 2", dialogueUI.CurrentLine);
             dialogueUI.MarkLineComplete();
 
-            Assert.That(string.Equals(dialogueUI.CurrentLine, "NPC: Klar und deutlich."));
+            Assert.AreEqual("NPC: Klar und deutlich.", dialogueUI.CurrentLine);
             dialogueUI.MarkLineComplete();
 
             Assert.AreEqual(2, dialogueUI.CurrentOptions.Count);

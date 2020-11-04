@@ -692,7 +692,8 @@ namespace Yarn.Unity
 
                     // Localize the line associated with the option
                     var localisedLine = lineProvider.GetLocalizedLine(options.Options[i].Line);
-                    localisedLine.Text = Dialogue.ParseMarkup(localisedLine.RawText);
+                    var text = Dialogue.ExpandSubstitutions(localisedLine.RawText, options.Options[i].Line.Substitutions);
+                    localisedLine.Text = Dialogue.ParseMarkup(text);
 
                     optionSet[i] = new DialogueOption {
                         TextID = options.Options[i].Line.ID,
@@ -752,8 +753,11 @@ namespace Yarn.Unity
                 // Get the localized line from our line provider
                 CurrentLine = lineProvider.GetLocalizedLine(line);
 
+                // Expand substitutions
+                var text = Dialogue.ExpandSubstitutions(CurrentLine.RawText, CurrentLine.Substitutions);
+
                 // Render the markup
-                CurrentLine.Text = Dialogue.ParseMarkup(CurrentLine.RawText);
+                CurrentLine.Text = Dialogue.ParseMarkup(text);
 
                 CurrentLine.Status = LineStatus.Running;
 

@@ -35,7 +35,7 @@ namespace Yarn.Unity.Tests
             // Store the localised text in our CurrentLine property and
             // signal that we're done "delivering" the line after the
             // correct amount of time
-            CurrentLine = dialogueLine.RawText;
+            CurrentLine = dialogueLine.Text.Text;
 
             isLineInterrupted = false;
 

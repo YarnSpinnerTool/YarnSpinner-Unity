@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- Inline expressions (for example, `One plus one is {1+1}`) are now expanded.
+
 ## [v2.0.0-beta1] 2020-10-19
 
 ### Added
