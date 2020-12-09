@@ -111,6 +111,9 @@ namespace Yarn.Unity {
         /// </summary>
         public override void ResetToDefaults ()
         {
+            if (defaultVariables == null)
+                defaultVariables = new DefaultVariable[0];
+            
             Clear ();
 
             // For each default variable that's been defined, parse the
