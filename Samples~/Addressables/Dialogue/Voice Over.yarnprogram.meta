@@ -1,14 +1,20 @@
 fileFormatVersion: 2
 guid: ddcfd1feee1fa432d8ca6b9cbf8ef935
 ScriptedImporter:
-  fileIDToRecycleName:
-    11400000: Program
-    2186277476908879412: ImportLogs
+  internalIDToNameTable:
+  - first:
+      114: 11400000
+    second: Program
+  - first:
+      41386430: 2186277476908879412
+    second: ImportLogs
   externalObjects: {}
+  serializedVersion: 2
   userData: 
   assetBundleName: 
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 053561912b1654d80a424bb0696a74ae, type: 3}
-  sourceScripts: []
+  sourceScripts:
+  - {fileID: 4900002, guid: 8145c244bd6668a44b6a1aed4910a096, type: 3}
   compileError: 
   serializedDeclarations: []

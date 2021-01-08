@@ -42,6 +42,11 @@
       "displayName": "Phone Chat",
       "description": "A text message style phone conversation template.",
       "path": "Samples~/PhoneChat"
+    },
+    {
+      "displayName": "Addressables",
+      "description": "How to use Addressables package to load in audio as a separate external assets via 'address'... requires the Addressables package.",
+      "path": "Samples~/Addressables"
     }
   ]
 }
