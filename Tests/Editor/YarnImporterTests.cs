@@ -182,8 +182,8 @@ position: 0,0
             // Simplify the results so that we can compare these string
             // table entries based only on specific fields
             System.Func<StringTableEntry, (string id, string text)> simplifier = e => (id: e.ID, text: e.Text);
-            var simpleResult = expectedStrings.Select(simplifier);
-            var simpleExpected = generatedStringsTable.Select(simplifier);
+            var simpleExpected = expectedStrings.Select(simplifier);
+            var simpleResult = generatedStringsTable.Select(simplifier);
 
             Assert.AreEqual(simpleExpected, simpleResult);
         }
