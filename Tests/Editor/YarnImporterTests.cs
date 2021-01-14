@@ -21,8 +21,10 @@ position: 0,0
 --- 
 Spieler: Kannst du mich hören? #line:0e3dc4b
 NPC: Klar und deutlich. #line:0967160
-[[Mir reicht es.| Exit]] #line:04e806e
-[[Nochmal!|Start]] #line:0901fb2
+-> Mir reicht es. #line:04e806e
+    <<jump Exit>>
+-> Nochmal! #line:0901fb2
+    <<jump Start>>
 ===
 title: Exit
 tags: 
@@ -42,8 +44,10 @@ colorID: 0
 position: 0,0
 --- 
 Spieler: Kannst du mich hören? This line was modified. #line:0e3dc4b
-[[Mir reicht es.| Exit]] #line:04e806e
-[[Nochmal!|Start]] #line:0901fb2
+-> Mir reicht es. #line:04e806e
+    <<jump Exit>>
+-> Nochmal! #line:0901fb2
+    <<jump Start>>
 This line was added. #line:a1b2c3
 ===
 title: Exit
