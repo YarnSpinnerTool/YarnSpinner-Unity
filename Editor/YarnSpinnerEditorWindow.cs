@@ -31,6 +31,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.Networking;
 using Yarn.Compiler.Upgrader;
+using System.Reflection;
 
 namespace Yarn.Unity
 {
@@ -75,7 +76,9 @@ namespace Yarn.Unity
             this.titleContent.text = "Yarn Spinner";
             this.titleContent.image = Icons.WindowIcon;
 
-            this.YarnSpinnerVersion = typeof(DialogueRunner).Assembly.GetName().Version.ToString();
+            this.YarnSpinnerCoreVersion = GetInformationalVersionForType(typeof(Dialogue));
+            this.YarnSpinnerCompilerVersion = GetInformationalVersionForType(typeof(Compiler.Compiler));
+            this.YarnSpinnerUnityVersion = GetInformationalVersionForType(typeof(DialogueRunner));
 
             if (supportersText == null)
             {
@@ -88,6 +91,20 @@ namespace Yarn.Unity
 
             // Also refresh the list right
             RefreshYarnProgramList();
+        }
+
+        private static string GetInformationalVersionForType(System.Type type)
+        {
+            var assembly = type.Assembly;
+
+            var informationalVersionAttributes = assembly.GetCustomAttributes(
+                typeof(AssemblyInformationalVersionAttribute),
+                false) as AssemblyInformationalVersionAttribute[];
+
+            var informationalVersionAttribute = informationalVersionAttributes.FirstOrDefault();
+
+            string version = informationalVersionAttribute?.InformationalVersion ?? "<unknown version>";
+            return version;
         }
 
         private void OnDisable()
@@ -145,7 +162,9 @@ namespace Yarn.Unity
 
         SelectedMode selectedMode = 0;
 
-        private string YarnSpinnerVersion;
+        private string YarnSpinnerCoreVersion;
+        private string YarnSpinnerCompilerVersion;
+        private string YarnSpinnerUnityVersion;
 
         void OnGUI()
         {
@@ -202,7 +221,10 @@ namespace Yarn.Unity
                     {
                         GUILayout.Label(new GUIContent(Icons.Logo), GUILayout.Width(logoSize), GUILayout.Height(logoSize));
                         GUILayout.Label("Yarn Spinner", titleLabel);
-                        GUILayout.Label(YarnSpinnerVersion, versionLabel);
+                        GUILayout.Label("Core: " + YarnSpinnerCoreVersion, versionLabel);
+                        GUILayout.Label("Compiler: " + YarnSpinnerCompilerVersion, versionLabel);
+                        GUILayout.Label("Unity: " + YarnSpinnerUnityVersion, versionLabel);
+
                         GUILayout.Space(10);
 
                         if (GUILayout.Button("Documentation"))
