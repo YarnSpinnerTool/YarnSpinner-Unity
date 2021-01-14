@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v2.0.0-beta2] 2021-01-14
 
 ### Added
 
@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Inline expressions (for example, `One plus one is {1+1}`) are now expanded.
 - Added Help URLs to various classes. (@radiatoryang)
+- The Upgrader window (Window -> Yarn Spinner -> Upgrade Scripts) now uses the updated
+  Yarn Spinner upgrade tools. See Yarn Spinner 2.0.0-beta2 release notes for more
+  information on the upgrader.
+- Fixed an issue where programs failed to import if a source script reference is invalid
+- Fixed an issue where the DialogueUI would show empty lines when showCharacterName is
+  false and the line has no character name
 
 ### Removed
 
