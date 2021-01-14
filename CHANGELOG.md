@@ -24,6 +24,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Removed
 
+- The `[[Destination]]` and `[[Option|Destination]]` syntax has been removed from the language.
+  - This syntax was inherited from the original Yarn language, which itself inherited it from Twine. 
+  - We removed it for four reasons: 
+    - it conflated jumps and options, which are very different operations, with too-similar syntax; 
+    - the Option-destination syntax for declaring options involved the management of non-obvious state (that is, if an option statement was inside an `if` branch that was never executed, it was not presented, and the runtime needed to keep track of that);
+    - it was not obvious that options accumulated and were only presented at the end of the node;
+    - finally, shortcut options provide a cleaner way to present the same behaviour.
+  - We have added a `<<jump Destination>>` command, which replaces the `[[Destination]]` jump syntax.
+  - No change to the bytecode is made here; these changes only affect the compiler.
+  - Instead of using ``[[Option|Destination]]`` syntax, use shortcut options instead. For example:
+
+```
+// Before
+Kim: You want a bagel?
+[[Yes, please!|GiveBagel]]
+[[No, thanks!|DontWantBagel]]
+
+// After
+Kim: You want a bagel?
+-> Yes, please!
+  <<jump GiveBagel>>
+-> No, thanks!
+  <<jump DontWantBagel>>
+```
+
 - InMemoryVariableStorage no longer manages 'default' variables (this concept has moved to the Yarn Program.) (@radiatoryang)
 
 ## [v2.0.0-beta1] 2020-10-19
