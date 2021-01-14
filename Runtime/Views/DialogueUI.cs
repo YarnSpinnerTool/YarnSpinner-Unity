@@ -283,7 +283,7 @@ namespace Yarn.Unity {
             finishCurrentLine = false;
 
             // The final text we'll be showing for this line.
-            string text = string.Empty;            
+            string text;
 
             // Are we hiding the character name?
             if (showCharacterName == false) {
@@ -295,6 +295,11 @@ namespace Yarn.Unity {
                 // resulting text
                 if (hasCharacterAttribute) {
                     text = dialogueLine.Text.DeleteRange(characterAttribute).Text;
+                } else {
+                    // This line doesn't have a [character] attribute, so
+                    // there's nothing to remove. We'll use the entire
+                    // text.
+                    text = dialogueLine.Text.Text;
                 }
             } else {
                 text = dialogueLine.Text.Text; 
