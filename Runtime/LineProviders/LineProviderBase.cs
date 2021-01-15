@@ -35,8 +35,14 @@ namespace Yarn.Unity
             }
         }
 
-        /// <summary>if defined, this Line Provider will ignore the current setting in Preferences.TextLanguage
-        /// and use the text language code override instead (e.g. "en" is the code for "English")</summary>
+        /// <summary>Specifies the language code to use for text content
+        /// for this <see cref="LineProviderBehaviour"/>, overriding
+        /// project settings.</summary>
+        /// <remarks>
+        /// If defined, this Line Provider will ignore the current setting
+        /// in Preferences.TextLanguage and use the text language code
+        /// override instead (e.g. "en" is the code for "English")
+        /// </remarks>
         [Tooltip("(optional) if defined, this Line Provider will use this language code instead of Preferences.TextLanguage... example: 'en' is the code for English")]
         public string textLanguageCodeOverride;
         public abstract LocalizedLine GetLocalizedLine(Yarn.Line line);

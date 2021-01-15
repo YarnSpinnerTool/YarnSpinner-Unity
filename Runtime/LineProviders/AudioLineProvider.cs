@@ -17,8 +17,14 @@ namespace Yarn.Unity
             }
         }
 
-        /// <summary>if defined, this Line Provider will ignore the current setting in Preferences.AudioLanguage
-        /// and use the audio language code override instead (e.g. "en" is the code for "English")</summary>
+        /// <summary>Specifies the language code to use for audio content
+        /// for this <see cref="AudioLineProvider"/>, overriding project
+        /// settings.</summary>
+        /// <remarks>
+        /// If defined, this Line Provider will ignore the current setting
+        /// in Preferences.AudioLanguage and use the audio language code
+        /// override instead (e.g. "en" is the code for "English")
+        /// </remarks>
         [Tooltip("(optional) if defined, this Line Provider will use this language code instead of Preferences.AudioLanguage... example: 'en' is the code for English")]
         public string audioLanguageCodeOverride;
 
