@@ -9,7 +9,26 @@ namespace Yarn.Unity
 {
     public class AudioLineProvider : LineProviderBehaviour
     {
-        private static string CurrentAudioLanguageCode => Preferences.AudioLanguage;
+        private string CurrentAudioLanguageCode 
+        { 
+            get 
+            { 
+                return string.IsNullOrWhiteSpace(audioLanguageCodeOverride) ? Preferences.AudioLanguage : audioLanguageCodeOverride;
+            }
+        }
+
+        /// <summary>if defined, this Line Provider will ignore the current setting in Preferences.AudioLanguage
+        /// and use the audio language code override instead (e.g. "en" is the code for "English")</summary>
+        [Tooltip("(optional) if defined, this Line Provider will use this language code instead of Preferences.AudioLanguage... example: 'en' is the code for English")]
+        public string audioLanguageCodeOverride;
+
+        public override void Start () {
+            base.Start();
+
+            if ( !string.IsNullOrWhiteSpace(audioLanguageCodeOverride) ) {
+                Debug.LogWarning($"LineProvider is ignoring global Preferences.AudioLanguage and using audioLanguageCodeOverride: {audioLanguageCodeOverride}");
+            }
+        }
 
         public override LocalizedLine GetLocalizedLine(Line line)
         {
@@ -47,6 +66,13 @@ namespace Yarn.Unity
         }
 
         public override bool LinesAvailable => true;
+    }
+
+    public class AudioLocalizedLine : LocalizedLine {
+        /// <summary>
+        /// DialogueLine's voice over clip
+        /// </summary>
+        public AudioClip AudioClip;
     }
 
 }

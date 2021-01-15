@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity;
 using UnityEngine.UI;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace Yarn.Unity.Example
 {
@@ -203,7 +206,11 @@ namespace Yarn.Unity.Example
         {
             // If the user presses the spacebar, signal that we want to
             // interrupt the line.
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current.spaceKey.wasPressedThisFrame)
+#else
             if (Input.GetKeyDown(KeyCode.Space))
+#endif
             {
                 MarkLineComplete();
             }

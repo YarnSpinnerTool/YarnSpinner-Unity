@@ -1,0 +1,27 @@
+fileFormatVersion: 2
+guid: 8145c244bd6668a44b6a1aed4910a096
+ScriptedImporter:
+  fileIDToRecycleName:
+    4900000: Strings
+    4900002: Program
+    2186277476908879412: ImportLogs
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 94073015eacc34c1d8fc6786e43d60ca, type: 3}
+  baseLanguageID: de
+  stringIDs:
+  - line:0e3dc4b
+  - line:0967160
+  - line:04e806e
+  - line:0901fb2
+  AnyImplicitStringIDs: 0
+  isSuccesfullyParsed: 1
+  parseErrorMessage: 
+  baseLanguage: {instanceID: 0}
+  localizations:
+  - languageName: en
+    text: {fileID: 4900000, guid: b5c9c0c15d0507b4b8b2f22fe9537a80, type: 3}
+  localizationDatabase: {fileID: 11400000, guid: 5685610a778bf4596b1426586e3f506c,
+    type: 2}

@@ -27,10 +27,27 @@ namespace Yarn.Unity
         /// </summary>
         public LocalizationDatabase localizationDatabase;
         
-        public string CurrentTextLanguageCode => Preferences.TextLanguage;
+        public string CurrentTextLanguageCode 
+        { 
+            get 
+            { 
+                return string.IsNullOrWhiteSpace(textLanguageCodeOverride) ? Preferences.TextLanguage : textLanguageCodeOverride;
+            }
+        }
+
+        /// <summary>if defined, this Line Provider will ignore the current setting in Preferences.TextLanguage
+        /// and use the text language code override instead (e.g. "en" is the code for "English")</summary>
+        [Tooltip("(optional) if defined, this Line Provider will use this language code instead of Preferences.TextLanguage... example: 'en' is the code for English")]
+        public string textLanguageCodeOverride;
         public abstract LocalizedLine GetLocalizedLine(Yarn.Line line);
         public abstract void PrepareForLines(IEnumerable<string> lineIDs);
         public abstract bool LinesAvailable {get;}
+
+        public virtual void Start () {
+            if ( !string.IsNullOrWhiteSpace(textLanguageCodeOverride) ) {
+                Debug.LogWarning($"LineProvider is ignoring global Preferences.TextLanguage and using textLanguageCodeOverride: {textLanguageCodeOverride}");
+            }
+        }
     }
 
     /// <summary>
@@ -90,10 +107,4 @@ namespace Yarn.Unity
         }
     }
 
-    public class AudioLocalizedLine : LocalizedLine {
-        /// <summary>
-        /// DialogueLine's voice over clip
-        /// </summary>
-        public AudioClip AudioClip;
-    }
 }

@@ -28,6 +28,9 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace Yarn.Unity.Example {
     public class PlayerCharacter : MonoBehaviour {
@@ -64,7 +67,14 @@ namespace Yarn.Unity.Example {
 
             // Move the player, clamping them to within the boundaries of
             // the level.
-            var movement = Input.GetAxis("Horizontal");
+#if ENABLE_INPUT_SYSTEM
+                var movement = 0f;
+                movement += Keyboard.current.rightArrowKey.isPressed ? 1f : 0f;
+                movement += Keyboard.current.leftArrowKey.isPressed ? -1f : 0f;
+#else
+                var movement = Input.GetAxis("Horizontal");
+#endif
+
             movement += movementFromButtons;
             movement *= (moveSpeed * Time.deltaTime);
 
@@ -75,13 +85,18 @@ namespace Yarn.Unity.Example {
             transform.position = newPosition;
 
             // Detect if we want to start a conversation
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current.spaceKey.wasPressedThisFrame) {
+                CheckForNearbyNPC ();
+            }
+#else
             if (Input.GetKeyDown(KeyCode.Space)) {
                 CheckForNearbyNPC ();
             }
-
             if (Input.GetKeyDown(KeyCode.Escape)) {
                 SceneManager.LoadScene("MainMenu");
             }
+#endif
         }
 
         /// Find all DialogueParticipants
