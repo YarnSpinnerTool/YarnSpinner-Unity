@@ -1489,14 +1489,17 @@ namespace Yarn.Unity
         /// The ID of this dialogue option
         /// </summary>
         public int DialogueOptionID;
+        
         /// <summary>
         /// The ID of the dialogue option's text
         /// </summary>
         public string TextID;
+
         /// <summary>
         /// The line for this dialogue option
         /// </summary>
         public LocalizedLine Line;
+        
         /// <summary>
         /// Indicates whether this value should be presented as available
         /// or not.
