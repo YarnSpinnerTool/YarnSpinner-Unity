@@ -92,6 +92,13 @@ namespace Yarn.Unity {
         public bool showCharacterName = true;
 
         /// <summary>
+        /// Indicates whether options whose line conditions have evaluated
+        /// to false should be shown (but be unselectable). If this value
+        /// is false, these options are not shown at all.
+        /// </summary>
+        public bool showUnavailableOptions = false; 
+
+        /// <summary>
         /// When true, the Runner has signaled to finish the current line
         /// asap.
         /// </summary>
@@ -391,6 +398,25 @@ namespace Yarn.Unity {
             currentOptionSelectionHandler = selectOption;
 
             foreach (var dialogueOption in dialogueOptions) {
+
+                bool allowOptionSelection = true;
+
+                if (dialogueOption.IsAvailable == false)
+                {
+                    if (showUnavailableOptions)
+                    {
+                        // Flag that we want to make this button not
+                        // selectable
+                        allowOptionSelection = false;
+                    }
+                    else
+                    {
+                        // Completely ignore this option - don't show it at
+                        // all
+                        continue;
+                    }
+                }
+
                 optionButtons [i].gameObject.SetActive (true);
 
                 // When the button is selected, tell the dialogue about it
@@ -413,6 +439,9 @@ namespace Yarn.Unity {
                 if (textMeshProText != null) {
                     textMeshProText.text = optionText;
                 }
+
+                // Make this button enabled if it's an available option
+                optionButtons[i].interactable = allowOptionSelection;
 
                 i++;
             }

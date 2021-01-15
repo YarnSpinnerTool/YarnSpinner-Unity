@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Added the ability for TextLineProvider and AudioLineProvider to override the project language settings.
+
+- Made options that have a line condition able to be presented to the player, but made unavailable.
+- This change was made in order to allow games to conditionally present, but disallow, options that the player can't choose. For example, consider the following script:
+
+```
+TD-110: Let me see your identification.
+-> Of course... um totally not General Kenobi and the son of Darth Vader.
+    Luke: Wait, what?!
+    TD-110: Promotion Time!
+-> You don't need to see his identification. <<if $learnt_mind_trick is true>>
+    TD-110: We don't need to see his identification.
+```
+
+- If the variable `$learnt_mind_trick` is false, a game may want to show the option but not allow the player to select it (i.e., show that this option could have been chosen if they'd learned how to do a mind trick.)
+- In previous versions of Yarn Spinner, if a line condition failed, the entire option was not delivered to the game. With this change, all options are delivered, and the `OptionSet.Option.IsAvailable` variable contains `false` if the condition was not met, and `true` if it was (or was not present.)
+- The `DialogueUI` component now has a "showUnavailableOptions" option that controls the display behaviour of unavailable options. If it's true, then unavailable options are presented, but not selectable; if it's false, then unavailable options are not presented at all (i.e. same as Yarn Spinner 1.0.)
+
+### Changed
+
+### Removed
+
 ## [v2.0.0-beta2] 2021-01-14
 
 ### Added
