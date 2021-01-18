@@ -207,8 +207,19 @@ public class LocalizationEditor : Editor {
     {
         System.Reflection.Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;
         System.Type audioUtilClass = unityEditorAssembly.GetType("UnityEditor.AudioUtil");
+
+        // The name of the method we want to invoke changed in 2020.2, so
+        // we'll do a little version testing here
+        string methodName;
+
+#if UNITY_2020_2_OR_NEWER
+        methodName = "PlayPreviewClip";
+#else
+        methodName = "PlayClip";
+#endif
+
         System.Reflection.MethodInfo method = audioUtilClass.GetMethod(
-            "PlayClip",
+            methodName,
             System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public,
             null,
             new System.Type[] { typeof(AudioClip), typeof(int), typeof(bool) },
@@ -224,8 +235,19 @@ public class LocalizationEditor : Editor {
     {
         System.Reflection.Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;
         System.Type audioUtilClass = unityEditorAssembly.GetType("UnityEditor.AudioUtil");
+
+        // The name of the method we want to invoke changed in 2020.2, so
+        // we'll do a little version testing here
+        string methodName;
+
+#if UNITY_2020_2_OR_NEWER
+        methodName = "StopAllPreviewClips";
+#else
+        methodName = "StopAllClips";
+#endif
+
         System.Reflection.MethodInfo method = audioUtilClass.GetMethod(
-            "StopAllClips",
+            methodName,
             System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public,
             null,
             new System.Type[] { },
@@ -241,6 +263,19 @@ public class LocalizationEditor : Editor {
     {
         System.Reflection.Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;
         System.Type audioUtilClass = unityEditorAssembly.GetType("UnityEditor.AudioUtil");
+
+        // The name of the method we want to invoke AND its parameters
+        // changed in 2020.2, so we'll do a little version testing here
+#if UNITY_2020_2_OR_NEWER
+        System.Reflection.MethodInfo method = audioUtilClass.GetMethod(
+            "IsPreviewClipPlaying",
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public
+        );
+        return (bool)method.Invoke(
+            null,
+            null
+        );
+#else
         System.Reflection.MethodInfo method = audioUtilClass.GetMethod(
             "IsClipPlaying",
             System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public,
@@ -252,5 +287,6 @@ public class LocalizationEditor : Editor {
             null,
             new object[] { clip }
         );
+#endif
     }
 }
