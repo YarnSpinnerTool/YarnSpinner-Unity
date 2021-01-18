@@ -26,6 +26,8 @@ TD-110: Let me see your identification.
 - In previous versions of Yarn Spinner, if a line condition failed, the entire option was not delivered to the game. With this change, all options are delivered, and the `OptionSet.Option.IsAvailable` variable contains `false` if the condition was not met, and `true` if it was (or was not present.)
 - The `DialogueUI` component now has a "showUnavailableOptions" option that controls the display behaviour of unavailable options. If it's true, then unavailable options are presented, but not selectable; if it's false, then unavailable options are not presented at all (i.e. same as Yarn Spinner 1.0.)
 
+- Audio for lines in a `Localization` object can now be previewed in the editor. (@radiatoryang)
+
 ### Changed
 
 ### Removed
