@@ -89,6 +89,12 @@ namespace Yarn.Unity
         public LineProviderBehaviour lineProvider;
 
         /// <summary>
+        /// If true, will print Debug.Log messages every time it enters a node, and other frequent events.
+        /// </summary>
+        [Tooltip("If true, will print Debug.Log messages every time it enters a node, and other frequent events")]
+        public bool verboseLogging = true;
+
+        /// <summary>
         /// Gets a value that indicates if the dialogue is actively running.
         /// </summary>
         public bool IsDialogueRunning { get; set; }
@@ -579,7 +585,8 @@ namespace Yarn.Unity
                 lineProviderIsTemporary = true;
 
                 // Let the user know what we're doing.
-                Debug.Log("Dialogue Runner has no LineProvider; setting a temporary one up with the base text found inside the scripts.");
+                if ( verboseLogging )
+                    Debug.Log("Dialogue Runner has no LineProvider; setting a temporary one up with the base text found inside the scripts.");
 
                 // Fill the localization database with the lines found in the scripts
                 
@@ -649,7 +656,9 @@ namespace Yarn.Unity
 
                 // Set up the logging system.
                 LogDebugMessage = delegate (string message) {
-                    Debug.Log(message);
+                    if ( verboseLogging ) {
+                        Debug.Log(message);
+                    }
                 },
                 LogErrorMessage = delegate (string message) {
                     Debug.LogError(message);
@@ -744,6 +753,10 @@ namespace Yarn.Unity
                 // We didn't find a method in our C# code to invoke. Try
                 // invoking on the publicly exposed UnityEvent.
                 onCommand?.Invoke(command.Text);
+
+                if ( onCommand == null || onCommand.GetPersistentEventCount() == 0 ) {
+                    Debug.LogError($"No Command <<{command.Text}>> was found. Did you remember to use the YarnCommand attribute or AddCommandHandler() function in C#?");
+                }
                 return;                
             }
 
@@ -755,6 +768,13 @@ namespace Yarn.Unity
 
                 // Expand substitutions
                 var text = Dialogue.ExpandSubstitutions(CurrentLine.RawText, CurrentLine.Substitutions);
+
+                if ( text == null) {
+                    Debug.LogWarning($"Dialogue Runner couldn't expand substitutions in Yarn program [{ yarnProgram.name }] node [{ CurrentNodeName }] with line ID [{ CurrentLine.TextID }]. "
+                        + "This usually happens because it couldn't find text in the Localization. Either the line isn't tagged properly, or the Localization Database isn't tracking the Yarn script's updates. "
+                        + "For now, Dialogue Runner will swap in CurrentLine.RawText ... but you should fix this problem.");
+                    text = CurrentLine.RawText;
+                }
 
                 // Render the markup
                 CurrentLine.Text = Dialogue.ParseMarkup(text);
