@@ -1,4 +1,4 @@
-﻿/*
+/*
 
 The MIT License (MIT)
 
@@ -708,6 +708,7 @@ namespace Yarn.Unity
                         TextID = options.Options[i].Line.ID,
                         DialogueOptionID = options.Options[i].ID,
                         Line = localisedLine,
+                        IsAvailable = options.Options[i].IsAvailable,
                     };
                 }
                 foreach (var dialogueView in dialogueViews) {
@@ -1508,14 +1509,22 @@ namespace Yarn.Unity
         /// The ID of this dialogue option
         /// </summary>
         public int DialogueOptionID;
+        
         /// <summary>
         /// The ID of the dialogue option's text
         /// </summary>
         public string TextID;
+
         /// <summary>
         /// The line for this dialogue option
         /// </summary>
         public LocalizedLine Line;
+        
+        /// <summary>
+        /// Indicates whether this value should be presented as available
+        /// or not.
+        /// </summary>
+        public bool IsAvailable;
     }
 
     #endregion

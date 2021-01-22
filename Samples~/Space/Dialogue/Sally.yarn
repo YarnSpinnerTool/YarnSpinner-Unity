@@ -13,14 +13,13 @@ position: 524,111
     Sally: Hi. #line:305cde
 <<endif>>
 
-<<if not visited("Sally.Watch")>>
-    [[Anything exciting happen on your watch?|Sally.Watch]] #line:5d7a7c
-<<endif>>
 
-<<if $sally_warning and not visited("Sally.Sorry")>>
-    [[Sorry about the console.|Sally.Sorry]] #line:0a7e39
-<<endif>>
-[[See you later.|Sally.Exit]] #line:0facf7
+-> Anything exciting happen on your watch? <<if not visited("Sally.Watch")>> #line:5d7a7c
+    <<jump Sally.Watch>>
+-> Sorry about the console. <<if $sally_warning and not visited("Sally.Sorry")>> #line:0a7e39
+    <<jump Sally.Sorry>>
+-> See you later. #line:0facf7
+    <<jump Sally.Exit>>
 ===
 
 title: Sally.Watch

@@ -31,18 +31,22 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.Networking;
 using Yarn.Compiler.Upgrader;
+using System.Reflection;
 
 namespace Yarn.Unity
 {
     public class YarnSpinnerEditorWindow : EditorWindow
     {
 
-        // Current scrolling position
-        Vector2 scrollPos;
+        // Current scrolling position for the About view
+        Vector2 aboutViewScrollPos;
 
-        // The list of Yarn scripts in the project. Updated by the
-        // UpgradeProgram method.
-        List<TextAsset> yarnProgramList = new List<TextAsset>();
+        // Current scrolling position for the Upgrade view
+        Vector2 upgradeViewScrollPos;
+
+        // The list paths to Yarn scripts in the project. Updated by the
+        // UpgradeProgram method. 
+        List<string> yarnProgramList = new List<string>();
 
         // The URL for the text document containing supporter information
         private const string SupportersURL = "https://yarnspinner.dev/supporters.txt";
@@ -72,7 +76,9 @@ namespace Yarn.Unity
             this.titleContent.text = "Yarn Spinner";
             this.titleContent.image = Icons.WindowIcon;
 
-            this.YarnSpinnerVersion = typeof(DialogueRunner).Assembly.GetName().Version.ToString();
+            this.YarnSpinnerCoreVersion = GetInformationalVersionForType(typeof(Dialogue));
+            this.YarnSpinnerCompilerVersion = GetInformationalVersionForType(typeof(Compiler.Compiler));
+            this.YarnSpinnerUnityVersion = GetInformationalVersionForType(typeof(DialogueRunner));
 
             if (supportersText == null)
             {
@@ -85,6 +91,20 @@ namespace Yarn.Unity
 
             // Also refresh the list right
             RefreshYarnProgramList();
+        }
+
+        private static string GetInformationalVersionForType(System.Type type)
+        {
+            var assembly = type.Assembly;
+
+            var informationalVersionAttributes = assembly.GetCustomAttributes(
+                typeof(AssemblyInformationalVersionAttribute),
+                false) as AssemblyInformationalVersionAttribute[];
+
+            var informationalVersionAttribute = informationalVersionAttributes.FirstOrDefault();
+
+            string version = informationalVersionAttribute?.InformationalVersion ?? "<unknown version>";
+            return version;
         }
 
         private void OnDisable()
@@ -142,7 +162,9 @@ namespace Yarn.Unity
 
         SelectedMode selectedMode = 0;
 
-        private string YarnSpinnerVersion;
+        private string YarnSpinnerCoreVersion;
+        private string YarnSpinnerCompilerVersion;
+        private string YarnSpinnerUnityVersion;
 
         void OnGUI()
         {
@@ -169,10 +191,10 @@ namespace Yarn.Unity
 
             float logoSize = Mathf.Min(EditorGUIUtility.currentViewWidth, 200);
 
-            using (var scroll = new EditorGUILayout.ScrollViewScope(scrollPos))
+            using (var scroll = new EditorGUILayout.ScrollViewScope(aboutViewScrollPos))
             using (new EditorGUILayout.VerticalScope(EditorStyles.inspectorDefaultMargins))
             {
-                scrollPos = scroll.scrollPosition;
+                aboutViewScrollPos = scroll.scrollPosition;
 
                 GUIStyle titleLabel = new GUIStyle(EditorStyles.largeLabel)
                 {
@@ -199,7 +221,10 @@ namespace Yarn.Unity
                     {
                         GUILayout.Label(new GUIContent(Icons.Logo), GUILayout.Width(logoSize), GUILayout.Height(logoSize));
                         GUILayout.Label("Yarn Spinner", titleLabel);
-                        GUILayout.Label(YarnSpinnerVersion, versionLabel);
+                        GUILayout.Label("Core: " + YarnSpinnerCoreVersion, versionLabel);
+                        GUILayout.Label("Compiler: " + YarnSpinnerCompilerVersion, versionLabel);
+                        GUILayout.Label("Unity: " + YarnSpinnerUnityVersion, versionLabel);
+
                         GUILayout.Space(10);
 
                         if (GUILayout.Button("Documentation"))
@@ -241,94 +266,101 @@ namespace Yarn.Unity
             GUILayout.Label("Upgrade your Yarn scripts from version 1 to version 2.");
             EditorGUILayout.HelpBox("Upgrading a script that's already in version 2 may throw an error, but won't modify your file.", MessageType.Info);
 
-            // Show the list of scripts we can upgrade
-            foreach (var script in yarnProgramList)
+            using (var scroll = new EditorGUILayout.ScrollViewScope(upgradeViewScrollPos))
+            using (new EditorGUILayout.VerticalScope(EditorStyles.inspectorDefaultMargins))
             {
-                EditorGUILayout.BeginHorizontal();
+                upgradeViewScrollPos = scroll.scrollPosition;
 
-                // Show the object field - disabled so people won't try and
-                // replace items in the list with other scripts, which
-                // won't work
-                EditorGUI.BeginDisabledGroup(true);
-                EditorGUILayout.ObjectField(script, typeof(TextAsset), false);
-                EditorGUI.EndDisabledGroup();
-
-                // A little "upgrade this specific script" button
-                if (GUILayout.Button("Upgrade"))
+                // Show the list of scripts we can upgrade
+                foreach (var script in yarnProgramList)
                 {
-                    UpgradeProgram(script, UpgradeType.Version1to2);
+                    EditorGUILayout.BeginHorizontal();
+
+                    // Show the object field - disabled so people won't try and
+                    // replace items in the list with other scripts, which
+                    // won't work
+                    EditorGUI.BeginDisabledGroup(true);
+
+                    // All paths will begin with the path to the Assets folder,
+                    // so just remove that for tidiness
+                    var displayedScript = script.Replace(Application.dataPath + Path.DirectorySeparatorChar, "");
+                    EditorGUILayout.LabelField(displayedScript);
+
+                    EditorGUI.EndDisabledGroup();
+
+                    EditorGUILayout.EndHorizontal();
                 }
-                EditorGUILayout.EndHorizontal();
             }
 
             // If we have any scripts, show an Upgrade All button
             if (yarnProgramList.Count > 0)
             {
-                if (GUILayout.Button("Upgrade All"))
+                if (GUILayout.Button("Upgrade Scripts"))
                 {
-                    foreach (var script in yarnProgramList)
-                    {
-                        UpgradeProgram(script, UpgradeType.Version1to2);
-                    }
+                    UpgradePrograms(yarnProgramList, UpgradeType.Version1to2);                    
                 }
             }
         }
 
-        private void UpgradeProgram(TextAsset script, UpgradeType upgradeMode)
+        private void UpgradePrograms(IEnumerable<string> paths, UpgradeType upgradeMode)
         {
-            // Get the path for this asset
-            var path = AssetDatabase.GetAssetPath(script);
-            string fileName = Path.GetFileName(path);
+            var files = paths.Select(s =>
+            {
+                var source = File.ReadAllText(s);
 
-            // Get the text from the path
-            var originalText = File.ReadAllText(path);
+                var file = new Yarn.Compiler.CompilationJob.File() {
+                    FileName = s,
+                    Source = source,
+                };
 
-            // Run it through the upgrader
-            string upgradedText;
+                return file;
+            });
+            
+            AssetDatabase.StartAssetEditing();
+
             try
             {
+                var upgradeJob = new UpgradeJob(upgradeMode, files);
 
-                upgradedText = LanguageUpgrader.UpgradeScript(
-                    originalText,
-                    fileName,
-                    upgradeMode,
-                    out var replacements);
+                var upgradeResult = LanguageUpgrader.Upgrade(upgradeJob);
 
-                if (replacements.Count() == 0)
-                {
-                    Debug.Log($"No upgrades required for {fileName}", script);
+                
+                foreach (var upgradedFile in upgradeResult.Files) {
+                    if (upgradedFile.Replacements.Count() == 0)
+                    {
+                        Debug.Log($"No upgrades required for {upgradedFile.Path}");
 
-                    // Exit here - we won't need to modify the file on
-                    // disk, so we can save some effort by returning at
-                    // this point
-                    return;
-                }
+                        continue;
+                    }
 
-                // Log some diagnostics about what changes we're making
-                foreach (var replacement in replacements)
-                {
-                    Debug.Log($@"{fileName}:{replacement.StartLine}: ""{replacement.OriginalText}"" -> ""{replacement.ReplacementText}""", script);
+                    // Log some diagnostics about what changes we're making
+                    foreach (var annotation in upgradedFile.Annotations)
+                    {
+                        Debug.Log($@"{upgradedFile.Path}: {annotation.Description}");
+                    }
+
+                    // Save the text back to disk
+                    File.WriteAllText(upgradedFile.Path, upgradedFile.UpgradedSource, System.Text.Encoding.UTF8);
+
+                    // (Re-)import the asset
+                    AssetDatabase.ImportAsset(upgradedFile.Path);
                 }
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"Failed to upgrade {fileName}: {e.GetType()} {e.Message}", script);
+                Debug.LogError($"Failed to run upgrade job: {e.GetType()} {e.Message}");
                 return;
-            }
+            }            
 
-            // Save the text back to disk
-            File.WriteAllText(path, upgradedText, System.Text.Encoding.UTF8);
-
-            // Re-import the asset
-            AssetDatabase.ImportAsset(path);
+            AssetDatabase.StopAssetEditing();
         }
 
         private void RefreshYarnProgramList()
         {
             // Search for all Yarn scripts, and load them into the list.
-            yarnProgramList = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.yarn")
-                                           .Select(path => AssetDatabase.LoadAssetAtPath<TextAsset>(path))
-                                           .ToList();
+            yarnProgramList = Directory.GetFiles(Application.dataPath, "*.yarn", SearchOption.AllDirectories)
+                                .Concat(Directory.GetFiles(Application.dataPath, "*.yarnprogram", SearchOption.AllDirectories))
+                                .ToList();
 
             // Repaint to ensure that any changes to the list are visible
             Repaint();

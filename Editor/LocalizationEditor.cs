@@ -14,10 +14,12 @@ public class LocalizationEditor : Editor {
 
     private SerializedProperty languageNameProperty;
     private SerializedProperty assetSourceFolderProperty;
+    private AudioClip lastPreviewed;
 
     private void OnEnable() {
         languageNameProperty = serializedObject.FindProperty("_LocaleCode");
         assetSourceFolderProperty = serializedObject.FindProperty("assetSourceFolder");
+        lastPreviewed = null;
     }
 
     public override void OnInspectorGUI() {
@@ -167,10 +169,124 @@ public class LocalizationEditor : Editor {
 
                 // Show the object field
                 EditorGUILayout.ObjectField(" ", entry.asset, typeof(UnityEngine.Object), false);
+
+                // for AudioClips, add a little play preview button
+                if ( entry.asset.GetType() == typeof(UnityEngine.AudioClip) ) {
+                    var rect = GUILayoutUtility.GetLastRect();
+                    
+                    EditorGUI.EndDisabledGroup();
+                    bool isPlaying = IsClipPlaying( (AudioClip)entry.asset );
+                    if ( lastPreviewed == (AudioClip)entry.asset && isPlaying ) {
+                        rect.width = 54;
+                        rect.x += EditorGUIUtility.labelWidth - 56;
+                        if ( GUI.Button(rect, "▣ Stop" ) ) {
+                            StopAllClips();
+                            lastPreviewed = null;
+                        }
+                    } else {
+                        rect.width = 18;
+                        rect.x += EditorGUIUtility.labelWidth - 20;
+                        if ( GUI.Button(rect, "▸") ) {
+                            PlayClip( (AudioClip)entry.asset );
+                            lastPreviewed = (AudioClip)entry.asset;
+                        }
+                    }
+                    EditorGUI.BeginDisabledGroup(true);
+                }
+
                 EditorGUI.EndDisabledGroup();
                 EditorGUILayout.Space();
             }
 
         }
+    }
+
+    // below is some terrible reflection needed for the AudioClip preview
+    // terrible hack from https://forum.unity.com/threads/way-to-play-audio-in-editor-using-an-editor-script.132042/#post-4767824
+    public static void PlayClip(AudioClip clip, int startSample = 0, bool loop = false)
+    {
+        System.Reflection.Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;
+        System.Type audioUtilClass = unityEditorAssembly.GetType("UnityEditor.AudioUtil");
+
+        // The name of the method we want to invoke changed in 2020.2, so
+        // we'll do a little version testing here
+        string methodName;
+
+#if UNITY_2020_2_OR_NEWER
+        methodName = "PlayPreviewClip";
+#else
+        methodName = "PlayClip";
+#endif
+
+        System.Reflection.MethodInfo method = audioUtilClass.GetMethod(
+            methodName,
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public,
+            null,
+            new System.Type[] { typeof(AudioClip), typeof(int), typeof(bool) },
+            null
+        );
+        method.Invoke(
+            null,
+            new object[] { clip, startSample, loop }
+        );
+    }
+
+    public static void StopAllClips()
+    {
+        System.Reflection.Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;
+        System.Type audioUtilClass = unityEditorAssembly.GetType("UnityEditor.AudioUtil");
+
+        // The name of the method we want to invoke changed in 2020.2, so
+        // we'll do a little version testing here
+        string methodName;
+
+#if UNITY_2020_2_OR_NEWER
+        methodName = "StopAllPreviewClips";
+#else
+        methodName = "StopAllClips";
+#endif
+
+        System.Reflection.MethodInfo method = audioUtilClass.GetMethod(
+            methodName,
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public,
+            null,
+            new System.Type[] { },
+            null
+        );
+        method.Invoke(
+            null,
+            new object[] { }
+        );
+    }
+
+    public static bool IsClipPlaying(AudioClip clip)
+    {
+        System.Reflection.Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;
+        System.Type audioUtilClass = unityEditorAssembly.GetType("UnityEditor.AudioUtil");
+
+        // The name of the method we want to invoke AND its parameters
+        // changed in 2020.2, so we'll do a little version testing here
+#if UNITY_2020_2_OR_NEWER
+        System.Reflection.MethodInfo method = audioUtilClass.GetMethod(
+            "IsPreviewClipPlaying",
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public
+        );
+        return (bool)method.Invoke(
+            null,
+            null
+        );
+#else
+        System.Reflection.MethodInfo method = audioUtilClass.GetMethod(
+            "IsClipPlaying",
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public,
+            null,
+            new System.Type[] { typeof(AudioClip) },
+            null
+        );
+        return (bool)method.Invoke(
+            null,
+            new object[] { clip }
+        );
+#endif
     }
 }

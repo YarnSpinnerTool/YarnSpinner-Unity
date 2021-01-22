@@ -8,6 +8,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Added the ability for TextLineProvider and AudioLineProvider to override the project language settings.
+
+- Made options that have a line condition able to be presented to the player, but made unavailable.
+- This change was made in order to allow games to conditionally present, but disallow, options that the player can't choose. For example, consider the following script:
+
+```
+TD-110: Let me see your identification.
+-> Of course... um totally not General Kenobi and the son of Darth Vader.
+    Luke: Wait, what?!
+    TD-110: Promotion Time!
+-> You don't need to see his identification. <<if $learnt_mind_trick is true>>
+    TD-110: We don't need to see his identification.
+```
+
+- If the variable `$learnt_mind_trick` is false, a game may want to show the option but not allow the player to select it (i.e., show that this option could have been chosen if they'd learned how to do a mind trick.)
+- In previous versions of Yarn Spinner, if a line condition failed, the entire option was not delivered to the game. With this change, all options are delivered, and the `OptionSet.Option.IsAvailable` variable contains `false` if the condition was not met, and `true` if it was (or was not present.)
+- The `DialogueUI` component now has a "showUnavailableOptions" option that controls the display behaviour of unavailable options. If it's true, then unavailable options are presented, but not selectable; if it's false, then unavailable options are not presented at all (i.e. same as Yarn Spinner 1.0.)
+
+- Audio for lines in a `Localization` object can now be previewed in the editor. (@radiatoryang)
+
+### Changed
+
+### Removed
+
+## [v2.0.0-beta2] 2021-01-14
+
+### Added
+
 - InMemoryVariableStorage now shows the current state of variables in the Inspector. (@radiatoryang)
 - InMemoryVariableStorage now supports saving variables to file, and to PlayerPrefs. (@radiatoryang)
 
@@ -15,8 +43,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Inline expressions (for example, `One plus one is {1+1}`) are now expanded.
 - Added Help URLs to various classes. (@radiatoryang)
+- The Upgrader window (Window -> Yarn Spinner -> Upgrade Scripts) now uses the updated
+  Yarn Spinner upgrade tools. See Yarn Spinner 2.0.0-beta2 release notes for more
+  information on the upgrader.
+- Fixed an issue where programs failed to import if a source script reference is invalid
+- Fixed an issue where the DialogueUI would show empty lines when showCharacterName is
+  false and the line has no character name
 
 ### Removed
+
+- The `[[Destination]]` and `[[Option|Destination]]` syntax has been removed from the language.
+  - This syntax was inherited from the original Yarn language, which itself inherited it from Twine. 
+  - We removed it for four reasons: 
+    - it conflated jumps and options, which are very different operations, with too-similar syntax; 
+    - the Option-destination syntax for declaring options involved the management of non-obvious state (that is, if an option statement was inside an `if` branch that was never executed, it was not presented, and the runtime needed to keep track of that);
+    - it was not obvious that options accumulated and were only presented at the end of the node;
+    - finally, shortcut options provide a cleaner way to present the same behaviour.
+  - We have added a `<<jump Destination>>` command, which replaces the `[[Destination]]` jump syntax.
+  - No change to the bytecode is made here; these changes only affect the compiler.
+  - Instead of using ``[[Option|Destination]]`` syntax, use shortcut options instead. For example:
+
+```
+// Before
+Kim: You want a bagel?
+[[Yes, please!|GiveBagel]]
+[[No, thanks!|DontWantBagel]]
+
+// After
+Kim: You want a bagel?
+-> Yes, please!
+  <<jump GiveBagel>>
+-> No, thanks!
+  <<jump DontWantBagel>>
+```
 
 - InMemoryVariableStorage no longer manages 'default' variables (this concept has moved to the Yarn Program.) (@radiatoryang)
 

@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff34614f4518d409d9e35af62a22851c, type: 3}
+  m_Name: LocalizationDatabase-de
+  m_EditorClassIdentifier: 
+  _LocaleCode: de
+  assetSourceFolder: {fileID: 102900000, guid: 039e7cc69a9756041bd31eb499a17a17, type: 3}
+  _stringTable:
+    keys:
+    - line:0e3dc4b
+    - line:0967160
+    - line:04e806e
+    - line:0901fb2
+    values:
+    - "Spieler: Kannst du mich h\xF6ren?"
+    - 'NPC: Klar und deutlich.'
+    - Mir reicht es.
+    - Nochmal!
+  _assetTable:
+    keys: []
+    values: []
+  _addressTable:
+    keys:
+    - line:0e3dc4b
+    - line:0967160
+    values:
+    - m_AssetGUID: 925ab48b6d0bd314f8d29fb0fcad02ef
+      m_SubObjectName: 
+    - m_AssetGUID: 7c1a3502fb6e83e4287a5967faaab88d
+      m_SubObjectName: 
