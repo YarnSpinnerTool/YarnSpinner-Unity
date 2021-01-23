@@ -315,6 +315,8 @@ namespace Yarn.Unity
                         }
                     }
 
+                    EditorGUILayout.HelpBox("To add a Yarn script to this localization, inspect the Yarn script.", MessageType.Info);
+
                     EditorGUI.indentLevel -= 1;
 
                     
