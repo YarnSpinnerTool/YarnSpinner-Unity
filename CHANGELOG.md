@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- The dialogue runner can now be configured to log less to the console, reducing the amount of noise it generates there. (@radiatoryang)
+- Warning messages and errors now appear to help users diagnose two common problems: (1) not adding a Command properly, (2) can't find a localization entry for a line (either because of broken line tag or bad connection to Localization Database) (@radiatoryang)
+- Added a helpbox on the LocalizationDatabase inspector to tell user how to add scripts to a localization: inspect the Yarn script, not the localization database
 - Added the ability for TextLineProvider and AudioLineProvider to override the project language settings.
 
 - Made options that have a line condition able to be presented to the player, but made unavailable.
