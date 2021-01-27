@@ -33,6 +33,8 @@ TD-110: Let me see your identification.
 
 ### Changed
 
+- Certain private methods in `DialogueUI` have changed to protected, making it easier to subclass
+
 ### Removed
 
 ## [v2.0.0-beta2] 2021-01-14
