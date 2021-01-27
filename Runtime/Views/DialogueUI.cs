@@ -102,15 +102,15 @@ namespace Yarn.Unity {
         /// When true, the Runner has signaled to finish the current line
         /// asap.
         /// </summary>
-        private bool finishCurrentLine = false;
+        protected bool finishCurrentLine = false;
 
         // The method that we should call when the user has chosen an
         // option. Externally provided by the DialogueRunner.
-        private System.Action<int> currentOptionSelectionHandler;
+        protected System.Action<int> currentOptionSelectionHandler;
 
         // When true, the DialogueRunner is waiting for the user to press
         // one of the option buttons.
-        private bool waitingForOptionSelection = false;
+        protected bool waitingForOptionSelection = false;
 
         /// <summary>
         /// A <see cref="UnityEngine.Events.UnityEvent"/> that is called
@@ -381,7 +381,7 @@ namespace Yarn.Unity {
 
         /// Show a list of options, and wait for the player to make a
         /// selection.
-        private  IEnumerator DoRunOptions (DialogueOption[] dialogueOptions, System.Action<int> selectOption)
+        protected IEnumerator DoRunOptions (DialogueOption[] dialogueOptions, System.Action<int> selectOption)
         {
             // Do a little bit of safety checking
             if (dialogueOptions.Length > optionButtons.Count) {
