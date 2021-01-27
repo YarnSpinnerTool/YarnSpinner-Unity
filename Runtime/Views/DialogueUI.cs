@@ -446,6 +446,11 @@ namespace Yarn.Unity {
                 i++;
             }
 
+            // hide all remaining unused buttons
+            for ( ; i < optionButtons.Count; i++) {
+                optionButtons[i].gameObject.SetActive(false);
+            }
+
             onOptionsStart?.Invoke();
 
             // Wait until the chooser has been used and then removed 

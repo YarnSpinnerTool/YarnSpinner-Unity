@@ -367,6 +367,11 @@ PrefabInstance:
       propertyPath: onNameNotPresent.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_BoolArgument
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6885618662069859611, guid: 9e0841b82a4ebcd438730d23886e17e6,
+        type: 3}
+      propertyPath: showCharacterName
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9e0841b82a4ebcd438730d23886e17e6, type: 3}
 --- !u!1 &484263811 stripped
