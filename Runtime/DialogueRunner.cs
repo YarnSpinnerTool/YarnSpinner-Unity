@@ -272,7 +272,7 @@ namespace Yarn.Unity
         {
             // Stop any processes that might be running already
             foreach (var dialogueView in dialogueViews) {
-                if (dialogueView == null) continue;
+                if (dialogueView == null || dialogueView.enabled == false) continue;
 
                 dialogueView.StopAllCoroutines();
             }
@@ -286,7 +286,7 @@ namespace Yarn.Unity
 
                 // Signal that we're starting up.
                 foreach (var dialogueView in dialogueViews) {
-                    if (dialogueView == null) continue;
+                    if (dialogueView == null || dialogueView.enabled == false) continue;
 
                     dialogueView.DialogueStarted();
                 }
@@ -628,7 +628,7 @@ namespace Yarn.Unity
             // next line (or interrupt the current one).
             System.Action continueAction = OnViewUserIntentNextLine;
             foreach (var dialogueView in dialogueViews) {
-                if (dialogueView == null)
+                if (dialogueView == null || dialogueView.enabled == false)
                 {
                     Debug.LogWarning("The 'Dialogue Views' field contains a NULL element.", gameObject);
                     continue;
@@ -712,7 +712,7 @@ namespace Yarn.Unity
                     };
                 }
                 foreach (var dialogueView in dialogueViews) {
-                    if (dialogueView == null) continue;
+                    if (dialogueView == null || dialogueView.enabled == false) continue;
 
                     dialogueView.RunOptions(optionSet, selectAction);
                 }
@@ -722,7 +722,7 @@ namespace Yarn.Unity
             {
                 IsDialogueRunning = false;
                 foreach (var dialogueView in dialogueViews) {
-                    if (dialogueView == null) continue;
+                    if (dialogueView == null || dialogueView.enabled == false) continue;
 
                     dialogueView.DialogueComplete();
                 }
@@ -787,7 +787,7 @@ namespace Yarn.Unity
 
                 // Send line to available dialogue views
                 foreach (var dialogueView in dialogueViews) {
-                    if (dialogueView == null) continue;
+                    if (dialogueView == null || dialogueView.enabled == false) continue;
 
                     // Mark this dialogue view as active                
                     ActiveDialogueViews.Add(dialogueView);
@@ -1211,7 +1211,7 @@ namespace Yarn.Unity
             line.Status = newStatus;
 
             foreach (var dialogueView in dialogueViews) {
-                if (dialogueView == null) continue;
+                if (dialogueView == null || dialogueView.enabled == false) continue;
 
                 dialogueView.OnLineStatusChanged(line);
             }
@@ -1284,7 +1284,7 @@ namespace Yarn.Unity
             ActiveDialogueViews.Clear();
 
             foreach (var dialogueView in dialogueViews) {
-                if (dialogueView == null) continue;
+                if (dialogueView == null || dialogueView.enabled == false) continue;
                 // we do this in two passes - first by adding each
                 // dialogueView into ActiveDialogueViews, then by asking
                 // them to dismiss the line - because calling
@@ -1297,7 +1297,7 @@ namespace Yarn.Unity
             }
                 
             foreach (var dialogueView in dialogueViews) {
-                if (dialogueView == null) continue;
+                if (dialogueView == null || dialogueView.enabled == false) continue;
 
                 dialogueView.DismissLine(() => DialogueViewCompletedDismissal(dialogueView));
             }
