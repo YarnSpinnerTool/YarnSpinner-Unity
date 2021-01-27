@@ -14,9 +14,10 @@ namespace Yarn.Unity
     /// cref="DialogueViewBase"/> classes use to present content to the
     /// player. 
     ///
-    /// Subclasses of this abstract class may return subclasses of
-    /// LocalizedLine. For example, <see cref="AudioLineProvider"/> returns
-    /// an <see cref="AudioLocalizedLine"/>, which includes <see
+    /// Subclasses of this abstract class may return subclasses of <see
+    /// cref="LocalizedLine"/>. For example, <see
+    /// cref="AudioLineProvider"/> returns an <see
+    /// cref="AudioLocalizedLine"/>, which includes <see
     /// cref="AudioClip"/>; views that make use of audio can then access
     /// this additional data.
     /// </remarks>
