@@ -33,7 +33,8 @@ TD-110: Let me see your identification.
 
 ### Changed
 
-- Certain private methods in `DialogueUI` have changed to protected, making it easier to subclass
+- Certain private methods in `DialogueUI` have changed to protected, making it easier to subclass (@radiatoryang)
+- Fixed an issue where option buttons from previous option prompts could re-appear in later prompts (@radiatoryang)
 
 ### Removed
 
