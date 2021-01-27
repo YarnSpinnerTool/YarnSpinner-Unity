@@ -1,9 +1,6 @@
 # Visual Novel example documentation
 
-This is an example project that implements a few Yarn Spinner features:
-
-- `DialogueUISplit.cs` shows how to separate the speaker's name from their dialogue, and how to display them separately
-- `VNManager.cs` demos extensive use of Yarn Commands to implement custom visual novel functionality (sprite management, sound playback, screen fades)
+This is an example project that uses many custom Yarn Commands to implement custom visual novel functionality (sprite management, sound playback, screen fades). Look in `VNManager.cs` to see how!
 
 This is intended as an example of how Yarn Spinner is flexible enough to support a variety of game formats and genres. **It is not actively developed, it is just a template / example.** If you want to add new commands of functionality, try to figure it out yourself!
 
@@ -24,7 +21,7 @@ For reference, the example character sprites are about 600 x 1200 pixels. Becaus
 
 # VN Commands API reference
 
-If you're new to Yarn Spinner, read about [Yarn Commands](https://yarnspinner.dev/docs/unity/adding-command-handlers/).
+If you're new to Yarn Spinner, read about [Yarn Commands](https://yarnspinner.dev/docs/unity/working-with-commands/).
 
 API example: for the command `<<Draw (spriteName), (x=0.5), (y=0.5)>>`, the `"=0.5"` is a default value used if you don't specify the number yourself. So you can type `<<Draw house01>>` or `<<Draw DogHappy, 0.75>>` and it's ok, it will fill in the other parameters with default values.
 
