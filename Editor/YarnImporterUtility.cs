@@ -136,19 +136,31 @@ internal static class YarnImporterUtility
         AssetDatabase.ImportAsset(destinationPath);
         AssetDatabase.SaveAssets();
 
-        var programImporter = AssetImporter.GetAtPath(destinationPath) as YarnProgramImporter;
-        programImporter.sourceScripts.Add(AssetDatabase.LoadAssetAtPath<TextAsset>(path));
+        AssignScriptToProgram(path, destinationPath);
 
+        return destinationPath;
+
+    }
+
+    /// <summary>
+    /// Assign a .yarn TextAsset file found at sourcePath to the YarnProgramImporter found at programPath
+    /// </summary>
+    internal static void AssignScriptToProgram(string sourcePath, string programPath) {
+        AssignScriptToProgram(AssetDatabase.LoadAssetAtPath<TextAsset>(sourcePath), AssetImporter.GetAtPath(programPath) as YarnProgramImporter);
+    }
+
+    /// <summary>
+    /// Assign a .yarn TextAsset file newSourceScript to the YarnProgramImporter programImporter
+    /// </summary>
+    internal static void AssignScriptToProgram(TextAsset newSourceScript, YarnProgramImporter programImporter) {
+        programImporter.sourceScripts.Add(newSourceScript);
         EditorUtility.SetDirty(programImporter);
 
         // Reimport the program to make it generate its default string
         // table, if needed
         programImporter.SaveAndReimport();
-
-        return destinationPath;
-        
-
     }
+
 
     /// <summary>
     /// Creates a new localization CSV file for the specified object, for

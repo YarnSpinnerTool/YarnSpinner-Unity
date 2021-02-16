@@ -72,13 +72,22 @@ public class YarnImporterEditor : ScriptedImporterEditor
         EditorGUILayout.PropertyField(baseLanguageIdProperty);
 
         if (destinationYarnProgram == null) {
-            EditorGUILayout.HelpBox("This script is not currently part of a Yarn Program. Either add one in the field above, or click Create New Yarn Program.", MessageType.Info);
-            if (GUILayout.Button("Create New Yarn Program")) {
+            EditorGUILayout.HelpBox("This script is not currently part of a Yarn Program, so it can't be compiled or loaded into a Dialogue Runner. Either click Create New Yarn Program, or Assign to Existing Yarn Program.", MessageType.Info);
+            if (GUILayout.Button("Create New Yarn Program...")) {
                 YarnImporterUtility.CreateYarnProgram(target as YarnImporter);
                 
                 UpdateDestinationProgram();
 
             }
+            if (GUILayout.Button("Assign to Existing Yarn Program...")) {
+                var programPath = EditorUtility.OpenFilePanelWithFilters("Select an existing Yarn Program", Application.dataPath, new string[] {"Yarn Program (.yarnprogram)", "yarnprogram"} );
+                programPath = "Assets" + programPath.Substring( Application.dataPath.Length );
+                if ( !string.IsNullOrEmpty(programPath) ) {
+                    YarnImporterUtility.AssignScriptToProgram( (target as YarnImporter).assetPath, programPath);
+                }
+                UpdateDestinationProgram();
+            }
+            
         } else {
             using (new EditorGUI.DisabledGroupScope(true)) {
                 EditorGUILayout.ObjectField("Program", destinationYarnProgram, typeof(YarnProgramImporter), false);
