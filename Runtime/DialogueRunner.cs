@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Yarn.Unity
 {
@@ -195,7 +196,7 @@ namespace Yarn.Unity
 
             // In each assembly, find all types that descend from MonoBehaviour
             foreach (var assembly in allAssemblies) {
-                foreach (var type in assembly.GetTypes()) {
+                foreach (var type in assembly.GetLoadableTypes().Where(t => t.IsSubclassOf(typeof(MonoBehaviour)))) {
 
                     // We only care about MonoBehaviours
                     if (typeof(MonoBehaviour).IsAssignableFrom(type) == false) {
@@ -1528,4 +1529,22 @@ namespace Yarn.Unity
     }
 
     #endregion
+
+    public static class AssemblyExtensions
+    {
+        /// <summary>
+        /// Assembly.GetTypes() can throw in some cases.  This extension will catch that exception and return only the types which were successfully loaded from the assembly.
+        /// </summary>
+        public static IEnumerable<System.Type> GetLoadableTypes(this Assembly @this)
+        {
+            try
+            {
+                return @this.GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                return e.Types.Where(t => t != null);
+            }
+        }
+    }
 }
