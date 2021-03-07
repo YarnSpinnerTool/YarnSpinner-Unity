@@ -11,7 +11,7 @@ public static class YarnEditorUtility {
     // GUID for editor assets. (Doing it like this means that we don't have
     // to worry about where the assets are on disk, if the user has moved
     // Yarn Spinner around.)
-    const string IconTextureGUID = "528a6dd601766934abb8b1053bd798ef";
+    const string IconTextureGUID = "0ed312066ea6f40f6af965f21c818b34";
     const string TemplateFileGUID = "4f4ca4a46020a454f80e2ac78eda5aa1";
 
     /// <summary>

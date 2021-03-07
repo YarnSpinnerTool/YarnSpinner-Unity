@@ -55,6 +55,8 @@ With this change, you can instead say this:
 <<walk MyDestination wait>>
 ```
 
+- New icons for Yarn Spinner assets have been added.
+
 ### Changed
 
 - Certain private methods in `DialogueUI` have changed to protected, making it easier to subclass (@radiatoryang)
