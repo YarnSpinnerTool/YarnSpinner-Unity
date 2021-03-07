@@ -31,6 +31,8 @@ TD-110: Let me see your identification.
 
 - Audio for lines in a `Localization` object can now be previewed in the editor. (@radiatoryang)
 
+- Lines can be added to a `Localization` object at runtime. They're only stored in memory, and are discarded when gameplay ends.
+
 ### Changed
 
 - Certain private methods in `DialogueUI` have changed to protected, making it easier to subclass (@radiatoryang)

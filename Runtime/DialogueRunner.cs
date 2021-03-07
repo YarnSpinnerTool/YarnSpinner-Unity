@@ -241,20 +241,19 @@ namespace Yarn.Unity
         /// table based on the value of set in the Preferences dialogue.
         public void Add(YarnProgram scriptToLoad, string localizationId = null, IEnumerable<StringTableEntry> stringTableEntries = null)
         {
-            Dialogue.AddProgram(scriptToLoad.GetProgram());         
+            Dialogue.AddProgram(scriptToLoad.GetProgram());
 
-            if (lineProviderIsTemporary) {
-                if (localizationId == null || stringTableEntries == null) {
-                    const string dialogueRunnerName = nameof(Unity.DialogueRunner);
-                    const string lineProviderName = nameof(Unity.LineProviderBehaviour);
-                    const string stringTableName = nameof(stringTableEntries);
-                    const string localizationIDName = nameof(localizationId);
+            if (lineProviderIsTemporary && (localizationId == null || stringTableEntries == null))
+            {
+                const string dialogueRunnerName = nameof(Unity.DialogueRunner);
+                const string lineProviderName = nameof(Unity.LineProviderBehaviour);
+                const string stringTableName = nameof(stringTableEntries);
+                const string localizationIDName = nameof(localizationId);
 
-                    Debug.LogWarning($"Yarn script {scriptToLoad.name} is being added at runtime, but this {dialogueRunnerName} was not configured to use a {lineProviderName}, and a {localizationIDName} and {stringTableName} weren't provided. Lines from this script will not render correctly.\n\nTo fix this, either configure this {dialogueRunnerName} to use a {lineProviderName}, or provide a {localizationIDName} and {stringTableName}.");
-                }
-                
-                lineProvider.localizationDatabase.GetLocalization(localizationId).AddLocalizedStrings(stringTableEntries);
+                Debug.LogWarning($"Yarn script {scriptToLoad.name} is being added at runtime, but this {dialogueRunnerName} was not configured to use a {lineProviderName}, and a {localizationIDName} and {stringTableName} weren't provided. Lines from this script will not render correctly.\n\nTo fix this, either configure this {dialogueRunnerName} to use a {lineProviderName}, or provide a {localizationIDName} and {stringTableName}.");
             }
+
+            lineProvider.localizationDatabase.GetLocalization(localizationId).AddLocalizedStrings(stringTableEntries);
         }
 
         /// <summary>

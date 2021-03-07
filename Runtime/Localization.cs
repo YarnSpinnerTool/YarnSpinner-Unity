@@ -30,6 +30,8 @@ namespace Yarn.Unity
         [SerializeField] private StringDictionary _stringTable = new StringDictionary();
         [SerializeField] private AssetDictionary _assetTable = new AssetDictionary();
 
+        private Dictionary<string,string> _runtimeStringTable = new Dictionary<string, string>();
+
 
 #if ADDRESSABLES
         [System.Serializable]
@@ -42,28 +44,39 @@ namespace Yarn.Unity
         #region Localized Strings
         public string GetLocalizedString(string key)
         {
-            _stringTable.TryGetValue(key, out var result);
-            return result;
+            string result;
+            if (_runtimeStringTable.TryGetValue(key, out result)) {
+                return result;
+            }
+
+            if (_stringTable.TryGetValue(key, out result)) {
+                return result;
+            }
+
+            return null;
         }
 
-        public void SetLocalizedString(string key, string value) => _stringTable.Add(key, value);
+        public bool ContainsLocalizedString(string key) => _runtimeStringTable.ContainsKey(key) || _stringTable.ContainsKey(key);
 
-        public bool ContainsLocalizedString(string key) => _stringTable.ContainsKey(key);
-
-        public void AddLocalizedString(string key, string  value) => _stringTable.Add(key, value);
-
-        public void AddLocalizedStrings(IEnumerable<KeyValuePair<string, string>> strings)
+        public void AddLocalizedString(string key, string value)
         {
-            foreach (var entry in strings)
-            {
-                _stringTable.Add(entry.Key, entry.Value);
+            if (Application.isPlaying) {
+                _runtimeStringTable.Add(key, value);
+            } else {
+                _stringTable.Add(key, value);
             }
         }
 
-        public void AddLocalizedStrings(IEnumerable<StringTableEntry> parsedStringTableEntries) {
-            foreach (var entry in parsedStringTableEntries) {
-                var id = entry.ID;//.Replace("line:", "");
-                _stringTable.Add(id, entry.Text);
+        public void AddLocalizedStrings(IEnumerable<KeyValuePair<string, string>> strings)
+        {
+            foreach (var entry in strings) {
+                AddLocalizedString(entry.Key, entry.Value);                    
+            }
+        }
+
+        public void AddLocalizedStrings(IEnumerable<StringTableEntry> stringTableEntries) {
+            foreach (var entry in stringTableEntries) {
+                AddLocalizedString(entry.ID, entry.Text);
             }
         }
 
@@ -140,6 +153,7 @@ namespace Yarn.Unity
         {
             _stringTable.Clear();
             _assetTable.Clear();
+            _runtimeStringTable.Clear();
 #if ADDRESSABLES
             _addressTable.Clear();
 #endif
@@ -155,7 +169,15 @@ namespace Yarn.Unity
         /// <returns>The line IDs.</returns>
         public IEnumerable<string> GetLineIDs()
         {
-            return _stringTable.Keys;
+            var allKeys = new List<string>();
+            
+            var runtimeKeys = _runtimeStringTable.Keys;
+            var compileTimeKeys = _stringTable.Keys;
+
+            allKeys.AddRange(runtimeKeys);
+            allKeys.AddRange(compileTimeKeys);
+
+            return allKeys;
         }
     }
 }
