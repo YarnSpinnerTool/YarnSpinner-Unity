@@ -1110,13 +1110,25 @@ namespace Yarn.Unity
                     continue;
                 }
 
+                var parameterName = methodParameters[i].Name;
                 var expectedType = methodParameters[i].ParameterType;
 
-                // Two special case: if the method expects a GameObject
-                // or a Component (or Component-derived type), locate
-                // that object and supply it. The object, or the object
-                // the desired component is on, must be active. If this
-                // fails, supply null.
+                // We handle three special cases:
+                // - if the method expects a GameObject, attempt locate
+                //   that game object by the provided name. The game object
+                //   must be active. If this lookup fails, provide null.
+                // - if the method expects a Component, or a
+                //   Component-derived type, locate that object and supply
+                //   it. The object, or the object the desired component is
+                //   on, must be active. If this fails, supply null.
+                // - if the method expects a Boolean, and the parameter is
+                //   a string that case-insensitively matches the name of
+                //   the parameter, act as though the parameter had been
+                //   "true". This allows us to write a command like
+                //   "Move(bool wait)", and invoke it as "<<move wait>>",
+                //   instead of having to say "<<move true>>". If it's
+                //   false, provide false; if it's any other string, throw
+                //   an error.
                 if (typeof(GameObject).IsAssignableFrom(expectedType))
                 {
                     finalParameters[i] = GameObject.Find(parameters[i]);
@@ -1134,6 +1146,25 @@ namespace Yarn.Unity
                         finalParameters[i] = c;
                     }
                 }
+                else if (typeof(bool).IsAssignableFrom(expectedType))
+                {
+                    // If it's a bool, and the parameter was the name of
+                    // the parameter, act as though they had written
+                    // 'true'.
+                    if (parameters[i].Equals(parameterName, StringComparison.InvariantCultureIgnoreCase)) {
+                        finalParameters[i] = true;
+                    } else {
+                        // It wasn't the name of the parameter, so attempt
+                        // to parse it as a boolean (i.e. the strings
+                        // "true" or "false"), and throw an exception if
+                        // that failed
+                        try {
+                            finalParameters[i] = Convert.ToBoolean(parameters[i]);
+                        } catch (Exception e) {
+                            throw new ArgumentException($"can't convert parameter {i+1} (\"{parameters[i]}\") to parameter {parameterName} ({expectedType}): {e}");                        
+                        }
+                    }
+                }
                 else
                 {
                     // Attempt to perform a straight conversion, using
@@ -1142,8 +1173,7 @@ namespace Yarn.Unity
                     try {
                         finalParameters[i] = Convert.ChangeType(parameters[i], expectedType, System.Globalization.CultureInfo.InvariantCulture);
                     } catch (Exception e) {
-                        var paramName  = methodParameters[i].Name;
-                        throw new ArgumentException($"can't convert parameter {i+1} (\"{parameters[i]}\") to parameter {paramName} ({expectedType}): {e}");                        
+                        throw new ArgumentException($"can't convert parameter {i+1} (\"{parameters[i]}\") to parameter {parameterName} ({expectedType}): {e}");                        
                     }
                     
                 }

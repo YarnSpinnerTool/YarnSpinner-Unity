@@ -33,6 +33,28 @@ TD-110: Let me see your identification.
 
 - Lines can be added to a `Localization` object at runtime. They're only stored in memory, and are discarded when gameplay ends.
 
+- Commands that take a boolean parameter now support specifying that parameter by its name, rather than requiring the string `true`.
+- For example, if you have a command like this:
+
+```csharp
+  [YarnCommand("walk")]
+  void WalkToPoint(string destinationName, bool wait = false) {
+    // ...
+  }
+```
+
+Previously, you'd need to use this in your Yarn scripts:
+
+```
+<<walk MyDestination true>>
+```
+
+With this change, you can instead say this:
+
+```
+<<walk MyDestination wait>>
+```
+
 ### Changed
 
 - Certain private methods in `DialogueUI` have changed to protected, making it easier to subclass (@radiatoryang)
