@@ -326,7 +326,7 @@ namespace Yarn.Unity
 
                 
                 foreach (var upgradedFile in upgradeResult.Files) {
-                    if (upgradedFile.Replacements.Count() == 0)
+                    if (upgradedFile.Replacements.Count() == 0 && upgradedFile.IsNewFile == false)
                     {
                         Debug.Log($"No upgrades required for {upgradedFile.Path}");
 

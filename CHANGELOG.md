@@ -60,6 +60,7 @@ With this change, you can instead say this:
 - Certain private methods in `DialogueUI` have changed to protected, making it easier to subclass (@radiatoryang)
 - Fixed an issue where option buttons from previous option prompts could re-appear in later prompts (@radiatoryang)
 - Fixed an issue where dialogue views that are not enabled were still being waited for (@radiatoryang)
+- Upgrader tool now creates new files on disk, where needed (for example, .yarnprogram files)
 
 ### Removed
 
