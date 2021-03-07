@@ -638,6 +638,10 @@ namespace Yarn.Unity
 
             if (yarnProgram != null)
             {
+                if (Dialogue.IsActive) {
+                    Debug.LogError($"DialogueRunner wanted to load a Yarn Program in its Start method, but the Dialogue was already running one. The Dialogue Runner may not behave as you expect.");
+                }
+
                 Dialogue.SetProgram(yarnProgram.GetProgram());
 
                 if (startAutomatically)
