@@ -49,7 +49,7 @@ public static class YarnEditorUtility {
     /// Begins the interactive process of creating a new Yarn file in the
     /// Editor.
     /// </summary>    
-    [MenuItem("Assets/Create/Yarn Script", false, 101)]
+    [MenuItem("Assets/Create/Yarn Spinner/Yarn Script", false, 10)]
     public static void CreateYarnAsset() {
 
         // This method call is undocumented, but public. It's defined in
