@@ -8,7 +8,8 @@ namespace Yarn.Unity {
     /// </summary>
     public class YarnLinesAsCanvasText : MonoBehaviour {
         [UnityEngine.Serialization.FormerlySerializedAs("yarnScript")]
-        public YarnProgram yarnProgram;
+        [UnityEngine.Serialization.FormerlySerializedAs("yarnProgram")]
+        public YarnProject yarnProject;
         
         public TextAsset useLinesFromScript;
 

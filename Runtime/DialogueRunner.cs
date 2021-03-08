@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Yarn.Unity
 {
@@ -44,10 +45,11 @@ namespace Yarn.Unity
     public class DialogueRunner : MonoBehaviour
     {
         /// <summary>
-        /// The <see cref="YarnProgram"/> assets that should be loaded on
+        /// The <see cref="YarnProject"/> asset that should be loaded on
         /// scene start.
         /// </summary>
-        public YarnProgram yarnProgram;
+        [UnityEngine.Serialization.FormerlySerializedAs("yarnProgram")]
+        public YarnProject yarnProject;
 
         /// <summary>
         /// The variable storage object.
@@ -195,7 +197,7 @@ namespace Yarn.Unity
 
             // In each assembly, find all types that descend from MonoBehaviour
             foreach (var assembly in allAssemblies) {
-                foreach (var type in assembly.GetTypes()) {
+                foreach (var type in assembly.GetLoadableTypes().Where(t => t.IsSubclassOf(typeof(MonoBehaviour)))) {
 
                     // We only care about MonoBehaviours
                     if (typeof(MonoBehaviour).IsAssignableFrom(type) == false) {
@@ -236,25 +238,24 @@ namespace Yarn.Unity
         /// DialogueRunner's combined string table.
         /// </summary>
         /// <remarks>This method calls <see
-        /// cref="AddDialogueLines(YarnProgram)"/> to load the string table
+        /// cref="AddDialogueLines(YarnProject)"/> to load the string table
         /// for the current localisation. It selects the appropriate string
         /// table based on the value of set in the Preferences dialogue.
-        public void Add(YarnProgram scriptToLoad, string localizationId = null, IEnumerable<StringTableEntry> stringTableEntries = null)
+        public void Add(YarnProject scriptToLoad, string localizationId = null, IEnumerable<StringTableEntry> stringTableEntries = null)
         {
-            Dialogue.AddProgram(scriptToLoad.GetProgram());         
+            Dialogue.AddProgram(scriptToLoad.GetProgram());
 
-            if (lineProviderIsTemporary) {
-                if (localizationId == null || stringTableEntries == null) {
-                    const string dialogueRunnerName = nameof(Unity.DialogueRunner);
-                    const string lineProviderName = nameof(Unity.LineProviderBehaviour);
-                    const string stringTableName = nameof(stringTableEntries);
-                    const string localizationIDName = nameof(localizationId);
+            if (lineProviderIsTemporary && (localizationId == null || stringTableEntries == null))
+            {
+                const string dialogueRunnerName = nameof(Unity.DialogueRunner);
+                const string lineProviderName = nameof(Unity.LineProviderBehaviour);
+                const string stringTableName = nameof(stringTableEntries);
+                const string localizationIDName = nameof(localizationId);
 
-                    Debug.LogWarning($"Yarn script {scriptToLoad.name} is being added at runtime, but this {dialogueRunnerName} was not configured to use a {lineProviderName}, and a {localizationIDName} and {stringTableName} weren't provided. Lines from this script will not render correctly.\n\nTo fix this, either configure this {dialogueRunnerName} to use a {lineProviderName}, or provide a {localizationIDName} and {stringTableName}.");
-                }
-                
-                lineProvider.localizationDatabase.GetLocalization(localizationId).AddLocalizedStrings(stringTableEntries);
+                Debug.LogWarning($"Yarn script {scriptToLoad.name} is being added at runtime, but this {dialogueRunnerName} was not configured to use a {lineProviderName}, and a {localizationIDName} and {stringTableName} weren't provided. Lines from this script will not render correctly.\n\nTo fix this, either configure this {dialogueRunnerName} to use a {lineProviderName}, or provide a {localizationIDName} and {stringTableName}.");
             }
+
+            lineProvider.localizationDatabase.GetLocalization(localizationId).AddLocalizedStrings(stringTableEntries);
         }
 
         /// <summary>
@@ -571,10 +572,10 @@ namespace Yarn.Unity
                 // back to a really simple setup: we'll create a temporary
                 // TextLineProvider, create a temporary
                 // LocalizationDatabase, and set it up with the
-                // YarnPrograms we know about.
+                // YarnProjects we know about.
 
                 // TODO: decide what to do about determining the
-                // localization of runtime-provided YarnPrograms. Make it a
+                // localization of runtime-provided YarnProjects. Make it a
                 // parameter on an AddCompiledProgram method?
 
                 // Create the temporary line provider and the localization database
@@ -595,18 +596,18 @@ namespace Yarn.Unity
                 // localization CSV text asset associated with this
                 // script. (The text asset will only be included in the
                 // build if the YarnImporter determines that the
-                // YarnProgram has no LocalizationDatabase assigned.)
-                if (yarnProgram == null) {
-                    Debug.LogWarning($"No Yarn Program was provided. Cannot generate a temporary line provider from script contents.");
-                } else if (yarnProgram.defaultStringTable == null)
+                // YarnProject has no LocalizationDatabase assigned.)
+                if (yarnProject == null) {
+                    Debug.LogWarning($"No Yarn Project was provided. Cannot generate a temporary line provider from script contents.");
+                } else if (yarnProject.defaultStringTable == null)
                 {
-                    Debug.LogWarning($"No base localization string table was included for the Yarn script {yarnProgram.name}. It may be connected to a {nameof(LocalizationDatabase)}. You should set this {nameof(DialogueRunner)} up with a Line Provider, and connect the Line Provider to the LocalizationDatabase.");
+                    Debug.LogWarning($"No base localization string table was included for the Yarn script {yarnProject.name}. It may be connected to a {nameof(LocalizationDatabase)}. You should set this {nameof(DialogueRunner)} up with a Line Provider, and connect the Line Provider to the LocalizationDatabase.");
                     ;
                 }
                 else
                 {
                     // Extract the text for the base localization.
-                    var text = yarnProgram.defaultStringTable.text;
+                    var text = yarnProject.defaultStringTable.text;
 
                     // Parse it into string table entries.
                     var parsedStringTableEntries = StringTableEntry.ParseFromCSV(text);
@@ -637,9 +638,13 @@ namespace Yarn.Unity
                 dialogueView.onUserWantsLineContinuation = continueAction;
             }
 
-            if (yarnProgram != null)
+            if (yarnProject != null)
             {
-                Dialogue.SetProgram(yarnProgram.GetProgram());
+                if (Dialogue.IsActive) {
+                    Debug.LogError($"DialogueRunner wanted to load a Yarn Project in its Start method, but the Dialogue was already running one. The Dialogue Runner may not behave as you expect.");
+                }
+
+                Dialogue.SetProgram(yarnProject.GetProgram());
 
                 if (startAutomatically)
                 {
@@ -771,7 +776,7 @@ namespace Yarn.Unity
                 var text = Dialogue.ExpandSubstitutions(CurrentLine.RawText, CurrentLine.Substitutions);
 
                 if ( text == null) {
-                    Debug.LogWarning($"Dialogue Runner couldn't expand substitutions in Yarn program [{ yarnProgram.name }] node [{ CurrentNodeName }] with line ID [{ CurrentLine.TextID }]. "
+                    Debug.LogWarning($"Dialogue Runner couldn't expand substitutions in Yarn Project [{ yarnProject.name }] node [{ CurrentNodeName }] with line ID [{ CurrentLine.TextID }]. "
                         + "This usually happens because it couldn't find text in the Localization. Either the line isn't tagged properly, or the Localization Database isn't tracking the Yarn script's updates. "
                         + "For now, Dialogue Runner will swap in CurrentLine.RawText ... but you should fix this problem.");
                     text = CurrentLine.RawText;
@@ -1111,13 +1116,25 @@ namespace Yarn.Unity
                     continue;
                 }
 
+                var parameterName = methodParameters[i].Name;
                 var expectedType = methodParameters[i].ParameterType;
 
-                // Two special case: if the method expects a GameObject
-                // or a Component (or Component-derived type), locate
-                // that object and supply it. The object, or the object
-                // the desired component is on, must be active. If this
-                // fails, supply null.
+                // We handle three special cases:
+                // - if the method expects a GameObject, attempt locate
+                //   that game object by the provided name. The game object
+                //   must be active. If this lookup fails, provide null.
+                // - if the method expects a Component, or a
+                //   Component-derived type, locate that object and supply
+                //   it. The object, or the object the desired component is
+                //   on, must be active. If this fails, supply null.
+                // - if the method expects a Boolean, and the parameter is
+                //   a string that case-insensitively matches the name of
+                //   the parameter, act as though the parameter had been
+                //   "true". This allows us to write a command like
+                //   "Move(bool wait)", and invoke it as "<<move wait>>",
+                //   instead of having to say "<<move true>>". If it's
+                //   false, provide false; if it's any other string, throw
+                //   an error.
                 if (typeof(GameObject).IsAssignableFrom(expectedType))
                 {
                     finalParameters[i] = GameObject.Find(parameters[i]);
@@ -1135,6 +1152,25 @@ namespace Yarn.Unity
                         finalParameters[i] = c;
                     }
                 }
+                else if (typeof(bool).IsAssignableFrom(expectedType))
+                {
+                    // If it's a bool, and the parameter was the name of
+                    // the parameter, act as though they had written
+                    // 'true'.
+                    if (parameters[i].Equals(parameterName, StringComparison.InvariantCultureIgnoreCase)) {
+                        finalParameters[i] = true;
+                    } else {
+                        // It wasn't the name of the parameter, so attempt
+                        // to parse it as a boolean (i.e. the strings
+                        // "true" or "false"), and throw an exception if
+                        // that failed
+                        try {
+                            finalParameters[i] = Convert.ToBoolean(parameters[i]);
+                        } catch (Exception e) {
+                            throw new ArgumentException($"can't convert parameter {i+1} (\"{parameters[i]}\") to parameter {parameterName} ({expectedType}): {e}");                        
+                        }
+                    }
+                }
                 else
                 {
                     // Attempt to perform a straight conversion, using
@@ -1143,8 +1179,7 @@ namespace Yarn.Unity
                     try {
                         finalParameters[i] = Convert.ChangeType(parameters[i], expectedType, System.Globalization.CultureInfo.InvariantCulture);
                     } catch (Exception e) {
-                        var paramName  = methodParameters[i].Name;
-                        throw new ArgumentException($"can't convert parameter {i+1} (\"{parameters[i]}\") to parameter {paramName} ({expectedType}): {e}");                        
+                        throw new ArgumentException($"can't convert parameter {i+1} (\"{parameters[i]}\") to parameter {parameterName} ({expectedType}): {e}");                        
                     }
                     
                 }
@@ -1528,4 +1563,22 @@ namespace Yarn.Unity
     }
 
     #endregion
+
+    public static class AssemblyExtensions
+    {
+        /// <summary>
+        /// Assembly.GetTypes() can throw in some cases.  This extension will catch that exception and return only the types which were successfully loaded from the assembly.
+        /// </summary>
+        public static IEnumerable<System.Type> GetLoadableTypes(this Assembly @this)
+        {
+            try
+            {
+                return @this.GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                return e.Types.Where(t => t != null);
+            }
+        }
+    }
 }

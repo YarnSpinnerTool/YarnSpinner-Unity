@@ -1,11 +1,18 @@
 fileFormatVersion: 2
 guid: ba013fcce07ad48a383403726b73fcca
 ScriptedImporter:
-  fileIDToRecycleName:
-    4900000: Strings
-    11400000: Program
-    2186277476908879412: ImportLogs
+  internalIDToNameTable:
+  - first:
+      49: 4900000
+    second: Strings
+  - first:
+      114: 11400000
+    second: Program
+  - first:
+      41386430: 2186277476908879412
+    second: ImportLogs
   externalObjects: {}
+  serializedVersion: 2
   userData: 
   assetBundleName: 
   assetBundleVariant: 

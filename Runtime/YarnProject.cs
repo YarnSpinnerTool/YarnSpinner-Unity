@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Yarn.Unity {
 
     [HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
-    public class YarnProgram : ScriptableObject {
+    public class YarnProject : ScriptableObject {
 
         [SerializeField]
         [HideInInspector]

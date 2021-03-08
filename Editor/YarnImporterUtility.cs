@@ -56,7 +56,7 @@ internal static class YarnImporterUtility
         foreach (YarnImporter importer in serializedObject.targetObjects)
         {        
             var guid = AssetDatabase.AssetPathToGUID(importer.assetPath);
-            localizationDatabaseAsset.AddTrackedProgram(guid);
+            localizationDatabaseAsset.AddTrackedProject(guid);
 
             // If this database doesn't currently have a localization
             // for the currently selected program, add one
@@ -109,14 +109,14 @@ internal static class YarnImporterUtility
     }
 
     /// <summary>
-    /// Creates a new .yarnprogram asset in the same directory as the Yarn
+    /// Creates a new .yarnproject asset in the same directory as the Yarn
     /// script represented by serializedObject, and configures the script's
-    /// /// importer to use the new Yarn Program.
+    /// importer to use the new Yarn Project.
     /// </summary>
     /// <param name="serializedObject">A serialized object that represents
     /// a <see cref="YarnImporter"/>.</param>
     /// <returns>The path to the created asset.</returns>
-    internal static string CreateYarnProgram(YarnImporter initialSourceAsset)
+    internal static string CreateYarnProject(YarnImporter initialSourceAsset)
     {
         
         // Figure out where on disk this asset is
@@ -125,7 +125,7 @@ internal static class YarnImporterUtility
 
         // Figure out a new, unique path for the localization we're
         // creating
-        var databaseFileName = $"Program.yarnprogram";
+        var databaseFileName = $"Project.yarnproject";
 
         var destinationPath = Path.Combine(directory, databaseFileName);
         destinationPath = AssetDatabase.GenerateUniqueAssetPath(destinationPath);
@@ -146,13 +146,13 @@ internal static class YarnImporterUtility
     /// Assign a .yarn TextAsset file found at sourcePath to the YarnProgramImporter found at programPath
     /// </summary>
     internal static void AssignScriptToProgram(string sourcePath, string programPath) {
-        AssignScriptToProgram(AssetDatabase.LoadAssetAtPath<TextAsset>(sourcePath), AssetImporter.GetAtPath(programPath) as YarnProgramImporter);
+        AssignScriptToProgram(AssetDatabase.LoadAssetAtPath<TextAsset>(sourcePath), AssetImporter.GetAtPath(programPath) as YarnProjectImporter);
     }
 
     /// <summary>
     /// Assign a .yarn TextAsset file newSourceScript to the YarnProgramImporter programImporter
     /// </summary>
-    internal static void AssignScriptToProgram(TextAsset newSourceScript, YarnProgramImporter programImporter) {
+    internal static void AssignScriptToProgram(TextAsset newSourceScript, YarnProjectImporter programImporter) {
         programImporter.sourceScripts.Add(newSourceScript);
         EditorUtility.SetDirty(programImporter);
 

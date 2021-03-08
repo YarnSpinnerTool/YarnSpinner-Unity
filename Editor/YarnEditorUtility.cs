@@ -11,7 +11,7 @@ public static class YarnEditorUtility {
     // GUID for editor assets. (Doing it like this means that we don't have
     // to worry about where the assets are on disk, if the user has moved
     // Yarn Spinner around.)
-    const string IconTextureGUID = "528a6dd601766934abb8b1053bd798ef";
+    const string IconTextureGUID = "0ed312066ea6f40f6af965f21c818b34";
     const string TemplateFileGUID = "4f4ca4a46020a454f80e2ac78eda5aa1";
 
     /// <summary>
@@ -49,7 +49,7 @@ public static class YarnEditorUtility {
     /// Begins the interactive process of creating a new Yarn file in the
     /// Editor.
     /// </summary>    
-    [MenuItem("Assets/Create/Yarn Script", false, 101)]
+    [MenuItem("Assets/Create/Yarn Spinner/Yarn Script", false, 10)]
     public static void CreateYarnAsset() {
 
         // This method call is undocumented, but public. It's defined in
@@ -63,15 +63,15 @@ public static class YarnEditorUtility {
             GetTemplateYarnScriptPath());
     }
 
-    [MenuItem("Assets/Create/Yarn Spinner/Yarn Program", false, 101)]
-    public static void CreateYarnProgram() {
+    [MenuItem("Assets/Create/Yarn Spinner/Yarn Project", false, 101)]
+    public static void CreateYarnProject() {
         // This method call is undocumented, but public. It's defined in
         // ProjectWindowUtil, and used by other parts of the editor to
         // create other kinds of assets (scripts, textures, etc).
         ProjectWindowUtil.StartNameEditingIfProjectWindowExists(
             0,
             ScriptableObject.CreateInstance<DoCreateYarnScriptAsset>(),
-            "NewProgram.yarnprogram",
+            "NewProgram.yarnproject",
             GetYarnDocumentIconTexture(),
             GetTemplateYarnScriptPath());
     }
@@ -99,10 +99,10 @@ public static class YarnEditorUtility {
         
         // Figure out the 'file name' that the user entered
         string scriptName;
-        if (Path.GetExtension(pathName).Equals("yarnprogram", System.StringComparison.InvariantCultureIgnoreCase)) {
-            // This is a .yarnprogram file; the script "name" is always
-            // "Program".
-            scriptName = "Program";
+        if (Path.GetExtension(pathName).Equals("yarnproject", System.StringComparison.InvariantCultureIgnoreCase)) {
+            // This is a .yarnproject file; the script "name" is always
+            // "Project".
+            scriptName = "Project";
         } else {
             // The script name is the name of the file, sans extension.
             scriptName = Path.GetFileNameWithoutExtension(pathName);

@@ -46,7 +46,7 @@ namespace Yarn.Unity
 
         // The list paths to Yarn scripts in the project. Updated by the
         // UpgradeProgram method. 
-        List<string> yarnProgramList = new List<string>();
+        List<string> yarnProjectList = new List<string>();
 
         // The URL for the text document containing supporter information
         private const string SupportersURL = "https://yarnspinner.dev/supporters.txt";
@@ -87,10 +87,10 @@ namespace Yarn.Unity
 
             // Subscribe to be notified of asset changes - we'll use them
             // to refresh our asset list
-            EditorApplication.projectChanged += RefreshYarnProgramList;
+            EditorApplication.projectChanged += RefreshYarnProjectList;
 
             // Also refresh the list right
-            RefreshYarnProgramList();
+            RefreshYarnProjectList();
         }
 
         private static string GetInformationalVersionForType(System.Type type)
@@ -110,7 +110,7 @@ namespace Yarn.Unity
         private void OnDisable()
         {
             // Tidy up our update-list delegate when we're going away
-            EditorApplication.projectChanged -= RefreshYarnProgramList;
+            EditorApplication.projectChanged -= RefreshYarnProjectList;
         }
 
         private static void EditorUpdate()
@@ -272,7 +272,7 @@ namespace Yarn.Unity
                 upgradeViewScrollPos = scroll.scrollPosition;
 
                 // Show the list of scripts we can upgrade
-                foreach (var script in yarnProgramList)
+                foreach (var script in yarnProjectList)
                 {
                     EditorGUILayout.BeginHorizontal();
 
@@ -293,16 +293,16 @@ namespace Yarn.Unity
             }
 
             // If we have any scripts, show an Upgrade All button
-            if (yarnProgramList.Count > 0)
+            if (yarnProjectList.Count > 0)
             {
                 if (GUILayout.Button("Upgrade Scripts"))
                 {
-                    UpgradePrograms(yarnProgramList, UpgradeType.Version1to2);                    
+                    UpgradeProjects(yarnProjectList, UpgradeType.Version1to2);                    
                 }
             }
         }
 
-        private void UpgradePrograms(IEnumerable<string> paths, UpgradeType upgradeMode)
+        private void UpgradeProjects(IEnumerable<string> paths, UpgradeType upgradeMode)
         {
             var files = paths.Select(s =>
             {
@@ -326,7 +326,7 @@ namespace Yarn.Unity
 
                 
                 foreach (var upgradedFile in upgradeResult.Files) {
-                    if (upgradedFile.Replacements.Count() == 0)
+                    if (upgradedFile.Replacements.Count() == 0 && upgradedFile.IsNewFile == false)
                     {
                         Debug.Log($"No upgrades required for {upgradedFile.Path}");
 
@@ -355,11 +355,11 @@ namespace Yarn.Unity
             AssetDatabase.StopAssetEditing();
         }
 
-        private void RefreshYarnProgramList()
+        private void RefreshYarnProjectList()
         {
             // Search for all Yarn scripts, and load them into the list.
-            yarnProgramList = Directory.GetFiles(Application.dataPath, "*.yarn", SearchOption.AllDirectories)
-                                .Concat(Directory.GetFiles(Application.dataPath, "*.yarnprogram", SearchOption.AllDirectories))
+            yarnProjectList = Directory.GetFiles(Application.dataPath, "*.yarn", SearchOption.AllDirectories)
+                                .Concat(Directory.GetFiles(Application.dataPath, "*.yarnproject", SearchOption.AllDirectories))
                                 .ToList();
 
             // Repaint to ensure that any changes to the list are visible

@@ -14,8 +14,8 @@ using System.Collections;
 
 namespace Yarn.Unity
 {
-    [ScriptedImporter(1, new[] { "yarnprogram" }, 1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
-    public class YarnProgramImporter : ScriptedImporter
+    [ScriptedImporter(1, new[] { "yarnproject" }, 1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
+    public class YarnProjectImporter : ScriptedImporter
     {
 
         [System.Serializable]
@@ -62,13 +62,13 @@ namespace Yarn.Unity
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
-            var program = ScriptableObject.CreateInstance<YarnProgram>();
+            var project = ScriptableObject.CreateInstance<YarnProject>();
 
             // Start by creating the asset - no matter what, we need to
             // produce an asset, even if it doesn't contain valid Yarn
             // bytecode, so that other assets don't lose their references.
-            ctx.AddObjectToAsset("Program", program);
-            ctx.SetMainObject(program);
+            ctx.AddObjectToAsset("Project", project);
+            ctx.SetMainObject(project);
 
             foreach (var script in sourceScripts) {
                 string path = AssetDatabase.GetAssetPath(script);
@@ -95,8 +95,8 @@ namespace Yarn.Unity
             }
             catch (ParseException e)
             {
-                ctx.LogImportError($"Error in Yarn Program file:{e.Message}");
-                compileError = $"Error in Yarn Program {ctx.assetPath}: {e.Message}";
+                ctx.LogImportError($"Error in Yarn Project: {e.Message}");
+                compileError = $"Error in Yarn Project {ctx.assetPath}: {e.Message}";
                 return;
             }
 
@@ -110,7 +110,7 @@ namespace Yarn.Unity
 
             // We're done processing this file - we've parsed it, and
             // pulled any information out of it that we need to. Now to
-            // compile the scripts associated with this program.
+            // compile the scripts associated with this project.
 
             var scriptImporters = sourceScripts.Where(s => s != null).Select(s => AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(s)) as YarnImporter );
 
@@ -169,7 +169,7 @@ namespace Yarn.Unity
             }
 
             // Store _all_ declarations - both the ones in this
-            // .yarnprogram file, and the ones inside the .yarn files
+            // .yarnproject file, and the ones inside the .yarn files
             serializedDeclarations = localDeclarations
                 .Concat(compilationResult.Declarations)
                 .Where(decl => decl.DeclarationType == Declaration.Type.Variable)
@@ -226,7 +226,7 @@ namespace Yarn.Unity
 
                 ctx.AddObjectToAsset("Strings", defaultStringTable);
 
-                program.defaultStringTable = defaultStringTable;
+                project.defaultStringTable = defaultStringTable;
             }
 
             if (compilationResult.Program == null)
@@ -247,7 +247,7 @@ namespace Yarn.Unity
                 compiledBytes = memoryStream.ToArray();
             }
 
-            program.compiledYarnProgram = compiledBytes;
+            project.compiledYarnProgram = compiledBytes;
         }
     }
 
@@ -447,7 +447,7 @@ namespace Yarn.Unity
         }
     }
 
-    [CustomPropertyDrawer(typeof(YarnProgramImporter.SerializedDeclaration))]
+    [CustomPropertyDrawer(typeof(YarnProjectImporter.SerializedDeclaration))]
     public class DeclarationPropertyDrawer: PropertyDrawer {
 
         /// <summary>

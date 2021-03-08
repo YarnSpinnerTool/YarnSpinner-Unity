@@ -31,11 +31,40 @@ TD-110: Let me see your identification.
 
 - Audio for lines in a `Localization` object can now be previewed in the editor. (@radiatoryang)
 
+- Lines can be added to a `Localization` object at runtime. They're only stored in memory, and are discarded when gameplay ends.
+
+- Commands that take a boolean parameter now support specifying that parameter by its name, rather than requiring the string `true`.
+- For example, if you have a command like this:
+
+```csharp
+  [YarnCommand("walk")]
+  void WalkToPoint(string destinationName, bool wait = false) {
+    // ...
+  }
+```
+
+Previously, you'd need to use this in your Yarn scripts:
+
+```
+<<walk MyDestination true>>
+```
+
+With this change, you can instead say this:
+
+```
+<<walk MyDestination wait>>
+```
+
+- New icons for Yarn Spinner assets have been added.
+
 ### Changed
 
 - Certain private methods in `DialogueUI` have changed to protected, making it easier to subclass (@radiatoryang)
 - Fixed an issue where option buttons from previous option prompts could re-appear in later prompts (@radiatoryang)
 - Fixed an issue where dialogue views that are not enabled were still being waited for (@radiatoryang)
+- Upgrader tool now creates new files on disk, where needed (for example, .yarnprogram files)
+- `YarnProgram`, the asset that stores references to individual .yarn files for compilation, has been renamed to `YarnProject`. Because this change makes Unity forget any existing references to "YarnProgram" assets, **when upgrading to this version, you must set the Yarn Project field in your Dialogue Runners again.**
+- Renamed the 'StartHere' demo to 'Intro', because it's not actually the first step in installing Yarn Spinner.
 
 ### Removed
 

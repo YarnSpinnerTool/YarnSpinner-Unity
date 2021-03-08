@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Yarn.Unity
 {
 
-    [CreateAssetMenu(fileName = "LocalizationDatabase", menuName = "Yarn Spinner/Localization Database", order = 0), HelpURL("https://yarnspinner.dev/docs/unity/localisation/")]
+    [CreateAssetMenu(fileName = "LocalizationDatabase", menuName = "Yarn Spinner/Localization Database", order = 100), HelpURL("https://yarnspinner.dev/docs/unity/localisation/")]
     public class LocalizationDatabase : ScriptableObject
     {
         [SerializeField] List<Localization> _localizations = new List<Localization>();
@@ -74,7 +74,7 @@ namespace Yarn.Unity
         }
 
 #if UNITY_EDITOR
-        // The list of YarnPrograms that supply this LocalizationDatabase
+        // The list of YarnProjects that supply this LocalizationDatabase
         // with line content. LocalizationDatabaseEditor uses this to
         // update this database with content.
         [SerializeField] List<TextAsset> _trackedScripts = new List<TextAsset>();
@@ -83,7 +83,7 @@ namespace Yarn.Unity
         // (re-)imported, and are (or previously were) configured to use
         // this LocalizationDatabase. An AssetPostProcessor will use this
         // to update its contents, and also update the list of
-        // TrackedPrograms.
+        // TrackedScripts.
         [SerializeField] List<string> _recentlyUpdatedScriptGUIDs = new List<string>();
 
         public bool NeedsUpdate => _recentlyUpdatedScriptGUIDs.Count > 0;
@@ -91,7 +91,7 @@ namespace Yarn.Unity
         public IEnumerable<TextAsset> TrackedScripts => _trackedScripts;
         public List<string> RecentlyUpdatedGUIDs => _recentlyUpdatedScriptGUIDs;
 
-        public void AddTrackedProgram(string guid)
+        public void AddTrackedProject(string guid)
         {
             if (_recentlyUpdatedScriptGUIDs.Contains(guid) == false)
             {
@@ -99,7 +99,7 @@ namespace Yarn.Unity
             }
         }
 
-        public void AddTrackedProgram(TextAsset script)
+        public void AddTrackedProject(TextAsset script)
         {
             // No-op if we already have this in the list
             if (_trackedScripts.Contains(script)) {
@@ -108,12 +108,12 @@ namespace Yarn.Unity
             _trackedScripts.Add(script);
         }
 
-        public void RemoveTrackedProgram(TextAsset script)
+        public void RemoveTrackedProject(TextAsset script)
         {
             _trackedScripts.Remove(script);
         }
 
-        public void RemoveTrackedProgram(string guid)
+        public void RemoveTrackedProject(string guid)
         {
             _recentlyUpdatedScriptGUIDs.Remove(guid);
         }
@@ -123,14 +123,14 @@ namespace Yarn.Unity
         }
 
         private void OnValidate() {
-            var newTrackedProgramList = new List<TextAsset>();
+            var newTrackedProjectList = new List<TextAsset>();
             foreach (var entry in _trackedScripts) {
                 if (entry == null) {
                     continue;
                 }
-                newTrackedProgramList.Add(entry);
+                newTrackedProjectList.Add(entry);
             }
-            _trackedScripts = newTrackedProgramList;
+            _trackedScripts = newTrackedProjectList;
         }
 #endif
     }
