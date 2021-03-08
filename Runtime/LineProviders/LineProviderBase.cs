@@ -26,7 +26,7 @@ namespace Yarn.Unity
         /// <summary>
         /// The data source for this line provider.
         /// </summary>
-        public LocalizationDatabase localizationDatabase;
+        public LineDatabase lineDatabase;
         
         /// <summary>
         /// The language code for the currently selected language.

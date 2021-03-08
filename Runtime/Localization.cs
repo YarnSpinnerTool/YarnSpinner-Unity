@@ -95,7 +95,7 @@ namespace Yarn.Unity
 
 #if ADDRESSABLES
             if (_addressTable.ContainsKey(key)) {
-                Debug.LogError($"Localization {this.name} failed to find an asset for line {key}, but a value was found in the addressable references table. Double check your project's Use Addressables setting, or if it's correct, update the Localization Database.", this);
+                Debug.LogError($"Localization {this.name} failed to find an asset for line {key}, but a value was found in the addressable references table. Double check your project's Use Addressables setting, or if it's correct, update the Line Database.", this);
             }
 #endif
             return null;
@@ -125,7 +125,7 @@ namespace Yarn.Unity
 
             if (result != null && _assetTable.ContainsKey(key))
             {
-                Debug.LogError($"Localization {this.name} failed to find an address for line {key}, but a value was found in the direct references table. Double check your project's Use Addressables setting, or if it's correct, update the Localization Database.", this);
+                Debug.LogError($"Localization {this.name} failed to find an address for line {key}, but a value was found in the direct references table. Double check your project's Use Addressables setting, or if it's correct, update the Line Database.", this);
             }
 
             return result;

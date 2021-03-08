@@ -10,10 +10,10 @@ using UnityEditor.AddressableAssets;
 #endif
 
 
-internal static class LocalizationDatabaseUtility {
+internal static class LineDatabaseUtility {
     /// <summary>
     /// Creates a new localization asset with the given language, and
-    /// adds it to the localization database.
+    /// adds it to the line database.
     /// </summary>
     /// <param name="language">The locale code for the language to add.
     /// </param>    
@@ -41,7 +41,7 @@ internal static class LocalizationDatabaseUtility {
         AssetDatabase.SaveAssets();
         AssetDatabase.ImportAsset(destinationPath);
 
-        // Now that it exists, add it to the LocalizationDatabase's
+        // Now that it exists, add it to the LineDatabase's
         // _localizations field
         localizationsProperty.InsertArrayElementAtIndex(localizationsProperty.arraySize);
         var newProp = localizationsProperty.GetArrayElementAtIndex(localizationsProperty.arraySize - 1);
@@ -50,15 +50,15 @@ internal static class LocalizationDatabaseUtility {
         // And we're done!
         serializedObject.ApplyModifiedProperties();
 
-        // Finally, update this localization database so that this new
+        // Finally, update this line database so that this new
         // localization has content.
-        UpdateContents(serializedObject.targetObject as LocalizationDatabase);
+        UpdateContents(serializedObject.targetObject as LineDatabase);
 
         // Return the path of the file we created.
         return destinationPath;
     }
 
-    public static void UpdateContents(LocalizationDatabase database)
+    public static void UpdateContents(LineDatabase database)
     {
         // First, get all scripts whose importers are configured to use
         // this database - we need to add them to our TrackedPrograms list
@@ -73,7 +73,7 @@ internal static class LocalizationDatabaseUtility {
 
             var importer = AssetImporter.GetAtPath(path);
             if (!(importer is YarnImporter yarnImporter)) {
-                Debug.LogWarning($"Yarn Spinner internal error: localization database was told to load asset {path}, but this does not have a {nameof(YarnImporter)}. Ignoring.");
+                Debug.LogWarning($"Yarn Spinner internal error: line database was told to load asset {path}, but this does not have a {nameof(YarnImporter)}. Ignoring.");
                 continue;
             }
 
@@ -84,7 +84,7 @@ internal static class LocalizationDatabaseUtility {
                 continue;
             }
 
-            if (yarnImporter.localizationDatabase == database)
+            if (yarnImporter.lineDatabase == database)
             {
                 // We need to add or update content based on this asset.
                 database.AddTrackedProject(textAsset);
@@ -137,7 +137,7 @@ internal static class LocalizationDatabaseUtility {
             }
             catch (KeyNotFoundException)
             {
-                Debug.LogWarning($"{localizedTextAsset.text.name} is marked for language {languageName}, but this {nameof(LocalizationDatabase)} isn't set up for that language. TODO: offer a quick way to create one here.");
+                Debug.LogWarning($"{localizedTextAsset.text.name} is marked for language {languageName}, but this {nameof(LineDatabase)} isn't set up for that language. TODO: offer a quick way to create one here.");
                 continue;
             }
 

@@ -42,14 +42,14 @@ namespace Yarn.Unity
                 throw new System.InvalidOperationException($"Can't get audio for line {line.ID}: {nameof(CurrentAudioLanguageCode)} is not set");                
             }
 
-            Localization audioLocalization = localizationDatabase.GetLocalization(CurrentAudioLanguageCode);
+            Localization audioLocalization = lineDatabase.GetLocalization(CurrentAudioLanguageCode);
 
             Localization textLocalization;
 
             // If the audio language is different to the text language,
             // pull the text data from a different localization
             if (CurrentAudioLanguageCode != CurrentTextLanguageCode) {
-                textLocalization = localizationDatabase.GetLocalization(CurrentTextLanguageCode);
+                textLocalization = lineDatabase.GetLocalization(CurrentTextLanguageCode);
             } else {
                 textLocalization = audioLocalization;
             }

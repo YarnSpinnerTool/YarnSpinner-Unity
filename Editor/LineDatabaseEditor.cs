@@ -12,9 +12,9 @@ namespace Yarn.Unity
 {
 
 
-    [CustomEditor(typeof(LocalizationDatabase))]
+    [CustomEditor(typeof(LineDatabase))]
     [CanEditMultipleObjects]
-    public class LocalizationDatabaseEditor : Editor
+    public class LineDatabaseEditor : Editor
     {
         SerializedProperty localizationsProperty;
         SerializedProperty trackedProgramsProperty;
@@ -35,7 +35,7 @@ namespace Yarn.Unity
             var menu = new GenericMenu();
 
             // Build the list of locales that are present in the currently
-            // selected LocalizationDatabase(s).
+            // selected LineDatabase(s).
             var locales = new List<string>();
             foreach (SerializedProperty localization in localizationsProperty)
             {
@@ -117,7 +117,7 @@ namespace Yarn.Unity
                 return;
             }
 
-            LocalizationDatabaseUtility.CreateLocalizationWithLanguage(serializedObject, theLanguage);
+            LineDatabaseUtility.CreateLocalizationWithLanguage(serializedObject, theLanguage);
         }
 
         
@@ -125,14 +125,14 @@ namespace Yarn.Unity
         public override void OnInspectorGUI()
         {
             // If true, at least one of the Localizations in the selected
-            // LocalizationDatabases are null references; in this case, the
+            // LineDatabases are null references; in this case, the
             // Add New Localization button will be disabled (it will be
             // re-enabled when the empty field is filled)
             bool anyLocalizationsAreNull = false;
 
             if (localizationsProperty.arraySize == 0)
             {
-                EditorGUILayout.HelpBox($"This {ObjectNames.NicifyVariableName(nameof(LocalizationDatabase)).ToLowerInvariant()} has no {ObjectNames.NicifyVariableName(nameof(Localization)).ToLowerInvariant()}s. Create a new one, or add an existing one.", MessageType.Info);
+                EditorGUILayout.HelpBox($"This {ObjectNames.NicifyVariableName(nameof(LineDatabase)).ToLowerInvariant()} has no {ObjectNames.NicifyVariableName(nameof(Localization)).ToLowerInvariant()}s. Create a new one, or add an existing one.", MessageType.Info);
             }
 
             foreach (SerializedProperty property in localizationsProperty)
@@ -209,7 +209,7 @@ namespace Yarn.Unity
                 // Is a locale code set that's invalid?
                 if (localeCode == null)
                 {
-                    EditorGUILayout.HelpBox($"Drag and drop a {nameof(Localization)} to this field to add it to this localization database.", MessageType.Info);
+                    EditorGUILayout.HelpBox($"Drag and drop a {nameof(Localization)} to this field to add it to this line database.", MessageType.Info);
                 }
                 else
                 {
@@ -283,7 +283,7 @@ namespace Yarn.Unity
             // and offer to update the database now
             if (trackedProgramsProperty.arraySize == 0)
             {
-                EditorGUILayout.HelpBox("No Yarn scripts currently use this database.\n\nTo make a Yarn script use this database, select one, and set its Localization Database to this file.", MessageType.Info);
+                EditorGUILayout.HelpBox("No Yarn scripts currently use this database.\n\nTo make a Yarn script use this database, select one, and set its Line Database to this file.", MessageType.Info);
             }
             else
             {
@@ -294,9 +294,9 @@ namespace Yarn.Unity
 
                     if (GUILayout.Button("Update Database"))
                     {
-                        foreach (LocalizationDatabase target in serializedObject.targetObjects)
+                        foreach (LineDatabase target in serializedObject.targetObjects)
                         {
-                            LocalizationDatabaseUtility.UpdateContents(target);
+                            LineDatabaseUtility.UpdateContents(target);
                         }
                     }
 

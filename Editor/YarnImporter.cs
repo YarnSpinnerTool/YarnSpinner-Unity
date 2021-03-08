@@ -21,9 +21,9 @@ namespace Yarn.Unity
     {
         // Detects when a YarnProject has been imported (either created or
         // modified), and checks to see if its importer is configured to
-        // associate it with a LocalizationDatabase. If it is, the
-        // LocalizationDatabase is updated to include this project in its
-        // TrackedProjects collection. Finally, the LocalizationDatabase is
+        // associate it with a LineDatabase. If it is, the
+        // LineDatabase is updated to include this project in its
+        // TrackedProjects collection. Finally, the LineDatabase is
         // made to update its contents.
         //
         // We do this in a post-processor rather than in the importer
@@ -34,26 +34,26 @@ namespace Yarn.Unity
         static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
         {
 
-            // Find all localization databases whose list of recently
+            // Find all line databases whose list of recently
             // updated scripts has changed.
-            var allLocalizationDatabases = AssetDatabase
-                .FindAssets($"t:{nameof(LocalizationDatabase)}")
+            var allLineDatabases = AssetDatabase
+                .FindAssets($"t:{nameof(LineDatabase)}")
                 .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
-                .Select(path => AssetDatabase.LoadAssetAtPath<LocalizationDatabase>(path))
+                .Select(path => AssetDatabase.LoadAssetAtPath<LineDatabase>(path))
                 .Where(db => db.NeedsUpdate);
 
-            if (allLocalizationDatabases.Count() == 0) {
+            if (allLineDatabases.Count() == 0) {
                 return;
             }
 
-            foreach (var db in allLocalizationDatabases) {
+            foreach (var db in allLineDatabases) {
                 // Make the database update its contents
-                LocalizationDatabaseUtility.UpdateContents(db);
+                LineDatabaseUtility.UpdateContents(db);
             }
 
-            // Save any changed localization databases. (This will
+            // Save any changed line databases. (This will
             // trigger this method to be called again, but the
-            // localization databases will no longer need updating, so
+            // line databases will no longer need updating, so
             // we won't loop.)
             AssetDatabase.SaveAssets();
         }
@@ -89,7 +89,8 @@ namespace Yarn.Unity
             ArrayUtility.Add(ref localizations,  new YarnTranslation(languageID, languageAsset));
         }
 
-        public LocalizationDatabase localizationDatabase;
+        [UnityEngine.Serialization.FormerlySerializedAs("localizationDatabase")]
+        public LineDatabase lineDatabase;
 
         private void OnValidate()
         {
@@ -289,8 +290,8 @@ namespace Yarn.Unity
                 
             }
 
-            if (localizationDatabase) {
-                localizationDatabase.AddTrackedProject(AssetDatabase.AssetPathToGUID(ctx.assetPath));
+            if (lineDatabase) {
+                lineDatabase.AddTrackedProject(AssetDatabase.AssetPathToGUID(ctx.assetPath));
             }
 
         }

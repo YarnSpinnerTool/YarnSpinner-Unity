@@ -193,7 +193,7 @@ position: 0,0
         }
 
         [Test]
-        public void YarnImporterUtility_CanCreateNewLocalizationDatabase()
+        public void YarnImporterUtility_CanCreateNewLineDatabase()
         {
             // Arrange: Import a yarn script
             string fileName = Path.GetRandomFileName();
@@ -207,24 +207,24 @@ position: 0,0
             var importer = AssetImporter.GetAtPath(path) as YarnImporter;
             var serializedObject = new SerializedObject(importer);
 
-            var localizationDatabaseAfterImport = importer.localizationDatabase;
+            var lineDatabaseAfterImport = importer.lineDatabase;
 
-            // Act: create a new localization database. 
-            YarnImporterUtility.CreateNewLocalizationDatabase(serializedObject);
+            // Act: create a new line database. 
+            YarnImporterUtility.CreateNewLineDatabase(serializedObject);
 
             importer.SaveAndReimport();
 
-            // Assert: Verify that the new localization database exists,
+            // Assert: Verify that the new line database exists,
             // and contains a single localization, and that localization
             // contains the string table entries we expect.
-            Assert.Null(localizationDatabaseAfterImport, "The script should not have a localization database after initial creation");
+            Assert.Null(lineDatabaseAfterImport, "The script should not have a line database after initial creation");
 
-            Assert.NotNull(importer.localizationDatabase, "Importer should have a localization database");
-            createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.localizationDatabase));
+            Assert.NotNull(importer.lineDatabase, "Importer should have a line database");
+            createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.lineDatabase));
 
-            var db = importer.localizationDatabase;
-            Assert.AreEqual(1, db.Localizations.Count(), "Localization database should have a single localization");
-            createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.localizationDatabase.Localizations.First()));
+            var db = importer.lineDatabase;
+            Assert.AreEqual(1, db.Localizations.Count(), "Line Database should have a single localization");
+            createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.lineDatabase.Localizations.First()));
 
             var localization = db.Localizations.First();
             Assert.AreEqual(localization.LocaleCode, importer.baseLanguageID, "Localization locale should match script's language");
@@ -234,7 +234,7 @@ position: 0,0
         }
 
         [Test]
-        public void YarnImporterUtility_CanCreateLocalizationInLocalizationDatabase()
+        public void YarnImporterUtility_CanCreateLocalizationInLineDatabase()
         {
             // Arrange: Import a yarn script and create a localization
             // database for it
@@ -246,16 +246,16 @@ position: 0,0
             var importer = AssetImporter.GetAtPath(path) as YarnImporter;
             var importerSerializedObject = new SerializedObject(importer);
 
-            YarnImporterUtility.CreateNewLocalizationDatabase(importerSerializedObject);
-            createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.localizationDatabase));
+            YarnImporterUtility.CreateNewLineDatabase(importerSerializedObject);
+            createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.lineDatabase));
 
-            var databaseSerializedObject = new SerializedObject(importer.localizationDatabase);
+            var databaseSerializedObject = new SerializedObject(importer.lineDatabase);
 
             // Act: Create a new localization CSV file for some new language
-            LocalizationDatabaseUtility.CreateLocalizationWithLanguage(databaseSerializedObject, AlternateLocaleCode);
+            LineDatabaseUtility.CreateLocalizationWithLanguage(databaseSerializedObject, AlternateLocaleCode);
             YarnImporterUtility.CreateLocalizationForLanguageInProgram(importerSerializedObject, AlternateLocaleCode);
 
-            foreach (var loc in importer.localizationDatabase.Localizations)
+            foreach (var loc in importer.lineDatabase.Localizations)
             {
                 createdFilePaths.Add(AssetDatabase.GetAssetPath(loc));
             }
@@ -288,13 +288,13 @@ position: 0,0
             AssetDatabase.Refresh();
             var importer = AssetImporter.GetAtPath(path) as YarnImporter;
             var importerSerializedObject = new SerializedObject(importer);            
-            var localizationPaths = YarnImporterUtility.CreateNewLocalizationDatabase(importerSerializedObject);
+            var localizationPaths = YarnImporterUtility.CreateNewLineDatabase(importerSerializedObject);
 
             createdFilePaths.AddRange(localizationPaths);
 
-            var localizationDatabaseSerializedObject = new SerializedObject(importer.localizationDatabase);
+            var lineDatabaseSerializedObject = new SerializedObject(importer.lineDatabase);
 
-            var newLocalizationFilePath = LocalizationDatabaseUtility.CreateLocalizationWithLanguage(localizationDatabaseSerializedObject, AlternateLocaleCode);
+            var newLocalizationFilePath = LineDatabaseUtility.CreateLocalizationWithLanguage(lineDatabaseSerializedObject, AlternateLocaleCode);
 
             createdFilePaths.Add(newLocalizationFilePath);
 

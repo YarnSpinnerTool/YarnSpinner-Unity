@@ -15,12 +15,12 @@ public class YarnImporterEditor : ScriptedImporterEditor
 {
     private SerializedProperty baseLanguageIdProperty;
     private SerializedProperty baseLanguageProperty;
-    private SerializedProperty localizationDatabaseProperty;
+    private SerializedProperty lineDatabaseProperty;
     private SerializedProperty isSuccessfullyCompiledProperty;
     private SerializedProperty compilationErrorMessageProperty;
     private SerializedProperty localizationsProperty;
 
-    public string DestinationProgramError => destinationYarnProjectImporter?.compileError ?? null;
+    public string DestinationProjectError => destinationYarnProjectImporter?.compileError ?? null;
 
     private YarnProject destinationYarnPrject;
     private YarnProjectImporter destinationYarnProjectImporter;
@@ -31,7 +31,7 @@ public class YarnImporterEditor : ScriptedImporterEditor
 
         baseLanguageIdProperty = serializedObject.FindProperty("baseLanguageID");
         baseLanguageProperty = serializedObject.FindProperty("baseLanguage");
-        localizationDatabaseProperty = serializedObject.FindProperty("localizationDatabase");
+        lineDatabaseProperty = serializedObject.FindProperty("lineDatabase");
         isSuccessfullyCompiledProperty = serializedObject.FindProperty("isSuccesfullyParsed");
         compilationErrorMessageProperty = serializedObject.FindProperty("parseErrorMessage");
         localizationsProperty = serializedObject.FindProperty("localizations");
@@ -63,9 +63,9 @@ public class YarnImporterEditor : ScriptedImporterEditor
             } else {
                 EditorGUILayout.HelpBox(compilationErrorMessageProperty.stringValue, MessageType.Error);
             }                  
-        } else if (string.IsNullOrEmpty(DestinationProgramError) == false) {
+        } else if (string.IsNullOrEmpty(DestinationProjectError) == false) {
             
-            EditorGUILayout.HelpBox(DestinationProgramError, MessageType.Error);
+            EditorGUILayout.HelpBox(DestinationProjectError, MessageType.Error);
             
         }
 
@@ -108,13 +108,13 @@ public class YarnImporterEditor : ScriptedImporterEditor
 
             bool showReadOnlyLocalizationUI = false;
 
-            if (localizationDatabaseProperty.objectReferenceValue != null)
+            if (lineDatabaseProperty.objectReferenceValue != null)
             {
                 // We don't have a line tag for every string, BUT we have a
-                // localization database attached. This can happen when
+                // line database attached. This can happen when
                 // we've done some loc work, and added new lines, but
                 // haven't tagged those new lines. Draw a read-only view of
-                // the localization database so that it's clear that the
+                // the line database so that it's clear that the
                 // setup hasn't been lost, and offer to update the line
                 // tags.
 
@@ -219,18 +219,18 @@ public class YarnImporterEditor : ScriptedImporterEditor
     {
         using (var changed = new EditorGUI.ChangeCheckScope())
         {
-            var previousLocalizationDatabase = localizationDatabaseProperty.objectReferenceValue as LocalizationDatabase;
+            var previousLineDatabase = lineDatabaseProperty.objectReferenceValue as LineDatabase;
 
-            // Show the 'localization database' property
-            EditorGUILayout.PropertyField(localizationDatabaseProperty);
+            // Show the 'line database' property
+            EditorGUILayout.PropertyField(lineDatabaseProperty);
 
             // If this changed to a valid value, update that database so
             // that it tracks all selected programs
             if (changed.changed)
             {
-                var newObjectReference = localizationDatabaseProperty.objectReferenceValue;
+                var newObjectReference = lineDatabaseProperty.objectReferenceValue;
 
-                if (previousLocalizationDatabase != null && previousLocalizationDatabase != newObjectReference ) {
+                if (previousLineDatabase != null && previousLineDatabase != newObjectReference ) {
                     // The property used to refer to a localization
                     // database, but that's changed. Tell the previous
                     // value to stop tracking this program.                    
@@ -238,27 +238,27 @@ public class YarnImporterEditor : ScriptedImporterEditor
                     {
                         var guid = AssetDatabase.AssetPathToGUID(importer.assetPath);
                         
-                        previousLocalizationDatabase.RemoveTrackedProject(guid);
+                        previousLineDatabase.RemoveTrackedProject(guid);
                         
-                        // Mark that the localization database has changed,
+                        // Mark that the line database has changed,
                         // so needs to be saved
-                        EditorUtility.SetDirty(previousLocalizationDatabase);
+                        EditorUtility.SetDirty(previousLineDatabase);
                     }
                 }
 
                 // Tell the new database that it should track us
-                if (newObjectReference is LocalizationDatabase database)
+                if (newObjectReference is LineDatabase database)
                 {
                     foreach (YarnImporter importer in serializedObject.targetObjects)
                     {
                         var guid = AssetDatabase.AssetPathToGUID(importer.assetPath);
                         database.AddTrackedProject(guid);
 
-                        // Mark that the localization database should save
+                        // Mark that the line database should save
                         // changes
-                        if (previousLocalizationDatabase != null)
+                        if (previousLineDatabase != null)
                         {
-                            EditorUtility.SetDirty(previousLocalizationDatabase);
+                            EditorUtility.SetDirty(previousLineDatabase);
                         }
                     }
                 } 
@@ -268,30 +268,30 @@ public class YarnImporterEditor : ScriptedImporterEditor
 
         EditorGUI.BeginDisabledGroup(onlyAllowEditingDatabaseField);
 
-        // If no localization database is provided, offer a button that
+        // If no line database is provided, offer a button that
         // will create a new one that 1. tracks this script 2. has a
         // localization set to this script's base language 3. and also we
         // make sure that this project's language list includes this
         // program's base language.
-        if (localizationDatabaseProperty.objectReferenceValue == null)
+        if (lineDatabaseProperty.objectReferenceValue == null)
         {
-            if (GUILayout.Button("Create New Localization Database"))
+            if (GUILayout.Button("Create New Line Database"))
             {
-                YarnImporterUtility.CreateNewLocalizationDatabase(serializedObject);
+                YarnImporterUtility.CreateNewLineDatabase(serializedObject);
             }
         }
 
-        // For every localization in the localization database:
+        // For every localization in the line database:
         // - If we have a TextAsset for it, show it here
         // - If we don't, create a button that creates one
         //
         // We only do this if we're editing a single object, because each
         // separate script will have its own translations.
-        if (serializedObject.isEditingMultipleObjects == false && localizationDatabaseProperty.objectReferenceValue != null)
+        if (serializedObject.isEditingMultipleObjects == false && lineDatabaseProperty.objectReferenceValue != null)
         {
             EditorGUI.indentLevel += 1;
             var importer = serializedObject.targetObject as YarnImporter;
-            var localizationDatabase = localizationDatabaseProperty.objectReferenceValue as LocalizationDatabase;
+            var lineDatabase = lineDatabaseProperty.objectReferenceValue as LineDatabase;
 
             var languagesList = new List<string>();
             languagesList.Add(importer.baseLanguageID);
@@ -355,7 +355,7 @@ public class YarnImporterEditor : ScriptedImporterEditor
             // For each language that's present in the localization
             // database but not present in this script, offer buttons that
             // create a CSV for that language
-            var languagesMissing = localizationDatabase.GetLocalizationLanguages().Except(languagesList);
+            var languagesMissing = lineDatabase.GetLocalizationLanguages().Except(languagesList);
 
             foreach (var language in languagesMissing)
             {
@@ -397,11 +397,11 @@ public class YarnImporterEditor : ScriptedImporterEditor
 
             // Show a warning for any languages that the script has a
             // localization for, but that the database doesn't call for
-            var languagesExtraneous = languagesList.Except(localizationDatabase.GetLocalizationLanguages());
+            var languagesExtraneous = languagesList.Except(lineDatabase.GetLocalizationLanguages());
 
             if (languagesExtraneous.Count() > 0)
             {
-                EditorGUILayout.HelpBox($"This script has localizations for the following languages, but the localization database isn't set up to use them: {string.Join(", ", languagesExtraneous)}", MessageType.Warning);
+                EditorGUILayout.HelpBox($"This script has localizations for the following languages, but the line database isn't set up to use them: {string.Join(", ", languagesExtraneous)}", MessageType.Warning);
             }
 
             // TODO: is it possible to interleave the property fields for
@@ -421,7 +421,7 @@ public class YarnImporterEditor : ScriptedImporterEditor
             }
 
 
-            EditorGUILayout.HelpBox("To add a localization for a new language, select the Localization Database, and click Create New Localization.", MessageType.Info);
+            EditorGUILayout.HelpBox("To add a localization for a new language, select the Line Database, and click Create New Localization.", MessageType.Info);
         }
 
         EditorGUI.EndDisabledGroup();

@@ -11,7 +11,7 @@ namespace Yarn.Unity {
         private SerializedProperty stringsToViews;
         private SerializedProperty _yarnProgramProperty = default;
         private SerializedProperty _useLinesFromProperty;
-        private SerializedProperty _localizationDatabaseProperty;
+        private SerializedProperty _lineDatabaseProperty;
         private SerializedProperty _stringsToViewsProperty;
         
         private SerializedProperty _useTextMeshProProperty = default;
@@ -29,7 +29,7 @@ namespace Yarn.Unity {
 
             _yarnProgramProperty = serializedObject.FindProperty("yarnProgram");
             _useLinesFromProperty = serializedObject.FindProperty("useLinesFromScript");
-            _localizationDatabaseProperty = serializedObject.FindProperty("localizationDatabase");
+            _lineDatabaseProperty = serializedObject.FindProperty("lineDatabase");
             
             _stringsToViewsProperty = serializedObject.FindProperty("stringsToViews");
 
@@ -96,7 +96,7 @@ namespace Yarn.Unity {
             using (var change = new EditorGUI.ChangeCheckScope()) {
                 EditorGUILayout.PropertyField(_yarnProgramProperty);
                 EditorGUILayout.PropertyField(_useLinesFromProperty);
-                EditorGUILayout.PropertyField(_localizationDatabaseProperty);
+                EditorGUILayout.PropertyField(_lineDatabaseProperty);
 
                 if (change.changed) {
                     // Rebuild the string table if the yarn asset or the language preference has changed
@@ -109,8 +109,8 @@ namespace Yarn.Unity {
 
             if (!(_yarnProgramProperty.objectReferenceValue is YarnProject)) {
                 EditorGUILayout.HelpBox("This component needs a yarn script.", MessageType.Info);
-            } else if (!(_localizationDatabaseProperty.objectReferenceValue is LocalizationDatabase localizationDatabase)) {
-                EditorGUILayout.HelpBox("This component needs a localization database.", MessageType.Info);
+            } else if (!(_lineDatabaseProperty.objectReferenceValue is LineDatabase lineDatabase)) {
+                EditorGUILayout.HelpBox("This component needs a line database.", MessageType.Info);
              } else {
                 _showTextUiComponents = EditorGUILayout.Foldout(_showTextUiComponents, _textUiComponentsLabel);
                 if (_showTextUiComponents) {
@@ -135,7 +135,7 @@ namespace Yarn.Unity {
                             string key = keyProperty.stringValue;
 
                             // Retrieve the localized text
-                            var localisedText = localizationDatabase.GetLocalization(Preferences.TextLanguage)?.GetLocalizedString(key) ?? $"<no localization for '{Preferences.TextLanguage}'>";
+                            var localisedText = lineDatabase.GetLocalization(Preferences.TextLanguage)?.GetLocalizedString(key) ?? $"<no localization for '{Preferences.TextLanguage}'>";
 
 
                             GUIContent label = new GUIContent() { 

@@ -182,12 +182,12 @@ namespace Yarn.Unity
                 importer.parseErrorMessage = null;
             }
 
-            var unassignedScripts = scriptImporters.Any(s => s.localizationDatabase == null);
+            var unassignedScripts = scriptImporters.Any(s => s.lineDatabase == null);
 
             if (unassignedScripts)
             {
                 // We have scripts in this program whose lines are not
-                // being sent to a localization database. Create a 'default'
+                // being sent to a line database. Create a 'default'
                 // string table for this program, so that it can be used by
                 // a DialogueRunner when it creates its temporary line
                 // provider.

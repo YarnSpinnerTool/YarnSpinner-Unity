@@ -6,8 +6,8 @@ using System.Collections.Generic;
 namespace Yarn.Unity
 {
 
-    [CreateAssetMenu(fileName = "LocalizationDatabase", menuName = "Yarn Spinner/Localization Database", order = 100), HelpURL("https://yarnspinner.dev/docs/unity/localisation/")]
-    public class LocalizationDatabase : ScriptableObject
+    [CreateAssetMenu(fileName = "LineDatabase", menuName = "Yarn Spinner/Line Database", order = 100), HelpURL("https://yarnspinner.dev/docs/unity/localisation/")]
+    public class LineDatabase : ScriptableObject
     {
         [SerializeField] List<Localization> _localizations = new List<Localization>();
         public IEnumerable<Localization> Localizations => _localizations;
@@ -74,14 +74,14 @@ namespace Yarn.Unity
         }
 
 #if UNITY_EDITOR
-        // The list of YarnProjects that supply this LocalizationDatabase
-        // with line content. LocalizationDatabaseEditor uses this to
+        // The list of YarnProjects that supply this LineDatabase
+        // with line content. LineDatabaseEditor uses this to
         // update this database with content.
         [SerializeField] List<TextAsset> _trackedScripts = new List<TextAsset>();
 
         // A list of GUIDs for YarnScripts that have recently been
         // (re-)imported, and are (or previously were) configured to use
-        // this LocalizationDatabase. An AssetPostProcessor will use this
+        // this LineDatabase. An AssetPostProcessor will use this
         // to update its contents, and also update the list of
         // TrackedScripts.
         [SerializeField] List<string> _recentlyUpdatedScriptGUIDs = new List<string>();

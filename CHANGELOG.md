@@ -64,6 +64,7 @@ With this change, you can instead say this:
 - Fixed an issue where dialogue views that are not enabled were still being waited for (@radiatoryang)
 - Upgrader tool now creates new files on disk, where needed (for example, .yarnprogram files)
 - `YarnProgram`, the asset that stores references to individual .yarn files for compilation, has been renamed to `YarnProject`. Because this change makes Unity forget any existing references to "YarnProgram" assets, **when upgrading to this version, you must set the Yarn Project field in your Dialogue Runners again.**
+- `LocalizationDatabase`, the asset that stores references to `Localization` assets and manages per-locale line lookups, has been renamed to `LineDatabase`. Because this change makes Unity forget any existing references to "LocalizationDatabase" assets, **when upgrading to this version, you must set the LineDatabase field in your LineProviders again.**
 - Renamed the 'StartHere' demo to 'Intro', because it's not actually the first step in installing Yarn Spinner.
 
 ### Removed

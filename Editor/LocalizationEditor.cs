@@ -141,7 +141,7 @@ public class LocalizationEditor : Editor {
 
             string localizationName = nameof(Localization).ToLowerInvariant();
             string assetSourceFolderName = ObjectNames.NicifyVariableName(nameof(Localization.AssetSourceFolder)).ToLowerInvariant();
-            string localizationDatabaseName = ObjectNames.NicifyVariableName(nameof(LocalizationDatabase)).ToLowerInvariant();
+            string localizationDatabaseName = ObjectNames.NicifyVariableName(nameof(LineDatabase)).ToLowerInvariant();
             
             var message = $"This {localizationName} has an {assetSourceFolderName}, but no assets for any of its lines. Select the {localizationDatabaseName} that uses this {localizationName}, and click Update.\n\nIf you still see this message, check that the files in the {assetSourceFolderName} include your script's line IDs in their file names.";
 

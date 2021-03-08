@@ -7,12 +7,12 @@ using Yarn.Unity;
 
 /// <summary>
 /// Contains methods for performing high-level operations on Yarn scripts,
-/// and their associated localization files and localization databases.
+/// and their associated localization files and line databases.
 /// </summary>
 internal static class YarnImporterUtility
 {
     /// <summary>
-    /// Creates a new localization database asset adjacent to one of the
+    /// Creates a new line database asset adjacent to one of the
     /// selected objects, configures all selected objects to use it, and
     /// ensures that the project's text language list includes this
     /// program's base language. A Localization asset will also be created
@@ -21,15 +21,15 @@ internal static class YarnImporterUtility
     /// <param name="serializedObject">A serialized object that represents
     /// a <see cref="YarnImporter"/>.</param>
     /// <returns>The paths to the newly created assets.</returns>
-    internal static string[] CreateNewLocalizationDatabase(SerializedObject serializedObject)
+    internal static string[] CreateNewLineDatabase(SerializedObject serializedObject)
     {
         if (serializedObject.isEditingMultipleObjects) {
-            throw new System.InvalidOperationException($"Cannot invoke {nameof(CreateNewLocalizationDatabase)} when editing multiple objects");
+            throw new System.InvalidOperationException($"Cannot invoke {nameof(CreateNewLineDatabase)} when editing multiple objects");
         }
 
         var createdPaths = new List<string>();
 
-        var localizationDatabaseProperty = serializedObject.FindProperty("localizationDatabase");
+        var lineDatabaseProperty = serializedObject.FindProperty("lineDatabase");
 
         var target = serializedObject.targetObjects[0];
 
@@ -39,14 +39,14 @@ internal static class YarnImporterUtility
 
         // Figure out a new, unique path for the localization we're
         // creating
-        var databaseFileName = $"LocalizationDatabase.asset";
+        var databaseFileName = $"Line Database.asset";
         var destinationPath = Path.Combine(directory, databaseFileName);
         destinationPath = AssetDatabase.GenerateUniqueAssetPath(destinationPath);
 
         createdPaths.Add(destinationPath);
 
         // Create the asset and set it up
-        var localizationDatabaseAsset = ScriptableObject.CreateInstance<LocalizationDatabase>();
+        var lineDatabase = ScriptableObject.CreateInstance<LineDatabase>();
 
         // The list of languages we needed to add to the project's text language
         // list
@@ -56,13 +56,13 @@ internal static class YarnImporterUtility
         foreach (YarnImporter importer in serializedObject.targetObjects)
         {        
             var guid = AssetDatabase.AssetPathToGUID(importer.assetPath);
-            localizationDatabaseAsset.AddTrackedProject(guid);
+            lineDatabase.AddTrackedProject(guid);
 
             // If this database doesn't currently have a localization
             // for the currently selected program, add one
             var theLanguage = importer.baseLanguageID;
 
-            if (localizationDatabaseAsset.HasLocalization(theLanguage) == false)
+            if (lineDatabase.HasLocalization(theLanguage) == false)
             {
                 var localizationPath = Path.Combine(directory, $"{Path.GetFileNameWithoutExtension(databaseFileName)}-{theLanguage}.asset");
                 localizationPath = AssetDatabase.GenerateUniqueAssetPath(localizationPath);
@@ -75,7 +75,7 @@ internal static class YarnImporterUtility
 
                 createdPaths.Add(localizationPath);
 
-                localizationDatabaseAsset.AddLocalization(localizationAsset);
+                lineDatabase.AddLocalization(localizationAsset);
             }
 
             // Add this language to the project's text language list if
@@ -93,15 +93,15 @@ internal static class YarnImporterUtility
         }
 
         // Populate the database's contents
-        LocalizationDatabaseUtility.UpdateContents(localizationDatabaseAsset);
+        LineDatabaseUtility.UpdateContents(lineDatabase);
 
         // Save it to disk
-        AssetDatabase.CreateAsset(localizationDatabaseAsset, destinationPath);
+        AssetDatabase.CreateAsset(lineDatabase, destinationPath);
         AssetDatabase.SaveAssets();
         AssetDatabase.ImportAsset(destinationPath);
 
-        // Associate this localization database with the object.
-        localizationDatabaseProperty.objectReferenceValue = localizationDatabaseAsset;
+        // Associate this line database with the object.
+        lineDatabaseProperty.objectReferenceValue = lineDatabase;
         
         serializedObject.ApplyModifiedProperties(); 
 
@@ -237,7 +237,7 @@ internal static class YarnImporterUtility
     /// a <see cref="YarnImporter"/>.</param>
     internal static void UpdateLocalizationCSVs(SerializedObject serializedObject)
     {
-        var localizationDatabaseProperty = serializedObject.FindProperty("localizationDatabase");
+        var lineDatabaseProperty = serializedObject.FindProperty("lineDatabase");
 
         if (serializedObject.isEditingMultipleObjects) {
             Debug.LogError($"Can't update localization CSVs: multiple objects are being edited.");
@@ -262,9 +262,9 @@ internal static class YarnImporterUtility
             Debug.Log($"Updated the following files: {string.Join(", ", modifiedFiles.Select(f => f.name))}");
         } else {
             Debug.Log($"No files needed updating.");
-            // Update our corresponding localization database.
-            if (localizationDatabaseProperty.objectReferenceValue is LocalizationDatabase database) {
-                LocalizationDatabaseUtility.UpdateContents(database);
+            // Update our corresponding line database.
+            if (lineDatabaseProperty.objectReferenceValue is LineDatabase database) {
+                LineDatabaseUtility.UpdateContents(database);
             }
         }
     }

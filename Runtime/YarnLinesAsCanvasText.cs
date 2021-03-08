@@ -13,7 +13,8 @@ namespace Yarn.Unity {
         
         public TextAsset useLinesFromScript;
 
-        public LocalizationDatabase localizationDatabase;
+        [UnityEngine.Serialization.FormerlySerializedAs("localizationDatabase")]
+        public LineDatabase lineDatabase;
 
         [System.Serializable]
         public class StringObjectDictionary : SerializedDictionary<string, Object> {}
@@ -39,7 +40,7 @@ namespace Yarn.Unity {
         /// yarnScript.
         /// </summary>
         private void UpdateTextOnUiElements() {
-            var loc = localizationDatabase.GetLocalization(Preferences.TextLanguage);
+            var loc = lineDatabase.GetLocalization(Preferences.TextLanguage);
             
             foreach (var line in stringsToViews) {
 
