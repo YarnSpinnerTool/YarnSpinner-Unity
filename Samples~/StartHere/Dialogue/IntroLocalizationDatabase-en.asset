@@ -88,6 +88,3 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 7471cb9b9f4424824b21adc8546ac585, type: 3}
     - {fileID: 8300000, guid: 40bef1bded7c94b85b736e9c9111ba56, type: 3}
     - {fileID: 8300000, guid: 23d8f208f2a08402e8932e1e152a933b, type: 3}
-  _addressTable:
-    keys: []
-    values: []

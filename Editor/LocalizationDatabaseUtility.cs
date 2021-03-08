@@ -87,13 +87,13 @@ internal static class LocalizationDatabaseUtility {
             if (yarnImporter.localizationDatabase == database)
             {
                 // We need to add or update content based on this asset.
-                database.AddTrackedProgram(textAsset);
+                database.AddTrackedProject(textAsset);
             }
             else
             {
                 // This asset used to refer to this database, but now no
                 // longer does. Remove the reference.
-                database.RemoveTrackedProgram(textAsset);
+                database.RemoveTrackedProject(textAsset);
             }
 
         }

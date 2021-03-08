@@ -26,14 +26,9 @@ MonoBehaviour:
     - Mir reicht es.
     - Nochmal!
   _assetTable:
-    keys: []
-    values: []
-  _addressTable:
     keys:
     - line:0e3dc4b
     - line:0967160
     values:
-    - m_AssetGUID: 925ab48b6d0bd314f8d29fb0fcad02ef
-      m_SubObjectName: 
-    - m_AssetGUID: 7c1a3502fb6e83e4287a5967faaab88d
-      m_SubObjectName: 
+    - {fileID: 8300000, guid: 925ab48b6d0bd314f8d29fb0fcad02ef, type: 3}
+    - {fileID: 8300000, guid: 7c1a3502fb6e83e4287a5967faaab88d, type: 3}

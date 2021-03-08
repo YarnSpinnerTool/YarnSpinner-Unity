@@ -60,7 +60,7 @@ namespace Yarn.Unity {
             var canvasText = serializedObject.targetObject as YarnLinesAsCanvasText;
             var useLinesFromTextAsset = _useLinesFromProperty.objectReferenceValue;
 
-            if (!(_yarnProgramProperty.objectReferenceValue is YarnProgram yarnProgram))
+            if (!(_yarnProgramProperty.objectReferenceValue is YarnProject yarnProject))
             {
                 // No program means no strings available, so clear it and
                 // bail out
@@ -107,7 +107,7 @@ namespace Yarn.Unity {
             
             EditorGUILayout.PropertyField(_useTextMeshProProperty);
 
-            if (!(_yarnProgramProperty.objectReferenceValue is YarnProgram)) {
+            if (!(_yarnProgramProperty.objectReferenceValue is YarnProject)) {
                 EditorGUILayout.HelpBox("This component needs a yarn script.", MessageType.Info);
             } else if (!(_localizationDatabaseProperty.objectReferenceValue is LocalizationDatabase localizationDatabase)) {
                 EditorGUILayout.HelpBox("This component needs a localization database.", MessageType.Info);

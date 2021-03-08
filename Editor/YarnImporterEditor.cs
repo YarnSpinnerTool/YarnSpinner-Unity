@@ -20,10 +20,10 @@ public class YarnImporterEditor : ScriptedImporterEditor
     private SerializedProperty compilationErrorMessageProperty;
     private SerializedProperty localizationsProperty;
 
-    public string DestinationProgramError => destinationYarnProgramImporter?.compileError ?? null;
+    public string DestinationProgramError => destinationYarnProjectImporter?.compileError ?? null;
 
-    private YarnProgram destinationYarnProgram;
-    private YarnProgramImporter destinationYarnProgramImporter;
+    private YarnProject destinationYarnPrject;
+    private YarnProjectImporter destinationYarnProjectImporter;
 
     public override void OnEnable()
     {
@@ -41,11 +41,11 @@ public class YarnImporterEditor : ScriptedImporterEditor
 
     private void UpdateDestinationProgram()
     {
-        destinationYarnProgram = (target as YarnImporter).DestinationProgram;
+        destinationYarnPrject = (target as YarnImporter).DestinationProject;
 
-        if (destinationYarnProgram != null)
+        if (destinationYarnPrject != null)
         {
-            destinationYarnProgramImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(destinationYarnProgram)) as YarnProgramImporter;
+            destinationYarnProjectImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(destinationYarnPrject)) as YarnProjectImporter;
         }
     }
 
@@ -71,17 +71,17 @@ public class YarnImporterEditor : ScriptedImporterEditor
 
         EditorGUILayout.PropertyField(baseLanguageIdProperty);
 
-        if (destinationYarnProgram == null) {
-            EditorGUILayout.HelpBox("This script is not currently part of a Yarn Program. Either add one in the field above, or click Create New Yarn Program.", MessageType.Info);
-            if (GUILayout.Button("Create New Yarn Program")) {
-                YarnImporterUtility.CreateYarnProgram(target as YarnImporter);
+        if (destinationYarnPrject == null) {
+            EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project. Either add one in the field above, or click Create New Yarn Project.", MessageType.Info);
+            if (GUILayout.Button("Create New Yarn Project")) {
+                YarnImporterUtility.CreateYarnProject(target as YarnImporter);
                 
                 UpdateDestinationProgram();
 
             }
         } else {
             using (new EditorGUI.DisabledGroupScope(true)) {
-                EditorGUILayout.ObjectField("Program", destinationYarnProgram, typeof(YarnProgramImporter), false);
+                EditorGUILayout.ObjectField("Program", destinationYarnPrject, typeof(YarnProjectImporter), false);
             }
         }
 
@@ -172,10 +172,10 @@ public class YarnImporterEditor : ScriptedImporterEditor
     {
         // First, gather all existing line tags, so that we don't
         // accidentally overwrite an existing one. Do this by finding _all_
-        // YarnPrograms, and by extension their importers, and get the
+        // YarnProjects, and by extension their importers, and get the
         // string tags that they found.
 
-        var allLineTags = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.yarn") // get all yarn programs 
+        var allLineTags = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.yarn") // get all yarn scripts 
             .Select(path => AssetImporter.GetAtPath(path)) // get the asset importer for that path
             .OfType<YarnImporter>() // ensure that they're all YarnImporters
             .SelectMany(importer => importer.stringIDs) // Get all of the string IDs in the base localization
@@ -238,7 +238,7 @@ public class YarnImporterEditor : ScriptedImporterEditor
                     {
                         var guid = AssetDatabase.AssetPathToGUID(importer.assetPath);
                         
-                        previousLocalizationDatabase.RemoveTrackedProgram(guid);
+                        previousLocalizationDatabase.RemoveTrackedProject(guid);
                         
                         // Mark that the localization database has changed,
                         // so needs to be saved
@@ -252,7 +252,7 @@ public class YarnImporterEditor : ScriptedImporterEditor
                     foreach (YarnImporter importer in serializedObject.targetObjects)
                     {
                         var guid = AssetDatabase.AssetPathToGUID(importer.assetPath);
-                        database.AddTrackedProgram(guid);
+                        database.AddTrackedProject(guid);
 
                         // Mark that the localization database should save
                         // changes

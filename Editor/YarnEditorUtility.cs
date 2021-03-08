@@ -63,15 +63,15 @@ public static class YarnEditorUtility {
             GetTemplateYarnScriptPath());
     }
 
-    [MenuItem("Assets/Create/Yarn Spinner/Yarn Program", false, 101)]
-    public static void CreateYarnProgram() {
+    [MenuItem("Assets/Create/Yarn Spinner/Yarn Project", false, 101)]
+    public static void CreateYarnProject() {
         // This method call is undocumented, but public. It's defined in
         // ProjectWindowUtil, and used by other parts of the editor to
         // create other kinds of assets (scripts, textures, etc).
         ProjectWindowUtil.StartNameEditingIfProjectWindowExists(
             0,
             ScriptableObject.CreateInstance<DoCreateYarnScriptAsset>(),
-            "NewProgram.yarnprogram",
+            "NewProgram.yarnproject",
             GetYarnDocumentIconTexture(),
             GetTemplateYarnScriptPath());
     }
@@ -99,10 +99,10 @@ public static class YarnEditorUtility {
         
         // Figure out the 'file name' that the user entered
         string scriptName;
-        if (Path.GetExtension(pathName).Equals("yarnprogram", System.StringComparison.InvariantCultureIgnoreCase)) {
-            // This is a .yarnprogram file; the script "name" is always
-            // "Program".
-            scriptName = "Program";
+        if (Path.GetExtension(pathName).Equals("yarnproject", System.StringComparison.InvariantCultureIgnoreCase)) {
+            // This is a .yarnproject file; the script "name" is always
+            // "Project".
+            scriptName = "Project";
         } else {
             // The script name is the name of the file, sans extension.
             scriptName = Path.GetFileNameWithoutExtension(pathName);

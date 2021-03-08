@@ -45,10 +45,11 @@ namespace Yarn.Unity
     public class DialogueRunner : MonoBehaviour
     {
         /// <summary>
-        /// The <see cref="YarnProgram"/> assets that should be loaded on
+        /// The <see cref="YarnProject"/> asset that should be loaded on
         /// scene start.
         /// </summary>
-        public YarnProgram yarnProgram;
+        [UnityEngine.Serialization.FormerlySerializedAs("yarnProgram")]
+        public YarnProject yarnProject;
 
         /// <summary>
         /// The variable storage object.
@@ -237,10 +238,10 @@ namespace Yarn.Unity
         /// DialogueRunner's combined string table.
         /// </summary>
         /// <remarks>This method calls <see
-        /// cref="AddDialogueLines(YarnProgram)"/> to load the string table
+        /// cref="AddDialogueLines(YarnProject)"/> to load the string table
         /// for the current localisation. It selects the appropriate string
         /// table based on the value of set in the Preferences dialogue.
-        public void Add(YarnProgram scriptToLoad, string localizationId = null, IEnumerable<StringTableEntry> stringTableEntries = null)
+        public void Add(YarnProject scriptToLoad, string localizationId = null, IEnumerable<StringTableEntry> stringTableEntries = null)
         {
             Dialogue.AddProgram(scriptToLoad.GetProgram());
 
@@ -571,10 +572,10 @@ namespace Yarn.Unity
                 // back to a really simple setup: we'll create a temporary
                 // TextLineProvider, create a temporary
                 // LocalizationDatabase, and set it up with the
-                // YarnPrograms we know about.
+                // YarnProjects we know about.
 
                 // TODO: decide what to do about determining the
-                // localization of runtime-provided YarnPrograms. Make it a
+                // localization of runtime-provided YarnProjects. Make it a
                 // parameter on an AddCompiledProgram method?
 
                 // Create the temporary line provider and the localization database
@@ -595,18 +596,18 @@ namespace Yarn.Unity
                 // localization CSV text asset associated with this
                 // script. (The text asset will only be included in the
                 // build if the YarnImporter determines that the
-                // YarnProgram has no LocalizationDatabase assigned.)
-                if (yarnProgram == null) {
-                    Debug.LogWarning($"No Yarn Program was provided. Cannot generate a temporary line provider from script contents.");
-                } else if (yarnProgram.defaultStringTable == null)
+                // YarnProject has no LocalizationDatabase assigned.)
+                if (yarnProject == null) {
+                    Debug.LogWarning($"No Yarn Project was provided. Cannot generate a temporary line provider from script contents.");
+                } else if (yarnProject.defaultStringTable == null)
                 {
-                    Debug.LogWarning($"No base localization string table was included for the Yarn script {yarnProgram.name}. It may be connected to a {nameof(LocalizationDatabase)}. You should set this {nameof(DialogueRunner)} up with a Line Provider, and connect the Line Provider to the LocalizationDatabase.");
+                    Debug.LogWarning($"No base localization string table was included for the Yarn script {yarnProject.name}. It may be connected to a {nameof(LocalizationDatabase)}. You should set this {nameof(DialogueRunner)} up with a Line Provider, and connect the Line Provider to the LocalizationDatabase.");
                     ;
                 }
                 else
                 {
                     // Extract the text for the base localization.
-                    var text = yarnProgram.defaultStringTable.text;
+                    var text = yarnProject.defaultStringTable.text;
 
                     // Parse it into string table entries.
                     var parsedStringTableEntries = StringTableEntry.ParseFromCSV(text);
@@ -637,13 +638,13 @@ namespace Yarn.Unity
                 dialogueView.onUserWantsLineContinuation = continueAction;
             }
 
-            if (yarnProgram != null)
+            if (yarnProject != null)
             {
                 if (Dialogue.IsActive) {
-                    Debug.LogError($"DialogueRunner wanted to load a Yarn Program in its Start method, but the Dialogue was already running one. The Dialogue Runner may not behave as you expect.");
+                    Debug.LogError($"DialogueRunner wanted to load a Yarn Project in its Start method, but the Dialogue was already running one. The Dialogue Runner may not behave as you expect.");
                 }
 
-                Dialogue.SetProgram(yarnProgram.GetProgram());
+                Dialogue.SetProgram(yarnProject.GetProgram());
 
                 if (startAutomatically)
                 {
@@ -775,7 +776,7 @@ namespace Yarn.Unity
                 var text = Dialogue.ExpandSubstitutions(CurrentLine.RawText, CurrentLine.Substitutions);
 
                 if ( text == null) {
-                    Debug.LogWarning($"Dialogue Runner couldn't expand substitutions in Yarn program [{ yarnProgram.name }] node [{ CurrentNodeName }] with line ID [{ CurrentLine.TextID }]. "
+                    Debug.LogWarning($"Dialogue Runner couldn't expand substitutions in Yarn Project [{ yarnProject.name }] node [{ CurrentNodeName }] with line ID [{ CurrentLine.TextID }]. "
                         + "This usually happens because it couldn't find text in the Localization. Either the line isn't tagged properly, or the Localization Database isn't tracking the Yarn script's updates. "
                         + "For now, Dialogue Runner will swap in CurrentLine.RawText ... but you should fix this problem.");
                     text = CurrentLine.RawText;

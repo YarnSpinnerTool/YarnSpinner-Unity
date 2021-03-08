@@ -63,6 +63,7 @@ With this change, you can instead say this:
 - Fixed an issue where option buttons from previous option prompts could re-appear in later prompts (@radiatoryang)
 - Fixed an issue where dialogue views that are not enabled were still being waited for (@radiatoryang)
 - Upgrader tool now creates new files on disk, where needed (for example, .yarnprogram files)
+- `YarnProgram`, the asset that stores references to individual .yarn files for compilation, has been renamed to `YarnProject`. Because this change makes Unity forget any existing references to "YarnProgram" assets, **when upgrading to this version, you must set the Yarn Project field in your Dialogue Runners again.**
 
 ### Removed
 

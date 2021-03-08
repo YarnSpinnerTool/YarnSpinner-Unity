@@ -14,8 +14,8 @@ using System.Collections;
 
 namespace Yarn.Unity
 {
-    [CustomEditor(typeof(YarnProgramImporter))]
-    public class YarnProgramImporterEditor : ScriptedImporterEditor
+    [CustomEditor(typeof(YarnProjectImporter))]
+    public class YarnProjectImporterEditor : ScriptedImporterEditor
     {
 
         private SerializedProperty compileErrorProperty;
@@ -51,15 +51,15 @@ namespace Yarn.Unity
 
             if (sourceScriptsProperty.arraySize == 0)
             {
-                EditorGUILayout.HelpBox("This Yarn Program has no content. Add Yarn Scripts to it.", MessageType.Warning);
+                EditorGUILayout.HelpBox("This Yarn Project has no content. Add Yarn Scripts to it.", MessageType.Warning);
             }
             else
             {
-                EditorGUILayout.HelpBox("This Yarn Program is currently using the following scripts. It will automatically refresh when they change. If you've made a change elsewhere and need to update this Yarn Program, click Update.", MessageType.Info);
+                EditorGUILayout.HelpBox("This Yarn Project is currently using the following scripts. It will automatically refresh when they change. If you've made a change elsewhere and need to update this Yarn Project, click Update.", MessageType.Info);
 
                 if (GUILayout.Button("Update"))
                 {
-                    (serializedObject.targetObject as YarnProgramImporter).SaveAndReimport();
+                    (serializedObject.targetObject as YarnProjectImporter).SaveAndReimport();
                 }
             }
             EditorGUILayout.PropertyField(sourceScriptsProperty, true);
@@ -136,7 +136,7 @@ namespace Yarn.Unity
 
             var output = Yarn.Compiler.Utility.GenerateYarnFileWithDeclarations(thisProgramDeclarations, "Program");
 
-            var importer = target as YarnProgramImporter;
+            var importer = target as YarnProjectImporter;
             File.WriteAllText(importer.assetPath, output, System.Text.Encoding.UTF8);
             AssetDatabase.ImportAsset(importer.assetPath);            
         }

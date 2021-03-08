@@ -19,11 +19,11 @@ namespace Yarn.Unity
 
     internal class YarnAssetPostProcessor : AssetPostprocessor
     {
-        // Detects when a YarnProgram has been imported (either created or
+        // Detects when a YarnProject has been imported (either created or
         // modified), and checks to see if its importer is configured to
         // associate it with a LocalizationDatabase. If it is, the
-        // LocalizationDatabase is updated to include this program in its
-        // TrackedPrograms collection. Finally, the LocalizationDatabase is
+        // LocalizationDatabase is updated to include this project in its
+        // TrackedProjects collection. Finally, the LocalizationDatabase is
         // made to update its contents.
         //
         // We do this in a post-processor rather than in the importer
@@ -124,18 +124,18 @@ namespace Yarn.Unity
             }
         }
 
-        public YarnProgram DestinationProgram {
+        public YarnProject DestinationProject {
             get {
-                var destinationProgramPath = AssetDatabase.FindAssets("t:YarnProgram")
+                var destinationProjectPath = AssetDatabase.FindAssets("t:YarnProject")
                     .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
-                    .Select(path => AssetImporter.GetAtPath(path) as YarnProgramImporter)
+                    .Select(path => AssetImporter.GetAtPath(path) as YarnProjectImporter)
                     .FirstOrDefault(importer => importer.sourceScripts.Select(s => AssetDatabase.GetAssetPath(s)).Contains(assetPath))?.assetPath;
 
-                if (destinationProgramPath == null) {
+                if (destinationProjectPath == null) {
                     return null;
                 }
 
-                return AssetDatabase.LoadAssetAtPath<YarnProgram>(destinationProgramPath);
+                return AssetDatabase.LoadAssetAtPath<YarnProject>(destinationProjectPath);
             }
         }
 
@@ -290,7 +290,7 @@ namespace Yarn.Unity
             }
 
             if (localizationDatabase) {
-                localizationDatabase.AddTrackedProgram(AssetDatabase.AssetPathToGUID(ctx.assetPath));
+                localizationDatabase.AddTrackedProject(AssetDatabase.AssetPathToGUID(ctx.assetPath));
             }
 
         }
@@ -314,7 +314,7 @@ namespace Yarn.Unity
             isSuccesfullyParsed = true;
 
             // Create a container for storing the bytes
-            var programContainer = new TextAsset("<pre-compiled Yarn program>");
+            var programContainer = new TextAsset("<pre-compiled Yarn script>");
             
             // Add this container to the imported asset; it will be
             // what the user interacts with in Unity

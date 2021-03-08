@@ -26,14 +26,9 @@ MonoBehaviour:
     - (NEEDS UPDATE) I got enough of this.
     - (NEEDS UPDATE) Again!
   _assetTable:
-    keys: []
-    values: []
-  _addressTable:
     keys:
     - line:0e3dc4b
     - line:0967160
     values:
-    - m_AssetGUID: dbce673db3c96a24a948d24b4c61f462
-      m_SubObjectName: 
-    - m_AssetGUID: cb3a7dc09556e344191a02051b6c2e6c
-      m_SubObjectName: 
+    - {fileID: 8300000, guid: dbce673db3c96a24a948d24b4c61f462, type: 3}
+    - {fileID: 8300000, guid: cb3a7dc09556e344191a02051b6c2e6c, type: 3}
