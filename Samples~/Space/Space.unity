@@ -1207,7 +1207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b6798449caec4a32a5ad27badb06624, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  localizationDatabase: {fileID: 11400000, guid: 93d5bc4e054ac4572a2da48fa49ea322, type: 2}
+  lineDatabase: {fileID: 11400000, guid: 93d5bc4e054ac4572a2da48fa49ea322, type: 2}
   textLanguageCodeOverride: en
   audioLanguageCodeOverride: de
 --- !u!850595691 &1274772176
