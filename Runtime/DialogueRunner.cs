@@ -531,6 +531,26 @@ namespace Yarn.Unity
         /// <seealso cref="AddFunction{TResult}(string, Func{TResult})"/>
         public void RemoveFunction(string name) => Dialogue.Library.DeregisterFunction(name);
 
+        /// <summary>
+        /// Sets the dialogue views and makes sure the callback <see cref="DialogueViewBase.MarkLineComplete"/>
+        /// will respond correctly.
+        /// </summary>
+        /// <param name="views">The array of views to be assigned.</param>
+        public void SetDialogueViews(DialogueViewBase[] views)
+        {
+            dialogueViews = views;
+
+            Action continueAction = OnViewUserIntentNextLine;
+            foreach (var dialogueView in dialogueViews) {
+                if (dialogueView == null) {
+                    Debug.LogWarning("The 'Dialogue Views' field contains a NULL element.", gameObject);
+                    continue;
+                }
+
+                dialogueView.onUserWantsLineContinuation = continueAction;
+            }
+        }
+
         #region Private Properties/Variables/Procedures
 
         /// <summary>
