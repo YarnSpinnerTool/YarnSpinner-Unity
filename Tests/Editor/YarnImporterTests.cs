@@ -278,7 +278,8 @@ position: 0,0
         public void YarnProjectImporter_OnValidYarnFileWithNoLineTags_CannotGetStrings() {
             // Arrange:
             // Set up a project with a Yarn file filled with tagged lines.
-            var project = SetUpProject(@"---
+            var project = SetUpProject(@"title: Demo
+---
 This script contains lines that are tagged... #line:tagged_line
 But not all of them are.
 ===
