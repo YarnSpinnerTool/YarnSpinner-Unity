@@ -415,7 +415,9 @@ namespace Yarn.Unity
         {
             if (script == null)
             {
-                throw new System.ArgumentNullException(nameof(script));
+                // This might be a 'None' or 'Missing' asset, so return
+                // false here.
+                return false;
             }
 
             // Get the importer for this TextAsset
