@@ -14,7 +14,7 @@ using System.Collections;
 
 namespace Yarn.Unity
 {
-    [ScriptedImporter(1, new[] { "yarnproject" }, 1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
+    [ScriptedImporter(2, new[] { "yarnproject" }, 1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
     public class YarnProjectImporter : ScriptedImporter
     {
 

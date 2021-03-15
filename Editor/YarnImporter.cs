@@ -20,7 +20,7 @@ namespace Yarn.Unity
     /// <summary>
     /// A <see cref="ScriptedImporter"/> for Yarn assets. The actual asset used and referenced at runtime and in the editor will be a <see cref="YarnScript"/>, which this class wraps around creating the asset's corresponding meta file.
     /// </summary>
-    [ScriptedImporter(2, new[] { "yarn", "yarnc" }, -1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
+    [ScriptedImporter(3, new[] { "yarn", "yarnc" }, -1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
     public class YarnImporter : ScriptedImporter
     {
         /// <summary>
