@@ -31,7 +31,7 @@ namespace Yarn.Unity
         /// </summary>
         /// <seealso cref="onNameNotPresent"/>
         public DialogueRunner.StringUnityEvent onNameUpdate;
-        
+
         /// <summary>
         /// Invoked when the dialogue is started.
         /// </summary>
@@ -47,7 +47,8 @@ namespace Yarn.Unity
         /// <seealso cref="onNameUpdate"/>
         public UnityEvent onNameNotPresent;
 
-        public override void DialogueStarted() {
+        public override void DialogueStarted()
+        {
             onDialogueStarted?.Invoke();
         }
 
@@ -75,7 +76,7 @@ namespace Yarn.Unity
                 // Then notify the rest of the scene about it. This
                 // generally involves updating a text view and making it
                 // visible.
-                onNameUpdate?.Invoke(characterAttribute.Properties["name"].StringValue);                
+                onNameUpdate?.Invoke(characterAttribute.Properties["name"].StringValue);
             }
             else
             {

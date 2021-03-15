@@ -31,10 +31,10 @@ namespace Yarn.Unity
         /// this method returns <see cref="textLanguageCodeOverride"/>.
         /// Otherwise, <see cref="Preferences.TextLanguage"/> is returned.
         /// </remarks>
-        public string CurrentTextLanguageCode 
-        { 
-            get 
-            { 
+        public string CurrentTextLanguageCode
+        {
+            get
+            {
                 return string.IsNullOrWhiteSpace(textLanguageCodeOverride) ? Preferences.TextLanguage : textLanguageCodeOverride;
             }
         }
@@ -49,7 +49,7 @@ namespace Yarn.Unity
         /// </remarks>
         [Tooltip("(optional) if defined, this Line Provider will use this language code instead of Preferences.TextLanguage... example: 'en' is the code for English")]
         public string textLanguageCodeOverride;
-        
+
         /// <summary>
         /// Prepares and returns a <see cref="LocalizedLine"/> from the
         /// specified <see cref="Yarn.Line"/>.
@@ -67,7 +67,7 @@ namespace Yarn.Unity
         /// <summary>
         /// The YarnProject that contains the localized data for lines.
         /// </summary>
-        public YarnProject YarnProject {get; set;}
+        public YarnProject YarnProject { get; set; }
 
         /// <summary>
         /// Signals to the line provider that lines with the provided line
@@ -94,7 +94,7 @@ namespace Yarn.Unity
         /// Gets a value indicating whether this line provider is ready to
         /// provide <see cref="LocalizedLine"/> objects.
         /// </summary>
-        public abstract bool LinesAvailable {get;}
+        public abstract bool LinesAvailable { get; }
 
         /// <summary>
         /// Called by Unity when the <see cref="LineProviderBehaviour"/>
@@ -104,8 +104,10 @@ namespace Yarn.Unity
         /// This method is <see langword="public"/> <see
         /// langword="virtual"/> to allow subclasses to override it.
         /// </remarks>
-        public virtual void Start () {
-            if ( !string.IsNullOrWhiteSpace(textLanguageCodeOverride) ) {
+        public virtual void Start()
+        {
+            if (!string.IsNullOrWhiteSpace(textLanguageCodeOverride))
+            {
                 Debug.LogWarning($"LineProvider is ignoring global Preferences.TextLanguage and using textLanguageCodeOverride: {textLanguageCodeOverride}");
             }
         }
@@ -115,7 +117,8 @@ namespace Yarn.Unity
     /// Represents a line, ready to be presented to the user in the
     /// localisation they have specified.
     /// </summary>
-    public class LocalizedLine {
+    public class LocalizedLine
+    {
         /// <summary>
         /// DialogueLine's ID
         /// </summary>
@@ -140,10 +143,14 @@ namespace Yarn.Unity
         /// This value will be <see langword="null"/> if the line does not
         /// have a character name.
         /// </remarks>
-        public string CharacterName {
-            get {
-                if (Text.TryGetAttributeWithName("character", out var characterNameAttribute)) {
-                    if (characterNameAttribute.Properties.TryGetValue("name", out var value)) {
+        public string CharacterName
+        {
+            get
+            {
+                if (Text.TryGetAttributeWithName("character", out var characterNameAttribute))
+                {
+                    if (characterNameAttribute.Properties.TryGetValue("name", out var value))
+                    {
                         return value.StringValue;
                     }
                 }
@@ -165,12 +172,17 @@ namespace Yarn.Unity
         /// If the line has no `character` attribute, this method returns
         /// the same value as <see cref="Text"/>.
         /// </remarks>
-        public Markup.MarkupParseResult TextWithoutCharacterName {
-            get {
+        public Markup.MarkupParseResult TextWithoutCharacterName
+        {
+            get
+            {
                 // If a 'character' attribute is present, remove its text
-                if (Text.TryGetAttributeWithName("character", out var characterNameAttribute)) {
-                    return Text.DeleteRange(characterNameAttribute);                    
-                } else {
+                if (Text.TryGetAttributeWithName("character", out var characterNameAttribute))
+                {
+                    return Text.DeleteRange(characterNameAttribute);
+                }
+                else
+                {
                     return Text;
                 }
             }

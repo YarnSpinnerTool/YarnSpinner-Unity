@@ -24,7 +24,7 @@ namespace Yarn.Unity
         [SerializeField] private StringDictionary _stringTable = new StringDictionary();
         [SerializeField] private AssetDictionary _assetTable = new AssetDictionary();
 
-        private Dictionary<string,string> _runtimeStringTable = new Dictionary<string, string>();
+        private Dictionary<string, string> _runtimeStringTable = new Dictionary<string, string>();
 
 
 #if ADDRESSABLES
@@ -39,11 +39,13 @@ namespace Yarn.Unity
         public string GetLocalizedString(string key)
         {
             string result;
-            if (_runtimeStringTable.TryGetValue(key, out result)) {
+            if (_runtimeStringTable.TryGetValue(key, out result))
+            {
                 return result;
             }
 
-            if (_stringTable.TryGetValue(key, out result)) {
+            if (_stringTable.TryGetValue(key, out result))
+            {
                 return result;
             }
 
@@ -54,22 +56,28 @@ namespace Yarn.Unity
 
         public void AddLocalizedString(string key, string value)
         {
-            if (Application.isPlaying) {
+            if (Application.isPlaying)
+            {
                 _runtimeStringTable.Add(key, value);
-            } else {
+            }
+            else
+            {
                 _stringTable.Add(key, value);
             }
         }
 
         public void AddLocalizedStrings(IEnumerable<KeyValuePair<string, string>> strings)
         {
-            foreach (var entry in strings) {
-                AddLocalizedString(entry.Key, entry.Value);                    
+            foreach (var entry in strings)
+            {
+                AddLocalizedString(entry.Key, entry.Value);
             }
         }
 
-        public void AddLocalizedStrings(IEnumerable<StringTableEntry> stringTableEntries) {
-            foreach (var entry in stringTableEntries) {
+        public void AddLocalizedStrings(IEnumerable<StringTableEntry> stringTableEntries)
+        {
+            foreach (var entry in stringTableEntries)
+            {
                 AddLocalizedString(entry.ID, entry.Text);
             }
         }
@@ -99,7 +107,7 @@ namespace Yarn.Unity
 
         public bool ContainsLocalizedObject<T>(string key) where T : UnityEngine.Object => _assetTable.ContainsKey(key) && _assetTable[key] is T;
 
-        public void AddLocalizedObject<T>(string key, T value) where T: UnityEngine.Object => _assetTable.Add(key, value);
+        public void AddLocalizedObject<T>(string key, T value) where T : UnityEngine.Object => _assetTable.Add(key, value);
 
         public void AddLocalizedObjects<T>(IEnumerable<KeyValuePair<string, T>> objects) where T : UnityEngine.Object
         {
@@ -164,7 +172,7 @@ namespace Yarn.Unity
         public IEnumerable<string> GetLineIDs()
         {
             var allKeys = new List<string>();
-            
+
             var runtimeKeys = _runtimeStringTable.Keys;
             var compileTimeKeys = _stringTable.Keys;
 
@@ -180,16 +188,21 @@ namespace Yarn.Unity
 namespace Yarn.Unity
 {
     /// <summary>
-    /// Provides methods for finding voice over <see cref="AudioClip"/>s in the project matching a Yarn linetag/string ID and a language ID.
+    /// Provides methods for finding voice over <see cref="AudioClip"/>s in
+    /// the project matching a Yarn linetag/string ID and a language ID.
     /// </summary>
     public static class FindVoiceOver
     {
         /// <summary>
-        /// Finds all voice over <see cref="AudioClip"/>s in the project with a filename matching a Yarn linetag and a language ID.
+        /// Finds all voice over <see cref="AudioClip"/>s in the project
+        /// with a filename matching a Yarn linetag and a language ID.
         /// </summary>
-        /// <param name="linetag">The linetag/string ID the voice over filename should match.</param>
-        /// <param name="language">The language ID the voice over filename should match.</param>
-        /// <returns>A string array with GUIDs of all matching <see cref="AudioClip"/>s.</returns>
+        /// <param name="linetag">The linetag/string ID the voice over
+        /// filename should match.</param>
+        /// <param name="language">The language ID the voice over filename
+        /// should match.</param>
+        /// <returns>A string array with GUIDs of all matching <see
+        /// cref="AudioClip"/>s.</returns>
         public static string[] GetMatchingVoiceOverAudioClip(string linetag, string language)
         {
             var lineTagContents = linetag.Replace("line:", "");
@@ -216,7 +229,8 @@ namespace Yarn.Unity
         public static string[] SearchAssetDatabase(string searchPattern, string language)
         {
             var result = AssetDatabase.FindAssets(searchPattern);
-            // Check if result is ambiguous and try to improve the situation
+            // Check if result is ambiguous and try to improve the
+            // situation
             if (result.Length > 1)
             {
                 var assetsInMatchingLanguageDirectory = GetAsseetsInMatchingLanguageDirectory(result, language);

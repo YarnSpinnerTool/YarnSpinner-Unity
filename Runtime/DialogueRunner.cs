@@ -4,23 +4,23 @@ The MIT License (MIT)
 
 Copyright (c) 2015-2017 Secret Lab Pty. Ltd. and Yarn Spinner contributors.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
 
 */
 
@@ -63,8 +63,8 @@ namespace Yarn.Unity
 
         /// <summary>The name of the node to start from.</summary>
         /// <remarks>
-        /// This value is used to select a node to start from when
-        /// <see cref="StartDialogue"/> is called.
+        /// This value is used to select a node to start from when <see
+        /// cref="StartDialogue"/> is called.
         /// </remarks>
         public string startNode = Yarn.Dialogue.DefaultStartNodeName;
 
@@ -84,20 +84,23 @@ namespace Yarn.Unity
         public bool continueNextLineOnLineFinished;
 
         /// <summary>
-        /// If true, when an option is selected, it's as though it were a line.
+        /// If true, when an option is selected, it's as though it were a
+        /// line.
         /// </summary>
         public bool runSelectedOptionAsLine;
 
         public LineProviderBehaviour lineProvider;
 
         /// <summary>
-        /// If true, will print Debug.Log messages every time it enters a node, and other frequent events.
+        /// If true, will print Debug.Log messages every time it enters a
+        /// node, and other frequent events.
         /// </summary>
         [Tooltip("If true, will print Debug.Log messages every time it enters a node, and other frequent events")]
         public bool verboseLogging = true;
 
         /// <summary>
-        /// Gets a value that indicates if the dialogue is actively running.
+        /// Gets a value that indicates if the dialogue is actively
+        /// running.
         /// </summary>
         public bool IsDialogueRunning { get; set; }
 
@@ -121,7 +124,7 @@ namespace Yarn.Unity
         /// </remarks>
         /// <seealso cref="Dialogue.NodeStartHandler"/>
         public StringUnityEvent onNodeStart;
-        
+
         /// <summary>
         /// A Unity event that is called when a node is complete.
         /// </summary>
@@ -152,30 +155,26 @@ namespace Yarn.Unity
 
         /// <summary>
         /// A <see cref="StringUnityEvent"/> that is called when a <see
-        /// cref="Command"/> 
-        /// is received.
+        /// cref="Command"/> is received.
         /// </summary>
         /// <remarks>
         /// Use this method to dispatch a command to other parts of your
         /// game. This method is only called if the <see cref="Command"/>
         /// has not been handled by a command handler that has been added
-        /// to the
-        /// <see cref="DialogueRunner"/>, or by a method on a <see
+        /// to the <see cref="DialogueRunner"/>, or by a method on a <see
         /// cref="MonoBehaviour"/> in the scene with the attribute <see
         /// cref="YarnCommandAttribute"/>. {{|note|}} When a command is
-        /// delivered in this way, the <see cref="DialogueRunner"/> 
-        /// will not pause execution. If you want a command to make the
+        /// delivered in this way, the <see cref="DialogueRunner"/> will
+        /// not pause execution. If you want a command to make the
         /// DialogueRunner pause execution, see <see
-        /// cref="AddCommandHandler(string, CommandHandler)"/>.
-        /// {{|/note|}}
-        /// 
+        /// cref="AddCommandHandler(string, CommandHandler)"/>. {{|/note|}}
+        ///
         /// This method receives the full text of the command, as it
         /// appears between the `<![CDATA[<<]]>` and `<![CDATA[>>]]>`
         /// markers.
         /// </remarks>
         /// <seealso cref="AddCommandHandler(string, CommandHandler)"/>
-        /// <seealso cref="AddCommandHandler(string,
-        /// CommandHandler)"/>
+        /// <seealso cref="AddCommandHandler(string, CommandHandler)"/>
         /// <seealso cref="YarnCommandAttribute"/>
         public StringUnityEvent onCommand;
 
@@ -184,31 +183,39 @@ namespace Yarn.Unity
         /// Populated in the <see cref="InitializeClass"/> method.
         /// </summary>
         private static Dictionary<string, MethodInfo> _yarnCommands = new Dictionary<string, MethodInfo>();
-        
+
         /// <summary>
         /// Finds all MonoBehaviour types in the loaded assemblies, and
         /// looks for all methods that are tagged with YarnCommand.
         /// </summary>
         [RuntimeInitializeOnLoadMethod]
-        static void InitializeClass() {
+        static void InitializeClass()
+        {
 
             // Find all assemblies
             var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            // In each assembly, find all types that descend from MonoBehaviour
-            foreach (var assembly in allAssemblies) {
-                foreach (var type in assembly.GetLoadableTypes().Where(t => t.IsSubclassOf(typeof(MonoBehaviour)))) {
+            // In each assembly, find all types that descend from
+            // MonoBehaviour
+            foreach (var assembly in allAssemblies)
+            {
+                foreach (var type in assembly.GetLoadableTypes().Where(t => t.IsSubclassOf(typeof(MonoBehaviour))))
+                {
 
                     // We only care about MonoBehaviours
-                    if (typeof(MonoBehaviour).IsAssignableFrom(type) == false) {
+                    if (typeof(MonoBehaviour).IsAssignableFrom(type) == false)
+                    {
                         continue;
                     }
 
-                    // Find all methods on each type that have the YarnCommand attribute
-                    foreach (var method in type.GetMethods()) {
+                    // Find all methods on each type that have the
+                    // YarnCommand attribute
+                    foreach (var method in type.GetMethods())
+                    {
                         var attributes = new List<YarnCommandAttribute>(method.GetCustomAttributes<YarnCommandAttribute>());
-                        
-                        if (attributes.Count > 0) {
+
+                        if (attributes.Count > 0)
+                        {
                             // This method has the YarnCommand attribute!
                             // The compiler enforces a single attribute of
                             // this type on each members, so if we have n >
@@ -257,7 +264,8 @@ namespace Yarn.Unity
         public void StartDialogue(string startNode)
         {
             // Stop any processes that might be running already
-            foreach (var dialogueView in dialogueViews) {
+            foreach (var dialogueView in dialogueViews)
+            {
                 if (dialogueView == null || dialogueView.enabled == false) continue;
 
                 dialogueView.StopAllCoroutines();
@@ -271,7 +279,8 @@ namespace Yarn.Unity
                 IsDialogueRunning = true;
 
                 // Signal that we're starting up.
-                foreach (var dialogueView in dialogueViews) {
+                foreach (var dialogueView in dialogueViews)
+                {
                     if (dialogueView == null || dialogueView.enabled == false) continue;
 
                     dialogueView.DialogueStarted();
@@ -281,21 +290,26 @@ namespace Yarn.Unity
                 // will prepare the dialogue for running; as a side effect,
                 // our prepareForLines delegate may be called.
                 Dialogue.SetNode(startNode);
-                
-                if (lineProvider.LinesAvailable == false) {
+
+                if (lineProvider.LinesAvailable == false)
+                {
                     // The line provider isn't ready to give us our lines
                     // yet. We need to start a coroutine that waits for
                     // them to finish loading, and then runs the dialogue.
                     StartCoroutine(ContinueDialogueWhenLinesAvailable());
-                } else {
+                }
+                else
+                {
                     ContinueDialogue();
                 }
             }
         }
 
-        private IEnumerator ContinueDialogueWhenLinesAvailable() {
+        private IEnumerator ContinueDialogueWhenLinesAvailable()
+        {
             // Wait until lineProvider.LinesAvailable becomes true
-            while (lineProvider.LinesAvailable == false) {
+            while (lineProvider.LinesAvailable == false)
+            {
                 yield return null;
             }
 
@@ -304,7 +318,8 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Starts running the dialogue again from the node named <see cref="startNode"/>.
+        /// Starts running the dialogue again from the node named <see
+        /// cref="startNode"/>.
         /// </summary>        
         public void ResetDialogue()
         {
@@ -367,74 +382,89 @@ namespace Yarn.Unity
         /// will be invoked when the command is called.</param>
         private void AddCommandHandler(string commandName, Delegate handler)
         {
-            if (commandHandlers.ContainsKey(commandName)) {
+            if (commandHandlers.ContainsKey(commandName))
+            {
                 Debug.LogError($"Cannot add a command handler for {commandName}: one already exists");
                 return;
             }
             commandHandlers.Add(commandName, handler);
         }
 
-        public void AddCommandHandler(string commandHandler, System.Func<Coroutine> handler) {
+        public void AddCommandHandler(string commandHandler, System.Func<Coroutine> handler)
+        {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
-        public void AddCommandHandler<T1>(string commandHandler, System.Func<T1, Coroutine> handler) {
+        public void AddCommandHandler<T1>(string commandHandler, System.Func<T1, Coroutine> handler)
+        {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
-        public void AddCommandHandler<T1, T2>(string commandHandler, System.Func<T1, T2, Coroutine> handler) {
+        public void AddCommandHandler<T1, T2>(string commandHandler, System.Func<T1, T2, Coroutine> handler)
+        {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
-        public void AddCommandHandler<T1, T2, T3>(string commandHandler, System.Func<T1, T2, T3, Coroutine> handler) {
+        public void AddCommandHandler<T1, T2, T3>(string commandHandler, System.Func<T1, T2, T3, Coroutine> handler)
+        {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
-        public void AddCommandHandler<T1, T2, T3, T4>(string commandHandler, System.Func<T1, T2, T3, T4, Coroutine> handler) {
+        public void AddCommandHandler<T1, T2, T3, T4>(string commandHandler, System.Func<T1, T2, T3, T4, Coroutine> handler)
+        {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
-        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandHandler, System.Func<T1, T2, T3, T4, T5, Coroutine> handler) {
+        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandHandler, System.Func<T1, T2, T3, T4, T5, Coroutine> handler)
+        {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandHandler, System.Func<T1, T2, T3, T4, T5, T6, Coroutine> handler) {
+        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandHandler, System.Func<T1, T2, T3, T4, T5, T6, Coroutine> handler)
+        {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
-        public void AddCommandHandler(string commandHandler, System.Action handler) {
+        public void AddCommandHandler(string commandHandler, System.Action handler)
+        {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
-        public void AddCommandHandler<T1>(string commandHandler, System.Action<T1> handler) {
+        public void AddCommandHandler<T1>(string commandHandler, System.Action<T1> handler)
+        {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
-        public void AddCommandHandler<T1, T2>(string commandHandler, System.Action<T1, T2> handler) {
+        public void AddCommandHandler<T1, T2>(string commandHandler, System.Action<T1, T2> handler)
+        {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
-        public void AddCommandHandler<T1, T2, T3>(string commandHandler, System.Action<T1, T2, T3> handler) {
+        public void AddCommandHandler<T1, T2, T3>(string commandHandler, System.Action<T1, T2, T3> handler)
+        {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
-        public void AddCommandHandler<T1, T2, T3, T4>(string commandHandler, System.Action<T1, T2, T3, T4> handler) {
+        public void AddCommandHandler<T1, T2, T3, T4>(string commandHandler, System.Action<T1, T2, T3, T4> handler)
+        {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
-        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandHandler, System.Action<T1, T2, T3, T4, T5> handler) {
+        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandHandler, System.Action<T1, T2, T3, T4, T5> handler)
+        {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandHandler, System.Action<T1, T2, T3, T4, T5, T6> handler) {
+        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandHandler, System.Action<T1, T2, T3, T4, T5, T6> handler)
+        {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
-        
         /// <summary>
         /// Removes a command handler.
         /// </summary>
-        /// <param name="commandName">The name of the command to remove.</param>
+        /// <param name="commandName">The name of the command to
+        /// remove.</param>
         public void RemoveCommandHandler(string commandName)
         {
             commandHandlers.Remove(commandName);
@@ -447,29 +477,21 @@ namespace Yarn.Unity
         /// <remarks>
         /// When this function has been registered, it can be called from
         /// your Yarn scripts like so:
-        /// 
-        /// <![CDATA[
-        /// ```yarn
-        /// <<if myFunction(1, 2) == true>>
-        ///     myFunction returned true!
-        /// <<endif>>
-        /// ```
-        /// ]]>
-        /// 
+        ///
+        /// <![CDATA[```yarn <<if myFunction(1, 2) == true>> myFunction
+        /// returned true! <<endif>> ```]]>
+        ///
         /// The `call` command can also be used to invoke the function:
-        /// 
-        /// <![CDATA[
-        /// ```yarn
-        /// <<call myFunction(1, 2)>>
-        /// ```
-        /// ]]>    
+        ///
+        /// <![CDATA[```yarn <<call myFunction(1, 2)>> ```]]>    
         /// </remarks>
-        /// <param name="implementation">The <see cref="Delegate"/>
-        /// that should be invoked when this function is called.</param>
+        /// <param name="implementation">The <see cref="Delegate"/> that
+        /// should be invoked when this function is called.</param>
         /// <seealso cref="Library"/> 
         private void AddFunction(string name, Delegate implementation)
         {
-            if (Dialogue.Library.FunctionExists(name)) {
+            if (Dialogue.Library.FunctionExists(name))
+            {
                 Debug.LogError($"Cannot add function {name}: one already exists");
                 return;
             }
@@ -477,32 +499,39 @@ namespace Yarn.Unity
             Dialogue.Library.RegisterFunction(name, implementation);
         }
 
-        public void AddFunction<TResult>(string name, System.Func<TResult> implementation) {
-            AddFunction(name, (Delegate) implementation);
+        public void AddFunction<TResult>(string name, System.Func<TResult> implementation)
+        {
+            AddFunction(name, (Delegate)implementation);
         }
 
-        public void AddFunction<TResult, T1>(string name, System.Func<TResult, T1> implementation) {
-            AddFunction(name, (Delegate) implementation);
+        public void AddFunction<TResult, T1>(string name, System.Func<TResult, T1> implementation)
+        {
+            AddFunction(name, (Delegate)implementation);
         }
 
-        public void AddFunction<TResult, T1, T2>(string name, System.Func<TResult, T1, T2> implementation) {
-            AddFunction(name, (Delegate) implementation);
+        public void AddFunction<TResult, T1, T2>(string name, System.Func<TResult, T1, T2> implementation)
+        {
+            AddFunction(name, (Delegate)implementation);
         }
 
-        public void AddFunction<TResult, T1, T2, T3>(string name, System.Func<TResult, T1, T2, T3> implementation) {
-            AddFunction(name, (Delegate) implementation);
+        public void AddFunction<TResult, T1, T2, T3>(string name, System.Func<TResult, T1, T2, T3> implementation)
+        {
+            AddFunction(name, (Delegate)implementation);
         }
 
-        public void AddFunction<TResult, T1, T2, T3, T4>(string name, System.Func<TResult, T1, T2, T3, T4> implementation) {
-            AddFunction(name, (Delegate) implementation);
+        public void AddFunction<TResult, T1, T2, T3, T4>(string name, System.Func<TResult, T1, T2, T3, T4> implementation)
+        {
+            AddFunction(name, (Delegate)implementation);
         }
 
-        public void AddFunction<TResult, T1, T2, T3, T4, T5>(string name, System.Func<TResult, T1, T2, T3, T4, T5> implementation) {
-            AddFunction(name, (Delegate) implementation);
+        public void AddFunction<TResult, T1, T2, T3, T4, T5>(string name, System.Func<TResult, T1, T2, T3, T4, T5> implementation)
+        {
+            AddFunction(name, (Delegate)implementation);
         }
 
-        public void AddFunction<TResult, T1, T2, T3, T4, T5, T6>(string name, System.Func<TResult, T1, T2, T3, T4, T5, T6> implementation) {
-            AddFunction(name, (Delegate) implementation);
+        public void AddFunction<TResult, T1, T2, T3, T4, T5, T6>(string name, System.Func<TResult, T1, T2, T3, T4, T5, T6> implementation)
+        {
+            AddFunction(name, (Delegate)implementation);
         }
 
         /// <summary>
@@ -522,7 +551,7 @@ namespace Yarn.Unity
         /// The <see cref="LocalizedLine"/> currently being displayed on
         /// the dialogue views.
         /// </summary>
-        internal LocalizedLine CurrentLine {get;private set;}
+        internal LocalizedLine CurrentLine { get; private set; }
 
         /// <summary>
         ///  The collection of dialogue views that are currently either
@@ -548,17 +577,20 @@ namespace Yarn.Unity
         // not currently presenting options.
         private OptionSet currentOptions;
 
-        void Awake() {
-            if (lineProvider == null) {
-                // If we don't have a line provider, create a TextLineProvider and make it use that.
+        void Awake()
+        {
+            if (lineProvider == null)
+            {
+                // If we don't have a line provider, create a
+                // TextLineProvider and make it use that.
 
                 // Create the temporary line provider and the line database
                 lineProvider = gameObject.AddComponent<TextLineProvider>();
-                
+
                 lineProviderIsTemporary = true;
 
                 // Let the user know what we're doing.
-                if ( verboseLogging )
+                if (verboseLogging)
                 {
                     Debug.Log($"Dialogue Runner has no LineProvider; creating a {nameof(TextLineProvider)}.");
                 }
@@ -575,7 +607,8 @@ namespace Yarn.Unity
             // they'll call to pass on the user intent to move on to the
             // next line (or interrupt the current one).
             System.Action continueAction = OnViewUserIntentNextLine;
-            foreach (var dialogueView in dialogueViews) {
+            foreach (var dialogueView in dialogueViews)
+            {
                 if (dialogueView == null || dialogueView.enabled == false)
                 {
                     Debug.LogWarning("The 'Dialogue Views' field contains a NULL element.", gameObject);
@@ -587,7 +620,8 @@ namespace Yarn.Unity
 
             if (yarnProject != null)
             {
-                if (Dialogue.IsActive) {
+                if (Dialogue.IsActive)
+                {
                     Debug.LogError($"DialogueRunner wanted to load a Yarn Project in its Start method, but the Dialogue was already running one. The Dialogue Runner may not behave as you expect.");
                 }
 
@@ -605,35 +639,41 @@ namespace Yarn.Unity
         {
             // Create the main Dialogue runner, and pass our
             // variableStorage to it
-            var dialogue = new Yarn.Dialogue(variableStorage) {
+            var dialogue = new Yarn.Dialogue(variableStorage)
+            {
 
                 // Set up the logging system.
-                LogDebugMessage = delegate (string message) {
-                    if ( verboseLogging ) {
+                LogDebugMessage = delegate (string message)
+                {
+                    if (verboseLogging)
+                    {
                         Debug.Log(message);
                     }
                 },
-                LogErrorMessage = delegate (string message) {
+                LogErrorMessage = delegate (string message)
+                {
                     Debug.LogError(message);
                 },
 
                 LineHandler = HandleLine,
                 CommandHandler = HandleCommand,
                 OptionsHandler = HandleOptions,
-                NodeStartHandler = (node) => {
-                    onNodeStart?.Invoke(node);                    
+                NodeStartHandler = (node) =>
+                {
+                    onNodeStart?.Invoke(node);
                 },
-                NodeCompleteHandler = (node) => {
-                    onNodeComplete?.Invoke(node);                     
+                NodeCompleteHandler = (node) =>
+                {
+                    onNodeComplete?.Invoke(node);
                 },
                 DialogueCompleteHandler = HandleDialogueComplete,
                 PrepareForLinesHandler = PrepareForLines,
             };
 
-            // Yarn Spinner defines two built-in commands: "wait",
-            // and "stop". Stop is defined inside the Virtual
-            // Machine (the compiler traps it and makes it a
-            // special case.) Wait is defined here in Unity.
+            // Yarn Spinner defines two built-in commands: "wait", and
+            // "stop". Stop is defined inside the Virtual Machine (the
+            // compiler traps it and makes it a special case.) Wait is
+            // defined here in Unity.
             AddCommandHandler("wait", (float duration) => StartCoroutine(DoHandleWait(duration)));
 
             selectAction = SelectedOption;
@@ -643,28 +683,32 @@ namespace Yarn.Unity
             IEnumerator DoHandleWait(float duration)
             {
                 yield return new WaitForSeconds(duration);
-                
+
             }
 
-            void HandleOptions(OptionSet options) {
+            void HandleOptions(OptionSet options)
+            {
                 currentOptions = options;
 
                 DialogueOption[] optionSet = new DialogueOption[options.Options.Length];
-                for (int i = 0; i < options.Options.Length; i++) {
+                for (int i = 0; i < options.Options.Length; i++)
+                {
 
                     // Localize the line associated with the option
                     var localisedLine = lineProvider.GetLocalizedLine(options.Options[i].Line);
                     var text = Dialogue.ExpandSubstitutions(localisedLine.RawText, options.Options[i].Line.Substitutions);
                     localisedLine.Text = Dialogue.ParseMarkup(text);
 
-                    optionSet[i] = new DialogueOption {
+                    optionSet[i] = new DialogueOption
+                    {
                         TextID = options.Options[i].Line.ID,
                         DialogueOptionID = options.Options[i].ID,
                         Line = localisedLine,
                         IsAvailable = options.Options[i].IsAvailable,
                     };
                 }
-                foreach (var dialogueView in dialogueViews) {
+                foreach (var dialogueView in dialogueViews)
+                {
                     if (dialogueView == null || dialogueView.enabled == false) continue;
 
                     dialogueView.RunOptions(optionSet, selectAction);
@@ -674,7 +718,8 @@ namespace Yarn.Unity
             void HandleDialogueComplete()
             {
                 IsDialogueRunning = false;
-                foreach (var dialogueView in dialogueViews) {
+                foreach (var dialogueView in dialogueViews)
+                {
                     if (dialogueView == null || dialogueView.enabled == false) continue;
 
                     dialogueView.DialogueComplete();
@@ -685,20 +730,22 @@ namespace Yarn.Unity
             void HandleCommand(Command command)
             {
                 bool wasValidCommand;
-                
+
                 // Try looking in the command handlers first
                 wasValidCommand = DispatchCommandToRegisteredHandlers(command);
 
-                if (wasValidCommand) {
+                if (wasValidCommand)
+                {
                     // This was a valid command.
-                    return;                    
+                    return;
                 }
 
                 // We didn't find it in the comand handlers. Try looking in
                 // the game objects.
                 wasValidCommand = DispatchCommandToGameObject(command);
 
-                if (wasValidCommand) {
+                if (wasValidCommand)
+                {
                     // We found an object and method to invoke as a Yarn
                     // command. 
                     return;
@@ -708,10 +755,11 @@ namespace Yarn.Unity
                 // invoking on the publicly exposed UnityEvent.
                 onCommand?.Invoke(command.Text);
 
-                if ( onCommand == null || onCommand.GetPersistentEventCount() == 0 ) {
+                if (onCommand == null || onCommand.GetPersistentEventCount() == 0)
+                {
                     Debug.LogError($"No Command <<{command.Text}>> was found. Did you remember to use the YarnCommand attribute or AddCommandHandler() function in C#?");
                 }
-                return;                
+                return;
             }
 
             /// Forward the line to the dialogue UI.
@@ -723,7 +771,8 @@ namespace Yarn.Unity
                 // Expand substitutions
                 var text = Dialogue.ExpandSubstitutions(CurrentLine.RawText, CurrentLine.Substitutions);
 
-                if ( text == null) {
+                if (text == null)
+                {
                     Debug.LogWarning($"Dialogue Runner couldn't expand substitutions in Yarn Project [{ yarnProject.name }] node [{ CurrentNodeName }] with line ID [{ CurrentLine.TextID }]. "
                         + "This usually happens because it couldn't find text in the Localization. Either the line isn't tagged properly, or the Line Database isn't tracking the Yarn script's updates. "
                         + "For now, Dialogue Runner will swap in CurrentLine.RawText ... but you should fix this problem.");
@@ -739,14 +788,15 @@ namespace Yarn.Unity
                 ActiveDialogueViews.Clear();
 
                 // Send line to available dialogue views
-                foreach (var dialogueView in dialogueViews) {
+                foreach (var dialogueView in dialogueViews)
+                {
                     if (dialogueView == null || dialogueView.enabled == false) continue;
 
                     // Mark this dialogue view as active                
                     ActiveDialogueViews.Add(dialogueView);
-                    dialogueView.RunLine(CurrentLine, 
+                    dialogueView.RunLine(CurrentLine,
                         () => DialogueViewCompletedDelivery(dialogueView));
-                }                
+                }
             }
 
             /// Indicates to the DialogueRunner that the user has selected
@@ -757,9 +807,12 @@ namespace Yarn.Unity
                 // Dialogue
                 Dialogue.SetSelectedOption(obj);
 
-                if (runSelectedOptionAsLine) {
-                    foreach (var option in currentOptions.Options) {
-                        if (option.ID == obj) {
+                if (runSelectedOptionAsLine)
+                {
+                    foreach (var option in currentOptions.Options)
+                    {
+                        if (option.ID == obj)
+                        {
                             HandleLine(option.Line);
                             return;
                         }
@@ -767,16 +820,19 @@ namespace Yarn.Unity
 
                     Debug.LogError($"Can't run selected option ({obj}) as a line: couldn't find the option's associated {nameof(Line)} object");
                     ContinueDialogue();
-                } else {
+                }
+                else
+                {
                     ContinueDialogue();
                 }
-                
+
             }
 
-            
+
         }
 
-        bool DispatchCommandToRegisteredHandlers(Command command) {
+        bool DispatchCommandToRegisteredHandlers(Command command)
+        {
             return DispatchCommandToRegisteredHandlers(command.Text);
         }
 
@@ -794,8 +850,8 @@ namespace Yarn.Unity
 
             if (commandHandlers.ContainsKey(firstWord) == false)
             {
-                // We don't have a registered handler for this command,
-                // but some other part of the game might.
+                // We don't have a registered handler for this command, but
+                // some other part of the game might.
                 return false;
             }
 
@@ -808,8 +864,8 @@ namespace Yarn.Unity
             // Copy everything except the first word from the array
             System.Array.Copy(commandTokens, 1, remainingWords, 0, remainingWords.Length);
 
-            // Take the list of words, and prepend the onComplete
-            // delegate we were given - it's always the first parameter
+            // Take the list of words, and prepend the onComplete delegate
+            // we were given - it's always the first parameter
             var rawParameters = new List<string>(remainingWords);
 
             object[] finalParameters;
@@ -881,15 +937,16 @@ namespace Yarn.Unity
         }
 
         /// <inheritdoc cref="DispatchCommandToGameObject(Command)"/>
-        /// <param name="command">The text of the command to dispatch.</param>
+        /// <param name="command">The text of the command to
+        /// dispatch.</param>
         internal bool DispatchCommandToGameObject(string command)
         {
-        
+
             // Start by splitting our command string by spaces.
             var words = ParseCommandParameters(command);
 
-            // We need 2 parameters in order to have both a command
-            // name, and the name of an object to find.
+            // We need 2 parameters in order to have both a command name,
+            // and the name of an object to find.
             if (words.Length < 2)
             {
                 // Don't log an error, because the dialogue views might
@@ -903,9 +960,9 @@ namespace Yarn.Unity
 
             if (_yarnCommands.ContainsKey(commandName) == false)
             {
-                // We didn't find a MethodInfo to invoke for this
-                // command, so we can't dispatch it. Don't log an error
-                // for it, because this command may be handled by our
+                // We didn't find a MethodInfo to invoke for this command,
+                // so we can't dispatch it. Don't log an error for it,
+                // because this command may be handled by our
                 // DialogueViews.
                 return false;
             }
@@ -915,10 +972,10 @@ namespace Yarn.Unity
 
             if (sceneObject == null)
             {
-                // If we can't find an object, we can't dispatch a
-                // command. Log an error here, because this command has
-                // been registered with the YarnCommand system, but the
-                // object the script calls for doesn't exist.
+                // If we can't find an object, we can't dispatch a command.
+                // Log an error here, because this command has been
+                // registered with the YarnCommand system, but the object
+                // the script calls for doesn't exist.
                 Debug.LogError($"Can't run command {commandName} on {objectName}: an object with that name doesn't exist in the scene.");
 
                 return false;
@@ -940,26 +997,30 @@ namespace Yarn.Unity
 
             // Do we have any parameters? Parameters are any words in the
             // command after the first two (which are the command name and
-            // the object name); we need to remove these two from the start of the list.
+            // the object name); we need to remove these two from the start
+            // of the list.
             if (words.Length >= 2)
-            {                
+            {
                 parameters.RemoveRange(0, 2);
             }
 
-            // Convert the parameters from strings to the necessary types that this method expects            
+            // Convert the parameters from strings to the necessary types
+            // that this method expects            
             object[] finalParameters;
-            try {
+            try
+            {
                 finalParameters = GetPreparedParametersForMethod(parameters.ToArray(), methodInfo);
-            } catch (ArgumentException e) {
+            }
+            catch (ArgumentException e)
+            {
                 Debug.LogError($"Can't run command {commandName}: {e.Message}");
                 return false;
             }
 
             // We're finally ready to invoke the method on the object!
 
-            // Before we invoke it, we need to know if this is a
-            // coroutine. It's a coroutine if the method returns an
-            // IEnumerator.
+            // Before we invoke it, we need to know if this is a coroutine.
+            // It's a coroutine if the method returns an IEnumerator.
 
             var isCoroutine = methodInfo.ReturnType == typeof(IEnumerator);
 
@@ -968,7 +1029,7 @@ namespace Yarn.Unity
                 // Start the coroutine. When it's done, it will continue
                 // execution.
                 StartCoroutine(DoYarnCommand(target, methodInfo, finalParameters));
-                
+
                 return true;
             }
             else
@@ -1009,7 +1070,7 @@ namespace Yarn.Unity
         private object[] GetPreparedParametersForMethod(string[] parameters, MethodInfo methodInfo)
         {
             ParameterInfo[] methodParameters = methodInfo.GetParameters();
-            
+
             // First test
             var requiredParameters = 0;
             var optionalParameters = 0;
@@ -1036,27 +1097,28 @@ namespace Yarn.Unity
             {
                 if (parameters.Length < requiredParameters || parameters.Length > (requiredParameters + optionalParameters))
                 {
-                    throw new ArgumentException($"{methodInfo.Name} requires between {requiredParameters} and {requiredParameters + optionalParameters} parameters, but {parameters.Length} {(parameters.Length == 1 ? "was" : "were")} provided.");                    
+                    throw new ArgumentException($"{methodInfo.Name} requires between {requiredParameters} and {requiredParameters + optionalParameters} parameters, but {parameters.Length} {(parameters.Length == 1 ? "was" : "were")} provided.");
                 }
             }
             else
             {
                 if (parameters.Length != requiredParameters)
                 {
-                    throw new ArgumentException($"{methodInfo.Name} requires {requiredParameters} parameters, but {parameters.Length} {(parameters.Length == 1 ? "was" : "were")} provided.");          
+                    throw new ArgumentException($"{methodInfo.Name} requires {requiredParameters} parameters, but {parameters.Length} {(parameters.Length == 1 ? "was" : "were")} provided.");
                 }
             }
 
-            // Make a list of objects that we'll supply as parameters
-            // to the method when we invoke it.
+            // Make a list of objects that we'll supply as parameters to
+            // the method when we invoke it.
             var finalParameters = new object[requiredParameters + optionalParameters];
 
-            // Final check: convert each supplied parameter from a
-            // string to the expected type.
+            // Final check: convert each supplied parameter from a string
+            // to the expected type.
             for (int i = 0; i < finalParameters.Length; i++)
             {
 
-                if (i >= parameters.Length) {
+                if (i >= parameters.Length)
+                {
                     // We didn't supply a parameter here, so supply
                     // Type.Missing to make it use the default value
                     // instead.
@@ -1094,8 +1156,7 @@ namespace Yarn.Unity
                     var go = GameObject.Find(parameters[i]);
                     if (go != null)
                     {
-                        // Find the component on this game object (or
-                        // null)
+                        // Find the component on this game object (or null)
                         var c = go.GetComponentInChildren(expectedType);
                         finalParameters[i] = c;
                     }
@@ -1105,31 +1166,40 @@ namespace Yarn.Unity
                     // If it's a bool, and the parameter was the name of
                     // the parameter, act as though they had written
                     // 'true'.
-                    if (parameters[i].Equals(parameterName, StringComparison.InvariantCultureIgnoreCase)) {
+                    if (parameters[i].Equals(parameterName, StringComparison.InvariantCultureIgnoreCase))
+                    {
                         finalParameters[i] = true;
-                    } else {
+                    }
+                    else
+                    {
                         // It wasn't the name of the parameter, so attempt
                         // to parse it as a boolean (i.e. the strings
                         // "true" or "false"), and throw an exception if
                         // that failed
-                        try {
+                        try
+                        {
                             finalParameters[i] = Convert.ToBoolean(parameters[i]);
-                        } catch (Exception e) {
-                            throw new ArgumentException($"can't convert parameter {i+1} (\"{parameters[i]}\") to parameter {parameterName} ({expectedType}): {e}");                        
+                        }
+                        catch (Exception e)
+                        {
+                            throw new ArgumentException($"can't convert parameter {i + 1} (\"{parameters[i]}\") to parameter {parameterName} ({expectedType}): {e}");
                         }
                     }
                 }
                 else
                 {
-                    // Attempt to perform a straight conversion, using
-                    // the invariant culture. The parameter type must
-                    // implement IConvertible.
-                    try {
+                    // Attempt to perform a straight conversion, using the
+                    // invariant culture. The parameter type must implement
+                    // IConvertible.
+                    try
+                    {
                         finalParameters[i] = Convert.ChangeType(parameters[i], expectedType, System.Globalization.CultureInfo.InvariantCulture);
-                    } catch (Exception e) {
-                        throw new ArgumentException($"can't convert parameter {i+1} (\"{parameters[i]}\") to parameter {parameterName} ({expectedType}): {e}");                        
                     }
-                    
+                    catch (Exception e)
+                    {
+                        throw new ArgumentException($"can't convert parameter {i + 1} (\"{parameters[i]}\") to parameter {parameterName} ({expectedType}): {e}");
+                    }
+
                 }
             }
             return finalParameters;
@@ -1185,15 +1255,15 @@ namespace Yarn.Unity
         /// line about the state change.
         /// </summary>
         /// <param name="line">The line whose state is changing.</param>
-        /// <param name="newStatus">The <see
-        /// cref="LineStatus"/> that the line now
-        /// has.</param>
+        /// <param name="newStatus">The <see cref="LineStatus"/> that the
+        /// line now has.</param>
         private void UpdateLineStatus(LocalizedLine line, LineStatus newStatus)
         {
             // Update the state of the line and let the views know.
             line.Status = newStatus;
 
-            foreach (var dialogueView in dialogueViews) {
+            foreach (var dialogueView in dialogueViews)
+            {
                 if (dialogueView == null || dialogueView.enabled == false) continue;
 
                 dialogueView.OnLineStatusChanged(line);
@@ -1208,13 +1278,15 @@ namespace Yarn.Unity
 
         /// <summary>
         /// Called by a <see cref="DialogueViewBase"/> derived class from
-        /// <see cref="dialogueViews"/>
-        /// to inform the <see cref="DialogueRunner"/> that the user
-        /// intents to proceed to the next line.
+        /// <see cref="dialogueViews"/> to inform the <see
+        /// cref="DialogueRunner"/> that the user intents to proceed to the
+        /// next line.
         /// </summary>
-        public void OnViewUserIntentNextLine() {
-            
-            if (CurrentLine == null) {
+        public void OnViewUserIntentNextLine()
+        {
+
+            if (CurrentLine == null)
+            {
                 // There's no active line, so there's nothing that can be
                 // done here.
                 Debug.LogWarning($"{nameof(OnViewUserIntentNextLine)} was called, but no line was running.");
@@ -1251,22 +1323,24 @@ namespace Yarn.Unity
                     // further for the views to do. (This will only happen
                     // during the interval of time between a line becoming
                     // Ended and the next line appearing.)
-                    break;                
-            }    
+                    break;
+            }
 
-            if (CurrentLine.Status == LineStatus.Ended) {
+            if (CurrentLine.Status == LineStatus.Ended)
+            {
                 // This line is Ended, so we need to tell the dialogue
                 // views to dismiss it. 
                 DismissLineFromViews(dialogueViews);
             }
-            
+
         }
 
         private void DismissLineFromViews(IEnumerable<DialogueViewBase> dialogueViews)
         {
             ActiveDialogueViews.Clear();
 
-            foreach (var dialogueView in dialogueViews) {
+            foreach (var dialogueView in dialogueViews)
+            {
                 if (dialogueView == null || dialogueView.enabled == false) continue;
                 // we do this in two passes - first by adding each
                 // dialogueView into ActiveDialogueViews, then by asking
@@ -1278,8 +1352,9 @@ namespace Yarn.Unity
                 // entirely done)
                 ActiveDialogueViews.Add(dialogueView);
             }
-                
-            foreach (var dialogueView in dialogueViews) {
+
+            foreach (var dialogueView in dialogueViews)
+            {
                 if (dialogueView == null || dialogueView.enabled == false) continue;
 
                 dialogueView.DismissLine(() => DialogueViewCompletedDismissal(dialogueView));
@@ -1293,10 +1368,12 @@ namespace Yarn.Unity
             ActiveDialogueViews.Remove(dialogueView);
 
             // Have all of the views completed dismissal? 
-            if (ActiveDialogueViews.Count == 0) {
-                // Then we're ready to continue to the next piece of content.
+            if (ActiveDialogueViews.Count == 0)
+            {
+                // Then we're ready to continue to the next piece of
+                // content.
                 ContinueDialogue();
-            }            
+            }
         }
         #endregion
     }
@@ -1315,8 +1392,8 @@ namespace Yarn.Unity
     /// second word, if any, is the name of any <see cref="GameObject"/>s
     /// in the scene. 
     ///
-    /// If one is found, it is checked to see if any of the
-    /// <see cref="MonoBehaviour"/>s attached to the class has a <see
+    /// If one is found, it is checked to see if any of the <see
+    /// cref="MonoBehaviour"/>s attached to the class has a <see
     /// cref="YarnCommandAttribute"/> whose <see
     /// cref="YarnCommandAttribute.CommandString"/> matching the first word
     /// of the command.
@@ -1349,61 +1426,45 @@ namespace Yarn.Unity
     /// The following C# code uses the `YarnCommand` attribute to register
     /// commands.
     ///
-    /// <![CDATA[
-    /// ```csharp 
-    /// class ExampleBehaviour : MonoBehaviour {
-    ///         [YarnCommand("jump")] 
-    ///         void Jump()
-    ///         {
-    ///             Debug.Log($"{this.gameObject.name} is jumping!");
-    ///         }
-    ///    
-    ///         [YarnCommand("walk")] 
-    ///         void WalkToDestination(string destination) {
-    ///             Debug.Log($"{this.gameObject.name} is walking to {destination}!");
-    ///         }
-    ///     
-    ///         [YarnCommand("shine_flashlight")] 
-    ///         IEnumerator ShineFlashlight(string durationString) {
-    ///             float.TryParse(durationString, out var duration);
-    ///             Debug.Log($"{this.gameObject.name} is turning on the flashlight for {duration} seconds!");
-    ///             yield new WaitForSeconds(duration);
-    ///             Debug.Log($"{this.gameObject.name} is turning off the flashlight!");
-    ///         }
-    /// }
-    /// ```
-    /// ]]>
+    /// <![CDATA[```csharp class ExampleBehaviour : MonoBehaviour
+    /// {[YarnCommand("jump")] void Jump()
+    /// {Debug.Log($"{this.gameObject.name} is jumping!");}
+    ///
+    ///         [YarnCommand("walk")] void WalkToDestination(string
+    ///         destination) {Debug.Log($"{this.gameObject.name} is walking
+    ///         to {destination}!");}
+    ///
+    ///         [YarnCommand("shine_flashlight")] IEnumerator
+    ///         ShineFlashlight(string durationString)
+    ///         {float.TryParse(durationString, out var duration);
+    ///         Debug.Log($"{this.gameObject.name} is turning on the
+    ///         flashlight for {duration} seconds!"); yield new
+    ///         WaitForSeconds(duration);
+    ///         Debug.Log($"{this.gameObject.name} is turning off the
+    ///         flashlight!");}} ```]]>
     ///
     /// Next, assume that this `ExampleBehaviour` script has been attached
     /// to a <see cref="GameObject"/> present in the scene named "Mae". The
     /// `Jump` and `WalkToDestination` methods may then be called from a
     /// Yarn script like so:
     ///
-    /// <![CDATA[
-    /// ```yarn 
-    /// // Call the Jump() method in the ExampleBehaviour on Mae
-    /// <<jump Mae>>
+    /// <![CDATA[```yarn // Call the Jump() method in the ExampleBehaviour
+    /// on Mae <<jump Mae>>
     ///
-    /// // Call the WalkToDestination() method in the ExampleBehaviour 
-    /// // on Mae, passing "targetPoint" as a parameter
-    /// <<walk Mae targetPoint>>
-    /// 
+    /// // Call the WalkToDestination() method in the ExampleBehaviour //
+    /// on Mae, passing "targetPoint" as a parameter <<walk Mae
+    /// targetPoint>>
+    ///
     /// // Call the ShineFlashlight method, passing "0.5" as a parameter;
-    /// // dialogue will wait until the coroutine ends.
-    /// <<shine_flashlight Mae 0.5>>
-    /// ```
-    /// ]]>
+    /// // dialogue will wait until the coroutine ends. <<shine_flashlight
+    /// Mae 0.5>> ```]]>
     ///
     /// Running this Yarn code will result in the following text being
     /// logged to the Console:
     ///
-    /// ``` 
-    /// Mae is jumping! 
-    /// Mae is walking to targetPoint! 
-    /// Mae is turning on the flashlight for 0.5 seconds!
-    /// (... 0.5 seconds elapse ...)
-    /// Mae is turning off the flashlight!
-    /// ```
+    /// ``` Mae is jumping! Mae is walking to targetPoint! Mae is turning
+    /// on the flashlight for 0.5 seconds! (... 0.5 seconds elapse ...) Mae
+    /// is turning off the flashlight! ```
     /// </example>
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
     public class YarnCommandAttribute : System.Attribute
@@ -1421,7 +1482,7 @@ namespace Yarn.Unity
 
         public YarnCommandAttribute(string commandString) => CommandString = commandString;
     }
-    
+
     /// <summary>
     /// A <see cref="MonoBehaviour"/> that a <see cref="DialogueRunner"/>
     /// uses to store and retrieve variables.
@@ -1435,13 +1496,13 @@ namespace Yarn.Unity
     {
         /// <inheritdoc/>
         public abstract bool TryGetValue<T>(string variableName, out T result);
-        
+
         /// <inheritdoc/>
         public abstract void SetValue(string variableName, string stringValue);
-        
+
         /// <inheritdoc/>
         public abstract void SetValue(string variableName, float floatValue);
-        
+
         /// <inheritdoc/>
         public abstract void SetValue(string variableName, bool boolValue);
 
@@ -1485,14 +1546,15 @@ namespace Yarn.Unity
         Ended
     }
 
-    
 
-    public class DialogueOption {
+
+    public class DialogueOption
+    {
         /// <summary>
         /// The ID of this dialogue option
         /// </summary>
         public int DialogueOptionID;
-        
+
         /// <summary>
         /// The ID of the dialogue option's text
         /// </summary>
@@ -1502,7 +1564,7 @@ namespace Yarn.Unity
         /// The line for this dialogue option
         /// </summary>
         public LocalizedLine Line;
-        
+
         /// <summary>
         /// Indicates whether this value should be presented as available
         /// or not.
@@ -1515,7 +1577,9 @@ namespace Yarn.Unity
     public static class AssemblyExtensions
     {
         /// <summary>
-        /// Assembly.GetTypes() can throw in some cases.  This extension will catch that exception and return only the types which were successfully loaded from the assembly.
+        /// Assembly.GetTypes() can throw in some cases.  This extension
+        /// will catch that exception and return only the types which were
+        /// successfully loaded from the assembly.
         /// </summary>
         public static IEnumerable<System.Type> GetLoadableTypes(this Assembly @this)
         {

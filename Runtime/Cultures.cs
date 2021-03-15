@@ -12,9 +12,11 @@ namespace Yarn.Unity
     {
         private static Lazy<IEnumerable<Culture>> _allCultures = new Lazy<IEnumerable<Culture>>(() => MakeCultureList());
 
-        private static Lazy<Dictionary<string, Culture>> _allCulturesTable = new Lazy<Dictionary<string, Culture>>( () => {
+        private static Lazy<Dictionary<string, Culture>> _allCulturesTable = new Lazy<Dictionary<string, Culture>>(() =>
+        {
             var dict = new Dictionary<string, Culture>();
-            foreach (var entry in _allCultures.Value) {
+            foreach (var entry in _allCultures.Value)
+            {
                 dict[entry.Name] = entry;
             }
             return dict;
@@ -29,24 +31,29 @@ namespace Yarn.Unity
             {
                 Name = c.Name,
                 DisplayName = c.DisplayName,
-                NativeName = c.NativeName,                
+                NativeName = c.NativeName,
             })
             .Append(new Culture { Name = "mi", DisplayName = "Maori", NativeName = "Māori" })
             .OrderBy(c => c.DisplayName);
 
         public static IEnumerable<Culture> GetCultures() => _allCultures.Value;
 
-        public static Culture GetCulture(string name) {
+        public static Culture GetCulture(string name)
+        {
             var exists = _allCulturesTable.Value.TryGetValue(name, out var result);
 
-            if (exists) {
+            if (exists)
+            {
                 return result;
-            } else {
+            }
+            else
+            {
                 throw new ArgumentException($"Culture {name} not found", name);
             }
         }
 
-        public static bool HasCulture(string name) {
+        public static bool HasCulture(string name)
+        {
             return _allCulturesTable.Value.ContainsKey(name);
         }
     }

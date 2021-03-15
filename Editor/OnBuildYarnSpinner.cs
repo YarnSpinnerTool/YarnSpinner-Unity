@@ -6,27 +6,34 @@ using UnityEngine;
 /// <summary>
 /// Steps required by YarnSpinner for a working build.
 /// </summary>
-public class OnBuildYarnSpinner : IPreprocessBuildWithReport, IPostprocessBuildWithReport {
+public class OnBuildYarnSpinner : IPreprocessBuildWithReport, IPostprocessBuildWithReport
+{
     static bool createdResourcesDirectory = false;
 
     // Yarn's order in the build process is not important atm
     int IOrderedCallback.callbackOrder => int.MaxValue;
 
-    void IPostprocessBuildWithReport.OnPostprocessBuild(BuildReport report) {
-        if (createdResourcesDirectory) {
+    void IPostprocessBuildWithReport.OnPostprocessBuild(BuildReport report)
+    {
+        if (createdResourcesDirectory)
+        {
             System.IO.Directory.Delete(GetResourcesPath(), true);
             System.IO.File.Delete(GetResourcesPath() + ".meta");
-        } else {
+        }
+        else
+        {
             System.IO.File.Delete(GetResourcesPath() + "/YarnProjectSettings.json");
             System.IO.File.Delete(GetResourcesPath() + "/YarnProjectSettings.json.meta");
         }
     }
 
-    void IPreprocessBuildWithReport.OnPreprocessBuild(BuildReport report) {
+    void IPreprocessBuildWithReport.OnPreprocessBuild(BuildReport report)
+    {
         ProjectSettings.WriteProjectSettingsToDisk();
 
         createdResourcesDirectory = false;
-        if (!System.IO.Directory.Exists(GetResourcesPath())) {
+        if (!System.IO.Directory.Exists(GetResourcesPath()))
+        {
             System.IO.Directory.CreateDirectory(GetResourcesPath());
             createdResourcesDirectory = true;
         }
@@ -36,7 +43,8 @@ public class OnBuildYarnSpinner : IPreprocessBuildWithReport, IPostprocessBuildW
         AssetDatabase.ImportAsset("Assets/Resources/YarnProjectSettings.json", ImportAssetOptions.ForceUpdate);
     }
 
-    static string GetResourcesPath () {
+    static string GetResourcesPath()
+    {
         return Application.dataPath + "/Resources";
     }
 }

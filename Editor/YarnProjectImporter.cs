@@ -19,7 +19,8 @@ namespace Yarn.Unity
     {
 
         [System.Serializable]
-        public class SerializedDeclaration {
+        public class SerializedDeclaration
+        {
             public string name = "$variable";
             public Yarn.Type type = Yarn.Type.String;
             public bool defaultValueBool;
@@ -50,7 +51,7 @@ namespace Yarn.Unity
                         this.defaultValueBool = (bool)decl.DefaultValue;
                         break;
                     default:
-                        throw new System.InvalidOperationException($"Invalid declaration type {decl.ReturnType}");                        
+                        throw new System.InvalidOperationException($"Invalid declaration type {decl.ReturnType}");
                 }
             }
         }
@@ -59,12 +60,13 @@ namespace Yarn.Unity
         /// <summary>
         /// Pairs a language ID with a TextAsset.
         /// </summary>
-        public class LanguageToSourceAsset { 
+        public class LanguageToSourceAsset
+        {
             /// <summary>
             /// The locale ID that this translation should create a
             /// Localization for.
             /// </summary>
-            public string languageID; 
+            public string languageID;
 
             /// <summary>
             /// The TextAsset containing CSV data that the Localization
@@ -88,9 +90,9 @@ namespace Yarn.Unity
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
-            #if YARNSPINNER_DEBUG
+#if YARNSPINNER_DEBUG
             UnityEngine.Profiling.Profiler.enabled = true;
-            #endif
+#endif
 
             var project = ScriptableObject.CreateInstance<YarnProject>();
 
@@ -102,9 +104,11 @@ namespace Yarn.Unity
             ctx.AddObjectToAsset("Project", project);
             ctx.SetMainObject(project);
 
-            foreach (var script in sourceScripts) {
+            foreach (var script in sourceScripts)
+            {
                 string path = AssetDatabase.GetAssetPath(script);
-                if (string.IsNullOrEmpty(path)) {
+                if (string.IsNullOrEmpty(path))
+                {
                     // This is, for some reason, not a valid script we can
                     // use. Don't add a dependency on it.
                     continue;
@@ -144,7 +148,7 @@ namespace Yarn.Unity
             // pulled any information out of it that we need to. Now to
             // compile the scripts associated with this project.
 
-            var scriptImporters = sourceScripts.Where(s => s != null).Select(s => AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(s)) as YarnImporter );
+            var scriptImporters = sourceScripts.Where(s => s != null).Select(s => AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(s)) as YarnImporter);
 
             // First step: check to see if there's any parse errors in the
             // files.
@@ -158,8 +162,8 @@ namespace Yarn.Unity
                 return;
             }
 
-            // Get paths to the scripts we're importing, and also map them to
-            // their corresponding importer
+            // Get paths to the scripts we're importing, and also map them
+            // to their corresponding importer
             var pathsToImporters = scriptImporters.ToDictionary(script => script.assetPath, script => script);
 
             if (pathsToImporters.Count == 0)
@@ -247,27 +251,33 @@ namespace Yarn.Unity
 
             ctx.AddObjectToAsset("localization-dev", developmentLocalization);
 
-            foreach (var pair in languagesToSourceAssets) {
+            foreach (var pair in languagesToSourceAssets)
+            {
 
                 // Don't create a localization if the language ID was not
                 // provided
-                if (string.IsNullOrEmpty(pair.languageID)) {
+                if (string.IsNullOrEmpty(pair.languageID))
+                {
                     Debug.LogWarning($"Not creating a localization for {project.name} because the language ID wasn't provided. Add the language ID to the localization in the Yarn Project's inspector.");
                     continue;
                 }
 
                 // Don't create a localization if the source asset was not
                 // provided
-                if (pair.stringsAsset == null) {
+                if (pair.stringsAsset == null)
+                {
                     Debug.LogWarning($"Not creating a localization for {pair.languageID} in the Yarn Project {project.name} because a text asset containing the strings wasn't found. Add a .csv file containing the translated lines to the Yarn Project's inspector.");
                     continue;
                 }
-                
+
                 IEnumerable<StringTableEntry> stringTable;
 
-                try {
+                try
+                {
                     stringTable = StringTableEntry.ParseFromCSV(pair.stringsAsset.text);
-                } catch (System.ArgumentException e) {
+                }
+                catch (System.ArgumentException e)
+                {
                     Debug.LogWarning($"Not creating a localization for {pair.languageID} in the Yarn Project {project.name} because an error was encountered during text parsing: {e}");
                     continue;
                 }
@@ -276,38 +286,43 @@ namespace Yarn.Unity
                 newLocalization.LocaleCode = pair.languageID;
 
                 newLocalization.AddLocalizedStrings(stringTable);
-            
+
                 project.localizations.Add(newLocalization);
                 newLocalization.name = pair.languageID;
 
-                if (pair.assetsFolder != null) {
+                if (pair.assetsFolder != null)
+                {
                     var assetsFolderPath = AssetDatabase.GetAssetPath(pair.assetsFolder);
 
-                    if (assetsFolderPath == null) {
+                    if (assetsFolderPath == null)
+                    {
                         // This was somehow not a valid reference?
                         Debug.LogWarning($"Can't find assets for localization {pair.languageID} in {project.name} because a path for the provided assets folder couldn't be found.");
-                    } else {
+                    }
+                    else
+                    {
                         var stringIDsToAssets = FindAssetsForLineIDs(stringTable.Select(s => s.ID), assetsFolderPath);
-                        
-                        #if YARNSPINNER_DEBUG
-                        var stopwatch = System.Diagnostics.Stopwatch.StartNew();                                                
-                        #endif
 
-                        newLocalization.AddLocalizedObjects(stringIDsToAssets.AsEnumerable());                        
+#if YARNSPINNER_DEBUG
+                        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+#endif
 
-                        #if YARNSPINNER_DEBUG
+                        newLocalization.AddLocalizedObjects(stringIDsToAssets.AsEnumerable());
+
+#if YARNSPINNER_DEBUG
                         stopwatch.Stop();
                         Debug.Log($"Imported {stringIDsToAssets.Count()} assets for {project.name} \"{pair.languageID}\" in {stopwatch.ElapsedMilliseconds}ms");
-                        #endif
+#endif
                     }
                 }
 
                 ctx.AddObjectToAsset("localization-" + pair.languageID, newLocalization);
 
-                // Make this asset get re-imported if the this source asset was modified
+                // Make this asset get re-imported if the this source asset
+                // was modified
                 ctx.DependsOnSourceAsset(AssetDatabase.GetAssetPath(pair.stringsAsset));
 
-                
+
             }
 
             // Store the compiled program
@@ -325,9 +340,9 @@ namespace Yarn.Unity
 
             project.compiledYarnProgram = compiledBytes;
 
-            #if YARNSPINNER_DEBUG
+#if YARNSPINNER_DEBUG
             UnityEngine.Profiling.Profiler.enabled = false;
-            #endif
+#endif
 
         }
 
@@ -335,25 +350,28 @@ namespace Yarn.Unity
         {
             // Find _all_ files in this director that are not .meta files
             var allFiles = Directory.EnumerateFiles(assetsFolderPath, "*", SearchOption.AllDirectories)
-                .Where(path => path.EndsWith(".meta") == false);                
+                .Where(path => path.EndsWith(".meta") == false);
 
             // Match files with those whose filenames contain a line ID
             var matchedFilesAndPaths = lineIDs.GroupJoin(
                 // the elements we're matching lineIDs to
-                allFiles, 
-                // the key for lineIDs (being strings, it's just the line ID itself)
-                lineID => lineID, 
+                allFiles,
+                // the key for lineIDs (being strings, it's just the line
+                // ID itself)
+                lineID => lineID,
                 // the key for assets (the filename without the path)
                 assetPath => Path.GetFileName(assetPath),
                 // the way we produce the result (a key-value pair)
                 (lineID, assetPaths) =>
                 {
-                    if (assetPaths.Count() > 1) {
+                    if (assetPaths.Count() > 1)
+                    {
                         Debug.LogWarning($"Line {lineID} has {assetPaths.Count()} possible assets.\n{string.Join(", ", assetPaths)}");
                     }
                     return new { lineID, assetPaths };
                 },
-                // the way we test to see if two elements should be joined (does the filename contain the line ID?)
+                // the way we test to see if two elements should be joined
+                // (does the filename contain the line ID?)
                 Compare.By<string>((fileName, lineID) =>
                 {
                     var lineIDWithoutPrefix = lineID.Replace("line:", "");
@@ -361,7 +379,7 @@ namespace Yarn.Unity
                 })
                 )
                 .ToDictionary(entry => entry.lineID, entry => AssetDatabase.LoadAssetAtPath<Object>(entry.assetPaths.FirstOrDefault()));
-            
+
 
             return matchedFilesAndPaths;
         }
@@ -371,7 +389,8 @@ namespace Yarn.Unity
         /// generate a strings table - that is, it has no compile errors,
         /// it has at least one script, and all scripts are fully tagged.
         /// </summary>
-        /// <inheritdoc path="exception" cref="GetScriptHasLineTags(TextAsset)"/>
+        /// <inheritdoc path="exception"
+        /// cref="GetScriptHasLineTags(TextAsset)"/>
         internal bool CanGenerateStringsTable => string.IsNullOrEmpty(this.compileError) && sourceScripts.Count > 0 && sourceScripts.All(s => GetScriptHasLineTags(s));
 
         /// <summary>
@@ -402,7 +421,8 @@ namespace Yarn.Unity
             // Get the importer for this TextAsset
             var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(script)) as YarnImporter;
 
-            if (importer == null) {
+            if (importer == null)
+            {
                 throw new System.ArgumentException($"The asset {script} is not imported via a {nameof(YarnImporter)}");
             }
 
@@ -427,13 +447,13 @@ namespace Yarn.Unity
                 // We have no scripts to work with - return an empty
                 // collection - there's no error, but there's no content
                 // either
-                return new List<StringTableEntry>(); 
+                return new List<StringTableEntry>();
             }
 
             // We now now compile!
             var job = CompilationJob.CreateFromFiles(pathsToImporters);
             job.CompilationType = CompilationJob.Type.StringsOnly;
-            
+
             CompilationResult compilationResult;
 
             try
@@ -442,7 +462,7 @@ namespace Yarn.Unity
             }
             catch (ParseException)
             {
-                Debug.LogError($"Can't generate a strings table from a Yarn Project that contains compile errors", null);                
+                Debug.LogError($"Can't generate a strings table from a Yarn Project that contains compile errors", null);
                 return null;
             }
 
@@ -459,12 +479,14 @@ namespace Yarn.Unity
 
             return stringTableEntries;
 
-            
+
         }
     }
 
-    public class ReorderableDeclarationsList {
-        private struct Problem {
+    public class ReorderableDeclarationsList
+    {
+        private struct Problem
+        {
             public string text;
             public int index;
         }
@@ -474,34 +496,36 @@ namespace Yarn.Unity
 
         private ReorderableList _list;
         private string filterString;
-        
+
         private List<int> filteredIndices = new List<int>();
         private List<Problem> problems = new List<Problem>();
-        
+
         private SerializedObject serializedObject;
         private SerializedProperty serializedProperty;
 
-        public ReorderableDeclarationsList(SerializedObject serializedObject, SerializedProperty property) {
+        public ReorderableDeclarationsList(SerializedObject serializedObject, SerializedProperty property)
+        {
             this.serializedObject = serializedObject;
             serializedProperty = property;
-            
-            _list = new UnityEditorInternal.ReorderableList(serializedObject, property, false, true, true, true) {
+
+            _list = new UnityEditorInternal.ReorderableList(serializedObject, property, false, true, true, true)
+            {
                 drawHeaderCallback = (rect) => DrawListHeader(rect, "Declarations"),
-                drawElementCallback = (rect, index, isActive, isFocused) => DrawListElement(rect,index,isActive, isFocused, useSearch: true),
-                elementHeightCallback = (index) => GetElementHeight(index, useSearch: true),            
+                drawElementCallback = (rect, index, isActive, isFocused) => DrawListElement(rect, index, isActive, isFocused, useSearch: true),
+                elementHeightCallback = (index) => GetElementHeight(index, useSearch: true),
                 onAddCallback = OnAdd,
                 onCanAddCallback = OnCanAdd,
-                onCanRemoveCallback = OnCanRemove,            
+                onCanRemoveCallback = OnCanRemove,
             };
 
-            UpdateProblems();    
+            UpdateProblems();
         }
 
         private void OnAdd(ReorderableList list)
         {
             serializedProperty.InsertArrayElementAtIndex(serializedProperty.arraySize);
-            var entry = serializedProperty.GetArrayElementAtIndex(serializedProperty.arraySize - 1);            
-            
+            var entry = serializedProperty.GetArrayElementAtIndex(serializedProperty.arraySize - 1);
+
             // Clear necessary properties to something useful
             var nameProp = entry.FindPropertyRelative("name");
             var typeProp = entry.FindPropertyRelative("type");
@@ -514,7 +538,7 @@ namespace Yarn.Unity
             defaultValueStringProp.stringValue = string.Empty;
             sourceYarnAssetProp.objectReferenceValue = null;
             descriptionProp.stringValue = string.Empty;
-            
+
         }
 
         private void UpdateProblems()
@@ -524,33 +548,34 @@ namespace Yarn.Unity
             var declarations = Cast<SerializedProperty>(serializedProperty.GetEnumerator()).ToList();
 
             // Find all variables with duplicate names
-            var names = declarations.Select((p, index) => new {name=p.FindPropertyRelative("name").stringValue, index});
-            
+            var names = declarations.Select((p, index) => new { name = p.FindPropertyRelative("name").stringValue, index });
+
             var duplicateNames = names.GroupBy(s => s.name)
                                     .Where(g => g.Count() > 1)
                                     .Select(g => g.Key)
                                     .ToList();
 
-            problems.AddRange(duplicateNames.Select(name => new Problem {
-                    text = $"Duplicate variable name {name}", 
-                    index = names.First(n => n.name == name).index 
-                }));
+            problems.AddRange(duplicateNames.Select(name => new Problem
+            {
+                text = $"Duplicate variable name {name}",
+                index = names.First(n => n.name == name).index
+            }));
 
             var invalidVariableNames = names.Where(decl => decl.name.Equals(string.Empty) == false && !decl.name.StartsWith("$"));
 
-            problems.AddRange(invalidVariableNames.Select(decl => new Problem { text = $"Variable name '{decl.name}' must begin with a $", index=decl.index}));
+            problems.AddRange(invalidVariableNames.Select(decl => new Problem { text = $"Variable name '{decl.name}' must begin with a $", index = decl.index }));
 
             var emptyVariableNames = names.Where(name => string.IsNullOrEmpty(name.name));
-            
-            problems.AddRange(emptyVariableNames.Select(decl => new Problem { text = $"Variable name must not be empty", index=decl.index}));
-            
+
+            problems.AddRange(emptyVariableNames.Select(decl => new Problem { text = $"Variable name must not be empty", index = decl.index }));
+
         }
 
         IEnumerable<T> Cast<T>(IEnumerator iterator)
         {
             while (iterator.MoveNext())
             {
-                yield return (T) iterator.Current;
+                yield return (T)iterator.Current;
             }
         }
 
@@ -563,77 +588,97 @@ namespace Yarn.Unity
         private bool OnCanAdd(ReorderableList list)
         {
             return IsSearching == false;
-        }   
+        }
 
-        private bool ShouldShowElement(int index) {
+        private bool ShouldShowElement(int index)
+        {
             // If we're not searching then all indices are shown
-            if (IsSearching == false) {
+            if (IsSearching == false)
+            {
                 return true;
             }
 
-            // Otherwise, we show this element if its index is in the filtered
-            // list
+            // Otherwise, we show this element if its index is in the
+            // filtered list
             return filteredIndices.Contains(index);
         }
 
         private float GetElementHeight(int index, bool useSearch)
         {
-            if (useSearch == false || ShouldShowElement(index)) {
+            if (useSearch == false || ShouldShowElement(index))
+            {
                 var item = serializedProperty.GetArrayElementAtIndex(index);
                 return DeclarationPropertyDrawer.GetPropertyHeightImpl(item, null);
-            } else {
+            }
+            else
+            {
                 return 0;
             }
         }
 
-        private void DrawListHeader(Rect rect, string label) {
+        private void DrawListHeader(Rect rect, string label)
+        {
             GUI.Label(rect, label);
         }
 
-        private void DrawListElement(Rect rect, int index, bool isActive, bool isFocused, bool useSearch) {
-            if (useSearch == false || ShouldShowElement(index)) {
+        private void DrawListElement(Rect rect, int index, bool isActive, bool isFocused, bool useSearch)
+        {
+            if (useSearch == false || ShouldShowElement(index))
+            {
                 var item = serializedProperty.GetArrayElementAtIndex(index);
                 EditorGUI.PropertyField(rect, item);
             }
         }
 
-        public void DrawLayout() {
+        public void DrawLayout()
+        {
             //serializedObject.Update();
             EditorGUILayout.Space();
 
-            foreach (var problem in problems) {
-                if (problem.index != -1) {
-                    using (new EditorGUILayout.HorizontalScope()) {
+            foreach (var problem in problems)
+            {
+                if (problem.index != -1)
+                {
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
                         EditorGUILayout.HelpBox(problem.text, MessageType.Error);
-                        if (GUILayout.Button("Select", GUILayout.ExpandWidth(false))) {
+                        if (GUILayout.Button("Select", GUILayout.ExpandWidth(false)))
+                        {
                             _list.index = problem.index;
-                        }                
+                        }
                     }
-                } else {
+                }
+                else
+                {
                     EditorGUILayout.HelpBox(problem.text, MessageType.Error);
                 }
                 EditorGUILayout.Space();
             }
 
-            using (var changeCheck = new EditorGUI.ChangeCheckScope()) {
+            using (var changeCheck = new EditorGUI.ChangeCheckScope())
+            {
                 filterString = EditorGUILayout.TextField("Search", filterString);
 
-                if (changeCheck.changed) {
+                if (changeCheck.changed)
+                {
                     UpdateSearch(filterString);
                 }
             }
-            
-            
-            using (var changeCheck = new EditorGUI.ChangeCheckScope()) {
+
+
+            using (var changeCheck = new EditorGUI.ChangeCheckScope())
+            {
                 _list.DoLayoutList();
 
-                if (changeCheck.changed) {
+                if (changeCheck.changed)
+                {
                     UpdateProblems();
                 }
             }
-            
 
-            if (IsSearching && filteredIndices.Count == 0) {
+
+            if (IsSearching && filteredIndices.Count == 0)
+            {
                 EditorGUILayout.LabelField("No items to show.");
             }
         }
@@ -642,16 +687,19 @@ namespace Yarn.Unity
         {
             filteredIndices.Clear();
 
-            if (string.IsNullOrEmpty(filterString) == false) {
+            if (string.IsNullOrEmpty(filterString) == false)
+            {
 
                 var count = serializedProperty.arraySize;
-                for (int i = 0; i < count; i++) {
+                for (int i = 0; i < count; i++)
+                {
 
-                    
+
                     var item = serializedProperty.GetArrayElementAtIndex(i);
-                    
+
                     var nameProperty = item.FindPropertyRelative("name");
-                    if (nameProperty.stringValue?.Contains(filterString) ?? false) {
+                    if (nameProperty.stringValue?.Contains(filterString) ?? false)
+                    {
                         filteredIndices.Add(i);
                     }
                 }
@@ -660,7 +708,8 @@ namespace Yarn.Unity
     }
 
     [CustomPropertyDrawer(typeof(YarnProjectImporter.SerializedDeclaration))]
-    public class DeclarationPropertyDrawer: PropertyDrawer {
+    public class DeclarationPropertyDrawer : PropertyDrawer
+    {
 
         /// <summary>
         /// Draws either a property field or a label field for <paramref
@@ -673,11 +722,14 @@ namespace Yarn.Unity
         /// for.</param>
         /// <param name="readOnly">Whether the property is read-only or
         /// not.</param>
-        private void DrawPropertyField(Rect position, SerializedProperty property, bool readOnly, string label = null) {
-            if (label == null) {
+        private void DrawPropertyField(Rect position, SerializedProperty property, bool readOnly, string label = null)
+        {
+            if (label == null)
+            {
                 label = property.displayName;
             }
-            if (readOnly) {
+            if (readOnly)
+            {
                 switch (property.propertyType)
                 {
                     case SerializedPropertyType.Integer:
@@ -693,9 +745,10 @@ namespace Yarn.Unity
                         EditorGUI.LabelField(position, label, property.stringValue);
                         break;
                     case SerializedPropertyType.ObjectReference:
-                        using (new EditorGUI.DisabledGroupScope(true)) {
+                        using (new EditorGUI.DisabledGroupScope(true))
+                        {
                             EditorGUI.ObjectField(position, property);
-                        }                        
+                        }
                         break;
                     case SerializedPropertyType.Enum:
                         var displayValue = property.enumDisplayNames[property.enumValueIndex];
@@ -703,12 +756,14 @@ namespace Yarn.Unity
                         break;
                 }
             }
-            else {
+            else
+            {
                 // Use delayed fields where possible to preserve
                 // responsivity (we don't want to force a serialization on
                 // Unity 2018 after every keystroke, and delayed fields
                 // don't report a change until the user changes focus)
-                switch (property.propertyType) {
+                switch (property.propertyType)
+                {
                     case SerializedPropertyType.String:
                         property.stringValue = EditorGUI.DelayedTextField(position, label, property.stringValue);
                         break;
@@ -718,16 +773,17 @@ namespace Yarn.Unity
                     case SerializedPropertyType.Integer:
                         property.floatValue = EditorGUI.DelayedIntField(position, label, property.intValue);
                         break;
-                    default:          
+                    default:
                         // Just use a regular field for other kinds of
                         // properties
                         EditorGUI.PropertyField(position, property, new GUIContent(label));
                         break;
-                }                
+                }
             }
         }
 
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
             EditorGUI.BeginProperty(position, label, property);
 
             // A serialized declaration is read-only if it came from a Yarn
@@ -737,7 +793,8 @@ namespace Yarn.Unity
 
             const float leftInset = 8;
 
-            Rect RectForFieldIndex(int index, int lineCount = 1) {
+            Rect RectForFieldIndex(int index, int lineCount = 1)
+            {
                 float verticalOffset = EditorGUIUtility.singleLineHeight * index + EditorGUIUtility.standardVerticalSpacing * index;
                 float height = EditorGUIUtility.singleLineHeight * lineCount + EditorGUIUtility.standardVerticalSpacing * (lineCount - 1);
 
@@ -753,13 +810,15 @@ namespace Yarn.Unity
 
             SerializedProperty nameProperty = property.FindPropertyRelative("name");
             string name = nameProperty.stringValue;
-            if (string.IsNullOrEmpty(name)) {
+            if (string.IsNullOrEmpty(name))
+            {
                 name = "Variable";
             }
-            
+
             property.isExpanded = EditorGUI.Foldout(foldoutPosition, property.isExpanded, name);
-            
-            if (property.isExpanded) {
+
+            if (property.isExpanded)
+            {
                 var namePosition = RectForFieldIndex(1);
                 var typePosition = RectForFieldIndex(2);
                 var defaultValuePosition = RectForFieldIndex(3);
@@ -767,13 +826,13 @@ namespace Yarn.Unity
                 var sourcePosition = RectForFieldIndex(6);
 
                 DrawPropertyField(namePosition, nameProperty, propertyIsReadOnly);
-                
+
                 SerializedProperty typeProperty = property.FindPropertyRelative("type");
 
                 DrawPropertyField(typePosition, typeProperty, propertyIsReadOnly);
 
                 SerializedProperty defaultValueProperty;
-                
+
                 switch ((Yarn.Type)typeProperty.enumValueIndex)
                 {
                     case Yarn.Type.Number:
@@ -784,40 +843,50 @@ namespace Yarn.Unity
                         break;
                     case Yarn.Type.Bool:
                         defaultValueProperty = property.FindPropertyRelative("defaultValueBool");
-                        break;  
+                        break;
                     default:
-                        defaultValueProperty = null;  
-                        break;            
+                        defaultValueProperty = null;
+                        break;
                 }
 
-                
-                if (defaultValueProperty == null) {
+
+                if (defaultValueProperty == null)
+                {
                     EditorGUI.LabelField(defaultValuePosition, "Default Value", $"Variable type {(Yarn.Type)typeProperty.enumValueIndex} is not allowed");
-                } else {
-                    DrawPropertyField(defaultValuePosition, defaultValueProperty, propertyIsReadOnly, "Default Value");                    
                 }
-                
-                
-                // Don't use DrawPropertyField here because we want to use a special gui style and directly use the string value
+                else
+                {
+                    DrawPropertyField(defaultValuePosition, defaultValueProperty, propertyIsReadOnly, "Default Value");
+                }
+
+
+                // Don't use DrawPropertyField here because we want to use
+                // a special gui style and directly use the string value
                 SerializedProperty descriptionProperty = property.FindPropertyRelative("description");
-                if (propertyIsReadOnly) {
+                if (propertyIsReadOnly)
+                {
                     descriptionPosition = EditorGUI.PrefixLabel(descriptionPosition, new GUIContent(descriptionProperty.displayName));
                     EditorGUI.SelectableLabel(descriptionPosition, descriptionProperty.stringValue, EditorStyles.wordWrappedLabel);
-                } else {
+                }
+                else
+                {
                     var wordWrappedTextField = EditorStyles.textField;
                     wordWrappedTextField.wordWrap = true;
-                
+
                     descriptionProperty.stringValue = EditorGUI.DelayedTextField(descriptionPosition, descriptionProperty.displayName, descriptionProperty.stringValue, wordWrappedTextField);
                 }
 
-                if (!propertyIsReadOnly) {
+                if (!propertyIsReadOnly)
+                {
                     EditorGUI.LabelField(sourcePosition, "Declared In", "this file");
-                } else {
+                }
+                else
+                {
                     SerializedProperty sourceProperty = property.FindPropertyRelative("sourceYarnAsset");
                     EditorGUI.ObjectField(sourcePosition, "Declared In", sourceProperty.objectReferenceValue, typeof(TextAsset), false);
                 }
-                
-                
+
+
             }
 
             EditorGUI.EndProperty();
@@ -829,12 +898,16 @@ namespace Yarn.Unity
             return GetPropertyHeightImpl(property, label);
         }
 
-        public static float GetPropertyHeightImpl(SerializedProperty property, GUIContent label) {
+        public static float GetPropertyHeightImpl(SerializedProperty property, GUIContent label)
+        {
             int lines;
 
-            if (property.isExpanded) {
-                lines = 7;                
-            } else {
+            if (property.isExpanded)
+            {
+                lines = 7;
+            }
+            else
+            {
                 lines = 1;
             }
 
@@ -842,8 +915,8 @@ namespace Yarn.Unity
         }
     }
 
-    // A simple class lets us use a delegate as an IEqualityComparer
-    // from https://stackoverflow.com/a/4607559
+    // A simple class lets us use a delegate as an IEqualityComparer from
+    // https://stackoverflow.com/a/4607559
     internal static class Compare
     {
         public static IEqualityComparer<T> By<T>(System.Func<T, T, bool> comparison)
@@ -871,7 +944,8 @@ namespace Yarn.Unity
                 // returning a constant for all values. This is inefficient
                 // because LINQ can't use an internal comparator, but we're
                 // already looking to use a delegate to do a more
-                // fine-grained test anyway, so we want to ensure that it's called.
+                // fine-grained test anyway, so we want to ensure that it's
+                // called.
                 return 0;
             }
         }

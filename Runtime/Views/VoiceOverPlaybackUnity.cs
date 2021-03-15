@@ -2,12 +2,14 @@
 using System.Collections;
 using UnityEngine;
 
-namespace Yarn.Unity {
+namespace Yarn.Unity
+{
     /// <summary>
     /// Handles playback of voice over <see cref="AudioClip"/>s referenced
     /// on <see cref="YarnScript"/>s.
     /// </summary>
-    public class VoiceOverPlaybackUnity : DialogueViewBase {
+    public class VoiceOverPlaybackUnity : DialogueViewBase
+    {
         /// <summary>
         /// The fade out time when <see cref="FinishCurrentLine"/> is
         /// called.
@@ -35,8 +37,10 @@ namespace Yarn.Unity {
         /// </summary>
         private bool interrupted = false;
 
-        private void Awake() {
-            if (!audioSource) {
+        private void Awake()
+        {
+            if (!audioSource)
+            {
                 audioSource = gameObject.AddComponent<AudioSource>();
                 audioSource.spatialBlend = 0f;
             }
@@ -48,10 +52,12 @@ namespace Yarn.Unity {
         /// </summary>
         /// <param name="dialogueLine"></param>
         /// <returns></returns>
-        public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished) {
+        public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
+        {
             interrupted = false;
 
-            if (!(dialogueLine is AudioLocalizedLine audioLine)) {
+            if (!(dialogueLine is AudioLocalizedLine audioLine))
+            {
                 Debug.LogError($"Playing voice over failed because {nameof(RunLine)} expected to receive an {nameof(AudioLocalizedLine)}, but instead received a {dialogueLine?.GetType().ToString() ?? "null"}. Is your {nameof(DialogueRunner)} set up to use a {nameof(AudioLineProvider)}?", gameObject);
                 onDialogueLineFinished();
                 return;
@@ -60,25 +66,29 @@ namespace Yarn.Unity {
             // Get the localized voice over audio clip
             var voiceOverClip = audioLine.AudioClip;
 
-            if (!voiceOverClip) {
+            if (!voiceOverClip)
+            {
                 Debug.Log("Playing voice over failed since the AudioClip of the voice over audio language or the base language was null.", gameObject);
                 onDialogueLineFinished();
                 return;
             }
-            if (audioSource.isPlaying) {
+            if (audioSource.isPlaying)
+            {
                 // Usually, this shouldn't happen because the
                 // DialogueRunner finishes and ends a line first
                 audioSource.Stop();
             }
 
             StartCoroutine(DoPlayback(voiceOverClip, onDialogueLineFinished));
-            
+
         }
 
-        private IEnumerator DoPlayback(AudioClip voiceOverClip, Action onDialogueLineFinished) {
+        private IEnumerator DoPlayback(AudioClip voiceOverClip, Action onDialogueLineFinished)
+        {
 
             // If we need to wait before starting playback, do this now
-            if (waitTimeBeforeLineStart > 0) {
+            if (waitTimeBeforeLineStart > 0)
+            {
                 yield return new WaitForSeconds(waitTimeBeforeLineStart);
             }
 
@@ -87,25 +97,30 @@ namespace Yarn.Unity {
 
             // Wait until either the audio source finishes playing, or the
             // interruption flag is set.
-            while (audioSource.isPlaying && !interrupted) {
+            while (audioSource.isPlaying && !interrupted)
+            {
                 yield return null;
             }
-            
+
             // If the line was interrupted, we need to wrap up the playback
             // as quickly as we can. We do this here with a fade-out to
             // zero over fadeOutTimeOnLineFinish seconds.
-            if (audioSource.isPlaying && interrupted) {
+            if (audioSource.isPlaying && interrupted)
+            {
                 // Fade out voice over clip            
                 float lerpPosition = 0f;
                 float volumeFadeStart = audioSource.volume;
-                while (audioSource.volume != 0) {
+                while (audioSource.volume != 0)
+                {
                     lerpPosition += Time.unscaledDeltaTime / fadeOutTimeOnLineFinish;
                     audioSource.volume = Mathf.Lerp(volumeFadeStart, 0, lerpPosition);
                     yield return null;
                 }
                 audioSource.Stop();
                 audioSource.volume = volumeFadeStart;
-            } else {
+            }
+            else
+            {
                 audioSource.Stop();
             }
 
@@ -131,7 +146,8 @@ namespace Yarn.Unity {
         /// </summary>
         /// <param name="dialogueOptions"></param>
         /// <param name="onOptionSelected"></param>
-        public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected) {
+        public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
+        {
             // Do nothing
         }
 
@@ -156,7 +172,7 @@ namespace Yarn.Unity {
                 case LineStatus.Ended:
                     // The line is being dismissed; we should ensure that
                     // audio playback has ended.
-                    audioSource.Stop();            
+                    audioSource.Stop();
                     break;
             }
         }

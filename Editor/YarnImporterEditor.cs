@@ -43,36 +43,48 @@ public class YarnImporterEditor : ScriptedImporterEditor
         }
     }
 
-    public override void OnInspectorGUI() {
-        
+    public override void OnInspectorGUI()
+    {
+
         serializedObject.Update();
         EditorGUILayout.Space();
 
         // If there's a parse error in any of the selected objects, show an
         // error. If the selected objects have the same destination
         // program, and there's a compile error in it, show that. 
-        if (string.IsNullOrEmpty(compilationErrorMessageProperty.stringValue) == false) {
-            if (serializedObject.isEditingMultipleObjects) {
+        if (string.IsNullOrEmpty(compilationErrorMessageProperty.stringValue) == false)
+        {
+            if (serializedObject.isEditingMultipleObjects)
+            {
                 EditorGUILayout.HelpBox("Some of the selected scripts have errors.", MessageType.Error);
-            } else {
+            }
+            else
+            {
                 EditorGUILayout.HelpBox(compilationErrorMessageProperty.stringValue, MessageType.Error);
-            }                  
-        } else if (string.IsNullOrEmpty(DestinationProjectError) == false) {
-            
+            }
+        }
+        else if (string.IsNullOrEmpty(DestinationProjectError) == false)
+        {
+
             EditorGUILayout.HelpBox(DestinationProjectError, MessageType.Error);
-            
+
         }
 
-        if (destinationYarnProject == null) {
+        if (destinationYarnProject == null)
+        {
             EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project. Create a new Yarn Project, and add this script to it.", MessageType.Info);
-            if (GUILayout.Button("Create New Yarn Project")) {
+            if (GUILayout.Button("Create New Yarn Project"))
+            {
                 YarnProjectUtility.CreateYarnProject(target as YarnImporter);
-                
+
                 UpdateDestinationProgram();
 
             }
-        } else {
-            using (new EditorGUI.DisabledGroupScope(true)) {
+        }
+        else
+        {
+            using (new EditorGUI.DisabledGroupScope(true))
+            {
                 EditorGUILayout.ObjectField("Program", destinationYarnProject, typeof(YarnProjectImporter), false);
             }
         }
@@ -105,7 +117,7 @@ public class YarnImporterEditor : ScriptedImporterEditor
 #endif
     }
 
-    
-    
+
+
 }
 

@@ -73,13 +73,18 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Draws a language selection popup.
-        /// Returns the corresponding SerializedProperty of the drawn language selection popup which be used after ApplyModifiedProperties() to detect changes to the settings.
+        /// Draws a language selection popup. Returns the corresponding
+        /// SerializedProperty of the drawn language selection popup which
+        /// be used after ApplyModifiedProperties() to detect changes to
+        /// the settings.
         /// </summary>
-        /// <param name="languagePreference">Determines wheter to draw the Text Language preference or the Audio Language preference.</param>
+        /// <param name="languagePreference">Determines wheter to draw the
+        /// Text Language preference or the Audio Language
+        /// preference.</param>
         private SerializedProperty DrawLanguagePreference(LanguagePreference languagePreference)
         {
-            // Declare and set variables depending on the type of language preference to draw
+            // Declare and set variables depending on the type of language
+            // preference to draw
             List<string> languages = default;
             SerializedProperty preferencesProperty = default;
             string defaultProjectLanguage = default;
@@ -106,7 +111,8 @@ namespace Yarn.Unity
                     break;
             }
 
-            // Get currently available languages and determine which the selected language should be
+            // Get currently available languages and determine which the
+            // selected language should be
             int selectedLanguageIndex = -1;
             string[] languagesNamesAvailableForSelection = languages.Count > 0 ? languages.ToArray() : System.Array.Empty<string>();
             var selectedLanguage = languagesNamesAvailableForSelection
@@ -118,11 +124,13 @@ namespace Yarn.Unity
             }
             else if (!string.IsNullOrEmpty(defaultProjectLanguage))
             {
-                // Assign default language in case the currently selected language has become invalid
+                // Assign default language in case the currently selected
+                // language has become invalid
                 selectedLanguageIndex = 0;
             }
             string[] languagesDisplayNamesAvailableForSelection = languagesNamesAvailableForSelection.Select(name => Cultures.GetCulture(name).DisplayName).ToArray();
-            // Disable popup and show message box in case the project languages have been defined yet
+            // Disable popup and show message box in case the project
+            // languages have been defined yet
             if (languagesNamesAvailableForSelection.Length == 0)
             {
                 GUI.enabled = false;
@@ -154,7 +162,8 @@ namespace Yarn.Unity
             AudioLanguage
         }
 
-        // Register the YarnSpinner user preferences in the "Preferences" window
+        // Register the YarnSpinner user preferences in the "Preferences"
+        // window
         [SettingsProvider]
         public static SettingsProvider CreatePreferencesSettingsProvider()
         {

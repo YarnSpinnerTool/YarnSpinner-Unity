@@ -10,19 +10,22 @@ using UnityEditor.AddressableAssets;
 
 [CustomEditor(typeof(Localization))]
 [CanEditMultipleObjects]
-public class LocalizationEditor : Editor {
+public class LocalizationEditor : Editor
+{
 
     private SerializedProperty languageNameProperty;
     private AudioClip lastPreviewed;
 
-    private void OnEnable() {
+    private void OnEnable()
+    {
         languageNameProperty = serializedObject.FindProperty("_LocaleCode");
         lastPreviewed = null;
     }
 
-    public override void OnInspectorGUI() {
-        
-        
+    public override void OnInspectorGUI()
+    {
+
+
         var cultures = Cultures.GetCultures().ToList();
 
         var cultureDisplayName = cultures.Where(c => c.Name == languageNameProperty.stringValue)
@@ -31,24 +34,29 @@ public class LocalizationEditor : Editor {
                                          .FirstOrDefault();
 
         EditorGUILayout.LabelField("Language", cultureDisplayName);
-        
+
         EditorGUILayout.Space();
 
-        if (serializedObject.isEditingMultipleObjects) {
+        if (serializedObject.isEditingMultipleObjects)
+        {
             EditorGUILayout.HelpBox($"Select a single {nameof(Localization).ToLowerInvariant()} to view its contents.", MessageType.None);
-        } else {
+        }
+        else
+        {
             var target = this.target as Localization;
 
             DrawLocalizationContents(target);
         }
-        
-        if (serializedObject.hasModifiedProperties) {
+
+        if (serializedObject.hasModifiedProperties)
+        {
             serializedObject.ApplyModifiedProperties();
         }
-        
+
     }
 
-    private struct LocalizedLineEntry {
+    private struct LocalizedLineEntry
+    {
         public string id;
         public string text;
         public Object asset;
@@ -67,7 +75,8 @@ public class LocalizationEditor : Editor {
         var lineKeys = target.GetLineIDs();
 
         // Early out if we don't have any lines
-        if (lineKeys.Count() == 0) {
+        if (lineKeys.Count() == 0)
+        {
             EditorGUILayout.HelpBox($"This {nameof(Localization).ToLowerInvariant()} does not contain any lines.", MessageType.Info);
             return;
         }
@@ -76,8 +85,9 @@ public class LocalizationEditor : Editor {
 
         var anyAssetsFound = false;
 
-        foreach (var key in lineKeys) {
-            
+        foreach (var key in lineKeys)
+        {
+
             var entry = new LocalizedLineEntry();
 
             entry.id = key;
@@ -109,12 +119,13 @@ public class LocalizationEditor : Editor {
                 }
             }
 
-        
+
 
             localizedLineContent.Add(entry);
         }
 
-        foreach (var entry in localizedLineContent) {
+        foreach (var entry in localizedLineContent)
+        {
 
             var idContent = new GUIContent(entry.id);
 
@@ -126,8 +137,9 @@ public class LocalizationEditor : Editor {
             // Show the line ID and localized text
             EditorGUILayout.LabelField(idContent, lineContent);
 
-            if (entry.asset != null) {
-                
+            if (entry.asset != null)
+            {
+
                 // Asset references are never editable here - they're only
                 // updated by the Localization Database. Add a
                 // DisabledGroup here to make all ObjectFields be
@@ -138,9 +150,10 @@ public class LocalizationEditor : Editor {
                 EditorGUILayout.ObjectField(" ", entry.asset, typeof(UnityEngine.Object), false);
 
                 // for AudioClips, add a little play preview button
-                if ( entry.asset.GetType() == typeof(UnityEngine.AudioClip) ) {
+                if (entry.asset.GetType() == typeof(UnityEngine.AudioClip))
+                {
                     var rect = GUILayoutUtility.GetLastRect();
-                    
+
                     // Localization assets are displayed in an Inspector
                     // that's always disabled, so we need to manually set
                     // the enabled flag to 'true' in order to let this
@@ -149,20 +162,25 @@ public class LocalizationEditor : Editor {
                     var wasEnabled = GUI.enabled;
                     GUI.enabled = true;
 
-                    bool isPlaying = IsClipPlaying( (AudioClip)entry.asset );
-                    if ( lastPreviewed == (AudioClip)entry.asset && isPlaying ) {
+                    bool isPlaying = IsClipPlaying((AudioClip)entry.asset);
+                    if (lastPreviewed == (AudioClip)entry.asset && isPlaying)
+                    {
                         rect.width = 54;
                         rect.x += EditorGUIUtility.labelWidth - 56;
-                        
-                        if ( GUI.Button(rect, "▣ Stop" ) ) {
+
+                        if (GUI.Button(rect, "▣ Stop"))
+                        {
                             StopAllClips();
                             lastPreviewed = null;
                         }
-                    } else {
+                    }
+                    else
+                    {
                         rect.width = 18;
                         rect.x += EditorGUIUtility.labelWidth - 20;
-                        if ( GUI.Button(rect, "▸") ) {
-                            PlayClip( (AudioClip)entry.asset );
+                        if (GUI.Button(rect, "▸"))
+                        {
+                            PlayClip((AudioClip)entry.asset);
                             lastPreviewed = (AudioClip)entry.asset;
                         }
                     }
@@ -172,7 +190,9 @@ public class LocalizationEditor : Editor {
                 }
 
                 EditorGUILayout.Space();
-            } else if (anyAssetsFound) {
+            }
+            else if (anyAssetsFound)
+            {
                 // Other entries have assets, but not this one. TODO: show
                 // a warning? probably need to make it really prominent,
                 // and possibly allow filtering this view to show only
@@ -183,7 +203,8 @@ public class LocalizationEditor : Editor {
     }
 
     // below is some terrible reflection needed for the AudioClip preview
-    // terrible hack from https://forum.unity.com/threads/way-to-play-audio-in-editor-using-an-editor-script.132042/#post-4767824
+    // terrible hack from
+    // https://forum.unity.com/threads/way-to-play-audio-in-editor-using-an-editor-script.132042/#post-4767824
     public static void PlayClip(AudioClip clip, int startSample = 0, bool loop = false)
     {
         System.Reflection.Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;

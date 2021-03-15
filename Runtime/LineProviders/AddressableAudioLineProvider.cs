@@ -8,34 +8,40 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 namespace Yarn.Unity
 {
     public class AddressableAudioLineProvider : LineProviderBehaviour
-    {   
-        private string CurrentAudioLanguageCode 
-        { 
-            get 
-            { 
+    {
+        private string CurrentAudioLanguageCode
+        {
+            get
+            {
                 return string.IsNullOrWhiteSpace(audioLanguageCodeOverride) ? Preferences.AudioLanguage : audioLanguageCodeOverride;
             }
         }
 
-        /// <summary>if defined, this Line Provider will ignore the current setting in Preferences.AudioLanguage
-        /// and use the audio language code override instead (e.g. "en" is the code for "English")</summary>
+        /// <summary>if defined, this Line Provider will ignore the current
+        /// setting in Preferences.AudioLanguage and use the audio language
+        /// code override instead (e.g. "en" is the code for
+        /// "English")</summary>
         [Tooltip("(optional) if defined, this Line Provider will use this language code instead of Preferences.AudioLanguage... example: 'en' is the code for English")]
         public string audioLanguageCodeOverride;
 
-        public override void Start () {
+        public override void Start()
+        {
             base.Start();
 
-            if ( !string.IsNullOrWhiteSpace(audioLanguageCodeOverride) ) {
+            if (!string.IsNullOrWhiteSpace(audioLanguageCodeOverride))
+            {
                 Debug.LogWarning($"LineProvider is ignoring global Preferences.AudioLanguage and using audioLanguageCodeOverride: {audioLanguageCodeOverride}");
             }
         }
-        
+
 #if !ADDRESSABLES
         const string NotCompatibleMessage = nameof(AddressableAudioLineProvider) + " won't work in this project, because the Addressable Assets package is not installed. Either import the package (see https://docs.unity3d.com/Packages/com.unity.addressables@1.16/), or use " + nameof(AudioLineProvider) + " instead.";
-        public override LocalizedLine GetLocalizedLine(Line line) {
+        public override LocalizedLine GetLocalizedLine(Line line)
+        {
             throw new System.InvalidOperationException(NotCompatibleMessage);
         }
-        public override void PrepareForLines(IEnumerable<string> lineIDs) {
+        public override void PrepareForLines(IEnumerable<string> lineIDs)
+        {
             throw new System.InvalidOperationException(NotCompatibleMessage);
         }
         public override bool LinesAvailable => throw new System.InvalidOperationException(NotCompatibleMessage);

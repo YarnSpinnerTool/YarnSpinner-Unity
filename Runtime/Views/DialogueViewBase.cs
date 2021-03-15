@@ -55,13 +55,6 @@ namespace Yarn.Unity
         /// be presented to the user.</param>
         /// <param name="onDialogueLineFinished">The method that should be
         /// called after the line has been finished.</param>
-        /// <returns>Returns <see
-        /// cref="Dialogue.HandlerExecutionType.PauseExecution"/> if
-        /// dialogue should wait until the completion handler is called
-        /// before continuing execution;
-        /// <see cref="Dialogue.HandlerExecutionType.ContinueExecution"/>
-        /// if dialogue should immediately continue running after calling
-        /// this method.</returns>
         /// FIXME: If this method is expected to be called only from the
         /// DialogueRunner then this should be converted into a coroutine
         /// and merged with RunLineWithCallback();
@@ -116,7 +109,7 @@ namespace Yarn.Unity
         /// cref="DialogueComplete"/> is called. If this method returns
         /// <see cref="Dialogue.HandlerExecutionType.ContinueExecution"/>,
         /// do not call the <paramref name="onComplete"/> method.
-        /// 
+        ///
         /// The default implementation does nothing.
         /// </remarks>
         /// <param name="nextNode">The name of the next node that is being
@@ -125,8 +118,7 @@ namespace Yarn.Unity
         /// indicate that the DialogueRunner should continue
         /// executing.</param>
         /// <inheritdoc cref="RunLine(Line, ILineLocalisationProvider,
-        /// Action)"/>
-        /// FIXME: This doesn't seem to be called anymore ...?
+        /// Action)"/> FIXME: This doesn't seem to be called anymore ...?
         public virtual void NodeComplete(string nextNode, Action onComplete)
         {
             // Default implementation does nothing.            
@@ -154,9 +146,9 @@ namespace Yarn.Unity
         /// content.
         ///
         /// If this method is called before the line has finished appearing
-        /// (that is, before the line's status changes to 
-        /// <see cref="LineStatus.Delivered"/>), the line's status will
-        /// change to <see cref="LineStatus.Interrupted"/>, and <see
+        /// (that is, before the line's status changes to <see
+        /// cref="LineStatus.Delivered"/>), the line's status will change
+        /// to <see cref="LineStatus.Interrupted"/>, and <see
         /// cref="OnLineStatusChanged"/> will be called to notify the view.
         /// </remarks>
         public void MarkLineComplete()

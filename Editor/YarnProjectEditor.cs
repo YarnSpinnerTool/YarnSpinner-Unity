@@ -8,13 +8,15 @@ using UnityEditor.Experimental.AssetImporters;
 namespace Yarn.Unity
 {
     [CustomEditor(typeof(YarnProject))]
-public class YarnProjectEditor : Editor {
-    public override void OnInspectorGUI() {
-        base.OnInspectorGUI();
+    public class YarnProjectEditor : Editor
+    {
+        public override void OnInspectorGUI()
+        {
+            base.OnInspectorGUI();
 
-        EditorGUILayout.LabelField("wow this is an embedded asset");
-        
+            EditorGUILayout.LabelField("wow this is an embedded asset");
+
+        }
     }
-}
 
 }

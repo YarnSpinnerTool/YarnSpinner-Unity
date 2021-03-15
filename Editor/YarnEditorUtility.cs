@@ -6,7 +6,8 @@ using System.IO;
 /// Contains utility methods for working with Yarn Spinner content in the
 /// Unity Editor.
 /// </summary>
-public static class YarnEditorUtility {
+public static class YarnEditorUtility
+{
 
     // GUID for editor assets. (Doing it like this means that we don't have
     // to worry about where the assets are on disk, if the user has moved
@@ -50,7 +51,8 @@ public static class YarnEditorUtility {
     /// Editor.
     /// </summary>    
     [MenuItem("Assets/Create/Yarn Spinner/Yarn Script", false, 10)]
-    public static void CreateYarnAsset() {
+    public static void CreateYarnAsset()
+    {
 
         // This method call is undocumented, but public. It's defined in
         // ProjectWindowUtil, and used by other parts of the editor to
@@ -64,7 +66,8 @@ public static class YarnEditorUtility {
     }
 
     [MenuItem("Assets/Create/Yarn Spinner/Yarn Project", false, 101)]
-    public static void CreateYarnProject() {
+    public static void CreateYarnProject()
+    {
         // This method call is undocumented, but public. It's defined in
         // ProjectWindowUtil, and used by other parts of the editor to
         // create other kinds of assets (scripts, textures, etc).
@@ -81,7 +84,8 @@ public static class YarnEditorUtility {
     /// template.
     /// </summary>
     /// <param name="path">The path at which to create the script.</param>
-    public static Object CreateYarnProject(string path) {
+    public static Object CreateYarnProject(string path)
+    {
         return CreateYarnScriptAssetFromTemplate(path, GetTemplateYarnScriptPath());
     }
 
@@ -90,7 +94,8 @@ public static class YarnEditorUtility {
     /// template.
     /// </summary>
     /// <param name="path">The path at which to create the script.</param>
-    public static Object CreateYarnAsset(string path) {
+    public static Object CreateYarnAsset(string path)
+    {
         return CreateYarnScriptAssetFromTemplate(path, GetTemplateYarnScriptPath());
     }
 
@@ -98,24 +103,30 @@ public static class YarnEditorUtility {
     {
         // Read the contents of the template file
         string templateContent;
-        try {
+        try
+        {
             templateContent = File.ReadAllText(resourceFile);
-        } catch { 
+        }
+        catch
+        {
             Debug.LogError("Failed to find the Yarn script template file. Creating an empty file instead.");
             // the minimal valid Yarn script - no headers, no body
-            templateContent = "---\n===\n"; 
-        } 
-        
+            templateContent = "---\n===\n";
+        }
+
         // Figure out the 'file name' that the user entered
         string scriptName;
-        if (Path.GetExtension(pathName).Equals(".yarnproject", System.StringComparison.InvariantCultureIgnoreCase)) {
+        if (Path.GetExtension(pathName).Equals(".yarnproject", System.StringComparison.InvariantCultureIgnoreCase))
+        {
             // This is a .yarnproject file; the script "name" is always
             // "Project".
             scriptName = "Project";
-        } else {
+        }
+        else
+        {
             // The script name is the name of the file, sans extension.
             scriptName = Path.GetFileNameWithoutExtension(pathName);
-        } 
+        }
 
         // Replace any spaces with underscores - these aren't allowed in
         // node names
@@ -166,7 +177,8 @@ public static class YarnEditorUtility {
         return AssetDatabase.LoadAssetAtPath<Object>(pathName);
     }
 
-    // A handler that receives a callback after the user finishes naming a new file.
+    // A handler that receives a callback after the user finishes naming a
+    // new file.
     private class DoCreateYarnScriptAsset : UnityEditor.ProjectWindowCallback.EndNameEditAction
     {
         // The user just finished typing (and didn't cancel it by pressing
@@ -178,7 +190,7 @@ public static class YarnEditorUtility {
             Object o = CreateYarnScriptAssetFromTemplate(pathName, resourceFile);
 
             // Reveal it on disk.
-            ProjectWindowUtil.ShowCreatedAsset(o);        
+            ProjectWindowUtil.ShowCreatedAsset(o);
         }
     }
 }

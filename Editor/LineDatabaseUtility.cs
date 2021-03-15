@@ -15,8 +15,8 @@ using UnityEditor.AddressableAssets;
 
 internal static class LineDatabaseUtility {
     /// <summary>
-    /// Creates a new localization asset with the given language, and
-    /// adds it to the line database.
+    /// Creates a new localization asset with the given language, and adds
+    /// it to the line database.
     /// </summary>
     /// <param name="language">The locale code for the language to add.
     /// </param>    
@@ -44,8 +44,8 @@ internal static class LineDatabaseUtility {
         AssetDatabase.SaveAssets();
         AssetDatabase.ImportAsset(destinationPath);
 
-        // Now that it exists, add it to the LineDatabase's
-        // _localizations field
+        // Now that it exists, add it to the LineDatabase's _localizations
+        // field
         localizationsProperty.InsertArrayElementAtIndex(localizationsProperty.arraySize);
         var newProp = localizationsProperty.GetArrayElementAtIndex(localizationsProperty.arraySize - 1);
         newProp.objectReferenceValue = localizationAsset;
@@ -53,8 +53,8 @@ internal static class LineDatabaseUtility {
         // And we're done!
         serializedObject.ApplyModifiedProperties();
 
-        // Finally, update this line database so that this new
-        // localization has content.
+        // Finally, update this line database so that this new localization
+        // has content.
         UpdateContents(serializedObject.targetObject as LineDatabase);
 
         // Return the path of the file we created.
@@ -176,8 +176,7 @@ internal static class LineDatabaseUtility {
         catch (ArgumentException)
         {
             // An ArgumentException will be thrown by the internal
-            // dictionary of the Localization if there's a duplicate
-            // key
+            // dictionary of the Localization if there's a duplicate key
             Debug.LogError($"Can't add line {entry.ID} (\"{entry.Text}\") because this localization already has an entry for this line. Are you trying to add two copies of the same file?");
             return;
         }
@@ -185,22 +184,21 @@ internal static class LineDatabaseUtility {
 
         if (localization.AssetSourceFolder == null)
         {
-            // No asset source folder specified, so don't go looking
-            // for assets to add
+            // No asset source folder specified, so don't go looking for
+            // assets to add
             return;
         }
 
         // Remove "line:" from the ID before looking for assets
         var id = entry.ID.Replace("line:", "");
 
-        // Look inside assetSourceFolder for any asset that includes
-        // this line ID
+        // Look inside assetSourceFolder for any asset that includes this
+        // line ID
         var assetGUIDs = AssetDatabase.FindAssets(id, new[] { AssetDatabase.GetAssetPath(localization.AssetSourceFolder) });
 
         if (assetGUIDs.Length == 0)
         {
-            // We didn't find any asset with this name, so early out
-            // here
+            // We didn't find any asset with this name, so early out here
             return;
         }
 
@@ -210,8 +208,8 @@ internal static class LineDatabaseUtility {
             Debug.LogWarning($"Multiple assets found for line {id} in language {localization.LocaleCode}: {assetPaths}");
         }
 
-        // Select the GUID for the first asset that we've found for
-        // this line
+        // Select the GUID for the first asset that we've found for this
+        // line
         var assetGUID = assetGUIDs[0];
 
         if (ProjectSettings.AddressableVoiceOverAudioClips)
@@ -236,9 +234,9 @@ internal static class LineDatabaseUtility {
     {
         if (AddressableAssetSettingsDefaultObject.SettingsExists == false)
         {
-            // Do nothing - the user hasn't set up their addressable
-            // assets settings object, so we have no place to record
-            // any new addresses.
+            // Do nothing - the user hasn't set up their addressable assets
+            // settings object, so we have no place to record any new
+            // addresses.
             return;
         }
 
@@ -247,9 +245,8 @@ internal static class LineDatabaseUtility {
         // Get or create the asset reference for this asset.
         var assetReference = settings.CreateAssetReference(assetGUID);
 
-        // Get the entry in the addressable assets settings - we want
-        // to update its address to be one that a LineProvider will ask
-        // for
+        // Get the entry in the addressable assets settings - we want to
+        // update its address to be one that a LineProvider will ask for
         var addressableAssetEntry = settings.FindAssetEntry(assetGUID);
 
         addressableAssetEntry?.SetAddress(entry.ID + "-" + localization.LocaleCode);

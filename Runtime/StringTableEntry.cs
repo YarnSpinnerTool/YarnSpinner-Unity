@@ -109,13 +109,15 @@ namespace Yarn.Unity
         /// when parsing the string.</exception>
         public static IEnumerable<StringTableEntry> ParseFromCSV(string sourceText)
         {
-            try {
+            try
+            {
                 using (var stringReader = new System.IO.StringReader(sourceText))
                 using (var csv = new CsvReader(stringReader, GetConfiguration()))
                 {
                     /*
-                    Do the below instead of GetRecords<T> due to incompatibility with IL2CPP
-                    See more: https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/36#issuecomment-691489913
+                    Do the below instead of GetRecords<T> due to
+                    incompatibility with IL2CPP See more:
+                    https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/36#issuecomment-691489913
                     */
                     var records = new List<StringTableEntry>();
                     csv.Read();
@@ -132,7 +134,7 @@ namespace Yarn.Unity
                         csv.TryGetField<string>("file", out var file);
                         csv.TryGetField<string>("node", out var node);
                         csv.TryGetField<string>("lineNumber", out var lineNumber);
-                        
+
                         var record = new StringTableEntry
                         {
                             Language = language ?? string.Empty,
@@ -150,7 +152,9 @@ namespace Yarn.Unity
 
                     return records;
                 }
-            } catch (CsvHelperException e) {
+            }
+            catch (CsvHelperException e)
+            {
                 throw new System.ArgumentException($"Error reading CSV file: {e}");
             }
         }
@@ -166,7 +170,7 @@ namespace Yarn.Unity
                     textWriter, // write into this stream
                     GetConfiguration() // use this configuration
                     );
-                
+
                 var fieldNames = new[] {
                     "language",
                     "id",
@@ -178,13 +182,15 @@ namespace Yarn.Unity
                     "comment",
                 };
 
-                foreach (var field in fieldNames) {
+                foreach (var field in fieldNames)
+                {
                     csv.WriteField(field);
                 }
                 csv.NextRecord();
 
-                foreach (var entry in entries) {
-                    var values = new [] {
+                foreach (var entry in entries)
+                {
+                    var values = new[] {
                         entry.Language,
                         entry.ID,
                         entry.Text,
@@ -194,7 +200,8 @@ namespace Yarn.Unity
                         entry.Lock,
                         entry.Comment,
                     };
-                    foreach (var value in values) {
+                    foreach (var value in values)
+                    {
                         csv.WriteField(value);
                     }
                     csv.NextRecord();

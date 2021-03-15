@@ -67,24 +67,30 @@ namespace Yarn.Unity
             // exceptions might get thrown, which we'll catch and log (if
             // we're in debug mode).
             bool canGenerateStringsTable;
-            try {
+            try
+            {
                 canGenerateStringsTable = yarnProjectImporter.CanGenerateStringsTable;
-            } catch (System.Exception e) {
-                #if YARNSPINNER_DEBUG
+            }
+            catch (System.Exception e)
+            {
+#if YARNSPINNER_DEBUG
                 Debug.LogWarning($"Encountered in error when checking to see if Yarn Project Importer could generate a strings table: {e}", this);
-                #endif
+#endif
                 canGenerateStringsTable = false;
             }
-            
-            using (new EditorGUI.DisabledScope(canGenerateStringsTable == false)) {
-                if (GUILayout.Button("Export Strings as CSV")) {
+
+            using (new EditorGUI.DisabledScope(canGenerateStringsTable == false))
+            {
+                if (GUILayout.Button("Export Strings as CSV"))
+                {
                     var currentPath = AssetDatabase.GetAssetPath(serializedObject.targetObject);
                     var currentFileName = Path.GetFileNameWithoutExtension(currentPath);
                     var currentDirectory = Path.GetDirectoryName(currentPath);
 
                     var destinationPath = EditorUtility.SaveFilePanel("Export Strings CSV", currentDirectory, $"{currentFileName}.csv", "csv");
 
-                    if (string.IsNullOrEmpty(destinationPath) == false) {
+                    if (string.IsNullOrEmpty(destinationPath) == false)
+                    {
                         // Generate the file on disk
                         YarnProjectUtility.WriteStringsFile(destinationPath, yarnProjectImporter);
 
@@ -93,30 +99,36 @@ namespace Yarn.Unity
                         AssetDatabase.Refresh();
                     }
                 }
-                if (yarnProjectImporter.languagesToSourceAssets.Count > 0) {
-                    if (GUILayout.Button("Update Existing Strings Files")) {
+                if (yarnProjectImporter.languagesToSourceAssets.Count > 0)
+                {
+                    if (GUILayout.Button("Update Existing Strings Files"))
+                    {
                         YarnProjectUtility.UpdateLocalizationCSVs(yarnProjectImporter);
                     }
                 }
             }
 
-            using (new EditorGUI.DisabledScope(canGenerateStringsTable == true)) {
-                if (GUILayout.Button("Add Line Tags to Scripts")) {
+            using (new EditorGUI.DisabledScope(canGenerateStringsTable == true))
+            {
+                if (GUILayout.Button("Add Line Tags to Scripts"))
+                {
                     YarnProjectUtility.AddLineTagsToFilesInYarnProject(yarnProjectImporter);
                 }
             }
 
             var hadChanges = serializedObject.ApplyModifiedProperties();
 
-            if (hadChanges) {
+            if (hadChanges)
+            {
                 Debug.Log($"{nameof(YarnProjectImporterEditor)} had changes");
             }
 
 #if UNITY_2018
-            // Unity 2018's ApplyRevertGUI is buggy, and doesn't automatically
-            // detect changes to the importer's serializedObject. This means
-            // that we'd need to track the state of the importer, and don't
-            // have a way to present a Revert button. 
+            // Unity 2018's ApplyRevertGUI is buggy, and doesn't
+            // automatically detect changes to the importer's
+            // serializedObject. This means that we'd need to track the
+            // state of the importer, and don't have a way to present a
+            // Revert button. 
             //
             // Rather than offer a broken experience, on Unity 2018 we
             // immediately reimport the changes. This is slow (we're
@@ -124,19 +136,20 @@ namespace Yarn.Unity
             // change!) but ensures that the writes are done.
             if (hadChanges)
             {
-                // Manually perform the same tasks as the 'Apply' button would
+                // Manually perform the same tasks as the 'Apply' button
+                // would
                 ApplyAndImport();
             }
 #endif
 
 #if UNITY_2019_1_OR_NEWER
-            // On Unity 2019 and newer, we can use an ApplyRevertGUI that works
-            // identically to the built-in importer inspectors.
+            // On Unity 2019 and newer, we can use an ApplyRevertGUI that
+            // works identically to the built-in importer inspectors.
             ApplyRevertGUI();
 #endif
         }
 
-        
+
 
         protected override void Apply()
         {
@@ -145,9 +158,11 @@ namespace Yarn.Unity
             // Get all declarations that came from this program
             var thisProgramDeclarations = new List<Yarn.Compiler.Declaration>();
 
-            for (int i = 0; i < serializedDeclarationsProperty.arraySize; i++) {
+            for (int i = 0; i < serializedDeclarationsProperty.arraySize; i++)
+            {
                 var decl = serializedDeclarationsProperty.GetArrayElementAtIndex(i);
-                if (decl.FindPropertyRelative("sourceYarnAsset").objectReferenceValue != null) {
+                if (decl.FindPropertyRelative("sourceYarnAsset").objectReferenceValue != null)
+                {
                     continue;
                 }
 
@@ -170,21 +185,21 @@ namespace Yarn.Unity
                         break;
                     case Yarn.Type.Bool:
                         defaultValue = decl.FindPropertyRelative("defaultValueBool").boolValue;
-                        break;  
+                        break;
                     default:
                         throw new System.ArgumentOutOfRangeException($"Invalid declaration type {type}");
                 }
 
                 var declaration = Declaration.CreateVariable(name, defaultValue, description);
 
-                thisProgramDeclarations.Add(declaration);            
+                thisProgramDeclarations.Add(declaration);
             }
 
             var output = Yarn.Compiler.Utility.GenerateYarnFileWithDeclarations(thisProgramDeclarations, "Program");
 
             var importer = target as YarnProjectImporter;
             File.WriteAllText(importer.assetPath, output, System.Text.Encoding.UTF8);
-            AssetDatabase.ImportAsset(importer.assetPath);            
+            AssetDatabase.ImportAsset(importer.assetPath);
         }
     }
 

@@ -18,7 +18,10 @@ namespace Yarn.Unity
 {
 
     /// <summary>
-    /// A <see cref="ScriptedImporter"/> for Yarn assets. The actual asset used and referenced at runtime and in the editor will be a <see cref="YarnScript"/>, which this class wraps around creating the asset's corresponding meta file.
+    /// A <see cref="ScriptedImporter"/> for Yarn assets. The actual asset
+    /// used and referenced at runtime and in the editor will be a <see
+    /// cref="YarnScript"/>, which this class wraps around creating the
+    /// asset's corresponding meta file.
     /// </summary>
     [ScriptedImporter(3, new[] { "yarn", "yarnc" }, -1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
     public class YarnImporter : ScriptedImporter
@@ -53,8 +56,10 @@ namespace Yarn.Unity
         /// </summary>
         public string parseErrorMessage = null;
 
-        public YarnProject DestinationProject {
-            get {
+        public YarnProject DestinationProject
+        {
+            get
+            {
                 var myAssetPath = assetPath;
                 var destinationProjectPath = AssetDatabase.FindAssets("t:YarnProject")
                     .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
@@ -62,14 +67,16 @@ namespace Yarn.Unity
                     .Where(importer => importer != null)
                     .FirstOrDefault(importer => importer.sourceScripts.Any(s =>
                     {
-                        // Does this importer depend on this asset? If so, then this is our destination asset.
+                        // Does this importer depend on this asset? If so,
+                        // then this is our destination asset.
                         string[] dependencies = AssetDatabase.GetDependencies(importer.assetPath);
                         var importerDependsOnThisAsset = dependencies.Contains<string>(myAssetPath);
-                        
+
                         return importerDependsOnThisAsset;
                     }))?.assetPath;
 
-                if (destinationProjectPath == null) {
+                if (destinationProjectPath == null)
+                {
                     return null;
                 }
 
@@ -89,8 +96,8 @@ namespace Yarn.Unity
         public override void OnImportAsset(AssetImportContext ctx)
         {
             var stopwatch = new System.Diagnostics.Stopwatch();
-            stopwatch.Start();            
-            
+            stopwatch.Start();
+
             var extension = System.IO.Path.GetExtension(ctx.assetPath);
 
             // Clear the 'strings available' flags in case this import
@@ -164,10 +171,10 @@ namespace Yarn.Unity
             var sourceText = File.ReadAllText(ctx.assetPath);
             string fileName = System.IO.Path.GetFileNameWithoutExtension(ctx.assetPath);
 
-            var text = new TextAsset(File.ReadAllText( ctx.assetPath));
+            var text = new TextAsset(File.ReadAllText(ctx.assetPath));
 
-            // Add this container to the imported asset; it will be
-            // what the user interacts with in Unity
+            // Add this container to the imported asset; it will be what
+            // the user interacts with in Unity
             ctx.AddObjectToAsset("Program", text, YarnEditorUtility.GetYarnDocumentIconTexture());
             ctx.SetMainObject(text);
 
@@ -180,16 +187,16 @@ namespace Yarn.Unity
             {
                 // Compile the source code into a compiled Yarn program (or
                 // generate a parse error)
-                var compilationJob = CompilationJob.CreateFromString(fileName,  sourceText, null);
+                var compilationJob = CompilationJob.CreateFromString(fileName, sourceText, null);
                 compilationJob.CompilationType = CompilationJob.Type.StringsOnly;
 
                 var result = Yarn.Compiler.Compiler.Compile(compilationJob);
-                
+
                 LastImportHadImplicitStringIDs = result.ContainsImplicitStringTags;
                 LastImportHadAnyStrings = result.StringTable.Count > 0;
 
                 stringTable = result.StringTable;
-                compiledProgram = result.Program;                
+                compiledProgram = result.Program;
                 isSuccessfullyParsed = true;
                 parseErrorMessage = string.Empty;
             }
@@ -222,9 +229,9 @@ namespace Yarn.Unity
 
             // Create a container for storing the bytes
             var programContainer = new TextAsset("<pre-compiled Yarn script>");
-            
-            // Add this container to the imported asset; it will be
-            // what the user interacts with in Unity
+
+            // Add this container to the imported asset; it will be what
+            // the user interacts with in Unity
             ctx.AddObjectToAsset("Program", programContainer, YarnEditorUtility.GetYarnDocumentIconTexture());
             ctx.SetMainObject(programContainer);
         }

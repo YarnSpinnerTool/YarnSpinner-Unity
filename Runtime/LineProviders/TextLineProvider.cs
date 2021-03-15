@@ -11,15 +11,16 @@ namespace Yarn.Unity
         public override LocalizedLine GetLocalizedLine(Yarn.Line line)
         {
             var text = YarnProject.GetLocalization(CurrentTextLanguageCode).GetLocalizedString(line.ID);
-            return new LocalizedLine() {
+            return new LocalizedLine()
+            {
                 TextID = line.ID,
                 RawText = text,
                 Substitutions = line.Substitutions
-                
             };
         }
 
-        public  override void PrepareForLines(IEnumerable<string> lineIDs) {
+        public override void PrepareForLines(IEnumerable<string> lineIDs)
+        {
             // No-op; text lines are always available
         }
 

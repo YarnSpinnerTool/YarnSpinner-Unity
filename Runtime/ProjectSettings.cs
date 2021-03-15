@@ -6,7 +6,8 @@ using UnityEngine;
 /// build and not altered after that.
 /// </summary>
 [System.Serializable]
-public class ProjectSettings : ScriptableObject {
+public class ProjectSettings : ScriptableObject
+{
     /// <summary>
     /// Project wide available text languages
     /// </summary>
@@ -34,7 +35,7 @@ public class ProjectSettings : ScriptableObject {
     /// Project wide available audio voice over languages
     /// </summary>
     public static List<string> AudioProjectLanguages => Instance._audioProjectLanguages;
-    
+
     /// <summary>
     /// Project wide default audio language. Returns null if no default
     /// languages exists.
@@ -57,7 +58,7 @@ public class ProjectSettings : ScriptableObject {
     /// This property is always false when the Addressable Assets package
     /// is not present.
     /// </summary>
-#if ADDRESSABLES    
+#if ADDRESSABLES
     public static bool AddressableVoiceOverAudioClips
     {
         get => Instance._addressableVoiceOverAudioClips; 
@@ -78,9 +79,12 @@ public class ProjectSettings : ScriptableObject {
     /// Makes sure that there's always an instance of this class alive upon
     /// access.
     /// </summary>
-    private static ProjectSettings Instance {
-        get {
-            if (!_instance) {
+    private static ProjectSettings Instance
+    {
+        get
+        {
+            if (!_instance)
+            {
                 // Calls Awake() implicitly
                 _instance = CreateInstance<ProjectSettings>();
             }
@@ -89,8 +93,10 @@ public class ProjectSettings : ScriptableObject {
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("", "IDE0051", Justification = "Called from Unity/upon creaton")]
-    private void Awake() {
-        if (_instance != null && this != _instance) {
+    private void Awake()
+    {
+        if (_instance != null && this != _instance)
+        {
             DestroyImmediate(_instance);
         }
         _instance = this;
@@ -108,12 +114,14 @@ public class ProjectSettings : ScriptableObject {
 #endif
     }
 
-    private void Initialize() {
+    private void Initialize()
+    {
         _textProjectLanguages = new List<string>();
         _audioProjectLanguages = new List<string>();
     }
 
-    private void OnDestroy() {
+    private void OnDestroy()
+    {
         SortAudioLanguagesList();
         WriteProjectSettingsToDisk();
     }
@@ -121,10 +129,13 @@ public class ProjectSettings : ScriptableObject {
     /// <summary>
     /// Sort the audio languages list to match the text languages list
     /// </summary>
-    private void SortAudioLanguagesList() {
+    private void SortAudioLanguagesList()
+    {
         var audioLanguagesSorted = new List<string>();
-        foreach (var textLanguage in _textProjectLanguages) {
-            if (_audioProjectLanguages.Contains(textLanguage)) {
+        foreach (var textLanguage in _textProjectLanguages)
+        {
+            if (_audioProjectLanguages.Contains(textLanguage))
+            {
                 audioLanguagesSorted.Add(textLanguage);
             }
         }
@@ -134,7 +145,8 @@ public class ProjectSettings : ScriptableObject {
     /// <summary>
     /// Write current Yarn project settings from memory to disk.
     /// </summary>
-    public static void WriteProjectSettingsToDisk() {
+    public static void WriteProjectSettingsToDisk()
+    {
         YarnSettingsHelper.WritePreferencesToDisk(Instance, _settingsPath);
     }
 
@@ -150,11 +162,15 @@ public class ProjectSettings : ScriptableObject {
     /// <throws cref="ArgumentException">Thrown when <paramref
     /// name="localeCode"/> is not a valid locale code (that is, it's not
     /// known to the <see cref="Yarn.Unity.Cultures"/> class.)</throws>
-    public static void AddNewTextLanguage(string localeCode) {
+    public static void AddNewTextLanguage(string localeCode)
+    {
 
-        if (Yarn.Unity.Cultures.HasCulture(localeCode)) {
+        if (Yarn.Unity.Cultures.HasCulture(localeCode))
+        {
             Instance._textProjectLanguages.Add(localeCode);
-        } else {
+        }
+        else
+        {
             throw new System.ArgumentException($"{localeCode} is not a valid locale code.", localeCode);
         }
     }

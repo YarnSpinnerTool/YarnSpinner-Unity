@@ -41,8 +41,8 @@ namespace Yarn.Unity
         private string _textLanguageFromDisk;
 
         /// <summary>
-        /// The audio language preference that was read from disk.
-        /// Used to detect changes to reduce writing to disk.
+        /// The audio language preference that was read from disk. Used to
+        /// detect changes to reduce writing to disk.
         /// </summary>
         private string _audioLanguageFromDisk;
 
@@ -54,8 +54,8 @@ namespace Yarn.Unity
 
         #region Accessors
         /// <summary>
-        /// Makes sure that there's always an instance of this
-        /// class alive upon access.
+        /// Makes sure that there's always an instance of this class alive
+        /// upon access.
         /// </summary>
         private static Preferences Instance
         {
@@ -71,8 +71,8 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// The text language preferred by the user. Changes will
-        /// be written to disk during exit and ending play mode.
+        /// The text language preferred by the user. Changes will be
+        /// written to disk during exit and ending play mode.
         /// </summary>
         public static string TextLanguage
         {
@@ -92,8 +92,8 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// The audio language preferred by the user. Changes will
-        /// be written to disk during exit and ending play mode.
+        /// The audio language preferred by the user. Changes will be
+        /// written to disk during exit and ending play mode.
         /// </summary>
         public static string AudioLanguage
         {
@@ -156,7 +156,8 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Returns true if settings have been changed and returns false if no settings have been changed.
+        /// Returns true if settings have been changed and returns false if
+        /// no settings have been changed.
         /// </summary>
         /// <returns></returns>
         private bool PreferencesChanged()
@@ -177,7 +178,9 @@ namespace Yarn.Unity
         /// <summary>
         /// Read the user's language preferences from disk.
         /// </summary>
-        /// <param name="useJson">If true, settings will be read from JSON file (default). If false, settings will be read from Unity's PlayerPrefs.</param>
+        /// <param name="useJson">If true, settings will be read from JSON
+        /// file (default). If false, settings will be read from Unity's
+        /// PlayerPrefs.</param>
         private void ReadPreferencesFromDisk(bool useJson = true)
         {
             if (useJson)
@@ -193,14 +196,17 @@ namespace Yarn.Unity
             // Apply text language preference from file
             if (!string.IsNullOrEmpty(_textLanguage))
             {
-                // Keep the value read from disk to be able to tell if this class has been modified during runtime
+                // Keep the value read from disk to be able to tell if this
+                // class has been modified during runtime
                 _textLanguageFromDisk = _textLanguage;
 
                 if (Cultures.HasCulture(_textLanguageFromDisk))
                 {
-                    // Language ID from JSON was not found in available Cultures so try to reset with current culture or the project's default language
+                    // Language ID from JSON was not found in available
+                    // Cultures so try to reset with current culture or the
+                    // project's default language
                     _textLanguageFromDisk = null;
-                    
+
                     _textLanguage = ProjectSettings.TextProjectLanguages.Contains(CultureInfo.CurrentCulture.Name) ? CultureInfo.CurrentCulture.Name : ProjectSettings.TextProjectLanguageDefault;
                 }
             }
@@ -208,11 +214,14 @@ namespace Yarn.Unity
             // Apply audio language preference from file
             if (!string.IsNullOrEmpty(_audioLanguage))
             {
-                // Keep the value read from disk to be able to tell if this class has been modified during runtime
+                // Keep the value read from disk to be able to tell if this
+                // class has been modified during runtime
                 _audioLanguageFromDisk = _audioLanguage;
                 if (Cultures.HasCulture(_audioLanguageFromDisk))
                 {
-                    // Language ID from JSON was not found in available Cultures so try to reset with current culture or the project's default language
+                    // Language ID from JSON was not found in available
+                    // Cultures so try to reset with current culture or the
+                    // project's default language
                     _audioLanguageFromDisk = null;
 
                     _audioLanguage = ProjectSettings.AudioProjectLanguages.Contains(CultureInfo.CurrentCulture.Name) ? CultureInfo.CurrentCulture.Name : ProjectSettings.AudioProjectLanguageDefault;
@@ -221,10 +230,15 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Write the preferences to disk. Will be stored outside of the project in the user settings directory of the OS.
+        /// Write the preferences to disk. Will be stored outside of the
+        /// project in the user settings directory of the OS.
         /// </summary>
-        /// <param name="force">Force writing the settings to disk (true) or only write to disk if settings have been changed (false).</param>
-        /// <param name="useJson">If true, settings will be written as JSON (default). If false, settings will be written to Unity's PlayerPrefs.</param>
+        /// <param name="force">Force writing the settings to disk (true)
+        /// or only write to disk if settings have been changed
+        /// (false).</param>
+        /// <param name="useJson">If true, settings will be written as JSON
+        /// (default). If false, settings will be written to Unity's
+        /// PlayerPrefs.</param>
         private static void WritePreferencesToDisk(bool force = false, bool useJson = true)
         {
             if (!Instance.PreferencesChanged() && !force)

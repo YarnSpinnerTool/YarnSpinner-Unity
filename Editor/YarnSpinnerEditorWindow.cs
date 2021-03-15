@@ -247,8 +247,8 @@ namespace Yarn.Unity
                 {
                     if (supportersText == null)
                     {
-                        // We're still waiting for supporters text to finish
-                        // arriving (or error out)
+                        // We're still waiting for supporters text to
+                        // finish arriving (or error out)
                         GUILayout.Label("Loading supporters...", creditsLabel);
                     }
                     else
@@ -276,13 +276,13 @@ namespace Yarn.Unity
                 {
                     EditorGUILayout.BeginHorizontal();
 
-                    // Show the object field - disabled so people won't try and
-                    // replace items in the list with other scripts, which
-                    // won't work
+                    // Show the object field - disabled so people won't try
+                    // and replace items in the list with other scripts,
+                    // which won't work
                     EditorGUI.BeginDisabledGroup(true);
 
-                    // All paths will begin with the path to the Assets folder,
-                    // so just remove that for tidiness
+                    // All paths will begin with the path to the Assets
+                    // folder, so just remove that for tidiness
                     var displayedScript = script.Replace(Application.dataPath + Path.DirectorySeparatorChar, "");
                     EditorGUILayout.LabelField(displayedScript);
 
@@ -297,7 +297,7 @@ namespace Yarn.Unity
             {
                 if (GUILayout.Button("Upgrade Scripts"))
                 {
-                    UpgradeProjects(yarnProjectList, UpgradeType.Version1to2);                    
+                    UpgradeProjects(yarnProjectList, UpgradeType.Version1to2);
                 }
             }
         }
@@ -308,14 +308,15 @@ namespace Yarn.Unity
             {
                 var source = File.ReadAllText(s);
 
-                var file = new Yarn.Compiler.CompilationJob.File() {
+                var file = new Yarn.Compiler.CompilationJob.File()
+                {
                     FileName = s,
                     Source = source,
                 };
 
                 return file;
             });
-            
+
             AssetDatabase.StartAssetEditing();
 
             try
@@ -324,8 +325,9 @@ namespace Yarn.Unity
 
                 var upgradeResult = LanguageUpgrader.Upgrade(upgradeJob);
 
-                
-                foreach (var upgradedFile in upgradeResult.Files) {
+
+                foreach (var upgradedFile in upgradeResult.Files)
+                {
                     if (upgradedFile.Replacements.Count() == 0 && upgradedFile.IsNewFile == false)
                     {
                         Debug.Log($"No upgrades required for {upgradedFile.Path}");
@@ -350,7 +352,7 @@ namespace Yarn.Unity
             {
                 Debug.LogError($"Failed to run upgrade job: {e.GetType()} {e.Message}");
                 return;
-            }            
+            }
 
             AssetDatabase.StopAssetEditing();
         }
