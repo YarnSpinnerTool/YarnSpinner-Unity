@@ -17,120 +17,57 @@ using System.Text;
 namespace Yarn.Unity
 {
 
-    internal class YarnAssetPostProcessor : AssetPostprocessor
-    {
-        // Detects when a YarnProject has been imported (either created or
-        // modified), and checks to see if its importer is configured to
-        // associate it with a LineDatabase. If it is, the
-        // LineDatabase is updated to include this project in its
-        // TrackedProjects collection. Finally, the LineDatabase is
-        // made to update its contents.
-        //
-        // We do this in a post-processor rather than in the importer
-        // itself, because assets created in an importer don't actually
-        // "exist" (as far as Unity is concerned) until after the import
-        // process completes, so references to that asset aren't valid
-        // (i.e. it hasn't been assigned a GUID yet).
-        static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
-        {
-
-            // Find all line databases whose list of recently
-            // updated scripts has changed.
-            var allLineDatabases = AssetDatabase
-                .FindAssets($"t:{nameof(LineDatabase)}")
-                .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
-                .Select(path => AssetDatabase.LoadAssetAtPath<LineDatabase>(path))
-                .Where(db => db.NeedsUpdate);
-
-            if (allLineDatabases.Count() == 0) {
-                return;
-            }
-
-            foreach (var db in allLineDatabases) {
-                // Make the database update its contents
-                LineDatabaseUtility.UpdateContents(db);
-            }
-
-            // Save any changed line databases. (This will
-            // trigger this method to be called again, but the
-            // line databases will no longer need updating, so
-            // we won't loop.)
-            AssetDatabase.SaveAssets();
-        }
-    }
-
     /// <summary>
     /// A <see cref="ScriptedImporter"/> for Yarn assets. The actual asset used and referenced at runtime and in the editor will be a <see cref="YarnScript"/>, which this class wraps around creating the asset's corresponding meta file.
     /// </summary>
     [ScriptedImporter(2, new[] { "yarn", "yarnc" }, -1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
     public class YarnImporter : ScriptedImporter
     {
-        // culture identifiers like en-US
-        public string baseLanguageID;
-
-        public string[] stringIDs;
-
-        public bool AnyImplicitStringIDs;
-        public bool StringsAvailable => stringIDs?.Length > 0;
-
-        public bool isSuccesfullyParsed = false;
-
-        public string parseErrorMessage = null;
-
-        public TextAsset baseLanguage;
-        
-        [SerializeField]
-        private YarnTranslation[] localizations = new YarnTranslation[0];
-
-        public IEnumerable<YarnTranslation> ExternalLocalizations => localizations;
-        public IEnumerable<YarnTranslation> AllLocalizations => localizations.Append(new YarnTranslation(baseLanguageID, baseLanguage));
-
-        public void AddLocalization(string languageID, TextAsset languageAsset) {
-            ArrayUtility.Add(ref localizations,  new YarnTranslation(languageID, languageAsset));
-        }
-
-        [UnityEngine.Serialization.FormerlySerializedAs("localizationDatabase")]
-        public LineDatabase lineDatabase;
-
-        private void OnValidate()
-        {
-            if (string.IsNullOrEmpty(baseLanguageID))
-            {
-                baseLanguageID = DefaultLocalizationName;
-            }
-        }
+        /// <summary>
+        /// Indicates whether the last time this file was imported, the
+        /// file contained lines that did not have a line tag (and
+        /// therefore were assigned an automatically-generated, 'implicit'
+        /// string tag.) 
+        /// </summary>
+        public bool LastImportHadImplicitStringIDs;
 
         /// <summary>
-        /// Returns the locale name to use as the base localization ID for
-        /// a newly created Yarn script. This will be either the first
-        /// entry in <see cref="ProjectSettings.TextProjectLanguages"/>, or
-        /// if this is not set, the user's current culture.
+        /// Indicates whether the last time this file was imported, the
+        /// file contained any string tags.
         /// </summary>
-        public static string DefaultLocalizationName
-        {
-            get
-            {
-                // If the user has added project wide text languages in the settings 
-                // dialogue, we default to the first text language as base language
-                if (ProjectSettings.TextProjectLanguages.Count > 0)
-                {
-                    return ProjectSettings.TextProjectLanguages[0];
-                    
-                }
-                else
-                {
-                    // Otherwrise use system's language as base language
-                    return CultureInfo.CurrentCulture.Name;
-                }
-            }
-        }
+        public bool LastImportHadAnyStrings;
+
+        /// <summary>
+        /// Indicates whether the last time this file was imported, the
+        /// file was able to be parsed without errors. 
+        /// </summary>
+        /// <remarks>
+        /// This value only represents whether syntactic errors exist or
+        /// not. Other errors may exist that prevent this script from being
+        /// compiled into a full program.
+        /// </remarks>
+        public bool isSuccessfullyParsed = false;
+
+        /// <summary>
+        /// Contains the text of the most recent parser error message.
+        /// </summary>
+        public string parseErrorMessage = null;
 
         public YarnProject DestinationProject {
             get {
+                var myAssetPath = assetPath;
                 var destinationProjectPath = AssetDatabase.FindAssets("t:YarnProject")
                     .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
                     .Select(path => AssetImporter.GetAtPath(path) as YarnProjectImporter)
-                    .FirstOrDefault(importer => importer.sourceScripts.Select(s => AssetDatabase.GetAssetPath(s)).Contains(assetPath))?.assetPath;
+                    .Where(importer => importer != null)
+                    .FirstOrDefault(importer => importer.sourceScripts.Any(s =>
+                    {
+                        // Does this importer depend on this asset? If so, then this is our destination asset.
+                        string[] dependencies = AssetDatabase.GetDependencies(importer.assetPath);
+                        var importerDependsOnThisAsset = dependencies.Contains<string>(myAssetPath);
+                        
+                        return importerDependsOnThisAsset;
+                    }))?.assetPath;
 
                 if (destinationProjectPath == null) {
                     return null;
@@ -154,13 +91,16 @@ namespace Yarn.Unity
             var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();            
             
-            OnValidate();
             var extension = System.IO.Path.GetExtension(ctx.assetPath);
 
-            // Clear the list of strings, in case this compilation fails
-            stringIDs = new string[] { };
+            // Clear the 'strings available' flags in case this import
+            // fails
+            LastImportHadAnyStrings = false;
+            LastImportHadImplicitStringIDs = false;
 
-            isSuccesfullyParsed = false;
+            parseErrorMessage = string.Empty;
+
+            isSuccessfullyParsed = false;
 
             if (extension == ".yarn")
             {
@@ -245,55 +185,21 @@ namespace Yarn.Unity
 
                 var result = Yarn.Compiler.Compiler.Compile(compilationJob);
                 
-                AnyImplicitStringIDs = result.ContainsImplicitStringTags;
+                LastImportHadImplicitStringIDs = result.ContainsImplicitStringTags;
+                LastImportHadAnyStrings = result.StringTable.Count > 0;
+
                 stringTable = result.StringTable;
                 compiledProgram = result.Program;                
-                isSuccesfullyParsed = true;
+                isSuccessfullyParsed = true;
                 parseErrorMessage = string.Empty;
             }
             catch (Yarn.Compiler.ParseException e)
             {
-                isSuccesfullyParsed = false;
+                isSuccessfullyParsed = false;
                 parseErrorMessage = e.Message;
                 ctx.LogImportError($"Error importing {ctx.assetPath}: {e.Message}");
                 return;
             }
-
-            // If there are lines in this script, generate a string table
-            // asset for it
-            if (stringTable?.Count > 0)
-            {
-                var lines = stringTable.Select(x => new StringTableEntry
-                {
-                    ID = x.Key,
-                    Language = baseLanguageID,
-                    Text = x.Value.text,
-                    File = x.Value.fileName,
-                    Node = x.Value.nodeName,
-                    LineNumber = x.Value.lineNumber.ToString(),
-                    Lock = GetHashString(x.Value.text, 8),
-                }).OrderBy(entry => int.Parse(entry.LineNumber));
-
-                var stringTableCSV = StringTableEntry.CreateCSV(lines);
-
-                var textAsset = new TextAsset(stringTableCSV);
-                textAsset.name = $"{fileName} ({baseLanguageID})";
-
-                ctx.AddObjectToAsset("Strings", textAsset);
-
-                // programContainer.baseLocalizationId = baseLanguageID;
-                baseLanguage = textAsset;
-                // programContainer.localizations = localizations.Append(new YarnScript.YarnTranslation(baseLanguageID, textAsset)).ToArray();
-                // programContainer.baseLocalizationId = baseLanguageID;
-
-                stringIDs = lines.Select(l => l.ID).ToArray();
-                
-            }
-
-            if (lineDatabase) {
-                lineDatabase.AddTrackedProject(AssetDatabase.AssetPathToGUID(ctx.assetPath));
-            }
-
         }
 
         private void ImportCompiledYarn(AssetImportContext ctx)
@@ -312,7 +218,7 @@ namespace Yarn.Unity
                 return;
             }
 
-            isSuccesfullyParsed = true;
+            isSuccessfullyParsed = true;
 
             // Create a container for storing the bytes
             var programContainer = new TextAsset("<pre-compiled Yarn script>");

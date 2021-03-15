@@ -55,14 +55,46 @@ namespace Yarn.Unity
             }
         }
 
+        [System.Serializable]
+        /// <summary>
+        /// Pairs a language ID with a TextAsset.
+        /// </summary>
+        public class LanguageToSourceAsset { 
+            /// <summary>
+            /// The locale ID that this translation should create a
+            /// Localization for.
+            /// </summary>
+            public string languageID; 
+
+            /// <summary>
+            /// The TextAsset containing CSV data that the Localization
+            /// should use.
+            /// </summary>
+            public TextAsset stringsAsset;
+
+            /// <summary>
+            /// The folder containing additional assets for the lines, such
+            /// as voiceover audio files.
+            /// </summary>
+            public DefaultAsset assetsFolder;
+        }
+
         public List<TextAsset> sourceScripts = new List<TextAsset>();
 
         public string compileError;
         public List<SerializedDeclaration> serializedDeclarations = new List<SerializedDeclaration>();
 
+        public List<LanguageToSourceAsset> languagesToSourceAssets;
+
         public override void OnImportAsset(AssetImportContext ctx)
         {
+            #if YARNSPINNER_DEBUG
+            UnityEngine.Profiling.Profiler.enabled = true;
+            #endif
+
             var project = ScriptableObject.CreateInstance<YarnProject>();
+
+            project.name = Path.GetFileNameWithoutExtension(ctx.assetPath);
 
             // Start by creating the asset - no matter what, we need to
             // produce an asset, even if it doesn't contain valid Yarn
@@ -116,7 +148,7 @@ namespace Yarn.Unity
 
             // First step: check to see if there's any parse errors in the
             // files.
-            var scriptsWithParseErrors = scriptImporters.Where(script => script.isSuccesfullyParsed == false);
+            var scriptsWithParseErrors = scriptImporters.Where(script => script.isSuccessfullyParsed == false);
 
             if (scriptsWithParseErrors.Count() != 0)
             {
@@ -168,6 +200,12 @@ namespace Yarn.Unity
                 return;
             }
 
+            if (compilationResult.Program == null)
+            {
+                ctx.LogImportError("Internal error: Failed to compile: resulting program was null, but compiler did not throw a parse exception.");
+                return;
+            }
+
             // Store _all_ declarations - both the ones in this
             // .yarnproject file, and the ones inside the .yarn files
             serializedDeclarations = localDeclarations
@@ -182,59 +220,97 @@ namespace Yarn.Unity
                 importer.parseErrorMessage = null;
             }
 
-            var unassignedScripts = scriptImporters.Any(s => s.lineDatabase == null);
+            // Generate a Localization for:
+            // 1. the Development content
+            // 2. each LanguageToSourceAsset we have
 
-            if (unassignedScripts)
+            var developmentLocalization = ScriptableObject.CreateInstance<Localization>();
+
+            developmentLocalization.LocaleCode = null;
+
+            var stringTableEntries = compilationResult.StringTable.Select(x => new StringTableEntry
             {
-                // We have scripts in this program whose lines are not
-                // being sent to a line database. Create a 'default'
-                // string table for this program, so that it can be used by
-                // a DialogueRunner when it creates its temporary line
-                // provider.
+                ID = x.Key,
+                Language = null,
+                Text = x.Value.text,
+                File = x.Value.fileName,
+                Node = x.Value.nodeName,
+                LineNumber = x.Value.lineNumber.ToString(),
+                Lock = YarnImporter.GetHashString(x.Value.text, 8),
+            });
 
-                string languageID = scriptImporters.First().baseLanguageID;
+            developmentLocalization.AddLocalizedStrings(stringTableEntries);
 
-                var lines = compilationResult.StringTable
-                    .Select(x =>
-                        {
-                            return new StringTableEntry
-                            {
-                                ID = x.Key,
-                                Language = languageID,
-                                Text = x.Value.text,
-                                File = x.Value.fileName,
-                                Node = x.Value.nodeName,
-                                LineNumber = x.Value.lineNumber.ToString(),
-                                Lock = YarnImporter.GetHashString(x.Value.text, 8),
-                            };
-                        })
-                    .OrderBy(entry => entry.File)
-                    .ThenBy(entry => int.Parse(entry.LineNumber));
+            project.baseLocalization = developmentLocalization;
 
-                var defaultStringTableCSV = StringTableEntry.CreateCSV(lines);
-                var defaultStringTable = new TextAsset(defaultStringTableCSV)
-                {
-                    name = $"{Path.GetFileNameWithoutExtension(ctx.assetPath)} Default String Table ({languageID})"
-                };
+            developmentLocalization.name = "Base";
 
-                // Hide this asset - it's not editable and can't be
-                // exported for localization (it only exists because a
-                // script isn't using the localization system!). As a
-                // result, we'll save it to disk, but not expose it as a
-                // file.
-                defaultStringTable.hideFlags = HideFlags.HideInHierarchy;
+            ctx.AddObjectToAsset("localization-dev", developmentLocalization);
 
-                ctx.AddObjectToAsset("Strings", defaultStringTable);
+            foreach (var pair in languagesToSourceAssets) {
 
-                project.defaultStringTable = defaultStringTable;
+                // Don't create a localization if the language ID was not
+                // provided
+                if (string.IsNullOrEmpty(pair.languageID)) {
+                    Debug.LogWarning($"Not creating a localization for {project.name} because the language ID wasn't provided. Add the language ID to the localization in the Yarn Project's inspector.");
+                    continue;
+                }
+
+                // Don't create a localization if the source asset was not
+                // provided
+                if (pair.stringsAsset == null) {
+                    Debug.LogWarning($"Not creating a localization for {pair.languageID} in the Yarn Project {project.name} because a text asset containing the strings wasn't found. Add a .csv file containing the translated lines to the Yarn Project's inspector.");
+                    continue;
+                }
+                
+                IEnumerable<StringTableEntry> stringTable;
+
+                try {
+                    stringTable = StringTableEntry.ParseFromCSV(pair.stringsAsset.text);
+                } catch (System.ArgumentException e) {
+                    Debug.LogWarning($"Not creating a localization for {pair.languageID} in the Yarn Project {project.name} because an error was encountered during text parsing: {e}");
+                    continue;
+                }
+
+                var newLocalization = ScriptableObject.CreateInstance<Localization>();
+                newLocalization.LocaleCode = pair.languageID;
+
+                newLocalization.AddLocalizedStrings(stringTable);
+            
+                project.localizations.Add(newLocalization);
+                newLocalization.name = pair.languageID;
+
+                if (pair.assetsFolder != null) {
+                    var assetsFolderPath = AssetDatabase.GetAssetPath(pair.assetsFolder);
+
+                    if (assetsFolderPath == null) {
+                        // This was somehow not a valid reference?
+                        Debug.LogWarning($"Can't find assets for localization {pair.languageID} in {project.name} because a path for the provided assets folder couldn't be found.");
+                    } else {
+                        var stringIDsToAssets = FindAssetsForLineIDs(stringTable.Select(s => s.ID), assetsFolderPath);
+                        
+                        #if YARNSPINNER_DEBUG
+                        var stopwatch = System.Diagnostics.Stopwatch.StartNew();                                                
+                        #endif
+
+                        newLocalization.AddLocalizedObjects(stringIDsToAssets.AsEnumerable());                        
+
+                        #if YARNSPINNER_DEBUG
+                        stopwatch.Stop();
+                        Debug.Log($"Imported {stringIDsToAssets.Count()} assets for {project.name} \"{pair.languageID}\" in {stopwatch.ElapsedMilliseconds}ms");
+                        #endif
+                    }
+                }
+
+                ctx.AddObjectToAsset("localization-" + pair.languageID, newLocalization);
+
+                // Make this asset get re-imported if the this source asset was modified
+                ctx.DependsOnSourceAsset(AssetDatabase.GetAssetPath(pair.stringsAsset));
+
+                
             }
 
-            if (compilationResult.Program == null)
-            {
-                ctx.LogImportError("Internal error: Failed to compile: resulting program was null.");
-                return;
-            }
-
+            // Store the compiled program
             byte[] compiledBytes = null;
 
             using (var memoryStream = new MemoryStream())
@@ -248,6 +324,142 @@ namespace Yarn.Unity
             }
 
             project.compiledYarnProgram = compiledBytes;
+
+            #if YARNSPINNER_DEBUG
+            UnityEngine.Profiling.Profiler.enabled = false;
+            #endif
+
+        }
+
+        private static Dictionary<string, Object> FindAssetsForLineIDs(IEnumerable<string> lineIDs, string assetsFolderPath)
+        {
+            // Find _all_ files in this director that are not .meta files
+            var allFiles = Directory.EnumerateFiles(assetsFolderPath, "*", SearchOption.AllDirectories)
+                .Where(path => path.EndsWith(".meta") == false);                
+
+            // Match files with those whose filenames contain a line ID
+            var matchedFilesAndPaths = lineIDs.GroupJoin(
+                // the elements we're matching lineIDs to
+                allFiles, 
+                // the key for lineIDs (being strings, it's just the line ID itself)
+                lineID => lineID, 
+                // the key for assets (the filename without the path)
+                assetPath => Path.GetFileName(assetPath),
+                // the way we produce the result (a key-value pair)
+                (lineID, assetPaths) =>
+                {
+                    if (assetPaths.Count() > 1) {
+                        Debug.LogWarning($"Line {lineID} has {assetPaths.Count()} possible assets.\n{string.Join(", ", assetPaths)}");
+                    }
+                    return new { lineID, assetPaths };
+                },
+                // the way we test to see if two elements should be joined (does the filename contain the line ID?)
+                Compare.By<string>((fileName, lineID) =>
+                {
+                    var lineIDWithoutPrefix = lineID.Replace("line:", "");
+                    return fileName.Contains(lineIDWithoutPrefix);
+                })
+                )
+                .ToDictionary(entry => entry.lineID, entry => AssetDatabase.LoadAssetAtPath<Object>(entry.assetPaths.FirstOrDefault()));
+            
+
+            return matchedFilesAndPaths;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this Yarn Project is able to
+        /// generate a strings table - that is, it has no compile errors,
+        /// it has at least one script, and all scripts are fully tagged.
+        /// </summary>
+        /// <inheritdoc path="exception" cref="GetScriptHasLineTags(TextAsset)"/>
+        internal bool CanGenerateStringsTable => string.IsNullOrEmpty(this.compileError) && sourceScripts.Count > 0 && sourceScripts.All(s => GetScriptHasLineTags(s));
+
+        /// <summary>
+        /// Gets a value indicating whether the source script has line
+        /// tags.
+        /// </summary>
+        /// <param name="script">The source script to add. This script must
+        /// have been imported by a <see cref="YarnImporter"/>.</param>
+        /// <returns>
+        /// <see langword="true"/> if the the script is fully tagged, <see
+        /// langword="false"/> otherwise.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown when <paramref name="script"/> is <see
+        /// langword="null"/>.
+        /// </exception>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when <paramref name="script"/> is not imported by a <see
+        /// cref="YarnImporter"/>.
+        /// </exception>
+        private bool GetScriptHasLineTags(TextAsset script)
+        {
+            if (script == null)
+            {
+                throw new System.ArgumentNullException(nameof(script));
+            }
+
+            // Get the importer for this TextAsset
+            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(script)) as YarnImporter;
+
+            if (importer == null) {
+                throw new System.ArgumentException($"The asset {script} is not imported via a {nameof(YarnImporter)}");
+            }
+
+            // Did it have any implicit string IDs when it was imported?
+            return importer.LastImportHadImplicitStringIDs == false;
+        }
+
+        /// <summary>
+        /// Generates a collection of <see cref="StringTableEntry"/>
+        /// objects, one for each line in this Yarn Project's scripts.
+        /// </summary>
+        /// <returns>An IEnumerable containing a <see
+        /// cref="StringTableEntry"/> for each of the lines in the Yarn
+        /// Project, or <see langword="null"/> if the Yarn Project contains
+        /// errors.</returns>
+        internal IEnumerable<StringTableEntry> GenerateStringsTable()
+        {
+            var pathsToImporters = sourceScripts.Where(s => s != null).Select(s => AssetDatabase.GetAssetPath(s));
+
+            if (pathsToImporters.Count() == 0)
+            {
+                // We have no scripts to work with - return an empty
+                // collection - there's no error, but there's no content
+                // either
+                return new List<StringTableEntry>(); 
+            }
+
+            // We now now compile!
+            var job = CompilationJob.CreateFromFiles(pathsToImporters);
+            job.CompilationType = CompilationJob.Type.StringsOnly;
+            
+            CompilationResult compilationResult;
+
+            try
+            {
+                compilationResult = Compiler.Compiler.Compile(job);
+            }
+            catch (ParseException)
+            {
+                Debug.LogError($"Can't generate a strings table from a Yarn Project that contains compile errors", null);                
+                return null;
+            }
+
+            IEnumerable<StringTableEntry> stringTableEntries = compilationResult.StringTable.Select(x => new StringTableEntry
+            {
+                ID = x.Key,
+                Language = null,
+                Text = x.Value.text,
+                File = x.Value.fileName,
+                Node = x.Value.nodeName,
+                LineNumber = x.Value.lineNumber.ToString(),
+                Lock = YarnImporter.GetHashString(x.Value.text, 8),
+            });
+
+            return stringTableEntries;
+
+            
         }
     }
 
@@ -386,7 +598,7 @@ namespace Yarn.Unity
         }
 
         public void DrawLayout() {
-            serializedObject.Update();
+            //serializedObject.Update();
             EditorGUILayout.Space();
 
             foreach (var problem in problems) {
@@ -628,7 +840,40 @@ namespace Yarn.Unity
 
             return EditorGUIUtility.singleLineHeight * lines + EditorGUIUtility.standardVerticalSpacing * lines + 1;
         }
+    }
 
+    // A simple class lets us use a delegate as an IEqualityComparer
+    // from https://stackoverflow.com/a/4607559
+    internal static class Compare
+    {
+        public static IEqualityComparer<T> By<T>(System.Func<T, T, bool> comparison)
+        {
+            return new DelegateComparer<T>(comparison);
+        }
 
+        private class DelegateComparer<T> : EqualityComparer<T>
+        {
+            private readonly System.Func<T, T, bool> comparison;
+
+            public DelegateComparer(System.Func<T, T, bool> identitySelector)
+            {
+                this.comparison = identitySelector;
+            }
+
+            public override bool Equals(T x, T y)
+            {
+                return comparison(x, y);
+            }
+
+            public override int GetHashCode(T obj)
+            {
+                // Force LINQ to never refer to the hash of an object by
+                // returning a constant for all values. This is inefficient
+                // because LINQ can't use an internal comparator, but we're
+                // already looking to use a delegate to do a more
+                // fine-grained test anyway, so we want to ensure that it's called.
+                return 0;
+            }
+        }
     }
 }

@@ -21,6 +21,7 @@ namespace Yarn.Unity
         private SerializedProperty compileErrorProperty;
         private SerializedProperty serializedDeclarationsProperty;
         private SerializedProperty sourceScriptsProperty;
+        private SerializedProperty languagesToSourceAssetsProperty;
 
         private ReorderableDeclarationsList serializedDeclarationsList;
 
@@ -31,12 +32,22 @@ namespace Yarn.Unity
             compileErrorProperty = serializedObject.FindProperty("compileError");
             serializedDeclarationsProperty = serializedObject.FindProperty("serializedDeclarations");
 
+            languagesToSourceAssetsProperty = serializedObject.FindProperty("languagesToSourceAssets");
+
             serializedDeclarationsList = new ReorderableDeclarationsList(serializedObject, serializedDeclarationsProperty);
         }
 
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
+
+            EditorGUILayout.Space();
+
+            if (sourceScriptsProperty.arraySize == 0)
+            {
+                EditorGUILayout.HelpBox("This Yarn Project has no content. Add Yarn Scripts to it.", MessageType.Warning);
+            }
+            EditorGUILayout.PropertyField(sourceScriptsProperty, true);
 
             EditorGUILayout.Space();
 
@@ -47,26 +58,59 @@ namespace Yarn.Unity
 
             serializedDeclarationsList.DrawLayout();
 
-            EditorGUILayout.Space();
+            EditorGUILayout.PropertyField(languagesToSourceAssetsProperty);
 
-            if (sourceScriptsProperty.arraySize == 0)
-            {
-                EditorGUILayout.HelpBox("This Yarn Project has no content. Add Yarn Scripts to it.", MessageType.Warning);
+            YarnProjectImporter yarnProjectImporter = serializedObject.targetObject as YarnProjectImporter;
+
+            // Ask the project importer if it can generate a strings table.
+            // This involves querying several assets, which means various
+            // exceptions might get thrown, which we'll catch and log (if
+            // we're in debug mode).
+            bool canGenerateStringsTable;
+            try {
+                canGenerateStringsTable = yarnProjectImporter.CanGenerateStringsTable;
+            } catch (System.Exception e) {
+                #if YARNSPINNER_DEBUG
+                Debug.LogWarning($"Encountered in error when checking to see if Yarn Project Importer could generate a strings table: {e}", this);
+                #endif
+                canGenerateStringsTable = false;
             }
-            else
-            {
-                EditorGUILayout.HelpBox("This Yarn Project is currently using the following scripts. It will automatically refresh when they change. If you've made a change elsewhere and need to update this Yarn Project, click Update.", MessageType.Info);
+            
+            using (new EditorGUI.DisabledScope(canGenerateStringsTable == false)) {
+                if (GUILayout.Button("Export Strings as CSV")) {
+                    var currentPath = AssetDatabase.GetAssetPath(serializedObject.targetObject);
+                    var currentFileName = Path.GetFileNameWithoutExtension(currentPath);
+                    var currentDirectory = Path.GetDirectoryName(currentPath);
 
-                if (GUILayout.Button("Update"))
-                {
-                    (serializedObject.targetObject as YarnProjectImporter).SaveAndReimport();
+                    var destinationPath = EditorUtility.SaveFilePanel("Export Strings CSV", currentDirectory, $"{currentFileName}.csv", "csv");
+
+                    if (string.IsNullOrEmpty(destinationPath) == false) {
+                        // Generate the file on disk
+                        YarnProjectUtility.WriteStringsFile(destinationPath, yarnProjectImporter);
+
+                        // destinationPath may have been inside our Assets
+                        // directory, so refresh the asset database
+                        AssetDatabase.Refresh();
+                    }
+                }
+                if (yarnProjectImporter.languagesToSourceAssets.Count > 0) {
+                    if (GUILayout.Button("Update Existing Strings Files")) {
+                        YarnProjectUtility.UpdateLocalizationCSVs(yarnProjectImporter);
+                    }
                 }
             }
-            EditorGUILayout.PropertyField(sourceScriptsProperty, true);
 
-
+            using (new EditorGUI.DisabledScope(canGenerateStringsTable == true)) {
+                if (GUILayout.Button("Add Line Tags to Scripts")) {
+                    YarnProjectUtility.AddLineTagsToFilesInYarnProject(yarnProjectImporter);
+                }
+            }
 
             var hadChanges = serializedObject.ApplyModifiedProperties();
+
+            if (hadChanges) {
+                Debug.Log($"{nameof(YarnProjectImporterEditor)} had changes");
+            }
 
 #if UNITY_2018
             // Unity 2018's ApplyRevertGUI is buggy, and doesn't automatically
@@ -91,6 +135,8 @@ namespace Yarn.Unity
             ApplyRevertGUI();
 #endif
         }
+
+        
 
         protected override void Apply()
         {

@@ -8,10 +8,7 @@ namespace Yarn.Unity {
     [CustomEditor(typeof(YarnLinesAsCanvasText))]
     public class YarnLinesAsCanvasTextEditor : Editor {
         
-        private SerializedProperty stringsToViews;
         private SerializedProperty _yarnProgramProperty = default;
-        private SerializedProperty _useLinesFromProperty;
-        private SerializedProperty _lineDatabaseProperty;
         private SerializedProperty _stringsToViewsProperty;
         
         private SerializedProperty _useTextMeshProProperty = default;
@@ -27,9 +24,7 @@ namespace Yarn.Unity {
             _headerStyle = new GUIStyle() { fontStyle = FontStyle.Bold };
             _lastLanguageId = Preferences.TextLanguage;
 
-            _yarnProgramProperty = serializedObject.FindProperty("yarnProgram");
-            _useLinesFromProperty = serializedObject.FindProperty("useLinesFromScript");
-            _lineDatabaseProperty = serializedObject.FindProperty("lineDatabase");
+            _yarnProgramProperty = serializedObject.FindProperty("yarnProject");
             
             _stringsToViewsProperty = serializedObject.FindProperty("stringsToViews");
 
@@ -58,8 +53,7 @@ namespace Yarn.Unity {
         {
 
             var canvasText = serializedObject.targetObject as YarnLinesAsCanvasText;
-            var useLinesFromTextAsset = _useLinesFromProperty.objectReferenceValue;
-
+            
             if (!(_yarnProgramProperty.objectReferenceValue is YarnProject yarnProject))
             {
                 // No program means no strings available, so clear it and
@@ -67,15 +61,17 @@ namespace Yarn.Unity {
                 ClearMappingTable(canvasText);
                 return;
             }
+            
+            var path = AssetDatabase.GetAssetPath(yarnProject);
+            var yarnProjectImporter = AssetImporter.GetAtPath(path) as YarnProjectImporter;
 
-            if (!(AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(useLinesFromTextAsset)) is YarnImporter yarnImporter))
-            {
+            if (yarnProjectImporter.CanGenerateStringsTable == false) {
                 ClearMappingTable(canvasText);
                 return;
             }
 
-            var stringIDs = yarnImporter.stringIDs;
-
+            var stringIDs = yarnProjectImporter.GenerateStringsTable().Select(t => t.ID);
+            
             var extraneousIDs = canvasText.stringsToViews.Keys.Except(stringIDs).ToList();
             var missingIDs = stringIDs.Except(canvasText.stringsToViews.Keys).ToList();
 
@@ -95,9 +91,7 @@ namespace Yarn.Unity {
 
             using (var change = new EditorGUI.ChangeCheckScope()) {
                 EditorGUILayout.PropertyField(_yarnProgramProperty);
-                EditorGUILayout.PropertyField(_useLinesFromProperty);
-                EditorGUILayout.PropertyField(_lineDatabaseProperty);
-
+                
                 if (change.changed) {
                     // Rebuild the string table if the yarn asset or the language preference has changed
                     UpdateTargetObjectMappingTable();
@@ -109,9 +103,7 @@ namespace Yarn.Unity {
 
             if (!(_yarnProgramProperty.objectReferenceValue is YarnProject)) {
                 EditorGUILayout.HelpBox("This component needs a yarn script.", MessageType.Info);
-            } else if (!(_lineDatabaseProperty.objectReferenceValue is LineDatabase lineDatabase)) {
-                EditorGUILayout.HelpBox("This component needs a line database.", MessageType.Info);
-             } else {
+            } else {
                 _showTextUiComponents = EditorGUILayout.Foldout(_showTextUiComponents, _textUiComponentsLabel);
                 if (_showTextUiComponents) {
 
@@ -135,7 +127,7 @@ namespace Yarn.Unity {
                             string key = keyProperty.stringValue;
 
                             // Retrieve the localized text
-                            var localisedText = lineDatabase.GetLocalization(Preferences.TextLanguage)?.GetLocalizedString(key) ?? $"<no localization for '{Preferences.TextLanguage}'>";
+                            var localisedText = (_yarnProgramProperty.objectReferenceValue as YarnProject).GetLocalization(Preferences.TextLanguage)?.GetLocalizedString(key) ?? $"<no localization for '{Preferences.TextLanguage}'>";
 
 
                             GUIContent label = new GUIContent() { 

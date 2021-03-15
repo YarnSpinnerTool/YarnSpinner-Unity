@@ -11,11 +11,6 @@ namespace Yarn.Unity {
         [UnityEngine.Serialization.FormerlySerializedAs("yarnProgram")]
         public YarnProject yarnProject;
         
-        public TextAsset useLinesFromScript;
-
-        [UnityEngine.Serialization.FormerlySerializedAs("localizationDatabase")]
-        public LineDatabase lineDatabase;
-
         [System.Serializable]
         public class StringObjectDictionary : SerializedDictionary<string, Object> {}
 
@@ -40,19 +35,20 @@ namespace Yarn.Unity {
         /// yarnScript.
         /// </summary>
         private void UpdateTextOnUiElements() {
-            var loc = lineDatabase.GetLocalization(Preferences.TextLanguage);
             
             foreach (var line in stringsToViews) {
 
-                var localizedString = loc.GetLocalizedString(line.Key);
+                throw new System.NotImplementedException("Not implemented yet");
 
-                var view = line.Value;
+                // var localizedString = yarnProject.GetLocalizedString(line.Key);
 
-                if (_useTextMeshPro && view is TextMeshProUGUI tmpText) {
-                    tmpText.text = localizedString;
-                } else if (view is UnityEngine.UI.Text text) {
-                    text.text = localizedString;
-                }
+                // var view = line.Value;
+
+                // if (_useTextMeshPro && view is TextMeshProUGUI tmpText) {
+                //     tmpText.text = localizedString;
+                // } else if (view is UnityEngine.UI.Text text) {
+                //     text.text = localizedString;
+                // }
             }
         }
     }

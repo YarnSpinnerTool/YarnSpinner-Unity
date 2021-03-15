@@ -10,7 +10,30 @@ namespace Yarn.Unity {
         [HideInInspector]
         public byte[] compiledYarnProgram;
 
-        public TextAsset defaultStringTable;
+        [SerializeField]
+        [HideInInspector]
+        public Localization baseLocalization;
+
+        [SerializeField]
+        [HideInInspector]
+        public List<Localization> localizations = new List<Localization>();
+
+        public Localization GetLocalization(string localeCode) {
+
+            // If localeCode is null, we use the base localization.
+            if (localeCode == null) {
+                return baseLocalization;
+            }
+
+            foreach (var loc in localizations) {
+                if (loc.LocaleCode == localeCode) {
+                    return loc;
+                }
+            }
+
+            // We didn't find a localization. Fall back to the Base localization.
+            return baseLocalization;
+        }
 
         /// <summary>
         /// Deserializes a compiled Yarn program from the stored bytes in this

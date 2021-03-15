@@ -24,11 +24,6 @@ namespace Yarn.Unity
     public abstract class LineProviderBehaviour : MonoBehaviour
     {
         /// <summary>
-        /// The data source for this line provider.
-        /// </summary>
-        public LineDatabase lineDatabase;
-        
-        /// <summary>
         /// The language code for the currently selected language.
         /// </summary>
         /// <remarks>
@@ -68,6 +63,11 @@ namespace Yarn.Unity
         /// <returns>A localized line, ready to be presented to the
         /// player.</returns>
         public abstract LocalizedLine GetLocalizedLine(Yarn.Line line);
+
+        /// <summary>
+        /// The YarnProject that contains the localized data for lines.
+        /// </summary>
+        public YarnProject YarnProject {get; set;}
 
         /// <summary>
         /// Signals to the line provider that lines with the provided line

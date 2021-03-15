@@ -105,49 +105,53 @@ namespace Yarn.Unity
         /// data.</param>
         /// <returns>The parsed collection of <see
         /// cref="StringTableEntry"/> structs.</returns>
-        /// <throws cref="CsvHelperException">Thrown when an error occurs
-        /// when parsing the string.</throws>
+        /// <exception cref="ArgumentException">Thrown when an error occurs
+        /// when parsing the string.</exception>
         public static IEnumerable<StringTableEntry> ParseFromCSV(string sourceText)
         {
-            using (var stringReader = new System.IO.StringReader(sourceText))
-            using (var csv = new CsvReader(stringReader, GetConfiguration()))
-            {
-                /*
-                Do the below instead of GetRecords<T> due to incompatibility with IL2CPP
-                See more: https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/36#issuecomment-691489913
-                */
-                var records = new List<StringTableEntry>();
-                csv.Read();
-                csv.ReadHeader();
-                while (csv.Read())
+            try {
+                using (var stringReader = new System.IO.StringReader(sourceText))
+                using (var csv = new CsvReader(stringReader, GetConfiguration()))
                 {
-                    // Fetch values; if they can't be found, they'll be
-                    // defaults.
-                    csv.TryGetField<string>("language", out var language);
-                    csv.TryGetField<string>("lock", out var lockString);
-                    csv.TryGetField<string>("comment", out var comment);
-                    csv.TryGetField<string>("id", out var id);
-                    csv.TryGetField<string>("text", out var text);
-                    csv.TryGetField<string>("file", out var file);
-                    csv.TryGetField<string>("node", out var node);
-                    csv.TryGetField<string>("lineNumber", out var lineNumber);
-                    
-                    var record = new StringTableEntry
+                    /*
+                    Do the below instead of GetRecords<T> due to incompatibility with IL2CPP
+                    See more: https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/36#issuecomment-691489913
+                    */
+                    var records = new List<StringTableEntry>();
+                    csv.Read();
+                    csv.ReadHeader();
+                    while (csv.Read())
                     {
-                        Language = language ?? string.Empty,
-                        ID = id ?? string.Empty,
-                        Text = text ?? string.Empty,
-                        File = file ?? string.Empty,
-                        Node = node ?? string.Empty,
-                        LineNumber = lineNumber ?? string.Empty,
-                        Lock = lockString ?? string.Empty,
-                        Comment = comment ?? string.Empty,
-                    };
+                        // Fetch values; if they can't be found, they'll be
+                        // defaults.
+                        csv.TryGetField<string>("language", out var language);
+                        csv.TryGetField<string>("lock", out var lockString);
+                        csv.TryGetField<string>("comment", out var comment);
+                        csv.TryGetField<string>("id", out var id);
+                        csv.TryGetField<string>("text", out var text);
+                        csv.TryGetField<string>("file", out var file);
+                        csv.TryGetField<string>("node", out var node);
+                        csv.TryGetField<string>("lineNumber", out var lineNumber);
+                        
+                        var record = new StringTableEntry
+                        {
+                            Language = language ?? string.Empty,
+                            ID = id ?? string.Empty,
+                            Text = text ?? string.Empty,
+                            File = file ?? string.Empty,
+                            Node = node ?? string.Empty,
+                            LineNumber = lineNumber ?? string.Empty,
+                            Lock = lockString ?? string.Empty,
+                            Comment = comment ?? string.Empty,
+                        };
 
-                    records.Add(record);
+                        records.Add(record);
+                    }
+
+                    return records;
                 }
-
-                return records;
+            } catch (CsvHelperException e) {
+                throw new System.ArgumentException($"Error reading CSV file: {e}");
             }
         }
 

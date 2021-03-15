@@ -64,10 +64,33 @@ With this change, you can instead say this:
 - Fixed an issue where dialogue views that are not enabled were still being waited for (@radiatoryang)
 - Upgrader tool now creates new files on disk, where needed (for example, .yarnprogram files)
 - `YarnProgram`, the asset that stores references to individual .yarn files for compilation, has been renamed to `YarnProject`. Because this change makes Unity forget any existing references to "YarnProgram" assets, **when upgrading to this version, you must set the Yarn Project field in your Dialogue Runners again.**
-- `LocalizationDatabase`, the asset that stores references to `Localization` assets and manages per-locale line lookups, has been renamed to `LineDatabase`. Because this change makes Unity forget any existing references to "LocalizationDatabase" assets, **when upgrading to this version, you must set the LineDatabase field in your LineProviders again.**
+- There is a new workflow for creating Yarn content:
+  - **Creating Your Yarn Scripts**
+    1. Create a Yarn Project by choosing Assets -> Create -> Yarn Spinner -> Yarn Project.
+    2. Second, create Yarn scripts by choosing Assets -> Create -> Yarn Spinner -> Yarn Script.
+    3. Fill these scripts with your dialogue.
+    4. Attach these scripts to the Yarn Project by selecting it, and dragging the scripts into the Source Scripts field. Click Apply.
+    5. *If you're not localizing your dialogue into other languages, and don't need to work with voiceover stop here. Otherwise:* 
+  - **Creating Your Localizations**
+    1. Click Export Strings as CSV, and save the file to disk. 
+    2. Translate the contents of the file into another language.
+    3. In the Languages To Source Assets field, add a new localization by clicking the `+` button.
+    4. Specify the language you've translated the dialogue to, and drag in the `.csv` file.
+    5.  Click Apply. A new localization will be added to the project, and will be used at runtime when the user's preferences indicates they want to use that language.
+    6.  *If you're only using text in your game, and don't need to add voice-overs, stop here. Otherwise:*
+
+  - **Adding Assets to Lines**
+    1.  Otherwise, record your audio lines. You can use the `.csv` file generated in an earlier step as your script.
+    2.  Name the audio files so that each file's name contains the line ID (found in the `id` column of the `.csv` file). Save each language's audio files into a separate folder.
+    3.  In the `YarnProject`'s inspector, drag the folder containing each language's audio files into the Assets Folder field. Click Apply.
+    4.  You're done. The Dialogue Runner and its line providers will be able to look up a localized asset for each line.
+- `Localization`, the asset that mapped line IDs to localized data, is now automatically generated for you by the `YarnProject`. You don't create them yourselves, and you no longer need to manually refresh them. The `YarnProject` always creates at least one localization: the "Base" localization, which contains the original text found in your `.yarn` files. You can create more localizations in the `YarnProject`'s inspector, and supply the language code to use and a `.csv` file containing replacement strings.
 - Renamed the 'StartHere' demo to 'Intro', because it's not actually the first step in installing Yarn Spinner.
+- Addressable Assets are currently **known to be broken** as of the time of this writing.
 
 ### Removed
+
+- `LocalizationDatabase`, the asset that stored references to `Localization` assets and manages per-locale line lookups, has been removed. This functionality is now handled by `YarnProject` assets. You no longer supply a localization database to a `DialogueRunner` or to a `LineProvider` - the work is handled for you.
 
 ## [v2.0.0-beta2] 2021-01-14
 

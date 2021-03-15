@@ -234,28 +234,13 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Adds a program at runtime, and adds string table entries to the
-        /// DialogueRunner's combined string table.
-        /// </summary>
-        /// <remarks>This method calls <see
-        /// cref="AddDialogueLines(YarnProject)"/> to load the string table
-        /// for the current localisation. It selects the appropriate string
-        /// table based on the value of set in the Preferences dialogue.
-        public void Add(YarnProject scriptToLoad, string localizationId = null, IEnumerable<StringTableEntry> stringTableEntries = null)
+        /// Replaces this DialogueRunner's yarn project with the provided
+        /// project.
+        /// </summary>        
+        public void SetProject(YarnProject newProject)
         {
-            Dialogue.AddProgram(scriptToLoad.GetProgram());
-
-            if (lineProviderIsTemporary && (localizationId == null || stringTableEntries == null))
-            {
-                const string dialogueRunnerName = nameof(Unity.DialogueRunner);
-                const string lineProviderName = nameof(Unity.LineProviderBehaviour);
-                const string stringTableName = nameof(stringTableEntries);
-                const string localizationIDName = nameof(localizationId);
-
-                Debug.LogWarning($"Yarn script {scriptToLoad.name} is being added at runtime, but this {dialogueRunnerName} was not configured to use a {lineProviderName}, and a {localizationIDName} and {stringTableName} weren't provided. Lines from this script will not render correctly.\n\nTo fix this, either configure this {dialogueRunnerName} to use a {lineProviderName}, or provide a {localizationIDName} and {stringTableName}.");
-            }
-
-            lineProvider.lineDatabase.GetLocalization(localizationId).AddLocalizedStrings(stringTableEntries);
+            Dialogue.SetProgram(newProject.GetProgram());
+            lineProvider.YarnProject = newProject;
         }
 
         /// <summary>
@@ -565,55 +550,17 @@ namespace Yarn.Unity
 
         void Awake() {
             if (lineProvider == null) {
-                // If we don't have a line provider, we don't have a way to
-                // access a LineDatabase and fetch information for
-                // other localizations, or to fetch localized assets like
-                // audio clips for voiceover. In this situation, we'll fall
-                // back to a really simple setup: we'll create a temporary
-                // TextLineProvider, create a temporary
-                // LineDatabase, and set it up with the
-                // YarnProjects we know about.
-
-                // TODO: decide what to do about determining the
-                // localization of runtime-provided YarnProjects. Make it a
-                // parameter on an AddCompiledProgram method?
+                // If we don't have a line provider, create a TextLineProvider and make it use that.
 
                 // Create the temporary line provider and the line database
                 lineProvider = gameObject.AddComponent<TextLineProvider>();
-                lineProvider.lineDatabase = ScriptableObject.CreateInstance<LineDatabase>();
-                var runtimeLocalization = lineProvider.lineDatabase.CreateLocalization(Preferences.TextLanguage);
-
+                
                 lineProviderIsTemporary = true;
 
                 // Let the user know what we're doing.
                 if ( verboseLogging )
-                    Debug.Log("Dialogue Runner has no LineProvider; setting a temporary one up with the base text found inside the scripts.");
-
-                // Fill the line database with the lines found in the scripts
-                
-                // In order to get the text of the base localization
-                // for this script, we need to parse the base
-                // localization CSV text asset associated with this
-                // script. (The text asset will only be included in the
-                // build if the YarnImporter determines that the
-                // YarnProject has no LineDatabase assigned.)
-                if (yarnProject == null) {
-                    Debug.LogWarning($"No Yarn Project was provided. Cannot generate a temporary line provider from script contents.");
-                } else if (yarnProject.defaultStringTable == null)
                 {
-                    Debug.LogWarning($"No base localization string table was included for the Yarn script {yarnProject.name}. It may be connected to a {nameof(LineDatabase)}. You should set this {nameof(DialogueRunner)} up with a Line Provider, and connect the Line Provider to the LineDatabase.");
-                    ;
-                }
-                else
-                {
-                    // Extract the text for the base localization.
-                    var text = yarnProject.defaultStringTable.text;
-
-                    // Parse it into string table entries.
-                    var parsedStringTableEntries = StringTableEntry.ParseFromCSV(text);
-
-                    // Add it to the runtime localization.
-                    runtimeLocalization.AddLocalizedStrings(parsedStringTableEntries);
+                    Debug.Log($"Dialogue Runner has no LineProvider; creating a {nameof(TextLineProvider)}.");
                 }
             }
         }
@@ -645,6 +592,7 @@ namespace Yarn.Unity
                 }
 
                 Dialogue.SetProgram(yarnProject.GetProgram());
+                lineProvider.YarnProject = yarnProject;
 
                 if (startAutomatically)
                 {

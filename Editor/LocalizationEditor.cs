@@ -13,12 +13,10 @@ using UnityEditor.AddressableAssets;
 public class LocalizationEditor : Editor {
 
     private SerializedProperty languageNameProperty;
-    private SerializedProperty assetSourceFolderProperty;
     private AudioClip lastPreviewed;
 
     private void OnEnable() {
         languageNameProperty = serializedObject.FindProperty("_LocaleCode");
-        assetSourceFolderProperty = serializedObject.FindProperty("assetSourceFolder");
         lastPreviewed = null;
     }
 
@@ -27,24 +25,13 @@ public class LocalizationEditor : Editor {
         
         var cultures = Cultures.GetCultures().ToList();
 
-        var cultureDisplayNames = cultures.Select(c => c.DisplayName);
+        var cultureDisplayName = cultures.Where(c => c.Name == languageNameProperty.stringValue)
+                                         .Select(c => c.DisplayName)
+                                         .DefaultIfEmpty("Development")
+                                         .FirstOrDefault();
 
-        var selectedIndex = cultures.FindIndex(c => c.Name == languageNameProperty.stringValue);
-        if (languageNameProperty.hasMultipleDifferentValues) {
-            selectedIndex = -1;
-        }
-
-        using (new EditorGUI.DisabledScope(selectedIndex == -1)) // disable popup if multiple values present
-        using (var change = new EditorGUI.ChangeCheckScope()) {
-            selectedIndex = EditorGUILayout.Popup("Language", selectedIndex, cultureDisplayNames.ToArray());
-
-            if (change.changed) {
-                languageNameProperty.stringValue = cultures[selectedIndex].Name;
-            }            
-        }
-
-        EditorGUILayout.PropertyField(assetSourceFolderProperty);
-
+        EditorGUILayout.LabelField("Language", cultureDisplayName);
+        
         EditorGUILayout.Space();
 
         if (serializedObject.isEditingMultipleObjects) {
@@ -52,9 +39,7 @@ public class LocalizationEditor : Editor {
         } else {
             var target = this.target as Localization;
 
-            var hasAssets = assetSourceFolderProperty.objectReferenceValue != null;
-
-            DrawLocalizationContents(target, hasAssets);
+            DrawLocalizationContents(target);
         }
         
         if (serializedObject.hasModifiedProperties) {
@@ -77,7 +62,7 @@ public class LocalizationEditor : Editor {
     /// <param name="showAssets">If true, this method will show any assets
     /// or addressable assets. If false, this method will only show the
     /// localized text.</param>
-    private void DrawLocalizationContents(Localization target, bool showAssets)
+    private void DrawLocalizationContents(Localization target)
     {
         var lineKeys = target.GetLineIDs();
 
@@ -100,52 +85,33 @@ public class LocalizationEditor : Editor {
             // Get the localized text for this line.
             entry.text = target.GetLocalizedString(key);
 
-            if (showAssets)
+            if (ProjectSettings.AddressableVoiceOverAudioClips)
             {
-                if (ProjectSettings.AddressableVoiceOverAudioClips)
-                {
 #if ADDRESSABLES
-                    if (target.ContainsLocalizedObjectAddress(key)) {
-                        var address = target.GetLocalizedObjectAddress(key);
+                if (target.ContainsLocalizedObjectAddress(key)) {
+                    var address = target.GetLocalizedObjectAddress(key);
 
-                        var asset = AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(address.AssetGUID));
+                    var asset = AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(address.AssetGUID));
 
-                        entry.asset = asset;
+                    entry.asset = asset;
 
-                        anyAssetsFound = true;                        
-                    }
+                    anyAssetsFound = true;                        
+                }
 #endif
-                }
-                else
+            }
+            else
+            {
+                if (target.ContainsLocalizedObject<Object>(key))
                 {
-                    if (target.ContainsLocalizedObject<Object>(key))
-                    {
-                        var o = target.GetLocalizedObject<Object>(key);
-                        entry.asset = o;
-                        anyAssetsFound = true;
-                    }
+                    var o = target.GetLocalizedObject<Object>(key);
+                    entry.asset = o;
+                    anyAssetsFound = true;
                 }
-
             }
 
+        
+
             localizedLineContent.Add(entry);
-        }
-
-        if (showAssets && anyAssetsFound == false) {
-            // We were asked to show asset references, but didn't find any.
-            // This Localization has had its source assets folder set, but
-            // the LocalizationDatabase hasn't run an update to populate
-            // its asset table, or, if it has, it found no assets. Assume
-            // the former case and show a help box instructing the user to
-            // update the database.
-
-            string localizationName = nameof(Localization).ToLowerInvariant();
-            string assetSourceFolderName = ObjectNames.NicifyVariableName(nameof(Localization.AssetSourceFolder)).ToLowerInvariant();
-            string localizationDatabaseName = ObjectNames.NicifyVariableName(nameof(LineDatabase)).ToLowerInvariant();
-            
-            var message = $"This {localizationName} has an {assetSourceFolderName}, but no assets for any of its lines. Select the {localizationDatabaseName} that uses this {localizationName}, and click Update.\n\nIf you still see this message, check that the files in the {assetSourceFolderName} include your script's line IDs in their file names.";
-
-            EditorGUILayout.HelpBox(message, MessageType.Info);
         }
 
         foreach (var entry in localizedLineContent) {
@@ -160,7 +126,8 @@ public class LocalizationEditor : Editor {
             // Show the line ID and localized text
             EditorGUILayout.LabelField(idContent, lineContent);
 
-            if (showAssets) {
+            if (entry.asset != null) {
+                
                 // Asset references are never editable here - they're only
                 // updated by the Localization Database. Add a
                 // DisabledGroup here to make all ObjectFields be
@@ -174,11 +141,19 @@ public class LocalizationEditor : Editor {
                 if ( entry.asset.GetType() == typeof(UnityEngine.AudioClip) ) {
                     var rect = GUILayoutUtility.GetLastRect();
                     
-                    EditorGUI.EndDisabledGroup();
+                    // Localization assets are displayed in an Inspector
+                    // that's always disabled, so we need to manually set
+                    // the enabled flag to 'true' in order to let this
+                    // button be clickable. We'll restore it after we
+                    // handle this button.
+                    var wasEnabled = GUI.enabled;
+                    GUI.enabled = true;
+
                     bool isPlaying = IsClipPlaying( (AudioClip)entry.asset );
                     if ( lastPreviewed == (AudioClip)entry.asset && isPlaying ) {
                         rect.width = 54;
                         rect.x += EditorGUIUtility.labelWidth - 56;
+                        
                         if ( GUI.Button(rect, "▣ Stop" ) ) {
                             StopAllClips();
                             lastPreviewed = null;
@@ -191,11 +166,17 @@ public class LocalizationEditor : Editor {
                             lastPreviewed = (AudioClip)entry.asset;
                         }
                     }
-                    EditorGUI.BeginDisabledGroup(true);
+
+                    // Restore the enabled state
+                    GUI.enabled = wasEnabled;
                 }
 
-                EditorGUI.EndDisabledGroup();
                 EditorGUILayout.Space();
+            } else if (anyAssetsFound) {
+                // Other entries have assets, but not this one. TODO: show
+                // a warning? probably need to make it really prominent,
+                // and possibly allow filtering this view to show only
+                // lines that have no assets?
             }
 
         }

@@ -1,0 +1,8 @@
+language,id,text,file,node,lineNumber,lock,comment
+en,line:01bbe32,Narrative Example,MainMenu.yarn,Menu,4,6d30d973,
+en,line:0ff5d85,Voice Over Example,MainMenu.yarn,Menu,5,f5e9ae3e,
+en,line:02d8e0d,Options,MainMenu.yarn,Menu,6,d0db8b5e,
+en,line:0cabcd2,Text Language,MainMenu.yarn,Menu,7,31545897,
+en,line:0718c80,Audio Language,MainMenu.yarn,Menu,8,e4964fd4,
+en,line:05073d5,Back,MainMenu.yarn,Menu,9,76900f1b,
+en,line:071d8ad,Apply,MainMenu.yarn,Menu,10,31e392d1,

@@ -71,9 +71,18 @@ public static class YarnEditorUtility {
         ProjectWindowUtil.StartNameEditingIfProjectWindowExists(
             0,
             ScriptableObject.CreateInstance<DoCreateYarnScriptAsset>(),
-            "NewProgram.yarnproject",
+            "NewProject.yarnproject",
             GetYarnDocumentIconTexture(),
             GetTemplateYarnScriptPath());
+    }
+
+    /// <summary>
+    /// Creates a new Yarn project at the given path, using the default
+    /// template.
+    /// </summary>
+    /// <param name="path">The path at which to create the script.</param>
+    public static Object CreateYarnProject(string path) {
+        return CreateYarnScriptAssetFromTemplate(path, GetTemplateYarnScriptPath());
     }
 
     /// <summary>
@@ -81,8 +90,8 @@ public static class YarnEditorUtility {
     /// template.
     /// </summary>
     /// <param name="path">The path at which to create the script.</param>
-    public static void CreateYarnAsset(string path) {
-        CreateYarnScriptAssetFromTemplate(path, GetTemplateYarnScriptPath());
+    public static Object CreateYarnAsset(string path) {
+        return CreateYarnScriptAssetFromTemplate(path, GetTemplateYarnScriptPath());
     }
 
     private static Object CreateYarnScriptAssetFromTemplate(string pathName, string resourceFile)
@@ -99,7 +108,7 @@ public static class YarnEditorUtility {
         
         // Figure out the 'file name' that the user entered
         string scriptName;
-        if (Path.GetExtension(pathName).Equals("yarnproject", System.StringComparison.InvariantCultureIgnoreCase)) {
+        if (Path.GetExtension(pathName).Equals(".yarnproject", System.StringComparison.InvariantCultureIgnoreCase)) {
             // This is a .yarnproject file; the script "name" is always
             // "Project".
             scriptName = "Project";

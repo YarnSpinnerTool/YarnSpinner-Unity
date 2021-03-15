@@ -10,7 +10,7 @@ namespace Yarn.Unity
     {
         public override LocalizedLine GetLocalizedLine(Yarn.Line line)
         {
-            var text = lineDatabase.GetLocalization(CurrentTextLanguageCode).GetLocalizedString(line.ID);
+            var text = YarnProject.GetLocalization(CurrentTextLanguageCode).GetLocalizedString(line.ID);
             return new LocalizedLine() {
                 TextID = line.ID,
                 RawText = text,

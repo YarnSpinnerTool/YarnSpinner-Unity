@@ -9,27 +9,9 @@ ScriptedImporter:
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 94073015eacc34c1d8fc6786e43d60ca, type: 3}
   baseLanguageID: en
-  stringIDs:
-  - line:tutorial-tom-1
-  - line:tutorial-tom-2
-  - line:tutorial-anne-1
-  - line:tutorial-tom-3
-  - line:tutorial-tom-4
-  - line:tutorial-anne-2
-  - line:tutorial-tom-5
-  - line:tutorial-anne-3
-  - line:tutorial-tom-6
-  - line:tutorial-tom-7
-  - line:tutorial-anne-4
-  - line:tutorial-tom-8
-  - line:tutorial-anne-5
-  - line:tutorial-tom-9
-  - line:tutorial-tom-10
-  - line:tutorial-anne-6
-  - line:tutorial-tom-11
+  stringIDs: []
   AnyImplicitStringIDs: 0
   isSuccesfullyParsed: 1
   parseErrorMessage: 
-  baseLanguage: {fileID: 7128917941130120860, guid: aa20c0d0a35724fbab9776c4c18234ba, type: 3}
+  baseLanguage: {instanceID: 0}
   localizations: []
-  localizationDatabase: {fileID: 11400000, guid: fa5a21f6812564c2d9f6b54dd9ed7ef8, type: 2}

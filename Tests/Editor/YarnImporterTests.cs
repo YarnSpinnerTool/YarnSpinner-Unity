@@ -33,6 +33,10 @@ position: 0,0
 --- 
 ===";
 
+        private const string TestYarnProgramSource = @"title: YarnProgram
+---
+===";
+
         // A modified version of TestYarnScriptSource, with the following
         // changes:
         // - A line has been added
@@ -57,11 +61,11 @@ position: 0,0
 --- 
 ===";
 
-        private static List<StringTableEntry> GetExpectedStrings(string fileName)
+        private static List<StringTableEntry> GetExpectedStrings(string fileName = "input")
         {
             return new List<StringTableEntry>() {
                 new StringTableEntry {
-                    Language = YarnImporter.DefaultLocalizationName,
+                    Language = null,
                     ID = "line:0e3dc4b",
                     Text = "Spieler: Kannst du mich hören?",
                     File = fileName,
@@ -69,7 +73,7 @@ position: 0,0
                     LineNumber = "6",
                 },
                 new StringTableEntry {
-                    Language = YarnImporter.DefaultLocalizationName,
+                    Language = null,
                     ID = "line:0967160",
                     Text = "NPC: Klar und deutlich.",
                     File = fileName,
@@ -77,7 +81,7 @@ position: 0,0
                     LineNumber = "7",
                 },
                 new StringTableEntry {
-                    Language = YarnImporter.DefaultLocalizationName,
+                    Language = null,
                     ID = "line:04e806e",
                     Text = "Mir reicht es.",
                     File = fileName,
@@ -85,7 +89,7 @@ position: 0,0
                     LineNumber = "8",
                 },
                 new StringTableEntry {
-                    Language = YarnImporter.DefaultLocalizationName,
+                    Language = null,
                     ID = "line:0901fb2",
                     Text = "Nochmal!",
                     File = fileName,
@@ -130,6 +134,75 @@ position: 0,0
             AssetDatabase.Refresh();
         }
 
+        // Sets up a YarnProject, and as many yarn scripts as there are
+        // parameters. All files will have random filenames.
+        public YarnProject SetUpProject(params string[] yarnScriptText) {
+
+            // Disable errors causing failures, in case the yarn script
+            // text contains deliberately invalid code
+            var wasIgnoringFailingMessages = LogAssert.ignoreFailingMessages;
+            LogAssert.ignoreFailingMessages = true;
+
+            string yarnProjectName = Path.GetRandomFileName();
+            string yarnProjectPath = $"Assets/{yarnProjectName}.yarnproject";
+            createdFilePaths.Add(yarnProjectPath);
+
+            var project = YarnEditorUtility.CreateYarnProject(yarnProjectPath) as YarnProject;
+            var yarnProjectImporter = AssetImporter.GetAtPath(yarnProjectPath) as YarnProjectImporter;
+
+            var pathsToAdd = new List<string>();
+
+            foreach (var scriptText in yarnScriptText) {
+
+                string yarnScriptName = Path.GetRandomFileName();
+                string yarnScriptPath = $"Assets/{yarnScriptName}.yarn";
+                createdFilePaths.Add(yarnScriptPath);
+                pathsToAdd.Add(yarnScriptPath);
+
+                string textToWrite;
+
+                if (string.IsNullOrEmpty(scriptText)) {
+                    textToWrite = $"title: {yarnScriptName.Replace(".", "_")}\n---\n===\n";
+                } else {
+                    textToWrite = scriptText;
+                }
+
+                File.WriteAllText(yarnScriptPath, textToWrite);
+            }
+
+            // Import all these files
+            AssetDatabase.Refresh();
+
+            foreach (var path in pathsToAdd) {
+                var textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
+
+                // We should have a text asset, imported by a YarnImporter
+                Assert.IsNotNull(textAsset);
+                Assert.IsInstanceOf<YarnImporter>(AssetImporter.GetAtPath(path));
+
+                // Make the yarn project use this script
+                yarnProjectImporter.sourceScripts.Add(textAsset);
+            }
+
+            // Reimport the project to make it set up the links
+            EditorUtility.SetDirty(yarnProjectImporter);
+            yarnProjectImporter.SaveAndReimport();
+
+            foreach (var path in pathsToAdd) {
+                var scriptImporter = AssetImporter.GetAtPath(path) as YarnImporter;
+                
+                Assert.AreSame(project, scriptImporter.DestinationProject);
+            }
+
+            // As a final check, make sure the project is referencing the
+            // right number of scripts
+            Assert.AreEqual(yarnScriptText.Length, yarnProjectImporter.sourceScripts.Count);
+
+            LogAssert.ignoreFailingMessages = wasIgnoringFailingMessages;
+
+            return project;
+        }
+
         [Test]
         public void YarnImporter_OnValidYarnFile_ShouldParse()
         {
@@ -142,7 +215,7 @@ position: 0,0
             AssetDatabase.Refresh();
             var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
-            Assert.True(result.isSuccesfullyParsed);
+            Assert.True(result.isSuccessfullyParsed);
 
         }
 
@@ -161,161 +234,179 @@ position: 0,0
             LogAssert.ignoreFailingMessages = false;
             var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
-            Assert.False(result.isSuccesfullyParsed);
+            Assert.False(result.isSuccessfullyParsed);
         }
 
         [Test]
-        public void YarnImporter_OnValidYarnFile_GetExpectedStrings()
+        public void YarnProjectImporter_OnValidYarnFile_ImportsAndCompilesSuccessfully() {
+            // Arrange: 
+            // Set up a Yarn project and a Yarn script.
+            var project = SetUpProject("");
+            
+            var yarnProjectImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
+            var scriptImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(yarnProjectImporter.sourceScripts.First())) as YarnImporter;
+
+            // Assert:
+            // The Yarn project has a reference to the Yarn script. They
+            // all report no compilation errors.
+            Assert.True(string.IsNullOrEmpty(scriptImporter.parseErrorMessage));
+            Assert.True(string.IsNullOrEmpty(yarnProjectImporter.compileError));
+            Assert.True(scriptImporter.isSuccessfullyParsed);
+            Assert.AreSame(project, scriptImporter.DestinationProject);
+        }
+
+        [Test]
+        public void YarnProjectImporter_OnInvalidYarnFile_ImportsButDoesNotCompile() {
+
+            // Arrange: 
+            // Set up a Yarn project and a Yarn script, with invalid code.
+            var project = SetUpProject("This is invalid yarn script, and will not compile.");
+            
+            var yarnProjectImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
+            var scriptImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(yarnProjectImporter.sourceScripts.First())) as YarnImporter;
+            
+            // Assert:
+            // The Yarn script will fail to compile, and both the script
+            // and the project will know about this, but they otherwise
+            // have correct asset references to each other.
+            Assert.IsNotEmpty(scriptImporter.parseErrorMessage);
+            Assert.AreSame(scriptImporter.DestinationProject, project);
+            Assert.AreSame(project, scriptImporter.DestinationProject);
+        }
+
+        [Test]
+        public void YarnProjectImporter_OnValidYarnFileWithNoLineTags_CannotGetStrings() {
+            // Arrange:
+            // Set up a project with a Yarn file filled with tagged lines.
+            var project = SetUpProject(@"---
+This script contains lines that are tagged... #line:tagged_line
+But not all of them are.
+===
+");
+            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
+
+            // Assert: 
+            // The project cannot generate a strings table.
+            Assert.IsFalse(importer.CanGenerateStringsTable);
+        }
+
+        [Test]
+        public void YarnProjectImporter_OnValidYarnFile_GetExpectedStrings()
         {
-            string fileName = Path.GetRandomFileName();
-            List<StringTableEntry> expectedStrings = GetExpectedStrings(fileName);
+            // Arrange:
+            // Set up a project with a Yarn file filled with tagged lines.
+            var project = SetUpProject(TestYarnScriptSource);
+            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
 
-            string path = Application.dataPath + "/" + fileName + ".yarn";
-            createdFilePaths.Add(path);
-
-            File.WriteAllText(path, TestYarnScriptSource, System.Text.Encoding.UTF8);
-            AssetDatabase.Refresh();
-            var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
-
-            // Importing this Yarn script will have produced a CSV
-            // TextAsset containing the string table extracted from this
-            // script. Parse that - we'll check that it contains what we
-            // expect.
-            var generatedStringsTable = StringTableEntry.ParseFromCSV(result.baseLanguage.text);
+            // Act: 
+            // Get the strings table from this project.
+            var generatedStringsTable = importer.GenerateStringsTable();
 
             // Simplify the results so that we can compare these string
             // table entries based only on specific fields
             System.Func<StringTableEntry, (string id, string text)> simplifier = e => (id: e.ID, text: e.Text);
-            var simpleExpected = expectedStrings.Select(simplifier);
+            var simpleExpected = GetExpectedStrings().Select(simplifier);
             var simpleResult = generatedStringsTable.Select(simplifier);
+
+            // Assert:
+            // The two string tables should be identical.
 
             Assert.AreEqual(simpleExpected, simpleResult);
         }
 
         [Test]
-        public void YarnImporterUtility_CanCreateNewLineDatabase()
+        public void YarnProjectImporter_OnImport_CreatesLocalizations()
         {
-            // Arrange: Import a yarn script
-            string fileName = Path.GetRandomFileName();
+            // Arrange:
+            // Set up a project with a Yarn file filled with tagged lines.
+            var project = SetUpProject(TestYarnScriptSource);
+            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
 
-            string path = Path.Combine("Assets", fileName + ".yarn");
-            createdFilePaths.Add(path);
-
-            File.WriteAllText(path, TestYarnScriptSource, System.Text.Encoding.UTF8);
-            AssetDatabase.ImportAsset(path);
-            AssetDatabase.Refresh();
-            var importer = AssetImporter.GetAtPath(path) as YarnImporter;
-            var serializedObject = new SerializedObject(importer);
-
-            var lineDatabaseAfterImport = importer.lineDatabase;
-
-            // Act: create a new line database. 
-            YarnImporterUtility.CreateNewLineDatabase(serializedObject);
-
-            importer.SaveAndReimport();
-
-            // Assert: Verify that the new line database exists,
-            // and contains a single localization, and that localization
-            // contains the string table entries we expect.
-            Assert.Null(lineDatabaseAfterImport, "The script should not have a line database after initial creation");
-
-            Assert.NotNull(importer.lineDatabase, "Importer should have a line database");
-            createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.lineDatabase));
-
-            var db = importer.lineDatabase;
-            Assert.AreEqual(1, db.Localizations.Count(), "Line Database should have a single localization");
-            createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.lineDatabase.Localizations.First()));
-
-            var localization = db.Localizations.First();
-            Assert.AreEqual(localization.LocaleCode, importer.baseLanguageID, "Localization locale should match script's language");
-
-            Assert.Contains(importer.baseLanguageID, ProjectSettings.TextProjectLanguages, "Script language should be present in the project language settings");
-
+            // Assert:
+            // The project has a base localization, and no other
+            // localizations. The base localization contains the expected
+            // line IDs.
+            Assert.IsNotNull(project.baseLocalization);
+            CollectionAssert.AreEquivalent(project.baseLocalization.GetLineIDs(), GetExpectedStrings().Select(l => l.ID));
+            Assert.IsEmpty(project.localizations);
         }
 
         [Test]
-        public void YarnImporterUtility_CanCreateLocalizationInLineDatabase()
+        public void YarnProjectUtility_OnGeneratingLinesFile_CreatesFile()
         {
-            // Arrange: Import a yarn script and create a localization
-            // database for it
-            string fileName = Path.GetRandomFileName();
-            string path = Path.Combine("Assets", fileName + ".yarn");
-            createdFilePaths.Add(path);
-            File.WriteAllText(path, TestYarnScriptSource, System.Text.Encoding.UTF8);
+            // Arrange:
+            // Set up a project with a Yarn file filled with tagged lines.
+            var project = SetUpProject(TestYarnScriptSource);
+            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
+
+            var destinationStringsFilePath = "Assets/" + Path.GetRandomFileName() + ".csv";
+            
+            // Act:
+            // Create a .CSV File, and add it to the Yarn project. 
+            YarnProjectUtility.WriteStringsFile(destinationStringsFilePath, importer);
+            createdFilePaths.Add(destinationStringsFilePath);
             AssetDatabase.Refresh();
-            var importer = AssetImporter.GetAtPath(path) as YarnImporter;
-            var importerSerializedObject = new SerializedObject(importer);
 
-            YarnImporterUtility.CreateNewLineDatabase(importerSerializedObject);
-            createdFilePaths.Add(AssetDatabase.GetAssetPath(importer.lineDatabase));
-
-            var databaseSerializedObject = new SerializedObject(importer.lineDatabase);
-
-            // Act: Create a new localization CSV file for some new language
-            LineDatabaseUtility.CreateLocalizationWithLanguage(databaseSerializedObject, AlternateLocaleCode);
-            YarnImporterUtility.CreateLocalizationForLanguageInProgram(importerSerializedObject, AlternateLocaleCode);
-
-            foreach (var loc in importer.lineDatabase.Localizations)
-            {
-                createdFilePaths.Add(AssetDatabase.GetAssetPath(loc));
-            }
-
-            foreach (var loc in importer.ExternalLocalizations)
-            {
-                createdFilePaths.Add(AssetDatabase.GetAssetPath(loc.text));
-            }
-
+            var stringsAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(destinationStringsFilePath);
+            importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset {languageID = "test", stringsAsset = stringsAsset});
+            EditorUtility.SetDirty(importer);
             importer.SaveAndReimport();
 
-            // Assert: Verify that it exists, contains the string table
-            // entries we expect, and has the language we expect.
-            var expectedLanguages = new HashSet<string> { importer.baseLanguageID, AlternateLocaleCode }.OrderBy(n => n);
-            
-            var foundLanguages = importer.AllLocalizations.Select(l => l.languageName).OrderBy(n => n);
-            
-            CollectionAssert.AreEquivalent(expectedLanguages, foundLanguages, $"The locales should be what we expect to see");
-        }
+            // Assert:
+            // A new localization, based on the .csv file we just created,
+            // should be present.
+            Assert.IsNotNull(project.baseLocalization);
+            Assert.IsNotEmpty(project.localizations);
+            Assert.AreEqual("test", project.localizations[0].LocaleCode);
+            CollectionAssert.AreEquivalent(project.localizations[0].GetLineIDs(), GetExpectedStrings().Select(l => l.ID));
+        }        
 
         [Test]
         public void YarnImporterUtility_CanUpdateLocalizedCSVs_WhenBaseScriptChanges()
         {
-            // Arrange: Import a yarn script and create a localization
-            // database for it, create an alternate localization for it
-            string fileName = Path.GetRandomFileName();
-            string path = Path.Combine("Assets", fileName + ".yarn");
-            createdFilePaths.Add(path);
-            File.WriteAllText(path, TestYarnScriptSource, System.Text.Encoding.UTF8);
+            // Arrange:
+            // Set up a project with a Yarn file filled with tagged lines.
+            var project = SetUpProject(TestYarnScriptSource);
+            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
+            var scriptPath = AssetDatabase.GetAssetPath(importer.sourceScripts[0]);
+
+            var destinationStringsFilePath = "Assets/" + Path.GetRandomFileName() + ".csv";
+            
+            // Act:
+            // Create a .CSV File, and add it to the Yarn project. 
+            YarnProjectUtility.WriteStringsFile(destinationStringsFilePath, importer);
+            createdFilePaths.Add(destinationStringsFilePath);
+
             AssetDatabase.Refresh();
-            var importer = AssetImporter.GetAtPath(path) as YarnImporter;
-            var importerSerializedObject = new SerializedObject(importer);            
-            var localizationPaths = YarnImporterUtility.CreateNewLineDatabase(importerSerializedObject);
 
-            createdFilePaths.AddRange(localizationPaths);
+            var stringsAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(destinationStringsFilePath);
+            importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset {languageID = "test", stringsAsset = stringsAsset});
+            EditorUtility.SetDirty(importer);
+            importer.SaveAndReimport();
 
-            var lineDatabaseSerializedObject = new SerializedObject(importer.lineDatabase);
+            // Capture the strings tables. We'll use them later.
+            var unmodifiedBaseStringsTable = importer.GenerateStringsTable();
+            var unmodifiedLocalizedStringsTable = StringTableEntry.ParseFromCSV(File.ReadAllText(destinationStringsFilePath));
+            
+            // Next, modify the original source script.
+            File.WriteAllText(scriptPath, TestYarnScriptSourceModified);
 
-            var newLocalizationFilePath = LineDatabaseUtility.CreateLocalizationWithLanguage(lineDatabaseSerializedObject, AlternateLocaleCode);
-
-            createdFilePaths.Add(newLocalizationFilePath);
-
-            var csvPath = YarnImporterUtility.CreateLocalizationForLanguageInProgram(importerSerializedObject, AlternateLocaleCode);
-
-            createdFilePaths.Add(csvPath);
-
-            var unmodifiedBaseStringsTable = StringTableEntry.ParseFromCSV((importerSerializedObject.targetObject as YarnImporter).baseLanguage.text);
-            var unmodifiedLocalizedStringsTable = StringTableEntry.ParseFromCSV((importerSerializedObject.targetObject as YarnImporter).AllLocalizations.First(l => l.languageName == AlternateLocaleCode).text.text);
-
-            // Act: modify the imported script so that lines are added,
-            // changed and deleted, and then update the localized CSV
-            // programmatically
-
-            File.WriteAllText(path, TestYarnScriptSourceModified, System.Text.Encoding.UTF8);
             AssetDatabase.Refresh();
-            YarnImporterUtility.UpdateLocalizationCSVs(importerSerializedObject);
 
-            var modifiedBaseStringsTable = StringTableEntry.ParseFromCSV((importerSerializedObject.targetObject as YarnImporter).baseLanguage.text);
-            var modifiedLocalizedStringsTable = StringTableEntry.ParseFromCSV((importerSerializedObject.targetObject as YarnImporter).AllLocalizations.First(l => l.languageName == AlternateLocaleCode).text.text);
+            // Finally, update the CSV.
+            LogAssert.Expect(LogType.Log, $"Updated the following files: {destinationStringsFilePath}");
+            YarnProjectUtility.UpdateLocalizationCSVs(importer);
 
+            AssetDatabase.Refresh();
+
+            // Doing it again should result in a no-op.
+            LogAssert.Expect(LogType.Log, "No files needed updating.");
+            YarnProjectUtility.UpdateLocalizationCSVs(importer);
+
+            // Capture the updated strings tables, so we can compare them.
+            var modifiedBaseStringsTable = importer.GenerateStringsTable();
+            var modifiedLocalizedStringsTable = StringTableEntry.ParseFromCSV(File.ReadAllText(destinationStringsFilePath));
+            
             // Assert: verify the base language string table contains the
             // string table entries we expect, verify the localized string
             // table contains the string table entries we expect
@@ -351,35 +442,5 @@ position: 0,0
             Assert.IsNotNull(YarnEditorUtility.GetTemplateYarnScriptPath());
         }
 
-        [Test]
-        public void YarnImporter_CanCreateYarnProject()
-        {
-
-            string scriptPath = "NewYarnScript.yarn";
-            string scriptFullPath = $"Assets/{scriptPath}";
-            YarnEditorUtility.CreateYarnAsset(scriptFullPath);
-            createdFilePaths.Add(scriptFullPath);
-            
-            Assert.True(File.Exists(scriptFullPath));
-
-            var scriptImporter = AssetImporter.GetAtPath(scriptFullPath) as YarnImporter;
-            
-            // The script has no destination program after being created
-            Assert.Null(scriptImporter.DestinationProject);
-
-            // Create a new Yarn Project for this script
-            var programPath = YarnImporterUtility.CreateYarnProject(scriptImporter);
-            createdFilePaths.Add(programPath);
-
-            // The script now has a destination project
-            Assert.NotNull(scriptImporter.DestinationProject);
-
-            var projectImporter = AssetImporter.GetAtPath(programPath) as YarnProjectImporter;
-
-            var scriptTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(scriptFullPath);
-
-            // The project includes the script importer in its Source Scripts list
-            Assert.Contains(scriptTextAsset, new List<TextAsset>(projectImporter.sourceScripts));
-        }
     }
 }

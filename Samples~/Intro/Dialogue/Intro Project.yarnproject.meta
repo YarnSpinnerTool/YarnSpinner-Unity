@@ -16,12 +16,17 @@ ScriptedImporter:
   script: {fileID: 11500000, guid: 053561912b1654d80a424bb0696a74ae, type: 3}
   sourceScripts:
   - {fileID: 6391573757903218779, guid: aa20c0d0a35724fbab9776c4c18234ba, type: 3}
-  compileError: 
-  serializedDeclarations:
-  - name: $knows_anne_name
-    type: 3
-    defaultValueBool: 0
-    defaultValueNumber: 0
-    defaultValueString: 
-    description: Does Tom know the name of the person he's talking to?
-    sourceYarnAsset: {instanceID: 0}
+  compileError: 'Error in Packages/dev.yarnspinner.unity/Samples/Intro/Dialogue/Intro.yarn
+    line 18
+
+    <<declare $knows_anne_name = false as bool "Does Tom know the name
+    of the person he''s talking to?">>
+
+    $knows_anne_name has already been declared
+    in Packages/dev.yarnspinner.unity/Samples/Intro/Dialogue/Intro Project.yarnproject,
+    line 3'
+  serializedDeclarations: []
+  languagesToSourceAssets:
+  - languageID: en
+    stringsAsset: {fileID: 4900000, guid: f4c7fedea0c7941d481f069a801f139c, type: 3}
+    assetsFolder: {fileID: 102900000, guid: 34865a6c44c3a4f9d8c586b0830b3b2d, type: 3}

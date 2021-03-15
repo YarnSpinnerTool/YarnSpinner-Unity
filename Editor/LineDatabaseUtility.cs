@@ -9,6 +9,9 @@ using Yarn.Unity;
 using UnityEditor.AddressableAssets;
 #endif
 
+#if false
+// TODO: LINEDATABASE NO LONGER EXISTS; RELOCATE ANY USEFUL FUNCTIONALITY
+// FROM THIS CLASS ELSEWHERE
 
 internal static class LineDatabaseUtility {
     /// <summary>
@@ -262,3 +265,5 @@ internal static class LineDatabaseUtility {
         localization.AddLocalizedObject(entry.ID, asset);
     }
 }
+
+#endif
