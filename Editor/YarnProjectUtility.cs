@@ -346,7 +346,7 @@ namespace Yarn.Unity
 
                 foreach (var script in importer.sourceScripts)
                 {
-                    var assetPath = importer.assetPath;
+                    var assetPath = AssetDatabase.GetAssetPath(script);
                     var contents = File.ReadAllText(assetPath);
 
                     // Produce a version of this file that contains line
@@ -363,6 +363,10 @@ namespace Yarn.Unity
                         AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.Default);
                     }
                 }
+            }
+            catch (System.Exception e) {
+                Debug.LogError($"Encountered an error when updating scripts: {e}");
+                return;
             }
             finally
             {
