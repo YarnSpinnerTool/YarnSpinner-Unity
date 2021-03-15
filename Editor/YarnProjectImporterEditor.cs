@@ -108,7 +108,13 @@ namespace Yarn.Unity
                 }
             }
 
-            using (new EditorGUI.DisabledScope(canGenerateStringsTable == true))
+            // Does this project's source scripts list contain any actual
+            // assets? (It can have a count of >0 and still have no assets
+            // when, for example, you've just clicked the + button but
+            // haven't dragged an asset in yet.)
+            var hasAnyTextAssets = yarnProjectImporter.sourceScripts.Where(s => s != null).Count() > 0;
+
+            using (new EditorGUI.DisabledScope(canGenerateStringsTable == true || hasAnyTextAssets == false))
             {
                 if (GUILayout.Button("Add Line Tags to Scripts"))
                 {
