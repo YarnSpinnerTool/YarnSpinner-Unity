@@ -15,14 +15,14 @@ position: 524,111
 
 
 -> Anything exciting happen on your watch? <<if not visited("Sally.Watch")>> #line:5d7a7c
-    <<jump Sally.Watch>>
+    <<jump Sally_Watch>>
 -> Sorry about the console. <<if $sally_warning and not visited("Sally.Sorry")>> #line:0a7e39
-    <<jump Sally.Sorry>>
+    <<jump Sally_Sorry>>
 -> See you later. #line:0facf7
-    <<jump Sally.Exit>>
+    <<jump Sally_Exit>>
 ===
 
-title: Sally.Watch
+title: Sally_Watch
 tags: 
 colorID: 0
 position: 512,430
@@ -37,7 +37,7 @@ Sally: Oh, Ship wanted to see you. Go say hi to it. #line:df4eaf
 <<endif>>
 ===
 
-title: Sally.Exit
+title: Sally_Exit
 tags: 
 colorID: 6
 position: 211,417
@@ -45,7 +45,7 @@ position: 211,417
 Sally: Bye. #line:60c282
 ===
 
-title: Sally.Sorry
+title: Sally_Sorry
 tags: 
 colorID: 0
 position: 827,439
