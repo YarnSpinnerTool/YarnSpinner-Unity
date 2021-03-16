@@ -11,15 +11,20 @@ using Yarn.Compiler;
 using System.IO;
 using UnityEditorInternal;
 using System.Collections;
+using System.Reflection;
 
 namespace Yarn.Unity
 {
     [CustomEditor(typeof(YarnProjectImporter))]
     public class YarnProjectImporterEditor : ScriptedImporterEditor
     {
+        // A runtime-only field that stores the defaultLanguage of the
+        // YarnProjectImporter. Used during Inspector GUI drawing.
+        internal static SerializedProperty CurrentProjectDefaultLanguageProperty;
 
         private SerializedProperty compileErrorProperty;
         private SerializedProperty serializedDeclarationsProperty;
+        private SerializedProperty defaultLanguageProperty;
         private SerializedProperty sourceScriptsProperty;
         private SerializedProperty languagesToSourceAssetsProperty;
 
@@ -32,6 +37,7 @@ namespace Yarn.Unity
             compileErrorProperty = serializedObject.FindProperty("compileError");
             serializedDeclarationsProperty = serializedObject.FindProperty("serializedDeclarations");
 
+            defaultLanguageProperty = serializedObject.FindProperty("defaultLanguage");
             languagesToSourceAssetsProperty = serializedObject.FindProperty("languagesToSourceAssets");
 
             serializedDeclarationsList = new ReorderableDeclarationsList(serializedObject, serializedDeclarationsProperty);
@@ -58,7 +64,13 @@ namespace Yarn.Unity
 
             serializedDeclarationsList.DrawLayout();
 
+            EditorGUILayout.PropertyField(defaultLanguageProperty, new GUIContent("Default Language"));
+
+            CurrentProjectDefaultLanguageProperty = defaultLanguageProperty;
+
             EditorGUILayout.PropertyField(languagesToSourceAssetsProperty);
+
+            CurrentProjectDefaultLanguageProperty = null;
 
             YarnProjectImporter yarnProjectImporter = serializedObject.targetObject as YarnProjectImporter;
 
@@ -206,6 +218,157 @@ namespace Yarn.Unity
             var importer = target as YarnProjectImporter;
             File.WriteAllText(importer.assetPath, output, System.Text.Encoding.UTF8);
             AssetDatabase.ImportAsset(importer.assetPath);
+        }
+    }
+
+    /// <summary>
+    /// An attribute that causes this property to be drawn as a read-only
+    /// label if a second property is equal to a specific static field on a
+    /// specific class.
+    /// </summary>
+    /// <remarks>
+    /// This attribute is used in order to make the 'stringsFile' field on
+    /// YarnProjectImporter.LanguageToSourceAsset appear as a read-only
+    /// label when its 'languageID' is equal to the default language of the
+    /// YarnProjectImporter currently being inspected.
+    ///
+    /// Yes, this is a really convoluted approach, but this is the best I
+    /// could come up with considering I didn't want to re-implement
+    /// drawing the entire list, and I can't pass contextual information to
+    /// a property.
+    /// </remarks>
+    internal class HideWhenPropertyValueEqualsContextAttribute : PropertyAttribute
+    {
+        /// <summary>
+        /// The class that contains a static field with the name given in
+        /// <see cref="FieldNameInOtherClass"/>.
+        /// </summary>
+        public System.Type OtherClassType;
+
+        /// <summary>
+        /// The name of the static field found in <see
+        /// cref="OtherClassType"/>. This field must be of type <see
+        /// cref="SerializedProperty"/>.
+        /// </summary>
+        /// <remarks>
+        /// You are strongly encouraged to use <code>nameof</code> to refer
+        /// to this member.
+        /// </remarks>
+        public string FieldNameInOtherClass;
+
+        /// <summary>
+        /// The name of the field whose value should be checked against.
+        /// This field must be a sibling of the field this attribute is
+        /// applied to.
+        /// </summary>
+        public string SiblingFieldName;
+
+        /// <summary>
+        /// The label to show for this field in the Inspector when the
+        /// field <see cref="SiblingFieldName"/> has a string value equal to
+        /// the <see cref="SerializedProperty"/> field in <see
+        /// cref="OtherClassType"/>.
+        /// </summary>
+        public string DisplayStringWhenEmpty;
+
+        public HideWhenPropertyValueEqualsContextAttribute(string siblingFieldName, System.Type classType, string fieldNameInOtherClass, string displayStringWhenEmpty)
+        {
+            OtherClassType = classType;
+            FieldNameInOtherClass = fieldNameInOtherClass;
+            SiblingFieldName = siblingFieldName;
+            DisplayStringWhenEmpty = displayStringWhenEmpty;
+        }
+    }
+
+    /// <summary>
+    /// The custom editor for drawing properties that have the
+    /// HideWhenPropertyValueEqualsContextAttribute applied to them.
+    /// </summary>
+    [CustomPropertyDrawer(typeof(HideWhenPropertyValueEqualsContextAttribute))]
+    internal class HideWhenValueEqualsContextAttributeEditor : PropertyDrawer
+    {
+        /// <summary>
+        /// Called by Unity to draw the GUI for properties that this editor
+        /// applies to.
+        /// </summary>
+        /// <param name="position">The rectangle to draw content
+        /// in.</param>
+        /// <param name="property">The property to draw.</param>
+        /// <param name="label">The label to draw for this
+        /// property.</param>
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            // Get the HideWhenPropertyValueEqualsContextAttribute that
+            // caused this drawer to be invoked.
+            var attribute = this.attribute as HideWhenPropertyValueEqualsContextAttribute;
+
+            // Get the data out of the attribute.
+            System.Type classType = attribute.OtherClassType;
+            string fieldName = attribute.FieldNameInOtherClass;
+            string displayStringWhenEmpty = attribute.DisplayStringWhenEmpty;
+
+            // Get the static field that the attribute wants to access.
+            System.Reflection.FieldInfo field = classType.GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+
+            // Get the internal method EditorGUI.DefaultPropertyField,
+            // which we'll call when we need to draw the original property
+            // UI.
+            MethodInfo defaultDraw = typeof(EditorGUI)
+                .GetMethod("DefaultPropertyField", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                
+            // Is the static field a serialized property?
+            if (field.FieldType.IsAssignableFrom(typeof(SerializedProperty)) == false)
+            {
+                // The field we were aimed at is not a serialized property.
+                // Early out.
+                defaultDraw.Invoke(null, new object[3] { position, property, label });
+                return;
+            }
+
+            // Get the context property from the class's static field.
+            SerializedProperty contextProperty = field.GetValue(null) as SerializedProperty;
+
+            // Next, get the property we're comparing to. This is required
+            // to be a sibling property of the one that had this attribute.
+
+            // We'll do this by taking the path to this property, removing
+            // the last element, and appending the target property name.
+            // We'll then use FindProperty to locate it.
+            var targetPropertyPath = string.Join(".", property.propertyPath.Split('.').Reverse().Skip(1).Reverse().Append(attribute.SiblingFieldName));
+
+            var targetProperty = property.serializedObject.FindProperty(targetPropertyPath);
+
+            if (targetProperty == null) {
+                // We couldn't find it. Log a warning, draw the original
+                // UI, and return.
+                Debug.LogWarning($"Property not found at path {targetPropertyPath}");
+                defaultDraw.Invoke(null, new object[3] { position, property, label });
+            }
+
+            // Ensure that they're both strings.
+            if (targetProperty.propertyType != SerializedPropertyType.String || contextProperty.propertyType != SerializedPropertyType.String) {
+                // They're not both strings. Draw as usual.
+                //
+                // (This restriction exists because, weirdly,
+                // SerializedProperty.DataEquals() on two properties that
+                // contained the strings "en-AU" and "en-US" was returning
+                // true. Restricting it to strings and doing a string
+                // comparison fixed this.)
+                defaultDraw.Invoke(null, new object[3] { position, property, label });
+            }
+            
+            // Finally, the moment of truth: compare the two strings.
+            if (contextProperty.stringValue.Equals(targetProperty.stringValue, System.StringComparison.InvariantCulture))
+            {
+                // The data matches. We don't want to show this property.
+                // Show the label instead.
+                EditorGUI.LabelField(position, label, new GUIContent(displayStringWhenEmpty));
+            }
+            else
+            {
+                // The data doesn't match. Draw as usual.
+                defaultDraw.Invoke(null, new object[3] { position, property, label });
+            }
         }
     }
 

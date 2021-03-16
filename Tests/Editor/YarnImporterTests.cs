@@ -349,7 +349,7 @@ But not all of them are.
             AssetDatabase.Refresh();
 
             var stringsAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(destinationStringsFilePath);
-            importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset {languageID = "test", stringsAsset = stringsAsset});
+            importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset {languageID = "test", stringsFile = stringsAsset});
             EditorUtility.SetDirty(importer);
             importer.SaveAndReimport();
 
@@ -381,7 +381,7 @@ But not all of them are.
             AssetDatabase.Refresh();
 
             var stringsAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(destinationStringsFilePath);
-            importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset {languageID = "test", stringsAsset = stringsAsset});
+            importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset {languageID = "test", stringsFile = stringsAsset});
             EditorUtility.SetDirty(importer);
             importer.SaveAndReimport();
 
@@ -442,6 +442,27 @@ But not all of them are.
             Assert.IsNotNull(YarnEditorUtility.GetYarnDocumentIconTexture());
             Assert.IsNotNull(YarnEditorUtility.GetTemplateYarnScriptPath());
         }
+
+        [Test]
+        public void YarnProjectImporter_OnNoLocalizationsSupplied_GeneratesExpectedLocalizations() {
+            throw new System.NotImplementedException();
+        }
+
+        [Test]
+        public void YarnProjectImporter_OnLocalizationsSuppliedButNotDefaultLanguage_GeneratesExpectedLocalizations() {
+            throw new System.NotImplementedException();
+        }
+
+        [Test]
+        public void YarnProjectImporter_OnLocalizationsSuppliedIncludingDefaultLanguage_GeneratesExpectedLocalizations() {
+            throw new System.NotImplementedException();
+        }
+
+        [Test]
+        public void YarnProjectImporter_OnLocalizationsConfigured_LocatesAssets() {
+            throw new System.NotImplementedException();
+        }
+        
 
     }
 }

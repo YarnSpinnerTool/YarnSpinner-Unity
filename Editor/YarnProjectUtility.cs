@@ -97,11 +97,11 @@ namespace Yarn.Unity
 
                 foreach (var loc in localizations)
                 {
-                    var fileWasChanged = UpdateLocalizationFile(baseLocalizationStrings, loc.languageID, loc.stringsAsset);
+                    var fileWasChanged = UpdateLocalizationFile(baseLocalizationStrings, loc.languageID, loc.stringsFile);
 
                     if (fileWasChanged)
                     {
-                        modifiedFiles.Add(loc.stringsAsset);
+                        modifiedFiles.Add(loc.stringsFile);
                     }
                 }
 

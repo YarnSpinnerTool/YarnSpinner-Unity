@@ -66,13 +66,24 @@ namespace Yarn.Unity
             /// The locale ID that this translation should create a
             /// Localization for.
             /// </summary>
+            [Language]
             public string languageID;
 
             /// <summary>
             /// The TextAsset containing CSV data that the Localization
             /// should use.
             /// </summary>
-            public TextAsset stringsAsset;
+            // Hide this when its value is equal to whatever property is
+            // stored in the YarnProjectImporterEditor class's
+            // CurrentProjectDefaultLanguageProperty.
+            [HideWhenPropertyValueEqualsContext(
+                "languageID", 
+                typeof(YarnProjectImporterEditor), 
+                nameof(YarnProjectImporterEditor.CurrentProjectDefaultLanguageProperty),
+                "Automatically included"
+                )]
+            [UnityEngine.Serialization.FormerlySerializedAs("stringsAsset")]
+            public TextAsset stringsFile;
 
             /// <summary>
             /// The folder containing additional assets for the lines, such
@@ -85,6 +96,9 @@ namespace Yarn.Unity
 
         public string compileError;
         public List<SerializedDeclaration> serializedDeclarations = new List<SerializedDeclaration>();
+
+        [Language]
+        public string defaultLanguage = System.Globalization.CultureInfo.CurrentCulture.Name;
 
         public List<LanguageToSourceAsset> languagesToSourceAssets;
 
@@ -224,36 +238,14 @@ namespace Yarn.Unity
                 importer.parseErrorMessage = null;
             }
 
-            // Generate a Localization for:
-            // 1. the Development content
-            // 2. each LanguageToSourceAsset we have
-
-            var developmentLocalization = ScriptableObject.CreateInstance<Localization>();
-
-            developmentLocalization.LocaleCode = null;
-
-            var stringTableEntries = compilationResult.StringTable.Select(x => new StringTableEntry
-            {
-                ID = x.Key,
-                Language = null,
-                Text = x.Value.text,
-                File = x.Value.fileName,
-                Node = x.Value.nodeName,
-                LineNumber = x.Value.lineNumber.ToString(),
-                Lock = YarnImporter.GetHashString(x.Value.text, 8),
-            });
-
-            developmentLocalization.AddLocalizedStrings(stringTableEntries);
-
-            project.baseLocalization = developmentLocalization;
-
-            developmentLocalization.name = "Base";
-
-            ctx.AddObjectToAsset("localization-dev", developmentLocalization);
+            // Will we need to create a default localization? This variable
+            // will be set to false if any of the languages we've
+            // configured in languagesToSourceAssets is the default
+            // language.
+            var shouldAddDefaultLocalization = true;
 
             foreach (var pair in languagesToSourceAssets)
             {
-
                 // Don't create a localization if the language ID was not
                 // provided
                 if (string.IsNullOrEmpty(pair.languageID))
@@ -262,24 +254,37 @@ namespace Yarn.Unity
                     continue;
                 }
 
-                // Don't create a localization if the source asset was not
-                // provided
-                if (pair.stringsAsset == null)
-                {
-                    Debug.LogWarning($"Not creating a localization for {pair.languageID} in the Yarn Project {project.name} because a text asset containing the strings wasn't found. Add a .csv file containing the translated lines to the Yarn Project's inspector.");
-                    continue;
-                }
-
                 IEnumerable<StringTableEntry> stringTable;
 
-                try
+                // Where do we get our strings from? If it's the default
+                // language, we'll pull it from the scripts. If it's from
+                // any other source, we'll pull it from the CSVs.
+                if (pair.languageID == defaultLanguage)
                 {
-                    stringTable = StringTableEntry.ParseFromCSV(pair.stringsAsset.text);
+                    // We'll use the program-supplied string table.
+                    stringTable = GenerateStringsTable();
+
+                    // We don't need to add a default localization.
+                    shouldAddDefaultLocalization = false;
                 }
-                catch (System.ArgumentException e)
+                else
                 {
-                    Debug.LogWarning($"Not creating a localization for {pair.languageID} in the Yarn Project {project.name} because an error was encountered during text parsing: {e}");
-                    continue;
+                    try
+                    {
+                        if (pair.stringsFile == null) {
+                            // We can't create this localization because we
+                            // don't have any data for it.
+                            Debug.LogWarning($"Not creating a localization for {pair.languageID} in the Yarn Project {project.name} because a text asset containing the strings wasn't found. Add a .csv file containing the translated lines to the Yarn Project's inspector.");
+                            continue;
+                        }
+
+                        stringTable = StringTableEntry.ParseFromCSV(pair.stringsFile.text);
+                    }
+                    catch (System.ArgumentException e)
+                    {
+                        Debug.LogWarning($"Not creating a localization for {pair.languageID} in the Yarn Project {project.name} because an error was encountered during text parsing: {e}");
+                        continue;
+                    }
                 }
 
                 var newLocalization = ScriptableObject.CreateInstance<Localization>();
@@ -318,11 +323,46 @@ namespace Yarn.Unity
 
                 ctx.AddObjectToAsset("localization-" + pair.languageID, newLocalization);
 
-                // Make this asset get re-imported if the this source asset
-                // was modified
-                ctx.DependsOnSourceAsset(AssetDatabase.GetAssetPath(pair.stringsAsset));
+
+                if (pair.languageID == defaultLanguage) {
+                    // If this is our default language, set it as such
+                    project.baseLocalization = newLocalization;
+                } else {
+                    // This localization depends upon a source asset. Make
+                    // this asset get re-imported if this source asset was
+                    // modified
+                    ctx.DependsOnSourceAsset(AssetDatabase.GetAssetPath(pair.stringsFile));
+                }
 
 
+            }
+
+            if (shouldAddDefaultLocalization) {
+                // We didn't add a localization for the default language.
+                // Create one for it now.
+
+                var developmentLocalization = ScriptableObject.CreateInstance<Localization>();
+
+                developmentLocalization.LocaleCode = defaultLanguage;
+
+                var stringTableEntries = compilationResult.StringTable.Select(x => new StringTableEntry
+                {
+                    ID = x.Key,
+                    Language = defaultLanguage,
+                    Text = x.Value.text,
+                    File = x.Value.fileName,
+                    Node = x.Value.nodeName,
+                    LineNumber = x.Value.lineNumber.ToString(),
+                    Lock = YarnImporter.GetHashString(x.Value.text, 8),
+                });
+
+                developmentLocalization.AddLocalizedStrings(stringTableEntries);
+
+                project.baseLocalization = developmentLocalization;
+
+                developmentLocalization.name = $"Default ({defaultLanguage})";
+
+                ctx.AddObjectToAsset("default-language", developmentLocalization);
             }
 
             // Store the compiled program
