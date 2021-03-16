@@ -33,7 +33,7 @@ using System.Runtime.InteropServices;
 using System.Collections;
 
 namespace Yarn.Unity {
-    class VoiceOverPlaybackFmod : DialogueViewBase {
+    public class VoiceOverPlaybackFmod : DialogueViewBase {
         FMOD.Studio.EVENT_CALLBACK dialogueCallback;
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Yarn.Unity {
                                 Marshal.StructureToPtr(parameter, parameterPtr, false);
                             }
                         }
-                    }
+                }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.DESTROY_PROGRAMMER_SOUND: {
                         var parameter = (FMOD.Studio.PROGRAMMER_SOUND_PROPERTIES)Marshal.PtrToStructure(parameterPtr, typeof(FMOD.Studio.PROGRAMMER_SOUND_PROPERTIES));
@@ -179,15 +179,18 @@ namespace Yarn.Unity {
             if (dialogueInstance.isValid()) {
                 dialogueInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
             }
+
+            // Playback finished (done or interrupted). Signal line delivery has finished.
+            onDialogueDeliveryComplete();
         }
 
         public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected) {
             // Do nothing
         }
 
-        public override void OnLineStatusChanged(LocalizedLine dialogueLine, LineStatus previousStatus, LineStatus newStatus)
+        public override void OnLineStatusChanged(LocalizedLine dialogueLine)
         {
-            switch (newStatus)
+            switch (dialogueLine.Status)
             {
                 case LineStatus.Running:
                     // Nothing to do here - continue running.

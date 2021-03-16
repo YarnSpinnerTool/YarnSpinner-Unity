@@ -70,4 +70,11 @@ Temporary Items
 
 # .NET symbols files, for debugging
 *.pdb
-*.pdb.meta 
+*.pdb.meta
+
+# FMOD generated files
+.cache/
+.user/
+
+# Ignore directories used for storing builds
+Build/

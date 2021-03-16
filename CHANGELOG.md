@@ -147,6 +147,8 @@ Kim: You want a bagel?
 - Added a phone chat sample. (@radiatoryang)
 - Added a visual novel template. (@radiatoryang)
 - Added support for voice overs. (@Schroedingers-Cat)
+- Added a dedicated voice over example scene which supports Unity's audio system and FMOD (@Schroedingers-Cat)
+- Added voice overs to the space ship example scene (Stefanie Enge and @Schroedingers-Cat)
 - Added a new API for presenting and managing lines of dialogue.
 - Added a new API for working with localizations.
 - Added an option to DialogueUI to allow hiding character names.
@@ -170,7 +172,7 @@ Kim: You want a bagel?
 ```
 
 - Nicer error messages when the localized text for a line of dialogue can't be found.
-- DialogueUI is now a subclass of DialogueViewBase.
+- DialogueUI is now a subclass of DialogueViewBase. (@desplesda and @Schroedingers-Cat)
 - Moved Yarn Spinner classes into the `Yarn.Unity` namespace, or one of its children, depending on its purpose.
 - Dialogue.AddFunction now uses functions that can take multiple parameters. You no longer use a single `Yarn.Value[]` parameter; you can now have up to 5, which can be strings, integers, floats, doubles, bools, or `Yarn.Value`s.
 - Commands registered via the `YarnCommand` attribute can now take parameter types besides strings. Parameters can also be optional. Additionally, these methods are now cached, and are faster to call.
