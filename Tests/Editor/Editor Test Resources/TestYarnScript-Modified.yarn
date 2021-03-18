@@ -1,0 +1,23 @@
+title: Start
+tags:
+colorID: 0
+position: 0,0
+--- 
+// A modified version of TestYarnScript.yarn, with the following changes to
+// lines:
+// - A line has been added
+// - A line has been modified
+// - A line has been removed
+Spieler: Kannst du mich hören? This line was modified. #line:0e3dc4b
+-> Mir reicht es. #line:04e806e
+    <<jump Exit>>
+-> Nochmal! #line:0901fb2
+    <<jump Start>>
+This line was added. #line:a1b2c3
+===
+title: Exit
+tags: 
+colorID: 0
+position: 0,0
+--- 
+===

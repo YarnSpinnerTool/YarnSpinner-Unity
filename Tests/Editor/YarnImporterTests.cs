@@ -12,92 +12,45 @@ namespace Yarn.Unity.Tests
 {
     public class YarnImporterTests
     {
+
+        private static DefaultAsset GetFolder(string directoryName) {
+            var path = AssetDatabase.FindAssets(Path.GetFileNameWithoutExtension(directoryName) + " t:DefaultAsset")
+                                    .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
+                                    .FirstOrDefault(path => Path.GetFileName(path) == directoryName);
+
+            if (path == null) {
+                throw new DirectoryNotFoundException(path);
+            }                    
+            if (Directory.Exists(path) == false) {
+                throw new DirectoryNotFoundException(path);
+            }
+
+            return AssetDatabase.LoadAssetAtPath<DefaultAsset>(path);
+         }
+        
+        private static TextAsset GetScriptSource(string fileName) {
+            var path = AssetDatabase.FindAssets(Path.GetFileNameWithoutExtension(fileName))
+                                    .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
+                                    .FirstOrDefault(path => Path.GetFileName(path) == fileName);
+
+            if (path == null) {
+                throw new FileNotFoundException(path);
+            }
+
+            Debug.Log($"Resolved {fileName} to {path}");
+
+            return AssetDatabase.LoadAssetAtPath<TextAsset>(path);
+        }
+
         // A sample Yarn script that we'll store in an asset as part of
         // these tests
-        private const string TestYarnScriptSource = @"title: Start
-tags:
-colorID: 0
-position: 0,0
---- 
-Spieler: Kannst du mich hören? #line:0e3dc4b
-NPC: Klar und deutlich. #line:0967160
--> Mir reicht es. #line:04e806e
-    <<jump Exit>>
--> Nochmal! #line:0901fb2
-    <<jump Start>>
-===
-title: Exit
-tags: 
-colorID: 0
-position: 0,0
---- 
-===";
+        private static string TestYarnScriptSource => GetScriptSource("TestYarnScript.yarn").text;
 
-        private const string TestYarnProgramSource = @"title: YarnProgram
----
-===";
+        private static string TestYarnProgramSource => GetScriptSource("TestYarnProject.yarnproject").text;
+        
+        private static string TestYarnScriptSourceModified => GetScriptSource("TestYarnScript-Modified.yarn").text;
 
-        // A modified version of TestYarnScriptSource, with the following
-        // changes:
-        // - A line has been added
-        // - A line has been modified
-        // - A line has been removed
-        private const string TestYarnScriptSourceModified = @"title: Start
-tags:
-colorID: 0
-position: 0,0
---- 
-Spieler: Kannst du mich hören? This line was modified. #line:0e3dc4b
--> Mir reicht es. #line:04e806e
-    <<jump Exit>>
--> Nochmal! #line:0901fb2
-    <<jump Start>>
-This line was added. #line:a1b2c3
-===
-title: Exit
-tags: 
-colorID: 0
-position: 0,0
---- 
-===";
-
-        private static List<StringTableEntry> GetExpectedStrings(string fileName = "input")
-        {
-            return new List<StringTableEntry>() {
-                new StringTableEntry {
-                    Language = null,
-                    ID = "line:0e3dc4b",
-                    Text = "Spieler: Kannst du mich hören?",
-                    File = fileName,
-                    Node = "Start",
-                    LineNumber = "6",
-                },
-                new StringTableEntry {
-                    Language = null,
-                    ID = "line:0967160",
-                    Text = "NPC: Klar und deutlich.",
-                    File = fileName,
-                    Node = "Start",
-                    LineNumber = "7",
-                },
-                new StringTableEntry {
-                    Language = null,
-                    ID = "line:04e806e",
-                    Text = "Mir reicht es.",
-                    File = fileName,
-                    Node = "Start",
-                    LineNumber = "8",
-                },
-                new StringTableEntry {
-                    Language = null,
-                    ID = "line:0901fb2",
-                    Text = "Nochmal!",
-                    File = fileName,
-                    Node = "Start",
-                    LineNumber = "9",
-                }
-            };
-        }
+        private static IEnumerable<StringTableEntry> ExpectedStrings => StringTableEntry.ParseFromCSV(GetScriptSource("TestYarnProject-Strings.csv").text);
 
         // The files that a test created, stored as paths. These files are
         // deleted in TearDown.
@@ -306,7 +259,7 @@ But not all of them are.
             // Simplify the results so that we can compare these string
             // table entries based only on specific fields
             System.Func<StringTableEntry, (string id, string text)> simplifier = e => (id: e.ID, text: e.Text);
-            var simpleExpected = GetExpectedStrings().Select(simplifier);
+            var simpleExpected = ExpectedStrings.Select(simplifier);
             var simpleResult = generatedStringsTable.Select(simplifier);
 
             // Assert:
@@ -328,8 +281,9 @@ But not all of them are.
             // localizations. The base localization contains the expected
             // line IDs.
             Assert.IsNotNull(project.baseLocalization);
-            CollectionAssert.AreEquivalent(project.baseLocalization.GetLineIDs(), GetExpectedStrings().Select(l => l.ID));
-            Assert.IsEmpty(project.localizations);
+            Assert.AreEqual(1, project.localizations.Count());
+            Assert.AreSame(project.baseLocalization, project.localizations[0]);
+            CollectionAssert.AreEquivalent(project.baseLocalization.GetLineIDs(), ExpectedStrings.Select(l => l.ID));            
         }
 
         [Test]
@@ -359,7 +313,7 @@ But not all of them are.
             Assert.IsNotNull(project.baseLocalization);
             Assert.IsNotEmpty(project.localizations);
             Assert.AreEqual("test", project.localizations[0].LocaleCode);
-            CollectionAssert.AreEquivalent(project.localizations[0].GetLineIDs(), GetExpectedStrings().Select(l => l.ID));
+            CollectionAssert.AreEquivalent(project.localizations[0].GetLineIDs(), ExpectedStrings.Select(l => l.ID));
         }        
 
         [Test]
