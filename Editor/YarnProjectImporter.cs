@@ -360,6 +360,8 @@ namespace Yarn.Unity
 
                 project.baseLocalization = developmentLocalization;
 
+                project.localizations.Add(project.baseLocalization);
+
                 developmentLocalization.name = $"Default ({defaultLanguage})";
 
                 ctx.AddObjectToAsset("default-language", developmentLocalization);
@@ -511,7 +513,7 @@ namespace Yarn.Unity
             IEnumerable<StringTableEntry> stringTableEntries = compilationResult.StringTable.Select(x => new StringTableEntry
             {
                 ID = x.Key,
-                Language = null,
+                Language = defaultLanguage,
                 Text = x.Value.text,
                 File = x.Value.fileName,
                 Node = x.Value.nodeName,
