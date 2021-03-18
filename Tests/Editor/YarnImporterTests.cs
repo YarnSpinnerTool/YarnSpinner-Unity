@@ -399,22 +399,199 @@ But not all of them are.
 
         [Test]
         public void YarnProjectImporter_OnNoLocalizationsSupplied_GeneratesExpectedLocalizations() {
-            throw new System.NotImplementedException();
+            
+            // Arrange: 
+            // A project with a yarn script, configured with a known
+            // default language.
+            const string defaultLanguage = "de";
+            const string otherLanguage = "en";
+            
+            var project = SetUpProject(YarnImporterTests.TestYarnScriptSource);
+
+            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
+
+            importer.defaultLanguage = defaultLanguage;
+
+            // Act: 
+            // No further steps are taken besides re-importing it.
+            EditorUtility.SetDirty(importer);
+            importer.SaveAndReimport();
+
+            // Assert:
+            // A single localization exists, with the default language.
+            Assert.AreEqual(1, project.localizations.Count);
+            Assert.AreSame(project.baseLocalization, project.localizations.First());
+
+            Assert.NotNull(project.baseLocalization);
+            
+            var allAssetsAtPath = AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(project));
+
+            // Two assets: the project, and the localization
+            Assert.AreEqual(2, allAssetsAtPath.Count())
+            ;
+            // The localizations that were imported are the same as the
+            // localizations the asset knows about
+            Assert.AreSame(project.baseLocalization, allAssetsAtPath.OfType<Localization>().First());
         }
 
         [Test]
         public void YarnProjectImporter_OnLocalizationsSuppliedButNotDefaultLanguage_GeneratesExpectedLocalizations() {
-            throw new System.NotImplementedException();
+            // Arrange: 
+            // A project with a yarn script, configured with a known
+            // default language.
+            const string defaultLanguage = "de";
+            const string otherLanguage = "en";
+            
+            var project = SetUpProject(YarnImporterTests.TestYarnScriptSource);
+
+            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
+
+            importer.defaultLanguage = defaultLanguage;
+
+            // Act:
+            // Configure this importer to have a localization that:
+            // - is not the same language as the default language" 
+            // - has a strings file
+            importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset {
+                languageID = otherLanguage,
+                stringsFile = GetScriptSource("TestYarnProject-Strings.csv")
+            });
+
+            EditorUtility.SetDirty(importer);
+            importer.SaveAndReimport();
+
+            // Assert:
+            // Two localizations exist: one for the default localization,
+            // and one for the additional language. Because we didn't
+            // define a localization for the default language, an
+            // 'implicit' localization was created. Both contain the same
+            // lines.
+            Assert.AreEqual(2, project.localizations.Count);
+
+            var defaultLocalization = project.localizations.First(l => l.LocaleCode == defaultLanguage);
+            var otherLocalization = project.localizations.First(l => l.LocaleCode == otherLanguage);
+
+            Assert.NotNull(defaultLocalization);
+            Assert.NotNull(otherLocalization);
+
+            Assert.AreNotSame(defaultLocalization, otherLocalization);
+            Assert.AreSame(defaultLocalization, project.baseLocalization);
+
+            CollectionAssert.AreEquivalent(defaultLocalization.GetLineIDs(), otherLocalization.GetLineIDs());
+
+            var allAssetsAtPath = AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(project));
+
+            // Three assets: the project, and the two localizations
+            Assert.AreEqual(3, allAssetsAtPath.Count());
+            // The localizations that were imported are the same as the
+            // localizations the asset knows about
+            CollectionAssert.AreEquivalent(project.localizations, allAssetsAtPath.OfType<Localization>());
         }
 
         [Test]
         public void YarnProjectImporter_OnLocalizationsSuppliedIncludingDefaultLanguage_GeneratesExpectedLocalizations() {
-            throw new System.NotImplementedException();
+            // Arrange: 
+            // A project with a yarn script, configured with a known
+            // default language.
+            const string defaultLanguage = "de";
+            const string otherLanguage = "en";
+            
+            var project = SetUpProject(YarnImporterTests.TestYarnScriptSource);
+
+            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
+
+            importer.defaultLanguage = defaultLanguage;
+
+            // Act:
+            // Configure this importer to have two localizations.
+            // - One that:
+            //    - is not the same language as the default language" 
+            //    - has a strings file
+            // - One that:
+            //    - is the same language as the default language" (and
+            //      therefore needs no strings file)
+
+            importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset {
+                languageID = defaultLanguage,                
+            });
+
+            importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset {
+                languageID = otherLanguage,
+                stringsFile = GetScriptSource("TestYarnProject-Strings.csv")
+            });
+
+            EditorUtility.SetDirty(importer);
+            importer.SaveAndReimport();
+
+            // Assert: 
+            // Two localizations exist: one for the default languageg, and
+            // one for the other language. They contain the same lines. We
+            // defined two translations, but one of them was the same
+            // language as the default, so an implicit "default"
+            // localization didn't need to be generated.
+            Assert.AreEqual(2, project.localizations.Count);
+
+            var defaultLocalization = project.localizations.First(l => l.LocaleCode == defaultLanguage);
+            var otherLocalization = project.localizations.First(l => l.LocaleCode == otherLanguage);
+
+            Assert.NotNull(defaultLocalization);
+            Assert.NotNull(otherLocalization);
+
+            Assert.AreNotSame(defaultLocalization, otherLocalization);
+            Assert.AreSame(defaultLocalization, project.baseLocalization);
+
+            CollectionAssert.AreEquivalent(defaultLocalization.GetLineIDs(), otherLocalization.GetLineIDs());
+
+            var allAssetsAtPath = AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(project));
+
+            // Three assets: the project, and the two localizations
+            Assert.AreEqual(3, allAssetsAtPath.Count());
+            // The localizations that were imported are the same as the
+            // localizations the asset knows about
+            CollectionAssert.AreEquivalent(project.localizations, allAssetsAtPath.OfType<Localization>());
         }
 
         [Test]
         public void YarnProjectImporter_OnLocalizationsConfigured_LocatesAssets() {
-            throw new System.NotImplementedException();
+
+            // Arrange: 
+            // A project with a yarn script, configured with a known
+            // default language.
+            const string defaultLanguage = "de";
+            
+            var project = SetUpProject(YarnImporterTests.TestYarnScriptSource);
+
+            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
+
+            importer.defaultLanguage = defaultLanguage;
+
+            // Act:
+            // Configure this importer to have a localization that:
+            // - is the same language as the default language" (and
+            //   therefore has no strings file)
+            // - has an assets folder to pull from
+            importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset {
+                languageID = defaultLanguage,
+                assetsFolder = GetFolder("Editor Test Resources"),
+            });
+
+            EditorUtility.SetDirty(importer);
+            importer.SaveAndReimport();
+            
+            // Assert:
+            // A single localization exists that contains the loaded assets.
+            
+            Assert.AreEqual(1, project.localizations.Count);
+
+            Localization localization = project.localizations[0];
+            IEnumerable<AudioClip> allAudioClips = localization.GetLineIDs()
+                                                               .Select(id => localization.GetLocalizedObject<AudioClip>(id));
+
+            Assert.AreEqual(defaultLanguage, localization.LocaleCode);
+            CollectionAssert.AreEquivalent(ExpectedStrings.Select(l => l.ID), localization.GetLineIDs());
+            Assert.AreEqual(ExpectedStrings.Count(), allAudioClips.Count());
+            CollectionAssert.AllItemsAreNotNull(allAudioClips);
+            CollectionAssert.AllItemsAreUnique(allAudioClips);
         }
         
 
