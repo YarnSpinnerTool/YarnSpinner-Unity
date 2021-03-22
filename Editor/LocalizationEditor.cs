@@ -4,7 +4,8 @@ using Yarn.Unity;
 using System.Linq;
 using System.Collections.Generic;
 
-#if ADDRESSABLES
+#if USE_ADDRESSABLES
+using UnityEngine.AddressableAssets;
 using UnityEditor.AddressableAssets;
 #endif
 
@@ -85,6 +86,10 @@ public class LocalizationEditor : Editor
 
         var anyAssetsFound = false;
 
+        #if USE_ADDRESSABLES
+        var allAddressEntries = AddressableAssetSettingsDefaultObject.Settings.groups.SelectMany(g => g.entries).ToDictionary(e => e.address);
+        #endif
+
         foreach (var key in lineKeys)
         {
 
@@ -95,17 +100,13 @@ public class LocalizationEditor : Editor
             // Get the localized text for this line.
             entry.text = target.GetLocalizedString(key);
 
-            if (ProjectSettings.AddressableVoiceOverAudioClips)
-            {
-#if ADDRESSABLES
-                if (target.ContainsLocalizedObjectAddress(key)) {
-                    var address = target.GetLocalizedObjectAddress(key);
+            if (target.ContainsLocalizedAssets && target.UsesAddressableAssets) {
+#if USE_ADDRESSABLES
+                string address = Localization.GetAddressForLine(key, target.LocaleCode);
 
-                    var asset = AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(address.AssetGUID));
-
-                    entry.asset = asset;
-
-                    anyAssetsFound = true;                        
+                if (allAddressEntries.TryGetValue(address, out var addressableAssetEntry)) {
+                    entry.asset = AssetDatabase.LoadAssetAtPath<Object>(addressableAssetEntry.AssetPath);
+                    anyAssetsFound = true;                
                 }
 #endif
             }

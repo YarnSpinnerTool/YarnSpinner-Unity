@@ -18,10 +18,12 @@ ScriptedImporter:
   - {fileID: 4900002, guid: 8145c244bd6668a44b6a1aed4910a096, type: 3}
   compileError: 
   serializedDeclarations: []
+  defaultLanguage: de
   languagesToSourceAssets:
   - languageID: de
-    stringsAsset: {fileID: 4900000, guid: eb9d8d8a260ba4f01aba01c3e85f0060, type: 3}
+    stringsFile: {fileID: 4900000, guid: eb9d8d8a260ba4f01aba01c3e85f0060, type: 3}
     assetsFolder: {fileID: 102900000, guid: 039e7cc69a9756041bd31eb499a17a17, type: 3}
   - languageID: en
-    stringsAsset: {fileID: 4900000, guid: b5c9c0c15d0507b4b8b2f22fe9537a80, type: 3}
+    stringsFile: {fileID: 4900000, guid: b5c9c0c15d0507b4b8b2f22fe9537a80, type: 3}
     assetsFolder: {fileID: 102900000, guid: 3a460b8afa6ce6c4985969315a2c331e, type: 3}
+  useAddressableAssets: 1

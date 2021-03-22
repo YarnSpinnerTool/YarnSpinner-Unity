@@ -77,8 +77,8 @@ namespace Yarn.Unity
             // stored in the YarnProjectImporterEditor class's
             // CurrentProjectDefaultLanguageProperty.
             [HideWhenPropertyValueEqualsContext(
-                "languageID", 
-                typeof(YarnProjectImporterEditor), 
+                "languageID",
+                typeof(YarnProjectImporterEditor),
                 nameof(YarnProjectImporterEditor.CurrentProjectDefaultLanguageProperty),
                 "Automatically included"
                 )]
@@ -101,6 +101,8 @@ namespace Yarn.Unity
         public string defaultLanguage = System.Globalization.CultureInfo.CurrentCulture.Name;
 
         public List<LanguageToSourceAsset> languagesToSourceAssets;
+
+        public bool useAddressableAssets;
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
@@ -271,7 +273,8 @@ namespace Yarn.Unity
                 {
                     try
                     {
-                        if (pair.stringsFile == null) {
+                        if (pair.stringsFile == null)
+                        {
                             // We can't create this localization because we
                             // don't have any data for it.
                             Debug.LogWarning($"Not creating a localization for {pair.languageID} in the Yarn Project {project.name} because a text asset containing the strings wasn't found. Add a .csv file containing the translated lines to the Yarn Project's inspector.");
@@ -306,38 +309,73 @@ namespace Yarn.Unity
                     }
                     else
                     {
-                        var stringIDsToAssets = FindAssetsForLineIDs(stringTable.Select(s => s.ID), assetsFolderPath);
+                        newLocalization.ContainsLocalizedAssets = true;
 
-#if YARNSPINNER_DEBUG
-                        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+#if USE_ADDRESSABLES
+                        const bool addressablesAvailable = true;
+#else
+                        const bool addressablesAvailable = false;
 #endif
 
-                        newLocalization.AddLocalizedObjects(stringIDsToAssets.AsEnumerable());
+                        if (addressablesAvailable && useAddressableAssets)
+                        {
+                            // We only need to flag that the assets
+                            // required by this localization are accessed
+                            // via the Addressables system. (Call
+                            // YarnProjectUtility.UpdateAssetAddresses to
+                            // ensure that the appropriate assets have the
+                            // appropriate addresses.)
+                            newLocalization.UsesAddressableAssets = true;                            
+                        }
+                        else
+                        {
+                            // We need to find the assets used by this
+                            // localization now, and assign them to the
+                            // Localization object.
+#if YARNSPINNER_DEBUG
+                            // This can take some time, so we'll measure
+                            // how long it takes.
+                            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+#endif
+
+                            // Get the line IDs.
+                            IEnumerable<string> lineIDs = stringTable.Select(s => s.ID);
+
+                            // Map each line ID to its asset path.
+                            var stringIDsToAssetPaths = YarnProjectUtility.FindAssetPathsForLineIDs(lineIDs, assetsFolderPath);
+
+                            // Load the asset, so we can assign the reference.
+                            var assetPaths = stringIDsToAssetPaths
+                                .Select(a => new KeyValuePair<string, Object>(a.Key, AssetDatabase.LoadAssetAtPath<Object>(a.Value)));
+
+                            newLocalization.AddLocalizedObjects(assetPaths);
 
 #if YARNSPINNER_DEBUG
-                        stopwatch.Stop();
-                        Debug.Log($"Imported {stringIDsToAssets.Count()} assets for {project.name} \"{pair.languageID}\" in {stopwatch.ElapsedMilliseconds}ms");
+                            stopwatch.Stop();
+                            Debug.Log($"Imported {stringIDsToAssetPaths.Count()} assets for {project.name} \"{pair.languageID}\" in {stopwatch.ElapsedMilliseconds}ms");
 #endif
+                        }
                     }
                 }
 
                 ctx.AddObjectToAsset("localization-" + pair.languageID, newLocalization);
 
-
-                if (pair.languageID == defaultLanguage) {
+                if (pair.languageID == defaultLanguage)
+                {
                     // If this is our default language, set it as such
                     project.baseLocalization = newLocalization;
-                } else {
+                }
+                else
+                {
                     // This localization depends upon a source asset. Make
                     // this asset get re-imported if this source asset was
                     // modified
                     ctx.DependsOnSourceAsset(AssetDatabase.GetAssetPath(pair.stringsFile));
                 }
-
-
             }
 
-            if (shouldAddDefaultLocalization) {
+            if (shouldAddDefaultLocalization)
+            {
                 // We didn't add a localization for the default language.
                 // Create one for it now.
 
@@ -386,44 +424,6 @@ namespace Yarn.Unity
             UnityEngine.Profiling.Profiler.enabled = false;
 #endif
 
-        }
-
-        private static Dictionary<string, Object> FindAssetsForLineIDs(IEnumerable<string> lineIDs, string assetsFolderPath)
-        {
-            // Find _all_ files in this director that are not .meta files
-            var allFiles = Directory.EnumerateFiles(assetsFolderPath, "*", SearchOption.AllDirectories)
-                .Where(path => path.EndsWith(".meta") == false);
-
-            // Match files with those whose filenames contain a line ID
-            var matchedFilesAndPaths = lineIDs.GroupJoin(
-                // the elements we're matching lineIDs to
-                allFiles,
-                // the key for lineIDs (being strings, it's just the line
-                // ID itself)
-                lineID => lineID,
-                // the key for assets (the filename without the path)
-                assetPath => Path.GetFileName(assetPath),
-                // the way we produce the result (a key-value pair)
-                (lineID, assetPaths) =>
-                {
-                    if (assetPaths.Count() > 1)
-                    {
-                        Debug.LogWarning($"Line {lineID} has {assetPaths.Count()} possible assets.\n{string.Join(", ", assetPaths)}");
-                    }
-                    return new { lineID, assetPaths };
-                },
-                // the way we test to see if two elements should be joined
-                // (does the filename contain the line ID?)
-                Compare.By<string>((fileName, lineID) =>
-                {
-                    var lineIDWithoutPrefix = lineID.Replace("line:", "");
-                    return fileName.Contains(lineIDWithoutPrefix);
-                })
-                )
-                .ToDictionary(entry => entry.lineID, entry => AssetDatabase.LoadAssetAtPath<Object>(entry.assetPaths.FirstOrDefault()));
-
-
-            return matchedFilesAndPaths;
         }
 
         /// <summary>

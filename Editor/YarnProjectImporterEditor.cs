@@ -13,6 +13,10 @@ using UnityEditorInternal;
 using System.Collections;
 using System.Reflection;
 
+#if USE_ADDRESSABLES
+using UnityEditor.AddressableAssets;
+#endif
+
 namespace Yarn.Unity
 {
     [CustomEditor(typeof(YarnProjectImporter))]
@@ -27,6 +31,7 @@ namespace Yarn.Unity
         private SerializedProperty defaultLanguageProperty;
         private SerializedProperty sourceScriptsProperty;
         private SerializedProperty languagesToSourceAssetsProperty;
+        private SerializedProperty useAddressableAssetsProperty;
 
         private ReorderableDeclarationsList serializedDeclarationsList;
 
@@ -39,6 +44,8 @@ namespace Yarn.Unity
 
             defaultLanguageProperty = serializedObject.FindProperty("defaultLanguage");
             languagesToSourceAssetsProperty = serializedObject.FindProperty("languagesToSourceAssets");
+
+            useAddressableAssetsProperty = serializedObject.FindProperty("useAddressableAssets");
 
             serializedDeclarationsList = new ReorderableDeclarationsList(serializedObject, serializedDeclarationsProperty);
         }
@@ -79,6 +86,7 @@ namespace Yarn.Unity
             // exceptions might get thrown, which we'll catch and log (if
             // we're in debug mode).
             bool canGenerateStringsTable;
+
             try
             {
                 canGenerateStringsTable = yarnProjectImporter.CanGenerateStringsTable;
@@ -91,8 +99,41 @@ namespace Yarn.Unity
                 canGenerateStringsTable = false;
             }
 
+            // The following controls only do something useful if all of
+            // the lines in the project have tags, which means the project
+            // can generate a string table.
             using (new EditorGUI.DisabledScope(canGenerateStringsTable == false))
             {
+#if USE_ADDRESSABLES
+                
+                // If the addressable assets package is available, show a
+                // checkbox for using it.
+                var hasAnySourceAssetFolders = yarnProjectImporter.languagesToSourceAssets.Any(l => l.assetsFolder != null);
+                if (hasAnySourceAssetFolders == false) {
+                    // Disable this checkbox if there are no assets available.
+                    using (new EditorGUI.DisabledScope(true)) {
+                        EditorGUILayout.Toggle(useAddressableAssetsProperty.displayName, false);
+                    }
+                } else {
+                    EditorGUILayout.PropertyField(useAddressableAssetsProperty);
+
+                    // Show a warning if we've requested addressables but
+                    // haven't set it up.
+                    if (useAddressableAssetsProperty.boolValue && AddressableAssetSettingsDefaultObject.SettingsExists == false) {
+                        EditorGUILayout.HelpBox("Please set up Addressable Assets in this project.", MessageType.Warning);
+                    }
+                }
+
+                // Add a button for updating asset addresses, if any asset
+                // source folders exist
+                if (useAddressableAssetsProperty.boolValue && AddressableAssetSettingsDefaultObject.SettingsExists) {
+                    using (new EditorGUI.DisabledScope(hasAnySourceAssetFolders == false)) {
+                        if (GUILayout.Button($"Update Asset Addresses")) {
+                            YarnProjectUtility.UpdateAssetAddresses(yarnProjectImporter);
+                        }
+                    }
+                } 
+#endif
                 if (GUILayout.Button("Export Strings as CSV"))
                 {
                     var currentPath = AssetDatabase.GetAssetPath(serializedObject.targetObject);
@@ -126,6 +167,8 @@ namespace Yarn.Unity
             // haven't dragged an asset in yet.)
             var hasAnyTextAssets = yarnProjectImporter.sourceScripts.Where(s => s != null).Count() > 0;
 
+            // Disable this button if 1. all lines already have tags or 2.
+            // no actual source files exist
             using (new EditorGUI.DisabledScope(canGenerateStringsTable == true || hasAnyTextAssets == false))
             {
                 if (GUILayout.Button("Add Line Tags to Scripts"))
@@ -135,11 +178,6 @@ namespace Yarn.Unity
             }
 
             var hadChanges = serializedObject.ApplyModifiedProperties();
-
-            if (hadChanges)
-            {
-                Debug.Log($"{nameof(YarnProjectImporterEditor)} had changes");
-            }
 
 #if UNITY_2018
             // Unity 2018's ApplyRevertGUI is buggy, and doesn't

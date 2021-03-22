@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using Yarn.Unity;
 
-#if ADDRESSABLES
+#if USE_ADDRESSABLES
 using UnityEditor.AddressableAssets;
 #endif
 
@@ -214,7 +214,7 @@ internal static class LineDatabaseUtility {
 
         if (ProjectSettings.AddressableVoiceOverAudioClips)
         {
-#if ADDRESSABLES
+#if USE_ADDRESSABLES
             // Add the asset reference
             AddAddressableAssetReferenceToLocalization(localization, entry, assetGUID);
 #else
@@ -229,7 +229,7 @@ internal static class LineDatabaseUtility {
         }
     }
 
-#if ADDRESSABLES
+#if USE_ADDRESSABLES
     private static void AddAddressableAssetReferenceToLocalization(Localization localization, StringTableEntry entry, string assetGUID)
     {
         if (AddressableAssetSettingsDefaultObject.SettingsExists == false)

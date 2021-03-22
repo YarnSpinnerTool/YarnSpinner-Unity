@@ -59,12 +59,6 @@ namespace Yarn.Unity.Tests
         // deleted in TearDown.
         List<string> createdFilePaths = new List<string>();
 
-        // Gets a locale code for a language that is not the current base.
-
-        private string AlternateLocaleCode =>
-                    new string[] { "en", "de", "zh-cn" } // some languages
-                    .First(s => s != Preferences.TextLanguage); // that are not the current one
-
         [SetUp]
         public void Setup()
         {

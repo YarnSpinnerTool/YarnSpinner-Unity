@@ -38,3 +38,4 @@ ScriptedImporter:
   - languageID: de
     stringsFile: {fileID: 4900000, guid: c7ccc37b05d57b5449cdae7c315d1646, type: 3}
     assetsFolder: {fileID: 102900000, guid: 7ff8e9b3304254b479fd8264873f64d4, type: 3}
+  useAddressableAssets: 1

@@ -384,7 +384,7 @@ PrefabInstance:
     - target: {fileID: 5935829475398715329, guid: 4ec3df5875e7347beb6176b545b8fb39, type: 3}
       propertyPath: lineProvider
       value: 
-      objectReference: {fileID: 2086818864}
+      objectReference: {fileID: 2086818860}
     - target: {fileID: 5935829475398715329, guid: 4ec3df5875e7347beb6176b545b8fb39, type: 3}
       propertyPath: _voiceOverPlayback
       value: 
@@ -548,7 +548,7 @@ MonoBehaviour:
   waitTimeBeforeLineStart: 0
   waitTimeAfterLineComplete: 0
   audioSource: {fileID: 0}
---- !u!114 &2086818864
+--- !u!114 &2086818860
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -557,8 +557,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 2086818858}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3eecab994ec244f02810459f368074ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 6b6798449caec4a32a5ad27badb06624, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textLanguageCodeOverride: en
-  audioLanguageCodeOverride: de
+  textLanguageCode: en
+  audioLanguage: en

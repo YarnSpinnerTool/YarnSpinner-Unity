@@ -18,13 +18,11 @@ namespace Yarn.Unity
         Dictionary<string, Object> idsToTexts = new Dictionary<string, Object>();
         private bool _showTextUiComponents = true;
         private const string _textUiComponentsLabel = "Text UI Components";
-        private string _lastLanguageId = default;
         private GUIStyle _headerStyle;
 
         private void OnEnable()
         {
             _headerStyle = new GUIStyle() { fontStyle = FontStyle.Bold };
-            _lastLanguageId = Preferences.TextLanguage;
 
             _yarnProgramProperty = serializedObject.FindProperty("yarnProject");
 
@@ -144,8 +142,7 @@ namespace Yarn.Unity
                             string key = keyProperty.stringValue;
 
                             // Retrieve the localized text
-                            var localisedText = (_yarnProgramProperty.objectReferenceValue as YarnProject).GetLocalization(Preferences.TextLanguage)?.GetLocalizedString(key) ?? $"<no localization for '{Preferences.TextLanguage}'>";
-
+                            var localisedText = (_yarnProgramProperty.objectReferenceValue as YarnProject).baseLocalization.GetLocalizedString(key);
 
                             GUIContent label = new GUIContent()
                             {

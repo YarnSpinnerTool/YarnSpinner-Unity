@@ -11,6 +11,17 @@ namespace Yarn.Unity
 
     public class Localization : ScriptableObject
     {
+        /// <summary>
+        /// Returns the address that should be used to fetch an asset
+        /// suitable for a specific line in a specific language.
+        /// </summary>
+        /// <param name="lineID">The line ID to use when generating the address.</param>
+        /// <param name="language">The language to use when generating the address.</param>
+        /// <returns>The address to use.</returns>
+        internal static string GetAddressForLine(string lineID, string language) {
+            return $"line_{language}_{lineID.Replace("line:", "")}";
+        }
+
         public string LocaleCode { get => _LocaleCode; set => _LocaleCode = value; }
 
         [SerializeField] private string _LocaleCode;
@@ -26,14 +37,15 @@ namespace Yarn.Unity
 
         private Dictionary<string, string> _runtimeStringTable = new Dictionary<string, string>();
 
+        public bool ContainsLocalizedAssets { get => _containsLocalizedAssets; internal set => _containsLocalizedAssets = value; }
+        
+        public bool UsesAddressableAssets { get => _usesAddressableAssets; internal set => _usesAddressableAssets = value; }
 
-#if ADDRESSABLES
-        [System.Serializable]
-        class AddressDictionary : SerializedDictionary<string, UnityEngine.AddressableAssets.AssetReference> { }
+        [SerializeField]
+        private bool _containsLocalizedAssets;
 
-        [SerializeField] private AddressDictionary _addressTable = new AddressDictionary();
-#endif
-
+        [SerializeField]
+        private bool _usesAddressableAssets;
 
         #region Localized Strings
         public string GetLocalizedString(string key)
@@ -88,6 +100,10 @@ namespace Yarn.Unity
 
         public T GetLocalizedObject<T>(string key) where T : UnityEngine.Object
         {
+            if (_usesAddressableAssets) {
+                Debug.LogWarning($"Localization {name} uses addressable assets. Use the Addressable Assets API to load the asset.");
+            }
+
             _assetTable.TryGetValue(key, out var result);
 
             if (result is T resultAsTargetObject)
@@ -95,11 +111,6 @@ namespace Yarn.Unity
                 return resultAsTargetObject;
             }
 
-#if ADDRESSABLES
-            if (_addressTable.ContainsKey(key)) {
-                Debug.LogError($"Localization {this.name} failed to find an asset for line {key}, but a value was found in the addressable references table. Double check your project's Use Addressables setting, or if it's correct, update the Line Database.", this);
-            }
-#endif
             return null;
         }
 
@@ -118,47 +129,11 @@ namespace Yarn.Unity
         }
         #endregion
 
-#if ADDRESSABLES
-        #region Localized Addresses
-
-        public UnityEngine.AddressableAssets.AssetReference GetLocalizedObjectAddress(string key)
-        {
-            _addressTable.TryGetValue(key, out var result);
-
-            if (result != null && _assetTable.ContainsKey(key))
-            {
-                Debug.LogError($"Localization {this.name} failed to find an address for line {key}, but a value was found in the direct references table. Double check your project's Use Addressables setting, or if it's correct, update the Line Database.", this);
-            }
-
-            return result;
-        }
-
-        public void SetLocalizedObjectAddress(string key, UnityEngine.AddressableAssets.AssetReference value) => _addressTable.Add(key, value);
-
-        public bool ContainsLocalizedObjectAddress(string key) => _addressTable.ContainsKey(key);
-
-        public void AddLocalizedObjectAddress(string key, UnityEngine.AddressableAssets.AssetReference value) => _addressTable.Add(key, value);
-
-        public void AddLocalizedObjectAddresses(IEnumerable<KeyValuePair<string, UnityEngine.AddressableAssets.AssetReference>> objects)
-        {
-
-            foreach (var entry in objects)
-            {
-                _addressTable.Add(entry.Key, entry.Value);
-            }
-        }
-
-        #endregion
-#endif
-
         public virtual void Clear()
         {
             _stringTable.Clear();
             _assetTable.Clear();
             _runtimeStringTable.Clear();
-#if ADDRESSABLES
-            _addressTable.Clear();
-#endif
         }
 
         /// <summary>

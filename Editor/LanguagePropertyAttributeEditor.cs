@@ -28,23 +28,25 @@ namespace Yarn.Unity
 
             int currentCultureIndex;
 
-            if (culturesToIndicies.ContainsKey(value)) {
-                // The property doesn't contain a valid culture name.
-                // Default it to the current locale, and also update the property so that it
-                // value = System.Globalization.CultureInfo.CurrentCulture.Name;
-                // property.stringValue = value;
-                currentCultureIndex = culturesToIndicies[value];                
-            } else {
+            if (culturesToIndicies.ContainsKey(value))
+            {
+                currentCultureIndex = culturesToIndicies[value];
+            }
+            else
+            {
+                // The property doesn't contain a valid culture name. Show
+                // an 'empty' value, which will be replaced when the user
+                // selects a valid value from the dropdown.                
                 currentCultureIndex = -1;
             }
 
-            
             var allCultureDisplayNames = allCultures.Select(c => c.DisplayName).Select(n => new GUIContent(n)).ToArray();
 
             using (var changeCheck = new EditorGUI.ChangeCheckScope())
             {
                 var selectedIndex = EditorGUI.Popup(position, label, currentCultureIndex, allCultureDisplayNames);
-                if (changeCheck.changed) {
+                if (changeCheck.changed)
+                {
                     property.stringValue = allCultures[selectedIndex].Name;
                 }
             }

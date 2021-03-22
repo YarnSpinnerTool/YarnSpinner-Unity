@@ -10533,7 +10533,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bec29c0a230741bdac901dba8da47ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  yarnProject: {fileID: 7545569452688597077, guid: 8a1d961a5e8174346a106050a88b7033, type: 3}
+  yarnProject: {fileID: 7545569452688597077, guid: 55636a520881a41289ff66b8d06e2a3f, type: 3}
   variableStorage: {fileID: 1290606830}
   dialogueViews:
   - {fileID: 1290606829}
@@ -10598,8 +10598,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b6798449caec4a32a5ad27badb06624, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textLanguageCodeOverride: en
-  audioLanguageCodeOverride: en
+  textLanguageCode: en-AU
+  audioLanguage: en-AU
 --- !u!114 &1290606835
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -10,6 +10,9 @@ namespace Yarn.Unity.Example
 {
     public class MainMenuOptions : MonoBehaviour
     {
+        private const string TextLanguageKey = "YarnSpinner_Demo_MainMenu_TextLanguage";
+        private const string AudioLanguageKey = "YarnSpinner_Demo_MainMenu_AudioLanguage";
+
         public Dropdown textLanguagesDropdown;
         public Dropdown audioLanguagesDropdown;
         public TMP_Dropdown textLanguagesTMPDropdown;
@@ -20,25 +23,30 @@ namespace Yarn.Unity.Example
         int textLanguageSelected = -1;
         int audioLanguageSelected = -1;
 
+        [SerializeField] YarnProject yarnProject;
+
+        private static string TextLanguage {
+            get {
+                return PlayerPrefs.GetString(TextLanguageKey, null);
+            }
+            set {
+                PlayerPrefs.SetString(TextLanguageKey, value);
+            }
+        }
+
+        private static string AudioLanguage {
+            get {
+                return PlayerPrefs.GetString(AudioLanguageKey, null);
+            }
+            set {
+                PlayerPrefs.SetString(AudioLanguageKey, value);
+            }
+        }
+
         private void Awake()
         {
             LoadTextLanguagesIntoDropdowns();
             LoadAudioLanguagesIntoDropdowns();
-        }
-
-        private void OnEnable()
-        {
-            Preferences.LanguagePreferencesChanged += OnLanguagePreferencesChanged;
-        }
-
-        private void OnDisable()
-        {
-            Preferences.LanguagePreferencesChanged -= OnLanguagePreferencesChanged;
-        }
-
-        public void OnLanguagePreferencesChanged(object sender, System.EventArgs e)
-        {
-            Awake();
         }
 
         public void OnValueChangedTextLanguage(int value)
@@ -69,18 +77,10 @@ namespace Yarn.Unity.Example
             {
                 var textLanguageList = new List<string>();
 
-                if (ProjectSettings.TextProjectLanguages.Count > 0) {
-                    foreach (var language in ProjectSettings.TextProjectLanguages) {
-                    var culture = Cultures.GetCulture(language);
-                    textLanguageList.Add(culture.NativeName);
+                foreach (var localization in yarnProject.localizations) {
+                    var culture = Cultures.GetCulture(localization.LocaleCode);
+                    textLanguageList.Add(culture.DisplayName);
                 }
-                } else {
-                    // If no project settings have been defined, show all available cultures
-                    foreach (var culture in Cultures.GetCultures()) {
-                        textLanguageList.Add(culture.NativeName);
-                    }
-                }
-                
 
                 PopulateLanguagesListToDropdown(textLanguageList, textLanguagesTMPDropdown, textLanguagesDropdown, ref textLanguageSelected, PreferencesSetting.TextLanguage);
             }
@@ -91,18 +91,18 @@ namespace Yarn.Unity.Example
             
             if (audioLanguagesDropdown || audioLanguagesTMPDropdown)
             {
-                var audioLanguagesList = new List<string>();
-                if (ProjectSettings.AudioProjectLanguages.Count == 0) {
-                    // If no project settings have been defined, show all available cultures                    
-                    foreach (var culture in Cultures.GetCultures()) {
-                        audioLanguagesList.Add(culture.Name);
-                    }                        
-                } else {
-                    foreach (var language in ProjectSettings.AudioProjectLanguages) {
-                        audioLanguagesList.Add(language);
+                var audioLanguageList = new List<string>();
+
+                foreach (var localization in yarnProject.localizations) {
+                    if (localization.ContainsLocalizedAssets == false) {
+                        continue;
                     }
+
+                    var culture = Cultures.GetCulture(localization.LocaleCode);
+                    audioLanguageList.Add(culture.DisplayName);
                 }
-                PopulateLanguagesListToDropdown(audioLanguagesList, audioLanguagesTMPDropdown, audioLanguagesDropdown, ref audioLanguageSelected, PreferencesSetting.AudioLanguage);
+
+                PopulateLanguagesListToDropdown(audioLanguageList, textLanguagesTMPDropdown, textLanguagesDropdown, ref textLanguageSelected, PreferencesSetting.TextLanguage);
             }
         }
 
@@ -112,10 +112,10 @@ namespace Yarn.Unity.Example
             switch (setting)
             {
                 case PreferencesSetting.TextLanguage:
-                    selectedLanguageIndex = languageList.IndexOf(Preferences.TextLanguage);
+                    selectedLanguageIndex = languageList.IndexOf(TextLanguage);
                     break;
                 case PreferencesSetting.AudioLanguage:
-                    selectedLanguageIndex = languageList.IndexOf(Preferences.AudioLanguage);
+                    selectedLanguageIndex = languageList.IndexOf(AudioLanguage);
                     break;
             }
 
@@ -164,10 +164,10 @@ namespace Yarn.Unity.Example
             switch (setting)
             {
                 case PreferencesSetting.TextLanguage:
-                    Preferences.TextLanguage = language;
+                    TextLanguage = language;
                     break;
                 case PreferencesSetting.AudioLanguage:
-                    Preferences.AudioLanguage = language;
+                    AudioLanguage = language;
                     break;
             }
             

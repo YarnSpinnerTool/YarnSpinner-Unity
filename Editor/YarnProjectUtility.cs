@@ -5,6 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Yarn.Unity;
 
+#if USE_ADDRESSABLES
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
+#endif
+
 namespace Yarn.Unity
 {
     /// <summary>
@@ -152,6 +157,88 @@ namespace Yarn.Unity
                                 .ThenBy(entry => int.Parse(entry.LineNumber));
         }
 
+        internal static void UpdateAssetAddresses(YarnProjectImporter importer)
+        {
+#if USE_ADDRESSABLES
+            var lineIDs = importer.GenerateStringsTable().Select(s => s.ID);
+
+            // Get a map of language IDs to (lineID, asset path) pairs
+            var languageToAssets = importer
+                // Get the languages-to-source-assets map
+                .languagesToSourceAssets
+                // Get the asset folder for them
+                .Select(l => new {l.languageID, l.assetsFolder})
+                // Only consider those that have an asset folder
+                .Where(f => f.assetsFolder != null)
+                // Get the path for the asset folder
+                .Select(f => new {f.languageID, path = AssetDatabase.GetAssetPath(f.assetsFolder)})
+                // Use that to get the assets inside these folders
+                .Select(f => new {f.languageID, assetPaths = FindAssetPathsForLineIDs(lineIDs, f.path)});
+
+            var addressableAssetSettings = AddressableAssetSettingsDefaultObject.Settings;
+
+            foreach (var languageToAsset in languageToAssets) {
+                var assets = languageToAsset.assetPaths
+                    .Select(pair => new {LineID = pair.Key, GUID = AssetDatabase.AssetPathToGUID(pair.Value)});
+                
+                foreach (var asset in assets) {
+                    // Find the existing entry for this asset, if it has
+                    // one.
+                    AddressableAssetEntry entry = addressableAssetSettings.FindAssetEntry(asset.GUID);
+
+                    if (entry == null) {
+                        // This asset didn't have an entry. Create one in
+                        // the default group.
+                        entry = addressableAssetSettings.CreateOrMoveEntry(asset.GUID, addressableAssetSettings.DefaultGroup);
+                    }
+
+                    // Update the entry's address.
+                    entry.SetAddress(Localization.GetAddressForLine(asset.LineID, languageToAsset.languageID));
+                }
+            }
+#else
+            throw new System.NotSupportedException($"A method that requires the Addressable Assets package was called, but USE_ADDRESSABLES was not defined. Please either install Addressable Assets, or if you have already, add it to this project's compiler definitions.");
+#endif
+        }
+
+        internal static Dictionary<string, string> FindAssetPathsForLineIDs(IEnumerable<string> lineIDs, string assetsFolderPath)
+        {
+            // Find _all_ files in this director that are not .meta files
+            var allFiles = Directory.EnumerateFiles(assetsFolderPath, "*", SearchOption.AllDirectories)
+                .Where(path => path.EndsWith(".meta") == false);
+
+            // Match files with those whose filenames contain a line ID
+            var matchedFilesAndPaths = lineIDs.GroupJoin(
+                // the elements we're matching lineIDs to
+                allFiles,
+                // the key for lineIDs (being strings, it's just the line
+                // ID itself)
+                lineID => lineID,
+                // the key for assets (the filename without the path)
+                assetPath => Path.GetFileName(assetPath),
+                // the way we produce the result (a key-value pair)
+                (lineID, assetPaths) =>
+                {
+                    if (assetPaths.Count() > 1)
+                    {
+                        Debug.LogWarning($"Line {lineID} has {assetPaths.Count()} possible assets.\n{string.Join(", ", assetPaths)}");
+                    }
+                    return new { lineID, assetPaths };
+                },
+                // the way we test to see if two elements should be joined
+                // (does the filename contain the line ID?)
+                Compare.By<string>((fileName, lineID) =>
+                {
+                    var lineIDWithoutPrefix = lineID.Replace("line:", "");
+                    return fileName.Contains(lineIDWithoutPrefix);
+                })
+                )
+                // Discard any pair where no asset was found
+                .Where(pair => pair.assetPaths.Count() > 0)
+                .ToDictionary(entry => entry.lineID, entry => entry.assetPaths.FirstOrDefault());
+
+            return matchedFilesAndPaths;
+        }
 
         /// <summary>
         /// Verifies the TextAsset referred to by <paramref

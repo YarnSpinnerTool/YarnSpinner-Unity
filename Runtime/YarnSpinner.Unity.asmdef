@@ -1,16 +1,24 @@
 {
     "name": "YarnSpinner.Unity",
+    "rootNamespace": "",
     "references": [
         "Unity.TextMeshPro",
         "Unity.Addressables",
         "Unity.ResourceManager"
     ],
-    "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": []
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.addressables",
+            "expression": "1",
+            "define": "USE_ADDRESSABLES"
+        }
+    ],
+    "noEngineReferences": false
 }

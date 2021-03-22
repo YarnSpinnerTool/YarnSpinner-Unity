@@ -23,32 +23,10 @@ namespace Yarn.Unity
     /// </remarks>
     public abstract class LineProviderBehaviour : MonoBehaviour
     {
-        /// <summary>
-        /// The language code for the currently selected language.
-        /// </summary>
-        /// <remarks>
-        /// If <see cref="textLanguageCodeOverride"/> is not null or blank,
-        /// this method returns <see cref="textLanguageCodeOverride"/>.
-        /// Otherwise, <see cref="Preferences.TextLanguage"/> is returned.
-        /// </remarks>
-        public string CurrentTextLanguageCode
-        {
-            get
-            {
-                return string.IsNullOrWhiteSpace(textLanguageCodeOverride) ? Preferences.TextLanguage : textLanguageCodeOverride;
-            }
-        }
-
         /// <summary>Specifies the language code to use for text content
-        /// for this <see cref="LineProviderBehaviour"/>, overriding
-        /// project settings.</summary>
-        /// <remarks>
-        /// If defined, this Line Provider will ignore the current setting
-        /// in Preferences.TextLanguage and use the text language code
-        /// override instead (e.g. "en" is the code for "English")
-        /// </remarks>
-        [Tooltip("(optional) if defined, this Line Provider will use this language code instead of Preferences.TextLanguage... example: 'en' is the code for English")]
-        public string textLanguageCodeOverride;
+        /// for this <see cref="LineProviderBehaviour"/>.
+        [Language]
+        public string textLanguageCode = System.Globalization.CultureInfo.CurrentCulture.Name;
 
         /// <summary>
         /// Prepares and returns a <see cref="LocalizedLine"/> from the
@@ -67,6 +45,9 @@ namespace Yarn.Unity
         /// <summary>
         /// The YarnProject that contains the localized data for lines.
         /// </summary>
+        /// <remarks>This property is set at run-time by the object that
+        /// will be requesting content (typically a <see
+        /// cref="DialogueRunner"/>).
         public YarnProject YarnProject { get; set; }
 
         /// <summary>
@@ -74,27 +55,36 @@ namespace Yarn.Unity
         /// IDs may be presented shortly.        
         /// </summary>
         /// <remarks>
-        /// Subclasses of <see cref="LineProviderBehaviour"/> should use
+        /// Subclasses of <see cref="LineProviderBehaviour"/> can override
         /// this to prepare any neccessary resources needed to present
-        /// these lines, like pre-loading voice-over audio.
+        /// these lines, like pre-loading voice-over audio. The default
+        /// implementation does nothing.
         ///
         /// Not every line may run; this method serves as a way to give the
         /// line provider advance notice that a line _may_ run, not _will_
         /// run.
         ///
-        /// When this method is run, the <see cref="LinesAvailable"/>
-        /// property may change to false until the necessary resources have
-        /// loaded.
+        /// When this method is run, the value returned by the <see
+        /// cref="LinesAvailable"/> property should change to false until the
+        /// necessary resources have loaded.
         /// </remarks>
         /// <param name="lineIDs">A collection of line IDs that the line
         /// provider should prepare for.</param>
-        public abstract void PrepareForLines(IEnumerable<string> lineIDs);
+        public virtual void PrepareForLines(IEnumerable<string> lineIDs) {
+            // No-op by default.
+        }
 
         /// <summary>
         /// Gets a value indicating whether this line provider is ready to
-        /// provide <see cref="LocalizedLine"/> objects.
+        /// provide <see cref="LocalizedLine"/> objects. The default
+        /// implementation returns <see langword="true"/>.
         /// </summary>
-        public abstract bool LinesAvailable { get; }
+        /// <remarks>
+        /// Subclasses should return <see langword="false"/> when the
+        /// required resources needed to deliver lines are not yet ready,
+        /// and <see langword="true"/> when they are.
+        /// </remarks>
+        public virtual bool LinesAvailable => true;
 
         /// <summary>
         /// Called by Unity when the <see cref="LineProviderBehaviour"/>
@@ -106,10 +96,6 @@ namespace Yarn.Unity
         /// </remarks>
         public virtual void Start()
         {
-            if (!string.IsNullOrWhiteSpace(textLanguageCodeOverride))
-            {
-                Debug.LogWarning($"LineProvider is ignoring global Preferences.TextLanguage and using textLanguageCodeOverride: {textLanguageCodeOverride}");
-            }
         }
     }
 
