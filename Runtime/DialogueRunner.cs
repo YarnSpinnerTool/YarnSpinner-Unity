@@ -783,7 +783,8 @@ namespace Yarn.Unity
                 if ( onCommand == null || onCommand.GetPersistentEventCount() == 0 ) {
                     Debug.LogError($"No Command <<{command.Text}>> was found. Did you remember to use the YarnCommand attribute or AddCommandHandler() function in C#?");
                 }
-                return;                
+
+                ContinueDialogue();
             }
 
             /// Forward the line to the dialogue UI.
