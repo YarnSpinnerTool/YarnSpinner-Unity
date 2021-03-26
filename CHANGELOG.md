@@ -72,6 +72,7 @@ With this change, you can instead say this:
 - Renamed the 'StartHere' demo to 'Intro', because it's not actually the first step in installing Yarn Spinner.
 - Simplified the workflow for working with Addressable Assets - you now import the package, enable its use on your Yarn Project, and click the Update Asset Addresses button to ensure that all assets have an address that Yarn Spinner knows about.
 - The 3D, VisualNovel, and Intro examples have been updated to use the new `LineView` and `OptionsListView` components, rather than `DialogueUI`.
+- `DialogueRunner.ResetDialogue` is now marked as Obsolete (it had the same effect as just calling `StartDialogue` anyway.)
 
 ### Removed
 

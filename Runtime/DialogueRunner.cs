@@ -321,6 +321,7 @@ namespace Yarn.Unity
         /// Starts running the dialogue again from the node named <see
         /// cref="startNode"/>.
         /// </summary>        
+        [Obsolete("Use " + nameof(StartDialogue) + " instead.")]
         public void ResetDialogue()
         {
             StartDialogue();
