@@ -158,11 +158,6 @@ namespace Yarn.Unity
 
 #if USE_ADDRESSABLES
 
-        private void ResourceLocationsLoadComplete(AsyncOperationHandle<IList<IResourceLocation>> obj)
-        {
-            throw new System.NotImplementedException();
-        }
-
         private void AssetLoadComplete(AsyncOperationHandle<AudioClip> operation)
         {
             if (pendingLoadOperations.TryGetValue(operation, out var stringID) == false)

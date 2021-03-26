@@ -45,12 +45,6 @@ namespace Yarn.Unity
         /// Called by the <see cref="DialogueRunner"/> to signal that a
         /// line should be displayed to the user.
         /// </summary>
-        /// <remarks>
-        /// If this method returns <see
-        /// cref="Dialogue.HandlerExecutionType.ContinueExecution"/>, it
-        /// should not call the <paramref name="onDialogueLineFinished"/>
-        /// method.
-        /// </remarks>
         /// <param name="dialogueLine">The content of the line that should
         /// be presented to the user.</param>
         /// <param name="onDialogueLineFinished">The method that should be
@@ -58,7 +52,11 @@ namespace Yarn.Unity
         /// FIXME: If this method is expected to be called only from the
         /// DialogueRunner then this should be converted into a coroutine
         /// and merged with RunLineWithCallback();
-        public abstract void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished);
+        public virtual void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished) {
+            // The default implementation does nothing, and immediately
+            // calls onDialogueLineFinished.
+            onDialogueLineFinished?.Invoke();
+        }
 
         /// <summary>
         /// Called by the DialogueRunner to indicate that the line that
@@ -74,7 +72,9 @@ namespace Yarn.Unity
         /// <param name="dialogueLine">The <see cref="LocalizedLine"/> that
         /// has changed state.</param>
         /// <seealso cref="LineStatus"/>
-        public abstract void OnLineStatusChanged(LocalizedLine dialogueLine);
+        public virtual void OnLineStatusChanged(LocalizedLine dialogueLine) {
+            // Default implementation is a no-op.
+        }
 
         /// <summary>
         /// Called by the <see cref="DialogueRunner"/> to signal that the
@@ -83,7 +83,11 @@ namespace Yarn.Unity
         /// </summary>
         /// <param name="onDismissalComplete">The method that should be
         /// called when the view has finished dismissing the line.</param>
-        public abstract void DismissLine(Action onDismissalComplete);
+        public virtual void DismissLine(Action onDismissalComplete) {
+            // The default implementation does nothing, and immediately
+            // calls onDialogueLineFinished.
+            onDismissalComplete?.Invoke();
+        }
 
         /// <summary>
         /// Called by the <see cref="DialogueRunner"/> to signal that a set
@@ -98,7 +102,9 @@ namespace Yarn.Unity
         /// displayed to the user.</param>
         /// <param name="onOptionSelected">A method that should be called
         /// when the user has made a selection.</param>
-        public abstract void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected);
+        public virtual void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected) {
+            // The default implementation does nothing.
+        }
 
         /// <summary>
         /// Called by the <see cref="DialogueRunner"/> to signal that the
@@ -121,7 +127,7 @@ namespace Yarn.Unity
         /// Action)"/> FIXME: This doesn't seem to be called anymore ...?
         public virtual void NodeComplete(string nextNode, Action onComplete)
         {
-            // Default implementation does nothing.            
+            // The default implementation does nothing.            
         }
 
         /// <summary>

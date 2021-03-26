@@ -8,9 +8,9 @@ namespace Yarn.Unity.Example {
 	/// <summary>
 	/// runs Yarn commands and manages sprites for the Visual Novel example
 	/// </summary>
-    public class VNManager : MonoBehaviour
+    public class VNManager : DialogueViewBase
     {
-		DialogueRunner runner;
+		[SerializeField] DialogueRunner runner;
 
 		[Header("Assets"), Tooltip("you can manually assign various assets here if you don't want to use /Resources/ folder")]
 		public List<Sprite> loadSprites = new List<Sprite>();
@@ -43,8 +43,6 @@ namespace Yarn.Unity.Example {
 		static Vector2 screenSize = new Vector2( 1280f, 720f); // needed for position calcuations, e.g. what does "left" mean?
 
 		void Awake () {
-			runner = GetComponent<DialogueRunner>();
-
 			// manually add all Yarn command handlers, so that we don't
 			// have to type out game object names in Yarn scripts (also
 			// gives us a performance increase by avoiding GameObject.Find)
@@ -371,18 +369,27 @@ namespace Yarn.Unity.Example {
 			StartCoroutine( MoveCoroutine( parent, newPos, moveTime ) );
 		}
 
-		#endregion
+        #endregion
 
 
 
-		#region Utility
+        #region Utility
 
-		public void OnActorSpeak (string actorName) {
-			if ( actors.ContainsKey(actorName) ) {
-				HighlightSprite(actors[actorName].actorImage);
+        public override void RunLine(LocalizedLine dialogueLine, System.Action onDialogueLineFinished)
+        {
+            var actorName = dialogueLine.CharacterName;
+
+            if (string.IsNullOrEmpty(actorName) == false && actors.ContainsKey(actorName)) {
+                HighlightSprite(actors[actorName].actorImage);
 				nameplateBG.color = actors[actorName].actorColor;
-			}
-		}
+                nameplateBG.gameObject.SetActive(true);
+            } else {
+                nameplateBG.gameObject.SetActive(false);
+            }
+
+            onDialogueLineFinished();
+        }
+
 		public void HighlightSprite (Image sprite) {
 			StopCoroutine( "HighlightSpriteCoroutine" ); // use StartCoroutine(string) overload so that we can Stop and Start the coroutine (it doesn't work otherwise?)
 			StartCoroutine( "HighlightSpriteCoroutine", sprite );
