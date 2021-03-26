@@ -57,6 +57,8 @@ With this change, you can instead say this:
 
 - New icons for Yarn Spinner assets have been added.
 
+- New dialogue views, `LineView` and `OptionListView`, have been added. These are intended to replace the previous `DialogueUI`, make use of TextMeshPro for text display, and allow for easier customisation through prefabs.
+
 ### Changed
 
 - Certain private methods in `DialogueUI` have changed to protected, making it easier to subclass (@radiatoryang)
@@ -67,6 +69,7 @@ With this change, you can instead say this:
 - `Localization`, the asset that mapped line IDs to localized data, is now automatically generated for you by the `YarnProject`. You don't create them yourselves, and you no longer need to manually refresh them. The `YarnProject` always creates at least one localization: the "Base" localization, which contains the original text found in your `.yarn` files. You can create more localizations in the `YarnProject`'s inspector, and supply the language code to use and a `.csv` file containing replacement strings.
 - Renamed the 'StartHere' demo to 'Intro', because it's not actually the first step in installing Yarn Spinner.
 - Simplified the workflow for working with Addressable Assets - you now import the package, enable its use on your Yarn Project, and click the Update Asset Addresses button to ensure that all assets have an address that Yarn Spinner knows about.
+- The 3D, VisualNovel, and Intro examples have been updated to use the new `LineView` and `OptionsListView` components, rather than `DialogueUI`.
 
 ### Removed
 
