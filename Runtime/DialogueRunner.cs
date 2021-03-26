@@ -587,12 +587,22 @@ namespace Yarn.Unity
                 // Create the temporary line provider and the line database
                 lineProvider = gameObject.AddComponent<TextLineProvider>();
 
-                lineProviderIsTemporary = true;
-
                 // Let the user know what we're doing.
                 if (verboseLogging)
                 {
-                    Debug.Log($"Dialogue Runner has no LineProvider; creating a {nameof(TextLineProvider)}.");
+                    Debug.Log($"Dialogue Runner has no LineProvider; creating a {nameof(TextLineProvider)}.", this);
+                }
+            }
+
+            if (variableStorage == null) {
+                // If we don't have a variable storage, create an
+                // InMemoryVariableStorage and make it use that.
+
+                variableStorage = gameObject.AddComponent<InMemoryVariableStorage>();
+
+                // Let the user know what we're doing.
+                if (verboseLogging) {
+                    Debug.Log($"Dialogue Runner has no Variable Storage; creating a {nameof(InMemoryVariableStorage)}", this);
                 }
             }
         }
@@ -600,8 +610,9 @@ namespace Yarn.Unity
         /// Start the dialogue
         void Start()
         {
-            Assert.IsNotNull(dialogueViews, "No View class (like DialogueUI) was given! Can't run the dialogue without a View class!");
-            Assert.IsNotNull(variableStorage, "Variable storage was not set! Can't run the dialogue!");
+            if (dialogueViews.Length == 0) {
+                Debug.LogWarning($"Dialogue Runner doesn't have any dialogue views set up. No lines or options will be visible.");
+            }
 
             // Give each dialogue view the continuation action, which
             // they'll call to pass on the user intent to move on to the

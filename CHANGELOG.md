@@ -59,6 +59,8 @@ With this change, you can instead say this:
 
 - New dialogue views, `LineView` and `OptionListView`, have been added. These are intended to replace the previous `DialogueUI`, make use of TextMeshPro for text display, and allow for easier customisation through prefabs.
 
+- `DialogueRunner`s will now automatically create and use an `InMemoryVariableStorage` object if one isn't provided.
+
 ### Changed
 
 - Certain private methods in `DialogueUI` have changed to protected, making it easier to subclass (@radiatoryang)
