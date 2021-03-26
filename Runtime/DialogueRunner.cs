@@ -151,7 +151,7 @@ namespace Yarn.Unity
         /// Gets the underlying <see cref="Dialogue"/> object that runs the
         /// Yarn code.
         /// </summary>
-        public Dialogue Dialogue => dialogue ?? (dialogue = CreateDialogueInstance());
+        public Dialogue Dialogue => _dialogue ?? (_dialogue = CreateDialogueInstance());
 
         /// <summary>
         /// A <see cref="StringUnityEvent"/> that is called when a <see
@@ -328,7 +328,7 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Unloads all nodes from the <see cref="dialogue"/>.
+        /// Unloads all nodes from the <see cref="Dialogue"/>.
         /// </summary>
         public void Clear()
         {
@@ -337,7 +337,7 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Stops the <see cref="dialogue"/>.
+        /// Stops the <see cref="Dialogue"/>.
         /// </summary>
         public void Stop()
         {
@@ -568,7 +568,7 @@ namespace Yarn.Unity
         /// Our conversation engine
         /** Automatically created on first access
          */
-        Dialogue dialogue;
+        private Dialogue _dialogue;
 
         // If true, lineProvider was created at runtime, and will be empty.
         // Calls to Add() should insert line content into it.
