@@ -94,7 +94,7 @@ namespace Yarn.Unity.Editor
             {
                 case LineView.ContinueActionType.None:
                     EditorGUI.indentLevel += 1;
-                    EditorGUILayout.HelpBox($"After each line has finished appearing, this line view will stop and wait.\n\nTo continue to the next line, you will need to call {nameof(LineView.OnContinueClicked)} on this component, or turn on the {ObjectNames.NicifyVariableName(nameof(DialogueRunner))}'s \"{ObjectNames.NicifyVariableName(nameof(DialogueRunner.continueNextLineOnLineFinished))}\" setting.", MessageType.Info);
+                    EditorGUILayout.HelpBox($"After each line has finished appearing, this line view will stop and wait.\n\nTo continue to the next line, you will need to call {nameof(LineView.OnContinueClicked)} on this component, or turn on the {ObjectNames.NicifyVariableName(nameof(DialogueRunner))}'s \"{ObjectNames.NicifyVariableName(nameof(DialogueRunner.automaticallyContinueLines))}\" setting.", MessageType.Info);
                     EditorGUI.indentLevel -= 1;
                     break;
                 case LineView.ContinueActionType.KeyCode:

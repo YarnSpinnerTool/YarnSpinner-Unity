@@ -81,7 +81,8 @@ namespace Yarn.Unity
         /// Whether the DialogueRunner should automatically proceed to the
         /// next line once a line has been finished.
         /// </summary>
-        public bool continueNextLineOnLineFinished;
+        [UnityEngine.Serialization.FormerlySerializedAs("continueNextLineOnLineFinished")]
+        public bool automaticallyContinueLines;
 
         /// <summary>
         /// If true, when an option is selected, it's as though it were a
@@ -1246,7 +1247,7 @@ namespace Yarn.Unity
 
                 // Should the line automatically become Ended as soon as
                 // it's Delivered?
-                if (continueNextLineOnLineFinished)
+                if (automaticallyContinueLines)
                 {
                     // Go ahead and notify the views. 
                     UpdateLineStatus(CurrentLine, LineStatus.Dismissed);
