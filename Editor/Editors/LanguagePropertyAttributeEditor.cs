@@ -3,7 +3,7 @@ using UnityEditor;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace Yarn.Unity
+namespace Yarn.Unity.Editor
 {
 
     [CustomPropertyDrawer(typeof(LanguageAttribute))]
@@ -21,7 +21,8 @@ namespace Yarn.Unity
                 return;
             }
 
-            // Display this property as a dropdown that lets you select a language.
+            // Display this property as a dropdown that lets you select a
+            // language.
             var allCultures = Cultures.GetCultures().ToList();
             var indices = Enumerable.Range(0, allCultures.Count());
 

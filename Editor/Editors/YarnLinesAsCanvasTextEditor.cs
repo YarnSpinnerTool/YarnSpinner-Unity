@@ -4,10 +4,10 @@ using UnityEditor;
 using UnityEngine;
 using TMPro;
 
-namespace Yarn.Unity
+namespace Yarn.Unity.Editor
 {
     [CustomEditor(typeof(YarnLinesAsCanvasText))]
-    public class YarnLinesAsCanvasTextEditor : Editor
+    public class YarnLinesAsCanvasTextEditor : UnityEditor.Editor
     {
 
         private SerializedProperty _yarnProgramProperty = default;

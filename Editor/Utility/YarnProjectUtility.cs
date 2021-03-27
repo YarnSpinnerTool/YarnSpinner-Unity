@@ -10,7 +10,7 @@ using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 #endif
 
-namespace Yarn.Unity
+namespace Yarn.Unity.Editor
 {
     /// <summary>
     /// Contains methods for performing high-level operations on Yarn
@@ -451,7 +451,8 @@ namespace Yarn.Unity
                     }
                 }
             }
-            catch (System.Exception e) {
+            catch (System.Exception e)
+            {
                 Debug.LogError($"Encountered an error when updating scripts: {e}");
                 return;
             }

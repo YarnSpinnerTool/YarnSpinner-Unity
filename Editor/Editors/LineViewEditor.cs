@@ -1,10 +1,11 @@
 using UnityEngine;
 using UnityEditor;
 
-namespace Yarn.Unity {
-
+namespace Yarn.Unity.Editor
+{
     [CustomEditor(typeof(LineView))]
-    public class LineViewEditor : Editor {
+    public class LineViewEditor : UnityEditor.Editor
+    {
         private SerializedProperty canvasGroupProperty;
         private SerializedProperty useFadeEffectProperty;
         private SerializedProperty fadeInTimeProperty;
@@ -16,14 +17,15 @@ namespace Yarn.Unity {
         private SerializedProperty typewriterEffectSpeedProperty;
 
         private SerializedProperty continueButtonProperty;
-        
+
         private SerializedProperty continueActionTypeProperty;
         private SerializedProperty continueActionKeyCodeProperty;
         private SerializedProperty continueActionReferenceProperty;
         private SerializedProperty continueActionProperty;
 
-        public void OnEnable() {
-            
+        public void OnEnable()
+        {
+
             canvasGroupProperty = serializedObject.FindProperty(nameof(LineView.canvasGroup));
             useFadeEffectProperty = serializedObject.FindProperty(nameof(LineView.useFadeEffect));
             fadeInTimeProperty = serializedObject.FindProperty(nameof(LineView.fadeInTime));
@@ -48,17 +50,19 @@ namespace Yarn.Unity {
         {
             var baseProperties = new[] {
                 canvasGroupProperty,
-                
+
                 lineTextProperty,
-                
+
             };
-            foreach (var prop in baseProperties) {
+            foreach (var prop in baseProperties)
+            {
                 EditorGUILayout.PropertyField(prop);
             }
 
             EditorGUILayout.PropertyField(useFadeEffectProperty);
 
-            if (useFadeEffectProperty.boolValue) {
+            if (useFadeEffectProperty.boolValue)
+            {
                 EditorGUI.indentLevel += 1;
                 EditorGUILayout.PropertyField(fadeInTimeProperty);
                 EditorGUILayout.PropertyField(fadeOutTimeProperty);
@@ -68,7 +72,8 @@ namespace Yarn.Unity {
 
             EditorGUILayout.PropertyField(useTypewriterEffectProperty);
 
-            if (useTypewriterEffectProperty.boolValue) {
+            if (useTypewriterEffectProperty.boolValue)
+            {
                 EditorGUI.indentLevel += 1;
                 EditorGUILayout.PropertyField(typewriterEffectSpeedProperty);
                 EditorGUI.indentLevel -= 1;
@@ -76,14 +81,15 @@ namespace Yarn.Unity {
 
             EditorGUILayout.PropertyField(characterNameTextProperty);
 
-            if (characterNameTextProperty.objectReferenceValue == null) {
+            if (characterNameTextProperty.objectReferenceValue == null)
+            {
                 EditorGUI.indentLevel += 1;
                 EditorGUILayout.PropertyField(showCharacterNamePropertyInLineViewProperty);
                 EditorGUI.indentLevel -= 1;
             }
 
             EditorGUILayout.PropertyField(continueActionTypeProperty);
-            
+
             switch ((LineView.ContinueActionType)continueActionTypeProperty.enumValueIndex)
             {
                 case LineView.ContinueActionType.None:

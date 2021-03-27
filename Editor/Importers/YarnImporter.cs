@@ -14,7 +14,7 @@ using Yarn.Compiler;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Yarn.Unity
+namespace Yarn.Unity.Editor
 {
 
     /// <summary>

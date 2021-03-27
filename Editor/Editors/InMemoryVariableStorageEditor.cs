@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-namespace Yarn.Unity
+namespace Yarn.Unity.Editor
 {
 
     [CustomEditor(typeof(InMemoryVariableStorage))]
-    public class InMemoryVariableStorageEditor : Editor
+    public class InMemoryVariableStorageEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {

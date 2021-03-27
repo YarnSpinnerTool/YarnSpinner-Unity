@@ -12,7 +12,7 @@ using System.IO;
 using UnityEditorInternal;
 using System.Collections;
 
-namespace Yarn.Unity
+namespace Yarn.Unity.Editor
 {
     [ScriptedImporter(2, new[] { "yarnproject" }, 1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
     public class YarnProjectImporter : ScriptedImporter

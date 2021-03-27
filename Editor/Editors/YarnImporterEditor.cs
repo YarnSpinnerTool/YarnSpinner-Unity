@@ -10,88 +10,91 @@ using System.IO;
 using System.Collections.Generic;
 using Yarn.Unity;
 
-[CustomEditor(typeof(YarnImporter))]
-public class YarnImporterEditor : ScriptedImporterEditor
+namespace Yarn.Unity.Editor
 {
-    private SerializedProperty isSuccessfullyCompiledProperty;
-    private SerializedProperty compilationErrorMessageProperty;
-    private SerializedProperty localizationsProperty;
-
-    public string DestinationProjectError => destinationYarnProjectImporter?.compileError ?? null;
-
-    private YarnProject destinationYarnProject;
-    private YarnProjectImporter destinationYarnProjectImporter;
-
-    public override void OnEnable()
+    [CustomEditor(typeof(YarnImporter))]
+    public class YarnImporterEditor : ScriptedImporterEditor
     {
-        base.OnEnable();
+        private SerializedProperty isSuccessfullyCompiledProperty;
+        private SerializedProperty compilationErrorMessageProperty;
+        private SerializedProperty localizationsProperty;
 
-        isSuccessfullyCompiledProperty = serializedObject.FindProperty("isSuccesfullyParsed");
-        compilationErrorMessageProperty = serializedObject.FindProperty("parseErrorMessage");
-        localizationsProperty = serializedObject.FindProperty("localizations");
+        public string DestinationProjectError => destinationYarnProjectImporter?.compileError ?? null;
 
-        UpdateDestinationProgram();
-    }
+        private YarnProject destinationYarnProject;
+        private YarnProjectImporter destinationYarnProjectImporter;
 
-    private void UpdateDestinationProgram()
-    {
-        destinationYarnProject = (target as YarnImporter).DestinationProject;
-
-        if (destinationYarnProject != null)
+        public override void OnEnable()
         {
-            destinationYarnProjectImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(destinationYarnProject)) as YarnProjectImporter;
+            base.OnEnable();
+
+            isSuccessfullyCompiledProperty = serializedObject.FindProperty("isSuccesfullyParsed");
+            compilationErrorMessageProperty = serializedObject.FindProperty("parseErrorMessage");
+            localizationsProperty = serializedObject.FindProperty("localizations");
+
+            UpdateDestinationProgram();
         }
-    }
 
-    public override void OnInspectorGUI()
-    {
-
-        serializedObject.Update();
-        EditorGUILayout.Space();
-
-        // If there's a parse error in any of the selected objects, show an
-        // error. If the selected objects have the same destination
-        // program, and there's a compile error in it, show that. 
-        if (string.IsNullOrEmpty(compilationErrorMessageProperty.stringValue) == false)
+        private void UpdateDestinationProgram()
         {
-            if (serializedObject.isEditingMultipleObjects)
+            destinationYarnProject = (target as YarnImporter).DestinationProject;
+
+            if (destinationYarnProject != null)
             {
-                EditorGUILayout.HelpBox("Some of the selected scripts have errors.", MessageType.Error);
+                destinationYarnProjectImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(destinationYarnProject)) as YarnProjectImporter;
+            }
+        }
+
+        public override void OnInspectorGUI()
+        {
+
+            serializedObject.Update();
+            EditorGUILayout.Space();
+
+            // If there's a parse error in any of the selected objects,
+            // show an error. If the selected objects have the same
+            // destination program, and there's a compile error in it, show
+            // that. 
+            if (string.IsNullOrEmpty(compilationErrorMessageProperty.stringValue) == false)
+            {
+                if (serializedObject.isEditingMultipleObjects)
+                {
+                    EditorGUILayout.HelpBox("Some of the selected scripts have errors.", MessageType.Error);
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox(compilationErrorMessageProperty.stringValue, MessageType.Error);
+                }
+            }
+            else if (string.IsNullOrEmpty(DestinationProjectError) == false)
+            {
+
+                EditorGUILayout.HelpBox(DestinationProjectError, MessageType.Error);
+
+            }
+
+            if (destinationYarnProject == null)
+            {
+                EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project. Create a new Yarn Project, and add this script to it.", MessageType.Info);
+                if (GUILayout.Button("Create New Yarn Project"))
+                {
+                    YarnProjectUtility.CreateYarnProject(target as YarnImporter);
+
+                    UpdateDestinationProgram();
+
+                }
             }
             else
             {
-                EditorGUILayout.HelpBox(compilationErrorMessageProperty.stringValue, MessageType.Error);
+                using (new EditorGUI.DisabledGroupScope(true))
+                {
+                    EditorGUILayout.ObjectField("Program", destinationYarnProject, typeof(YarnProjectImporter), false);
+                }
             }
-        }
-        else if (string.IsNullOrEmpty(DestinationProjectError) == false)
-        {
 
-            EditorGUILayout.HelpBox(DestinationProjectError, MessageType.Error);
+            EditorGUILayout.Space();
 
-        }
-
-        if (destinationYarnProject == null)
-        {
-            EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project. Create a new Yarn Project, and add this script to it.", MessageType.Info);
-            if (GUILayout.Button("Create New Yarn Project"))
-            {
-                YarnProjectUtility.CreateYarnProject(target as YarnImporter);
-
-                UpdateDestinationProgram();
-
-            }
-        }
-        else
-        {
-            using (new EditorGUI.DisabledGroupScope(true))
-            {
-                EditorGUILayout.ObjectField("Program", destinationYarnProject, typeof(YarnProjectImporter), false);
-            }
-        }
-
-        EditorGUILayout.Space();
-
-        var hadChanges = serializedObject.ApplyModifiedProperties();
+            var hadChanges = serializedObject.ApplyModifiedProperties();
 
 #if UNITY_2018
         // Unity 2018's ApplyRevertGUI is buggy, and doesn't automatically
@@ -111,13 +114,13 @@ public class YarnImporterEditor : ScriptedImporterEditor
 #endif
 
 #if UNITY_2019_1_OR_NEWER
-        // On Unity 2019 and newer, we can use an ApplyRevertGUI that works
-        // identically to the built-in importer inspectors.
-        ApplyRevertGUI();
+            // On Unity 2019 and newer, we can use an ApplyRevertGUI that
+            // works identically to the built-in importer inspectors.
+            ApplyRevertGUI();
 #endif
+        }
+
+
+
     }
-
-
-
 }
-

@@ -5,6 +5,7 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
+using Yarn.Unity.Editor;
 
 namespace Yarn.Unity.Tests
 {

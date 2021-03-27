@@ -5,10 +5,10 @@ using UnityEditor.AssetImporters;
 using UnityEditor.Experimental.AssetImporters;
 #endif
 
-namespace Yarn.Unity
+namespace Yarn.Unity.Editor
 {
     [CustomEditor(typeof(YarnProject))]
-    public class YarnProjectEditor : Editor
+    public class YarnProjectEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {

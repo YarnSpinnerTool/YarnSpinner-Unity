@@ -17,7 +17,7 @@ using System.Reflection;
 using UnityEditor.AddressableAssets;
 #endif
 
-namespace Yarn.Unity
+namespace Yarn.Unity.Editor
 {
     [CustomEditor(typeof(YarnProjectImporter))]
     public class YarnProjectImporterEditor : ScriptedImporterEditor
@@ -110,7 +110,8 @@ namespace Yarn.Unity
                 // checkbox for using it.
                 var hasAnySourceAssetFolders = yarnProjectImporter.languagesToSourceAssets.Any(l => l.assetsFolder != null);
                 if (hasAnySourceAssetFolders == false) {
-                    // Disable this checkbox if there are no assets available.
+                    // Disable this checkbox if there are no assets
+                    // available.
                     using (new EditorGUI.DisabledScope(true)) {
                         EditorGUILayout.Toggle(useAddressableAssetsProperty.displayName, false);
                     }
@@ -303,8 +304,8 @@ namespace Yarn.Unity
 
         /// <summary>
         /// The label to show for this field in the Inspector when the
-        /// field <see cref="SiblingFieldName"/> has a string value equal to
-        /// the <see cref="SerializedProperty"/> field in <see
+        /// field <see cref="SiblingFieldName"/> has a string value equal
+        /// to the <see cref="SerializedProperty"/> field in <see
         /// cref="OtherClassType"/>.
         /// </summary>
         public string DisplayStringWhenEmpty;
@@ -353,7 +354,7 @@ namespace Yarn.Unity
             // UI.
             MethodInfo defaultDraw = typeof(EditorGUI)
                 .GetMethod("DefaultPropertyField", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-                
+
             // Is the static field a serialized property?
             if (field.FieldType.IsAssignableFrom(typeof(SerializedProperty)) == false)
             {
@@ -376,7 +377,8 @@ namespace Yarn.Unity
 
             var targetProperty = property.serializedObject.FindProperty(targetPropertyPath);
 
-            if (targetProperty == null) {
+            if (targetProperty == null)
+            {
                 // We couldn't find it. Log a warning, draw the original
                 // UI, and return.
                 Debug.LogWarning($"Property not found at path {targetPropertyPath}");
@@ -384,7 +386,8 @@ namespace Yarn.Unity
             }
 
             // Ensure that they're both strings.
-            if (targetProperty.propertyType != SerializedPropertyType.String || contextProperty.propertyType != SerializedPropertyType.String) {
+            if (targetProperty.propertyType != SerializedPropertyType.String || contextProperty.propertyType != SerializedPropertyType.String)
+            {
                 // They're not both strings. Draw as usual.
                 //
                 // (This restriction exists because, weirdly,
@@ -394,7 +397,7 @@ namespace Yarn.Unity
                 // comparison fixed this.)
                 defaultDraw.Invoke(null, new object[3] { position, property, label });
             }
-            
+
             // Finally, the moment of truth: compare the two strings.
             if (contextProperty.stringValue.Equals(targetProperty.stringValue, System.StringComparison.InvariantCulture))
             {
