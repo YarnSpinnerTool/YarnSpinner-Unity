@@ -46,7 +46,7 @@ namespace Yarn.Unity.Tests
         public IEnumerator RunLine_OnValidYarnLine_ShowCorrectText()
         {
             // Arrange
-            Runner.StartDialogue();
+            Runner.StartDialogue(Runner.startNode);
             float startTime;
             startTime = Time.time;
             while (Time.time - startTime < 10 && !string.Equals(TextCanvas.text, "Spieler: Kannst du mich hören? 2"))
@@ -59,7 +59,7 @@ namespace Yarn.Unity.Tests
             // Arrange for second line
             yield return null;
             yield return null;
-            UI.MarkLineComplete();
+            UI.ReadyForNextLine();
 
             startTime = Time.time;
             while (Time.time - startTime < 10 && !string.Equals(TextCanvas.text, "NPC: Klar und deutlich."))
@@ -71,7 +71,7 @@ namespace Yarn.Unity.Tests
 
             // Cleanup
             yield return null;
-            UI.MarkLineComplete();
+            UI.ReadyForNextLine();
             yield return null;
             UI.SelectOption(0);
             yield return null;
@@ -83,7 +83,7 @@ namespace Yarn.Unity.Tests
             // Arrange
             UI.showCharacterName = false;
 
-            Runner.StartDialogue();
+            Runner.StartDialogue(Runner.startNode);
             float startTime;
             startTime = Time.time;
             while (Time.time - startTime < 10 && !string.Equals(TextCanvas.text, "Kannst du mich hören? 2"))
@@ -99,7 +99,7 @@ namespace Yarn.Unity.Tests
         public IEnumerator RunLine_OnValidYarnLine_LinesCanBeInterrupted()
         {
 
-            Runner.StartDialogue();
+            Runner.StartDialogue(Runner.startNode);
 
             var expectedFinalText = "Spieler: Kannst du mich hören? 2";
 
@@ -115,7 +115,7 @@ namespace Yarn.Unity.Tests
             Assert.AreNotEqual(expectedFinalText, TextCanvas.text, "Dialogue view should not yet have delivered all of the text.");
 
             // Signal an interruption
-            UI.MarkLineComplete();
+            UI.ReadyForNextLine();
             yield return null;
 
             Assert.AreEqual(expectedFinalText, TextCanvas.text, "Dialogue view should be displaying all text after interruption.");

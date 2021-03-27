@@ -53,11 +53,11 @@ namespace Yarn.Unity.Tests
         public IEnumerator SetValue_TryGetValue()
         {
             // run all lines
-            Runner.StartDialogue();
-            UI.MarkLineComplete();
+            Runner.StartDialogue(Runner.startNode);
+            UI.ReadyForNextLine();
             yield return null;
             yield return null;
-            UI.MarkLineComplete();
+            UI.ReadyForNextLine();
             yield return null;
             yield return null;
 
@@ -104,11 +104,11 @@ namespace Yarn.Unity.Tests
         public IEnumerator SaveLoadPlayerPrefs()
         {
             // run all lines
-            Runner.StartDialogue();
-            UI.MarkLineComplete();
+            Runner.StartDialogue(Runner.startNode);
+            UI.ReadyForNextLine();
             yield return null;
             yield return null;
-            UI.MarkLineComplete();
+            UI.ReadyForNextLine();
             yield return null;
             yield return null;
 
@@ -127,11 +127,11 @@ namespace Yarn.Unity.Tests
         public IEnumerator SaveLoadFile()
         {
             // run all lines
-            Runner.StartDialogue();
-            UI.MarkLineComplete();
+            Runner.StartDialogue(Runner.startNode);
+            UI.ReadyForNextLine();
             yield return null;
             yield return null;
-            UI.MarkLineComplete();
+            UI.ReadyForNextLine();
             yield return null;
             yield return null;
 

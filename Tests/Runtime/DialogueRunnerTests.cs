@@ -45,14 +45,14 @@ namespace Yarn.Unity.Tests
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
             DialogueRunnerMockUI dialogueUI = GameObject.FindObjectOfType<DialogueRunnerMockUI>();
 
-            runner.StartDialogue();
+            runner.StartDialogue(runner.startNode);
             yield return null;
 
             Assert.AreEqual("Spieler: Kannst du mich hören? 2", dialogueUI.CurrentLine);
-            dialogueUI.MarkLineComplete();
+            dialogueUI.ReadyForNextLine();
 
             Assert.AreEqual("NPC: Klar und deutlich.", dialogueUI.CurrentLine);
-            dialogueUI.MarkLineComplete();
+            dialogueUI.ReadyForNextLine();
 
             Assert.AreEqual(2, dialogueUI.CurrentOptions.Count);
             Assert.AreEqual("Mir reicht es.", dialogueUI.CurrentOptions[0]);
@@ -70,14 +70,14 @@ namespace Yarn.Unity.Tests
             viewArrayWithNullElement.Add(null);
             runner.dialogueViews = viewArrayWithNullElement.ToArray();
 
-            runner.StartDialogue();
+            runner.StartDialogue(runner.startNode);
             yield return null;
 
             Assert.AreEqual("Spieler: Kannst du mich hören? 2", dialogueUI.CurrentLine);
-            dialogueUI.MarkLineComplete();
+            dialogueUI.ReadyForNextLine();
 
             Assert.AreEqual("NPC: Klar und deutlich.", dialogueUI.CurrentLine);
-            dialogueUI.MarkLineComplete();
+            dialogueUI.ReadyForNextLine();
 
             Assert.AreEqual(2, dialogueUI.CurrentOptions.Count);
             Assert.AreEqual("Mir reicht es.", dialogueUI.CurrentOptions[0]);
