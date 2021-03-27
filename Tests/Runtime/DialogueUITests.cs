@@ -7,6 +7,8 @@ using UnityEngine.TestTools;
 using UnityEngine.UI;
 using Yarn.Unity;
 
+#pragma warning disable CS0618 // 'member' is obsolete (done to prevent 'DialogueUI is obsolete' messages in Unity - these are valid messages, but it's not useful to warn the Unity developer about code they can't modify)
+
 namespace Yarn.Unity.Tests
 {
     public class DialogueUITests : IPrebuildSetup, IPostBuildCleanup
