@@ -260,13 +260,15 @@ namespace Yarn.Unity
             // Stop any processes that might be running already
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false) continue;
+                if (dialogueView == null || dialogueView.enabled == false) {
+                    continue;
+                }
 
                 dialogueView.StopAllCoroutines();
             }
 
             // Get it going
-            
+
             // Mark that we're in conversation.
             IsDialogueRunning = true;
 
@@ -323,7 +325,7 @@ namespace Yarn.Unity
         public void ResetDialogue(string nodeName = null)
         {
             nodeName = nodeName ?? startNode ?? CurrentNodeName ?? throw new ArgumentNullException($"Cannot reset dialogue: couldn't figure out a node to restart the dialogue from.");
-            
+
             StartDialogue(nodeName);
         }
 
@@ -591,14 +593,16 @@ namespace Yarn.Unity
                 }
             }
 
-            if (variableStorage == null) {
+            if (variableStorage == null)
+            {
                 // If we don't have a variable storage, create an
                 // InMemoryVariableStorage and make it use that.
 
                 variableStorage = gameObject.AddComponent<InMemoryVariableStorage>();
 
                 // Let the user know what we're doing.
-                if (verboseLogging) {
+                if (verboseLogging)
+                {
                     Debug.Log($"Dialogue Runner has no Variable Storage; creating a {nameof(InMemoryVariableStorage)}", this);
                 }
             }
@@ -607,7 +611,8 @@ namespace Yarn.Unity
         /// Start the dialogue
         void Start()
         {
-            if (dialogueViews.Length == 0) {
+            if (dialogueViews.Length == 0)
+            {
                 Debug.LogWarning($"Dialogue Runner doesn't have any dialogue views set up. No lines or options will be visible.");
             }
 
@@ -1351,7 +1356,8 @@ namespace Yarn.Unity
             foreach (var dialogueView in dialogueViews)
             {
                 // Skip any dialogueView that is null or not enabled
-                if (dialogueView == null || dialogueView.enabled == false) {
+                if (dialogueView == null || dialogueView.enabled == false)
+                {
                     continue;
                 }
 

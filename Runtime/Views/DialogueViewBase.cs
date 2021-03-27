@@ -52,7 +52,8 @@ namespace Yarn.Unity
         /// FIXME: If this method is expected to be called only from the
         /// DialogueRunner then this should be converted into a coroutine
         /// and merged with RunLineWithCallback();
-        public virtual void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished) {
+        public virtual void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
+        {
             // The default implementation does nothing, and immediately
             // calls onDialogueLineFinished.
             onDialogueLineFinished?.Invoke();
@@ -72,7 +73,8 @@ namespace Yarn.Unity
         /// <param name="dialogueLine">The <see cref="LocalizedLine"/> that
         /// has changed state.</param>
         /// <seealso cref="LineStatus"/>
-        public virtual void OnLineStatusChanged(LocalizedLine dialogueLine) {
+        public virtual void OnLineStatusChanged(LocalizedLine dialogueLine)
+        {
             // Default implementation is a no-op.
         }
 
@@ -83,7 +85,8 @@ namespace Yarn.Unity
         /// </summary>
         /// <param name="onDismissalComplete">The method that should be
         /// called when the view has finished dismissing the line.</param>
-        public virtual void DismissLine(Action onDismissalComplete) {
+        public virtual void DismissLine(Action onDismissalComplete)
+        {
             // The default implementation does nothing, and immediately
             // calls onDialogueLineFinished.
             onDismissalComplete?.Invoke();
@@ -102,7 +105,8 @@ namespace Yarn.Unity
         /// displayed to the user.</param>
         /// <param name="onOptionSelected">A method that should be called
         /// when the user has made a selection.</param>
-        public virtual void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected) {
+        public virtual void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
+        {
             // The default implementation does nothing.
         }
 
@@ -121,7 +125,7 @@ namespace Yarn.Unity
         /// <param name="nextNode">The name of the next node that is being
         /// entered.</param>
         /// <param name="onComplete">A method that should be called to
-        /// indicate that the DialogueRunner should continue
+        /// /// indicate that the DialogueRunner should continue
         /// executing.</param>
         /// <inheritdoc cref="RunLine(Line, ILineLocalisationProvider,
         /// Action)"/> FIXME: This doesn't seem to be called anymore ...?

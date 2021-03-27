@@ -70,7 +70,8 @@ namespace Yarn.Unity
         /// </remarks>
         /// <param name="lineIDs">A collection of line IDs that the line
         /// provider should prepare for.</param>
-        public virtual void PrepareForLines(IEnumerable<string> lineIDs) {
+        public virtual void PrepareForLines(IEnumerable<string> lineIDs)
+        {
             // No-op by default.
         }
 
@@ -109,14 +110,17 @@ namespace Yarn.Unity
         /// DialogueLine's ID
         /// </summary>
         public string TextID;
+
         /// <summary>
         /// DialogueLine's inline expression's substitution
         /// </summary>
         public string[] Substitutions;
+
         /// <summary>
         /// DialogueLine's text
         /// </summary>
         public string RawText;
+
         /// <summary>
         /// The line's delivery status.
         /// </summary>

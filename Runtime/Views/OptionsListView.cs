@@ -27,13 +27,15 @@ namespace Yarn.Unity
         // The line we saw most recently.
         private LocalizedLine lastSeenLine;
 
-        public void Start() {
+        public void Start()
+        {
             canvasGroup.alpha = 0;
             canvasGroup.interactable = false;
             canvasGroup.blocksRaycasts = false;
         }
 
-        public void Reset() {
+        public void Reset()
+        {
             canvasGroup = GetComponentInParent<CanvasGroup>();
         }
 
@@ -49,12 +51,14 @@ namespace Yarn.Unity
         public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
         {
             // Hide all existing option views
-            foreach (var optionView in optionViews) {
+            foreach (var optionView in optionViews)
+            {
                 optionView.gameObject.SetActive(false);
             }
 
             // If we don't already have enough option views, create more
-            while (dialogueOptions.Length > optionViews.Count) {
+            while (dialogueOptions.Length > optionViews.Count)
+            {
                 var optionView = CreateNewOptionView();
                 optionView.gameObject.SetActive(false);
             }
@@ -62,12 +66,14 @@ namespace Yarn.Unity
             // Set up all of the option views
             int optionViewsCreated = 0;
 
-            for (int i = 0; i < dialogueOptions.Length; i++) {
+            for (int i = 0; i < dialogueOptions.Length; i++)
+            {
 
                 var optionView = optionViews[i];
                 var option = dialogueOptions[i];
 
-                if (option.IsAvailable == false && showUnavailableOptions == false) {
+                if (option.IsAvailable == false && showUnavailableOptions == false)
+                {
                     // Don't show this option.
                     continue;
                 }
@@ -77,7 +83,8 @@ namespace Yarn.Unity
                 optionView.Option = option;
 
                 // The first available option is selected by default
-                if (optionViewsCreated == 0) {
+                if (optionViewsCreated == 0)
+                {
                     optionView.Select();
                 }
 
@@ -85,7 +92,8 @@ namespace Yarn.Unity
             }
 
             // Update the last line, if one is configured
-            if (lastLineText != null) {
+            if (lastLineText != null)
+            {
                 lastLineText.text = lastSeenLine.Text.Text;
             }
 
@@ -97,13 +105,13 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// /// Creates and configures a new <see cref="OptionView"/>, and adds
+        /// Creates and configures a new <see cref="OptionView"/>, and adds
         /// it to <see cref="optionViews"/>.
         /// </summary>
         private OptionView CreateNewOptionView()
         {
             var optionView = Instantiate(optionViewPrefab);
-            optionView.transform.SetParent(transform,false);
+            optionView.transform.SetParent(transform, false);
             optionView.transform.SetAsLastSibling();
 
             optionView.OnOptionSelected = OptionViewWasSelected;
@@ -115,7 +123,8 @@ namespace Yarn.Unity
         /// <summary>
         /// Called by <see cref="OptionView"/> objects.
         /// </summary>
-        private void OptionViewWasSelected(DialogueOption option) {
+        private void OptionViewWasSelected(DialogueOption option)
+        {
             StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeTime, () => OnOptionSelected(option.DialogueOptionID)));
             ;
         }

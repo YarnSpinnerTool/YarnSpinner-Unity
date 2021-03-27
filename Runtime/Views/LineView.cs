@@ -10,15 +10,18 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Layouts;
 #endif
 
-namespace Yarn.Unity {
+namespace Yarn.Unity
+{
 
-    public class InterruptionFlag {
-        public bool Interrupted {get; private set;} = false;
+    public class InterruptionFlag
+    {
+        public bool Interrupted { get; private set; } = false;
         public void Set() => Interrupted = true;
         public void Clear() => Interrupted = false;
     }
 
-    public static class Effects {
+    public static class Effects
+    {
         /// <summary>
         /// A coroutine that fades a <see cref="CanvasGroup"/> object's
         /// opacity from <paramref name="from"/> to <paramref name="to"/>
@@ -52,11 +55,14 @@ namespace Yarn.Unity {
             }
 
             canvasGroup.alpha = to;
- 
-            if (to == 0) {
+
+            if (to == 0)
+            {
                 canvasGroup.interactable = false;
                 canvasGroup.blocksRaycasts = false;
-            } else {
+            }
+            else
+            {
                 canvasGroup.interactable = true;
                 canvasGroup.blocksRaycasts = true;
             }
@@ -64,7 +70,8 @@ namespace Yarn.Unity {
             onComplete?.Invoke();
         }
 
-        public static IEnumerator Typewriter(TextMeshProUGUI text, float lettersPerSecond, Action onComplete = null, InterruptionFlag interruption = null) {
+        public static IEnumerator Typewriter(TextMeshProUGUI text, float lettersPerSecond, Action onComplete = null, InterruptionFlag interruption = null)
+        {
 
             // Start with everything invisible
             text.maxVisibleCharacters = 0;
@@ -78,7 +85,8 @@ namespace Yarn.Unity {
             var characterCount = text.textInfo.characterCount;
 
             // Early out if letter speed is zero or text length is zero
-            if (lettersPerSecond <= 0 || characterCount == 0) {
+            if (lettersPerSecond <= 0 || characterCount == 0)
+            {
                 // Show everything and invoke the completion handler
                 text.maxVisibleCharacters = characterCount;
                 onComplete?.Invoke();
@@ -99,11 +107,13 @@ namespace Yarn.Unity {
             // the requested speed.
             var accumulator = Time.deltaTime;
 
-            while (text.maxVisibleCharacters < characterCount && interruption?.Interrupted == false) {
+            while (text.maxVisibleCharacters < characterCount && interruption?.Interrupted == false)
+            {
 
                 // We need to show as many letters as we have accumulated
                 // time for.
-                while (accumulator >= secondsPerLetter) {
+                while (accumulator >= secondsPerLetter)
+                {
                     text.maxVisibleCharacters += 1;
                     accumulator -= secondsPerLetter;
                 }
@@ -124,7 +134,8 @@ namespace Yarn.Unity {
 
     public class LineView : DialogueViewBase
     {
-        internal enum ContinueActionType {
+        internal enum ContinueActionType
+        {
             None,
             KeyCode,
             InputSystemAction,
@@ -161,7 +172,7 @@ namespace Yarn.Unity {
         [SerializeField]
         [Min(0)]
         internal float typewriterEffectSpeed = 0f;
-        
+
         [SerializeField]
         internal GameObject continueButton = null;
 
@@ -183,18 +194,20 @@ namespace Yarn.Unity {
         [UnityEngine.Serialization.FormerlySerializedAs("skipAction")]
         internal InputAction continueAction = new InputAction("Skip", InputActionType.Button, CommonUsages.Cancel);
 #endif
-        
+
         private InterruptionFlag interruptionFlag = new InterruptionFlag();
 
         LocalizedLine currentLine = null;
 
-        public void Start() {
+        public void Start()
+        {
             canvasGroup.alpha = 0;
 
 #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
             // If we are using an action reference, and it's not null,
             // configure it
-            if (continueActionType == ContinueActionType.InputSystemActionFromAsset && continueActionReference != null) {
+            if (continueActionType == ContinueActionType.InputSystemActionFromAsset && continueActionReference != null)
+            {
                 continueActionReference.action.performed += UserPerformedSkipAction;
             }
 
@@ -211,17 +224,21 @@ namespace Yarn.Unity {
         }
 #endif
 
-        public void Reset() {
+        public void Reset()
+        {
             canvasGroup = GetComponentInParent<CanvasGroup>();
         }
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-        public void Update() {
+        public void Update()
+        {
             // If the legacy input system is available, we are configured
             // to use a keycode to skip lines, AND the skip keycode was
             // just pressed, then skip
-            if (continueActionType == ContinueActionType.KeyCode) {
-                if (UnityEngine.Input.GetKeyDown(continueActionKeyCode)) {
+            if (continueActionType == ContinueActionType.KeyCode)
+            {
+                if (UnityEngine.Input.GetKeyDown(continueActionKeyCode))
+                {
                     OnContinueClicked();
                 }
             }
@@ -240,7 +257,9 @@ namespace Yarn.Unity {
             if (useFadeEffect)
             {
                 StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeOutTime, onDismissalComplete));
-            } else {
+            }
+            else
+            {
                 canvasGroup.interactable = false;
                 canvasGroup.alpha = 0;
                 canvasGroup.blocksRaycasts = false;
@@ -262,10 +281,12 @@ namespace Yarn.Unity {
                 case LineStatus.FinishedPresenting:
                     // The line has finished being delivered by all views.
                     // Display the Continue button.
-                    if (continueButton != null) {
+                    if (continueButton != null)
+                    {
                         continueButton.SetActive(true);
                         var selectable = continueButton.GetComponentInChildren<Selectable>();
-                        if (selectable != null) {
+                        if (selectable != null)
+                        {
                             selectable.Select();
                         }
                     }
@@ -282,9 +303,12 @@ namespace Yarn.Unity {
 #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
             // If we are using a custom Unity Input System action, enable
             // it now.
-            if (continueActionType == ContinueActionType.InputSystemAction) {
+            if (continueActionType == ContinueActionType.InputSystemAction)
+            {
                 continueAction?.Enable();
-            } else if (continueActionType == ContinueActionType.InputSystemActionFromAsset) {
+            }
+            else if (continueActionType == ContinueActionType.InputSystemActionFromAsset)
+            {
                 continueActionReference?.action.Enable();
             }
 #endif
@@ -292,13 +316,15 @@ namespace Yarn.Unity {
             lineText.gameObject.SetActive(true);
             canvasGroup.gameObject.SetActive(true);
 
-            if (continueButton != null) {
+            if (continueButton != null)
+            {
                 continueButton.SetActive(false);
             }
 
             interruptionFlag.Clear();
 
-            if (characterNameText == null) {
+            if (characterNameText == null)
+            {
                 if (showCharacterNameInLineView)
                 {
                     lineText.text = dialogueLine.Text.Text;
@@ -307,34 +333,45 @@ namespace Yarn.Unity {
                 {
                     lineText.text = dialogueLine.TextWithoutCharacterName.Text;
                 }
-            } else {
+            }
+            else
+            {
                 characterNameText.text = dialogueLine.CharacterName;
                 lineText.text = dialogueLine.TextWithoutCharacterName.Text;
             }
 
-            if (useFadeEffect) {
-                if (useTypewriterEffect) {                
+            if (useFadeEffect)
+            {
+                if (useTypewriterEffect)
+                {
                     // If we're also using a typewriter effect, ensure that
                     // there are no visible characters so that we don't
                     // fade in on the text fully visible
                     lineText.maxVisibleCharacters = 0;
-                } else {
+                }
+                else
+                {
                     // Ensure that the max visible characters is effectively unlimited.
                     lineText.maxVisibleCharacters = int.MaxValue;
                 }
 
                 // Fade up and then call FadeComplete when done
                 StartCoroutine(Effects.FadeAlpha(canvasGroup, 0, 1, fadeInTime, () => FadeComplete(onDialogueLineFinished), interruptionFlag));
-            } else {
+            }
+            else
+            {
                 // Immediately appear 
                 canvasGroup.interactable = true;
                 canvasGroup.alpha = 1;
                 canvasGroup.blocksRaycasts = true;
 
-                if (useTypewriterEffect) {
+                if (useTypewriterEffect)
+                {
                     // Start the typewriter
                     StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, onDialogueLineFinished, interruptionFlag));
-                } else {
+                }
+                else
+                {
                     onDialogueLineFinished();
                 }
             }
@@ -342,15 +379,20 @@ namespace Yarn.Unity {
 
         private void FadeComplete(Action onDialogueLineFinished)
         {
-            if (useTypewriterEffect) {
+            if (useTypewriterEffect)
+            {
                 StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, onDialogueLineFinished, interruptionFlag));
-            } else {
+            }
+            else
+            {
                 onDialogueLineFinished();
             }
         }
 
-        public void OnContinueClicked() {
-            if (currentLine == null) {
+        public void OnContinueClicked()
+        {
+            if (currentLine == null)
+            {
                 // We're not actually displaying a line. No-op.
                 return;
             }
