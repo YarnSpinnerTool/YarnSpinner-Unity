@@ -47,6 +47,7 @@ namespace Yarn.Unity
     /// </remarks>
     /// <seealso cref="DialogueRunner"/>
     [HelpURL("https://yarnspinner.dev/docs/unity/components/dialogue-ui/")]
+    [System.Obsolete("This class will be removed before the release of 2.0. Use " + nameof(LineView) + " and " + nameof(OptionsListView) + " instead.")]
     public class DialogueUI : DialogueViewBase
     {
         /// <summary>
