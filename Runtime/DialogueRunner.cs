@@ -251,12 +251,6 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Starts running dialogue. The node specified by <see
-        /// cref="startNode"/> will start running.
-        /// </summary>
-        public void StartDialogue() => StartDialogue(startNode);
-
-        /// <summary>
         /// Start the dialogue from a specific node.
         /// </summary>
         /// <param name="startNode">The name of the node to start running
@@ -315,13 +309,22 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Starts running the dialogue again from the node named <see
-        /// cref="startNode"/>.
-        /// </summary>        
-        [Obsolete("Use " + nameof(StartDialogue) + " instead.")]
-        public void ResetDialogue()
+        /// Starts running the dialogue again.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="nodeName"/> is null, the node specified by
+        /// <see cref="startNode"/> is attempted, followed the currently
+        /// running node. If none of these options are available, an <see
+        /// cref="ArgumentNullException"/> is thrown.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">Thrown when a node to
+        /// restart the dialogue from cannot be found.</exception>
+        [Obsolete("Use " + nameof(StartDialogue) + "(nodeName) instead.")]
+        public void ResetDialogue(string nodeName = null)
         {
-            StartDialogue();
+            nodeName = nodeName ?? startNode ?? CurrentNodeName ?? throw new ArgumentNullException($"Cannot reset dialogue: couldn't figure out a node to restart the dialogue from.");
+            
+            StartDialogue(nodeName);
         }
 
         /// <summary>
@@ -636,7 +639,7 @@ namespace Yarn.Unity
 
                 if (startAutomatically)
                 {
-                    StartDialogue();
+                    StartDialogue(startNode);
                 }
             }
         }
