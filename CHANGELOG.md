@@ -8,10 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+### Changed
+
+### Removed
+
+## [v2.0.0-beta3] 2021-03-27
+
+### Added
+
 - The dialogue runner can now be configured to log less to the console, reducing the amount of noise it generates there. (@radiatoryang)
 - Warning messages and errors now appear to help users diagnose two common problems: (1) not adding a Command properly, (2) can't find a localization entry for a line (either because of broken line tag or bad connection to Localization Database) (@radiatoryang)
-- Added the ability for TextLineProvider and AudioLineProvider to override the project language settings.
-
 - Made options that have a line condition able to be presented to the player, but made unavailable.
 - This change was made in order to allow games to conditionally present, but disallow, options that the player can't choose. For example, consider the following script:
 
@@ -27,11 +33,8 @@ TD-110: Let me see your identification.
 - If the variable `$learnt_mind_trick` is false, a game may want to show the option but not allow the player to select it (i.e., show that this option could have been chosen if they'd learned how to do a mind trick.)
 - In previous versions of Yarn Spinner, if a line condition failed, the entire option was not delivered to the game. With this change, all options are delivered, and the `OptionSet.Option.IsAvailable` variable contains `false` if the condition was not met, and `true` if it was (or was not present.)
 - The `DialogueUI` component now has a "showUnavailableOptions" option that controls the display behaviour of unavailable options. If it's true, then unavailable options are presented, but not selectable; if it's false, then unavailable options are not presented at all (i.e. same as Yarn Spinner 1.0.)
-
 - Audio for lines in a `Localization` object can now be previewed in the editor. (@radiatoryang)
-
 - Lines can be added to a `Localization` object at runtime. They're only stored in memory, and are discarded when gameplay ends.
-
 - Commands that take a boolean parameter now support specifying that parameter by its name, rather than requiring the string `true`.
 - For example, if you have a command like this:
 
@@ -45,21 +48,18 @@ TD-110: Let me see your identification.
 Previously, you'd need to use this in your Yarn scripts:
 
 ```
-<<walk MyDestination true>>
+<<walk MyObject MyDestination true>>
 ```
 
 With this change, you can instead say this:
 
 ```
-<<walk MyDestination wait>>
+<<walk MyObject MyDestination wait>>
 ```
 
 - New icons for Yarn Spinner assets have been added.
-
 - New dialogue views, `LineView` and `OptionListView`, have been added. These are intended to replace the previous `DialogueUI`, make use of TextMeshPro for text display, and allow for easier customisation through prefabs.
-
 - `DialogueRunner`s will now automatically create and use an `InMemoryVariableStorage` object if one isn't provided.
-
 - The Inspector for `DialogueRunner` has been updated, and is now easier to use.
 
 ### Changed
@@ -67,11 +67,15 @@ With this change, you can instead say this:
 - Certain private methods in `DialogueUI` have changed to protected, making it easier to subclass (@radiatoryang)
 - Fixed an issue where option buttons from previous option prompts could re-appear in later prompts (@radiatoryang)
 - Fixed an issue where dialogue views that are not enabled were still being waited for (@radiatoryang)
-- Upgrader tool now creates new files on disk, where needed (for example, .yarnprogram files)
+- Upgrader tool now creates new files on disk, where needed (for example, .yarnproject files)
 - `YarnProgram`, the asset that stores references to individual .yarn files for compilation, has been renamed to `YarnProject`. Because this change makes Unity forget any existing references to "YarnProgram" assets, **when upgrading to this version, you must set the Yarn Project field in your Dialogue Runners again.**
-- `Localization`, the asset that mapped line IDs to localized data, is now automatically generated for you by the `YarnProject`. You don't create them yourselves, and you no longer need to manually refresh them. The `YarnProject` always creates at least one localization: the "Base" localization, which contains the original text found in your `.yarn` files. You can create more localizations in the `YarnProject`'s inspector, and supply the language code to use and a `.csv` file containing replacement strings.
+- `Localization`, the asset that mapped line IDs to localized data, is now automatically generated for you by the `YarnProject`. 
+  - You don't create them yourselves, and you no longer need to manually refresh them. 
+  - The `YarnProject` always creates at least one localization: the "Base" localization, which contains the original text found in your `.yarn` files. 
+  - You can create more localizations in the `YarnProject`'s inspector, and supply the language code to use and a `.csv` file containing replacement strings.
 - Renamed the 'StartHere' demo to 'Intro', because it's not actually the first step in installing Yarn Spinner.
-- Simplified the workflow for working with Addressable Assets - you now import the package, enable its use on your Yarn Project, and click the Update Asset Addresses button to ensure that all assets have an address that Yarn Spinner knows about.
+- Simplified the workflow for working with Addressable Assets.
+  - You now import the package, enable its use on your Yarn Project, and click the Update Asset Addresses button to ensure that all assets have an address that Yarn Spinner knows about.
 - The 3D, VisualNovel, and Intro examples have been updated to use the new `LineView` and `OptionsListView` components, rather than `DialogueUI`.
 - `DialogueRunner.ResetDialogue` is now marked as Obsolete (it had the same effect as just calling `StartDialogue` anyway.)
 - The `LineStatus` enum's values have been renamed, to better convey their purpose:
