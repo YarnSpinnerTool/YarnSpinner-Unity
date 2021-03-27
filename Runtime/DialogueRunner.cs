@@ -64,7 +64,7 @@ namespace Yarn.Unity
         /// <summary>The name of the node to start from.</summary>
         /// <remarks>
         /// This value is used to select a node to start from when <see
-        /// cref="StartDialogue"/> is called.
+        /// cref="startAutomatically"/> is called.
         /// </remarks>
         public string startNode = Yarn.Dialogue.DefaultStartNodeName;
 
@@ -143,18 +143,6 @@ namespace Yarn.Unity
         public UnityEvent onDialogueComplete;
 
         /// <summary>
-        /// Gets the name of the current node that is being run.
-        /// </summary>
-        /// <seealso cref="Dialogue.currentNode"/>
-        public string CurrentNodeName => Dialogue.CurrentNode;
-
-        /// <summary>
-        /// Gets the underlying <see cref="Dialogue"/> object that runs the
-        /// Yarn code.
-        /// </summary>
-        public Dialogue Dialogue => _dialogue ?? (_dialogue = CreateDialogueInstance());
-
-        /// <summary>
         /// A <see cref="StringUnityEvent"/> that is called when a <see
         /// cref="Command"/> is received.
         /// </summary>
@@ -178,6 +166,18 @@ namespace Yarn.Unity
         /// <seealso cref="AddCommandHandler(string, CommandHandler)"/>
         /// <seealso cref="YarnCommandAttribute"/>
         public StringUnityEvent onCommand;
+
+        /// <summary>
+        /// Gets the name of the current node that is being run.
+        /// </summary>
+        /// <seealso cref="Dialogue.currentNode"/>
+        public string CurrentNodeName => Dialogue.CurrentNode;
+
+        /// <summary>
+        /// Gets the underlying <see cref="Dialogue"/> object that runs the
+        /// Yarn code.
+        /// </summary>
+        public Dialogue Dialogue => _dialogue ?? (_dialogue = CreateDialogueInstance());
 
         /// <summary>
         /// The collection of registered YarnCommand-tagged methods.
