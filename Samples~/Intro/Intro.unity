@@ -5144,6 +5144,53 @@ Transform:
   m_Father: {fileID: 757243267}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
+--- !u!1 &319993979
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 319993981}
+  - component: {fileID: 319993980}
+  m_Layer: 0
+  m_Name: Voice Over
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &319993980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319993979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb87ae987c60e9d4f8346202d271648d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fadeOutTimeOnLineFinish: 0.05
+  waitTimeBeforeLineStart: 0.1
+  waitTimeAfterLineComplete: 0.5
+  audioSource: {fileID: 0}
+--- !u!4 &319993981
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319993979}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 784.2908, y: 427.51587, z: -18.84578}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &424243560
 GameObject:
   m_ObjectHideFlags: 0
@@ -5220,7 +5267,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 25
+  m_AdditionalShaderChannelsFlag: 1
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -5277,7 +5324,7 @@ Transform:
   - {fileID: 225466838}
   - {fileID: 78317532}
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &976859271
 GameObject:
@@ -5360,7 +5407,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &993905817
 GameObject:
@@ -10206,7 +10253,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1290606828
 GameObject:
@@ -10218,10 +10265,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1290606832}
   - component: {fileID: 1290606831}
-  - component: {fileID: 1290606830}
-  - component: {fileID: 1290606829}
   - component: {fileID: 1290606834}
-  - component: {fileID: 1290606833}
   - component: {fileID: 1290606835}
   m_Layer: 0
   m_Name: Dialogue Runner
@@ -10230,44 +10274,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1290606829
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1290606828}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 867336b34cfa84ecf97b051a7b4ba8f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  contentContainer: {fileID: 0}
-  lineText: {fileID: 0}
-  optionButtonTemplate: {fileID: 0}
-  optionContainer: {fileID: 0}
-  fadeTime: 0.25
-  characters:
-  - name: Tom
-    color: {r: 1, g: 0.8352941, b: 0.41568628, a: 1}
-  - name: Anne
-    color: {r: 0.41568625, g: 1, b: 0.94345075, a: 1}
-  optionsColor: {r: 1, g: 0.8352941, b: 0.41568628, a: 1}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &1290606830
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1290606828}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 610c541718d694070a21327d1ae62e75, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  showDebug: 0
-  debugTextView: {fileID: 0}
 --- !u!114 &1290606831
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10281,15 +10287,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   yarnProject: {fileID: 7545569452688597077, guid: 55636a520881a41289ff66b8d06e2a3f, type: 3}
-  variableStorage: {fileID: 1290606830}
+  variableStorage: {fileID: 0}
   dialogueViews:
-  - {fileID: 1290606833}
+  - {fileID: 319993980}
   - {fileID: 4935123090840333077}
   - {fileID: 6323935187362328800}
   - {fileID: 33153664}
   startNode: Start
   startAutomatically: 1
-  continueNextLineOnLineFinished: 1
+  automaticallyContinueLines: 1
   runSelectedOptionAsLine: 1
   lineProvider: {fileID: 1290606834}
   verboseLogging: 1
@@ -10319,22 +10325,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1290606833
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1290606828}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb87ae987c60e9d4f8346202d271648d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  fadeOutTimeOnLineFinish: 0.05
-  waitTimeBeforeLineStart: 0.1
-  waitTimeAfterLineComplete: 0.5
-  audioSource: {fileID: 0}
 --- !u!114 &1290606834
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10452,7 +10442,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
 --- !u!1 &1489939340
 GameObject:
@@ -15334,7 +15324,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!224 &591704808857048583
 RectTransform:
@@ -15657,16 +15647,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canvasGroup: {fileID: 4935123090840333076}
+  useFadeEffect: 1
   fadeInTime: 0.25
   fadeOutTime: 0.05
   lineText: {fileID: 4935123091905265835}
-  showCharacterName: 0
+  showCharacterNameInLineView: 0
   characterNameText: {fileID: 0}
   useTypewriterEffect: 1
   typewriterEffectSpeed: 120
   continueButton: {fileID: 0}
   continueActionType: 1
   continueActionKeyCode: 27
+  continueActionReference: {fileID: 0}
+  continueAction:
+    m_Name: Skip
+    m_Type: 1
+    m_ExpectedControlType: 
+    m_Id: 
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: 
+      m_Path: Cancel
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Skip
+      m_Flags: 0
 --- !u!114 &4935123090840333078
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16057,6 +16065,7 @@ MonoBehaviour:
   optionViewPrefab: {fileID: 773296065738612373}
   lastLineText: {fileID: 0}
   fadeTime: 0.1
+  showUnavailableOptions: 0
 --- !u!114 &6323935187362328802
 MonoBehaviour:
   m_ObjectHideFlags: 0
