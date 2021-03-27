@@ -380,7 +380,7 @@ namespace Yarn.Unity.Editor
                 // Ensure it's a YarnProjectImporter
                 .OfType<YarnProjectImporter>()
                 // Get all of their source scripts, as a single sequence
-                .SelectMany(importer => importer.sourceScripts)
+                .SelectMany(i => i.sourceScripts)
                 // Get the path for each asset
                 .Select(sourceAsset => AssetDatabase.GetAssetPath(sourceAsset))
                 // get each asset importer for that path
@@ -389,7 +389,7 @@ namespace Yarn.Unity.Editor
                 .OfType<YarnImporter>()
                 // get the path for each importer's asset (the compiler
                 // will use this)
-                .Select(importer => AssetDatabase.GetAssetPath(importer))
+                .Select(i => AssetDatabase.GetAssetPath(i))
                 // remove any nulls, in case any are found
                 .Where(path => path != null);
 

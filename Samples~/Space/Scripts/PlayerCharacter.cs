@@ -72,12 +72,12 @@ namespace Yarn.Unity.Example
 
             // Move the player, clamping them to within the boundaries of
             // the level.
+            var movement = 0f;
 #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-                var movement = 0f;
-                movement += Keyboard.current.rightArrowKey.isPressed ? 1f : 0f;
-                movement += Keyboard.current.leftArrowKey.isPressed ? -1f : 0f;
-#elif ENABLE_LEGACY_INPUT_MANAGER
-            var movement = Input.GetAxis("Horizontal");
+            movement += Keyboard.current.rightArrowKey.isPressed ? 1f : 0f;
+            movement += Keyboard.current.leftArrowKey.isPressed ? -1f : 0f;
+#elif ENABLE_LEGACY_INPUT_MANAGER || UNITY_2018
+            movement += Input.GetAxis("Horizontal");
 #endif
 
             movement += movementFromButtons;

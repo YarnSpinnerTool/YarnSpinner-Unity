@@ -16,7 +16,7 @@ namespace Yarn.Unity.Tests
         {
             var path = AssetDatabase.FindAssets(Path.GetFileNameWithoutExtension(directoryName) + " t:DefaultAsset")
                                     .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
-                                    .FirstOrDefault(path => Path.GetFileName(path) == directoryName);
+                                    .FirstOrDefault(p => Path.GetFileName(p) == directoryName);
 
             if (path == null)
             {
@@ -34,7 +34,7 @@ namespace Yarn.Unity.Tests
         {
             var path = AssetDatabase.FindAssets(Path.GetFileNameWithoutExtension(fileName))
                                     .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
-                                    .FirstOrDefault(path => Path.GetFileName(path) == fileName);
+                                    .FirstOrDefault(p => Path.GetFileName(p) == fileName);
 
             if (path == null)
             {
