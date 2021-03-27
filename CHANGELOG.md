@@ -61,6 +61,8 @@ With this change, you can instead say this:
 
 - `DialogueRunner`s will now automatically create and use an `InMemoryVariableStorage` object if one isn't provided.
 
+- The Inspector for `DialogueRunner` has been updated, and is now easier to use.
+
 ### Changed
 
 - Certain private methods in `DialogueUI` have changed to protected, making it easier to subclass (@radiatoryang)
