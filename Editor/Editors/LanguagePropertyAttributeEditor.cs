@@ -11,10 +11,13 @@ namespace Yarn.Unity
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            // If this property is not a string, fall back to default implementation.
+            // If this property is not a string, show an error label. (We
+            // can't call EditorGUI.PropertyField, because that would cause
+            // an infinite recursion - Unity would invoke this property
+            // drawer again.)
             if (property.propertyType != SerializedPropertyType.String)
             {
-                EditorGUI.PropertyField(position, property, label);
+                EditorGUI.HelpBox(position, $"{property.name} is not a string.", MessageType.Error);
                 return;
             }
 
