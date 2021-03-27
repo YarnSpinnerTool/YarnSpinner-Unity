@@ -1540,7 +1540,7 @@ namespace Yarn.Unity
         Presenting,
         /// <summary>
         /// The user has interrupted the delivery of this line, by calling
-        /// <see cref="DialogueViewBase.MarkLineComplete"/> before all line
+        /// <see cref="DialogueViewBase.ReadyForNextLine"/> before all line
         /// views finished delivering the line. All line views should
         /// finish delivering the line as quickly as possible, and then
         /// signal that the line has been <see cref="FinishedPresenting"/>.
@@ -1560,7 +1560,7 @@ namespace Yarn.Unity
         ///
         /// A line remains in the <see cref="FinishedPresenting"/> state until a
         /// Dialogue View calls <see
-        /// cref="DialogueViewBase.MarkLineComplete"/>. At this point, the
+        /// cref="DialogueViewBase.ReadyForNextLine"/>. At this point, the
         /// line will transition to the <see cref="Dismissed"/> state, and <see
         /// cref="DialogueViewBase.DismissLine(Action)"/> will be called on
         /// all views to dismiss the line.

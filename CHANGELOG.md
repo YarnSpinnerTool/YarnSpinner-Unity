@@ -79,6 +79,7 @@ With this change, you can instead say this:
   - `Delivered` is now `FinishedPresenting`.
   - `Ended` is now `Dismissed` .
 - The `ResetDialogue()` method now takes an optional parameter to restart from. If none is provided, the dialogue runner attempts to restart from the start node, followed by the current node, or else throws an exception.
+- `DialogueViewBase.MarkLineComplete`, the method for signalling that the user wants to interrupt or proceed to the next line, has been renamed to `ReadyForNextLine`.
 
 ### Removed
 

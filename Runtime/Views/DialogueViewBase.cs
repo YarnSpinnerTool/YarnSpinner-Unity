@@ -157,7 +157,7 @@ namespace Yarn.Unity
         /// to <see cref="LineStatus.Interrupted"/>, and <see
         /// cref="OnLineStatusChanged"/> will be called to notify the view.
         /// </remarks>
-        public void MarkLineComplete()
+        public void ReadyForNextLine()
         {
             // Call the continuation callback, if we have it.
             onUserWantsLineContinuation?.Invoke();

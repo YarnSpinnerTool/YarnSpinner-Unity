@@ -354,7 +354,7 @@ namespace Yarn.Unity {
                 // We're not actually displaying a line. No-op.
                 return;
             }
-            MarkLineComplete();
+            ReadyForNextLine();
         }
     }
 }
