@@ -16,6 +16,8 @@ namespace Yarn.Unity
 
         [SerializeField] float fadeTime = 0.1f;
 
+        [SerializeField] bool showUnavailableOptions = false;
+
         // A cached pool of OptionView objects so that we can reuse them
         private List<OptionView> optionViews = new List<OptionView>();
 
@@ -53,23 +55,33 @@ namespace Yarn.Unity
 
             // If we don't already have enough option views, create more
             while (dialogueOptions.Length > optionViews.Count) {
-                CreateNewOptionView();
+                var optionView = CreateNewOptionView();
+                optionView.gameObject.SetActive(false);
             }
 
             // Set up all of the option views
+            int optionViewsCreated = 0;
+
             for (int i = 0; i < dialogueOptions.Length; i++) {
 
                 var optionView = optionViews[i];
                 var option = dialogueOptions[i];
 
+                if (option.IsAvailable == false && showUnavailableOptions == false) {
+                    // Don't show this option.
+                    continue;
+                }
+
                 optionView.gameObject.SetActive(true);
 
                 optionView.Option = option;
 
-                // The first option is selected by default
-                if (i == 0) {
+                // The first available option is selected by default
+                if (optionViewsCreated == 0) {
                     optionView.Select();
                 }
+
+                optionViewsCreated += 1;
             }
 
             // Update the last line, if one is configured
@@ -88,7 +100,7 @@ namespace Yarn.Unity
         /// /// Creates and configures a new <see cref="OptionView"/>, and adds
         /// it to <see cref="optionViews"/>.
         /// </summary>
-        private void CreateNewOptionView()
+        private OptionView CreateNewOptionView()
         {
             var optionView = Instantiate(optionViewPrefab);
             optionView.transform.SetParent(transform,false);
@@ -96,6 +108,8 @@ namespace Yarn.Unity
 
             optionView.OnOptionSelected = OptionViewWasSelected;
             optionViews.Add(optionView);
+
+            return optionView;
         }
 
         /// <summary>
