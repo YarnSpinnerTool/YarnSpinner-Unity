@@ -219,7 +219,7 @@ namespace Yarn.Unity
         /// <remarks>
         /// This method is called after the line's <see
         /// cref="LocalizedLine.Status"/> has changed to <see
-        /// cref="LineStatus.Ended"/>. Use this method to dismiss the
+        /// cref="LineStatus.Dismissed"/>. Use this method to dismiss the
         /// line's UI elements.
         ///
         /// After this method is called, the next piece of dialogue content
@@ -360,7 +360,7 @@ namespace Yarn.Unity
 
             switch (dialogueLine.Status)
             {
-                case LineStatus.Running:
+                case LineStatus.Presenting:
                     // No-op; this line is running
                     break;
                 case LineStatus.Interrupted:
@@ -368,12 +368,12 @@ namespace Yarn.Unity
                     // in our delivery
                     finishCurrentLine = true;
                     break;
-                case LineStatus.Delivered:
+                case LineStatus.FinishedPresenting:
                     // The line has now finished its delivery across all
                     // views, so we can signal call our UnityEvent for it
                     onLineFinishDisplaying?.Invoke();
                     break;
-                case LineStatus.Ended:
+                case LineStatus.Dismissed:
                     // The line has now Ended. DismissLine will be called
                     // shortly.
                     onLineEnd?.Invoke();

@@ -153,7 +153,7 @@ namespace Yarn.Unity
         ///
         /// If this method is called before the line has finished appearing
         /// (that is, before the line's status changes to <see
-        /// cref="LineStatus.Delivered"/>), the line's status will change
+        /// cref="LineStatus.FinishedPresenting"/>), the line's status will change
         /// to <see cref="LineStatus.Interrupted"/>, and <see
         /// cref="OnLineStatusChanged"/> will be called to notify the view.
         /// </remarks>

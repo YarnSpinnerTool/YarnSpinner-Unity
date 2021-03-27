@@ -73,6 +73,11 @@ With this change, you can instead say this:
 - Simplified the workflow for working with Addressable Assets - you now import the package, enable its use on your Yarn Project, and click the Update Asset Addresses button to ensure that all assets have an address that Yarn Spinner knows about.
 - The 3D, VisualNovel, and Intro examples have been updated to use the new `LineView` and `OptionsListView` components, rather than `DialogueUI`.
 - `DialogueRunner.ResetDialogue` is now marked as Obsolete (it had the same effect as just calling `StartDialogue` anyway.)
+- The `LineStatus` enum's values have been renamed, to better convey their purpose:
+  - `Running` is now `Presenting`.
+  - `Interrupted` remains the same.
+  - `Delivered` is now `FinishedPresenting`.
+  - `Ended` is now `Dismissed` .
 
 ### Removed
 

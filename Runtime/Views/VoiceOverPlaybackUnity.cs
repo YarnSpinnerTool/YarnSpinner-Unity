@@ -155,7 +155,7 @@ namespace Yarn.Unity
         {
             switch (dialogueLine.Status)
             {
-                case LineStatus.Running:
+                case LineStatus.Presenting:
                     // Nothing to do here - continue running.
                     break;
                 case LineStatus.Interrupted:
@@ -164,12 +164,12 @@ namespace Yarn.Unity
                     // by fadeOutTimeOnLineFinish.
                     interrupted = true;
                     break;
-                case LineStatus.Delivered:
+                case LineStatus.FinishedPresenting:
                     // The line has finished delivery on all views. Nothing
                     // left to do for us, since the audio will have already
                     // finished playing out.
                     break;
-                case LineStatus.Ended:
+                case LineStatus.Dismissed:
                     // The line is being dismissed; we should ensure that
                     // audio playback has ended.
                     audioSource.Stop();

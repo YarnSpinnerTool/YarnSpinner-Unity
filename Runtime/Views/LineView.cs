@@ -252,14 +252,14 @@ namespace Yarn.Unity {
         {
             switch (dialogueLine.Status)
             {
-                case LineStatus.Running:
+                case LineStatus.Presenting:
                     break;
                 case LineStatus.Interrupted:
                     // We have been interrupted. Set our interruption flag,
                     // so that any animations get skipped.
                     interruptionFlag.Set();
                     break;
-                case LineStatus.Delivered:
+                case LineStatus.FinishedPresenting:
                     // The line has finished being delivered by all views.
                     // Display the Continue button.
                     if (continueButton != null) {
@@ -270,7 +270,7 @@ namespace Yarn.Unity {
                         }
                     }
                     break;
-                case LineStatus.Ended:
+                case LineStatus.Dismissed:
                     break;
             }
         }

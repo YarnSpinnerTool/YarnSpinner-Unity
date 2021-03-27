@@ -272,36 +272,33 @@ namespace Yarn.Unity
             }
 
             // Get it going
-            RunDialogue();
-            void RunDialogue()
+            
+            // Mark that we're in conversation.
+            IsDialogueRunning = true;
+
+            // Signal that we're starting up.
+            foreach (var dialogueView in dialogueViews)
             {
-                // Mark that we're in conversation.
-                IsDialogueRunning = true;
+                if (dialogueView == null || dialogueView.enabled == false) continue;
 
-                // Signal that we're starting up.
-                foreach (var dialogueView in dialogueViews)
-                {
-                    if (dialogueView == null || dialogueView.enabled == false) continue;
+                dialogueView.DialogueStarted();
+            }
 
-                    dialogueView.DialogueStarted();
-                }
+            // Request that the dialogue select the current node. This
+            // will prepare the dialogue for running; as a side effect,
+            // our prepareForLines delegate may be called.
+            Dialogue.SetNode(startNode);
 
-                // Request that the dialogue select the current node. This
-                // will prepare the dialogue for running; as a side effect,
-                // our prepareForLines delegate may be called.
-                Dialogue.SetNode(startNode);
-
-                if (lineProvider.LinesAvailable == false)
-                {
-                    // The line provider isn't ready to give us our lines
-                    // yet. We need to start a coroutine that waits for
-                    // them to finish loading, and then runs the dialogue.
-                    StartCoroutine(ContinueDialogueWhenLinesAvailable());
-                }
-                else
-                {
-                    ContinueDialogue();
-                }
+            if (lineProvider.LinesAvailable == false)
+            {
+                // The line provider isn't ready to give us our lines
+                // yet. We need to start a coroutine that waits for
+                // them to finish loading, and then runs the dialogue.
+                StartCoroutine(ContinueDialogueWhenLinesAvailable());
+            }
+            else
+            {
+                ContinueDialogue();
             }
         }
 
@@ -570,10 +567,6 @@ namespace Yarn.Unity
          */
         private Dialogue _dialogue;
 
-        // If true, lineProvider was created at runtime, and will be empty.
-        // Calls to Add() should insert line content into it.
-        private bool lineProviderIsTemporary = false;
-
         // The current set of options that we're presenting. Null if we're
         // not currently presenting options.
         private OptionSet currentOptions;
@@ -621,9 +614,9 @@ namespace Yarn.Unity
             System.Action continueAction = OnViewUserIntentNextLine;
             foreach (var dialogueView in dialogueViews)
             {
+                // Skip any null or disabled dialogue views
                 if (dialogueView == null || dialogueView.enabled == false)
                 {
-                    Debug.LogWarning("The 'Dialogue Views' field contains a NULL element.", gameObject);
                     continue;
                 }
 
@@ -638,6 +631,7 @@ namespace Yarn.Unity
                 }
 
                 Dialogue.SetProgram(yarnProject.GetProgram());
+
                 lineProvider.YarnProject = yarnProject;
 
                 if (startAutomatically)
@@ -691,157 +685,157 @@ namespace Yarn.Unity
             selectAction = SelectedOption;
 
             return dialogue;
+        }
 
-            IEnumerator DoHandleWait(float duration)
+        IEnumerator DoHandleWait(float duration)
+        {
+            yield return new WaitForSeconds(duration);
+
+        }
+
+        void HandleOptions(OptionSet options)
+        {
+            currentOptions = options;
+
+            DialogueOption[] optionSet = new DialogueOption[options.Options.Length];
+            for (int i = 0; i < options.Options.Length; i++)
             {
-                yield return new WaitForSeconds(duration);
 
+                // Localize the line associated with the option
+                var localisedLine = lineProvider.GetLocalizedLine(options.Options[i].Line);
+                var text = Dialogue.ExpandSubstitutions(localisedLine.RawText, options.Options[i].Line.Substitutions);
+                localisedLine.Text = Dialogue.ParseMarkup(text);
+
+                optionSet[i] = new DialogueOption
+                {
+                    TextID = options.Options[i].Line.ID,
+                    DialogueOptionID = options.Options[i].ID,
+                    Line = localisedLine,
+                    IsAvailable = options.Options[i].IsAvailable,
+                };
             }
-
-            void HandleOptions(OptionSet options)
+            foreach (var dialogueView in dialogueViews)
             {
-                currentOptions = options;
+                if (dialogueView == null || dialogueView.enabled == false) continue;
 
-                DialogueOption[] optionSet = new DialogueOption[options.Options.Length];
-                for (int i = 0; i < options.Options.Length; i++)
-                {
-
-                    // Localize the line associated with the option
-                    var localisedLine = lineProvider.GetLocalizedLine(options.Options[i].Line);
-                    var text = Dialogue.ExpandSubstitutions(localisedLine.RawText, options.Options[i].Line.Substitutions);
-                    localisedLine.Text = Dialogue.ParseMarkup(text);
-
-                    optionSet[i] = new DialogueOption
-                    {
-                        TextID = options.Options[i].Line.ID,
-                        DialogueOptionID = options.Options[i].ID,
-                        Line = localisedLine,
-                        IsAvailable = options.Options[i].IsAvailable,
-                    };
-                }
-                foreach (var dialogueView in dialogueViews)
-                {
-                    if (dialogueView == null || dialogueView.enabled == false) continue;
-
-                    dialogueView.RunOptions(optionSet, selectAction);
-                }
+                dialogueView.RunOptions(optionSet, selectAction);
             }
+        }
 
-            void HandleDialogueComplete()
+        void HandleDialogueComplete()
+        {
+            IsDialogueRunning = false;
+            foreach (var dialogueView in dialogueViews)
             {
-                IsDialogueRunning = false;
-                foreach (var dialogueView in dialogueViews)
-                {
-                    if (dialogueView == null || dialogueView.enabled == false) continue;
+                if (dialogueView == null || dialogueView.enabled == false) continue;
 
-                    dialogueView.DialogueComplete();
-                }
-                onDialogueComplete.Invoke();
+                dialogueView.DialogueComplete();
             }
+            onDialogueComplete.Invoke();
+        }
 
-            void HandleCommand(Command command)
+        void HandleCommand(Command command)
+        {
+            bool wasValidCommand;
+
+            // Try looking in the command handlers first
+            wasValidCommand = DispatchCommandToRegisteredHandlers(command);
+
+            if (wasValidCommand)
             {
-                bool wasValidCommand;
-
-                // Try looking in the command handlers first
-                wasValidCommand = DispatchCommandToRegisteredHandlers(command);
-
-                if (wasValidCommand)
-                {
-                    // This was a valid command.
-                    return;
-                }
-
-                // We didn't find it in the comand handlers. Try looking in
-                // the game objects.
-                wasValidCommand = DispatchCommandToGameObject(command);
-
-                if (wasValidCommand)
-                {
-                    // We found an object and method to invoke as a Yarn
-                    // command. 
-                    return;
-                }
-
-                // We didn't find a method in our C# code to invoke. Try
-                // invoking on the publicly exposed UnityEvent.
-                onCommand?.Invoke(command.Text);
-
-                if (onCommand == null || onCommand.GetPersistentEventCount() == 0)
-                {
-                    Debug.LogError($"No Command <<{command.Text}>> was found. Did you remember to use the YarnCommand attribute or AddCommandHandler() function in C#?");
-                }
+                // This was a valid command.
                 return;
             }
 
-            /// Forward the line to the dialogue UI.
-            void HandleLine(Line line)
+            // We didn't find it in the comand handlers. Try looking in the
+            // game objects.
+            wasValidCommand = DispatchCommandToGameObject(command);
+
+            if (wasValidCommand)
             {
-                // Get the localized line from our line provider
-                CurrentLine = lineProvider.GetLocalizedLine(line);
-
-                // Expand substitutions
-                var text = Dialogue.ExpandSubstitutions(CurrentLine.RawText, CurrentLine.Substitutions);
-
-                if (text == null)
-                {
-                    Debug.LogWarning($"Dialogue Runner couldn't expand substitutions in Yarn Project [{ yarnProject.name }] node [{ CurrentNodeName }] with line ID [{ CurrentLine.TextID }]. "
-                        + "This usually happens because it couldn't find text in the Localization. Either the line isn't tagged properly, or the Line Database isn't tracking the Yarn script's updates. "
-                        + "For now, Dialogue Runner will swap in CurrentLine.RawText ... but you should fix this problem.");
-                    text = CurrentLine.RawText;
-                }
-
-                // Render the markup
-                CurrentLine.Text = Dialogue.ParseMarkup(text);
-
-                CurrentLine.Status = LineStatus.Running;
-
-                // Clear the set of active dialogue views, just in case
-                ActiveDialogueViews.Clear();
-
-                // Send line to available dialogue views
-                foreach (var dialogueView in dialogueViews)
-                {
-                    if (dialogueView == null || dialogueView.enabled == false) continue;
-
-                    // Mark this dialogue view as active                
-                    ActiveDialogueViews.Add(dialogueView);
-                    dialogueView.RunLine(CurrentLine,
-                        () => DialogueViewCompletedDelivery(dialogueView));
-                }
+                // We found an object and method to invoke as a Yarn
+                // command. 
+                return;
             }
 
-            /// Indicates to the DialogueRunner that the user has selected
-            /// an option
-            void SelectedOption(int obj)
-            {
-                // Mark that this is the currently selected option in the
-                // Dialogue
-                Dialogue.SetSelectedOption(obj);
+            // We didn't find a method in our C# code to invoke. Try
+            // invoking on the publicly exposed UnityEvent.
+            onCommand?.Invoke(command.Text);
 
-                if (runSelectedOptionAsLine)
+            if (onCommand == null || onCommand.GetPersistentEventCount() == 0)
+            {
+                Debug.LogError($"No Command <<{command.Text}>> was found. Did you remember to use the YarnCommand attribute or AddCommandHandler() function in C#?");
+            }
+            return;
+        }
+
+        /// Forward the line to the dialogue UI.
+        void HandleLine(Line line)
+        {
+            // Get the localized line from our line provider
+            CurrentLine = lineProvider.GetLocalizedLine(line);
+
+            // Expand substitutions
+            var text = Dialogue.ExpandSubstitutions(CurrentLine.RawText, CurrentLine.Substitutions);
+
+            if (text == null)
+            {
+                Debug.LogWarning($"Dialogue Runner couldn't expand substitutions in Yarn Project [{ yarnProject.name }] node [{ CurrentNodeName }] with line ID [{ CurrentLine.TextID }]. "
+                    + "This usually happens because it couldn't find text in the Localization. The line may not be tagged properly. "
+                    + "Try re-importing this Yarn Program. "
+                    + "For now, Dialogue Runner will swap in CurrentLine.RawText.");
+                text = CurrentLine.RawText;
+            }
+
+            // Render the markup
+            CurrentLine.Text = Dialogue.ParseMarkup(text);
+
+            CurrentLine.Status = LineStatus.Presenting;
+
+            // Clear the set of active dialogue views, just in case
+            ActiveDialogueViews.Clear();
+
+            // Send line to available dialogue views
+            foreach (var dialogueView in dialogueViews)
+            {
+                if (dialogueView == null || dialogueView.enabled == false) continue;
+
+                // Mark this dialogue view as active
+                ActiveDialogueViews.Add(dialogueView);
+                dialogueView.RunLine(CurrentLine,
+                    () => DialogueViewCompletedDelivery(dialogueView));
+            }
+        }
+
+        /// Indicates to the DialogueRunner that the user has selected an
+        /// option
+        void SelectedOption(int obj)
+        {
+            // Mark that this is the currently selected option in the
+            // Dialogue
+            Dialogue.SetSelectedOption(obj);
+
+            if (runSelectedOptionAsLine)
+            {
+                foreach (var option in currentOptions.Options)
                 {
-                    foreach (var option in currentOptions.Options)
+                    if (option.ID == obj)
                     {
-                        if (option.ID == obj)
-                        {
-                            HandleLine(option.Line);
-                            return;
-                        }
+                        HandleLine(option.Line);
+                        return;
                     }
-
-                    Debug.LogError($"Can't run selected option ({obj}) as a line: couldn't find the option's associated {nameof(Line)} object");
-                    ContinueDialogue();
-                }
-                else
-                {
-                    ContinueDialogue();
                 }
 
+                Debug.LogError($"Can't run selected option ({obj}) as a line: couldn't find the option's associated {nameof(Line)} object");
+                ContinueDialogue();
             }
-
+            else
+            {
+                ContinueDialogue();
+            }
 
         }
+
 
         bool DispatchCommandToRegisteredHandlers(Command command)
         {
@@ -1227,7 +1221,7 @@ namespace Yarn.Unity
         /// delivering its line. When all views in <see
         /// cref="ActiveDialogueViews"/> have called this method, the
         /// line's status will change to <see
-        /// cref="LineStatus.Delivered"/>.
+        /// cref="LineStatus.FinishedPresenting"/>.
         /// </summary>
         /// <param name="dialogueView">The view that finished delivering
         /// the line.</param>
@@ -1240,14 +1234,14 @@ namespace Yarn.Unity
             // Have all of the views completed? 
             if (ActiveDialogueViews.Count == 0)
             {
-                UpdateLineStatus(CurrentLine, LineStatus.Delivered);
+                UpdateLineStatus(CurrentLine, LineStatus.FinishedPresenting);
 
                 // Should the line automatically become Ended as soon as
                 // it's Delivered?
                 if (continueNextLineOnLineFinished)
                 {
                     // Go ahead and notify the views. 
-                    UpdateLineStatus(CurrentLine, LineStatus.Ended);
+                    UpdateLineStatus(CurrentLine, LineStatus.Dismissed);
 
                     // Additionally, tell the views to dismiss the line
                     // from presentation. When each is done, it will notify
@@ -1307,7 +1301,7 @@ namespace Yarn.Unity
 
             switch (CurrentLine.Status)
             {
-                case LineStatus.Running:
+                case LineStatus.Presenting:
                     // The line has been Interrupted. Dialogue views should
                     // proceed to finish the delivery of the line as
                     // quickly as they can. (When all views have finished
@@ -1321,16 +1315,16 @@ namespace Yarn.Unity
                     // the user being insistent. This means the line is now
                     // Ended, and the dialogue views must dismiss the line
                     // immediately.
-                    UpdateLineStatus(CurrentLine, LineStatus.Ended);
+                    UpdateLineStatus(CurrentLine, LineStatus.Dismissed);
                     break;
-                case LineStatus.Delivered:
+                case LineStatus.FinishedPresenting:
                     // The line had finished delivery (either normally or
                     // because it was Interrupted), and the user has
                     // indicated they want to proceed to the next line. The
                     // line is therefore Ended.
-                    UpdateLineStatus(CurrentLine, LineStatus.Ended);
+                    UpdateLineStatus(CurrentLine, LineStatus.Dismissed);
                     break;
-                case LineStatus.Ended:
+                case LineStatus.Dismissed:
                     // The line has already been ended, so there's nothing
                     // further for the views to do. (This will only happen
                     // during the interval of time between a line becoming
@@ -1338,7 +1332,7 @@ namespace Yarn.Unity
                     break;
             }
 
-            if (CurrentLine.Status == LineStatus.Ended)
+            if (CurrentLine.Status == LineStatus.Dismissed)
             {
                 // This line is Ended, so we need to tell the dialogue
                 // views to dismiss it. 
@@ -1528,34 +1522,47 @@ namespace Yarn.Unity
     public enum LineStatus
     {
         /// <summary>
-        /// The line is being build up and shown to the user.
-        /// </summary>
-        Running,
-        /// <summary>
-        /// The line got interrupted while being build up and should
-        /// complete showing the line asap. View classes should get to the
-        /// end of the line as fast as possible. A view class showing text
-        /// would stop building up the text and immediately show the entire
-        /// line and a view class playing voice over clips would do a very
-        /// quick fade out and stop playback afterwards.
-        /// </summary>
-        Interrupted,
-        /// <summary>
-        /// The line has been fully presented to the user. A view class
-        /// presenting the line as text would be showing the entire line
-        /// and a view class playing voice over clips would be silent now.
+        /// The line is in the process of being presented to the user, but
+        /// has not yet finished appearing. 
         /// </summary>
         /// <remarks>
-        /// A line that was previously <see cref="LineStatus.Interrupted"/>
-        /// will become <see cref="LineStatus.Delivered"/> once the <see
-        /// cref="DialogueViewBase"/> has completed the interruption
-        /// process.
+        /// Lines in this state are in the process of being delivered; for
+        /// example, visual animations may be running, and audio playback
+        /// may be ongoing.
         /// </remarks>
-        Delivered,
+        Presenting,
+        /// <summary>
+        /// The user has interrupted the delivery of this line, by calling
+        /// <see cref="DialogueViewBase.MarkLineComplete"/> before all line
+        /// views finished delivering the line. All line views should
+        /// finish delivering the line as quickly as possible, and then
+        /// signal that the line has been <see cref="FinishedPresenting"/>.
+        /// </summary>
+        /// <remarks>
+        /// For example, any animations should skip to the end, either
+        /// immediately or very quickly, and any audio should stop or
+        /// quickly fade out.
+        /// </remarks>
+        Interrupted,
+        /// <summary>
+        /// The line has finished being delivered to the user.
+        /// </summary>
+        /// <remarks>
+        /// When a line has finished being delivered, any animations in
+        /// showing text and any audio playback should now be complete. 
+        ///
+        /// A line remains in the <see cref="FinishedPresenting"/> state until a
+        /// Dialogue View calls <see
+        /// cref="DialogueViewBase.MarkLineComplete"/>. At this point, the
+        /// line will transition to the <see cref="Dismissed"/> state, and <see
+        /// cref="DialogueViewBase.DismissLine(Action)"/> will be called on
+        /// all views to dismiss the line.
+        /// </remarks>
+        FinishedPresenting,
         /// <summary>
         /// The line is not being presented anymore in any way to the user.
         /// </summary>
-        Ended
+        Dismissed
     }
 
 
