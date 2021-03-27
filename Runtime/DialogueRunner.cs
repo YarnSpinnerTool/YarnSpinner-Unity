@@ -1136,7 +1136,7 @@ namespace Yarn.Unity
                 var expectedType = methodParameters[i].ParameterType;
 
                 // We handle three special cases:
-                // - if the method expects a GameObject, attempt locate
+                // - if the method expects a GameObject, attempt to locate
                 //   that game object by the provided name. The game object
                 //   must be active. If this lookup fails, provide null.
                 // - if the method expects a Component, or a
@@ -1347,7 +1347,11 @@ namespace Yarn.Unity
 
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false) continue;
+                // Skip any dialogueView that is null or not enabled
+                if (dialogueView == null || dialogueView.enabled == false) {
+                    continue;
+                }
+
                 // we do this in two passes - first by adding each
                 // dialogueView into ActiveDialogueViews, then by asking
                 // them to dismiss the line - because calling
