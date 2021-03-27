@@ -132,7 +132,14 @@ namespace Yarn.Unity
 
             EditorApplication.update -= EditorUpdate;
 
-            if (supportersRequest.isNetworkError || supportersRequest.isHttpError)
+            bool isError;
+#if UNITY_2020_1_OR_NEWER
+            isError = supportersRequest.result != UnityWebRequest.Result.Success;
+#else
+            isError = supportersRequest.isNetworkError || supportersRequest.isHttpError
+#endif
+        
+            if (isError)
             {
                 Debug.LogError("Error loading Yarn Spinner supporter data: " + supportersRequest.error);
                 supportersText = ""; // set to the empty string to prevent future loads
