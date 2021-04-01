@@ -136,7 +136,7 @@ namespace Yarn.Unity
 #if UNITY_2020_1_OR_NEWER
             isError = supportersRequest.result != UnityWebRequest.Result.Success;
 #else
-            isError = supportersRequest.isNetworkError || supportersRequest.isHttpError
+            isError = supportersRequest.isNetworkError || supportersRequest.isHttpError;
 #endif
         
             if (isError)
