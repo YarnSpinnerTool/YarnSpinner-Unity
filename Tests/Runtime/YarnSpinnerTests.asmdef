@@ -22,7 +22,7 @@
     "versionDefines": [
         {
             "name": "com.unity.addressables",
-            "expression": "1",
+            "expression": "[1.0,2.0)",
             "define": "USE_ADDRESSABLES"
         }
     ],
