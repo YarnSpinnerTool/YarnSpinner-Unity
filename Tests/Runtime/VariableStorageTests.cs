@@ -146,5 +146,21 @@ namespace Yarn.Unity.Tests
             // cleanup
             File.Delete( testFilePath );
         }
+
+        [Test]
+        public void VariableStorage_OnUsingValueWithInvalidName_ThrowsError() {
+            VarStorage.SetValue("$valid", 1);
+
+            Assert.Throws<System.ArgumentException>(() => {
+                VarStorage.SetValue("invalid", 1);
+            });
+
+            VarStorage.TryGetValue<float>("$valid", out var result1);
+
+            Assert.Throws<System.ArgumentException>(() => {
+                VarStorage.TryGetValue<float>("invalid", out var result2);
+            });
+
+        }
     }
 }

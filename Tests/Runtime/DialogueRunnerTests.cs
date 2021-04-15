@@ -180,5 +180,26 @@ namespace Yarn.Unity.Tests
                 yield return null;
             }
         }
+
+        [UnityTest]
+        public IEnumerator VariableStorage_OnExternalChanges_ReturnsExpectedValue() {
+            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            DialogueRunnerMockUI dialogueUI = GameObject.FindObjectOfType<DialogueRunnerMockUI>();
+            var variableStorage = GameObject.FindObjectOfType<VariableStorageBehaviour>();
+
+            runner.StartDialogue("VariableTest");
+            yield return null;
+
+            Assert.AreEqual("Jane: Yes! I've already walked 0 laps!", dialogueUI.CurrentLine);
+
+            variableStorage.SetValue("$laps", 1);
+
+            runner.StartDialogue("VariableTest");
+            yield return null;
+
+            Assert.AreEqual("Jane: Yes! I've already walked 1 laps!", dialogueUI.CurrentLine);
+
+            dialogueUI.ReadyForNextLine();
+        }   
     }
 }

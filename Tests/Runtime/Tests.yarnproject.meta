@@ -17,5 +17,14 @@ ScriptedImporter:
   sourceScripts:
   - {fileID: 4900000, guid: 40a60c3c28a91d34bbf2088bb0d2824a, type: 3}
   compileError: 
-  serializedDeclarations: []
+  serializedDeclarations:
+  - name: $laps
+    type: 1
+    defaultValueBool: 0
+    defaultValueNumber: 0
+    defaultValueString: 
+    description: How many laps Jane has walked
+    sourceYarnAsset: {instanceID: 0}
+  defaultLanguage: en-AU
   languagesToSourceAssets: []
+  useAddressableAssets: 0

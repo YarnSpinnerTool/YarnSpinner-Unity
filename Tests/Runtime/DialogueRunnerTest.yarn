@@ -16,3 +16,7 @@ colorID: 0
 position: 0,0
 ---
 ===
+title: VariableTest
+---
+Jane: Yes! I've already walked {$laps} laps!
+===

@@ -128,20 +128,41 @@ namespace Yarn.Unity
             }
         }
 
+        /// <summary>
+        /// Throws a <see cref="System.ArgumentException"/> if <paramref
+        /// name="variableName"/> is not a valid Yarn Spinner variable
+        /// name.
+        /// </summary>
+        /// <param name="variableName">The variable name to test.</param>
+        /// <exception cref="System.ArgumentException">Thrown when
+        /// <paramref name="variableName"/> is not a valid variable
+        /// name.</exception> 
+        private void ValidateVariableName(string variableName) {
+            if (variableName.StartsWith("$") == false) {
+                throw new System.ArgumentException($"{variableName} is not a valid variable name: Variable names must start with a '$'. (Did you mean to use '${variableName}'?)");
+            }
+        }
+
         public override void SetValue(string variableName, string stringValue)
         {
+            ValidateVariableName(variableName);
+
             variables[variableName] = stringValue;
             variableTypes[variableName] = typeof(string);
         }
 
         public override void SetValue(string variableName, float floatValue)
         {
+            ValidateVariableName(variableName);
+            
             variables[variableName] = floatValue;
             variableTypes[variableName] = typeof(float);
         }
 
         public override void SetValue(string variableName, bool boolValue)
         {
+            ValidateVariableName(variableName);
+            
             variables[variableName] = boolValue;
             variableTypes[variableName] = typeof(bool);
         }
@@ -155,8 +176,12 @@ namespace Yarn.Unity
         /// <returns>The <see cref="Value"/>. If a variable by the name of
         /// <paramref name="variableName"/> is not present, returns a value
         /// representing `null`.</returns>
+        /// <exception cref="System.ArgumentException">Thrown when
+        /// variableName is not a valid variable name.</exception>
         public override bool TryGetValue<T>(string variableName, out T result)
         {
+            ValidateVariableName(variableName);
+
             // If we don't have a variable with this name, return the null
             // value
             if (variables.ContainsKey(variableName) == false)
