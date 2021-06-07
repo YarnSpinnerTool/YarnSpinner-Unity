@@ -29,6 +29,8 @@ namespace Yarn.Unity.Editor
 
             public string description;
 
+            public bool isImplicit;
+
             public TextAsset sourceYarnAsset;
 
             public SerializedDeclaration(Declaration decl)
@@ -36,6 +38,7 @@ namespace Yarn.Unity.Editor
                 this.name = decl.Name;
                 this.type = decl.ReturnType;
                 this.description = decl.Description;
+                this.isImplicit = decl.IsImplicit;
 
                 sourceYarnAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(decl.SourceFileName);
 
@@ -780,7 +783,8 @@ namespace Yarn.Unity.Editor
                         EditorGUI.LabelField(position, label, property.intValue.ToString());
                         break;
                     case SerializedPropertyType.Boolean:
-                        EditorGUI.Toggle(position, label, property.boolValue);
+                        var boolText = property.boolValue ? "True" : "False";
+                        EditorGUI.LabelField(position, label, boolText);
                         break;
                     case SerializedPropertyType.Float:
                         EditorGUI.LabelField(position, label, property.floatValue.ToString());
@@ -834,6 +838,8 @@ namespace Yarn.Unity.Editor
             // script. We don't allow editing those in this panel, because
             // the text of the Yarn script belongs to the user.
             bool propertyIsReadOnly = property.FindPropertyRelative("sourceYarnAsset").objectReferenceValue != null;
+
+            propertyIsReadOnly |= property.FindPropertyRelative("isImplicit").boolValue;
 
             const float leftInset = 8;
 

@@ -54,6 +54,8 @@ namespace Yarn.Unity.Editor
         {
             serializedObject.Update();
 
+            YarnProjectImporter yarnProjectImporter = serializedObject.targetObject as YarnProjectImporter;
+
             EditorGUILayout.Space();
 
             if (sourceScriptsProperty.arraySize == 0)
@@ -64,12 +66,36 @@ namespace Yarn.Unity.Editor
 
             EditorGUILayout.Space();
 
-            if (string.IsNullOrEmpty(compileErrorProperty.stringValue) == false)
+            bool hasCompileError = string.IsNullOrEmpty(compileErrorProperty.stringValue) == false;
+
+            if (hasCompileError)
             {
                 EditorGUILayout.HelpBox(compileErrorProperty.stringValue, MessageType.Error);
             }
 
             serializedDeclarationsList.DrawLayout();
+
+            // If any of the serialized declarations are implicit, add a
+            // button that lets you generate explicit declarations for them
+            var anyImplicitDeclarations = false;
+            foreach (SerializedProperty declProp in serializedDeclarationsProperty) {
+                anyImplicitDeclarations |= declProp.FindPropertyRelative("isImplicit").boolValue;
+            }
+            
+            if (hasCompileError == false && anyImplicitDeclarations) {
+                if (GUILayout.Button("Convert Implicit Declarations")) {
+                    // add explicit variable declarations to the file
+                    YarnProjectUtility.ConvertImplicitVariableDeclarationsToExplicit(yarnProjectImporter);
+
+                    // Return here becuase this method call will cause the
+                    // YarnProgram contents to change, which confuses the
+                    // SerializedObject when we're in the middle of a GUI
+                    // draw call. So, stop here, and let Unity re-draw the
+                    // Inspector (which it will do on the next editor tick
+                    // because the item we're inspecting got re-imported.)
+                    return;
+                }
+            }
 
             EditorGUILayout.PropertyField(defaultLanguageProperty, new GUIContent("Default Language"));
 
@@ -78,8 +104,6 @@ namespace Yarn.Unity.Editor
             EditorGUILayout.PropertyField(languagesToSourceAssetsProperty);
 
             CurrentProjectDefaultLanguageProperty = null;
-
-            YarnProjectImporter yarnProjectImporter = serializedObject.targetObject as YarnProjectImporter;
 
             // Ask the project importer if it can generate a strings table.
             // This involves querying several assets, which means various

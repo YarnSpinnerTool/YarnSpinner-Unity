@@ -365,10 +365,10 @@ namespace Yarn.Unity.Editor
 
         internal static void AddLineTagsToFilesInYarnProject(YarnProjectImporter importer)
         {
-            // First, gather all existing line tags, so that we don't
-            // accidentally overwrite an existing one. Do this by finding
-            // all yarn scripts in all yarn projects, and get the string
-            // tags inside them.
+            // First, gather all existing line tags across ALL yarn
+            // projects, so that we don't accidentally overwrite an
+            // existing one. Do this by finding all yarn scripts in all
+            // yarn projects, and get the string tags inside them.
 
             var allYarnFiles =
                 // get all yarn projects across the entire project
@@ -511,6 +511,46 @@ namespace Yarn.Unity.Editor
             File.WriteAllText(destination, outputCSV);
 
             return true;
+        }
+
+        internal static void ConvertImplicitVariableDeclarationsToExplicit(YarnProjectImporter yarnProjectImporter) {
+            var allFilePaths = yarnProjectImporter.sourceScripts.Select(textAsset => AssetDatabase.GetAssetPath(textAsset));
+
+            var library = new Library();
+            YarnProject.AddYarnFunctionMethodsToLibrary(library);
+
+            var explicitDeclarationsCompilerJob = Compiler.CompilationJob.CreateFromFiles(AssetDatabase.GetAssetPath(yarnProjectImporter));
+
+            Compiler.CompilationResult explicitResult;
+
+            try {
+                explicitResult = Compiler.Compiler.Compile(explicitDeclarationsCompilerJob);
+            } catch (System.Exception e) {
+                Debug.LogError($"Compile error: {e}");
+                return;
+            }
+
+
+            var implicitDeclarationsCompilerJob = Compiler.CompilationJob.CreateFromFiles(allFilePaths, library);
+            implicitDeclarationsCompilerJob.CompilationType = Compiler.CompilationJob.Type.DeclarationsOnly;
+            implicitDeclarationsCompilerJob.VariableDeclarations = explicitResult.Declarations;
+
+            Compiler.CompilationResult implicitResult;
+
+            try {
+                implicitResult = Compiler.Compiler.Compile(implicitDeclarationsCompilerJob);
+            } catch (System.Exception e) {
+                Debug.LogError($"Compile error: {e}");
+                return;
+            }
+
+            var implicitDeclarations = implicitResult.Declarations.Where(d => d.DeclarationType == Compiler.Declaration.Type.Variable && d.IsImplicit);
+
+            var output = Yarn.Compiler.Utility.GenerateYarnFileWithDeclarations(explicitResult.Declarations.Concat(implicitDeclarations), "Program");
+
+            File.WriteAllText(yarnProjectImporter.assetPath, output, System.Text.Encoding.UTF8);
+            AssetDatabase.ImportAsset(yarnProjectImporter.assetPath);
+
         }
 
 

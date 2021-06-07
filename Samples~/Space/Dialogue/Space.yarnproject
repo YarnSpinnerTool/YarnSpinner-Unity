@@ -1,3 +1,5 @@
 ﻿title: Program
 ---
+<<declare $should_see_ship = false "Ship.yarn, node Ship, line 14">>
+<<declare $sally_warning = false "Ship.yarn, node Ship, line 14">>
 ===

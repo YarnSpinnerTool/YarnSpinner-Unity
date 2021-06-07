@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System.Reflection;
 
 namespace Yarn.Unity
 {
@@ -50,6 +51,42 @@ namespace Yarn.Unity
         {
             return Program.Parser.ParseFrom(compiledYarnProgram);
         }
+
+        public static void AddYarnFunctionMethodsToLibrary(Library library, params System.Reflection.Assembly[] assemblies) {
+            Debug.Log($"{nameof(AddYarnFunctionMethodsToLibrary)} is not currently implemented, and is a no-op.");
+            return;
+            if (assemblies.Length == 0) {
+                assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+            }
+
+            // In each assembly, find all types
+            foreach (var assembly in assemblies)
+            {
+                foreach (var type in assembly.GetLoadableTypes())
+                {
+                    // Find all static public methods on each type that
+                    // have the YarnFunction attribute
+                    foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.Public))
+                    {
+                        var attributes = new List<YarnFunctionAttribute>(method.GetCustomAttributes<YarnFunctionAttribute>());
+
+                        if (attributes.Count > 0)
+                        {
+                            var attr = attributes[0];
+                            // This method has the YarnCommand attribute!
+                            var del = method.CreateDelegate(typeof(System.Delegate));
+
+                            library.RegisterFunction(attr.FunctionName, del);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public class YarnFunctionAttribute : System.Attribute
+    {
+        public string FunctionName;
     }
 
 }

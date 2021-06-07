@@ -21,15 +21,17 @@ ScriptedImporter:
     defaultValueBool: 0
     defaultValueNumber: 0
     defaultValueString: 
-    description: Whether the player knows they should talk to the Ship.
-    sourceYarnAsset: {fileID: 4900002, guid: 8b6ae1e8d32e840f0b3fd0b033e52253, type: 3}
+    description: Ship.yarn, node Ship, line 14
+    isImplicit: 0
+    sourceYarnAsset: {instanceID: 0}
   - name: $sally_warning
     type: 3
     defaultValueBool: 0
     defaultValueNumber: 0
     defaultValueString: 
-    description: Whether the player has been given the warning from Sally.
-    sourceYarnAsset: {fileID: 4900002, guid: 8b6ae1e8d32e840f0b3fd0b033e52253, type: 3}
+    description: Ship.yarn, node Ship, line 14
+    isImplicit: 0
+    sourceYarnAsset: {instanceID: 0}
   defaultLanguage: en
   languagesToSourceAssets:
   - languageID: en
