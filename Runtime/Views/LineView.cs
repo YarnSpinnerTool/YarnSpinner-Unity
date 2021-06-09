@@ -70,7 +70,7 @@ namespace Yarn.Unity
             onComplete?.Invoke();
         }
 
-        public static IEnumerator Typewriter(TextMeshProUGUI text, float lettersPerSecond, Action onComplete = null, InterruptionFlag interruption = null)
+        public static IEnumerator Typewriter(TextMeshProUGUI text, float lettersPerSecond, Action onCharacterTyped = null, Action onComplete = null, InterruptionFlag interruption = null)
         {
 
             // Start with everything invisible
@@ -115,6 +115,7 @@ namespace Yarn.Unity
                 while (accumulator >= secondsPerLetter)
                 {
                     text.maxVisibleCharacters += 1;
+                    onCharacterTyped?.Invoke();
                     accumulator -= secondsPerLetter;
                 }
                 accumulator += Time.deltaTime;
@@ -168,6 +169,9 @@ namespace Yarn.Unity
 
         [SerializeField]
         internal bool useTypewriterEffect = false;
+
+        [SerializeField]
+        internal UnityEngine.Events.UnityEvent onCharacterTyped;
 
         [SerializeField]
         [Min(0)]
@@ -296,6 +300,10 @@ namespace Yarn.Unity
             }
         }
 
+        private void OnCharacterTyped() {
+            onCharacterTyped?.Invoke();
+        }
+
         public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
             currentLine = dialogueLine;
@@ -368,7 +376,7 @@ namespace Yarn.Unity
                 if (useTypewriterEffect)
                 {
                     // Start the typewriter
-                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, onDialogueLineFinished, interruptionFlag));
+                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, OnCharacterTyped, onDialogueLineFinished, interruptionFlag));
                 }
                 else
                 {
@@ -381,7 +389,7 @@ namespace Yarn.Unity
         {
             if (useTypewriterEffect)
             {
-                StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, onDialogueLineFinished, interruptionFlag));
+                StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, OnCharacterTyped, onDialogueLineFinished, interruptionFlag));
             }
             else
             {
