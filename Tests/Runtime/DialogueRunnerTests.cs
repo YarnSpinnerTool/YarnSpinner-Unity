@@ -87,6 +87,7 @@ namespace Yarn.Unity.Tests
 
         [TestCase("testCommandInteger DialogueRunner 1 2", "3")]
         [TestCase("testCommandString DialogueRunner a b", "ab")]
+        [TestCase("testCommandString DialogueRunner \"a b\" \"c d\"", "a bc d")]
         [TestCase("testCommandGameObject DialogueRunner Sphere", "Sphere")]
         [TestCase("testCommandComponent DialogueRunner Sphere", "Sphere's MeshRenderer")]
         [TestCase("testCommandGameObject DialogueRunner DoesNotExist", "(null)")]
