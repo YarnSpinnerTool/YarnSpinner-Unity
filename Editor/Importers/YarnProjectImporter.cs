@@ -45,13 +45,13 @@ namespace Yarn.Unity.Editor
                 switch (this.type)
                 {
                     case Type.Number:
-                        this.defaultValueNumber = (float)decl.DefaultValue;
+                        this.defaultValueNumber = System.Convert.ToSingle(decl.DefaultValue);
                         break;
                     case Type.String:
-                        this.defaultValueString = (string)decl.DefaultValue;
+                        this.defaultValueString = System.Convert.ToString(decl.DefaultValue);
                         break;
                     case Type.Bool:
-                        this.defaultValueBool = (bool)decl.DefaultValue;
+                        this.defaultValueBool = System.Convert.ToBoolean(decl.DefaultValue);
                         break;
                     default:
                         throw new System.InvalidOperationException($"Invalid declaration type {decl.ReturnType}");
