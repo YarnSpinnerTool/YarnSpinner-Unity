@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Changed
 
 * `OptionsListView` no longer throws a `NullPointerException` when the dialogue starts with options (instead of a line.) 
+* When creating a new Yarn Project file from the Assets -> Create menu, the correct icon is now used.
 
 ### Removed
 
