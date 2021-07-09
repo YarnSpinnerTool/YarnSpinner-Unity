@@ -94,7 +94,12 @@ namespace Yarn.Unity
             // Update the last line, if one is configured
             if (lastLineText != null)
             {
-                lastLineText.text = lastSeenLine.Text.Text;
+                if (lastSeenLine != null) {
+                    lastLineText.gameObject.SetActive(true);
+                    lastLineText.text = lastSeenLine.Text.Text;
+                } else {
+                    lastLineText.gameObject.SetActive(false);
+                }
             }
 
             // Note the delegate to call when an option is selected
