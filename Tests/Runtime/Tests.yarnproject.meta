@@ -24,6 +24,7 @@ ScriptedImporter:
     defaultValueNumber: 0
     defaultValueString: 
     description: How many laps Jane has walked
+    isImplicit: 0
     sourceYarnAsset: {instanceID: 0}
   defaultLanguage: en-AU
   languagesToSourceAssets: []

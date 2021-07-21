@@ -1,4 +1,5 @@
 ﻿title: Program
 ---
-<<declare $laps = 0 "How many laps Jane has walked">>
+/// How many laps Jane has walked
+<<declare $laps = 0>>
 ===
