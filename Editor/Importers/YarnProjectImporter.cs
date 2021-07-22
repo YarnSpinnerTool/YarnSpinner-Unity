@@ -21,8 +21,17 @@ namespace Yarn.Unity.Editor
         [System.Serializable]
         public class SerializedDeclaration
         {
+            internal static List<Yarn.IType> BuiltInTypesList = new List<Yarn.IType> {
+                Yarn.BuiltinTypes.String,
+                Yarn.BuiltinTypes.Boolean,
+                Yarn.BuiltinTypes.Number,
+            };
+
             public string name = "$variable";
-            public Yarn.Type type = Yarn.Type.String;
+
+            [UnityEngine.Serialization.FormerlySerializedAs("type")]
+            public string typeName = Yarn.BuiltinTypes.String.Name;
+
             public bool defaultValueBool;
             public float defaultValueNumber;
             public string defaultValueString;
@@ -36,25 +45,20 @@ namespace Yarn.Unity.Editor
             public SerializedDeclaration(Declaration decl)
             {
                 this.name = decl.Name;
-                this.type = decl.ReturnType;
+                this.typeName = decl.Type.Name;
                 this.description = decl.Description;
                 this.isImplicit = decl.IsImplicit;
 
                 sourceYarnAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(decl.SourceFileName);
 
-                switch (this.type)
-                {
-                    case Type.Number:
-                        this.defaultValueNumber = System.Convert.ToSingle(decl.DefaultValue);
-                        break;
-                    case Type.String:
-                        this.defaultValueString = System.Convert.ToString(decl.DefaultValue);
-                        break;
-                    case Type.Bool:
-                        this.defaultValueBool = System.Convert.ToBoolean(decl.DefaultValue);
-                        break;
-                    default:
-                        throw new System.InvalidOperationException($"Invalid declaration type {decl.ReturnType}");
+                if (this.typeName == BuiltinTypes.String.Name) {
+                    this.defaultValueString = System.Convert.ToString(decl.DefaultValue);
+                } else if (this.typeName == BuiltinTypes.Boolean.Name) {
+                    this.defaultValueBool = System.Convert.ToBoolean(decl.DefaultValue);
+                } else if (this.typeName == BuiltinTypes.Number.Name) {
+                    this.defaultValueNumber = System.Convert.ToSingle(decl.DefaultValue);
+                } else {
+                    throw new System.InvalidOperationException($"Invalid declaration type {decl.Type.Name}");
                 }
             }
         }
@@ -160,7 +164,7 @@ namespace Yarn.Unity.Editor
             // We'll replace this with a more complete list later if
             // compilation succeeds.
             serializedDeclarations = localDeclarations
-                .Where(decl => decl.DeclarationType == Declaration.Type.Variable)
+                .Where(decl => !(decl.Type is FunctionType))
                 .Select(decl => new SerializedDeclaration(decl)).ToList();
 
             // We're done processing this file - we've parsed it, and
@@ -233,7 +237,7 @@ namespace Yarn.Unity.Editor
             // .yarnproject file, and the ones inside the .yarn files
             serializedDeclarations = localDeclarations
                 .Concat(compilationResult.Declarations)
-                .Where(decl => decl.DeclarationType == Declaration.Type.Variable)
+                .Where(decl => !(decl.Type is FunctionType))
                 .Select(decl => new SerializedDeclaration(decl)).ToList();
 
             // Clear error messages from all scripts - they've all passed
@@ -575,13 +579,13 @@ namespace Yarn.Unity.Editor
 
             // Clear necessary properties to something useful
             var nameProp = entry.FindPropertyRelative("name");
-            var typeProp = entry.FindPropertyRelative("type");
+            var typeProp = entry.FindPropertyRelative("typeName");
             var defaultValueStringProp = entry.FindPropertyRelative("defaultValueString");
             var sourceYarnAssetProp = entry.FindPropertyRelative("sourceYarnAsset");
             var descriptionProp = entry.FindPropertyRelative("description");
 
             nameProp.stringValue = "$variable";
-            typeProp.enumValueIndex = (int)Yarn.Type.String;
+            typeProp.enumValueIndex = YarnProjectImporter.SerializedDeclaration.BuiltInTypesList.IndexOf(Yarn.BuiltinTypes.String);
             defaultValueStringProp.stringValue = string.Empty;
             sourceYarnAssetProp.objectReferenceValue = null;
             descriptionProp.stringValue = string.Empty;
@@ -877,32 +881,41 @@ namespace Yarn.Unity.Editor
 
                 DrawPropertyField(namePosition, nameProperty, propertyIsReadOnly);
 
-                SerializedProperty typeProperty = property.FindPropertyRelative("type");
+                SerializedProperty typeProperty = property.FindPropertyRelative("typeName");
 
-                DrawPropertyField(typePosition, typeProperty, propertyIsReadOnly);
+                if (propertyIsReadOnly) {
+                    DrawPropertyField(typePosition, typeProperty, true);
+                } else {
+                    var popupElements = YarnProjectImporter.SerializedDeclaration.BuiltInTypesList;
+                    var popupElementNames = popupElements.Select(t => t.Name).ToList();
+                    var selectedIndex = popupElementNames.IndexOf(typeProperty.stringValue);
+
+                    var prefixPosition = EditorGUI.PrefixLabel(typePosition, new GUIContent("Type"));
+
+                    selectedIndex = EditorGUI.Popup(prefixPosition, selectedIndex, popupElementNames.ToArray());
+                    if (selectedIndex >= 0 && selectedIndex <= popupElementNames.Count) {
+                        typeProperty.stringValue = popupElementNames[selectedIndex];
+                    }
+                }
 
                 SerializedProperty defaultValueProperty;
 
-                switch ((Yarn.Type)typeProperty.enumValueIndex)
-                {
-                    case Yarn.Type.Number:
-                        defaultValueProperty = property.FindPropertyRelative("defaultValueNumber");
-                        break;
-                    case Yarn.Type.String:
-                        defaultValueProperty = property.FindPropertyRelative("defaultValueString");
-                        break;
-                    case Yarn.Type.Bool:
-                        defaultValueProperty = property.FindPropertyRelative("defaultValueBool");
-                        break;
-                    default:
-                        defaultValueProperty = null;
-                        break;
+                var type = YarnProjectImporter.SerializedDeclaration.BuiltInTypesList.FirstOrDefault(t => t.Name == typeProperty.stringValue);
+
+                if (type == BuiltinTypes.Number) {
+                    defaultValueProperty = property.FindPropertyRelative("defaultValueNumber");
+                } else if (type == BuiltinTypes.String) {
+                    defaultValueProperty = property.FindPropertyRelative("defaultValueString");
+                } else if (type == BuiltinTypes.Boolean) {
+                    defaultValueProperty = property.FindPropertyRelative("defaultValueBool");
+                } else {
+                    defaultValueProperty = null;
                 }
 
 
                 if (defaultValueProperty == null)
                 {
-                    EditorGUI.LabelField(defaultValuePosition, "Default Value", $"Variable type {(Yarn.Type)typeProperty.enumValueIndex} is not allowed");
+                    EditorGUI.LabelField(defaultValuePosition, "Default Value", $"Variable type {typeProperty.stringValue} is not allowed");
                 }
                 else
                 {

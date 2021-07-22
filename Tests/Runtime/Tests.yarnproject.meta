@@ -19,7 +19,7 @@ ScriptedImporter:
   compileError: 
   serializedDeclarations:
   - name: $laps
-    type: 1
+    typeName: Bool
     defaultValueBool: 0
     defaultValueNumber: 0
     defaultValueString: 
