@@ -94,37 +94,39 @@ namespace Yarn.Unity
         /// Used internally by serialization functions to wrap around the
         /// SetValue() methods.
         /// </summary>
-        void SetVariable(string name, Yarn.Type type, string value)
+        void SetVariable(string name, Yarn.IType type, string value)
         {
-            switch (type)
+            if (type == Yarn.BuiltinTypes.Boolean)
             {
-                case Type.Bool:
-                    bool newBool;
-                    if (bool.TryParse(value, out newBool))
-                    {
-                        SetValue(name, newBool);
-                    }
-                    else
-                    {
-                        throw new System.InvalidCastException($"Couldn't initialize default variable {name} with value {value} as Bool");
-                    }
-                    break;
-                case Type.Number:
-                    float newNumber;
-                    if (float.TryParse(value, out newNumber))
-                    { // TODO: this won't work for different cultures (e.g. French write "0.53" as "0,53")
-                        SetValue(name, newNumber);
-                    }
-                    else
-                    {
-                        throw new System.InvalidCastException($"Couldn't initialize default variable {name} with value {value} as Number (Float)");
-                    }
-                    break;
-                case Type.String:
-                case Type.Undefined:
-                default:
-                    SetValue(name, value); // no special type conversion required
-                    break;
+                bool newBool;
+                if (bool.TryParse(value, out newBool))
+                {
+                    SetValue(name, newBool);
+                }
+                else
+                {
+                    throw new System.InvalidCastException($"Couldn't initialize default variable {name} with value {value} as Bool");
+                }
+            }
+            else if (type == Yarn.BuiltinTypes.Number)
+            {
+                float newNumber;
+                if (float.TryParse(value, out newNumber))
+                { // TODO: this won't work for different cultures (e.g. French write "0.53" as "0,53")
+                    SetValue(name, newNumber);
+                }
+                else
+                {
+                    throw new System.InvalidCastException($"Couldn't initialize default variable {name} with value {value} as Number (Float)");
+                }
+            }
+            else if (type == Yarn.BuiltinTypes.String)
+            {
+                SetValue(name, value); // no special type conversion required
+            }
+            else
+            {
+                throw new System.ArgumentOutOfRangeException($"Unsupported type {type.Name}");
             }
         }
 
@@ -332,21 +334,21 @@ namespace Yarn.Unity
             Debug.Log($"Variables loaded from file {filepath}");
         }
 
-        public static readonly Dictionary<System.Type, Yarn.Type> TypeMappings = new Dictionary<System.Type, Yarn.Type>
+        public static readonly Dictionary<System.Type, Yarn.IType> TypeMappings = new Dictionary<System.Type, Yarn.IType>
             {
-                { typeof(string), Yarn.Type.String },
-                { typeof(bool), Yarn.Type.Bool },
-                { typeof(int), Yarn.Type.Number },
-                { typeof(float), Yarn.Type.Number },
-                { typeof(double), Yarn.Type.Number },
-                { typeof(sbyte), Yarn.Type.Number },
-                { typeof(byte), Yarn.Type.Number },
-                { typeof(short), Yarn.Type.Number },
-                { typeof(ushort), Yarn.Type.Number },
-                { typeof(uint), Yarn.Type.Number },
-                { typeof(long), Yarn.Type.Number },
-                { typeof(ulong), Yarn.Type.Number },
-                { typeof(decimal), Yarn.Type.Number },
+                { typeof(string), Yarn.BuiltinTypes.String },
+                { typeof(bool), Yarn.BuiltinTypes.Boolean },
+                { typeof(int), Yarn.BuiltinTypes.Number },
+                { typeof(float), Yarn.BuiltinTypes.Number },
+                { typeof(double), Yarn.BuiltinTypes.Number },
+                { typeof(sbyte), Yarn.BuiltinTypes.Number },
+                { typeof(byte), Yarn.BuiltinTypes.Number },
+                { typeof(short), Yarn.BuiltinTypes.Number },
+                { typeof(ushort), Yarn.BuiltinTypes.Number },
+                { typeof(uint), Yarn.BuiltinTypes.Number },
+                { typeof(long), Yarn.BuiltinTypes.Number },
+                { typeof(ulong), Yarn.BuiltinTypes.Number },
+                { typeof(decimal), Yarn.BuiltinTypes.Number },
             };
 
         #endregion

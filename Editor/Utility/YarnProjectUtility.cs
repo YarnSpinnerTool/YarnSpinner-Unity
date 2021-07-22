@@ -544,7 +544,7 @@ namespace Yarn.Unity.Editor
                 return;
             }
 
-            var implicitDeclarations = implicitResult.Declarations.Where(d => d.DeclarationType == Compiler.Declaration.Type.Variable && d.IsImplicit);
+            var implicitDeclarations = implicitResult.Declarations.Where(d => !(d.Type is Yarn.FunctionType) && d.IsImplicit);
 
             var output = Yarn.Compiler.Utility.GenerateYarnFileWithDeclarations(explicitResult.Declarations.Concat(implicitDeclarations), "Program");
 

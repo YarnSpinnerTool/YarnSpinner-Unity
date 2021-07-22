@@ -17,7 +17,7 @@ ScriptedImporter:
   compileError: 
   serializedDeclarations:
   - name: $should_see_ship
-    type: 3
+    typeName: Bool
     defaultValueBool: 0
     defaultValueNumber: 0
     defaultValueString: 
@@ -25,7 +25,7 @@ ScriptedImporter:
     isImplicit: 0
     sourceYarnAsset: {instanceID: 0}
   - name: $sally_warning
-    type: 3
+    typeName: Bool
     defaultValueBool: 0
     defaultValueNumber: 0
     defaultValueString: 

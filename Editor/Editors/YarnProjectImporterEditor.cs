@@ -249,29 +249,25 @@ namespace Yarn.Unity.Editor
 
                 var name = decl.FindPropertyRelative("name").stringValue;
 
-                SerializedProperty typeProperty = decl.FindPropertyRelative("type");
+                SerializedProperty typeProperty = decl.FindPropertyRelative("typeName");
 
-                Type type = (Yarn.Type)typeProperty.enumValueIndex;
+                Yarn.IType type = YarnProjectImporter.SerializedDeclaration.BuiltInTypesList.FirstOrDefault(t => t.Name == typeProperty.stringValue);
 
                 var description = decl.FindPropertyRelative("description").stringValue;
 
-                object defaultValue;
-                switch (type)
-                {
-                    case Yarn.Type.Number:
-                        defaultValue = decl.FindPropertyRelative("defaultValueNumber").floatValue;
-                        break;
-                    case Yarn.Type.String:
-                        defaultValue = decl.FindPropertyRelative("defaultValueString").stringValue;
-                        break;
-                    case Yarn.Type.Bool:
-                        defaultValue = decl.FindPropertyRelative("defaultValueBool").boolValue;
-                        break;
-                    default:
-                        throw new System.ArgumentOutOfRangeException($"Invalid declaration type {type}");
-                }
+                System.IConvertible defaultValue;
 
-                var declaration = Declaration.CreateVariable(name, defaultValue, description);
+                if (type == Yarn.BuiltinTypes.Number) {
+                    defaultValue = decl.FindPropertyRelative("defaultValueNumber").floatValue;
+                } else if (type == Yarn.BuiltinTypes.String) {
+                    defaultValue = decl.FindPropertyRelative("defaultValueString").stringValue;
+                } else if (type == Yarn.BuiltinTypes.Boolean) {
+                    defaultValue = decl.FindPropertyRelative("defaultValueBool").boolValue;
+                } else {
+                    throw new System.ArgumentOutOfRangeException($"Invalid declaration type {type.Name}");
+                }
+                
+                var declaration = Declaration.CreateVariable(name, type, defaultValue, description);
 
                 thisProgramDeclarations.Add(declaration);
             }
