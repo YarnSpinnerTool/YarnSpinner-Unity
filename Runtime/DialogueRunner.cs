@@ -936,7 +936,7 @@ namespace Yarn.Unity
         private static string[] ParseCommandParameters(string command)
         {
             // return command.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
-            return Regex.Matches(command, cmdRegex)
+            return Regex.Matches(command, CMD_REGEX)
                     .Cast<Match>()
                     .Select(m => m.Value)
                     .ToArray();
@@ -966,7 +966,6 @@ namespace Yarn.Unity
         /// dispatch.</param>
         internal bool DispatchCommandToGameObject(string command)
         {
-
             // Start by splitting our command string by spaces.
             var words = ParseCommandParameters(command);
 
@@ -1054,7 +1053,6 @@ namespace Yarn.Unity
                 // Start the coroutine. When it's done, it will continue
                 // execution.
                 StartCoroutine(DoYarnCommand(target, methodInfo, finalParameters));
-
                 return true;
             }
             else
