@@ -28,6 +28,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 * Yarn Programs: The 'Convert Implicit Declarations' button has been temporarily removed, due to a required compatibility change related to the new type system. It will be restored before final 2.0 release.
 
+## [v2.0.0-beta4] 2021-04-01
+
+Yarn Spinner 2.0 Beta 4 is a hotfix release for Yarn Spinner 2.0 Beta 3. 
+
+### Changed 
+
+- Fixed an issue that caused Yarn Spinner to not compile on Unity 2018 or Unity 2019.
+
 ## [v2.0.0-beta3] 2021-03-27
 
 ### Added
