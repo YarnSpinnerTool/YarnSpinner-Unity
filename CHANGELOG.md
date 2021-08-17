@@ -8,12 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+### Changed
+
+### Removed
+
+## [v2.0.0-beta5] 2021-08-17
+
+### Added
+
 * `InMemoryVariableStorage` now throws an exception if you attempt to get or set a variable whose name doesn't start with `$`.
 
 ### Changed
 
 * `OptionsListView` no longer throws a `NullPointerException` when the dialogue starts with options (instead of a line.) 
 * When creating a new Yarn Project file from the Assets -> Create menu, the correct icon is now used.
+* Updated to use the new type system in Yarn Spinner 2.0-beta5.
 
 ### Removed
 
