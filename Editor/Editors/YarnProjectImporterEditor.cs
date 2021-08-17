@@ -75,6 +75,10 @@ namespace Yarn.Unity.Editor
 
             serializedDeclarationsList.DrawLayout();
 
+            // The 'Convert Implicit Declarations' feature has been
+            // temporarily removed in v2.0.0-beta5.
+
+#if false
             // If any of the serialized declarations are implicit, add a
             // button that lets you generate explicit declarations for them
             var anyImplicitDeclarations = false;
@@ -96,6 +100,7 @@ namespace Yarn.Unity.Editor
                     return;
                 }
             }
+#endif
 
             EditorGUILayout.PropertyField(defaultLanguageProperty, new GUIContent("Default Language"));
 

@@ -53,8 +53,8 @@ namespace Yarn.Unity
         }
 
         public static void AddYarnFunctionMethodsToLibrary(Library library, params System.Reflection.Assembly[] assemblies) {
-            Debug.Log($"{nameof(AddYarnFunctionMethodsToLibrary)} is not currently implemented, and is a no-op.");
-            return;
+            throw new System.NotImplementedException($"{nameof(AddYarnFunctionMethodsToLibrary)} is not currently implemented, and is a no-op.");
+            
             if (assemblies.Length == 0) {
                 assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
             }
