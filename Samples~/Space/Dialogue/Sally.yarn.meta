@@ -14,56 +14,7 @@ ScriptedImporter:
   assetBundleName: 
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 94073015eacc34c1d8fc6786e43d60ca, type: 3}
-  baseLanguageID: en
-  stringIDs:
-  - line:794945
-  - line:2dc39b
-  - line:34de2f
-  - line:dcc2bc
-  - line:a8e70c
-  - line:305cde
-  - line:5d7a7c
-  - line:0a7e39
-  - line:0facf7
-  - line:8c3f98
-  - line:24c418
-  - line:df4eaf
-  - line:1fea6c
-  - line:5df323
-  - line:60c282
-  - line:d7df49
-  AnyImplicitStringIDs: 0
-  isSuccesfullyParsed: 1
-  parseErrorMessage: "Error on line 18 at position 17:\nmismatched input '.' expecting
-    COMMAND_END\nDebug: Offending symbol type: COMMAND_TEXT\n    <<jump Sally.Watch>>\n               
-    ^\n\nTokens:\n1:0 ID \"title\"\n1:5 HEADER_DELIMITER \": \"\n1:7 REST_OF_LINE
-    \"Sally\"\n2:0 HEADER_NEWLINE \"\n\"\n2:0 ID \"tags\"\n2:4 HEADER_DELIMITER \":
-    \"\n3:0 HEADER_NEWLINE \"\n\"\n3:0 ID \"colorID\"\n3:7 HEADER_DELIMITER \": \"\n3:9
-    REST_OF_LINE \"0\"\n4:0 HEADER_NEWLINE \"\n\"\n4:0 ID \"position\"\n4:8 HEADER_DELIMITER
-    \": \"\n4:10 REST_OF_LINE \"524,111\"\n5:0 HEADER_NEWLINE \"\n\"\n5:0 '---' \"---\"\n6:0
-    '<<' \"<<\"\n6:2 COMMAND_IF \"if \"\n6:5 FUNC_ID \"visited\"\n6:12 '(' \"(\"\n6:13
-    STRING \"\"Sally\"\"\n6:20 ')' \")\"\n6:22 OPERATOR_LOGICAL_EQUALS \"is\"\n6:25
-    'false' \"false\"\n6:30 COMMAND_END \">>\"\n7:4 INDENT \"    \"\n7:4 TEXT \"P\"\n7:5
-    TEXT \"layer: Hey, Sally. \"\n7:24 '#' \"#\"\n7:25 HASHTAG_TEXT \"line:794945\"\n8:4
-    TEXT_NEWLINE \" \"\n8:4 TEXT \"S\"\n8:5 TEXT \"ally: Uah! \"\n8:16 '#' \"#\"\n8:17
-    HASHTAG_TEXT \"line:2dc39b\"\n9:4 TEXT_NEWLINE \" \"\n9:4 TEXT \"S\"\n9:5 TEXT
-    \"ally: You snuck up on me. \"\n9:31 '#' \"#\"\n9:32 HASHTAG_TEXT \"line:34de2f\"\n10:4
-    TEXT_NEWLINE \" \"\n10:4 TEXT \"S\"\n10:5 TEXT \"ally: Don't do that. \"\n10:26
-    '#' \"#\"\n10:27 HASHTAG_TEXT \"line:dcc2bc\"\n11:0 TEXT_NEWLINE \"\n\"\n10:0
-    DEDENT \"\n\"\n11:0 '<<' \"<<\"\n11:2 COMMAND_ELSE \"else\"\n11:6 COMMAND_END
-    \">>\"\n12:4 INDENT \"    \"\n12:4 TEXT \"P\"\n12:5 TEXT \"layer: Hey. \"\n12:17
-    '#' \"#\"\n12:18 HASHTAG_TEXT \"line:a8e70c\"\n13:4 TEXT_NEWLINE \" \"\n13:4
-    TEXT \"S\"\n13:5 TEXT \"ally: Hi. \"\n13:15 '#' \"#\"\n13:16 HASHTAG_TEXT \"line:305cde\"\n14:0
-    TEXT_NEWLINE \"\n\"\n13:0 DEDENT \"\n\"\n14:0 '<<' \"<<\"\n14:2 'endif' \"endif\"\n14:7
-    COMMAND_END \">>\"\n17:0 '->' \"->\"\n17:3 TEXT \"A\"\n17:4 TEXT \"nything exciting
-    happen on your watch? \"\n17:43 '<<' \"<<\"\n17:45 COMMAND_IF \"if \"\n17:48
-    OPERATOR_LOGICAL_NOT \"not\"\n17:52 FUNC_ID \"visited\"\n17:59 '(' \"(\"\n17:60
-    STRING \"\"Sally.Watch\"\"\n17:73 ')' \")\"\n17:74 COMMAND_END \">>\"\n17:77
-    '#' \"#\"\n17:78 HASHTAG_TEXT \"line:5d7a7c\"\n18:4 TEXT_NEWLINE \" \"\n18:4
-    INDENT \"    \"\n18:4 '<<' \"<<\"\n18:6 COMMAND_JUMP \"jump \"\n18:11 ID \"Sally\"\n18:16
-    COMMAND_TEXT \".\"\n18:17 COMMAND_TEXT \"Watch\""
-  baseLanguage: {fileID: 4900000, guid: 8b6ae1e8d32e840f0b3fd0b033e52253, type: 3}
-  localizations:
-  - languageName: de
-    text: {fileID: 4900000, guid: 1b0fbbc0a18fb4fcd90b66be99f1c05d, type: 3}
-  localizationDatabase: {fileID: 11400000, guid: 93d5bc4e054ac4572a2da48fa49ea322, type: 2}
+  LastImportHadImplicitStringIDs: 0
+  LastImportHadAnyStrings: 1
+  isSuccessfullyParsed: 1
+  parseErrorMessage: 
