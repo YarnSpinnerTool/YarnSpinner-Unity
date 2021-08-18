@@ -804,13 +804,26 @@ namespace Yarn.Unity
             // Clear the set of active dialogue views, just in case
             ActiveDialogueViews.Clear();
 
-            // Send line to available dialogue views
+            // the following is broken up into two stages because otherwise if the 
+            // first view happens to finish first once it calls dialogue complete
+            // it will empty the set of active views resulting in the line being considered
+            // finished by the runner despite there being a bunch of views still waiting
+            // so we do it over two loops.
+            // the first finds every active view and flags it as such
+            // the second then goes through them all and gives them the line
+
+            // Mark this dialogue view as active
             foreach (var dialogueView in dialogueViews)
             {
                 if (dialogueView == null || dialogueView.enabled == false) continue;
 
-                // Mark this dialogue view as active
                 ActiveDialogueViews.Add(dialogueView);
+            }
+            // Send line to all active dialogue views
+            foreach (var dialogueView in dialogueViews)
+            {
+                if (dialogueView == null || dialogueView.enabled == false) continue;
+
                 dialogueView.RunLine(CurrentLine,
                     () => DialogueViewCompletedDelivery(dialogueView));
             }
