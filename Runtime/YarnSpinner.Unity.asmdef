@@ -17,12 +17,12 @@
     "versionDefines": [
         {
             "name": "com.unity.addressables",
-            "expression": "1",
+            "expression": "1.0.0",
             "define": "USE_ADDRESSABLES"
         },
         {
             "name": "com.unity.inputsystem",
-            "expression": "1",
+            "expression": "1.0.0",
             "define": "USE_INPUTSYSTEM"
         }
     ],
