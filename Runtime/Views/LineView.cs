@@ -202,12 +202,12 @@ namespace Yarn.Unity
             // configure it
             if (continueActionType == ContinueActionType.InputSystemActionFromAsset && continueActionReference != null)
             {
-                continueActionReference.action.performed += UserPerformedSkipAction;
+                continueActionReference.action.started += UserPerformedSkipAction;
             }
 
             // The custom skip action always starts disabled
             continueAction?.Disable();
-            continueAction.performed += UserPerformedSkipAction;
+            continueAction.started += UserPerformedSkipAction;
 #endif
         }
 
