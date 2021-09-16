@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Yarn.Unity;
+﻿using UnityEngine;
 
-namespace Yarn.Unity.Example {
+namespace Yarn.Unity.Example
+{
     /// <summary>Script for the 3D RPG sample project in YarnSpinner. DialogueRunner invokes YarnCharacterView, 
     /// which locates the YarnCharacter who is speaking. Put this script on your various NPC gameObjects.</summary>
     public class YarnCharacter : MonoBehaviour
@@ -16,12 +14,17 @@ namespace Yarn.Unity.Example {
 
         [Tooltip("if true, then apply messageBubbleOffset relative to this transform's rotation and scale")]
         public bool offsetUsesRotation = false;
-        public Vector3 positionWithOffset { 
+
+        public Vector3 positionWithOffset
+        { 
             get {
-                if ( !offsetUsesRotation ) {
+                if (!offsetUsesRotation)
+                {
                     return transform.position + messageBubbleOffset;
-                } else {
-                    return transform.position + transform.TransformPoint( messageBubbleOffset ); // convert offset into local space
+                }
+                else
+                {
+                    return transform.position + transform.TransformPoint(messageBubbleOffset); // convert offset into local space
                 }
             }
         }
@@ -30,21 +33,21 @@ namespace Yarn.Unity.Example {
         // ... this is important because YarnCharacterManager.Awake() must run before YarnCharacter.Start()
         void Start()
         {
-            if ( YarnCharacterView.instance == null ) {
+            if (YarnCharacterView.instance == null)
+            {
                 Debug.LogError("YarnCharacter can't find the YarnCharacterView instance! Is the 3D Dialogue prefab and YarnCharacterView script in the scene?");
                 return;
             }
 
-            YarnCharacterView.instance.RegisterYarnCharacter( this );
+            YarnCharacterView.instance.RegisterYarnCharacter(this);
         }
 
         void OnDestroy()
         {
-            if ( YarnCharacterView.instance != null ) {
-                YarnCharacterView.instance.ForgetYarnCharacter( this );
+            if (YarnCharacterView.instance != null)
+            {
+                YarnCharacterView.instance.ForgetYarnCharacter(this);
             }
         }
-
-
     }
 }
