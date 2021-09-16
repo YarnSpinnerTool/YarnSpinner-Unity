@@ -54,7 +54,7 @@ namespace Yarn.Unity
             string characterName = dialogueLine.CharacterName;
 
             // Did we find one?
-            if (string.IsNullOrEmpty(characterName))
+            if (!string.IsNullOrEmpty(characterName))
             {
                 // Then notify the rest of the scene about it. This
                 // generally involves updating a text view and making it
