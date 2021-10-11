@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The console will no longer report an error indicating that a command is "already defined" when a subclass of a MonoBehaviour that has `YarnCommand` methods exists. 
 
+- `LocalizedLine.Text`'s setter is now public, not internal.
+
 ### Removed
 
 ## [v2.0.0-beta5] 2021-08-17

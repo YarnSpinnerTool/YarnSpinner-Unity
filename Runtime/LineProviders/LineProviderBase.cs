@@ -152,7 +152,7 @@ namespace Yarn.Unity
         /// The underlying <see cref="Yarn.Markup.MarkupParseResult"/> for
         /// this line.
         /// </summary>
-        public Markup.MarkupParseResult Text { get; internal set; }
+        public Markup.MarkupParseResult Text { get; set; }
 
         /// <summary>
         /// The underlying <see cref="Yarn.Markup.MarkupParseResult"/> for
