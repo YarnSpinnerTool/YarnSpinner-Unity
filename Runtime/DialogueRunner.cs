@@ -187,11 +187,6 @@ namespace Yarn.Unity
         private static Dictionary<string, MethodInfo> _yarnCommands = new Dictionary<string, MethodInfo>();
 
         /// <summary>
-        /// Regular expression used to split up command tokens divided with quotes.
-        /// </summary>
-        private static readonly string CMD_REGEX = @"(?<=[ ][\""]|^[\""])[^\""]+(?=[\""][ ]|[\""]$)|(?<=[ ]|^)[^\"" ]+(?=[ ]|$)"; // @"[\""].+?[\""]|[^ ]+" -> This is a simpler form, but won't remove quotes.
-
-        /// <summary>
         /// Finds all MonoBehaviour types in the loaded assemblies, and
         /// looks for all methods that are tagged with YarnCommand.
         /// </summary>
@@ -881,9 +876,9 @@ namespace Yarn.Unity
 
         internal bool DispatchCommandToRegisteredHandlers(String command)
         {
-            string[] commandTokens = ParseCommandParameters(command);
+            List<string> commandTokens = new List<string>(Dialogue.SplitCommandText(command));
 
-            if (commandTokens.Length == 0)
+            if (commandTokens.Count == 0)
             {
                 // Nothing to do
                 return false;
@@ -899,13 +894,14 @@ namespace Yarn.Unity
             }
 
             // Get all tokens after the name of the command
-            var remainingWords = new string[commandTokens.Length - 1];
+            var remainingWords = new string[commandTokens.Count - 1];
 
             var @delegate = commandHandlers[firstWord];
             var methodInfo = @delegate.Method;
 
+            
             // Copy everything except the first word from the array
-            System.Array.Copy(commandTokens, 1, remainingWords, 0, remainingWords.Length);
+            commandTokens.CopyTo(1, remainingWords, 0, remainingWords.Length);
 
             // Take the list of words, and prepend the onComplete delegate
             // we were given - it's always the first parameter
@@ -955,16 +951,6 @@ namespace Yarn.Unity
 
         }
 
-        private static string[] ParseCommandParameters(string command)
-        {
-            // return command.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
-            return Regex.Matches(command, CMD_REGEX)
-                    .Cast<Match>()
-                    .Select(m => m.Value)
-                    .ToArray();
-        }
-
-
         /// <summary>
         /// Parses the command string inside <paramref name="command"/>,
         /// attempts to locate a suitable method on a suitable game object,
@@ -989,11 +975,11 @@ namespace Yarn.Unity
         internal bool DispatchCommandToGameObject(string command)
         {
             // Start by splitting our command string by spaces.
-            var words = ParseCommandParameters(command);
+            var words = new List<string>(Dialogue.SplitCommandText(command));
 
             // We need 2 parameters in order to have both a command name,
             // and the name of an object to find.
-            if (words.Length < 2)
+            if (words.Count < 2)
             {
                 // Don't log an error, because the dialogue views might
                 // handle this command.
@@ -1045,7 +1031,7 @@ namespace Yarn.Unity
             // command after the first two (which are the command name and
             // the object name); we need to remove these two from the start
             // of the list.
-            if (words.Length >= 2)
+            if (words.Count() >= 2)
             {
                 parameters.RemoveRange(0, 2);
             }
