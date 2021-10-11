@@ -16,10 +16,9 @@ namespace Yarn.Unity.Editor
     public class YarnImporterEditor : ScriptedImporterEditor
     {
         private SerializedProperty isSuccessfullyCompiledProperty;
-        private SerializedProperty compilationErrorMessageProperty;
-        private SerializedProperty localizationsProperty;
-
-        public string DestinationProjectError => destinationYarnProjectImporter?.compileError ?? null;
+        private SerializedProperty parseErrorMessagesProperty;
+        
+        public IEnumerable<string> DestinationProjectError => destinationYarnProjectImporter?.compileErrors ?? new List<string>();
 
         private YarnProject destinationYarnProject;
         private YarnProjectImporter destinationYarnProjectImporter;
@@ -28,10 +27,9 @@ namespace Yarn.Unity.Editor
         {
             base.OnEnable();
 
-            isSuccessfullyCompiledProperty = serializedObject.FindProperty("isSuccesfullyParsed");
-            compilationErrorMessageProperty = serializedObject.FindProperty("parseErrorMessage");
-            localizationsProperty = serializedObject.FindProperty("localizations");
-
+            isSuccessfullyCompiledProperty = serializedObject.FindProperty(nameof(YarnImporter.isSuccessfullyParsed));
+            parseErrorMessagesProperty = serializedObject.FindProperty(nameof(YarnImporter.parseErrorMessages));
+            
             UpdateDestinationProgram();
         }
 
@@ -55,7 +53,7 @@ namespace Yarn.Unity.Editor
             // show an error. If the selected objects have the same
             // destination program, and there's a compile error in it, show
             // that. 
-            if (string.IsNullOrEmpty(compilationErrorMessageProperty.stringValue) == false)
+            if (parseErrorMessagesProperty.arraySize > 0)
             {
                 if (serializedObject.isEditingMultipleObjects)
                 {
@@ -63,14 +61,15 @@ namespace Yarn.Unity.Editor
                 }
                 else
                 {
-                    EditorGUILayout.HelpBox(compilationErrorMessageProperty.stringValue, MessageType.Error);
+                    foreach (SerializedProperty errorProperty in parseErrorMessagesProperty) {
+                        EditorGUILayout.HelpBox(errorProperty.stringValue, MessageType.Error);
+                    }
                 }
             }
-            else if (string.IsNullOrEmpty(DestinationProjectError) == false)
+            else if (DestinationProjectError.Count() > 0)
             {
-
-                EditorGUILayout.HelpBox(DestinationProjectError, MessageType.Error);
-
+                var displayMessage = string.Join("\n", DestinationProjectError);
+                EditorGUILayout.HelpBox(displayMessage, MessageType.Error);
             }
 
             if (destinationYarnProject == null)

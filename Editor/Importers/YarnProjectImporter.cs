@@ -101,7 +101,8 @@ namespace Yarn.Unity.Editor
 
         public List<TextAsset> sourceScripts = new List<TextAsset>();
 
-        public string compileError;
+        public List<string> compileErrors = new List<string>();
+
         public List<SerializedDeclaration> serializedDeclarations = new List<SerializedDeclaration>();
 
         [Language]
@@ -145,17 +146,25 @@ namespace Yarn.Unity.Editor
 
             IEnumerable<Declaration> localDeclarations;
 
-            compileError = null;
+            compileErrors.Clear();
 
-            try
+            var result = Compiler.Compiler.Compile(localDeclarationsCompileJob);
+            localDeclarations = result.Declarations;
+
+            IEnumerable<Diagnostic> errors;
+            
+            errors = result.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
+
+            if (errors.Count() > 0)
             {
-                var result = Compiler.Compiler.Compile(localDeclarationsCompileJob);
-                localDeclarations = result.Declarations;
-            }
-            catch (ParseException e)
-            {
-                ctx.LogImportError($"Error in Yarn Project: {e.Message}");
-                compileError = $"Error in Yarn Project {ctx.assetPath}: {e.Message}";
+                // We encountered errors while parsing for declarations.
+                // Report them and exit.
+                foreach (var error in errors)
+                {
+                    ctx.LogImportError($"Error in Yarn Project: {error}");
+                    compileErrors.Add($"Error in Yarn Project {ctx.assetPath}: {error}");
+                }
+
                 return;
             }
 
@@ -181,7 +190,7 @@ namespace Yarn.Unity.Editor
             {
                 // Parse errors! We can't continue.
                 string failingScriptNameList = string.Join("\n", scriptsWithParseErrors.Select(script => script.assetPath));
-                compileError = $"Parse errors exist in the following files:\n{failingScriptNameList}";
+                compileErrors.Add($"Parse errors exist in the following files:\n{failingScriptNameList}");
                 return;
             }
 
@@ -200,36 +209,36 @@ namespace Yarn.Unity.Editor
 
             CompilationResult compilationResult;
 
-            try
-            {
-                compilationResult = Compiler.Compiler.Compile(job);
-            }
-            catch (TypeException e)
-            {
-                ctx.LogImportError($"Error compiling: {e.Message}");
-                compileError = e.Message;
+            compilationResult = Compiler.Compiler.Compile(job);
 
-                var importer = pathsToImporters[e.FileName];
-                importer.parseErrorMessage = e.Message;
-                EditorUtility.SetDirty(importer);
+            errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
+        
+            if (errors.Count() > 0) {
+                var errorGroups = errors.GroupBy(e => e.FileName);
+                foreach (var errorGroup in errorGroups) {
+
+                    var errorMessages = errorGroup.Select(e => e.ToString());
+
+                    foreach (var message in errorMessages) {
+                        ctx.LogImportError($"Error compiling: {message}");
+                    }
+
+                    // Associate this compile error to the corresponding
+                    // script's importer.
+                    var importer = pathsToImporters[errorGroup.Key];
+
+                    compileErrors.AddRange(errorMessages);
+
+                    importer.parseErrorMessages.AddRange(errorMessages);
+                    EditorUtility.SetDirty(importer);
+                }
 
                 return;
             }
-            catch (ParseException e)
-            {
-                ctx.LogImportError(e.Message);
-                compileError = e.Message;
-
-                var importer = pathsToImporters[e.FileName];
-                importer.parseErrorMessage = e.Message;
-                EditorUtility.SetDirty(importer);
-
-                return;
-            }
-
+            
             if (compilationResult.Program == null)
             {
-                ctx.LogImportError("Internal error: Failed to compile: resulting program was null, but compiler did not throw a parse exception.");
+                ctx.LogImportError("Internal error: Failed to compile: resulting program was null, but compiler did not report errors.");
                 return;
             }
 
@@ -244,7 +253,8 @@ namespace Yarn.Unity.Editor
             // compilation
             foreach (var importer in pathsToImporters.Values)
             {
-                importer.parseErrorMessage = null;
+                importer.parseErrorMessages.Clear();
+                EditorUtility.SetDirty(importer);
             }
 
             // Will we need to create a default localization? This variable
@@ -440,7 +450,7 @@ namespace Yarn.Unity.Editor
         /// </summary>
         /// <inheritdoc path="exception"
         /// cref="GetScriptHasLineTags(TextAsset)"/>
-        internal bool CanGenerateStringsTable => string.IsNullOrEmpty(this.compileError) && sourceScripts.Count > 0 && sourceScripts.All(s => GetScriptHasLineTags(s));
+        internal bool CanGenerateStringsTable => this.compileErrors.Count == 0 && sourceScripts.Count > 0 && sourceScripts.All(s => GetScriptHasLineTags(s));
 
         /// <summary>
         /// Gets a value indicating whether the source script has line
@@ -507,12 +517,11 @@ namespace Yarn.Unity.Editor
 
             CompilationResult compilationResult;
 
-            try
-            {
-                compilationResult = Compiler.Compiler.Compile(job);
-            }
-            catch (ParseException)
-            {
+            compilationResult = Compiler.Compiler.Compile(job);
+
+            var errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
+
+            if (errors.Count() > 0) {
                 Debug.LogError($"Can't generate a strings table from a Yarn Project that contains compile errors", null);
                 return null;
             }

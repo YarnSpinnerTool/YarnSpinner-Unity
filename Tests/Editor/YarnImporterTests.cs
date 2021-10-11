@@ -208,8 +208,8 @@ namespace Yarn.Unity.Tests
             // Assert:
             // The Yarn project has a reference to the Yarn script. They
             // all report no compilation errors.
-            Assert.True(string.IsNullOrEmpty(scriptImporter.parseErrorMessage));
-            Assert.True(string.IsNullOrEmpty(yarnProjectImporter.compileError));
+            Assert.IsEmpty(scriptImporter.parseErrorMessages);
+            Assert.IsEmpty(yarnProjectImporter.compileErrors);
             Assert.True(scriptImporter.isSuccessfullyParsed);
             Assert.AreSame(project, scriptImporter.DestinationProject);
         }
@@ -229,7 +229,7 @@ namespace Yarn.Unity.Tests
             // The Yarn script will fail to compile, and both the script
             // and the project will know about this, but they otherwise
             // have correct asset references to each other.
-            Assert.IsNotEmpty(scriptImporter.parseErrorMessage);
+            Assert.IsNotEmpty(scriptImporter.parseErrorMessages);
             Assert.AreSame(scriptImporter.DestinationProject, project);
             Assert.AreSame(project, scriptImporter.DestinationProject);
         }
