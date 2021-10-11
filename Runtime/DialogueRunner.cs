@@ -213,7 +213,16 @@ namespace Yarn.Unity
                     // YarnCommand attribute
                     foreach (var method in type.GetMethods())
                     {
-                        var attributes = new List<YarnCommandAttribute>(method.GetCustomAttributes<YarnCommandAttribute>());
+                        if (method.DeclaringType != type)
+                        {
+                            // This method was not declared in this class,
+                            // and was inherited from a parent class. Don't
+                            // attempt to register this method, because
+                            // we'll get a conflict.
+                            continue;
+                        }
+
+                        var attributes = new List<YarnCommandAttribute>(method.GetCustomAttributes<YarnCommandAttribute>(false));
 
                         if (attributes.Count > 0)
                         {
