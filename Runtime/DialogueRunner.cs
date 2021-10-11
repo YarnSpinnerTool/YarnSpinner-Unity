@@ -33,6 +33,7 @@ using System.Reflection;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Yarn.Unity
 {
@@ -184,6 +185,11 @@ namespace Yarn.Unity
         /// Populated in the <see cref="InitializeClass"/> method.
         /// </summary>
         private static Dictionary<string, MethodInfo> _yarnCommands = new Dictionary<string, MethodInfo>();
+
+        /// <summary>
+        /// Regular expression used to split up command tokens divided with quotes.
+        /// </summary>
+        private static readonly string CMD_REGEX = @"(?<=[ ][\""]|^[\""])[^\""]+(?=[\""][ ]|[\""]$)|(?<=[ ]|^)[^\"" ]+(?=[ ]|$)"; // @"[\""].+?[\""]|[^ ]+" -> This is a simpler form, but won't remove quotes.
 
         /// <summary>
         /// Finds all MonoBehaviour types in the loaded assemblies, and
@@ -951,7 +957,11 @@ namespace Yarn.Unity
 
         private static string[] ParseCommandParameters(string command)
         {
-            return command.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            // return command.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            return Regex.Matches(command, CMD_REGEX)
+                    .Cast<Match>()
+                    .Select(m => m.Value)
+                    .ToArray();
         }
 
 
@@ -978,7 +988,6 @@ namespace Yarn.Unity
         /// dispatch.</param>
         internal bool DispatchCommandToGameObject(string command)
         {
-
             // Start by splitting our command string by spaces.
             var words = ParseCommandParameters(command);
 
@@ -1066,7 +1075,6 @@ namespace Yarn.Unity
                 // Start the coroutine. When it's done, it will continue
                 // execution.
                 StartCoroutine(DoYarnCommand(target, methodInfo, finalParameters));
-
                 return true;
             }
             else
