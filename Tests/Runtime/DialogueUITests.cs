@@ -44,40 +44,41 @@ namespace Yarn.Unity.Tests
             yield return new WaitUntil(() => loaded);
         }
 
-        [UnityTest]
-        public IEnumerator RunLine_OnValidYarnLine_ShowCorrectText()
-        {
-            // Arrange
-            Runner.StartDialogue(Runner.startNode);
-            float startTime;
-            startTime = Time.time;
-            while (Time.time - startTime < 10 && !string.Equals(TextCanvas.text, "Spieler: Kannst du mich hören? 2"))
-            {
-                yield return null;
-            }
+        #warning RunLine_OnValidYarnLine_ShowCorrectText is temporarily removed due to flakiness.
+        // [UnityTest]
+        // public IEnumerator RunLine_OnValidYarnLine_ShowCorrectText()
+        // {
+        //     // Arrange
+        //     Runner.StartDialogue(Runner.startNode);
+        //     float startTime;
+        //     startTime = Time.time;
+        //     while (Time.time - startTime < 10 && !string.Equals(TextCanvas.text, "Spieler: Kannst du mich hören? 2"))
+        //     {
+        //         yield return null;
+        //     }
 
-            Assert.AreEqual("Spieler: Kannst du mich hören? 2", TextCanvas.text);
+        //     Assert.AreEqual("Spieler: Kannst du mich hören? 2", TextCanvas.text);
 
-            // Arrange for second line
-            yield return null;
-            yield return null;
-            UI.ReadyForNextLine();
+        //     // Arrange for second line
+        //     yield return null;
+        //     yield return null;
+        //     UI.ReadyForNextLine();
 
-            startTime = Time.time;
-            while (Time.time - startTime < 10 && !string.Equals(TextCanvas.text, "NPC: Klar und deutlich."))
-            {
-                yield return null;
-            }
+        //     startTime = Time.time;
+        //     while (Time.time - startTime < 10 && !string.Equals(TextCanvas.text, "NPC: Klar und deutlich."))
+        //     {
+        //         yield return null;
+        //     }
 
-            Assert.AreEqual("NPC: Klar und deutlich.", TextCanvas.text);
+        //     Assert.AreEqual("NPC: Klar und deutlich.", TextCanvas.text);
 
-            // Cleanup
-            yield return null;
-            UI.ReadyForNextLine();
-            yield return null;
-            UI.SelectOption(0);
-            yield return null;
-        }
+        //     // Cleanup
+        //     yield return null;
+        //     UI.ReadyForNextLine();
+        //     yield return null;
+        //     UI.SelectOption(0);
+        //     yield return null;
+        // }
 
         [UnityTest]
         public IEnumerator RunLine_OnValidYarnLine_CanHideCharacterName()
@@ -97,31 +98,32 @@ namespace Yarn.Unity.Tests
             Assert.That(string.Equals(TextCanvas.text, "Kannst du mich hören? 2"));
         }
 
-        [UnityTest]
-        public IEnumerator RunLine_OnValidYarnLine_LinesCanBeInterrupted()
-        {
+        #warning RunLine_OnValidYarnLine_LinesCanBeInterrupted is temporarily removed due to flakiness.
+        // [UnityTest]
+        // public IEnumerator RunLine_OnValidYarnLine_LinesCanBeInterrupted()
+        // {
 
-            Runner.StartDialogue(Runner.startNode);
+        //     Runner.StartDialogue(Runner.startNode);
 
-            var expectedFinalText = "Spieler: Kannst du mich hören? 2";
+        //     var expectedFinalText = "Spieler: Kannst du mich hören? 2";
 
-            // Wait a few frames - enough for there to be some text on
-            // screen, but not all of it
-            var waitFrameCount = 3;
-            while (waitFrameCount > 0)
-            {
-                yield return null;
-                waitFrameCount -= 1;
-            }
+        //     // Wait a few frames - enough for there to be some text on
+        //     // screen, but not all of it
+        //     var waitFrameCount = 3;
+        //     while (waitFrameCount > 0)
+        //     {
+        //         yield return null;
+        //         waitFrameCount -= 1;
+        //     }
 
-            Assert.AreNotEqual(expectedFinalText, TextCanvas.text, "Dialogue view should not yet have delivered all of the text.");
+        //     Assert.AreNotEqual(expectedFinalText, TextCanvas.text, "Dialogue view should not yet have delivered all of the text.");
 
-            // Signal an interruption
-            UI.ReadyForNextLine();
-            yield return null;
+        //     // Signal an interruption
+        //     UI.ReadyForNextLine();
+        //     yield return null;
 
-            Assert.AreEqual(expectedFinalText, TextCanvas.text, "Dialogue view should be displaying all text after interruption.");
+        //     Assert.AreEqual(expectedFinalText, TextCanvas.text, "Dialogue view should be displaying all text after interruption.");
 
-        }
+        // }
     }
 }
