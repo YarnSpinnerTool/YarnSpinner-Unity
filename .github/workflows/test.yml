@@ -22,10 +22,10 @@ jobs:
           # - WebGL # WebGL.
     steps:
       - name: Activate Unity
-        uses: game-ci/unity-activate
+        uses: game-ci/unity-activate@1.3
         with:
           unityVersion: ${{ matrix.unityVersion }}
-          
+
       - name: Create empty Unity project
         run: |
           mkdir -p ${{ matrix.projectPath }}/Assets
