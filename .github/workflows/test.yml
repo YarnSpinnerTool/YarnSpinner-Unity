@@ -22,7 +22,7 @@ jobs:
           # - WebGL # WebGL.
     steps:
       - name: Activate Unity
-        uses: game-ci/unity-activate@1.3
+        uses: game-ci/unity-activate@2
         with:
           unityVersion: ${{ matrix.unityVersion }}
 
