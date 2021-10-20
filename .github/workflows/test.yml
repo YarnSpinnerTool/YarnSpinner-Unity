@@ -1,6 +1,11 @@
 name: Run Tests 🧪
 
-on: [push, pull_request, workflow_dispatch]
+
+on: 
+  push:
+    branches:
+      - features/ci
+  workflow_dispatch:
 
 jobs:
   buildAndTestForSomePlatforms:
