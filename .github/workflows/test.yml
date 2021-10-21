@@ -41,7 +41,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          path: Packages/YarnSpinner
+          path: ${{GITHUB_WORKSPACE}}/${{ matrix.projectPath }}/Packages/YarnSpinner
           
       - name: Fetch from Cache
         uses: actions/cache@v2
