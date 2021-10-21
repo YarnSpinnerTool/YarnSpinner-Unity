@@ -85,5 +85,5 @@ jobs:
         uses: actions/upload-artifact@v2
         if: always()
         with:
-          name: Test results (all modes)
+          name: Test results (edit + play, ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }})
           path: ${{ steps.testRunner.outputs.artifactsPath }}
