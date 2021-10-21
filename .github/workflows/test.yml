@@ -3,8 +3,7 @@ name: Run Tests 🧪
 
 on: 
   push:
-    branches:
-      - features/ci
+  pull_request:
   workflow_dispatch:
 
 jobs:
