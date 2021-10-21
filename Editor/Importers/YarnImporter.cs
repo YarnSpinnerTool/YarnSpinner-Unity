@@ -24,7 +24,7 @@ namespace Yarn.Unity.Editor
     /// asset's corresponding meta file.
     /// </summary>
     [ScriptedImporter(3, new[] { "yarn", "yarnc" }, -1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
-    public class YarnImporter : ScriptedImporter
+    public class YarnImporter : ScriptedImporter, IYarnErrorSource
     {
         /// <summary>
         /// Indicates whether the last time this file was imported, the
@@ -55,6 +55,8 @@ namespace Yarn.Unity.Editor
         /// Contains the text of the most recent parser error message.
         /// </summary>
         public List<string> parseErrorMessages = new List<string>();
+
+        IList<string> IYarnErrorSource.CompileErrors => parseErrorMessages;
 
         public YarnProject DestinationProject
         {
@@ -97,6 +99,8 @@ namespace Yarn.Unity.Editor
         {
             var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
+
+            YarnPreventPlayMode.AddYarnErrorSource(this);
 
             var extension = System.IO.Path.GetExtension(ctx.assetPath);
 
@@ -196,13 +200,11 @@ namespace Yarn.Unity.Editor
             {
                 isSuccessfullyParsed = false;
 
-                parseErrorMessages.AddRange(errors.Select(e => e.ToString()));
-
-                foreach (var error in errors)
-                {
-                    ctx.LogImportError($"Error importing {ctx.assetPath}: {error.ToString()}");
-                }
-
+                parseErrorMessages.AddRange(errors.Select(e => {
+                    string message = $"{ctx.assetPath}: {e}";
+                    ctx.LogImportError($"Error importing {message}");
+                    return message;
+                }));
             }
             else
             {

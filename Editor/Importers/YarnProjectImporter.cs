@@ -15,7 +15,7 @@ using System.Collections;
 namespace Yarn.Unity.Editor
 {
     [ScriptedImporter(2, new[] { "yarnproject" }, 1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
-    public class YarnProjectImporter : ScriptedImporter
+    public class YarnProjectImporter : ScriptedImporter, IYarnErrorSource
     {
 
         [System.Serializable]
@@ -112,11 +112,15 @@ namespace Yarn.Unity.Editor
 
         public bool useAddressableAssets;
 
+        IList<string> IYarnErrorSource.CompileErrors => compileErrors;
+
         public override void OnImportAsset(AssetImportContext ctx)
         {
 #if YARNSPINNER_DEBUG
             UnityEngine.Profiling.Profiler.enabled = true;
 #endif
+
+            YarnPreventPlayMode.AddYarnErrorSource(this);
 
             var project = ScriptableObject.CreateInstance<YarnProject>();
 
@@ -235,7 +239,7 @@ namespace Yarn.Unity.Editor
 
                 return;
             }
-            
+
             if (compilationResult.Program == null)
             {
                 ctx.LogImportError("Internal error: Failed to compile: resulting program was null, but compiler did not report errors.");
@@ -342,7 +346,7 @@ namespace Yarn.Unity.Editor
                             // YarnProjectUtility.UpdateAssetAddresses to
                             // ensure that the appropriate assets have the
                             // appropriate addresses.)
-                            newLocalization.UsesAddressableAssets = true;                            
+                            newLocalization.UsesAddressableAssets = true;
                         }
                         else
                         {
@@ -521,7 +525,8 @@ namespace Yarn.Unity.Editor
 
             var errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
 
-            if (errors.Count() > 0) {
+            if (errors.Count() > 0)
+            {
                 Debug.LogError($"Can't generate a strings table from a Yarn Project that contains compile errors", null);
                 return null;
             }
@@ -538,8 +543,6 @@ namespace Yarn.Unity.Editor
             });
 
             return stringTableEntries;
-
-
         }
     }
 
