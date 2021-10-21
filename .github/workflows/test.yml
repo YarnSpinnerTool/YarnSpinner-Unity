@@ -19,7 +19,10 @@ jobs:
         projectPath:
           - YarnSpinner
         unityVersion:
+          - 2018.4.36f1
+          - 2019.4.31f1
           - 2020.3.1f1
+          - 2021.1.26f1
         targetPlatform:
           # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
@@ -28,11 +31,6 @@ jobs:
           # - Android # Build an Android player.
           # - WebGL # WebGL.
     steps:
-      # - name: Activate Unity
-      #   uses: game-ci/unity-activate@v1.3
-      #   with:
-      #     unityVersion: ${{ matrix.unityVersion }}
-
       - name: Create empty Unity project
         run: |
           mkdir -p ${{ matrix.projectPath }}/Assets
