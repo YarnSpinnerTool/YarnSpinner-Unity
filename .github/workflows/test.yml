@@ -11,7 +11,7 @@ on:
 
 jobs:
   buildAndTestForSomePlatforms:
-    name: Build for ${{ matrix.targetPlatform }}
+    name: Test on ${{ matrix.unityVersion }} for ${{ matrix.targetPlatform }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -65,6 +65,7 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: 'Test Results ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}'
       
       - name: Upload test results
         uses: actions/upload-artifact@v2
