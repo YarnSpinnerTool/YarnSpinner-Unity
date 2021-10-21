@@ -19,7 +19,21 @@ jobs:
         projectPath:
           - YarnSpinner
         unityVersion:
-          - 2018.4.36f1
+          # Unity 2018 is not currently supported because:
+          #
+          # 1. Unity 2018 doesn't treat embedded packages as in
+          #    development, so it doesn't automatically enable testing (not
+          #    a huge deal, but we'd need to modify the package during this
+          #    workflow to enable it or globally enable testing, even in
+          #    end-user installations);
+          # 2. when Unity 2018 imports the scene, it doesn't have the
+          #    reference to the Yarn Project (something about how the class
+          #    ID of Yarn.Unity.YarnProject has changed between 2018 and
+          #    2019? not sure), which means that the tests fail because the
+          #    DialogueRunner object doesn't have a reference to the Yarn
+          #    Project.
+          
+          # - 2018.4.36f1  
           - 2019.4.31f1
           - 2020.3.1f1
           - 2021.1.26f1
