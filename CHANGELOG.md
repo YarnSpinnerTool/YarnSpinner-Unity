@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Backported check for Experimental status of AssetImporter (promoted in 2020.2)
+
 ### Removed
 
 ## [v1.2.6]
