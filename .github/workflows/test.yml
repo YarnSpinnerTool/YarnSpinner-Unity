@@ -26,10 +26,10 @@ jobs:
           # - Android # Build an Android player.
           # - WebGL # WebGL.
     steps:
-      - name: Activate Unity
-        uses: game-ci/unity-activate@v1.3
-        with:
-          unityVersion: ${{ matrix.unityVersion }}
+      # - name: Activate Unity
+      #   uses: game-ci/unity-activate@v1.3
+      #   with:
+      #     unityVersion: ${{ matrix.unityVersion }}
 
       - name: Create empty Unity project
         run: |
@@ -57,8 +57,6 @@ jobs:
       - name: Run tests
         uses: game-ci/unity-test-runner@v2
         id: testRunner
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
