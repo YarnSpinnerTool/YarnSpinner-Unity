@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
@@ -202,5 +203,20 @@ namespace Yarn.Unity.Tests
 
             dialogueUI.ReadyForNextLine();
         }   
+
+        [TestCase(@"one two three four", new[] {"one", "two", "three", "four"})]
+        [TestCase(@"one ""two three"" four", new[] {"one", "two three", "four"})]
+        [TestCase(@"one ""two three four", new[] {"one", "two three four"})]
+        [TestCase(@"one ""two \""three"" four", new[] {"one", "two \"three", "four"})]
+        [TestCase(@"one \two three four", new[] {"one", "\\two", "three", "four"})]
+        [TestCase(@"one ""two \\ three"" four", new[] {"one", "two \\ three", "four"})]
+        [TestCase(@"one ""two \1 three"" four", new[] {"one", "two \\1 three", "four"})]
+        [TestCase(@"one      two", new[] {"one", "two"})]
+        public void SplitCommandText_SplitsTextCorrectly(string input, IEnumerable<string> expectedComponents) 
+        {
+            IEnumerable<string> parsedComponents = DialogueRunner.SplitCommandText(input);
+
+            Assert.AreEqual(expectedComponents, parsedComponents);
+        }
     }
 }
