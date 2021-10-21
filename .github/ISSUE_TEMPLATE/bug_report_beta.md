@@ -31,6 +31,8 @@ letting us know about bugs and other problems while we get things ready for rele
   - Yarn Spinner Version: 
   - Unity Version:
 
+<!-- Please specify which beta version of Yarn Spinner this issue is for. For example, 'v2.0.0-beta1'. -->
+
 **Other information** 
 
 <!-- For example, a detailed explanation, stacktraces, related issues, suggestions how to fix, links for us to have context... -->
