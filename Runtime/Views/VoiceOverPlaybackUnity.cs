@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -82,7 +82,7 @@ namespace Yarn.Unity
 
             StartCoroutine(DoPlayback(voiceOverClip, onDialogueLineFinished));
 
-            IEnumerator DoPlayback(AudioClip voiceOverClip, Action onDialogueLineFinished)
+            IEnumerator DoPlayback(AudioClip clip, Action onFinished)
             {
                 // If we need to wait before starting playback, do this now
                 if (waitTimeBeforeLineStart > 0)
@@ -91,7 +91,7 @@ namespace Yarn.Unity
                 }
 
                 // Start playing the audio.
-                audioSource.PlayOneShot(voiceOverClip);
+                audioSource.PlayOneShot(clip);
 
                 // Wait until either the audio source finishes playing, or the
                 // interruption flag is set.
@@ -135,7 +135,7 @@ namespace Yarn.Unity
                 }
 
                 // We can now signal that the line delivery has finished.
-                onDialogueLineFinished();
+                onFinished();
             }
         }
 

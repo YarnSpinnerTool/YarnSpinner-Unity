@@ -370,15 +370,15 @@ namespace Yarn.Unity
                 }
             }
 
-            void FadeComplete(Action onDialogueLineFinished)
+            void FadeComplete(Action onFinished)
             {
                 if (useTypewriterEffect)
                 {
-                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, onDialogueLineFinished, interruptionFlag));
+                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, onFinished, interruptionFlag));
                 }
                 else
                 {
-                    onDialogueLineFinished();
+                    onFinished();
                 }
             }
         }
