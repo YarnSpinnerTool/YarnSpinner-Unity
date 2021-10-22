@@ -74,13 +74,21 @@ namespace Yarn.Unity.Editor
 
             if (destinationYarnProject == null)
             {
-                EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project. Create a new Yarn Project, and add this script to it.", MessageType.Info);
-                if (GUILayout.Button("Create New Yarn Project"))
+                EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project, so it can't be compiled or loaded into a Dialogue Runner. Either click Create New Yarn Project, or Assign to Existing Yarn Project.", MessageType.Info);
+                if (GUILayout.Button("Create New Yarn Project..."))
                 {
                     YarnProjectUtility.CreateYarnProject(target as YarnImporter);
 
                     UpdateDestinationProgram();
 
+                }
+                if (GUILayout.Button("Assign to Existing Yarn Program...")) {
+                    var programPath = EditorUtility.OpenFilePanelWithFilters("Select an existing Yarn Project", Application.dataPath, new string[] {"Yarn Program (.yarnprogram)", "yarnprogram"} );
+                    programPath = "Assets" + programPath.Substring( Application.dataPath.Length );
+                    if ( !string.IsNullOrEmpty(programPath) ) {
+                        YarnProjectUtility.AssignScriptToProgram( (target as YarnImporter).assetPath, programPath);
+                    }
+                    UpdateDestinationProgram();
                 }
             }
             else

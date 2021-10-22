@@ -43,24 +43,33 @@ namespace Yarn.Unity.Editor
 
             // Create the program
             YarnEditorUtility.CreateYarnAsset(destinationPath);
-
+            
             AssetDatabase.ImportAsset(destinationPath);
             AssetDatabase.SaveAssets();
 
-            var programImporter = AssetImporter.GetAtPath(destinationPath) as YarnProjectImporter;
-            programImporter.sourceScripts.Add(AssetDatabase.LoadAssetAtPath<TextAsset>(path));
+            AssignScriptToProgram(path, destinationPath);
 
+            return destinationPath;
+        }
+
+        /// <summary>
+        /// Assign a .yarn TextAsset file found at sourcePath to the YarnProgramImporter found at programPath
+        /// </summary>
+        internal static void AssignScriptToProgram(string sourcePath, string programPath) {
+            AssignScriptToProgram(AssetDatabase.LoadAssetAtPath<TextAsset>(sourcePath), AssetImporter.GetAtPath(programPath) as YarnProjectImporter);
+        }
+
+        /// <summary>
+        /// Assign a .yarn TextAsset file newSourceScript to the YarnProgramImporter programImporter
+        /// </summary>
+        internal static void AssignScriptToProgram(TextAsset newSourceScript, YarnProjectImporter programImporter) {
+            programImporter.sourceScripts.Add(newSourceScript);
             EditorUtility.SetDirty(programImporter);
 
             // Reimport the program to make it generate its default string
             // table, if needed
             programImporter.SaveAndReimport();
-
-            return destinationPath;
-
-
         }
-
 
         /// <summary>
         /// Updates every localization .CSV file associated with this
