@@ -230,7 +230,7 @@ namespace Yarn.Unity.Editor
                 Compare.By<string>((fileName, lineID) =>
                 {
                     var lineIDWithoutPrefix = lineID.Replace("line:", "");
-                    return fileName.Contains(lineIDWithoutPrefix);
+                    return Path.GetFileNameWithoutExtension(fileName).Equals(lineIDWithoutPrefix);
                 })
                 )
                 // Discard any pair where no asset was found
@@ -402,21 +402,22 @@ namespace Yarn.Unity.Editor
             // if a file contains a parse error.
             var allExistingTags = allYarnFiles.SelectMany(path =>
             {
-                try
-                {
-                    // Compile this script in strings-only mode to get
-                    // string entries
-                    var compilationJob = Yarn.Compiler.CompilationJob.CreateFromFiles(path);
-                    compilationJob.CompilationType = Yarn.Compiler.CompilationJob.Type.StringsOnly;
+                // Compile this script in strings-only mode to get
+                // string entries
+                var compilationJob = Yarn.Compiler.CompilationJob.CreateFromFiles(path);
+                compilationJob.CompilationType = Yarn.Compiler.CompilationJob.Type.StringsOnly;
 
-                    var result = Yarn.Compiler.Compiler.Compile(compilationJob);
-                    return result.StringTable.Where(i => i.Value.isImplicitTag == false).Select(i => i.Key);
-                }
-                catch (Yarn.Compiler.CompilerException e)
-                {
-                    Debug.LogWarning($"Can't check for existing line tags in {path}, because a compiler exception was thrown: {e}");
+                var result = Yarn.Compiler.Compiler.Compile(compilationJob);
+
+                bool containsErrors = result.Diagnostics
+                    .Any(d => d.Severity == Compiler.Diagnostic.DiagnosticSeverity.Error);
+
+                if (containsErrors) {
+                    Debug.LogWarning($"Can't check for existing line tags in {path} because it contains errors.");
                     return new string[] { };
                 }
+                
+                return result.StringTable.Where(i => i.Value.isImplicitTag == false).Select(i => i.Key);
             }).ToList(); // immediately execute this query so we can determine timing information
 
 #if YARNSPINNER_DEBUG

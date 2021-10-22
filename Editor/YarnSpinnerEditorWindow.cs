@@ -343,9 +343,9 @@ namespace Yarn.Unity
                     }
 
                     // Log some diagnostics about what changes we're making
-                    foreach (var annotation in upgradedFile.Annotations)
+                    foreach (var diagnostics in upgradedFile.Diagnostics)
                     {
-                        Debug.Log($@"{upgradedFile.Path}: {annotation.Description}");
+                        Debug.Log($@"{upgradedFile.Path}: {diagnostics}");
                     }
 
                     // Save the text back to disk

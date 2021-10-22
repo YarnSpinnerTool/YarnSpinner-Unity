@@ -8,7 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Command parameters can now be grouped with double quotes. eg. `<<add-recipe "Banana Sensations">` and `<<move "My Game Object" LocationName>>` (@andiCR)
+
 ### Changed
+
+- Updated to support new error handling in Yarn Spinner. 
+  - Yarn Spinner longer reports errors by throwing an exception, and instead provides a collection of diagnostic messages in the compiler result. In Unity, Yarn Spinner will now show _all_ error messages that the compiler may produce.
+
+- The console will no longer report an error indicating that a command is "already defined" when a subclass of a MonoBehaviour that has `YarnCommand` methods exists. 
+
+- `LocalizedLine.Text`'s setter is now public, not internal.
 
 ### Removed
 
@@ -201,9 +210,14 @@ Kim: You want a bagel?
 - Dialogue.AddFunction now uses functions that can take multiple parameters. You no longer use a single `Yarn.Value[]` parameter; you can now have up to 5, which can be strings, integers, floats, doubles, bools, or `Yarn.Value`s.
 - Commands registered via the `YarnCommand` attribute can now take parameter types besides strings. Parameters can also be optional. Additionally, these methods are now cached, and are faster to call.
 
-
 ### Removed
 - Commands registered via the `YarnCommand` attribute can no longer accept a `params` array of parameters. If your command takes a variable number of parameters, use optional parameters instead.
+
+## [v1.2.7] 
+
+### Changed
+
+- Backported check for Experimental status of AssetImporter (promoted in 2020.2)
 
 ## [v1.2.6]
 

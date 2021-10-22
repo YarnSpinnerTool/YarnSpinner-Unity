@@ -4,6 +4,10 @@
 
 [Yarn Spinner](https://yarnspinner.dev) is the friendly tool for writing dialogue games. This repo contains the Unity integration; you can find the core [Yarn Spinner compiler](https://github.com/YarnSpinnerTool/YarnSpinner) in its own repository.
 
+## Join Our Discord!
+
+For help, support, discussion, and chill community times, come and join the [Yarn Spinner Discord](https://discord.gg/9CvsQfS)!
+
 ## Getting Started
 
 To get started, you'll need to install Yarn Spinner in your Unity project. Yarn Spinner is available as a package via [OpenUPM](https://openupm.com), and via direct download as a `.unitypackage` file.
