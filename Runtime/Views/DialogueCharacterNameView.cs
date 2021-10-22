@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.Events;
-using Yarn.Unity;
 
 namespace Yarn.Unity
 {
@@ -52,31 +48,18 @@ namespace Yarn.Unity
             onDialogueStarted?.Invoke();
         }
 
-        public override void DismissLine(Action onDismissalComplete)
-        {
-            // Dismissing a line takes no time, so call the completion
-            // handler immediately
-            onDismissalComplete();
-        }
-
-        public override void OnLineStatusChanged(LocalizedLine dialogueLine)
-        {
-            // We don't need to do anything when the line status changes
-            // for this view
-        }
-
         public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
             // Try and get the character name from the line
-            var hasCharacterName = dialogueLine.Text.TryGetAttributeWithName("character", out var characterAttribute);
+            string characterName = dialogueLine.CharacterName;
 
             // Did we find one?
-            if (hasCharacterName)
+            if (!string.IsNullOrEmpty(characterName))
             {
                 // Then notify the rest of the scene about it. This
                 // generally involves updating a text view and making it
                 // visible.
-                onNameUpdate?.Invoke(characterAttribute.Properties["name"].StringValue);
+                onNameUpdate?.Invoke(characterName);
             }
             else
             {
@@ -88,11 +71,6 @@ namespace Yarn.Unity
 
             // Immediately mark this view as having finished its work
             onDialogueLineFinished();
-        }
-
-        public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
-        {
-            // This view doesn't present options, so do nothing here
         }
     }
 }
