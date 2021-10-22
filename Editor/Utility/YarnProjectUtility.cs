@@ -60,9 +60,20 @@ namespace Yarn.Unity.Editor
         }
 
         /// <summary>
-        /// Assign a .yarn TextAsset file newSourceScript to the YarnProgramImporter programImporter
+        /// Assign a .yarn <see cref="TextAsset"/> file <paramref
+        /// name="newSourceScript"/> to the <see
+        /// cref="YarnProjectImporter"/> <paramref
+        /// name="programImporter"/>.
         /// </summary>
-        internal static void AssignScriptToProgram(TextAsset newSourceScript, YarnProjectImporter programImporter) {
+        internal static void AssignScriptToProgram(TextAsset newSourceScript, YarnImporter scriptImporter, YarnProjectImporter programImporter) {
+
+            if (scriptImporter.DestinationProject != null) {
+                var existingProgramImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(scriptImporter.DestinationProject)) as YarnProjectImporter;
+                existingProgramImporter.sourceScripts.Remove(newSourceScript);
+                EditorUtility.SetDirty(existingProgramImporter);
+                existingProgramImporter.SaveAndReimport();
+            }
+
             programImporter.sourceScripts.Add(newSourceScript);
             EditorUtility.SetDirty(programImporter);
 
