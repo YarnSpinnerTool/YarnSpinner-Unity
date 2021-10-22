@@ -74,7 +74,7 @@ namespace Yarn.Unity.Editor
 
             if (destinationYarnProject == null)
             {
-                EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project, so it can't be compiled or loaded into a Dialogue Runner. Either click Create New Yarn Project, or Assign to Existing Yarn Project.", MessageType.Info);
+                EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project, so it can't be compiled or loaded into a Dialogue Runner. Either click Create New Yarn Project, or add a Yarn project to the field below.", MessageType.Info);
                 if (GUILayout.Button("Create New Yarn Project..."))
                 {
                     YarnProjectUtility.CreateYarnProject(target as YarnImporter);
@@ -82,21 +82,22 @@ namespace Yarn.Unity.Editor
                     UpdateDestinationProject();
 
                 }
-                if (GUILayout.Button("Assign to Existing Yarn Project...")) {
-                    var programPath = EditorUtility.OpenFilePanelWithFilters("Select an existing Yarn Project", Application.dataPath, new string[] {"Yarn Project (.yarnproject)", "yarnproject"} );
-                    programPath = "Assets" + programPath.Substring( Application.dataPath.Length );
-                    if ( !string.IsNullOrEmpty(programPath) ) {
-                        YarnProjectUtility.AssignScriptToProject( (target as YarnImporter).assetPath, programPath);
+            }
+            
+            using (var change = new EditorGUI.ChangeCheckScope())
+            {
+                var project = EditorGUILayout.ObjectField("Project", destinationYarnProject, typeof(YarnProject), false);
+
+                if (change.changed) {
+                    string programPath = null;
+                    if (project != null) {
+                        programPath = AssetDatabase.GetAssetPath(project);
                     }
+                    YarnProjectUtility.AssignScriptToProject( (target as YarnImporter).assetPath, programPath);
+                    
                     UpdateDestinationProject();
                 }
-            }
-            else
-            {
-                using (new EditorGUI.DisabledGroupScope(true))
-                {
-                    EditorGUILayout.ObjectField("Program", destinationYarnProject, typeof(YarnProjectImporter), false);
-                }
+
             }
 
             EditorGUILayout.Space();
