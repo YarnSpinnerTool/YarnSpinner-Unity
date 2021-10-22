@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Yarn.Unity.Example {
-
-    public class CharacterColorView : DialogueViewBase {
+namespace Yarn.Unity
+{
+    public class CharacterColorView : Yarn.Unity.DialogueViewBase
+    {
         [Serializable]
-        public class CharacterColorData {
+        public class CharacterColorData
+        {
             public string characterName;
             public Color displayColor = Color.white;
         }
@@ -22,7 +24,7 @@ namespace Yarn.Unity.Example {
             var characterName = dialogueLine.CharacterName;
 
             Color colorToUse = defaultColor;
-            
+
             if (string.IsNullOrEmpty(characterName) == false) {
                 foreach (var color in colorData) {
                     if (color.characterName.Equals(characterName, StringComparison.InvariantCultureIgnoreCase)) {
@@ -38,6 +40,5 @@ namespace Yarn.Unity.Example {
 
             onDialogueLineFinished();
         }
-
     }
 }

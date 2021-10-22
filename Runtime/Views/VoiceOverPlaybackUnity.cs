@@ -29,15 +29,15 @@ namespace Yarn.Unity
         public float waitTimeAfterLineComplete = 0f;
 
         [SerializeField]
-        private AudioSource audioSource;
+        AudioSource audioSource;
 
         /// <summary>
         /// When true, the <see cref="DialogueRunner"/> has signaled to
         /// finish the current line asap.
         /// </summary>
-        private bool interrupted = false;
+        bool interrupted = false;
 
-        private void Awake()
+        void Awake()
         {
             if (!audioSource)
             {
@@ -72,6 +72,7 @@ namespace Yarn.Unity
                 onDialogueLineFinished();
                 return;
             }
+
             if (audioSource.isPlaying)
             {
                 // Usually, this shouldn't happen because the
@@ -81,74 +82,61 @@ namespace Yarn.Unity
 
             StartCoroutine(DoPlayback(voiceOverClip, onDialogueLineFinished));
 
-        }
-
-        private IEnumerator DoPlayback(AudioClip voiceOverClip, Action onDialogueLineFinished)
-        {
-
-            // If we need to wait before starting playback, do this now
-            if (waitTimeBeforeLineStart > 0)
+            IEnumerator DoPlayback(AudioClip voiceOverClip, Action onDialogueLineFinished)
             {
-                yield return new WaitForSeconds(waitTimeBeforeLineStart);
-            }
-
-            // Start playing the audio.
-            audioSource.PlayOneShot(voiceOverClip);
-
-            // Wait until either the audio source finishes playing, or the
-            // interruption flag is set.
-            while (audioSource.isPlaying && !interrupted)
-            {
-                yield return null;
-            }
-
-            // If the line was interrupted, we need to wrap up the playback
-            // as quickly as we can. We do this here with a fade-out to
-            // zero over fadeOutTimeOnLineFinish seconds.
-            if (audioSource.isPlaying && interrupted)
-            {
-                // Fade out voice over clip            
-                float lerpPosition = 0f;
-                float volumeFadeStart = audioSource.volume;
-                while (audioSource.volume != 0)
+                // If we need to wait before starting playback, do this now
+                if (waitTimeBeforeLineStart > 0)
                 {
-                    lerpPosition += Time.unscaledDeltaTime / fadeOutTimeOnLineFinish;
-                    audioSource.volume = Mathf.Lerp(volumeFadeStart, 0, lerpPosition);
+                    yield return new WaitForSeconds(waitTimeBeforeLineStart);
+                }
+
+                // Start playing the audio.
+                audioSource.PlayOneShot(voiceOverClip);
+
+                // Wait until either the audio source finishes playing, or the
+                // interruption flag is set.
+                while (audioSource.isPlaying && !interrupted)
+                {
                     yield return null;
                 }
-                audioSource.Stop();
-                audioSource.volume = volumeFadeStart;
+
+                // If the line was interrupted, we need to wrap up the playback
+                // as quickly as we can. We do this here with a fade-out to
+                // zero over fadeOutTimeOnLineFinish seconds.
+                if (audioSource.isPlaying && interrupted)
+                {
+                    // Fade out voice over clip
+                    float lerpPosition = 0f;
+                    float volumeFadeStart = audioSource.volume;
+                    while (audioSource.volume != 0)
+                    {
+                        lerpPosition += Time.unscaledDeltaTime / fadeOutTimeOnLineFinish;
+                        audioSource.volume = Mathf.Lerp(volumeFadeStart, 0, lerpPosition);
+                        yield return null;
+                    }
+                    audioSource.Stop();
+                    audioSource.volume = volumeFadeStart;
+                }
+                else
+                {
+                    audioSource.Stop();
+                }
+
+                // We've finished our playback at this point, either by waiting
+                // normally or by interrupting it with a fadeout. If we weren't
+                // interrupted, and we have additional time to wait after the
+                // audio finishes, wait now. (If we were interrupted, we skip
+                // this wait, because the user has already indicated that
+                // they're fine with things moving faster than sounds normal.)
+
+                if (interrupted == false && waitTimeAfterLineComplete > 0)
+                {
+                    yield return new WaitForSeconds(waitTimeAfterLineComplete);
+                }
+
+                // We can now signal that the line delivery has finished.
+                onDialogueLineFinished();
             }
-            else
-            {
-                audioSource.Stop();
-            }
-
-            // We've finished our playback at this point, either by waiting
-            // normally or by interrupting it with a fadeout. If we weren't
-            // interrupted, and we have additional time to wait after the
-            // audio finishes, wait now. (If we were interrupted, we skip
-            // this wait, because the user has already indicated that
-            // they're fine with things moving faster than sounds normal.)
-
-            if (interrupted == false && waitTimeAfterLineComplete > 0)
-            {
-                yield return new WaitForSeconds(waitTimeAfterLineComplete);
-            }
-
-            // We can now signal that the line delivery has finished.
-            onDialogueLineFinished();
-        }
-
-        /// <summary>
-        /// Yarn Spinner's implementation of voice over playback does
-        /// nothing when presenting an option.
-        /// </summary>
-        /// <param name="dialogueOptions"></param>
-        /// <param name="onOptionSelected"></param>
-        public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
-        {
-            // Do nothing
         }
 
         public override void OnLineStatusChanged(LocalizedLine dialogueLine)
@@ -176,13 +164,5 @@ namespace Yarn.Unity
                     break;
             }
         }
-
-        public override void DismissLine(Action onDismissalComplete)
-        {
-            // Nothing left to do here - the audio playback will have
-            // already ended.
-            onDismissalComplete();
-        }
     }
 }
-
