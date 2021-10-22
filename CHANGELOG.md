@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - You can now add dialogue views to dialogue runner at any time.
 
+- The inspector for Yarn scripts now allows you to change the Project that the script belongs to. (@radiatoryang)
+
 ### Changed
 
 - Updated to support new error handling in Yarn Spinner. 
