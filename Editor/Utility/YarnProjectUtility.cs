@@ -70,7 +70,7 @@ namespace Yarn.Unity.Editor
                 throw new FileNotFoundException($"{nameof(sourcePath)} couldn't be loaded as a {nameof(TextAsset)}.");
             }
 
-            if (programImporter == null) {
+            if (projectPath != null && programImporter == null) {
                 throw new System.ArgumentException($"{nameof(projectPath)} is not a Yarn Project.");
             }
 
@@ -87,21 +87,36 @@ namespace Yarn.Unity.Editor
         /// cref="YarnProjectImporter"/> <paramref
         /// name="projectImporter"/>.
         /// </summary>
+        /// <remarks>If <paramref name="projectImporter"/> is <see
+        /// langword="null"/>, this script will be removed from its current
+        /// project (if any) and not added to another.</remarks>
+        /// <param name="newSourceScript">The script that should be
+        /// assigned to the Yarn Project.</param>
+        /// <param name="scriptImporter">The importer for <paramref
+        /// name="newSourceScript"/>.</param>
+        /// <param name="projectImporter">The importer for the project that
+        /// newSourceScript should be made a part of, or null.</param>
         internal static void AssignScriptToProject(TextAsset newSourceScript, YarnImporter scriptImporter, YarnProjectImporter projectImporter) {
 
             if (scriptImporter.DestinationProject != null) {
                 var existingProjectImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(scriptImporter.DestinationProject)) as YarnProjectImporter;
+
                 existingProjectImporter.sourceScripts.Remove(newSourceScript);
+
                 EditorUtility.SetDirty(existingProjectImporter);
+                
                 existingProjectImporter.SaveAndReimport();
             }
+            
+            if (projectImporter != null) {
+                projectImporter.sourceScripts.Add(newSourceScript);
+                EditorUtility.SetDirty(projectImporter);
 
-            projectImporter.sourceScripts.Add(newSourceScript);
-            EditorUtility.SetDirty(projectImporter);
+                // Reimport the program to make it generate its default string
+                // table, if needed
+                projectImporter.SaveAndReimport();
+            }
 
-            // Reimport the program to make it generate its default string
-            // table, if needed
-            projectImporter.SaveAndReimport();
         }
 
         /// <summary>
