@@ -53,8 +53,14 @@ namespace Yarn.Unity.Editor
         }
 
         /// <summary>
-        /// Assign a .yarn TextAsset file found at sourcePath to the YarnProgramImporter found at programPath
+        /// Assign a .yarn <see cref="TextAsset"/> file found at <paramref
+        /// name="sourcePath"/> to the <see cref="YarnProjectImporter"/>
+        /// found at <paramref name="programPath"/>.
         /// </summary>
+        /// <param name="programPath">The path to the .yarnproject
+        /// asset.</param>
+        /// <param name="sourcePath">The path to the source .yarn asset
+        /// that should be added to the Yarn Project.</param>
         internal static void AssignScriptToProgram(string sourcePath, string programPath) {
             var newSourceScript = AssetDatabase.LoadAssetAtPath<TextAsset>(sourcePath);
             var programImporter = AssetImporter.GetAtPath(programPath) as YarnProjectImporter;
