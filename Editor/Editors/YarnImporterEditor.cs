@@ -30,10 +30,10 @@ namespace Yarn.Unity.Editor
             isSuccessfullyCompiledProperty = serializedObject.FindProperty(nameof(YarnImporter.isSuccessfullyParsed));
             parseErrorMessagesProperty = serializedObject.FindProperty(nameof(YarnImporter.parseErrorMessages));
             
-            UpdateDestinationProgram();
+            UpdateDestinationProject();
         }
 
-        private void UpdateDestinationProgram()
+        private void UpdateDestinationProject()
         {
             destinationYarnProject = (target as YarnImporter).DestinationProject;
 
@@ -79,16 +79,16 @@ namespace Yarn.Unity.Editor
                 {
                     YarnProjectUtility.CreateYarnProject(target as YarnImporter);
 
-                    UpdateDestinationProgram();
+                    UpdateDestinationProject();
 
                 }
-                if (GUILayout.Button("Assign to Existing Yarn Program...")) {
-                    var programPath = EditorUtility.OpenFilePanelWithFilters("Select an existing Yarn Project", Application.dataPath, new string[] {"Yarn Program (.yarnprogram)", "yarnprogram"} );
+                if (GUILayout.Button("Assign to Existing Yarn Project...")) {
+                    var programPath = EditorUtility.OpenFilePanelWithFilters("Select an existing Yarn Project", Application.dataPath, new string[] {"Yarn Project (.yarnproject)", "yarnproject"} );
                     programPath = "Assets" + programPath.Substring( Application.dataPath.Length );
                     if ( !string.IsNullOrEmpty(programPath) ) {
-                        YarnProjectUtility.AssignScriptToProgram( (target as YarnImporter).assetPath, programPath);
+                        YarnProjectUtility.AssignScriptToProject( (target as YarnImporter).assetPath, programPath);
                     }
-                    UpdateDestinationProgram();
+                    UpdateDestinationProject();
                 }
             }
             else

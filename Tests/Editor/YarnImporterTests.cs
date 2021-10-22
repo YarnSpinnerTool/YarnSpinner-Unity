@@ -691,7 +691,7 @@ But not all of them are.
 
             // Act:
             // Assign the script to the project.
-            YarnProjectUtility.AssignScriptToProgram(scriptPath, projectPath);
+            YarnProjectUtility.AssignScriptToProject(scriptPath, projectPath);
 
             // Assert:
             // The script should now be part of the destination project.
@@ -726,8 +726,8 @@ But not all of them are.
             // Act:
             // Assign the script to the project, and then assign it to a
             // different project.
-            YarnProjectUtility.AssignScriptToProgram(scriptPath, project1Path);
-            YarnProjectUtility.AssignScriptToProgram(scriptPath, project2Path);
+            YarnProjectUtility.AssignScriptToProject(scriptPath, project1Path);
+            YarnProjectUtility.AssignScriptToProject(scriptPath, project2Path);
 
             project1Importer = AssetImporter.GetAtPath(project1Path) as YarnProjectImporter;
 

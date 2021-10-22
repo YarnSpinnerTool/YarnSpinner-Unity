@@ -47,7 +47,7 @@ namespace Yarn.Unity.Editor
             AssetDatabase.ImportAsset(destinationPath);
             AssetDatabase.SaveAssets();
 
-            AssignScriptToProgram(path, destinationPath);
+            AssignScriptToProject(path, destinationPath);
 
             return destinationPath;
         }
@@ -55,15 +55,15 @@ namespace Yarn.Unity.Editor
         /// <summary>
         /// Assign a .yarn <see cref="TextAsset"/> file found at <paramref
         /// name="sourcePath"/> to the <see cref="YarnProjectImporter"/>
-        /// found at <paramref name="programPath"/>.
+        /// found at <paramref name="projectPath"/>.
         /// </summary>
-        /// <param name="programPath">The path to the .yarnproject
+        /// <param name="projectPath">The path to the .yarnproject
         /// asset.</param>
         /// <param name="sourcePath">The path to the source .yarn asset
         /// that should be added to the Yarn Project.</param>
-        internal static void AssignScriptToProgram(string sourcePath, string programPath) {
+        internal static void AssignScriptToProject(string sourcePath, string projectPath) {
             var newSourceScript = AssetDatabase.LoadAssetAtPath<TextAsset>(sourcePath);
-            var programImporter = AssetImporter.GetAtPath(programPath) as YarnProjectImporter;
+            var programImporter = AssetImporter.GetAtPath(projectPath) as YarnProjectImporter;
             var scriptImporter = AssetImporter.GetAtPath(sourcePath) as YarnImporter;
 
             if (newSourceScript == null) {
@@ -71,37 +71,37 @@ namespace Yarn.Unity.Editor
             }
 
             if (programImporter == null) {
-                throw new System.ArgumentException($"{nameof(programPath)} is not a Yarn Project.");
+                throw new System.ArgumentException($"{nameof(projectPath)} is not a Yarn Project.");
             }
 
             if (scriptImporter == null) {
-                throw new System.ArgumentException($"{nameof(programPath)} is not a Yarn script.");
+                throw new System.ArgumentException($"{nameof(projectPath)} is not a Yarn script.");
             }
 
-            AssignScriptToProgram(newSourceScript, scriptImporter, programImporter);
+            AssignScriptToProject(newSourceScript, scriptImporter, programImporter);
         }
 
         /// <summary>
         /// Assign a .yarn <see cref="TextAsset"/> file <paramref
         /// name="newSourceScript"/> to the <see
         /// cref="YarnProjectImporter"/> <paramref
-        /// name="programImporter"/>.
+        /// name="projectImporter"/>.
         /// </summary>
-        internal static void AssignScriptToProgram(TextAsset newSourceScript, YarnImporter scriptImporter, YarnProjectImporter programImporter) {
+        internal static void AssignScriptToProject(TextAsset newSourceScript, YarnImporter scriptImporter, YarnProjectImporter projectImporter) {
 
             if (scriptImporter.DestinationProject != null) {
-                var existingProgramImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(scriptImporter.DestinationProject)) as YarnProjectImporter;
-                existingProgramImporter.sourceScripts.Remove(newSourceScript);
-                EditorUtility.SetDirty(existingProgramImporter);
-                existingProgramImporter.SaveAndReimport();
+                var existingProjectImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(scriptImporter.DestinationProject)) as YarnProjectImporter;
+                existingProjectImporter.sourceScripts.Remove(newSourceScript);
+                EditorUtility.SetDirty(existingProjectImporter);
+                existingProjectImporter.SaveAndReimport();
             }
 
-            programImporter.sourceScripts.Add(newSourceScript);
-            EditorUtility.SetDirty(programImporter);
+            projectImporter.sourceScripts.Add(newSourceScript);
+            EditorUtility.SetDirty(projectImporter);
 
             // Reimport the program to make it generate its default string
             // table, if needed
-            programImporter.SaveAndReimport();
+            projectImporter.SaveAndReimport();
         }
 
         /// <summary>
