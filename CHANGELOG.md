@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Command parameters can now be grouped with double quotes. eg. `<<add-recipe "Banana Sensations">` and `<<move "My Game Object" LocationName>>` (@andiCR)
 
+- You can now add dialogue views to dialogue runner at any time.
+
 ### Changed
 
 - Updated to support new error handling in Yarn Spinner. 
