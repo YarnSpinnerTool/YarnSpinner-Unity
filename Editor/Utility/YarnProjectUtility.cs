@@ -56,7 +56,23 @@ namespace Yarn.Unity.Editor
         /// Assign a .yarn TextAsset file found at sourcePath to the YarnProgramImporter found at programPath
         /// </summary>
         internal static void AssignScriptToProgram(string sourcePath, string programPath) {
-            AssignScriptToProgram(AssetDatabase.LoadAssetAtPath<TextAsset>(sourcePath), AssetImporter.GetAtPath(programPath) as YarnProjectImporter);
+            var newSourceScript = AssetDatabase.LoadAssetAtPath<TextAsset>(sourcePath);
+            var programImporter = AssetImporter.GetAtPath(programPath) as YarnProjectImporter;
+            var scriptImporter = AssetImporter.GetAtPath(sourcePath) as YarnImporter;
+
+            if (newSourceScript == null) {
+                throw new FileNotFoundException($"{nameof(sourcePath)} couldn't be loaded as a {nameof(TextAsset)}.");
+            }
+
+            if (programImporter == null) {
+                throw new System.ArgumentException($"{nameof(programPath)} is not a Yarn Project.");
+            }
+
+            if (scriptImporter == null) {
+                throw new System.ArgumentException($"{nameof(programPath)} is not a Yarn script.");
+            }
+
+            AssignScriptToProgram(newSourceScript, scriptImporter, programImporter);
         }
 
         /// <summary>
