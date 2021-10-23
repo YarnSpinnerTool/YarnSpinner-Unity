@@ -962,11 +962,27 @@ namespace Yarn.Unity
         }
 
 
+        /// <summary>
+        /// Parses the command string inside <paramref name="command"/>,
+        /// attempts to find a suitable handler from <see
+        /// cref="commandHandlers"/>, and invokes it if found.
+        /// </summary>
+        /// <param name="command">The <see cref="Command"/> to run.</param>
+        /// <param name="onSuccessfulDispatch">A method to run if a command
+        /// was successfully dispatched to a game object. This method is
+        /// not called if a registered command handler is not
+        /// found.</param>
+        /// <returns>True if the command was dispatched to a game object;
+        /// false otherwise.</returns>
         bool DispatchCommandToRegisteredHandlers(Command command, Action onSuccessfulDispatch)
         {
             return DispatchCommandToRegisteredHandlers(command.Text, onSuccessfulDispatch);
         }
 
+        /// <inheritdoc cref="DispatchCommandToRegisteredHandlers(Command,
+        /// Action)"/>
+        /// <param name="command">The text of the command to
+        /// dispatch.</param>
         internal bool DispatchCommandToRegisteredHandlers(String command, Action onSuccessfulDispatch)
         {
             List<string> commandTokens = new List<string>(SplitCommandText(command));
@@ -1051,9 +1067,12 @@ namespace Yarn.Unity
         /// </summary>
         /// <param name="command">The <see cref="Command"/> to run.</param>
         /// <param name="onSuccessfulDispatch">A method to run if a command
-        /// was successfully dispatched to a game object.</param>
-        /// <returns>True if the command was dispatched to a game object;
-        /// false otherwise.</returns>
+        /// was successfully dispatched to a game object. This method is
+        /// not called if a registered command handler is not
+        /// found.</param>
+        /// <returns><see langword="true"/> if the command was successfully
+        /// dispatched to a game object; <see langword="false"/> if no game
+        /// object was registered as a handler for the command.</returns>
         internal bool DispatchCommandToGameObject(Command command, Action onSuccessfulDispatch)
         {
             // Call out to the string version of this method, because
@@ -1067,9 +1086,6 @@ namespace Yarn.Unity
         /// <inheritdoc cref="DispatchCommandToGameObject(Command, Action)"/>
         /// <param name="command">The text of the command to
         /// dispatch.</param>
-        /// <returns><see langword="true"/> if the command was successfully
-        /// dispatched to a game object; <see langword="false"/> if no game
-        /// object was registered as a handler for the command.</returns>
         internal bool DispatchCommandToGameObject(string command, System.Action onSuccessfulDispatch)
         {
             if (string.IsNullOrEmpty(command))
