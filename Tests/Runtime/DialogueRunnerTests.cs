@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -196,6 +196,7 @@ namespace Yarn.Unity.Tests
 
             variableStorage.SetValue("$laps", 1);
 
+            runner.Stop();
             runner.StartDialogue("VariableTest");
             yield return null;
 
