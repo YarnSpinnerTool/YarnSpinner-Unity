@@ -299,6 +299,14 @@ namespace Yarn.Unity
         /// from.</param>
         public void StartDialogue(string startNode)
         {
+            // If the dialogue is currently executing instructions, then
+            // calling ContinueDialogue() at the end of this method will
+            // cause confusing results. Report an error and stop here.
+            if (Dialogue.IsActive) {
+                Debug.LogError($"Can't start dialogue from node {startNode}: the dialogue is currently in the middle of running. Stop the dialogue first.");
+                return;
+            }
+
             // Stop any processes that might be running already
             foreach (var dialogueView in dialogueViews)
             {
@@ -665,19 +673,7 @@ namespace Yarn.Unity
                 }
             }
 
-            if (VariableStorage == null)
-            {
-                // If we don't have a variable storage, create an
-                // InMemoryVariableStorage and make it use that.
-
-                VariableStorage = gameObject.AddComponent<InMemoryVariableStorage>();
-
-                // Let the user know what we're doing.
-                if (verboseLogging)
-                {
-                    Debug.Log($"Dialogue Runner has no Variable Storage; creating a {nameof(InMemoryVariableStorage)}", this);
-                }
-            }
+            
         }
 
         /// Start the dialogue
@@ -723,6 +719,20 @@ namespace Yarn.Unity
 
         Dialogue CreateDialogueInstance()
         {
+            if (VariableStorage == null)
+            {
+                // If we don't have a variable storage, create an
+                // InMemoryVariableStorage and make it use that.
+
+                VariableStorage = gameObject.AddComponent<InMemoryVariableStorage>();
+
+                // Let the user know what we're doing.
+                if (verboseLogging)
+                {
+                    Debug.Log($"Dialogue Runner has no Variable Storage; creating a {nameof(InMemoryVariableStorage)}", this);
+                }
+            }
+
             // Create the main Dialogue runner, and pass our
             // variableStorage to it
             var dialogue = new Yarn.Dialogue(VariableStorage)
