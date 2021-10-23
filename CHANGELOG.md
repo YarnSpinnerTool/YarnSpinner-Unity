@@ -26,6 +26,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `DialogueRunner` will now throw an exception if a dialogue view attempts to select an
   option on the same frame that options are run.
 
+- `DialogueRunner.VariableStorage` can now be modified at runtime.
+
 ### Removed
 
 ## [v2.0.0-beta5] 2021-08-17

@@ -55,7 +55,22 @@ namespace Yarn.Unity
         /// <summary>
         /// The variable storage object.
         /// </summary>
-        public VariableStorageBehaviour variableStorage;
+        [UnityEngine.Serialization.FormerlySerializedAs("variableStorage")]
+        [SerializeField] internal VariableStorageBehaviour _variableStorage;
+
+        /// <inheritdoc cref="_variableStorage"/>
+        public VariableStorageBehaviour VariableStorage
+        {
+            get => _variableStorage; 
+            set
+            {
+                _variableStorage = value;
+                if (_dialogue != null)
+                {
+                    _dialogue.VariableStorage = value;
+                }
+            }
+        }
 
         /// <summary>
         /// The View classes that will present the dialogue to the user.
@@ -614,13 +629,23 @@ namespace Yarn.Unity
         /// Maps the names of commands to action delegates.
         Dictionary<string, Delegate> commandHandlers = new Dictionary<string, Delegate>();
 
-        /// Our conversation engine
-        /** Automatically created on first access
-         */
+        /// <summary>
+        /// The underlying object that executes Yarn instructions
+        /// and provides lines, options and commands.
+        /// </summary>
+        /// <remarks>
+        /// Automatically created on first access.
+        /// </remarks>
+        
         private Dialogue _dialogue;
 
-        // The current set of options that we're presenting. Null if we're
-        // not currently presenting options.
+        /// <summary>
+        /// The current set of options that we're presenting.
+        /// </summary>
+        /// <remarks>
+        /// This value is <see langword="null"/> when the <see
+        /// cref="DialogueRunner"/> is not currently presenting options.
+        /// </remarks>
         private OptionSet currentOptions;
 
         void Awake()
@@ -640,12 +665,12 @@ namespace Yarn.Unity
                 }
             }
 
-            if (variableStorage == null)
+            if (VariableStorage == null)
             {
                 // If we don't have a variable storage, create an
                 // InMemoryVariableStorage and make it use that.
 
-                variableStorage = gameObject.AddComponent<InMemoryVariableStorage>();
+                VariableStorage = gameObject.AddComponent<InMemoryVariableStorage>();
 
                 // Let the user know what we're doing.
                 if (verboseLogging)
@@ -700,7 +725,7 @@ namespace Yarn.Unity
         {
             // Create the main Dialogue runner, and pass our
             // variableStorage to it
-            var dialogue = new Yarn.Dialogue(variableStorage)
+            var dialogue = new Yarn.Dialogue(VariableStorage)
             {
 
                 // Set up the logging system.
