@@ -95,9 +95,15 @@ namespace Yarn.Unity
         /// of options should be displayed to the user.
         /// </summary>
         /// <remarks>
-        /// When this method is called, the <see cref="DialogueRunner"/>
-        /// will pause execution until the `onOptionSelected` method is
-        /// called.
+        /// <para>When this method is called, the <see
+        /// cref="DialogueRunner"/> will pause execution until the
+        /// `onOptionSelected` method is called.</para>
+        ///
+        /// <para>If your scene includes multiple dialogue views that
+        /// override this method, they will all receive a call each time
+        /// the dialogue system presents options to the player. You must
+        /// ensure that only one of them calls the <paramref
+        /// name="onOptionSelected"/> method.</para>
         /// </remarks>
         /// <param name="dialogueOptions">The set of options that should be
         /// displayed to the user.</param>

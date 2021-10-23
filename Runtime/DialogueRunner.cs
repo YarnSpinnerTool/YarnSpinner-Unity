@@ -1,4 +1,4 @@
-/*
+﻿/*
 
 The MIT License (MIT)
 
@@ -185,6 +185,22 @@ namespace Yarn.Unity
         /// Populated in the <see cref="InitializeClass"/> method.
         /// </summary>
         private static Dictionary<string, MethodInfo> _yarnCommands = new Dictionary<string, MethodInfo>();
+
+        /// <summary>
+        /// A flag used to detect if an options handler attempts to set the
+        /// selected option on the same frame that options were provided.
+        /// </summary>
+        /// <remarks>
+        /// This field is set to false by <see
+        /// cref="HandleOptions(OptionSet)"/> immediately before calling
+        /// <see cref="DialogueViewBase.RunOptions(DialogueOption[],
+        /// Action{int})"/> on all objects in <see cref="dialogueViews"/>,
+        /// and set to true immediately after. If a call to <see
+        /// cref="DialogueViewBase.RunOptions(DialogueOption[],
+        /// Action{int})"/> calls its completion hander on the same frame,
+        /// an error is generated.
+        /// </remarks>
+        private bool IsOptionSelectionAllowed = false;
 
         /// <summary>
         /// Finds all MonoBehaviour types in the loaded assemblies, and
@@ -753,12 +769,19 @@ namespace Yarn.Unity
                     IsAvailable = options.Options[i].IsAvailable,
                 };
             }
+            
+            // Don't allow selecting options on the same frame that we
+            // provide them
+            IsOptionSelectionAllowed = false;
+
             foreach (var dialogueView in dialogueViews)
             {
                 if (dialogueView == null || dialogueView.enabled == false) continue;
 
                 dialogueView.RunOptions(optionSet, selectAction);
             }
+
+            IsOptionSelectionAllowed = true;
         }
 
         void HandleDialogueComplete()
@@ -861,26 +884,39 @@ namespace Yarn.Unity
             }
         }
 
+        /// <summary>
         /// Indicates to the DialogueRunner that the user has selected an
         /// option
-        void SelectedOption(int obj)
+        /// </summary>
+        /// <param name="optionIndex">The index of the option that was
+        /// selected.</param>
+        /// <exception cref="InvalidOperationException">Thrown when the
+        /// <see cref="IsOptionSelectionAllowed"/> field is <see
+        /// langword="true"/>, which is the case when <see
+        /// cref="DialogueViewBase.RunOptions(DialogueOption[],
+        /// Action{int})"/> is in the middle of being called.</exception>
+        void SelectedOption(int optionIndex)
         {
+            if (IsOptionSelectionAllowed == false) {
+                throw new InvalidOperationException("Selecting an option on the same frame that options are provided is not allowed. Wait at least one frame before selecting an option.");
+            }
+            
             // Mark that this is the currently selected option in the
             // Dialogue
-            Dialogue.SetSelectedOption(obj);
+            Dialogue.SetSelectedOption(optionIndex);
 
             if (runSelectedOptionAsLine)
             {
                 foreach (var option in currentOptions.Options)
                 {
-                    if (option.ID == obj)
+                    if (option.ID == optionIndex)
                     {
                         HandleLine(option.Line);
                         return;
                     }
                 }
 
-                Debug.LogError($"Can't run selected option ({obj}) as a line: couldn't find the option's associated {nameof(Line)} object");
+                Debug.LogError($"Can't run selected option ({optionIndex}) as a line: couldn't find the option's associated {nameof(Line)} object");
                 ContinueDialogue();
             }
             else
