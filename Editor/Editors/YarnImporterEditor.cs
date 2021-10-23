@@ -16,10 +16,9 @@ namespace Yarn.Unity.Editor
     public class YarnImporterEditor : ScriptedImporterEditor
     {
         private SerializedProperty isSuccessfullyCompiledProperty;
-        private SerializedProperty compilationErrorMessageProperty;
-        private SerializedProperty localizationsProperty;
-
-        public string DestinationProjectError => destinationYarnProjectImporter?.compileError ?? null;
+        private SerializedProperty parseErrorMessagesProperty;
+        
+        public IEnumerable<string> DestinationProjectError => destinationYarnProjectImporter?.compileErrors ?? new List<string>();
 
         private YarnProject destinationYarnProject;
         private YarnProjectImporter destinationYarnProjectImporter;
@@ -28,14 +27,13 @@ namespace Yarn.Unity.Editor
         {
             base.OnEnable();
 
-            isSuccessfullyCompiledProperty = serializedObject.FindProperty("isSuccesfullyParsed");
-            compilationErrorMessageProperty = serializedObject.FindProperty("parseErrorMessage");
-            localizationsProperty = serializedObject.FindProperty("localizations");
-
-            UpdateDestinationProgram();
+            isSuccessfullyCompiledProperty = serializedObject.FindProperty(nameof(YarnImporter.isSuccessfullyParsed));
+            parseErrorMessagesProperty = serializedObject.FindProperty(nameof(YarnImporter.parseErrorMessages));
+            
+            UpdateDestinationProject();
         }
 
-        private void UpdateDestinationProgram()
+        private void UpdateDestinationProject()
         {
             destinationYarnProject = (target as YarnImporter).DestinationProject;
 
@@ -55,7 +53,7 @@ namespace Yarn.Unity.Editor
             // show an error. If the selected objects have the same
             // destination program, and there's a compile error in it, show
             // that. 
-            if (string.IsNullOrEmpty(compilationErrorMessageProperty.stringValue) == false)
+            if (parseErrorMessagesProperty.arraySize > 0)
             {
                 if (serializedObject.isEditingMultipleObjects)
                 {
@@ -63,33 +61,43 @@ namespace Yarn.Unity.Editor
                 }
                 else
                 {
-                    EditorGUILayout.HelpBox(compilationErrorMessageProperty.stringValue, MessageType.Error);
+                    foreach (SerializedProperty errorProperty in parseErrorMessagesProperty) {
+                        EditorGUILayout.HelpBox(errorProperty.stringValue, MessageType.Error);
+                    }
                 }
             }
-            else if (string.IsNullOrEmpty(DestinationProjectError) == false)
+            else if (DestinationProjectError.Count() > 0)
             {
-
-                EditorGUILayout.HelpBox(DestinationProjectError, MessageType.Error);
-
+                var displayMessage = string.Join("\n", DestinationProjectError);
+                EditorGUILayout.HelpBox(displayMessage, MessageType.Error);
             }
 
             if (destinationYarnProject == null)
             {
-                EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project. Create a new Yarn Project, and add this script to it.", MessageType.Info);
-                if (GUILayout.Button("Create New Yarn Project"))
+                EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project, so it can't be compiled or loaded into a Dialogue Runner. Either click Create New Yarn Project, or add a Yarn project to the field below.", MessageType.Info);
+                if (GUILayout.Button("Create New Yarn Project..."))
                 {
                     YarnProjectUtility.CreateYarnProject(target as YarnImporter);
 
-                    UpdateDestinationProgram();
+                    UpdateDestinationProject();
 
                 }
             }
-            else
+            
+            using (var change = new EditorGUI.ChangeCheckScope())
             {
-                using (new EditorGUI.DisabledGroupScope(true))
-                {
-                    EditorGUILayout.ObjectField("Program", destinationYarnProject, typeof(YarnProjectImporter), false);
+                var project = EditorGUILayout.ObjectField("Project", destinationYarnProject, typeof(YarnProject), false);
+
+                if (change.changed) {
+                    string programPath = null;
+                    if (project != null) {
+                        programPath = AssetDatabase.GetAssetPath(project);
+                    }
+                    YarnProjectUtility.AssignScriptToProject( (target as YarnImporter).assetPath, programPath);
+                    
+                    UpdateDestinationProject();
                 }
+
             }
 
             EditorGUILayout.Space();

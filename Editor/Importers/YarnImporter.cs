@@ -54,7 +54,7 @@ namespace Yarn.Unity.Editor
         /// <summary>
         /// Contains the text of the most recent parser error message.
         /// </summary>
-        public string parseErrorMessage = null;
+        public List<string> parseErrorMessages = new List<string>();
 
         public YarnProject DestinationProject
         {
@@ -105,7 +105,7 @@ namespace Yarn.Unity.Editor
             LastImportHadAnyStrings = false;
             LastImportHadImplicitStringIDs = false;
 
-            parseErrorMessage = string.Empty;
+            parseErrorMessages.Clear();
 
             isSuccessfullyParsed = false;
 
@@ -181,31 +181,37 @@ namespace Yarn.Unity.Editor
             Yarn.Program compiledProgram = null;
             IDictionary<string, Yarn.Compiler.StringInfo> stringTable = null;
 
-            parseErrorMessage = null;
+            parseErrorMessages.Clear();
 
-            try
+            // Compile the source code into a compiled Yarn program (or
+            // generate a parse error)
+            var compilationJob = CompilationJob.CreateFromString(fileName, sourceText, null);
+            compilationJob.CompilationType = CompilationJob.Type.StringsOnly;
+
+            var result = Yarn.Compiler.Compiler.Compile(compilationJob);
+
+            IEnumerable<Diagnostic> errors = result.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
+
+            if (errors.Count() > 0)
             {
-                // Compile the source code into a compiled Yarn program (or
-                // generate a parse error)
-                var compilationJob = CompilationJob.CreateFromString(fileName, sourceText, null);
-                compilationJob.CompilationType = CompilationJob.Type.StringsOnly;
+                isSuccessfullyParsed = false;
 
-                var result = Yarn.Compiler.Compiler.Compile(compilationJob);
+                parseErrorMessages.AddRange(errors.Select(e => e.ToString()));
 
+                foreach (var error in errors)
+                {
+                    ctx.LogImportError($"Error importing {ctx.assetPath}: {error.ToString()}");
+                }
+
+            }
+            else
+            {
+                isSuccessfullyParsed = true;
                 LastImportHadImplicitStringIDs = result.ContainsImplicitStringTags;
                 LastImportHadAnyStrings = result.StringTable.Count > 0;
 
                 stringTable = result.StringTable;
                 compiledProgram = result.Program;
-                isSuccessfullyParsed = true;
-                parseErrorMessage = string.Empty;
-            }
-            catch (Yarn.Compiler.ParseException e)
-            {
-                isSuccessfullyParsed = false;
-                parseErrorMessage = e.Message;
-                ctx.LogImportError($"Error importing {ctx.assetPath}: {e.Message}");
-                return;
             }
         }
 

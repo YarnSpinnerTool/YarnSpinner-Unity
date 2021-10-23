@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
@@ -87,6 +88,7 @@ namespace Yarn.Unity.Tests
 
         [TestCase("testCommandInteger DialogueRunner 1 2", "3")]
         [TestCase("testCommandString DialogueRunner a b", "ab")]
+        [TestCase("testCommandString DialogueRunner \"a b\" \"c d\"", "a bc d")]
         [TestCase("testCommandGameObject DialogueRunner Sphere", "Sphere")]
         [TestCase("testCommandComponent DialogueRunner Sphere", "Sphere's MeshRenderer")]
         [TestCase("testCommandGameObject DialogueRunner DoesNotExist", "(null)")]
@@ -201,5 +203,20 @@ namespace Yarn.Unity.Tests
 
             dialogueUI.ReadyForNextLine();
         }   
+
+        [TestCase(@"one two three four", new[] {"one", "two", "three", "four"})]
+        [TestCase(@"one ""two three"" four", new[] {"one", "two three", "four"})]
+        [TestCase(@"one ""two three four", new[] {"one", "two three four"})]
+        [TestCase(@"one ""two \""three"" four", new[] {"one", "two \"three", "four"})]
+        [TestCase(@"one \two three four", new[] {"one", "\\two", "three", "four"})]
+        [TestCase(@"one ""two \\ three"" four", new[] {"one", "two \\ three", "four"})]
+        [TestCase(@"one ""two \1 three"" four", new[] {"one", "two \\1 three", "four"})]
+        [TestCase(@"one      two", new[] {"one", "two"})]
+        public void SplitCommandText_SplitsTextCorrectly(string input, IEnumerable<string> expectedComponents) 
+        {
+            IEnumerable<string> parsedComponents = DialogueRunner.SplitCommandText(input);
+
+            Assert.AreEqual(expectedComponents, parsedComponents);
+        }
     }
 }

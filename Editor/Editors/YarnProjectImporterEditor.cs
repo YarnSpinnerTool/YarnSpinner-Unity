@@ -26,7 +26,7 @@ namespace Yarn.Unity.Editor
         // YarnProjectImporter. Used during Inspector GUI drawing.
         internal static SerializedProperty CurrentProjectDefaultLanguageProperty;
 
-        private SerializedProperty compileErrorProperty;
+        private SerializedProperty compileErrorsProperty;
         private SerializedProperty serializedDeclarationsProperty;
         private SerializedProperty defaultLanguageProperty;
         private SerializedProperty sourceScriptsProperty;
@@ -38,14 +38,14 @@ namespace Yarn.Unity.Editor
         public override void OnEnable()
         {
             base.OnEnable();
-            sourceScriptsProperty = serializedObject.FindProperty("sourceScripts");
-            compileErrorProperty = serializedObject.FindProperty("compileError");
-            serializedDeclarationsProperty = serializedObject.FindProperty("serializedDeclarations");
+            sourceScriptsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.sourceScripts));
+            compileErrorsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.compileErrors));
+            serializedDeclarationsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.serializedDeclarations));
 
-            defaultLanguageProperty = serializedObject.FindProperty("defaultLanguage");
-            languagesToSourceAssetsProperty = serializedObject.FindProperty("languagesToSourceAssets");
+            defaultLanguageProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.defaultLanguage));
+            languagesToSourceAssetsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.languagesToSourceAssets));
 
-            useAddressableAssetsProperty = serializedObject.FindProperty("useAddressableAssets");
+            useAddressableAssetsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.useAddressableAssets));
 
             serializedDeclarationsList = new ReorderableDeclarationsList(serializedObject, serializedDeclarationsProperty);
         }
@@ -66,11 +66,13 @@ namespace Yarn.Unity.Editor
 
             EditorGUILayout.Space();
 
-            bool hasCompileError = string.IsNullOrEmpty(compileErrorProperty.stringValue) == false;
+            bool hasCompileError = compileErrorsProperty.arraySize > 0;
 
             if (hasCompileError)
             {
-                EditorGUILayout.HelpBox(compileErrorProperty.stringValue, MessageType.Error);
+                foreach (SerializedProperty compileError in compileErrorsProperty) {
+                    EditorGUILayout.HelpBox(compileError.stringValue, MessageType.Error);
+                }
             }
 
             serializedDeclarationsList.DrawLayout();
