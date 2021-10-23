@@ -836,7 +836,7 @@ namespace Yarn.Unity
             bool wasValidCommand;
 
             // Try looking in the command handlers first
-            wasValidCommand = DispatchCommandToRegisteredHandlers(command);
+            wasValidCommand = DispatchCommandToRegisteredHandlers(command, ContinueDialogue);
 
             if (wasValidCommand)
             {
@@ -845,8 +845,8 @@ namespace Yarn.Unity
             }
 
             // We didn't find it in the comand handlers. Try looking in the
-            // game objects.
-            wasValidCommand = DispatchCommandToGameObject(command);
+            // game objects. If it is, continue dialogue.
+            wasValidCommand = DispatchCommandToGameObject(command, ContinueDialogue);
 
             if (wasValidCommand)
             {
@@ -962,12 +962,12 @@ namespace Yarn.Unity
         }
 
 
-        bool DispatchCommandToRegisteredHandlers(Command command)
+        bool DispatchCommandToRegisteredHandlers(Command command, Action onSuccessfulDispatch)
         {
-            return DispatchCommandToRegisteredHandlers(command.Text);
+            return DispatchCommandToRegisteredHandlers(command.Text, onSuccessfulDispatch);
         }
 
-        internal bool DispatchCommandToRegisteredHandlers(String command)
+        internal bool DispatchCommandToRegisteredHandlers(String command, Action onSuccessfulDispatch)
         {
             List<string> commandTokens = new List<string>(SplitCommandText(command));
 
@@ -1012,20 +1012,20 @@ namespace Yarn.Unity
                 return false;
             }
 
-
             if (typeof(YieldInstruction).IsAssignableFrom(methodInfo.ReturnType))
             {
                 // This delegate returns a YieldInstruction of some kind
                 // (e.g. a Coroutine). Run it, and wait for it to finish
-                // before calling ContinueDialogue.
-                StartCoroutine(WaitForYieldInstruction(@delegate, finalParameters));
+                // before calling onSuccessfulDispatch.
+                StartCoroutine(WaitForYieldInstruction(@delegate, finalParameters, onSuccessfulDispatch));
             }
             else if (typeof(void) == methodInfo.ReturnType)
             {
-                // This method does not return anything. Invoke it and
-                // continue immediately.
+                // This method does not return anything. Invoke it and call
+                // our completion handler.
                 @delegate.DynamicInvoke(finalParameters);
-                ContinueDialogue();
+
+                onSuccessfulDispatch();
             }
             else
             {
@@ -1035,11 +1035,11 @@ namespace Yarn.Unity
 
             return true;
 
-            IEnumerator WaitForYieldInstruction(Delegate @theDelegate, object[] finalParametersToUse)
+            static IEnumerator WaitForYieldInstruction(Delegate @theDelegate, object[] finalParametersToUse, Action onSuccessfulDispatch)
             {
                 var yieldInstruction = @theDelegate.DynamicInvoke(finalParametersToUse);
                 yield return yieldInstruction;
-                ContinueDialogue();
+                onSuccessfulDispatch();
             }
 
         }
@@ -1050,23 +1050,38 @@ namespace Yarn.Unity
         /// and the invokes the method.
         /// </summary>
         /// <param name="command">The <see cref="Command"/> to run.</param>
+        /// <param name="onSuccessfulDispatch">A method to run if a command
+        /// was successfully dispatched to a game object.</param>
         /// <returns>True if the command was dispatched to a game object;
         /// false otherwise.</returns>
-        internal bool DispatchCommandToGameObject(Command command)
+        internal bool DispatchCommandToGameObject(Command command, Action onSuccessfulDispatch)
         {
             // Call out to the string version of this method, because
             // Yarn.Command's constructor is only accessible from inside
             // Yarn Spinner, but we want to be able to unit test. So, we
             // extract it, and call the underlying implementation, which is
             // testable.
-            return DispatchCommandToGameObject(command.Text);
+            return DispatchCommandToGameObject(command.Text, onSuccessfulDispatch);
         }
 
-        /// <inheritdoc cref="DispatchCommandToGameObject(Command)"/>
+        /// <inheritdoc cref="DispatchCommandToGameObject(Command, Action)"/>
         /// <param name="command">The text of the command to
         /// dispatch.</param>
-        internal bool DispatchCommandToGameObject(string command)
+        /// <returns><see langword="true"/> if the command was successfully
+        /// dispatched to a game object; <see langword="false"/> if no game
+        /// object was registered as a handler for the command.</returns>
+        internal bool DispatchCommandToGameObject(string command, System.Action onSuccessfulDispatch)
         {
+            if (string.IsNullOrEmpty(command))
+            {
+                throw new ArgumentException($"'{nameof(command)}' cannot be null or empty.", nameof(command));
+            }
+
+            if (onSuccessfulDispatch is null)
+            {
+                throw new ArgumentNullException(nameof(onSuccessfulDispatch));
+            }
+
             // Start by splitting our command string by spaces.
             var words = new List<string>(SplitCommandText(command));
 
@@ -1153,7 +1168,7 @@ namespace Yarn.Unity
             {
                 // Start the coroutine. When it's done, it will continue
                 // execution.
-                StartCoroutine(DoYarnCommand(target, methodInfo, finalParameters));
+                StartCoroutine(DoYarnCommand(target, methodInfo, finalParameters, onSuccessfulDispatch));
                 return true;
             }
             else
@@ -1162,20 +1177,21 @@ namespace Yarn.Unity
                 methodInfo.Invoke(target, finalParameters);
 
                 // Continue execution immediately after calling it.
-                ContinueDialogue();
+                onSuccessfulDispatch();
 
                 return true;
             }
 
             IEnumerator DoYarnCommand(MonoBehaviour component,
                                             MethodInfo method,
-                                            object[] localParameters)
+                                            object[] localParameters,
+                                            Action onSuccessfulDispatch)
             {
                 // Wait for this command coroutine to complete
                 yield return StartCoroutine((IEnumerator)method.Invoke(component, localParameters));
 
-                // And then continue running dialogue
-                ContinueDialogue();
+                // And then signal that we're done
+                onSuccessfulDispatch();
             }
         }
 
