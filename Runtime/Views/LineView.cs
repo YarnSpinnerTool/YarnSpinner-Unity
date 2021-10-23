@@ -1,18 +1,15 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
 #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Layouts;
 #endif
 
 namespace Yarn.Unity
 {
-
     public class InterruptionFlag
     {
         public bool Interrupted { get; private set; } = false;
@@ -72,7 +69,6 @@ namespace Yarn.Unity
 
         public static IEnumerator Typewriter(TextMeshProUGUI text, float lettersPerSecond, Action onCharacterTyped = null, Action onComplete = null, InterruptionFlag interruption = null)
         {
-
             // Start with everything invisible
             text.maxVisibleCharacters = 0;
 
@@ -109,7 +105,6 @@ namespace Yarn.Unity
 
             while (text.maxVisibleCharacters < characterCount && interruption?.Interrupted == false)
             {
-
                 // We need to show as many letters as we have accumulated
                 // time for.
                 while (accumulator >= secondsPerLetter)
@@ -121,7 +116,6 @@ namespace Yarn.Unity
                 accumulator += Time.deltaTime;
 
                 yield return null;
-
             }
 
             // We either finished displaying everything, or were
@@ -199,7 +193,7 @@ namespace Yarn.Unity
         internal InputAction continueAction = new InputAction("Skip", InputActionType.Button, CommonUsages.Cancel);
 #endif
 
-        private InterruptionFlag interruptionFlag = new InterruptionFlag();
+        InterruptionFlag interruptionFlag = new InterruptionFlag();
 
         LocalizedLine currentLine = null;
 
@@ -212,17 +206,17 @@ namespace Yarn.Unity
             // configure it
             if (continueActionType == ContinueActionType.InputSystemActionFromAsset && continueActionReference != null)
             {
-                continueActionReference.action.performed += UserPerformedSkipAction;
+                continueActionReference.action.started += UserPerformedSkipAction;
             }
 
             // The custom skip action always starts disabled
             continueAction?.Disable();
-            continueAction.performed += UserPerformedSkipAction;
+            continueAction.started += UserPerformedSkipAction;
 #endif
         }
 
 #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-        private void UserPerformedSkipAction(InputAction.CallbackContext obj)
+        void UserPerformedSkipAction(InputAction.CallbackContext obj)
         {
             OnContinueClicked();
         }
@@ -383,17 +377,17 @@ namespace Yarn.Unity
                     onDialogueLineFinished();
                 }
             }
-        }
 
-        private void FadeComplete(Action onDialogueLineFinished)
-        {
-            if (useTypewriterEffect)
+            void FadeComplete(Action onFinished)
             {
-                StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, OnCharacterTyped, onDialogueLineFinished, interruptionFlag));
-            }
-            else
-            {
-                onDialogueLineFinished();
+                if (useTypewriterEffect)
+                {
+                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, OnCharacterTyped, onFinished, interruptionFlag));
+                }
+                else
+                {
+                    onFinished();
+                }
             }
         }
 

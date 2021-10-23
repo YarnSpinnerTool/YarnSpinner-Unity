@@ -21,37 +21,44 @@ namespace Yarn.Unity.Editor
         [System.Serializable]
         public class SerializedDeclaration
         {
+            internal static List<Yarn.IType> BuiltInTypesList = new List<Yarn.IType> {
+                Yarn.BuiltinTypes.String,
+                Yarn.BuiltinTypes.Boolean,
+                Yarn.BuiltinTypes.Number,
+            };
+
             public string name = "$variable";
-            public Yarn.Type type = Yarn.Type.String;
+
+            [UnityEngine.Serialization.FormerlySerializedAs("type")]
+            public string typeName = Yarn.BuiltinTypes.String.Name;
+
             public bool defaultValueBool;
             public float defaultValueNumber;
             public string defaultValueString;
 
             public string description;
 
+            public bool isImplicit;
+
             public TextAsset sourceYarnAsset;
 
             public SerializedDeclaration(Declaration decl)
             {
                 this.name = decl.Name;
-                this.type = decl.ReturnType;
+                this.typeName = decl.Type.Name;
                 this.description = decl.Description;
+                this.isImplicit = decl.IsImplicit;
 
                 sourceYarnAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(decl.SourceFileName);
 
-                switch (this.type)
-                {
-                    case Type.Number:
-                        this.defaultValueNumber = (float)decl.DefaultValue;
-                        break;
-                    case Type.String:
-                        this.defaultValueString = (string)decl.DefaultValue;
-                        break;
-                    case Type.Bool:
-                        this.defaultValueBool = (bool)decl.DefaultValue;
-                        break;
-                    default:
-                        throw new System.InvalidOperationException($"Invalid declaration type {decl.ReturnType}");
+                if (this.typeName == BuiltinTypes.String.Name) {
+                    this.defaultValueString = System.Convert.ToString(decl.DefaultValue);
+                } else if (this.typeName == BuiltinTypes.Boolean.Name) {
+                    this.defaultValueBool = System.Convert.ToBoolean(decl.DefaultValue);
+                } else if (this.typeName == BuiltinTypes.Number.Name) {
+                    this.defaultValueNumber = System.Convert.ToSingle(decl.DefaultValue);
+                } else {
+                    throw new System.InvalidOperationException($"Invalid declaration type {decl.Type.Name}");
                 }
             }
         }
@@ -94,7 +101,8 @@ namespace Yarn.Unity.Editor
 
         public List<TextAsset> sourceScripts = new List<TextAsset>();
 
-        public string compileError;
+        public List<string> compileErrors = new List<string>();
+
         public List<SerializedDeclaration> serializedDeclarations = new List<SerializedDeclaration>();
 
         [Language]
@@ -138,17 +146,25 @@ namespace Yarn.Unity.Editor
 
             IEnumerable<Declaration> localDeclarations;
 
-            compileError = null;
+            compileErrors.Clear();
 
-            try
+            var result = Compiler.Compiler.Compile(localDeclarationsCompileJob);
+            localDeclarations = result.Declarations;
+
+            IEnumerable<Diagnostic> errors;
+            
+            errors = result.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
+
+            if (errors.Count() > 0)
             {
-                var result = Compiler.Compiler.Compile(localDeclarationsCompileJob);
-                localDeclarations = result.Declarations;
-            }
-            catch (ParseException e)
-            {
-                ctx.LogImportError($"Error in Yarn Project: {e.Message}");
-                compileError = $"Error in Yarn Project {ctx.assetPath}: {e.Message}";
+                // We encountered errors while parsing for declarations.
+                // Report them and exit.
+                foreach (var error in errors)
+                {
+                    ctx.LogImportError($"Error in Yarn Project: {error}");
+                    compileErrors.Add($"Error in Yarn Project {ctx.assetPath}: {error}");
+                }
+
                 return;
             }
 
@@ -157,7 +173,7 @@ namespace Yarn.Unity.Editor
             // We'll replace this with a more complete list later if
             // compilation succeeds.
             serializedDeclarations = localDeclarations
-                .Where(decl => decl.DeclarationType == Declaration.Type.Variable)
+                .Where(decl => !(decl.Type is FunctionType))
                 .Select(decl => new SerializedDeclaration(decl)).ToList();
 
             // We're done processing this file - we've parsed it, and
@@ -174,7 +190,7 @@ namespace Yarn.Unity.Editor
             {
                 // Parse errors! We can't continue.
                 string failingScriptNameList = string.Join("\n", scriptsWithParseErrors.Select(script => script.assetPath));
-                compileError = $"Parse errors exist in the following files:\n{failingScriptNameList}";
+                compileErrors.Add($"Parse errors exist in the following files:\n{failingScriptNameList}");
                 return;
             }
 
@@ -193,36 +209,36 @@ namespace Yarn.Unity.Editor
 
             CompilationResult compilationResult;
 
-            try
-            {
-                compilationResult = Compiler.Compiler.Compile(job);
-            }
-            catch (TypeException e)
-            {
-                ctx.LogImportError($"Error compiling: {e.Message}");
-                compileError = e.Message;
+            compilationResult = Compiler.Compiler.Compile(job);
 
-                var importer = pathsToImporters[e.FileName];
-                importer.parseErrorMessage = e.Message;
-                EditorUtility.SetDirty(importer);
+            errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
+        
+            if (errors.Count() > 0) {
+                var errorGroups = errors.GroupBy(e => e.FileName);
+                foreach (var errorGroup in errorGroups) {
+
+                    var errorMessages = errorGroup.Select(e => e.ToString());
+
+                    foreach (var message in errorMessages) {
+                        ctx.LogImportError($"Error compiling: {message}");
+                    }
+
+                    // Associate this compile error to the corresponding
+                    // script's importer.
+                    var importer = pathsToImporters[errorGroup.Key];
+
+                    compileErrors.AddRange(errorMessages);
+
+                    importer.parseErrorMessages.AddRange(errorMessages);
+                    EditorUtility.SetDirty(importer);
+                }
 
                 return;
             }
-            catch (ParseException e)
-            {
-                ctx.LogImportError(e.Message);
-                compileError = e.Message;
-
-                var importer = pathsToImporters[e.FileName];
-                importer.parseErrorMessage = e.Message;
-                EditorUtility.SetDirty(importer);
-
-                return;
-            }
-
+            
             if (compilationResult.Program == null)
             {
-                ctx.LogImportError("Internal error: Failed to compile: resulting program was null, but compiler did not throw a parse exception.");
+                ctx.LogImportError("Internal error: Failed to compile: resulting program was null, but compiler did not report errors.");
                 return;
             }
 
@@ -230,14 +246,15 @@ namespace Yarn.Unity.Editor
             // .yarnproject file, and the ones inside the .yarn files
             serializedDeclarations = localDeclarations
                 .Concat(compilationResult.Declarations)
-                .Where(decl => decl.DeclarationType == Declaration.Type.Variable)
+                .Where(decl => !(decl.Type is FunctionType))
                 .Select(decl => new SerializedDeclaration(decl)).ToList();
 
             // Clear error messages from all scripts - they've all passed
             // compilation
             foreach (var importer in pathsToImporters.Values)
             {
-                importer.parseErrorMessage = null;
+                importer.parseErrorMessages.Clear();
+                EditorUtility.SetDirty(importer);
             }
 
             // Will we need to create a default localization? This variable
@@ -433,7 +450,7 @@ namespace Yarn.Unity.Editor
         /// </summary>
         /// <inheritdoc path="exception"
         /// cref="GetScriptHasLineTags(TextAsset)"/>
-        internal bool CanGenerateStringsTable => string.IsNullOrEmpty(this.compileError) && sourceScripts.Count > 0 && sourceScripts.All(s => GetScriptHasLineTags(s));
+        internal bool CanGenerateStringsTable => this.compileErrors.Count == 0 && sourceScripts.Count > 0 && sourceScripts.All(s => GetScriptHasLineTags(s));
 
         /// <summary>
         /// Gets a value indicating whether the source script has line
@@ -500,12 +517,11 @@ namespace Yarn.Unity.Editor
 
             CompilationResult compilationResult;
 
-            try
-            {
-                compilationResult = Compiler.Compiler.Compile(job);
-            }
-            catch (ParseException)
-            {
+            compilationResult = Compiler.Compiler.Compile(job);
+
+            var errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
+
+            if (errors.Count() > 0) {
                 Debug.LogError($"Can't generate a strings table from a Yarn Project that contains compile errors", null);
                 return null;
             }
@@ -572,13 +588,13 @@ namespace Yarn.Unity.Editor
 
             // Clear necessary properties to something useful
             var nameProp = entry.FindPropertyRelative("name");
-            var typeProp = entry.FindPropertyRelative("type");
+            var typeProp = entry.FindPropertyRelative("typeName");
             var defaultValueStringProp = entry.FindPropertyRelative("defaultValueString");
             var sourceYarnAssetProp = entry.FindPropertyRelative("sourceYarnAsset");
             var descriptionProp = entry.FindPropertyRelative("description");
 
             nameProp.stringValue = "$variable";
-            typeProp.enumValueIndex = (int)Yarn.Type.String;
+            typeProp.enumValueIndex = YarnProjectImporter.SerializedDeclaration.BuiltInTypesList.IndexOf(Yarn.BuiltinTypes.String);
             defaultValueStringProp.stringValue = string.Empty;
             sourceYarnAssetProp.objectReferenceValue = null;
             descriptionProp.stringValue = string.Empty;
@@ -780,7 +796,8 @@ namespace Yarn.Unity.Editor
                         EditorGUI.LabelField(position, label, property.intValue.ToString());
                         break;
                     case SerializedPropertyType.Boolean:
-                        EditorGUI.Toggle(position, label, property.boolValue);
+                        var boolText = property.boolValue ? "True" : "False";
+                        EditorGUI.LabelField(position, label, boolText);
                         break;
                     case SerializedPropertyType.Float:
                         EditorGUI.LabelField(position, label, property.floatValue.ToString());
@@ -835,6 +852,8 @@ namespace Yarn.Unity.Editor
             // the text of the Yarn script belongs to the user.
             bool propertyIsReadOnly = property.FindPropertyRelative("sourceYarnAsset").objectReferenceValue != null;
 
+            propertyIsReadOnly |= property.FindPropertyRelative("isImplicit").boolValue;
+
             const float leftInset = 8;
 
             Rect RectForFieldIndex(int index, int lineCount = 1)
@@ -871,32 +890,41 @@ namespace Yarn.Unity.Editor
 
                 DrawPropertyField(namePosition, nameProperty, propertyIsReadOnly);
 
-                SerializedProperty typeProperty = property.FindPropertyRelative("type");
+                SerializedProperty typeProperty = property.FindPropertyRelative("typeName");
 
-                DrawPropertyField(typePosition, typeProperty, propertyIsReadOnly);
+                if (propertyIsReadOnly) {
+                    DrawPropertyField(typePosition, typeProperty, true);
+                } else {
+                    var popupElements = YarnProjectImporter.SerializedDeclaration.BuiltInTypesList;
+                    var popupElementNames = popupElements.Select(t => t.Name).ToList();
+                    var selectedIndex = popupElementNames.IndexOf(typeProperty.stringValue);
+
+                    var prefixPosition = EditorGUI.PrefixLabel(typePosition, new GUIContent("Type"));
+
+                    selectedIndex = EditorGUI.Popup(prefixPosition, selectedIndex, popupElementNames.ToArray());
+                    if (selectedIndex >= 0 && selectedIndex <= popupElementNames.Count) {
+                        typeProperty.stringValue = popupElementNames[selectedIndex];
+                    }
+                }
 
                 SerializedProperty defaultValueProperty;
 
-                switch ((Yarn.Type)typeProperty.enumValueIndex)
-                {
-                    case Yarn.Type.Number:
-                        defaultValueProperty = property.FindPropertyRelative("defaultValueNumber");
-                        break;
-                    case Yarn.Type.String:
-                        defaultValueProperty = property.FindPropertyRelative("defaultValueString");
-                        break;
-                    case Yarn.Type.Bool:
-                        defaultValueProperty = property.FindPropertyRelative("defaultValueBool");
-                        break;
-                    default:
-                        defaultValueProperty = null;
-                        break;
+                var type = YarnProjectImporter.SerializedDeclaration.BuiltInTypesList.FirstOrDefault(t => t.Name == typeProperty.stringValue);
+
+                if (type == BuiltinTypes.Number) {
+                    defaultValueProperty = property.FindPropertyRelative("defaultValueNumber");
+                } else if (type == BuiltinTypes.String) {
+                    defaultValueProperty = property.FindPropertyRelative("defaultValueString");
+                } else if (type == BuiltinTypes.Boolean) {
+                    defaultValueProperty = property.FindPropertyRelative("defaultValueBool");
+                } else {
+                    defaultValueProperty = null;
                 }
 
 
                 if (defaultValueProperty == null)
                 {
-                    EditorGUI.LabelField(defaultValuePosition, "Default Value", $"Variable type {(Yarn.Type)typeProperty.enumValueIndex} is not allowed");
+                    EditorGUI.LabelField(defaultValuePosition, "Default Value", $"Variable type {typeProperty.stringValue} is not allowed");
                 }
                 else
                 {

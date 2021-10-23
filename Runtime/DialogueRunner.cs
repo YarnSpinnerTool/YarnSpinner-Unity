@@ -33,6 +33,7 @@ using System.Reflection;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Yarn.Unity
 {
@@ -213,7 +214,16 @@ namespace Yarn.Unity
                     // YarnCommand attribute
                     foreach (var method in type.GetMethods())
                     {
-                        var attributes = new List<YarnCommandAttribute>(method.GetCustomAttributes<YarnCommandAttribute>());
+                        if (method.DeclaringType != type)
+                        {
+                            // This method was not declared in this class,
+                            // and was inherited from a parent class. Don't
+                            // attempt to register this method, because
+                            // we'll get a conflict.
+                            continue;
+                        }
+
+                        var attributes = new List<YarnCommandAttribute>(method.GetCustomAttributes<YarnCommandAttribute>(false));
 
                         if (attributes.Count > 0)
                         {
@@ -549,6 +559,26 @@ namespace Yarn.Unity
         /// <seealso cref="AddFunction{TResult}(string, Func{TResult})"/>
         public void RemoveFunction(string name) => Dialogue.Library.DeregisterFunction(name);
 
+        /// <summary>
+        /// Sets the dialogue views and makes sure the callback <see cref="DialogueViewBase.MarkLineComplete"/>
+        /// will respond correctly.
+        /// </summary>
+        /// <param name="views">The array of views to be assigned.</param>
+        public void SetDialogueViews(DialogueViewBase[] views)
+        {
+            dialogueViews = views;
+
+            Action continueAction = OnViewUserIntentNextLine;
+            foreach (var dialogueView in dialogueViews) {
+                if (dialogueView == null) {
+                    Debug.LogWarning("The 'Dialogue Views' field contains a NULL element.", gameObject);
+                    continue;
+                }
+
+                dialogueView.onUserWantsLineContinuation = continueAction;
+            }
+        }
+
         #region Private Properties/Variables/Procedures
 
         /// <summary>
@@ -771,10 +801,12 @@ namespace Yarn.Unity
             // invoking on the publicly exposed UnityEvent.
             onCommand?.Invoke(command.Text);
 
-            if (onCommand == null || onCommand.GetPersistentEventCount() == 0)
-            {
+            if ( onCommand == null || onCommand.GetPersistentEventCount() == 0 ) {
                 Debug.LogError($"No Command <<{command.Text}>> was found. Did you remember to use the YarnCommand attribute or AddCommandHandler() function in C#?");
             }
+
+            ContinueDialogue();
+        
             return;
         }
 
@@ -804,13 +836,26 @@ namespace Yarn.Unity
             // Clear the set of active dialogue views, just in case
             ActiveDialogueViews.Clear();
 
-            // Send line to available dialogue views
+            // the following is broken up into two stages because otherwise if the 
+            // first view happens to finish first once it calls dialogue complete
+            // it will empty the set of active views resulting in the line being considered
+            // finished by the runner despite there being a bunch of views still waiting
+            // so we do it over two loops.
+            // the first finds every active view and flags it as such
+            // the second then goes through them all and gives them the line
+
+            // Mark this dialogue view as active
             foreach (var dialogueView in dialogueViews)
             {
                 if (dialogueView == null || dialogueView.enabled == false) continue;
 
-                // Mark this dialogue view as active
                 ActiveDialogueViews.Add(dialogueView);
+            }
+            // Send line to all active dialogue views
+            foreach (var dialogueView in dialogueViews)
+            {
+                if (dialogueView == null || dialogueView.enabled == false) continue;
+
                 dialogueView.RunLine(CurrentLine,
                     () => DialogueViewCompletedDelivery(dialogueView));
             }
@@ -853,9 +898,9 @@ namespace Yarn.Unity
 
         internal bool DispatchCommandToRegisteredHandlers(String command)
         {
-            string[] commandTokens = ParseCommandParameters(command);
+            List<string> commandTokens = new List<string>(SplitCommandText(command));
 
-            if (commandTokens.Length == 0)
+            if (commandTokens.Count == 0)
             {
                 // Nothing to do
                 return false;
@@ -871,13 +916,14 @@ namespace Yarn.Unity
             }
 
             // Get all tokens after the name of the command
-            var remainingWords = new string[commandTokens.Length - 1];
+            var remainingWords = new string[commandTokens.Count - 1];
 
             var @delegate = commandHandlers[firstWord];
             var methodInfo = @delegate.Method;
 
+            
             // Copy everything except the first word from the array
-            System.Array.Copy(commandTokens, 1, remainingWords, 0, remainingWords.Length);
+            commandTokens.CopyTo(1, remainingWords, 0, remainingWords.Length);
 
             // Take the list of words, and prepend the onComplete delegate
             // we were given - it's always the first parameter
@@ -927,12 +973,6 @@ namespace Yarn.Unity
 
         }
 
-        private static string[] ParseCommandParameters(string command)
-        {
-            return command.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
-        }
-
-
         /// <summary>
         /// Parses the command string inside <paramref name="command"/>,
         /// attempts to locate a suitable method on a suitable game object,
@@ -956,13 +996,12 @@ namespace Yarn.Unity
         /// dispatch.</param>
         internal bool DispatchCommandToGameObject(string command)
         {
-
             // Start by splitting our command string by spaces.
-            var words = ParseCommandParameters(command);
+            var words = new List<string>(SplitCommandText(command));
 
             // We need 2 parameters in order to have both a command name,
             // and the name of an object to find.
-            if (words.Length < 2)
+            if (words.Count < 2)
             {
                 // Don't log an error, because the dialogue views might
                 // handle this command.
@@ -1014,7 +1053,7 @@ namespace Yarn.Unity
             // command after the first two (which are the command name and
             // the object name); we need to remove these two from the start
             // of the list.
-            if (words.Length >= 2)
+            if (words.Count() >= 2)
             {
                 parameters.RemoveRange(0, 2);
             }
@@ -1044,7 +1083,6 @@ namespace Yarn.Unity
                 // Start the coroutine. When it's done, it will continue
                 // execution.
                 StartCoroutine(DoYarnCommand(target, methodInfo, finalParameters));
-
                 return true;
             }
             else
@@ -1396,6 +1434,126 @@ namespace Yarn.Unity
             }
         }
         #endregion
+
+        /// <summary>
+        /// Splits input into a number of non-empty sub-strings, separated
+        /// by whitespace, and grouping double-quoted strings into a single
+        /// sub-string.
+        /// </summary>
+        /// <param name="input">The string to split.</param>
+        /// <returns>A collection of sub-strings.</returns>
+        /// <remarks>
+        /// This method behaves similarly to the <see
+        /// cref="string.Split(char[], StringSplitOptions)"/> method with
+        /// the <see cref="StringSplitOptions"/> parameter set to <see
+        /// cref="StringSplitOptions.RemoveEmptyEntries"/>, with the
+        /// following differences:
+        ///
+        /// <list type="bullet">
+        /// <item>Text that appears inside a pair of double-quote
+        /// characters will not be split.</item>
+        ///
+        /// <item>Text that appears after a double-quote character and
+        /// before the end of the input will not be split (that is, an
+        /// unterminated double-quoted string will be treated as though it
+        /// had been terminated at the end of the input.)</item>
+        ///
+        /// <item>When inside a pair of double-quote characters, the string
+        /// <c>\\</c> will be converted to <c>\</c>, and the string
+        /// <c>\"</c> will be converted to <c>"</c>.</item>
+        /// </list>
+        /// </remarks>
+        public static IEnumerable<string> SplitCommandText(string input)
+        {
+            var reader = new System.IO.StringReader(input.Normalize());
+
+            int c;
+
+            var results = new List<string>();
+            var currentComponent = new System.Text.StringBuilder();
+
+            while ((c = reader.Read()) != -1)
+            {
+                if (char.IsWhiteSpace((char)c))
+                {
+                    if (currentComponent.Length > 0)
+                    {
+                        // We've reached the end of a run of visible
+                        // characters. Add this run to the result list and
+                        // prepare for the next one.
+                        results.Add(currentComponent.ToString());
+                        currentComponent.Clear();
+                    }
+                    else
+                    {
+                        // We encountered a whitespace character, but
+                        // didn't have any characters queued up. Skip this
+                        // character.
+                    }
+
+                    continue;
+                }
+                else if (c == '\"')
+                {
+                    // We've entered a quoted string!
+                    while (true)
+                    {
+                        c = reader.Read();
+                        if (c == -1)
+                        {
+                            // Oops, we ended the input while parsing a
+                            // quoted string! Dump our current word
+                            // immediately and return.
+                            results.Add(currentComponent.ToString());
+                            return results;
+                        }
+                        else if (c == '\\')
+                        {
+                            // Possibly an escaped character!
+                            var next = reader.Peek();
+                            if (next == '\\' || next == '\"')
+                            {
+                                // It is! Skip the \ and use the character after it.
+                                reader.Read();
+                                currentComponent.Append((char)next);
+                            }
+                            else
+                            {
+                                // Oops, an invalid escape. Add the \ and
+                                // whatever is after it.
+                                currentComponent.Append((char)c);
+                            }
+                        }
+                        else if (c == '\"')
+                        {
+                            // The end of a string!
+                            break;
+                        }
+                        else
+                        {
+                            // Any other character. Add it to the buffer.
+                            currentComponent.Append((char)c);
+                        }
+                    }
+
+                    results.Add(currentComponent.ToString());
+                    currentComponent.Clear();
+                }
+                else
+                {
+                    currentComponent.Append((char)c);
+                }
+            }
+
+            if (currentComponent.Length > 0)
+            {
+                results.Add(currentComponent.ToString());
+            }
+
+            return results;
+        }
+
+        
     }
 
     #region Class/Interface

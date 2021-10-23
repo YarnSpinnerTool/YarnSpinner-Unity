@@ -18,7 +18,9 @@ title: Start
 // This information is visible in the Inspector for the Yarn Project that
 // uses this script. (You can also create declarations in the Inspector,
 // rather than including them in your scripts.)
-<<declare $knows_anne_name = false as bool "Does Tom know the name of the person he's talking to?">>
+
+/// Does Tom know the name of the person he's talking to?
+<<declare $knows_anne_name = false as bool>>
 
 // Before we start, wait two seconds to let the player see the environment
 // before starting the dialogue.

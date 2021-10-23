@@ -8,12 +8,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Command parameters can now be grouped with double quotes. eg. `<<add-recipe "Banana Sensations">` and `<<move "My Game Object" LocationName>>` (@andiCR)
+
+- You can now add dialogue views to dialogue runner at any time.
+
+- The inspector for Yarn scripts now allows you to change the Project that the script belongs to. (@radiatoryang)
+
+### Changed
+
+- Updated to support new error handling in Yarn Spinner. 
+  - Yarn Spinner longer reports errors by throwing an exception, and instead provides a collection of diagnostic messages in the compiler result. In Unity, Yarn Spinner will now show _all_ error messages that the compiler may produce.
+
+- The console will no longer report an error indicating that a command is "already defined" when a subclass of a MonoBehaviour that has `YarnCommand` methods exists. 
+
+- `LocalizedLine.Text`'s setter is now public, not internal.
+
+### Removed
+
+## [v2.0.0-beta5] 2021-08-17
+
+### Added
+
 * `InMemoryVariableStorage` now throws an exception if you attempt to get or set a variable whose name doesn't start with `$`.
 * `LineView` now has an onCharacterTyped event that triggers for each character typed in the typewriter effect.
 
 ### Changed
 
+* `OptionsListView` no longer throws a `NullPointerException` when the dialogue starts with options (instead of a line.) 
+* When creating a new Yarn Project file from the Assets -> Create menu, the correct icon is now used.
+* Updated to use the new type system in Yarn Spinner 2.0-beta5.
+
 ### Removed
+
+* Yarn Programs: The 'Convert Implicit Declarations' button has been temporarily removed, due to a required compatibility change related to the new type system. It will be restored before final 2.0 release.
+
+## [v2.0.0-beta4] 2021-04-01
+
+Yarn Spinner 2.0 Beta 4 is a hotfix release for Yarn Spinner 2.0 Beta 3. 
+
+### Changed 
+
+- Fixed an issue that caused Yarn Spinner to not compile on Unity 2018 or Unity 2019.
 
 ## [v2.0.0-beta3] 2021-03-27
 
@@ -180,9 +215,14 @@ Kim: You want a bagel?
 - Dialogue.AddFunction now uses functions that can take multiple parameters. You no longer use a single `Yarn.Value[]` parameter; you can now have up to 5, which can be strings, integers, floats, doubles, bools, or `Yarn.Value`s.
 - Commands registered via the `YarnCommand` attribute can now take parameter types besides strings. Parameters can also be optional. Additionally, these methods are now cached, and are faster to call.
 
-
 ### Removed
 - Commands registered via the `YarnCommand` attribute can no longer accept a `params` array of parameters. If your command takes a variable number of parameters, use optional parameters instead.
+
+## [v1.2.7] 
+
+### Changed
+
+- Backported check for Experimental status of AssetImporter (promoted in 2020.2)
 
 ## [v1.2.6]
 

@@ -14,7 +14,8 @@ namespace Yarn.Unity.Editor
         // GUID for editor assets. (Doing it like this means that we don't
         // have to worry about where the assets are on disk, if the user
         // has moved Yarn Spinner around.)
-        const string IconTextureGUID = "0ed312066ea6f40f6af965f21c818b34";
+        const string DocumentIconTextureGUID = "0ed312066ea6f40f6af965f21c818b34";
+        const string ProjectIconTextureGUID = "f6a533d9225cd40ea9ded31d4f686e3b";
         const string TemplateFileGUID = "4f4ca4a46020a454f80e2ac78eda5aa1";
 
         /// <summary>
@@ -25,7 +26,20 @@ namespace Yarn.Unity.Editor
         /// files.</returns>
         public static Texture2D GetYarnDocumentIconTexture()
         {
-            string textureAssetPath = AssetDatabase.GUIDToAssetPath(IconTextureGUID);
+            string textureAssetPath = AssetDatabase.GUIDToAssetPath(DocumentIconTextureGUID);
+
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(textureAssetPath);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Texture2D"/> that can be used to represent
+        /// Yarn project files.
+        /// </summary>
+        /// <returns>A texture to use in the Unity editor for Yarn project
+        /// files.</returns>
+        public static Texture2D GetYarnProjectIconTexture()
+        {
+            string textureAssetPath = AssetDatabase.GUIDToAssetPath(ProjectIconTextureGUID);
 
             return AssetDatabase.LoadAssetAtPath<Texture2D>(textureAssetPath);
         }
@@ -77,7 +91,7 @@ namespace Yarn.Unity.Editor
                 0,
                 ScriptableObject.CreateInstance<DoCreateYarnScriptAsset>(),
                 "NewProject.yarnproject",
-                GetYarnDocumentIconTexture(),
+                GetYarnProjectIconTexture(),
                 GetTemplateYarnScriptPath());
         }
 

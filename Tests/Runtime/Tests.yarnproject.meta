@@ -19,11 +19,12 @@ ScriptedImporter:
   compileError: 
   serializedDeclarations:
   - name: $laps
-    type: 1
+    typeName: Bool
     defaultValueBool: 0
     defaultValueNumber: 0
     defaultValueString: 
     description: How many laps Jane has walked
+    isImplicit: 0
     sourceYarnAsset: {instanceID: 0}
   defaultLanguage: en-AU
   languagesToSourceAssets: []

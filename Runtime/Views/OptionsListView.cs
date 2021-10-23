@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -19,13 +18,13 @@ namespace Yarn.Unity
         [SerializeField] bool showUnavailableOptions = false;
 
         // A cached pool of OptionView objects so that we can reuse them
-        private List<OptionView> optionViews = new List<OptionView>();
+        List<OptionView> optionViews = new List<OptionView>();
 
         // The method we should call when an option has been selected.
-        private Action<int> OnOptionSelected;
+        Action<int> OnOptionSelected;
 
         // The line we saw most recently.
-        private LocalizedLine lastSeenLine;
+        LocalizedLine lastSeenLine;
 
         public void Start()
         {
@@ -68,7 +67,6 @@ namespace Yarn.Unity
 
             for (int i = 0; i < dialogueOptions.Length; i++)
             {
-
                 var optionView = optionViews[i];
                 var option = dialogueOptions[i];
 
@@ -94,7 +92,12 @@ namespace Yarn.Unity
             // Update the last line, if one is configured
             if (lastLineText != null)
             {
-                lastLineText.text = lastSeenLine.Text.Text;
+                if (lastSeenLine != null) {
+                    lastLineText.gameObject.SetActive(true);
+                    lastLineText.text = lastSeenLine.Text.Text;
+                } else {
+                    lastLineText.gameObject.SetActive(false);
+                }
             }
 
             // Note the delegate to call when an option is selected
@@ -102,31 +105,30 @@ namespace Yarn.Unity
 
             // Fade it all in
             StartCoroutine(Effects.FadeAlpha(canvasGroup, 0, 1, fadeTime));
-        }
 
-        /// <summary>
-        /// Creates and configures a new <see cref="OptionView"/>, and adds
-        /// it to <see cref="optionViews"/>.
-        /// </summary>
-        private OptionView CreateNewOptionView()
-        {
-            var optionView = Instantiate(optionViewPrefab);
-            optionView.transform.SetParent(transform, false);
-            optionView.transform.SetAsLastSibling();
+            /// <summary>
+            /// Creates and configures a new <see cref="OptionView"/>, and adds
+            /// it to <see cref="optionViews"/>.
+            /// </summary>
+            OptionView CreateNewOptionView()
+            {
+                var optionView = Instantiate(optionViewPrefab);
+                optionView.transform.SetParent(transform, false);
+                optionView.transform.SetAsLastSibling();
 
-            optionView.OnOptionSelected = OptionViewWasSelected;
-            optionViews.Add(optionView);
+                optionView.OnOptionSelected = OptionViewWasSelected;
+                optionViews.Add(optionView);
 
-            return optionView;
-        }
+                return optionView;
+            }
 
-        /// <summary>
-        /// Called by <see cref="OptionView"/> objects.
-        /// </summary>
-        private void OptionViewWasSelected(DialogueOption option)
-        {
-            StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeTime, () => OnOptionSelected(option.DialogueOptionID)));
-            ;
+            /// <summary>
+            /// Called by <see cref="OptionView"/> objects.
+            /// </summary>
+            void OptionViewWasSelected(DialogueOption option)
+            {
+                StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeTime, () => OnOptionSelected(option.DialogueOptionID)));
+            }
         }
     }
 }

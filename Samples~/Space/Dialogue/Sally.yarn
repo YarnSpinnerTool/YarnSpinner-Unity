@@ -14,9 +14,9 @@ position: 524,111
 <<endif>>
 
 
--> Anything exciting happen on your watch? <<if not visited("Sally.Watch")>> #line:5d7a7c
+-> Anything exciting happen on your watch? <<if not visited("Sally_Watch")>> #line:5d7a7c
     <<jump Sally_Watch>>
--> Sorry about the console. <<if $sally_warning and not visited("Sally.Sorry")>> #line:0a7e39
+-> Sorry about the console. <<if $sally_warning and not visited("Sally_Sorry")>> #line:0a7e39
     <<jump Sally_Sorry>>
 -> See you later. #line:0facf7
     <<jump Sally_Exit>>
@@ -54,7 +54,7 @@ Sally: Yeah. Don't do it again. #line:d7df49
 ===
 title: Declarations
 ---
-<<declare $should_see_ship = false "Whether the player knows they should talk to the Ship.">>
-<<declare $sally_warning = false "Whether the player has been given the warning from Sally.">>
+// <<declare $should_see_ship = false "Whether the player knows they should talk to the Ship.">>
+// <<declare $sally_warning = false "Whether the player has been given the warning from Sally.">>
 ===
 

@@ -26,7 +26,7 @@ namespace Yarn.Unity.Editor
         // YarnProjectImporter. Used during Inspector GUI drawing.
         internal static SerializedProperty CurrentProjectDefaultLanguageProperty;
 
-        private SerializedProperty compileErrorProperty;
+        private SerializedProperty compileErrorsProperty;
         private SerializedProperty serializedDeclarationsProperty;
         private SerializedProperty defaultLanguageProperty;
         private SerializedProperty sourceScriptsProperty;
@@ -38,14 +38,14 @@ namespace Yarn.Unity.Editor
         public override void OnEnable()
         {
             base.OnEnable();
-            sourceScriptsProperty = serializedObject.FindProperty("sourceScripts");
-            compileErrorProperty = serializedObject.FindProperty("compileError");
-            serializedDeclarationsProperty = serializedObject.FindProperty("serializedDeclarations");
+            sourceScriptsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.sourceScripts));
+            compileErrorsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.compileErrors));
+            serializedDeclarationsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.serializedDeclarations));
 
-            defaultLanguageProperty = serializedObject.FindProperty("defaultLanguage");
-            languagesToSourceAssetsProperty = serializedObject.FindProperty("languagesToSourceAssets");
+            defaultLanguageProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.defaultLanguage));
+            languagesToSourceAssetsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.languagesToSourceAssets));
 
-            useAddressableAssetsProperty = serializedObject.FindProperty("useAddressableAssets");
+            useAddressableAssetsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.useAddressableAssets));
 
             serializedDeclarationsList = new ReorderableDeclarationsList(serializedObject, serializedDeclarationsProperty);
         }
@@ -53,6 +53,8 @@ namespace Yarn.Unity.Editor
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
+
+            YarnProjectImporter yarnProjectImporter = serializedObject.targetObject as YarnProjectImporter;
 
             EditorGUILayout.Space();
 
@@ -64,12 +66,43 @@ namespace Yarn.Unity.Editor
 
             EditorGUILayout.Space();
 
-            if (string.IsNullOrEmpty(compileErrorProperty.stringValue) == false)
+            bool hasCompileError = compileErrorsProperty.arraySize > 0;
+
+            if (hasCompileError)
             {
-                EditorGUILayout.HelpBox(compileErrorProperty.stringValue, MessageType.Error);
+                foreach (SerializedProperty compileError in compileErrorsProperty) {
+                    EditorGUILayout.HelpBox(compileError.stringValue, MessageType.Error);
+                }
             }
 
             serializedDeclarationsList.DrawLayout();
+
+            // The 'Convert Implicit Declarations' feature has been
+            // temporarily removed in v2.0.0-beta5.
+
+#if false
+            // If any of the serialized declarations are implicit, add a
+            // button that lets you generate explicit declarations for them
+            var anyImplicitDeclarations = false;
+            foreach (SerializedProperty declProp in serializedDeclarationsProperty) {
+                anyImplicitDeclarations |= declProp.FindPropertyRelative("isImplicit").boolValue;
+            }
+            
+            if (hasCompileError == false && anyImplicitDeclarations) {
+                if (GUILayout.Button("Convert Implicit Declarations")) {
+                    // add explicit variable declarations to the file
+                    YarnProjectUtility.ConvertImplicitVariableDeclarationsToExplicit(yarnProjectImporter);
+
+                    // Return here becuase this method call will cause the
+                    // YarnProgram contents to change, which confuses the
+                    // SerializedObject when we're in the middle of a GUI
+                    // draw call. So, stop here, and let Unity re-draw the
+                    // Inspector (which it will do on the next editor tick
+                    // because the item we're inspecting got re-imported.)
+                    return;
+                }
+            }
+#endif
 
             EditorGUILayout.PropertyField(defaultLanguageProperty, new GUIContent("Default Language"));
 
@@ -78,8 +111,6 @@ namespace Yarn.Unity.Editor
             EditorGUILayout.PropertyField(languagesToSourceAssetsProperty);
 
             CurrentProjectDefaultLanguageProperty = null;
-
-            YarnProjectImporter yarnProjectImporter = serializedObject.targetObject as YarnProjectImporter;
 
             // Ask the project importer if it can generate a strings table.
             // This involves querying several assets, which means various
@@ -225,29 +256,25 @@ namespace Yarn.Unity.Editor
 
                 var name = decl.FindPropertyRelative("name").stringValue;
 
-                SerializedProperty typeProperty = decl.FindPropertyRelative("type");
+                SerializedProperty typeProperty = decl.FindPropertyRelative("typeName");
 
-                Type type = (Yarn.Type)typeProperty.enumValueIndex;
+                Yarn.IType type = YarnProjectImporter.SerializedDeclaration.BuiltInTypesList.FirstOrDefault(t => t.Name == typeProperty.stringValue);
 
                 var description = decl.FindPropertyRelative("description").stringValue;
 
-                object defaultValue;
-                switch (type)
-                {
-                    case Yarn.Type.Number:
-                        defaultValue = decl.FindPropertyRelative("defaultValueNumber").floatValue;
-                        break;
-                    case Yarn.Type.String:
-                        defaultValue = decl.FindPropertyRelative("defaultValueString").stringValue;
-                        break;
-                    case Yarn.Type.Bool:
-                        defaultValue = decl.FindPropertyRelative("defaultValueBool").boolValue;
-                        break;
-                    default:
-                        throw new System.ArgumentOutOfRangeException($"Invalid declaration type {type}");
-                }
+                System.IConvertible defaultValue;
 
-                var declaration = Declaration.CreateVariable(name, defaultValue, description);
+                if (type == Yarn.BuiltinTypes.Number) {
+                    defaultValue = decl.FindPropertyRelative("defaultValueNumber").floatValue;
+                } else if (type == Yarn.BuiltinTypes.String) {
+                    defaultValue = decl.FindPropertyRelative("defaultValueString").stringValue;
+                } else if (type == Yarn.BuiltinTypes.Boolean) {
+                    defaultValue = decl.FindPropertyRelative("defaultValueBool").boolValue;
+                } else {
+                    throw new System.ArgumentOutOfRangeException($"Invalid declaration type {type.Name}");
+                }
+                
+                var declaration = Declaration.CreateVariable(name, type, defaultValue, description);
 
                 thisProgramDeclarations.Add(declaration);
             }
