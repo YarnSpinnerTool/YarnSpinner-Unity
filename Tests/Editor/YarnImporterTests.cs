@@ -161,6 +161,21 @@ namespace Yarn.Unity.Tests
             return project;
         }
 
+        /// <summary>
+        /// Formats a string with a random file name, registers that path
+        /// as a created file, and returns the formatted value.
+        /// </summary>
+        /// <param name="template">A format string compatible with <see
+        /// cref="string.Format(string, object)"/> </param>
+        /// <returns>A path to a file that will be deleted when the unit
+        /// test is torn down.</returns>
+        private string GetRandomFilePath(string template = "Assets/{0}")
+        {
+            var scriptPath = string.Format(template, Path.GetRandomFileName());
+            createdFilePaths.Add(scriptPath);
+            return scriptPath;
+        }
+
         [Test]
         public void YarnImporter_OnValidYarnFile_ShouldParse()
         {
@@ -609,6 +624,120 @@ But not all of them are.
             CollectionAssert.AllItemsAreUnique(allAudioClips);
         }
 
+        [Test]
+        public void YarnImporter_CanCreateNewScript()
+        {
+            // Arrange:
+            // Choose a location where the new asset should be created
+            string scriptPath = GetRandomFilePath("Assets/{0}.yarn");
 
+            // Act: 
+            // Create the new script
+            var scriptAsset = YarnEditorUtility.CreateYarnAsset(scriptPath) as TextAsset;
+
+            // Assert:
+            // The new file should be created as a TextAsset, and it should
+            // be imported with a YarnImporter.
+            var importer = AssetImporter.GetAtPath(scriptPath) as YarnImporter;
+
+            Assert.IsNotNull(scriptAsset);
+            Assert.IsNotNull(importer);
+        }
+
+        [Test]
+        public void YarnImporter_CanCreateNewProjectFromScript() {
+            // Arrange:
+            // Create a Yarn script.
+            var scriptPath = GetRandomFilePath("Assets/{0}.yarn");
+
+            var scriptAsset = YarnEditorUtility.CreateYarnAsset(scriptPath);
+            var importer = AssetImporter.GetAtPath(scriptPath) as YarnImporter;
+
+            // Act:
+            // Create a Yarn Project from that script.
+            var projectPath = YarnProjectUtility.CreateYarnProject(importer);
+            createdFilePaths.Add(projectPath);
+
+            // Assert: A new Yarn Project should exist, and is imported as
+            // a Yarn Project that has the original Yarn script as one of
+            // its source scripts.
+            Assert.True(File.Exists(projectPath));
+
+            var project = AssetDatabase.LoadAssetAtPath<YarnProject>(projectPath);
+            var projectImporter = AssetImporter.GetAtPath(projectPath) as YarnProjectImporter;
+
+            Assert.IsNotNull(project);
+            Assert.IsNotNull(projectImporter);
+            Assert.Contains(scriptAsset, projectImporter.sourceScripts);
+            Assert.AreSame(project, importer.DestinationProject);
+        }
+
+        [Test]
+        public void YarnImporter_CanAssignProjectToScript() {
+            // Arrange: 
+            // Create a new script and a project, independently of each
+            // other.
+            var scriptPath = GetRandomFilePath("Assets/{0}.yarn");
+            var projectPath = GetRandomFilePath("Assets/{0}.yarnproject");
+
+            var scriptAsset = YarnEditorUtility.CreateYarnAsset(scriptPath);
+            var scriptImporter = AssetImporter.GetAtPath(scriptPath) as YarnImporter;
+
+            var projectAsset = YarnEditorUtility.CreateYarnProject(projectPath);
+            var projectImporter = AssetImporter.GetAtPath(projectPath) as YarnProjectImporter;
+
+            Assert.IsNull(scriptImporter.DestinationProject);
+            Assert.IsEmpty(projectImporter.sourceScripts);
+
+            // Act:
+            // Assign the script to the project.
+            YarnProjectUtility.AssignScriptToProject(scriptPath, projectPath);
+
+            // Assert:
+            // The script should now be part of the destination project.
+            Assert.AreSame(scriptImporter.DestinationProject, projectAsset);
+            CollectionAssert.AreEquivalent(projectImporter.sourceScripts, new[] { scriptAsset });
+
+
+        }
+
+        [Test]
+        public void YarnImporter_CanReassignDifferentProjectToScript() {
+            // Arrange: 
+            // Create a new script and two projects, independently of each
+            // other.
+            var scriptPath = GetRandomFilePath("Assets/{0}.yarn");
+            var project1Path = GetRandomFilePath("Assets/1-{0}.yarnproject");
+            var project2Path = GetRandomFilePath("Assets/2-{0}.yarnproject");
+
+            var scriptAsset = YarnEditorUtility.CreateYarnAsset(scriptPath);
+            var scriptImporter = AssetImporter.GetAtPath(scriptPath) as YarnImporter;
+
+            var _ = YarnEditorUtility.CreateYarnProject(project1Path);
+            var project1Importer = AssetImporter.GetAtPath(project1Path) as YarnProjectImporter;
+
+            var project2Asset = YarnEditorUtility.CreateYarnProject(project2Path);
+            var project2Importer = AssetImporter.GetAtPath(project2Path) as YarnProjectImporter;
+
+            Assert.IsNull(scriptImporter.DestinationProject);
+            Assert.IsEmpty(project1Importer.sourceScripts);
+            Assert.IsEmpty(project2Importer.sourceScripts);
+
+            // Act:
+            // Assign the script to the project, and then assign it to a
+            // different project.
+            YarnProjectUtility.AssignScriptToProject(scriptPath, project1Path);
+            YarnProjectUtility.AssignScriptToProject(scriptPath, project2Path);
+
+            project1Importer = AssetImporter.GetAtPath(project1Path) as YarnProjectImporter;
+
+            // Assert:
+            // The script should now be part of the second project, and not the first.
+            Assert.IsEmpty(project1Importer.sourceScripts);
+            Assert.AreSame(scriptImporter.DestinationProject, project2Asset);
+            CollectionAssert.AreEquivalent(project2Importer.sourceScripts, new[] { scriptAsset });
+
+
+        }
     }
 }

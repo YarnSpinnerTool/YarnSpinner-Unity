@@ -30,10 +30,10 @@ namespace Yarn.Unity.Editor
             isSuccessfullyCompiledProperty = serializedObject.FindProperty(nameof(YarnImporter.isSuccessfullyParsed));
             parseErrorMessagesProperty = serializedObject.FindProperty(nameof(YarnImporter.parseErrorMessages));
             
-            UpdateDestinationProgram();
+            UpdateDestinationProject();
         }
 
-        private void UpdateDestinationProgram()
+        private void UpdateDestinationProject()
         {
             destinationYarnProject = (target as YarnImporter).DestinationProject;
 
@@ -74,21 +74,30 @@ namespace Yarn.Unity.Editor
 
             if (destinationYarnProject == null)
             {
-                EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project. Create a new Yarn Project, and add this script to it.", MessageType.Info);
-                if (GUILayout.Button("Create New Yarn Project"))
+                EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project, so it can't be compiled or loaded into a Dialogue Runner. Either click Create New Yarn Project, or add a Yarn project to the field below.", MessageType.Info);
+                if (GUILayout.Button("Create New Yarn Project..."))
                 {
                     YarnProjectUtility.CreateYarnProject(target as YarnImporter);
 
-                    UpdateDestinationProgram();
+                    UpdateDestinationProject();
 
                 }
             }
-            else
+            
+            using (var change = new EditorGUI.ChangeCheckScope())
             {
-                using (new EditorGUI.DisabledGroupScope(true))
-                {
-                    EditorGUILayout.ObjectField("Program", destinationYarnProject, typeof(YarnProjectImporter), false);
+                var project = EditorGUILayout.ObjectField("Project", destinationYarnProject, typeof(YarnProject), false);
+
+                if (change.changed) {
+                    string programPath = null;
+                    if (project != null) {
+                        programPath = AssetDatabase.GetAssetPath(project);
+                    }
+                    YarnProjectUtility.AssignScriptToProject( (target as YarnImporter).assetPath, programPath);
+                    
+                    UpdateDestinationProject();
                 }
+
             }
 
             EditorGUILayout.Space();
