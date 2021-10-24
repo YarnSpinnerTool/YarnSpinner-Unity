@@ -95,12 +95,9 @@ namespace Yarn.Unity.Editor
             {
                 (Func<AssetImporter, IYarnErrorSource> converter, string filterQuery) = assetSearchQueries.Dequeue();
 
-                errorSources.UnionWith(AssetDatabase.FindAssets(filterQuery)
-                    .Select(AssetDatabase.GUIDToAssetPath)
-                    .Select(path => AssetImporter.GetAtPath(path))
-                    .Select(converter)
-                    .Where(source => source != null)
-                    .Select(source => new WeakReference<IYarnErrorSource>(source)));
+                errorSources.UnionWith(
+                    YarnEditorUtility.GetAllAssetsOf(filterQuery, converter)
+                        .Select(source => new WeakReference<IYarnErrorSource>(source)));
             }
 
             foreach (WeakReference<IYarnErrorSource> errorSourceRef in errorSources)

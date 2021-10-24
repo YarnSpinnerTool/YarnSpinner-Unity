@@ -68,19 +68,16 @@ namespace Yarn.Unity.Editor
             get
             {
                 var myAssetPath = assetPath;
-                var destinationProjectPath = AssetDatabase.FindAssets("t:YarnProject")
-                    .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
-                    .Select(path => AssetImporter.GetAtPath(path) as YarnProjectImporter)
-                    .Where(importer => importer != null)
-                    .FirstOrDefault(importer => importer.sourceScripts.Any(s =>
+                var destinationProjectPath = YarnEditorUtility.GetAllAssetsOf<YarnProjectImporter>("t:YarnProject")
+                    .FirstOrDefault(importer =>
                     {
                         // Does this importer depend on this asset? If so,
                         // then this is our destination asset.
                         string[] dependencies = AssetDatabase.GetDependencies(importer.assetPath);
-                        var importerDependsOnThisAsset = dependencies.Contains<string>(myAssetPath);
+                        var importerDependsOnThisAsset = dependencies.Contains(myAssetPath);
 
                         return importerDependsOnThisAsset;
-                    }))?.assetPath;
+                    })?.assetPath;
 
                 if (destinationProjectPath == null)
                 {
