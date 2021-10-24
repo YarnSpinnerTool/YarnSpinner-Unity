@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -51,6 +50,8 @@ namespace Yarn.Unity.Editor
         public static void AddYarnErrorSource(IYarnErrorSource source) 
             => Instance.errorSources.Add(new WeakReference<IYarnErrorSource>(source));
 
+        public static bool HasCompileErrors() => Instance.CompilerErrors().Any();
+
         private readonly Queue<(Func<AssetImporter, IYarnErrorSource> converter, string filterQuery)> assetSearchQueries =
             new Queue<(Func<AssetImporter, IYarnErrorSource> converter, string filterQuery)>();
 
@@ -63,6 +64,25 @@ namespace Yarn.Unity.Editor
         {
             if (state != PlayModeStateChange.ExitingEditMode) { return; }
 
+            bool isValid = true;
+            foreach (string error in CompilerErrors())
+            {
+                isValid = false;
+                Debug.Log(error);
+            }
+
+            if (isValid) { return; }
+
+            EditorApplication.isPlaying = false;
+            Debug.LogError("There were import errors. Please fix them to continue.");
+
+            // usually the scene view should be initialized, but if it isn't then it isn't a huge deal
+            EditorWindow.GetWindow<SceneView>()
+                ?.ShowNotification(new GUIContent("All Yarn compiler errors must be fixed before entering Play Mode."));
+        }
+
+        private IEnumerable<string> CompilerErrors()
+        {
             // delete expired weak refs
             errorSources.RemoveWhere(weakRef => !weakRef.TryGetTarget(out var _));
 
@@ -79,27 +99,16 @@ namespace Yarn.Unity.Editor
                     .Select(source => new WeakReference<IYarnErrorSource>(source)));
             }
 
-            bool hasErrors = false;
             foreach (WeakReference<IYarnErrorSource> errorSourceRef in errorSources)
             {
-                if (!errorSourceRef.TryGetTarget(out IYarnErrorSource errorSource)) { return; }
+                if (!errorSourceRef.TryGetTarget(out IYarnErrorSource errorSource)) { continue; }
                 if (errorSource.CompileErrors.Count == 0) { continue; }
 
-                hasErrors = true;
                 foreach (string error in errorSource.CompileErrors)
                 {
-                    Debug.LogError(error);
+                    yield return error;
                 }
             }
-
-            if (!hasErrors) { return; }
-
-            EditorApplication.isPlaying = false;
-            Debug.LogError("There were import errors. Please fix them to continue.");
-
-            // usually the scene view should be initialized, but if it isn't then it isn't a huge deal
-            EditorWindow.GetWindow<SceneView>()
-                ?.ShowNotification(new GUIContent("All Yarn compiler errors must be fixed before entering Play Mode."));
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -174,7 +175,7 @@ namespace Yarn.Unity.Tests
             var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
             Assert.True(result.isSuccessfullyParsed);
-
+            Assert.False(YarnPreventPlayMode.HasCompileErrors(), "Should not have compiler errors");
         }
 
         [Test]
@@ -193,6 +194,7 @@ namespace Yarn.Unity.Tests
             var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
             Assert.False(result.isSuccessfullyParsed);
+            Assert.True(YarnPreventPlayMode.HasCompileErrors(), "Should have compiler errors");
         }
 
         [Test]
