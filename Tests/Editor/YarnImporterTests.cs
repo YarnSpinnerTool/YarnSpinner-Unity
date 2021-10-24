@@ -195,6 +195,11 @@ namespace Yarn.Unity.Tests
 
             Assert.False(result.isSuccessfullyParsed);
             Assert.True(YarnPreventPlayMode.HasCompileErrors(), "Should have compiler errors");
+
+            AssetDatabase.DeleteAsset(result.assetPath);
+            AssetDatabase.Refresh();
+
+            Assert.False(YarnPreventPlayMode.HasCompileErrors(), "Should not have compiler errors after deletion");
         }
 
         [Test]
@@ -214,6 +219,8 @@ namespace Yarn.Unity.Tests
             Assert.IsEmpty(yarnProjectImporter.compileErrors);
             Assert.True(scriptImporter.isSuccessfullyParsed);
             Assert.AreSame(project, scriptImporter.DestinationProject);
+
+            Assert.False(YarnPreventPlayMode.HasCompileErrors(), "Should show compiler errors");
         }
 
         [Test]
