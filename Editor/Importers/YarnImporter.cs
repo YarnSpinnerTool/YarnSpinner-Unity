@@ -61,6 +61,8 @@ namespace Yarn.Unity.Editor
 
         IList<string> IYarnErrorSource.CompileErrors => parseErrorMessages;
 
+        bool IYarnErrorSource.Destroyed => this == null;
+
         public YarnProject DestinationProject
         {
             get

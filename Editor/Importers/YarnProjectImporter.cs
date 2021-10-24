@@ -116,6 +116,8 @@ namespace Yarn.Unity.Editor
 
         IList<string> IYarnErrorSource.CompileErrors => compileErrors;
 
+        bool IYarnErrorSource.Destroyed => this == null;
+
         public override void OnImportAsset(AssetImportContext ctx)
         {
 #if YARNSPINNER_DEBUG

@@ -12,6 +12,8 @@ namespace Yarn.Unity.Editor
     public interface IYarnErrorSource
     {
         internal IList<string> CompileErrors { get; }
+
+        internal bool Destroyed { get; }
     }
 
     public class YarnPreventPlayMode
@@ -58,6 +60,8 @@ namespace Yarn.Unity.Editor
         private readonly HashSet<WeakReference<IYarnErrorSource>> errorSources = 
             new HashSet<WeakReference<IYarnErrorSource>>(new WeakRefComparer<IYarnErrorSource>());
 
+        private readonly HashSet<string> deletedSources = new HashSet<string>();
+
         private YarnPreventPlayMode() => EditorApplication.playModeStateChanged += OnPlayModeChanged;
 
         private void OnPlayModeChanged(PlayModeStateChange state)
@@ -84,7 +88,7 @@ namespace Yarn.Unity.Editor
         private IEnumerable<string> CompilerErrors()
         {
             // delete expired weak refs
-            errorSources.RemoveWhere(weakRef => !weakRef.TryGetTarget(out var _));
+            errorSources.RemoveWhere(weakRef => !weakRef.TryGetTarget(out var source) || source.Destroyed);
 
             // import all unloaded assets
             while (assetSearchQueries.Count > 0)
