@@ -234,6 +234,8 @@ namespace Yarn.Unity.Tests
             Assert.IsNotEmpty(scriptImporter.parseErrorMessages);
             Assert.AreSame(scriptImporter.DestinationProject, project);
             Assert.AreSame(project, scriptImporter.DestinationProject);
+
+            Assert.True(YarnPreventPlayMode.HasCompileErrors(), "Should show compiler errors");
         }
 
         [Test]
