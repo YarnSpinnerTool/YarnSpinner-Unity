@@ -15,8 +15,10 @@ using System.Collections;
 namespace Yarn.Unity.Editor
 {
     [ScriptedImporter(2, new[] { "yarnproject" }, 1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
+    [InitializeOnLoad]
     public class YarnProjectImporter : ScriptedImporter, IYarnErrorSource
     {
+        static YarnProjectImporter() => YarnPreventPlayMode.AddYarnErrorSourceType<YarnProjectImporter>("t:YarnProject");
 
         [System.Serializable]
         public class SerializedDeclaration

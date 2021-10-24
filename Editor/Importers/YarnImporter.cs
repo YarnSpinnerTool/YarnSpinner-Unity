@@ -24,8 +24,11 @@ namespace Yarn.Unity.Editor
     /// asset's corresponding meta file.
     /// </summary>
     [ScriptedImporter(3, new[] { "yarn", "yarnc" }, -1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
+    [InitializeOnLoad]
     public class YarnImporter : ScriptedImporter, IYarnErrorSource
     {
+        static YarnImporter() => YarnPreventPlayMode.AddYarnErrorSourceType<YarnImporter>("t:TextAsset");
+
         /// <summary>
         /// Indicates whether the last time this file was imported, the
         /// file contained lines that did not have a line tag (and
