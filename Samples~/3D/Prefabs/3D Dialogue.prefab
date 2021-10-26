@@ -296,6 +296,7 @@ MonoBehaviour:
   optionViewPrefab: {fileID: 6751883924115097644}
   lastLineText: {fileID: 0}
   fadeTime: 0.1
+  showUnavailableOptions: 0
 --- !u!225 &7173589957474124885
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -317,7 +318,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 836060695391200055}
-  - component: {fileID: 885874887454200359}
   - component: {fileID: 688934213352411039}
   - component: {fileID: 808382418586487042}
   - component: {fileID: 964784076211363546}
@@ -350,34 +350,6 @@ RectTransform:
   m_AnchoredPosition: {x: -32.1, y: -5.5}
   m_SizeDelta: {x: 100.52, y: 30.11}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &885874887454200359
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2070986685492645632}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dd23e20281c64684095f1099d13e39ae, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  keyToPress: 32
-  onKeyPressed:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 3741743096958657526, guid: 8d6c09a6f35ab93498a17f1a2b9375a9, type: 3}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: MarkLineComplete
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!222 &688934213352411039
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -460,9 +432,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 3741743096958657526, guid: 8d6c09a6f35ab93498a17f1a2b9375a9, type: 3}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: MarkLineComplete
+      - m_Target: {fileID: 856644338}
+        m_TargetAssemblyTypeName: Yarn.Unity.LineView, YarnSpinner.Unity
+        m_MethodName: OnContinueClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -720,18 +692,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canvasGroup: {fileID: 8697875263856351829}
+  useFadeEffect: 1
   fadeInTime: 0.25
   fadeOutTime: 0.05
   lineText: {fileID: 429547336}
-  showCharacterName: 0
+  showCharacterNameInLineView: 0
   characterNameText: {fileID: 0}
   useTypewriterEffect: 1
   typewriterEffectSpeed: 40
   continueButton: {fileID: 2070986685492645632}
-  skipActionType: 1
-  skipActionKeyCode: 32
-  skipActionReference: {fileID: 0}
-  skipAction:
+  continueActionType: 1
+  continueActionKeyCode: 32
+  continueActionReference: {fileID: 0}
+  continueAction:
     m_Name: Skip
     m_Type: 1
     m_ExpectedControlType: 
@@ -833,7 +806,7 @@ MonoBehaviour:
   - {fileID: 4138263016411109766}
   startNode: Start
   startAutomatically: 1
-  continueNextLineOnLineFinished: 0
+  automaticallyContinueLines: 0
   runSelectedOptionAsLine: 0
   lineProvider: {fileID: 0}
   verboseLogging: 1

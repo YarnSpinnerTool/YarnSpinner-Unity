@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Command parameters can now be grouped with double quotes. eg. `<<add-recipe "Banana Sensations">` and `<<move "My Game Object" LocationName>>` (@andiCR)
 
+- You can now add dialogue views to dialogue runner at any time.
+
+- The inspector for Yarn scripts now allows you to change the Project that the script belongs to. (@radiatoryang)
+
+- Yarn script compile errors will prevent play mode.
+
 ### Changed
 
 - Updated to support new error handling in Yarn Spinner. 
@@ -19,7 +25,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `LocalizedLine.Text`'s setter is now public, not internal.
 
-- Yarn script compile errors will prevent play mode.
+- `DialogueRunner` will now throw an exception if a dialogue view attempts to select an
+  option on the same frame that options are run.
+
+- `DialogueRunner.VariableStorage` can now be modified at runtime.
+
+- Calling `DialogueRunner.StartDialogue` when the dialogue runner is already running will now result in an error being logged.
 
 ### Removed
 
@@ -28,6 +39,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 * `InMemoryVariableStorage` now throws an exception if you attempt to get or set a variable whose name doesn't start with `$`.
+* `LineView` now has an onCharacterTyped event that triggers for each character typed in the typewriter effect.
 
 ### Changed
 

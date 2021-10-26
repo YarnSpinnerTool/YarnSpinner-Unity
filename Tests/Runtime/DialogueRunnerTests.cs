@@ -100,7 +100,7 @@ namespace Yarn.Unity.Tests
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
 
             LogAssert.Expect(LogType.Log, expectedLogResult);
-            var methodFound = runner.DispatchCommandToGameObject(test);
+            var methodFound = runner.DispatchCommandToGameObject(test, () => {});
 
             Assert.True(methodFound);        
         }
@@ -111,7 +111,7 @@ namespace Yarn.Unity.Tests
 
             var framesToWait = 5;
 
-            runner.DispatchCommandToGameObject($"testCommandCoroutine DialogueRunner {framesToWait}");
+            runner.DispatchCommandToGameObject($"testCommandCoroutine DialogueRunner {framesToWait}", () => {});
 
             LogAssert.Expect(LogType.Log, $"success {Time.frameCount + framesToWait}");
 
@@ -127,10 +127,10 @@ namespace Yarn.Unity.Tests
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
 
             LogAssert.Expect(LogType.Error, new Regex("requires between 1 and 2 parameters, but 0 were provided"));
-            runner.DispatchCommandToGameObject("testCommandOptionalParams DialogueRunner");
+            runner.DispatchCommandToGameObject("testCommandOptionalParams DialogueRunner", () => {});
 
             LogAssert.Expect(LogType.Error, new Regex("requires between 1 and 2 parameters, but 3 were provided"));
-            runner.DispatchCommandToGameObject("testCommandOptionalParams DialogueRunner 1 2 3");
+            runner.DispatchCommandToGameObject("testCommandOptionalParams DialogueRunner 1 2 3", () => {});
         }
 
         [Test]
@@ -138,7 +138,7 @@ namespace Yarn.Unity.Tests
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
 
             LogAssert.Expect(LogType.Error, new Regex("can't convert parameter"));
-            runner.DispatchCommandToGameObject("testCommandInteger DialogueRunner 1 not_an_integer");
+            runner.DispatchCommandToGameObject("testCommandInteger DialogueRunner 1 not_an_integer", () => {});
         }
 
         [Test]
@@ -151,8 +151,8 @@ namespace Yarn.Unity.Tests
             LogAssert.Expect(LogType.Log, "success 1");
             LogAssert.Expect(LogType.Log, "success 2");
 
-            runner.DispatchCommandToRegisteredHandlers("test1");
-            runner.DispatchCommandToRegisteredHandlers("test2 2");
+            runner.DispatchCommandToRegisteredHandlers("test1", () => {});
+            runner.DispatchCommandToRegisteredHandlers("test2 2", () => {});
         }
 
         [UnityTest]
@@ -174,7 +174,7 @@ namespace Yarn.Unity.Tests
 
             LogAssert.Expect(LogType.Log, $"success {Time.frameCount + framesToWait}");
 
-            runner.DispatchCommandToRegisteredHandlers("test");
+            runner.DispatchCommandToRegisteredHandlers("test", () => {});
 
             // After framesToWait frames, we should have seen the log
             while (framesToWait > 0) {
@@ -196,6 +196,7 @@ namespace Yarn.Unity.Tests
 
             variableStorage.SetValue("$laps", 1);
 
+            runner.Stop();
             runner.StartDialogue("VariableTest");
             yield return null;
 
