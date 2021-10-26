@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -189,7 +190,7 @@ namespace Yarn.Unity.Tests
             var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
             Assert.True(result.isSuccessfullyParsed);
-
+            Assert.False(YarnPreventPlayMode.HasCompileErrors(), "Should not have compiler errors");
         }
 
         [Test]
@@ -208,6 +209,12 @@ namespace Yarn.Unity.Tests
             var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
             Assert.False(result.isSuccessfullyParsed);
+            Assert.True(YarnPreventPlayMode.HasCompileErrors(), "Should have compiler errors");
+
+            AssetDatabase.DeleteAsset(result.assetPath);
+            AssetDatabase.Refresh();
+
+            Assert.False(YarnPreventPlayMode.HasCompileErrors(), "Should not have compiler errors after deletion");
         }
 
         [Test]
@@ -227,6 +234,8 @@ namespace Yarn.Unity.Tests
             Assert.IsEmpty(yarnProjectImporter.compileErrors);
             Assert.True(scriptImporter.isSuccessfullyParsed);
             Assert.AreSame(project, scriptImporter.DestinationProject);
+
+            Assert.False(YarnPreventPlayMode.HasCompileErrors(), "Should show compiler errors");
         }
 
         [Test]
@@ -247,6 +256,8 @@ namespace Yarn.Unity.Tests
             Assert.IsNotEmpty(scriptImporter.parseErrorMessages);
             Assert.AreSame(scriptImporter.DestinationProject, project);
             Assert.AreSame(project, scriptImporter.DestinationProject);
+
+            Assert.True(YarnPreventPlayMode.HasCompileErrors(), "Should show compiler errors");
         }
 
         [Test]

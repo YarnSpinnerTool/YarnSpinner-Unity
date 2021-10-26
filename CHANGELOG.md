@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The inspector for Yarn scripts now allows you to change the Project that the script belongs to. (@radiatoryang)
 
+- Yarn script compile errors will prevent play mode.
+
 ### Changed
 
 - Updated to support new error handling in Yarn Spinner. 
