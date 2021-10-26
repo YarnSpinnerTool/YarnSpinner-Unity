@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace Yarn.Unity.Editor
 {
+    using TypeRegistrationQuery = ValueTuple<Func<AssetImporter, IYarnErrorSource>, string>;
+    using ErrorSourceSet = HashSet<WeakReference<IYarnErrorSource>>;
+
     /// <summary>
     /// Interface to prevent play mode if there's errors.
     /// </summary>
@@ -54,13 +57,9 @@ namespace Yarn.Unity.Editor
 
         public static bool HasCompileErrors() => Instance.CompilerErrors().Any();
 
-        private readonly Queue<(Func<AssetImporter, IYarnErrorSource> converter, string filterQuery)> assetSearchQueries =
-            new Queue<(Func<AssetImporter, IYarnErrorSource> converter, string filterQuery)>();
+        private readonly Queue<TypeRegistrationQuery> assetSearchQueries = new Queue<TypeRegistrationQuery>();
 
-        private readonly HashSet<WeakReference<IYarnErrorSource>> errorSources = 
-            new HashSet<WeakReference<IYarnErrorSource>>(new WeakRefComparer<IYarnErrorSource>());
-
-        private readonly HashSet<string> deletedSources = new HashSet<string>();
+        private readonly ErrorSourceSet errorSources = new ErrorSourceSet(new WeakRefComparer<IYarnErrorSource>());
 
         private YarnPreventPlayMode() => EditorApplication.playModeStateChanged += OnPlayModeChanged;
 
@@ -72,7 +71,7 @@ namespace Yarn.Unity.Editor
             foreach (string error in CompilerErrors())
             {
                 isValid = false;
-                Debug.Log(error);
+                Debug.LogError(error);
             }
 
             if (isValid) { return; }
@@ -93,23 +92,17 @@ namespace Yarn.Unity.Editor
             // import all unloaded assets
             while (assetSearchQueries.Count > 0)
             {
-                (Func<AssetImporter, IYarnErrorSource> converter, string filterQuery) = assetSearchQueries.Dequeue();
+                (var converter, string filterQuery) = assetSearchQueries.Dequeue();
 
                 errorSources.UnionWith(
                     YarnEditorUtility.GetAllAssetsOf(filterQuery, converter)
                         .Select(source => new WeakReference<IYarnErrorSource>(source)));
             }
 
-            foreach (WeakReference<IYarnErrorSource> errorSourceRef in errorSources)
-            {
-                if (!errorSourceRef.TryGetTarget(out IYarnErrorSource errorSource)) { continue; }
-                if (errorSource.CompileErrors.Count == 0) { continue; }
-
-                foreach (string error in errorSource.CompileErrors)
-                {
-                    yield return error;
-                }
-            }
+            return errorSources
+                .Select(errorRef => errorRef.TryGetTarget(out IYarnErrorSource errorSource) ? errorSource : null)
+                .Where(errorSource => errorSource != null && errorSource.CompileErrors.Count > 0)
+                .SelectMany(errorSource => errorSource.CompileErrors);
         }
     }
 }
