@@ -1,23 +1,26 @@
 fileFormatVersion: 2
 guid: 40a60c3c28a91d34bbf2088bb0d2824a
 ScriptedImporter:
-  fileIDToRecycleName:
-    4900000: Program
-    4900002: Strings
+  internalIDToNameTable:
+  - first:
+      49: 4900000
+    second: Program
+  - first:
+      49: 4900002
+    second: Strings
   externalObjects: {}
+  serializedVersion: 2
   userData: 
   assetBundleName: 
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 94073015eacc34c1d8fc6786e43d60ca, type: 3}
-  baseLanguageID: en
-  stringIDs:
-  - line:0e3dc4b
-  - line:0967160
-  - line:04e806e
-  - line:0901fb2
-  AnyImplicitStringIDs: 0
-  isSuccesfullyParsed: 1
-  parseErrorMessage: 
-  baseLanguage: {instanceID: 0}
-  localizations: []
-  localizationDatabase: {instanceID: 0}
+  LastImportHadImplicitStringIDs: 1
+  LastImportHadAnyStrings: 1
+  isSuccessfullyParsed: 1
+  parseErrorMessages:
+  - '29:32: Error: testFunction parameter 1 expects a Number, not a String
+
+    testFunction("arg!
+    i am a pirate")
+
+'

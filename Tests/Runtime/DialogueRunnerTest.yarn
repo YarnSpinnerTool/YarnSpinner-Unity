@@ -20,3 +20,12 @@ title: VariableTest
 ---
 Jane: Yes! I've already walked {$laps} laps!
 ===
+title: FunctionTest
+---
+Jane: Yes! I've already walked {testFnVariable($laps)} laps!
+===
+title: FunctionTest2
+---
+Jane: Yes! I've already walked {testFnLiteral("arg! i am a pirate")} laps!
+// actual function unit testing should go in the YarnSpinner core
+===

@@ -8,6 +8,12 @@ namespace Yarn.Unity.Tests
 {
     public class DialogueRunnerMockUI : Yarn.Unity.DialogueViewBase
     {
+        private static DialogueRunnerMockUI instance;
+        public static DialogueRunnerMockUI GetInstance(string name)
+        {
+            return name == "custom" ? instance : null;
+        }
+
         // The text of the most recently received line that we've been
         // given
         public string CurrentLine { get; private set; } = default;
@@ -30,6 +36,11 @@ namespace Yarn.Unity.Tests
         // that delivery is complete immediately.
         private bool isLineInterrupted;
 
+        private void Awake()
+        {
+            instance = this;
+        }
+
         public override void RunLine(LocalizedLine dialogueLine, Action onLineDeliveryComplete)
         {
             // Store the localised text in our CurrentLine property and
@@ -47,7 +58,6 @@ namespace Yarn.Unity.Tests
             {
                 onLineDeliveryComplete();
             }
-
         }
 
         private IEnumerator SimulateLineDelivery(Action onLineDeliveryComplete)
@@ -165,6 +175,78 @@ namespace Yarn.Unity.Tests
                 yield return null;
             }
             Debug.Log($"success {Time.frameCount}");
+        }
+
+        [YarnCommand]
+        public void testCommandDefaultName()
+        {
+            Debug.Log("success");
+        }
+
+        [YarnCommand("testCommandCustomInjector", Injector = nameof(GetInstance))]
+        public void TestCommandCustomInjector()
+        {
+            Debug.Log("success");
+        }
+    }
+
+    [YarnStateInjector(nameof(GetInstance))]
+    public class CustomInjector
+    {
+        private static CustomInjector _instance;
+        private static CustomInjector GetInstance(string _)
+        {
+            _instance ??= new CustomInjector();
+            Debug.Log(_instance);
+            return _instance;
+        }
+
+        private static MeshRenderer CustomGetComponent(string name)
+        {
+            Debug.Log($"Got {name}");
+            return GameObject.Find(name)?.GetComponent<MeshRenderer>();
+        }
+
+        [YarnCommand("testStaticCommand")]
+        public static void TestStaticCommand()
+        {
+            Debug.Log("success");
+        }
+
+        [YarnCommand("testPrivateStaticCommand")]
+        private static void TestPrivateStaticCommand()
+        {
+            Debug.Log("success");
+        }
+
+        [YarnFunction("testFnVariable")]
+        public static int TestFunctionVariable(int num)
+        {
+            return num * num;
+        }
+
+        [YarnFunction("testFnLiteral")]
+        public static string TestFunctionVariable(string text)
+        {
+            return $"{text} no you're not! {text}";
+        }
+
+        [YarnCommand("testCustomParameter")]
+        private static void TestCustomParameter([YarnParameter(nameof(CustomGetComponent))] MeshRenderer _)
+        {
+            // no-op
+        }
+
+        [YarnCommand("testClassWideCustomInjector")]
+        public void TestClassWideCustomInjector()
+        {
+            Debug.Log("success");
+        }
+
+        [YarnCommand("testPrivate")]
+        private void TestPrivate()
+        {
+            Debug.Log("success");
         }
     }
 }
