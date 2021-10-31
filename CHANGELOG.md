@@ -16,6 +16,95 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Yarn script compile errors will prevent play mode.
 
+- Default functions have been added for convenience.
+  - `float random()` - returns a number between 0 and 1, inclusive (proxies Unity's default prng)
+  - `float random_range(float, float)` - returns a number in a given range, inclusive (proxies Unity's default prng)
+  - `int dice(int)` - returns an integer in a given range, like a dice (proxies Unity's default prng)
+    - For example, `dice(6) + dice(6)` to simulate two dice, or `dice(20)` for a D20 roll.
+  - `int round(float)` - rounds a number using away-from-zero rounding
+  - `float round_places(float, int)` - rounds a number to n digits using away-from-zero rounding
+  - `int floor(float)` - floors a number (towards negative infinity)
+  - `int ceil(float)` - ceilings a number (towards positive infinity)
+  - `int int(float)` - truncates the number (towards zero)
+  - `int inc(float | int)` - increments to the next integer
+  - `int dec(float | int)` - decrements to the previous integer
+  - `int decimal(float)` - gets the decimal portion of the float
+
+- The `YarnFunction` attribute has been added.
+  - Simply add it to a static function, eg
+
+    ```cs
+    [YarnFunction] // registers function under "example"
+    public static int example(int param) {
+      return param + 1;
+    }
+
+    [YarnFunction("custom_name")] // registers function under "custom_name"
+    public static int example2(int param) {
+      return param * param;
+    }
+    ```
+
+- The `YarnCommand` attribute has been improved and made more robust for most use cases.
+  - You can now leave the name blank to use the method name as the registration name.
+
+    ```cs
+    [YarnCommand] // like in previous example with YarnFunction.
+    void example(int steps) {
+      for (int i = 0; i < steps; i++) { ... }
+    }
+
+    [YarnCommand("custom_name")] // you can still provide a custom name if you want
+    void example2(int steps) {
+      for (int i = steps - 1; i >= 0; i--) { ... }
+    }
+    ```
+
+  - It now recognizes static functions and does not attempt to use the first parameter as an instance variable anymore.
+
+    ```cs
+    [YarnCommand] // use like so: <<example>>
+    static void example() => ...;
+
+    [YarnCommand] // still as before: <<example objectName>>
+    void example2() => ...;
+    ```
+
+  - You can also define custom getters for better performance.
+  
+    ```cs
+    [YarnStateInjector(nameof(GetBehavior))] // if this is null, the previous behavior of using GameObject.Find will still be available
+    class CustomBehavior : MonoBehaviour {
+      static CustomBehavior GetBehavior(string name) {
+        // e.g., it may only exist under a certain transform, or you have a custom cache...
+        // or it's built from a ScriptableObject...
+        return ...;
+      }
+
+      [YarnCommand] // the "this" will be as returned from GetBehavior
+      void example() => Debug.Log(this);
+
+      // special variation on getting behavior
+      static CustomBehavior GetBehaviorSpecial(string name) => ...;
+
+      [YarnCommand(Injector = nameof(GetBehaviorSpecial))]
+      void example_special() => Debug.Log(this);
+    }
+    ```
+
+  - You can also define custom getters for Component parameters in the same vein.
+  
+    ```cs
+    class CustomBehavior : MonoBehaviour {
+      static Animator GetAnimator(string name) => ...;
+
+      [YarnCommand]
+      void example([YarnParameter(nameof(GetAnimator))] Animator animator) => Debug.Log(animator);
+    }
+    ```
+
+  - You should continue to use manual registration if you want to have "pseudo-static" dispatch, where there is an instance attached to the action, but the script should not know about it.
+
 ### Changed
 
 - Updated to support new error handling in Yarn Spinner. 
