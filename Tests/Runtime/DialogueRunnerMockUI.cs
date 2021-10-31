@@ -141,7 +141,7 @@ namespace Yarn.Unity.Tests
                 Debug.Log($"{r.name}'s MeshRenderer");
             } else {
                 Debug.Log($"(null)");
-            } 
+            }
         }
 
         // A Yarn command that has optional parameters
@@ -156,8 +156,6 @@ namespace Yarn.Unity.Tests
             Debug.Log($"success");
         }
 
-        
-
         // A Yarn command that begins a coroutine
         [YarnCommand("testCommandCoroutine")]
         public IEnumerator TestCommandCoroutine(int frameDelay) {
@@ -168,7 +166,5 @@ namespace Yarn.Unity.Tests
             }
             Debug.Log($"success {Time.frameCount}");
         }
-
-        
     }
 }

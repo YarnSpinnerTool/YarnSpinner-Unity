@@ -580,7 +580,7 @@ namespace Yarn.Unity.Editor
             var allFilePaths = yarnProjectImporter.sourceScripts.Select(textAsset => AssetDatabase.GetAssetPath(textAsset));
 
             var library = new Library();
-            YarnProject.AddYarnFunctionMethodsToLibrary(library);
+            ActionManager.RegisterFunctions(library);
 
             var explicitDeclarationsCompilerJob = Compiler.CompilationJob.CreateFromFiles(AssetDatabase.GetAssetPath(yarnProjectImporter));
 

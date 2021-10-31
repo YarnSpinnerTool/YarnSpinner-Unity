@@ -137,7 +137,7 @@ namespace Yarn.Unity.Tests
         public void HandleCommand_FailsWhenParameterTypesNotValid() {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
 
-            LogAssert.Expect(LogType.Error, new Regex("can't convert parameter"));
+            LogAssert.Expect(LogType.Error, new Regex("Can't convert the given parameter"));
             runner.DispatchCommandToGameObject("testCommandInteger DialogueRunner 1 not_an_integer", () => {});
         }
 
