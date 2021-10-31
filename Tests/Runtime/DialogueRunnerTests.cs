@@ -220,6 +220,12 @@ namespace Yarn.Unity.Tests
 
             Assert.AreEqual("Jane: Yes! I've already walked arg! i am a pirate no you're not! arg! i am a pirate laps!", dialogueUI.CurrentLine);
 
+            runner.Stop();
+            runner.StartDialogue("BuiltinsTest");
+            yield return null;
+
+            Assert.AreEqual("Jane: round(3.522) = 4; round_places(3.522, 2) = 3.52; floor(3.522) = 3; floor(-3.522) = -4; ceil(3.522) = 4; ceil(-3.522) = -3; inc(3.522) = 4; inc(4) = 5; dec(3.522) = 3; dec(3) = 2; decimal(3.522) = 0.5220001; int(3.522) = 3; int(-3.522) = -3;", dialogueUI.CurrentLine);
+
             dialogueUI.ReadyForNextLine();
         }   
 

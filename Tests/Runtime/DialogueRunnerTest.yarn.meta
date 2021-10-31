@@ -17,10 +17,4 @@ ScriptedImporter:
   LastImportHadImplicitStringIDs: 1
   LastImportHadAnyStrings: 1
   isSuccessfullyParsed: 1
-  parseErrorMessages:
-  - '29:32: Error: testFunction parameter 1 expects a Number, not a String
-
-    testFunction("arg!
-    i am a pirate")
-
-'
+  parseErrorMessages: []
