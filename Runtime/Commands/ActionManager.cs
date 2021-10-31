@@ -46,7 +46,11 @@ namespace Yarn.Unity
 
         private static bool IsInjector(Type injectorType, MethodInfo injectorFunction, Type destinationType = null)
         {
+#if UNITY_2020_3_OR_NEWER
             destinationType ??= injectorType;
+#else
+            destinationType = destinationType == null ? null : injectorType;
+#endif
 
             if (injectorFunction == null
                 || !injectorFunction.IsStatic
@@ -185,6 +189,7 @@ namespace Yarn.Unity
         private static Type GetFuncType(int paramCount)
         {
             // this causes me physical pain
+#if UNITY_2020_3_OR_NEWER
             return paramCount switch
             {
                 0 => typeof(Func<>),
@@ -207,6 +212,31 @@ namespace Yarn.Unity
                 _ =>  throw new ArgumentException("Delegates are limited to 16 parameters. Consider splitting up " +
                     "the implementation into multiple parts.")
             };
+#else
+            switch (paramCount)
+            {
+                case 0: return typeof(Func<>);
+                case 1: return typeof(Func<,>);
+                case 2: return typeof(Func<,,>);
+                case 3: return typeof(Func<,,,>);
+                case 4: return typeof(Func<,,,,>);
+                case 5: return typeof(Func<,,,,,>);
+                case 6: return typeof(Func<,,,,,,>);
+                case 7: return typeof(Func<,,,,,,,>);
+                case 8: return typeof(Func<,,,,,,,,>);
+                case 9: return typeof(Func<,,,,,,,,,>);
+                case 10: return typeof(Func<,,,,,,,,,,>);
+                case 11: return typeof(Func<,,,,,,,,,,,>);
+                case 12: return typeof(Func<,,,,,,,,,,,,>);
+                case 13: return typeof(Func<,,,,,,,,,,,,,>);
+                case 14: return typeof(Func<,,,,,,,,,,,,,,>);
+                case 15: return typeof(Func<,,,,,,,,,,,,,,,>);
+                case 16: return typeof(Func<,,,,,,,,,,,,,,,,>);
+                default:
+                    throw new ArgumentException("Delegates are limited to 16 parameters. Consider splitting up " +
+                        "the implementation into multiple parts.");
+            }
+#endif
         }
 
         private static Delegate GetFunctionRunner(MethodInfo method)
