@@ -66,7 +66,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     [YarnCommand] // use like so: <<example>>
     static void example() => ...;
 
-    [YarnCommand] // still as before: <<example objectName>>
+    [YarnCommand] // still as before: <<example2 objectName>>
     void example2() => ...;
     ```
 
