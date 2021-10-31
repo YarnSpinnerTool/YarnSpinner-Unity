@@ -232,9 +232,10 @@ namespace Yarn.Unity
             // Find all assemblies
             var allMethods = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(assembly => assembly.GetLoadableTypes())
-                .SelectMany(type => type.GetMethods(AllMembers));
+                .SelectMany(type => type.GetMethods(AllMembers).Select(method => (Type: type, Method: method)))
+                .Where(m => m.Method.DeclaringType == m.Type); // don't register inherited methods
 
-            foreach (var method in allMethods)
+            foreach (var (_, method) in allMethods)
             {
                 var command = method.GetCustomAttribute<YarnCommandAttribute>(false);
                 if (command != null)

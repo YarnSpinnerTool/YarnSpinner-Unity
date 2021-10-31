@@ -249,4 +249,7 @@ namespace Yarn.Unity.Tests
             Debug.Log("success");
         }
     }
+
+    // test that derived methods don't register
+    public class CustomInjectorDerived : CustomInjector { }
 }
