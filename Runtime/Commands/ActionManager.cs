@@ -359,10 +359,17 @@ namespace Yarn.Unity
         /// <param name="library">Library instance to register.</param>
         public static void RegisterFunctions(Library library)
         {
+#if NET_STANDARD // c# 8+ (Unity 2022)
             foreach (var (name, implementation) in functions)
             {
                 library.RegisterFunction(name, implementation);
             }
+#else
+            foreach (var kv in functions)
+            {
+                library.RegisterFunction(kv.Key, kv.Value);
+            }
+#endif
         }
         
         static ActionManager()
