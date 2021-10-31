@@ -103,7 +103,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     }
     ```
 
-  - You should continue to use manual registration if you want to have "pseudo-static" dispatch, where there is an instance attached to the action, but the script should not know about it.
+  - You should continue to use manual registration if you want to make an instance function (ie where the ["target"](https://docs.microsoft.com/en-us/dotnet/api/system.delegate.target?view=netstandard-2.0) is defined) static.
 
 ### Changed
 
