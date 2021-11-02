@@ -30,7 +30,7 @@ Here are a few things you can do that will increase the likelihood of your pull 
 
 ### Unity & LTS support
 
-As we are a group of volunteers, we can only officially support the versions of Unity that are actively supported. Please check the official [LTS FAQ](https://support.unity.com/hc/en-us/articles/4403332003348-What-is-a-Unity-LTS-Long-Term-Support-version-and-what-can-I-expect-from-it-) for more up-to-date information.
+As we are a group of volunteers, we can only officially support the versions of Unity that are actively supported by Unity themselves. Please check the official [LTS FAQ](https://support.unity.com/hc/en-us/articles/4403332003348-What-is-a-Unity-LTS-Long-Term-Support-version-and-what-can-I-expect-from-it-) for more up-to-date information.
 
 To recap, we currently support:
 
