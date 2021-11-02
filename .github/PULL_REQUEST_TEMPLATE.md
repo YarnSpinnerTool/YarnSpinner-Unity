@@ -3,7 +3,7 @@
   - [ ] Does it pass all existing unit tests without modification?
     - If not, what did you change?
     - If you altered it significantly, what coverage issue did you fix?
-  - [ ] Does it compile & pass all tests in [every supported version](../CONTRIBUTING.md#Unity-&-LTS-support)?
+  - [ ] Does it compile & pass all tests in [every supported version](../CONTRIBUTING.md#unity--lts-support)?
     - [ ] 2021.2 Tech Stream 2
     - [ ] 2021.1 Tech Stream 1
     - [ ] 2020.3 LTS
