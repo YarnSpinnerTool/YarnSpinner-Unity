@@ -1051,13 +1051,15 @@ namespace Yarn.Unity
 
             return true;
 
-            static IEnumerator WaitForYieldInstruction(Delegate @theDelegate, object[] finalParametersToUse, Action onSuccessfulDispatch)
+#if UNITY_2020_3_OR_NEWER
+            static
+#endif
+            IEnumerator WaitForYieldInstruction(Delegate @theDelegate, object[] finalParametersToUse, Action onSuccess)
             {
                 var yieldInstruction = @theDelegate.DynamicInvoke(finalParametersToUse);
                 yield return yieldInstruction;
-                onSuccessfulDispatch();
+                onSuccess();
             }
-
         }
 
         /// <summary>
@@ -1201,13 +1203,13 @@ namespace Yarn.Unity
             IEnumerator DoYarnCommand(MonoBehaviour component,
                                             MethodInfo method,
                                             object[] localParameters,
-                                            Action onSuccessfulDispatch)
+                                            Action onSuccess)
             {
                 // Wait for this command coroutine to complete
                 yield return StartCoroutine((IEnumerator)method.Invoke(component, localParameters));
 
                 // And then signal that we're done
-                onSuccessfulDispatch();
+                onSuccess();
             }
         }
 
@@ -1536,7 +1538,7 @@ namespace Yarn.Unity
                 ContinueDialogue();
             }
         }
-        #endregion
+#endregion
 
         /// <summary>
         /// Splits input into a number of non-empty sub-strings, separated

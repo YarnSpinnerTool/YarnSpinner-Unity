@@ -14,9 +14,15 @@ namespace Yarn.Unity.Editor
     /// </summary>
     public interface IYarnErrorSource
     {
-        internal IList<string> CompileErrors { get; }
+#if UNITY_2020_3_OR_NEWER
+        internal
+#endif
+        IList<string> CompileErrors { get; }
 
-        internal bool Destroyed { get; }
+#if UNITY_2020_3_OR_NEWER
+        internal
+#endif
+        bool Destroyed { get; }
     }
 
     public class YarnPreventPlayMode
@@ -35,7 +41,21 @@ namespace Yarn.Unity.Editor
         }
 
         private static YarnPreventPlayMode _instance;
+#if UNITY_2020_3_OR_NEWER
         private static YarnPreventPlayMode Instance => _instance ??= new YarnPreventPlayMode();
+#else
+        private static YarnPreventPlayMode Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new YarnPreventPlayMode();
+                }
+                return _instance;
+            }
+        }
+#endif
 
         /// <summary>
         /// Register a error source type to gather initial asset state.
