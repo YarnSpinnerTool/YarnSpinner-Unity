@@ -28,6 +28,23 @@ Here are a few things you can do that will increase the likelihood of your pull 
 * Keep your change as focused as possible. If there are multiple changes you would like to make that are not dependent upon each other, consider submitting them as separate pull requests.
 * [Write a good commit message](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
 
+### Unity & LTS support
+
+As we are a group of volunteers, we can only officially support the versions of Unity that are actively supported. Please check the official [LTS FAQ](https://support.unity.com/hc/en-us/articles/4403332003348-What-is-a-Unity-LTS-Long-Term-Support-version-and-what-can-I-expect-from-it-) for more up-to-date information.
+
+To recap, we currently support:
+
+* 2021.2 (2021.2.0f1 - Tech Stream 2)
+* 2021.1 (2021.1.27f1 - Tech Stream 1)
+* 2020.3 (2020.3.21f1 - LTS) -- Support will be discontinued in Q1 2023.
+* 2019.4 (2019.4.32f1 - Legacy LTS) -- Support will be discontinued in Q1 2022.
+
+We have limited support for:
+
+* 2022.1 (2022.1.0a13 - Alpha)
+
+However, if you would like to submit contributions to fix support for unsupported versions, please go ahead and do so, but do note that we cannot guarantee that it continues to work for that version.
+
 ### Branches
 
 All of Yarn Spinner's in-progress work happens on the `develop` branch. When we make a release, we merge from `develop` into `master`. This means that `master` is always in a releasable state.
