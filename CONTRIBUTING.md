@@ -34,14 +34,14 @@ As we are a group of volunteers, we can only officially support the versions of 
 
 To recap, we currently support:
 
-* 2021.2 (2021.2.0f1 - Tech Stream 2)
-* 2021.1 (2021.1.27f1 - Tech Stream 1)
-* 2020.3 (2020.3.21f1 - LTS) -- Support will be discontinued in Q1 2023.
-* 2019.4 (2019.4.32f1 - Legacy LTS) -- Support will be discontinued in Q1 2022.
+* 2021.2 (Tech Stream 2)
+* 2021.1 (Tech Stream 1)
+* 2020.3 (LTS) -- Support will be discontinued in Q1 2023.
+* 2019.4 (Legacy LTS) -- Support will be discontinued in Q1 2022.
 
 We have limited support for:
 
-* 2022.1 (2022.1.0a13 - Alpha)
+* 2022.1 (Alpha)
 
 However, if you would like to submit contributions to fix support for unsupported versions, please go ahead and do so, but do note that we cannot guarantee that it continues to work for that version.
 
