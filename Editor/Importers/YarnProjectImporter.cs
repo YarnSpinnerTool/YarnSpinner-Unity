@@ -443,7 +443,7 @@ namespace Yarn.Unity.Editor
                 compiledBytes = memoryStream.ToArray();
             }
 
-            project.compiledYarnProgram = compiledBytes;
+            project.Compile(compiledBytes);
 
 #if YARNSPINNER_DEBUG
             UnityEngine.Profiling.Profiler.enabled = false;

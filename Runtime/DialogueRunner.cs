@@ -288,7 +288,7 @@ namespace Yarn.Unity
         /// </summary>        
         public void SetProject(YarnProject newProject)
         {
-            Dialogue.SetProgram(newProject.GetProgram());
+            Dialogue.SetProgram(newProject.YarnProgram);
             lineProvider.YarnProject = newProject;
         }
 
@@ -706,7 +706,7 @@ namespace Yarn.Unity
                     Debug.LogError($"DialogueRunner wanted to load a Yarn Project in its Start method, but the Dialogue was already running one. The Dialogue Runner may not behave as you expect.");
                 }
 
-                Dialogue.SetProgram(yarnProject.GetProgram());
+                Dialogue.SetProgram(yarnProject.YarnProgram);
 
                 lineProvider.YarnProject = yarnProject;
 

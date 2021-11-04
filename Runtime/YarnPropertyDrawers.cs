@@ -23,7 +23,7 @@ namespace Yarn.Unity
     {
         private string[] GetNodes(YarnProject project)
         {
-            return project.GetProgram().Nodes.Keys.ToArray();
+            return project.YarnProgram.Nodes.Keys.ToArray();
         }
 
         private YarnProject GetYarnProject(SerializedProperty property)
