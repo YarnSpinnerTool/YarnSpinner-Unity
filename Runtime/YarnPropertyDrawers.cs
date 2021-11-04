@@ -45,13 +45,13 @@ namespace Yarn.Unity
             }
 
             var nodes = GetNodes(project);
-            int index = Math.Max(0, Array.IndexOf(nodes, property.stringValue));
+            int index = Array.IndexOf(nodes, property.stringValue);
             int selected = EditorGUI.Popup(
                 position,
                 new GUIContent(property.displayName, property.tooltip),
-                index,
-                nodes.Select(node => new GUIContent(node)).ToArray());
-            property.stringValue = nodes[selected];
+                index == -1 ? nodes.Length : index,
+                nodes.Select(node => new GUIContent(node)).Append(new GUIContent("None")).ToArray());
+            property.stringValue = selected == nodes.Length ? "" : nodes[selected];
         }
     }
 #endif
