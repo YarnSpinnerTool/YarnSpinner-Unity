@@ -16,6 +16,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Yarn script compile errors will prevent play mode.
 
+- The `YarnNode` attribute can be added onto string values to restrict the values to node names. For example:
+
+  ```cs
+  YarnProject SomeProject;
+
+  [YarnNode(nameof(SomeProject))]
+  string TargetNode; // will take whatever nodes exist in the linked project
+
+  DialogueRunner SomeRunner;
+
+  [YarnNode(nameof(SomeRunner))]
+  string TargetNode2; // will refer to whatever the runner has loaded currently
+  ```
+
 ### Changed
 
 - Updated to support new error handling in Yarn Spinner. 
