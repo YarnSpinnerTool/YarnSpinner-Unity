@@ -31,7 +31,8 @@ namespace Yarn.Unity
             var projectFieldName = (attribute as YarnNodeAttribute)?.Project;
             if (projectFieldName == null) { return null; }
 
-            return property.serializedObject.FindProperty(projectFieldName).objectReferenceValue as YarnProject;
+            var target = property.serializedObject.FindProperty(projectFieldName).objectReferenceValue;
+            return target as YarnProject ?? (target as DialogueRunner)?.yarnProject;
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
