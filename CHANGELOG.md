@@ -19,6 +19,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `LocalizedLine.Text`'s setter is now public, not internal.
 
+- Line Views will now only enable and disable action references if the line view is also configured to use said action.
+
 ### Removed
 
 ## [v2.0.0-beta5] 2021-08-17
