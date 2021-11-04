@@ -1,10 +1,16 @@
 name: Run Tests 🧪
 
-on: [push, pull_request, workflow_dispatch]
+
+on: 
+  push:
+      branches:
+          - develop
+          - 'feature/**'
+  workflow_dispatch:
 
 jobs:
   buildAndTestForSomePlatforms:
-    name: Build for ${{ matrix.targetPlatform }}
+    name: Test on ${{ matrix.unityVersion }} for ${{ matrix.targetPlatform }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -12,7 +18,24 @@ jobs:
         projectPath:
           - YarnSpinner
         unityVersion:
+          # Unity 2018 is not currently supported because:
+          #
+          # 1. Unity 2018 doesn't treat embedded packages as in
+          #    development, so it doesn't automatically enable testing (not
+          #    a huge deal, but we'd need to modify the package during this
+          #    workflow to enable it or globally enable testing, even in
+          #    end-user installations);
+          # 2. when Unity 2018 imports the scene, it doesn't have the
+          #    reference to the Yarn Project (something about how the class
+          #    ID of Yarn.Unity.YarnProject has changed between 2018 and
+          #    2019? not sure), which means that the tests fail because the
+          #    DialogueRunner object doesn't have a reference to the Yarn
+          #    Project.
+          
+          # - 2018.4.36f1  
+          - 2019.4.31f1
           - 2020.3.1f1
+          - 2021.1.26f1
         targetPlatform:
           # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
@@ -21,11 +44,6 @@ jobs:
           # - Android # Build an Android player.
           # - WebGL # WebGL.
     steps:
-      - name: Activate Unity
-        uses: game-ci/unity-activate@v1.3
-        with:
-          unityVersion: ${{ matrix.unityVersion }}
-
       - name: Create empty Unity project
         run: |
           mkdir -p ${{ matrix.projectPath }}/Assets
@@ -36,7 +54,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          path: Packages/YarnSpinner
+          path: ${{ matrix.projectPath }}/Packages/YarnSpinner
           
       - name: Fetch from Cache
         uses: actions/cache@v2
@@ -53,15 +71,18 @@ jobs:
         uses: game-ci/unity-test-runner@v2
         id: testRunner
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
         with:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: 'Test Results ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}'
       
       - name: Upload test results
         uses: actions/upload-artifact@v2
         if: always()
         with:
-          name: Test results (all modes)
+          name: Test results (edit + play, ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }})
           path: ${{ steps.testRunner.outputs.artifactsPath }}

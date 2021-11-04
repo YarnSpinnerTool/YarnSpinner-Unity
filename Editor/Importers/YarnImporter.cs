@@ -24,8 +24,11 @@ namespace Yarn.Unity.Editor
     /// asset's corresponding meta file.
     /// </summary>
     [ScriptedImporter(3, new[] { "yarn", "yarnc" }, -1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
-    public class YarnImporter : ScriptedImporter
+    [InitializeOnLoad]
+    public class YarnImporter : ScriptedImporter, IYarnErrorSource
     {
+        static YarnImporter() => YarnPreventPlayMode.AddYarnErrorSourceType<YarnImporter>("t:TextAsset");
+
         /// <summary>
         /// Indicates whether the last time this file was imported, the
         /// file contained lines that did not have a line tag (and
@@ -56,24 +59,25 @@ namespace Yarn.Unity.Editor
         /// </summary>
         public List<string> parseErrorMessages = new List<string>();
 
+        IList<string> IYarnErrorSource.CompileErrors => parseErrorMessages;
+
+        bool IYarnErrorSource.Destroyed => this == null;
+
         public YarnProject DestinationProject
         {
             get
             {
                 var myAssetPath = assetPath;
-                var destinationProjectPath = AssetDatabase.FindAssets("t:YarnProject")
-                    .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
-                    .Select(path => AssetImporter.GetAtPath(path) as YarnProjectImporter)
-                    .Where(importer => importer != null)
-                    .FirstOrDefault(importer => importer.sourceScripts.Any(s =>
+                var destinationProjectPath = YarnEditorUtility.GetAllAssetsOf<YarnProjectImporter>("t:YarnProject")
+                    .FirstOrDefault(importer =>
                     {
                         // Does this importer depend on this asset? If so,
                         // then this is our destination asset.
                         string[] dependencies = AssetDatabase.GetDependencies(importer.assetPath);
-                        var importerDependsOnThisAsset = dependencies.Contains<string>(myAssetPath);
+                        var importerDependsOnThisAsset = dependencies.Contains(myAssetPath);
 
                         return importerDependsOnThisAsset;
-                    }))?.assetPath;
+                    })?.assetPath;
 
                 if (destinationProjectPath == null)
                 {
@@ -97,6 +101,8 @@ namespace Yarn.Unity.Editor
         {
             var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
+
+            YarnPreventPlayMode.AddYarnErrorSource(this);
 
             var extension = System.IO.Path.GetExtension(ctx.assetPath);
 
@@ -196,13 +202,11 @@ namespace Yarn.Unity.Editor
             {
                 isSuccessfullyParsed = false;
 
-                parseErrorMessages.AddRange(errors.Select(e => e.ToString()));
-
-                foreach (var error in errors)
-                {
-                    ctx.LogImportError($"Error importing {ctx.assetPath}: {error.ToString()}");
-                }
-
+                parseErrorMessages.AddRange(errors.Select(e => {
+                    string message = $"{ctx.assetPath}: {e}";
+                    ctx.LogImportError($"Error importing {message}");
+                    return message;
+                }));
             }
             else
             {

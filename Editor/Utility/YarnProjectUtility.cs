@@ -43,24 +43,81 @@ namespace Yarn.Unity.Editor
 
             // Create the program
             YarnEditorUtility.CreateYarnAsset(destinationPath);
-
+            
             AssetDatabase.ImportAsset(destinationPath);
             AssetDatabase.SaveAssets();
 
-            var programImporter = AssetImporter.GetAtPath(destinationPath) as YarnProjectImporter;
-            programImporter.sourceScripts.Add(AssetDatabase.LoadAssetAtPath<TextAsset>(path));
-
-            EditorUtility.SetDirty(programImporter);
-
-            // Reimport the program to make it generate its default string
-            // table, if needed
-            programImporter.SaveAndReimport();
+            AssignScriptToProject(path, destinationPath);
 
             return destinationPath;
-
-
         }
 
+        /// <summary>
+        /// Assign a .yarn <see cref="TextAsset"/> file found at <paramref
+        /// name="sourcePath"/> to the <see cref="YarnProjectImporter"/>
+        /// found at <paramref name="projectPath"/>.
+        /// </summary>
+        /// <param name="projectPath">The path to the .yarnproject
+        /// asset.</param>
+        /// <param name="sourcePath">The path to the source .yarn asset
+        /// that should be added to the Yarn Project.</param>
+        internal static void AssignScriptToProject(string sourcePath, string projectPath) {
+            var newSourceScript = AssetDatabase.LoadAssetAtPath<TextAsset>(sourcePath);
+            var programImporter = AssetImporter.GetAtPath(projectPath) as YarnProjectImporter;
+            var scriptImporter = AssetImporter.GetAtPath(sourcePath) as YarnImporter;
+
+            if (newSourceScript == null) {
+                throw new FileNotFoundException($"{nameof(sourcePath)} couldn't be loaded as a {nameof(TextAsset)}.");
+            }
+
+            if (projectPath != null && programImporter == null) {
+                throw new System.ArgumentException($"{nameof(projectPath)} is not a Yarn Project.");
+            }
+
+            if (scriptImporter == null) {
+                throw new System.ArgumentException($"{nameof(projectPath)} is not a Yarn script.");
+            }
+
+            AssignScriptToProject(newSourceScript, scriptImporter, programImporter);
+        }
+
+        /// <summary>
+        /// Assign a .yarn <see cref="TextAsset"/> file <paramref
+        /// name="newSourceScript"/> to the <see
+        /// cref="YarnProjectImporter"/> <paramref
+        /// name="projectImporter"/>.
+        /// </summary>
+        /// <remarks>If <paramref name="projectImporter"/> is <see
+        /// langword="null"/>, this script will be removed from its current
+        /// project (if any) and not added to another.</remarks>
+        /// <param name="newSourceScript">The script that should be
+        /// assigned to the Yarn Project.</param>
+        /// <param name="scriptImporter">The importer for <paramref
+        /// name="newSourceScript"/>.</param>
+        /// <param name="projectImporter">The importer for the project that
+        /// newSourceScript should be made a part of, or null.</param>
+        internal static void AssignScriptToProject(TextAsset newSourceScript, YarnImporter scriptImporter, YarnProjectImporter projectImporter) {
+
+            if (scriptImporter.DestinationProject != null) {
+                var existingProjectImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(scriptImporter.DestinationProject)) as YarnProjectImporter;
+
+                existingProjectImporter.sourceScripts.Remove(newSourceScript);
+
+                EditorUtility.SetDirty(existingProjectImporter);
+                
+                existingProjectImporter.SaveAndReimport();
+            }
+            
+            if (projectImporter != null) {
+                projectImporter.sourceScripts.Add(newSourceScript);
+                EditorUtility.SetDirty(projectImporter);
+
+                // Reimport the program to make it generate its default string
+                // table, if needed
+                projectImporter.SaveAndReimport();
+            }
+
+        }
 
         /// <summary>
         /// Updates every localization .CSV file associated with this
@@ -102,6 +159,11 @@ namespace Yarn.Unity.Editor
 
                 foreach (var loc in localizations)
                 {
+                    if (loc.stringsFile == null) {
+                        Debug.LogWarning($"Can't update localization for {loc.languageID} because it doesn't have a strings file.", yarnProjectImporter);
+                        continue;
+                    }
+                    
                     var fileWasChanged = UpdateLocalizationFile(baseLocalizationStrings, loc.languageID, loc.stringsFile);
 
                     if (fileWasChanged)

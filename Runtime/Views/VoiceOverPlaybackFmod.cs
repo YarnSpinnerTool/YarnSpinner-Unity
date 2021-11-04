@@ -32,8 +32,10 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Collections;
 
-namespace Yarn.Unity {
-    class VoiceOverPlaybackFmod : DialogueViewBase {
+namespace Yarn.Unity
+{
+    class VoiceOverPlaybackFmod : DialogueViewBase
+    {
         FMOD.Studio.EVENT_CALLBACK dialogueCallback;
 
         /// <summary>
@@ -47,30 +49,33 @@ namespace Yarn.Unity {
         /// When true, the Runner has signaled to finish the current line
         /// asap.
         /// </summary>
-        private bool finishCurrentLine = false;
+        bool interrupted = false;
 
         /// <summary>
         /// FMOD callbacks are received via a static method. To support
         /// multiple instances of this playback class, we track the last
         /// fired FMOD event per instance here.
         /// </summary>
-        private FMOD.Studio.EventInstance _lastVoiceOverEvent;
+        FMOD.Studio.EventInstance lastVoiceOverEvent;
 
         /// <summary>
         /// All instances currently alive of this class. Necessary to
         /// properly deal with static callbacks from FMOD.
         /// </summary>
-        private static List<VoiceOverPlaybackFmod> _instances = new List<VoiceOverPlaybackFmod>();
+        static List<VoiceOverPlaybackFmod> instances = new List<VoiceOverPlaybackFmod>();
 
-        private void OnEnable() {
-            _instances.Add(this);
+        void OnEnable()
+        {
+            instances.Add(this);
         }
 
-        private void OnDisable() {
-            _instances.Remove(this);
+        void OnDisable()
+        {
+            instances.Remove(this);
         }
 
-        void Start() {
+        void Start()
+        {
             // Explicitly create the delegate object and assign it to a
             // member so it doesn't get freed by the garbage collected
             // while it's being used
@@ -83,7 +88,10 @@ namespace Yarn.Unity {
         // playback.)
 
         [AOT.MonoPInvokeCallback(typeof(FMOD.Studio.EVENT_CALLBACK))]
-        static FMOD.RESULT DialogueEventCallback(FMOD.Studio.EVENT_CALLBACK_TYPE type, FMOD.Studio.EventInstance instance, IntPtr parameterPtr) {
+        static FMOD.RESULT DialogueEventCallback(FMOD.Studio.EVENT_CALLBACK_TYPE type, IntPtr instancePtr, IntPtr parameterPtr)
+        {
+            FMOD.Studio.EventInstance instance = new FMOD.Studio.EventInstance(instancePtr);
+
             // Retrieve the user data
             IntPtr stringPtr;
             instance.getUserData(out stringPtr);
@@ -137,84 +145,80 @@ namespace Yarn.Unity {
             return FMOD.RESULT.OK;
         }
 
-        public override void RunLine(LocalizedLine dialogueLine, System.Action onDialogueDeliveryComplete) {
-
-            StartCoroutine(DoRunLine(dialogueLine, onDialogueDeliveryComplete));
-        }
-        
-        private IEnumerator DoRunLine(LocalizedLine dialogueLine, System.Action onDialogueDeliveryComplete) {
-
-            finishCurrentLine = false;
-
-            // Check if this instance is currently playing back another
-            // voice over in which case we stop it
-            if (_lastVoiceOverEvent.isValid()) {
-                _lastVoiceOverEvent.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-            }
-
-            // Create playback event
-            FMOD.Studio.EventInstance dialogueInstance;
-            try {
-                dialogueInstance = FMODUnity.RuntimeManager.CreateInstance(fmodEvent);
-            } catch (Exception) {
-                Debug.LogWarning("FMOD: Voice over playback failed.", gameObject);
-                throw;
-            }
-
-            _lastVoiceOverEvent = dialogueInstance;
-
-            // Pin the key string in memory and pass a pointer through the
-            // user data
-            GCHandle stringHandle = GCHandle.Alloc(dialogueLine.TextID.Remove(0, 5), GCHandleType.Pinned);
-            dialogueInstance.setUserData(GCHandle.ToIntPtr(stringHandle));
-
-            dialogueInstance.setCallback(dialogueCallback, FMOD.Studio.EVENT_CALLBACK_TYPE.ALL);
-            dialogueInstance.start();
-            dialogueInstance.release();
-
-            while (!finishCurrentLine && dialogueInstance.isValid()) {
-                yield return null;
-            }
-
-            if (dialogueInstance.isValid()) {
-                dialogueInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-            }
-        }
-
-        public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected) {
-            // Do nothing
-        }
-
-        public override void OnLineStatusChanged(LocalizedLine dialogueLine, LineStatus previousStatus, LineStatus newStatus)
+        public override void RunLine(LocalizedLine dialogueLine, System.Action onDialogueDeliveryComplete)
         {
-            switch (newStatus)
+            StartCoroutine(DoRunLine(dialogueLine, onDialogueDeliveryComplete));
+
+            IEnumerator DoRunLine(LocalizedLine dialogueLine, System.Action onDialogueDeliveryComplete)
             {
-                case LineStatus.Running:
+                interrupted = false;
+
+                // Check if this instance is currently playing back another
+                // voice over in which case we stop it
+                if (lastVoiceOverEvent.isValid())
+                {
+                    lastVoiceOverEvent.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+                }
+
+                // Create playback event
+                FMOD.Studio.EventInstance dialogueInstance;
+                try
+                {
+                    dialogueInstance = FMODUnity.RuntimeManager.CreateInstance(fmodEvent);
+                }
+                catch (Exception)
+                {
+                    UnityEngine.Debug.LogWarning("FMOD: Voice over playback failed.", gameObject);
+                    throw;
+                }
+
+                lastVoiceOverEvent = dialogueInstance;
+
+                // Pin the key string in memory and pass a pointer through the
+                // user data
+                GCHandle stringHandle = GCHandle.Alloc(dialogueLine.TextID.Remove(0, 5), GCHandleType.Pinned);
+                dialogueInstance.setUserData(GCHandle.ToIntPtr(stringHandle));
+
+                dialogueInstance.setCallback(dialogueCallback, FMOD.Studio.EVENT_CALLBACK_TYPE.ALL);
+                dialogueInstance.start();
+                dialogueInstance.release();
+
+                while (!interrupted && dialogueInstance.isValid())
+                {
+                    yield return null;
+                }
+
+                if (dialogueInstance.isValid())
+                {
+                    dialogueInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+                }
+            }
+        }
+
+        public override void OnLineStatusChanged(LocalizedLine dialogueLine)
+        {
+            switch (dialogueLine.Status)
+            {
+                case LineStatus.Presenting:
                     // Nothing to do here - continue running.
                     break;
                 case LineStatus.Interrupted:
                     // The user wants us to wrap up the audio quickly. The
                     // DoPlayback coroutine will apply the fade out defined
                     // by fadeOutTimeOnLineFinish.
-                    finishCurrentLine = true;
+                    interrupted = true;
                     break;
-                case LineStatus.Delivered:
+                case LineStatus.FinishedPresenting:
                     // The line has finished delivery on all views. Nothing
                     // left to do for us, since the audio will have already
                     // finished playing out.
                     break;
-                case LineStatus.Ended:
+                case LineStatus.Dismissed:
                     // The line is being dismissed; ensure that we
                     // interrupt the FMOD instance.
-                    finishCurrentLine = true;
+                    interrupted = true;
                     break;
             }
-        }
-
-        public override void DismissLine(Action onDismissalComplete)
-        {
-            // Nothing to do here - the audio will have already finished.
-            onDismissalComplete();
         }
     }
 }

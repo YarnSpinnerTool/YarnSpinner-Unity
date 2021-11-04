@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Command parameters can now be grouped with double quotes. eg. `<<add-recipe "Banana Sensations">` and `<<move "My Game Object" LocationName>>` (@andiCR)
 
+- You can now add dialogue views to dialogue runner at any time.
+
+- The inspector for Yarn scripts now allows you to change the Project that the script belongs to. (@radiatoryang)
+
+- Yarn script compile errors will prevent play mode.
+
 ### Changed
 
 - Updated to support new error handling in Yarn Spinner. 
@@ -18,6 +24,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The console will no longer report an error indicating that a command is "already defined" when a subclass of a MonoBehaviour that has `YarnCommand` methods exists. 
 
 - `LocalizedLine.Text`'s setter is now public, not internal.
+
+- `DialogueRunner` will now throw an exception if a dialogue view attempts to select an
+  option on the same frame that options are run.
+
+- `DialogueRunner.VariableStorage` can now be modified at runtime.
+
+- Calling `DialogueRunner.StartDialogue` when the dialogue runner is already running will now result in an error being logged.
 
 - Line Views will now only enable and disable action references if the line view is also configured to use said action.
 
@@ -28,6 +41,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 * `InMemoryVariableStorage` now throws an exception if you attempt to get or set a variable whose name doesn't start with `$`.
+* `LineView` now has an onCharacterTyped event that triggers for each character typed in the typewriter effect.
 
 ### Changed
 
@@ -212,9 +226,14 @@ Kim: You want a bagel?
 - Dialogue.AddFunction now uses functions that can take multiple parameters. You no longer use a single `Yarn.Value[]` parameter; you can now have up to 5, which can be strings, integers, floats, doubles, bools, or `Yarn.Value`s.
 - Commands registered via the `YarnCommand` attribute can now take parameter types besides strings. Parameters can also be optional. Additionally, these methods are now cached, and are faster to call.
 
-
 ### Removed
 - Commands registered via the `YarnCommand` attribute can no longer accept a `params` array of parameters. If your command takes a variable number of parameters, use optional parameters instead.
+
+## [v1.2.7] 
+
+### Changed
+
+- Backported check for Experimental status of AssetImporter (promoted in 2020.2)
 
 ## [v1.2.6]
 

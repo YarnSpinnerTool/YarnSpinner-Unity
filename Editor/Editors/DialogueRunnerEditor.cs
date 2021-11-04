@@ -28,7 +28,7 @@ namespace Yarn.Unity.Editor
         private void OnEnable()
         {
             yarnProjectProperty = serializedObject.FindProperty(nameof(DialogueRunner.yarnProject));
-            variableStorageProperty = serializedObject.FindProperty(nameof(DialogueRunner.variableStorage));
+            variableStorageProperty = serializedObject.FindProperty(nameof(DialogueRunner._variableStorage));
             dialogueViewsProperty = serializedObject.FindProperty(nameof(DialogueRunner.dialogueViews));
             startNodeProperty = serializedObject.FindProperty(nameof(DialogueRunner.startNode));
             startAutomaticallyProperty = serializedObject.FindProperty(nameof(DialogueRunner.startAutomatically));

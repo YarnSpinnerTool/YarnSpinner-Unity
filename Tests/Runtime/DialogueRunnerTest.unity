@@ -250,12 +250,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   yarnProject: {fileID: 7545569452688597077, guid: a9b357f08075f43cbad81d8ec757e1f7, type: 3}
-  variableStorage: {fileID: 999971321}
+  _variableStorage: {fileID: 999971321}
   dialogueViews:
   - {fileID: 999971320}
   startNode: Start
-  startAutomatically: 1
-  continueNextLineOnLineFinished: 0
+  startAutomatically: 0
+  automaticallyContinueLines: 0
   runSelectedOptionAsLine: 0
   lineProvider: {fileID: 0}
   verboseLogging: 1

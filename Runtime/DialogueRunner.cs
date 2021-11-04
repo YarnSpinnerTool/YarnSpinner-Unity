@@ -1,4 +1,4 @@
-/*
+﻿/*
 
 The MIT License (MIT)
 
@@ -55,7 +55,22 @@ namespace Yarn.Unity
         /// <summary>
         /// The variable storage object.
         /// </summary>
-        public VariableStorageBehaviour variableStorage;
+        [UnityEngine.Serialization.FormerlySerializedAs("variableStorage")]
+        [SerializeField] internal VariableStorageBehaviour _variableStorage;
+
+        /// <inheritdoc cref="_variableStorage"/>
+        public VariableStorageBehaviour VariableStorage
+        {
+            get => _variableStorage; 
+            set
+            {
+                _variableStorage = value;
+                if (_dialogue != null)
+                {
+                    _dialogue.VariableStorage = value;
+                }
+            }
+        }
 
         /// <summary>
         /// The View classes that will present the dialogue to the user.
@@ -187,6 +202,22 @@ namespace Yarn.Unity
         private static Dictionary<string, MethodInfo> _yarnCommands = new Dictionary<string, MethodInfo>();
 
         /// <summary>
+        /// A flag used to detect if an options handler attempts to set the
+        /// selected option on the same frame that options were provided.
+        /// </summary>
+        /// <remarks>
+        /// This field is set to false by <see
+        /// cref="HandleOptions(OptionSet)"/> immediately before calling
+        /// <see cref="DialogueViewBase.RunOptions(DialogueOption[],
+        /// Action{int})"/> on all objects in <see cref="dialogueViews"/>,
+        /// and set to true immediately after. If a call to <see
+        /// cref="DialogueViewBase.RunOptions(DialogueOption[],
+        /// Action{int})"/> calls its completion hander on the same frame,
+        /// an error is generated.
+        /// </remarks>
+        private bool IsOptionSelectionAllowed = false;
+
+        /// <summary>
         /// Finds all MonoBehaviour types in the loaded assemblies, and
         /// looks for all methods that are tagged with YarnCommand.
         /// </summary>
@@ -268,6 +299,14 @@ namespace Yarn.Unity
         /// from.</param>
         public void StartDialogue(string startNode)
         {
+            // If the dialogue is currently executing instructions, then
+            // calling ContinueDialogue() at the end of this method will
+            // cause confusing results. Report an error and stop here.
+            if (Dialogue.IsActive) {
+                Debug.LogError($"Can't start dialogue from node {startNode}: the dialogue is currently in the middle of running. Stop the dialogue first.");
+                return;
+            }
+
             // Stop any processes that might be running already
             foreach (var dialogueView in dialogueViews)
             {
@@ -559,6 +598,26 @@ namespace Yarn.Unity
         /// <seealso cref="AddFunction{TResult}(string, Func{TResult})"/>
         public void RemoveFunction(string name) => Dialogue.Library.DeregisterFunction(name);
 
+        /// <summary>
+        /// Sets the dialogue views and makes sure the callback <see cref="DialogueViewBase.MarkLineComplete"/>
+        /// will respond correctly.
+        /// </summary>
+        /// <param name="views">The array of views to be assigned.</param>
+        public void SetDialogueViews(DialogueViewBase[] views)
+        {
+            dialogueViews = views;
+
+            Action continueAction = OnViewUserIntentNextLine;
+            foreach (var dialogueView in dialogueViews) {
+                if (dialogueView == null) {
+                    Debug.LogWarning("The 'Dialogue Views' field contains a NULL element.", gameObject);
+                    continue;
+                }
+
+                dialogueView.onUserWantsLineContinuation = continueAction;
+            }
+        }
+
         #region Private Properties/Variables/Procedures
 
         /// <summary>
@@ -578,13 +637,23 @@ namespace Yarn.Unity
         /// Maps the names of commands to action delegates.
         Dictionary<string, Delegate> commandHandlers = new Dictionary<string, Delegate>();
 
-        /// Our conversation engine
-        /** Automatically created on first access
-         */
+        /// <summary>
+        /// The underlying object that executes Yarn instructions
+        /// and provides lines, options and commands.
+        /// </summary>
+        /// <remarks>
+        /// Automatically created on first access.
+        /// </remarks>
+        
         private Dialogue _dialogue;
 
-        // The current set of options that we're presenting. Null if we're
-        // not currently presenting options.
+        /// <summary>
+        /// The current set of options that we're presenting.
+        /// </summary>
+        /// <remarks>
+        /// This value is <see langword="null"/> when the <see
+        /// cref="DialogueRunner"/> is not currently presenting options.
+        /// </remarks>
         private OptionSet currentOptions;
 
         void Awake()
@@ -604,19 +673,7 @@ namespace Yarn.Unity
                 }
             }
 
-            if (variableStorage == null)
-            {
-                // If we don't have a variable storage, create an
-                // InMemoryVariableStorage and make it use that.
-
-                variableStorage = gameObject.AddComponent<InMemoryVariableStorage>();
-
-                // Let the user know what we're doing.
-                if (verboseLogging)
-                {
-                    Debug.Log($"Dialogue Runner has no Variable Storage; creating a {nameof(InMemoryVariableStorage)}", this);
-                }
-            }
+            
         }
 
         /// Start the dialogue
@@ -662,9 +719,23 @@ namespace Yarn.Unity
 
         Dialogue CreateDialogueInstance()
         {
+            if (VariableStorage == null)
+            {
+                // If we don't have a variable storage, create an
+                // InMemoryVariableStorage and make it use that.
+
+                VariableStorage = gameObject.AddComponent<InMemoryVariableStorage>();
+
+                // Let the user know what we're doing.
+                if (verboseLogging)
+                {
+                    Debug.Log($"Dialogue Runner has no Variable Storage; creating a {nameof(InMemoryVariableStorage)}", this);
+                }
+            }
+
             // Create the main Dialogue runner, and pass our
             // variableStorage to it
-            var dialogue = new Yarn.Dialogue(variableStorage)
+            var dialogue = new Yarn.Dialogue(VariableStorage)
             {
 
                 // Set up the logging system.
@@ -733,12 +804,19 @@ namespace Yarn.Unity
                     IsAvailable = options.Options[i].IsAvailable,
                 };
             }
+            
+            // Don't allow selecting options on the same frame that we
+            // provide them
+            IsOptionSelectionAllowed = false;
+
             foreach (var dialogueView in dialogueViews)
             {
                 if (dialogueView == null || dialogueView.enabled == false) continue;
 
                 dialogueView.RunOptions(optionSet, selectAction);
             }
+
+            IsOptionSelectionAllowed = true;
         }
 
         void HandleDialogueComplete()
@@ -758,7 +836,7 @@ namespace Yarn.Unity
             bool wasValidCommand;
 
             // Try looking in the command handlers first
-            wasValidCommand = DispatchCommandToRegisteredHandlers(command);
+            wasValidCommand = DispatchCommandToRegisteredHandlers(command, ContinueDialogue);
 
             if (wasValidCommand)
             {
@@ -767,8 +845,8 @@ namespace Yarn.Unity
             }
 
             // We didn't find it in the comand handlers. Try looking in the
-            // game objects.
-            wasValidCommand = DispatchCommandToGameObject(command);
+            // game objects. If it is, continue dialogue.
+            wasValidCommand = DispatchCommandToGameObject(command, ContinueDialogue);
 
             if (wasValidCommand)
             {
@@ -781,10 +859,12 @@ namespace Yarn.Unity
             // invoking on the publicly exposed UnityEvent.
             onCommand?.Invoke(command.Text);
 
-            if (onCommand == null || onCommand.GetPersistentEventCount() == 0)
-            {
+            if ( onCommand == null || onCommand.GetPersistentEventCount() == 0 ) {
                 Debug.LogError($"No Command <<{command.Text}>> was found. Did you remember to use the YarnCommand attribute or AddCommandHandler() function in C#?");
             }
+
+            ContinueDialogue();
+        
             return;
         }
 
@@ -839,26 +919,39 @@ namespace Yarn.Unity
             }
         }
 
+        /// <summary>
         /// Indicates to the DialogueRunner that the user has selected an
         /// option
-        void SelectedOption(int obj)
+        /// </summary>
+        /// <param name="optionIndex">The index of the option that was
+        /// selected.</param>
+        /// <exception cref="InvalidOperationException">Thrown when the
+        /// <see cref="IsOptionSelectionAllowed"/> field is <see
+        /// langword="true"/>, which is the case when <see
+        /// cref="DialogueViewBase.RunOptions(DialogueOption[],
+        /// Action{int})"/> is in the middle of being called.</exception>
+        void SelectedOption(int optionIndex)
         {
+            if (IsOptionSelectionAllowed == false) {
+                throw new InvalidOperationException("Selecting an option on the same frame that options are provided is not allowed. Wait at least one frame before selecting an option.");
+            }
+            
             // Mark that this is the currently selected option in the
             // Dialogue
-            Dialogue.SetSelectedOption(obj);
+            Dialogue.SetSelectedOption(optionIndex);
 
             if (runSelectedOptionAsLine)
             {
                 foreach (var option in currentOptions.Options)
                 {
-                    if (option.ID == obj)
+                    if (option.ID == optionIndex)
                     {
                         HandleLine(option.Line);
                         return;
                     }
                 }
 
-                Debug.LogError($"Can't run selected option ({obj}) as a line: couldn't find the option's associated {nameof(Line)} object");
+                Debug.LogError($"Can't run selected option ({optionIndex}) as a line: couldn't find the option's associated {nameof(Line)} object");
                 ContinueDialogue();
             }
             else
@@ -869,14 +962,30 @@ namespace Yarn.Unity
         }
 
 
-        bool DispatchCommandToRegisteredHandlers(Command command)
+        /// <summary>
+        /// Parses the command string inside <paramref name="command"/>,
+        /// attempts to find a suitable handler from <see
+        /// cref="commandHandlers"/>, and invokes it if found.
+        /// </summary>
+        /// <param name="command">The <see cref="Command"/> to run.</param>
+        /// <param name="onSuccessfulDispatch">A method to run if a command
+        /// was successfully dispatched to a game object. This method is
+        /// not called if a registered command handler is not
+        /// found.</param>
+        /// <returns>True if the command was dispatched to a game object;
+        /// false otherwise.</returns>
+        bool DispatchCommandToRegisteredHandlers(Command command, Action onSuccessfulDispatch)
         {
-            return DispatchCommandToRegisteredHandlers(command.Text);
+            return DispatchCommandToRegisteredHandlers(command.Text, onSuccessfulDispatch);
         }
 
-        internal bool DispatchCommandToRegisteredHandlers(String command)
+        /// <inheritdoc cref="DispatchCommandToRegisteredHandlers(Command,
+        /// Action)"/>
+        /// <param name="command">The text of the command to
+        /// dispatch.</param>
+        internal bool DispatchCommandToRegisteredHandlers(String command, Action onSuccessfulDispatch)
         {
-            List<string> commandTokens = new List<string>(Dialogue.SplitCommandText(command));
+            List<string> commandTokens = new List<string>(SplitCommandText(command));
 
             if (commandTokens.Count == 0)
             {
@@ -919,20 +1028,20 @@ namespace Yarn.Unity
                 return false;
             }
 
-
             if (typeof(YieldInstruction).IsAssignableFrom(methodInfo.ReturnType))
             {
                 // This delegate returns a YieldInstruction of some kind
                 // (e.g. a Coroutine). Run it, and wait for it to finish
-                // before calling ContinueDialogue.
-                StartCoroutine(WaitForYieldInstruction(@delegate, finalParameters));
+                // before calling onSuccessfulDispatch.
+                StartCoroutine(WaitForYieldInstruction(@delegate, finalParameters, onSuccessfulDispatch));
             }
             else if (typeof(void) == methodInfo.ReturnType)
             {
-                // This method does not return anything. Invoke it and
-                // continue immediately.
+                // This method does not return anything. Invoke it and call
+                // our completion handler.
                 @delegate.DynamicInvoke(finalParameters);
-                ContinueDialogue();
+
+                onSuccessfulDispatch();
             }
             else
             {
@@ -942,11 +1051,11 @@ namespace Yarn.Unity
 
             return true;
 
-            IEnumerator WaitForYieldInstruction(Delegate @theDelegate, object[] finalParametersToUse)
+            static IEnumerator WaitForYieldInstruction(Delegate @theDelegate, object[] finalParametersToUse, Action onSuccessfulDispatch)
             {
                 var yieldInstruction = @theDelegate.DynamicInvoke(finalParametersToUse);
                 yield return yieldInstruction;
-                ContinueDialogue();
+                onSuccessfulDispatch();
             }
 
         }
@@ -957,25 +1066,40 @@ namespace Yarn.Unity
         /// and the invokes the method.
         /// </summary>
         /// <param name="command">The <see cref="Command"/> to run.</param>
-        /// <returns>True if the command was dispatched to a game object;
-        /// false otherwise.</returns>
-        internal bool DispatchCommandToGameObject(Command command)
+        /// <param name="onSuccessfulDispatch">A method to run if a command
+        /// was successfully dispatched to a game object. This method is
+        /// not called if a registered command handler is not
+        /// found.</param>
+        /// <returns><see langword="true"/> if the command was successfully
+        /// dispatched to a game object; <see langword="false"/> if no game
+        /// object was registered as a handler for the command.</returns>
+        internal bool DispatchCommandToGameObject(Command command, Action onSuccessfulDispatch)
         {
             // Call out to the string version of this method, because
             // Yarn.Command's constructor is only accessible from inside
             // Yarn Spinner, but we want to be able to unit test. So, we
             // extract it, and call the underlying implementation, which is
             // testable.
-            return DispatchCommandToGameObject(command.Text);
+            return DispatchCommandToGameObject(command.Text, onSuccessfulDispatch);
         }
 
-        /// <inheritdoc cref="DispatchCommandToGameObject(Command)"/>
+        /// <inheritdoc cref="DispatchCommandToGameObject(Command, Action)"/>
         /// <param name="command">The text of the command to
         /// dispatch.</param>
-        internal bool DispatchCommandToGameObject(string command)
+        internal bool DispatchCommandToGameObject(string command, System.Action onSuccessfulDispatch)
         {
+            if (string.IsNullOrEmpty(command))
+            {
+                throw new ArgumentException($"'{nameof(command)}' cannot be null or empty.", nameof(command));
+            }
+
+            if (onSuccessfulDispatch is null)
+            {
+                throw new ArgumentNullException(nameof(onSuccessfulDispatch));
+            }
+
             // Start by splitting our command string by spaces.
-            var words = new List<string>(Dialogue.SplitCommandText(command));
+            var words = new List<string>(SplitCommandText(command));
 
             // We need 2 parameters in order to have both a command name,
             // and the name of an object to find.
@@ -1060,7 +1184,7 @@ namespace Yarn.Unity
             {
                 // Start the coroutine. When it's done, it will continue
                 // execution.
-                StartCoroutine(DoYarnCommand(target, methodInfo, finalParameters));
+                StartCoroutine(DoYarnCommand(target, methodInfo, finalParameters, onSuccessfulDispatch));
                 return true;
             }
             else
@@ -1069,20 +1193,21 @@ namespace Yarn.Unity
                 methodInfo.Invoke(target, finalParameters);
 
                 // Continue execution immediately after calling it.
-                ContinueDialogue();
+                onSuccessfulDispatch();
 
                 return true;
             }
 
             IEnumerator DoYarnCommand(MonoBehaviour component,
                                             MethodInfo method,
-                                            object[] localParameters)
+                                            object[] localParameters,
+                                            Action onSuccessfulDispatch)
             {
                 // Wait for this command coroutine to complete
                 yield return StartCoroutine((IEnumerator)method.Invoke(component, localParameters));
 
-                // And then continue running dialogue
-                ContinueDialogue();
+                // And then signal that we're done
+                onSuccessfulDispatch();
             }
         }
 
@@ -1412,234 +1537,125 @@ namespace Yarn.Unity
             }
         }
         #endregion
-    }
 
-    #region Class/Interface
-
-    /// <summary>
-    /// An attribute that marks a method on a <see cref="MonoBehaviour"/>
-    /// as a [command](<![CDATA[ {{<ref
-    /// "/docs/unity/working-with-commands">}}]]>).
-    /// </summary>
-    /// <remarks>
-    /// When a <see cref="DialogueRunner"/> receives a <see
-    /// cref="Command"/>, and no command handler has been installed for the
-    /// command, it splits it by spaces, and then checks to see if the
-    /// second word, if any, is the name of any <see cref="GameObject"/>s
-    /// in the scene. 
-    ///
-    /// If one is found, it is checked to see if any of the <see
-    /// cref="MonoBehaviour"/>s attached to the class has a <see
-    /// cref="YarnCommandAttribute"/> whose <see
-    /// cref="YarnCommandAttribute.CommandString"/> matching the first word
-    /// of the command.
-    ///
-    /// If a method is found, its parameters are checked:
-    ///
-    /// * If the method takes a single <see cref="string"/>[] parameter,
-    /// the method is called, and will be passed an array containing all
-    /// words in the command after the first two.
-    ///
-    /// * If the method takes a number of <see cref="string"/> parameters
-    /// equal to the number of words in the command after the first two, it
-    /// will be called with those words as parameters.
-    ///
-    /// * Otherwise, it will not be called, and a warning will be issued.
-    ///
-    /// ### `YarnCommand`s and Coroutines
-    ///
-    /// This attribute may be attached to a coroutine. 
-    ///
-    /// {{|note|}} The <see cref="DialogueRunner"/> determines if the
-    /// method is a coroutine if the method returns <see
-    /// cref="IEnumerator"/>. {{|/note|}}
-    ///
-    /// If the method is a coroutine, the DialogueRunner will pause
-    /// execution until the coroutine ends.
-    /// </remarks>
-    /// <example>
-    ///
-    /// The following C# code uses the `YarnCommand` attribute to register
-    /// commands.
-    ///
-    /// <![CDATA[```csharp class ExampleBehaviour : MonoBehaviour
-    /// {[YarnCommand("jump")] void Jump()
-    /// {Debug.Log($"{this.gameObject.name} is jumping!");}
-    ///
-    ///         [YarnCommand("walk")] void WalkToDestination(string
-    ///         destination) {Debug.Log($"{this.gameObject.name} is walking
-    ///         to {destination}!");}
-    ///
-    ///         [YarnCommand("shine_flashlight")] IEnumerator
-    ///         ShineFlashlight(string durationString)
-    ///         {float.TryParse(durationString, out var duration);
-    ///         Debug.Log($"{this.gameObject.name} is turning on the
-    ///         flashlight for {duration} seconds!"); yield new
-    ///         WaitForSeconds(duration);
-    ///         Debug.Log($"{this.gameObject.name} is turning off the
-    ///         flashlight!");}} ```]]>
-    ///
-    /// Next, assume that this `ExampleBehaviour` script has been attached
-    /// to a <see cref="GameObject"/> present in the scene named "Mae". The
-    /// `Jump` and `WalkToDestination` methods may then be called from a
-    /// Yarn script like so:
-    ///
-    /// <![CDATA[```yarn // Call the Jump() method in the ExampleBehaviour
-    /// on Mae <<jump Mae>>
-    ///
-    /// // Call the WalkToDestination() method in the ExampleBehaviour //
-    /// on Mae, passing "targetPoint" as a parameter <<walk Mae
-    /// targetPoint>>
-    ///
-    /// // Call the ShineFlashlight method, passing "0.5" as a parameter;
-    /// // dialogue will wait until the coroutine ends. <<shine_flashlight
-    /// Mae 0.5>> ```]]>
-    ///
-    /// Running this Yarn code will result in the following text being
-    /// logged to the Console:
-    ///
-    /// ``` Mae is jumping! Mae is walking to targetPoint! Mae is turning
-    /// on the flashlight for 0.5 seconds! (... 0.5 seconds elapse ...) Mae
-    /// is turning off the flashlight! ```
-    /// </example>
-    [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-    public class YarnCommandAttribute : System.Attribute
-    {
         /// <summary>
-        /// The name of the command, as it exists in Yarn.
+        /// Splits input into a number of non-empty sub-strings, separated
+        /// by whitespace, and grouping double-quoted strings into a single
+        /// sub-string.
         /// </summary>
+        /// <param name="input">The string to split.</param>
+        /// <returns>A collection of sub-strings.</returns>
         /// <remarks>
-        /// This value does not have to be the same as the name of the
-        /// method. For example, you could have a method named
-        /// "`WalkToPoint`", and expose it to Yarn as a command named
-        /// "`walk_to_point`".
-        /// </remarks>        
-        public string CommandString { get; set; }
-
-        public YarnCommandAttribute(string commandString) => CommandString = commandString;
-    }
-
-    /// <summary>
-    /// A <see cref="MonoBehaviour"/> that a <see cref="DialogueRunner"/>
-    /// uses to store and retrieve variables.
-    /// </summary>
-    /// <remarks>
-    /// This abstract class inherits from <see cref="MonoBehaviour"/>,
-    /// which means that subclasses of this class can be attached to <see
-    /// cref="GameObject"/>s.
-    /// </remarks>
-    public abstract class VariableStorageBehaviour : MonoBehaviour, Yarn.IVariableStorage
-    {
-        /// <inheritdoc/>
-        public abstract bool TryGetValue<T>(string variableName, out T result);
-
-        /// <inheritdoc/>
-        public abstract void SetValue(string variableName, string stringValue);
-
-        /// <inheritdoc/>
-        public abstract void SetValue(string variableName, float floatValue);
-
-        /// <inheritdoc/>
-        public abstract void SetValue(string variableName, bool boolValue);
-
-        /// <inheritdoc/>        
-        public abstract void Clear();
-    }
-
-    /// <summary>
-    /// The presentation status of a <see cref="LocalizedLine"/>.
-    /// </summary>
-    public enum LineStatus
-    {
-        /// <summary>
-        /// The line is in the process of being presented to the user, but
-        /// has not yet finished appearing. 
-        /// </summary>
-        /// <remarks>
-        /// Lines in this state are in the process of being delivered; for
-        /// example, visual animations may be running, and audio playback
-        /// may be ongoing.
-        /// </remarks>
-        Presenting,
-        /// <summary>
-        /// The user has interrupted the delivery of this line, by calling
-        /// <see cref="DialogueViewBase.ReadyForNextLine"/> before all line
-        /// views finished delivering the line. All line views should
-        /// finish delivering the line as quickly as possible, and then
-        /// signal that the line has been <see cref="FinishedPresenting"/>.
-        /// </summary>
-        /// <remarks>
-        /// For example, any animations should skip to the end, either
-        /// immediately or very quickly, and any audio should stop or
-        /// quickly fade out.
-        /// </remarks>
-        Interrupted,
-        /// <summary>
-        /// The line has finished being delivered to the user.
-        /// </summary>
-        /// <remarks>
-        /// When a line has finished being delivered, any animations in
-        /// showing text and any audio playback should now be complete. 
+        /// This method behaves similarly to the <see
+        /// cref="string.Split(char[], StringSplitOptions)"/> method with
+        /// the <see cref="StringSplitOptions"/> parameter set to <see
+        /// cref="StringSplitOptions.RemoveEmptyEntries"/>, with the
+        /// following differences:
         ///
-        /// A line remains in the <see cref="FinishedPresenting"/> state until a
-        /// Dialogue View calls <see
-        /// cref="DialogueViewBase.ReadyForNextLine"/>. At this point, the
-        /// line will transition to the <see cref="Dismissed"/> state, and <see
-        /// cref="DialogueViewBase.DismissLine(Action)"/> will be called on
-        /// all views to dismiss the line.
+        /// <list type="bullet">
+        /// <item>Text that appears inside a pair of double-quote
+        /// characters will not be split.</item>
+        ///
+        /// <item>Text that appears after a double-quote character and
+        /// before the end of the input will not be split (that is, an
+        /// unterminated double-quoted string will be treated as though it
+        /// had been terminated at the end of the input.)</item>
+        ///
+        /// <item>When inside a pair of double-quote characters, the string
+        /// <c>\\</c> will be converted to <c>\</c>, and the string
+        /// <c>\"</c> will be converted to <c>"</c>.</item>
+        /// </list>
         /// </remarks>
-        FinishedPresenting,
-        /// <summary>
-        /// The line is not being presented anymore in any way to the user.
-        /// </summary>
-        Dismissed
-    }
-
-
-
-    public class DialogueOption
-    {
-        /// <summary>
-        /// The ID of this dialogue option
-        /// </summary>
-        public int DialogueOptionID;
-
-        /// <summary>
-        /// The ID of the dialogue option's text
-        /// </summary>
-        public string TextID;
-
-        /// <summary>
-        /// The line for this dialogue option
-        /// </summary>
-        public LocalizedLine Line;
-
-        /// <summary>
-        /// Indicates whether this value should be presented as available
-        /// or not.
-        /// </summary>
-        public bool IsAvailable;
-    }
-
-    #endregion
-
-    public static class AssemblyExtensions
-    {
-        /// <summary>
-        /// Assembly.GetTypes() can throw in some cases.  This extension
-        /// will catch that exception and return only the types which were
-        /// successfully loaded from the assembly.
-        /// </summary>
-        public static IEnumerable<System.Type> GetLoadableTypes(this Assembly @this)
+        public static IEnumerable<string> SplitCommandText(string input)
         {
-            try
+            var reader = new System.IO.StringReader(input.Normalize());
+
+            int c;
+
+            var results = new List<string>();
+            var currentComponent = new System.Text.StringBuilder();
+
+            while ((c = reader.Read()) != -1)
             {
-                return @this.GetTypes();
+                if (char.IsWhiteSpace((char)c))
+                {
+                    if (currentComponent.Length > 0)
+                    {
+                        // We've reached the end of a run of visible
+                        // characters. Add this run to the result list and
+                        // prepare for the next one.
+                        results.Add(currentComponent.ToString());
+                        currentComponent.Clear();
+                    }
+                    else
+                    {
+                        // We encountered a whitespace character, but
+                        // didn't have any characters queued up. Skip this
+                        // character.
+                    }
+
+                    continue;
+                }
+                else if (c == '\"')
+                {
+                    // We've entered a quoted string!
+                    while (true)
+                    {
+                        c = reader.Read();
+                        if (c == -1)
+                        {
+                            // Oops, we ended the input while parsing a
+                            // quoted string! Dump our current word
+                            // immediately and return.
+                            results.Add(currentComponent.ToString());
+                            return results;
+                        }
+                        else if (c == '\\')
+                        {
+                            // Possibly an escaped character!
+                            var next = reader.Peek();
+                            if (next == '\\' || next == '\"')
+                            {
+                                // It is! Skip the \ and use the character after it.
+                                reader.Read();
+                                currentComponent.Append((char)next);
+                            }
+                            else
+                            {
+                                // Oops, an invalid escape. Add the \ and
+                                // whatever is after it.
+                                currentComponent.Append((char)c);
+                            }
+                        }
+                        else if (c == '\"')
+                        {
+                            // The end of a string!
+                            break;
+                        }
+                        else
+                        {
+                            // Any other character. Add it to the buffer.
+                            currentComponent.Append((char)c);
+                        }
+                    }
+
+                    results.Add(currentComponent.ToString());
+                    currentComponent.Clear();
+                }
+                else
+                {
+                    currentComponent.Append((char)c);
+                }
             }
-            catch (ReflectionTypeLoadException e)
+
+            if (currentComponent.Length > 0)
             {
-                return e.Types.Where(t => t != null);
+                results.Add(currentComponent.ToString());
             }
+
+            return results;
         }
+
+        
     }
 }
