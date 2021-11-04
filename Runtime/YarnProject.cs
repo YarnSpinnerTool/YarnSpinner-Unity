@@ -28,6 +28,11 @@ namespace Yarn.Unity
 
         private Program cachedProgram;
 
+        /// <summary>
+        /// The current program associated with this project. If you call
+        /// <see cref="Compile(byte[])"/>, this will automatically update the
+        /// program with a new object.
+        /// </summary>
         public Program YarnProgram
         {
             get
@@ -93,7 +98,7 @@ namespace Yarn.Unity
         /// <summary>
         /// Compiles the program from raw byte data.
         /// </summary>
-        /// <param name="rawData">The raw data derived from compilation.</param>
+        /// <param name="rawData">The raw serialized data derived from compilation.</param>
         public void Compile(byte[] bytecode)
         {
             // we're assuming that if you're using this API, you'll no longer be using the compiled yarn program.

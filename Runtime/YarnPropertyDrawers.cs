@@ -9,6 +9,14 @@ using UnityEditor;
 
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// Restrict a <see cref="string"/> field into only the nodes available to
+    /// a <see cref="YarnProject"/>.
+    /// </summary>
+    /// <remarks>
+    /// You can also use a <see cref="DialogueRunner"/> to dynamically refer to
+    /// whatever <see cref="YarnProject"/> that it currently is referring to.
+    /// </remarks>
     [AttributeUsage(AttributeTargets.Field)]
     public class YarnNodeAttribute : PropertyAttribute
     {
