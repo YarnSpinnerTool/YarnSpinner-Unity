@@ -32,6 +32,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Calling `DialogueRunner.StartDialogue` when the dialogue runner is already running will now result in an error being logged.
 
+- The included `System.*` DLLs are now dependencies from [OpenUPM's NuGet proxy](https://openupm.com/nuget/). This means that the DLL conflict in 2021.2+ for .NET Standard 2.1 will no longer occur.
+
 ### Removed
 
 ## [v2.0.0-beta5] 2021-08-17
