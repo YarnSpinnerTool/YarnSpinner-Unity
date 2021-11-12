@@ -5,7 +5,12 @@
   "description": "Yarn Spinner is the friendly tool for interactive conversations. Write your dialogue in a simple programming language that's designed to be straightforward for writers and powerful for programmers, and then attach it to your scenes to power your conversations.",
   "unity": "2018.4",
   "dependencies": {
-    "com.unity.textmeshpro": "1.4.1"
+    "com.unity.textmeshpro": "1.4.1",
+    "org.nuget.system.buffers": "4.5.1",
+    "org.nuget.system.memory": "4.5.4",
+    "org.nuget.system.numerics.vectors": "4.5.0",
+    "org.nuget.system.reflection.typeextensions": "4.7.0",
+    "org.nuget.system.runtime.compilerservices.unsafe": "5.0.0"
   },
   "keywords": [
     "Dialogue",
