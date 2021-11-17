@@ -14,9 +14,9 @@ namespace Yarn.Unity.Editor
     /// </summary>
     public interface IYarnErrorSource
     {
-        internal IList<string> CompileErrors { get; }
+        IList<string> CompileErrors { get; }
 
-        internal bool Destroyed { get; }
+        bool Destroyed { get; }
     }
 
     public class YarnPreventPlayMode
@@ -35,7 +35,17 @@ namespace Yarn.Unity.Editor
         }
 
         private static YarnPreventPlayMode _instance;
-        private static YarnPreventPlayMode Instance => _instance ??= new YarnPreventPlayMode();
+        private static YarnPreventPlayMode Instance
+        {
+            get
+            {
+                if (_instance == null) {
+                    _instance = new YarnPreventPlayMode();
+                }
+
+                return _instance;
+            }
+        }
 
         /// <summary>
         /// Register a error source type to gather initial asset state.

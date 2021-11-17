@@ -1050,14 +1050,33 @@ namespace Yarn.Unity
             }
 
             return true;
+        }
 
-            static IEnumerator WaitForYieldInstruction(Delegate @theDelegate, object[] finalParametersToUse, Action onSuccessfulDispatch)
-            {
-                var yieldInstruction = @theDelegate.DynamicInvoke(finalParametersToUse);
-                yield return yieldInstruction;
-                onSuccessfulDispatch();
-            }
+        /// <summary>
+        /// A coroutine that invokes @<paramref name="theDelegate"/> that
+        /// returns a <see cref="YieldInstruction"/>, yields on that
+        /// result, and then invokes <paramref
+        /// name="onSuccessfulDispatch"/>.
+        /// </summary>
+        /// <param name="theDelegate">The method to call. This must return
+        /// a value of type <see cref="YieldInstruction"/>.</param>
+        /// <param name="finalParametersToUse">The parameters to pass to
+        /// the call to <paramref name="theDelegate"/>.</param>
+        /// <param name="onSuccessfulDispatch">The method to call after the
+        /// <see cref="YieldInstruction"/> returned by <paramref
+        /// name="theDelegate"/> has finished.</param>
+        /// <returns>An <see cref="IEnumerator"/> to use with <see
+        /// cref="StartCoroutine"/>.</returns>
+        private static IEnumerator WaitForYieldInstruction(Delegate @theDelegate, object[] finalParametersToUse, Action onSuccessfulDispatch)
+        {
+            // Invoke the delegate.
+            var yieldInstruction = @theDelegate.DynamicInvoke(finalParametersToUse);
 
+            // Yield on the return result.
+            yield return yieldInstruction;
+
+            // Call the completion handler.
+            onSuccessfulDispatch();
         }
 
         /// <summary>
@@ -1201,13 +1220,13 @@ namespace Yarn.Unity
             IEnumerator DoYarnCommand(MonoBehaviour component,
                                             MethodInfo method,
                                             object[] localParameters,
-                                            Action onSuccessfulDispatch)
+                                            Action onDispatch)
             {
                 // Wait for this command coroutine to complete
                 yield return StartCoroutine((IEnumerator)method.Invoke(component, localParameters));
 
                 // And then signal that we're done
-                onSuccessfulDispatch();
+                onDispatch();
             }
         }
 
