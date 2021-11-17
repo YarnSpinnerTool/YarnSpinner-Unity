@@ -34,6 +34,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Line Views will now only enable and disable action references if the line view is also configured to use said action.
 
+- Yarn Project importer will now save variable declaration metadata on the first time
+
 ### Removed
 
 ## [v2.0.0-beta5] 2021-08-17
