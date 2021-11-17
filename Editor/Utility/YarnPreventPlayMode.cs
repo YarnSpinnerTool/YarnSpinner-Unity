@@ -24,7 +24,8 @@ namespace Yarn.Unity.Editor
         /// <summary>
         /// Comparer to proxy comparison to objects themselves.
         /// </summary>
-        /// <typeparam name="T">Passed directly to <see cref="WeakReference{T}"/></typeparam>
+        /// <typeparam name="T">Passed directly to <see
+        /// cref="WeakReference{T}"/></typeparam>
         private class WeakRefComparer<T> : IEqualityComparer<WeakReference<T>> where T : class
         {
             public bool Equals(WeakReference<T> x, WeakReference<T> y)
@@ -39,7 +40,8 @@ namespace Yarn.Unity.Editor
         {
             get
             {
-                if (_instance == null) {
+                if (_instance == null)
+                {
                     _instance = new YarnPreventPlayMode();
                 }
 
@@ -49,12 +51,17 @@ namespace Yarn.Unity.Editor
 
         /// <summary>
         /// Register a error source type to gather initial asset state.
-        /// 
-        /// Note that you may have to use <see cref="InitializeOnLoadAttribute"/> on your class to get it to reliably register
-        /// on domain reloads etc, as by default .NET lazily loads static state.
+        ///
+        /// Note that you may have to use <see
+        /// cref="InitializeOnLoadAttribute"/> on your class to get it to
+        /// reliably register on domain reloads etc, as by default .NET
+        /// lazily loads static state.
         /// </summary>
-        /// <typeparam name="T">An asset importer type that qualifies as error source.</typeparam>
-        /// <param name="filterQuery">Search query (see <see cref="AssetDatabase.FindAssets(string)"/> documentation for formatting).</param>
+        /// <typeparam name="T">An asset importer type that qualifies as
+        /// error source.</typeparam>
+        /// <param name="filterQuery">Search query (see <see
+        /// cref="AssetDatabase.FindAssets(string)"/> documentation for
+        /// formatting).</param>
         public static void AddYarnErrorSourceType<T>(string filterQuery) where T : AssetImporter, IYarnErrorSource
             => Instance.assetSearchQueries.Enqueue((importer => importer as T, filterQuery));
 
@@ -62,7 +69,7 @@ namespace Yarn.Unity.Editor
         /// Use this error source to prevent play mode if there are errors.
         /// </summary>
         /// <param name="source">Source to register.</param>
-        public static void AddYarnErrorSource(IYarnErrorSource source) 
+        public static void AddYarnErrorSource(IYarnErrorSource source)
             => Instance.errorSources.Add(new WeakReference<IYarnErrorSource>(source));
 
         public static bool HasCompileErrors() => Instance.CompilerErrors().Any();
