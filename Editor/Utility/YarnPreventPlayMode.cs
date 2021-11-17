@@ -89,9 +89,13 @@ namespace Yarn.Unity.Editor
             EditorApplication.isPlaying = false;
             Debug.LogError("There were import errors. Please fix them to continue.");
 
-            // usually the scene view should be initialized, but if it isn't then it isn't a huge deal
-            EditorWindow.GetWindow<SceneView>()
-                ?.ShowNotification(new GUIContent("All Yarn compiler errors must be fixed before entering Play Mode."));
+            // usually the scene view should be initialized, but if it
+            // isn't then it isn't a huge deal
+            SceneView sceneView = EditorWindow.GetWindow<SceneView>();
+
+            if (sceneView != null) {
+                sceneView.ShowNotification(new GUIContent("All Yarn compiler errors must be fixed before entering Play Mode."));
+            }
         }
 
         private IEnumerable<string> CompilerErrors()
