@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Yarn script compile errors will prevent play mode.
 
+- Sample scenes now have a render pipeline detector gameobject that will warn when the sample scene materials won't look correct in the current render pipeline.
+
 ### Changed
 
 - Updated to support new error handling in Yarn Spinner. 
