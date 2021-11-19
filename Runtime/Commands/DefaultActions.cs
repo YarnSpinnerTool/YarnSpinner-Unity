@@ -14,22 +14,22 @@ namespace Yarn.Unity
         /// and makes it a special case.) Wait is defined here in Unity.
         /// </summary>
         /// <param name="duration">How long to wait.</param>
-        [YarnCommand]
-        public static IEnumerator wait(float duration)
+        [YarnCommand("wait")]
+        public static IEnumerator Wait(float duration)
         {
             yield return new WaitForSeconds(duration);
         }
         #endregion
 
         #region Functions
-        [YarnFunction]
-        public static float random()
+        [YarnFunction("random")]
+        public static float Random()
         {
-            return random_range(0, 1);
+            return RandomRange(0, 1);
         }
 
-        [YarnFunction]
-        public static float random_range(float minInclusive, float maxInclusive)
+        [YarnFunction("random_range")]
+        public static float RandomRange(float minInclusive, float maxInclusive)
         {
             return UnityEngine.Random.Range(minInclusive, maxInclusive);
         }
@@ -40,32 +40,32 @@ namespace Yarn.Unity
         /// <param name="sides">Dice range.</param>
         /// <returns>A number between <c>[1, <paramref name="sides"/>]</c>.
         /// </returns>
-        [YarnFunction]
-        public static int dice(int sides)
+        [YarnFunction("dice")]
+        public static int Dice(int sides)
         {
             return UnityEngine.Random.Range(1, sides + 1);
         }
 
-        [YarnFunction]
-        public static int round(float num)
+        [YarnFunction("round")]
+        public static int Round(float num)
         {
-            return (int)round_places(num, 0);
+            return (int)RoundPlaces(num, 0);
         }
 
-        [YarnFunction]
-        public static float round_places(float num, int places)
+        [YarnFunction("round_places")]
+        public static float RoundPlaces(float num, int places)
         {
             return (float)Math.Round(num, places);
         }
 
-        [YarnFunction]
-        public static int floor(float num)
+        [YarnFunction("floor")]
+        public static int Floor(float num)
         {
             return Mathf.FloorToInt(num);
         }
 
-        [YarnFunction]
-        public static int ceil(float num)
+        [YarnFunction("ceil")]
+        public static int Ceil(float num)
         {
             return Mathf.CeilToInt(num);
         }
@@ -73,10 +73,10 @@ namespace Yarn.Unity
         /// <summary>
         /// Increment if integer, otherwise go to next integer.
         /// </summary>
-        [YarnFunction]
-        public static int inc(float num)
+        [YarnFunction("inc")]
+        public static int Inc(float num)
         {
-            if (@decimal(num) != 0)
+            if (Decimal(num) != 0)
             {
                 return Mathf.CeilToInt(num);
             }
@@ -86,10 +86,10 @@ namespace Yarn.Unity
         /// <summary>
         /// Decrement if integer, otherwise go to previous integer.
         /// </summary>
-        [YarnFunction]
-        public static int dec(float num)
+        [YarnFunction("dec")]
+        public static int Dec(float num)
         {
-            if (@decimal(num) != 0)
+            if (Decimal(num) != 0)
             {
                 return Mathf.FloorToInt(num);
             }
@@ -101,10 +101,10 @@ namespace Yarn.Unity
         /// </summary>
         /// <param name="num">Number to get the decimal portion of.</param>
         /// <returns><c>[0, 1)</c></returns>
-        [YarnFunction]
-        public static float @decimal(float num)
+        [YarnFunction("decimal")]
+        public static float Decimal(float num)
         {
-            return num - @int(num);
+            return num - Int(num);
         }
 
         /// <summary>
@@ -114,8 +114,8 @@ namespace Yarn.Unity
         /// </summary>
         /// <param name="num">Number to truncate.</param>
         /// <returns>Truncated float value as int.</returns>
-        [YarnFunction]
-        public static int @int(float num)
+        [YarnFunction("int")]
+        public static int Int(float num)
         {
             return (int)Math.Truncate(num);
         }
