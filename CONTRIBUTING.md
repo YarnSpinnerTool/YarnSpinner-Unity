@@ -30,18 +30,7 @@ Here are a few things you can do that will increase the likelihood of your pull 
 
 ### Unity & LTS support
 
-As we are a group of volunteers, we can only officially support the versions of Unity that are actively supported by Unity themselves. Please check the official [LTS FAQ](https://support.unity.com/hc/en-us/articles/4403332003348-What-is-a-Unity-LTS-Long-Term-Support-version-and-what-can-I-expect-from-it-) for more up-to-date information.
-
-To recap, we currently support:
-
-* 2021.2 (Tech Stream 2)
-* 2021.1 (Tech Stream 1)
-* 2020.3 (LTS) -- Support will be discontinued in Q1 2023.
-* 2019.4 (Legacy LTS) -- Support will be discontinued in Q1 2022.
-
-We have limited support for:
-
-* 2022.1 (Alpha)
+As we are a group of volunteers, we can only officially support the versions of Unity that are actively supported by Unity themselves. Please check the official [LTS FAQ](https://support.unity.com/hc/en-us/articles/4403332003348-What-is-a-Unity-LTS-Long-Term-Support-version-and-what-can-I-expect-from-it-) for more up-to-date information. Currently, the minimum supported version is 2019.4.
 
 However, if you would like to submit contributions to fix support for unsupported versions, please go ahead and do so, but do note that we cannot guarantee that it continues to work for that version.
 
