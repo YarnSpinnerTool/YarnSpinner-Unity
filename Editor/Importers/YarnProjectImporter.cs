@@ -826,20 +826,16 @@ namespace Yarn.Unity.Editor
             }
             else
             {
-                // Use delayed fields where possible to preserve
-                // responsivity (we don't want to force a serialization on
-                // Unity 2018 after every keystroke, and delayed fields
-                // don't report a change until the user changes focus)
                 switch (property.propertyType)
                 {
                     case SerializedPropertyType.String:
-                        property.stringValue = EditorGUI.DelayedTextField(position, label, property.stringValue);
+                        property.stringValue = EditorGUI.TextField(position, label, property.stringValue);
                         break;
                     case SerializedPropertyType.Float:
-                        property.floatValue = EditorGUI.DelayedFloatField(position, label, property.floatValue);
+                        property.floatValue = EditorGUI.FloatField(position, label, property.floatValue);
                         break;
                     case SerializedPropertyType.Integer:
-                        property.floatValue = EditorGUI.DelayedIntField(position, label, property.intValue);
+                        property.floatValue = EditorGUI.IntField(position, label, property.intValue);
                         break;
                     default:
                         // Just use a regular field for other kinds of
@@ -952,7 +948,7 @@ namespace Yarn.Unity.Editor
                     var wordWrappedTextField = EditorStyles.textField;
                     wordWrappedTextField.wordWrap = true;
 
-                    descriptionProperty.stringValue = EditorGUI.DelayedTextField(descriptionPosition, descriptionProperty.displayName, descriptionProperty.stringValue, wordWrappedTextField);
+                    descriptionProperty.stringValue = EditorGUI.TextField(descriptionPosition, descriptionProperty.displayName, descriptionProperty.stringValue, wordWrappedTextField);
                 }
 
                 if (!propertyIsReadOnly)

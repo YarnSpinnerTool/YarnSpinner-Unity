@@ -14,9 +14,9 @@ namespace Yarn.Unity.Editor
     /// </summary>
     public interface IYarnErrorSource
     {
-        internal IList<string> CompileErrors { get; }
+        IList<string> CompileErrors { get; }
 
-        internal bool Destroyed { get; }
+        bool Destroyed { get; }
     }
 
     public class YarnPreventPlayMode
@@ -24,7 +24,8 @@ namespace Yarn.Unity.Editor
         /// <summary>
         /// Comparer to proxy comparison to objects themselves.
         /// </summary>
-        /// <typeparam name="T">Passed directly to <see cref="WeakReference{T}"/></typeparam>
+        /// <typeparam name="T">Passed directly to <see
+        /// cref="WeakReference{T}"/></typeparam>
         private class WeakRefComparer<T> : IEqualityComparer<WeakReference<T>> where T : class
         {
             public bool Equals(WeakReference<T> x, WeakReference<T> y)
@@ -35,16 +36,32 @@ namespace Yarn.Unity.Editor
         }
 
         private static YarnPreventPlayMode _instance;
-        private static YarnPreventPlayMode Instance => _instance ??= new YarnPreventPlayMode();
+        private static YarnPreventPlayMode Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new YarnPreventPlayMode();
+                }
+
+                return _instance;
+            }
+        }
 
         /// <summary>
         /// Register a error source type to gather initial asset state.
-        /// 
-        /// Note that you may have to use <see cref="InitializeOnLoadAttribute"/> on your class to get it to reliably register
-        /// on domain reloads etc, as by default .NET lazily loads static state.
+        ///
+        /// Note that you may have to use <see
+        /// cref="InitializeOnLoadAttribute"/> on your class to get it to
+        /// reliably register on domain reloads etc, as by default .NET
+        /// lazily loads static state.
         /// </summary>
-        /// <typeparam name="T">An asset importer type that qualifies as error source.</typeparam>
-        /// <param name="filterQuery">Search query (see <see cref="AssetDatabase.FindAssets(string)"/> documentation for formatting).</param>
+        /// <typeparam name="T">An asset importer type that qualifies as
+        /// error source.</typeparam>
+        /// <param name="filterQuery">Search query (see <see
+        /// cref="AssetDatabase.FindAssets(string)"/> documentation for
+        /// formatting).</param>
         public static void AddYarnErrorSourceType<T>(string filterQuery) where T : AssetImporter, IYarnErrorSource
             => Instance.assetSearchQueries.Enqueue((importer => importer as T, filterQuery));
 
@@ -52,7 +69,7 @@ namespace Yarn.Unity.Editor
         /// Use this error source to prevent play mode if there are errors.
         /// </summary>
         /// <param name="source">Source to register.</param>
-        public static void AddYarnErrorSource(IYarnErrorSource source) 
+        public static void AddYarnErrorSource(IYarnErrorSource source)
             => Instance.errorSources.Add(new WeakReference<IYarnErrorSource>(source));
 
         public static bool HasCompileErrors() => Instance.CompilerErrors().Any();
@@ -79,9 +96,13 @@ namespace Yarn.Unity.Editor
             EditorApplication.isPlaying = false;
             Debug.LogError("There were import errors. Please fix them to continue.");
 
-            // usually the scene view should be initialized, but if it isn't then it isn't a huge deal
-            EditorWindow.GetWindow<SceneView>()
-                ?.ShowNotification(new GUIContent("All Yarn compiler errors must be fixed before entering Play Mode."));
+            // usually the scene view should be initialized, but if it
+            // isn't then it isn't a huge deal
+            SceneView sceneView = EditorWindow.GetWindow<SceneView>();
+
+            if (sceneView != null) {
+                sceneView.ShowNotification(new GUIContent("All Yarn compiler errors must be fixed before entering Play Mode."));
+            }
         }
 
         private IEnumerable<string> CompilerErrors()

@@ -105,6 +105,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   - You should continue to use manual registration if you want to make an instance function (ie where the ["target"](https://docs.microsoft.com/en-us/dotnet/api/system.delegate.target?view=netstandard-2.0) is defined) static.
 
+- Sample scenes now have a render pipeline detector gameobject that will warn when the sample scene materials won't look correct in the current render pipeline.
+
+- Variables declared inside Yarn scripts will now have the default values set into the variable storage.
+
 ### Changed
 
 - Updated to support new error handling in Yarn Spinner. 
@@ -120,6 +124,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `DialogueRunner.VariableStorage` can now be modified at runtime.
 
 - Calling `DialogueRunner.StartDialogue` when the dialogue runner is already running will now result in an error being logged.
+
+- Line Views will now only enable and disable action references if the line view is also configured to use said action.
+
+- Yarn Project importer will now save variable declaration metadata on the first time
 
 ### Removed
 
