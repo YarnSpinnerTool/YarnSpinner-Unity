@@ -293,6 +293,55 @@ namespace Yarn.Unity
         }
 
         /// <summary>
+        /// Loads any initial variables declared in the program and loads that variable with its default declaration value into the variable storage.
+        /// Any variable that is already in the storage will be skipped, the assumption is that this means the value has been overridden at some point and shouldn't be otherwise touched.
+        /// Can force an override of the existing values with the default if that is desired.
+        /// </summary>
+        public void SetInitialVariables(bool overrideExistingValues = false)
+        {
+            if (yarnProject == null) 
+            {
+                Debug.LogError("Unable to set default values, there is no project set");
+                return;
+            }
+
+            // grabbing all the initial values from the program and inserting them into the storage
+            // we first need to make sure that the value isn't already set in the storage
+            var values = yarnProject.GetProgram().InitialValues;
+            foreach (var pair in values)
+            {
+                if (!overrideExistingValues && VariableStorage.Contains(pair.Key))
+                {
+                    continue;
+                }
+                var value = pair.Value;
+                switch (value.ValueCase)
+                {
+                    case Yarn.Operand.ValueOneofCase.StringValue:
+                    {
+                        VariableStorage.SetValue(pair.Key, value.StringValue);
+                        break;
+                    }
+                    case Yarn.Operand.ValueOneofCase.BoolValue:
+                    {
+                        VariableStorage.SetValue(pair.Key, value.BoolValue);
+                        break;
+                    }
+                    case Yarn.Operand.ValueOneofCase.FloatValue:
+                    {
+                        VariableStorage.SetValue(pair.Key, value.FloatValue);
+                        break;
+                    }
+                    default:
+                    {
+                        Debug.LogWarning($"{pair.Key} is of an invalid type: {value.ValueCase}");
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Start the dialogue from a specific node.
         /// </summary>
         /// <param name="startNode">The name of the node to start running
@@ -709,6 +758,8 @@ namespace Yarn.Unity
                 Dialogue.SetProgram(yarnProject.GetProgram());
 
                 lineProvider.YarnProject = yarnProject;
+
+                SetInitialVariables();
 
                 if (startAutomatically)
                 {
