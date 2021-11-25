@@ -10,13 +10,6 @@ using UnityEngine.InputSystem;
 
 namespace Yarn.Unity
 {
-    public class InterruptionFlag
-    {
-        public bool Interrupted { get; private set; } = false;
-        public void Set() => Interrupted = true;
-        public void Clear() => Interrupted = false;
-    }
-
     public static class Effects
     {
         /// <summary>
@@ -34,13 +27,13 @@ namespace Yarn.Unity
         /// from 0 to 1.</param>
         /// <param name="onComplete">A delegate to invoke after fading is
         /// complete.</param>
-        public static IEnumerator FadeAlpha(CanvasGroup canvasGroup, float from, float to, float fadeTime, Action onComplete = null, InterruptionFlag interruption = null)
+        public static IEnumerator FadeAlpha(CanvasGroup canvasGroup, float from, float to, float fadeTime, Action onComplete = null)
         {
             canvasGroup.alpha = from;
 
             var timeElapsed = 0f;
 
-            while (timeElapsed < fadeTime && (interruption?.Interrupted ?? false) == false)
+            while (timeElapsed < fadeTime)
             {
                 var fraction = timeElapsed / fadeTime;
                 timeElapsed += Time.deltaTime;
@@ -67,7 +60,7 @@ namespace Yarn.Unity
             onComplete?.Invoke();
         }
 
-        public static IEnumerator Typewriter(TextMeshProUGUI text, float lettersPerSecond, Action onCharacterTyped = null, Action onComplete = null, InterruptionFlag interruption = null)
+        public static IEnumerator Typewriter(TextMeshProUGUI text, float lettersPerSecond, Action onCharacterTyped = null, Action onComplete = null)
         {
             // Start with everything invisible
             text.maxVisibleCharacters = 0;
@@ -103,7 +96,7 @@ namespace Yarn.Unity
             // the requested speed.
             var accumulator = Time.deltaTime;
 
-            while (text.maxVisibleCharacters < characterCount && interruption?.Interrupted == false)
+            while (text.maxVisibleCharacters < characterCount)
             {
                 // We need to show as many letters as we have accumulated
                 // time for.
@@ -121,6 +114,8 @@ namespace Yarn.Unity
             // We either finished displaying everything, or were
             // interrupted. Either way, display everything now.
             text.maxVisibleCharacters = characterCount;
+
+            Debug.Log("typewriter done normally");
 
             // Wrap up by invoking our completion handler.
             onComplete?.Invoke();
@@ -193,8 +188,6 @@ namespace Yarn.Unity
         internal InputAction continueAction = new InputAction("Skip", InputActionType.Button, CommonUsages.Cancel);
 #endif
 
-        InterruptionFlag interruptionFlag = new InterruptionFlag();
-
         LocalizedLine currentLine = null;
 
         public void Start()
@@ -230,6 +223,11 @@ namespace Yarn.Unity
 #if ENABLE_LEGACY_INPUT_MANAGER
         public void Update()
         {
+            if (Input.GetKeyUp(KeyCode.L))
+            {
+                FindObjectOfType<DialogueRunner>().InterruptLine();
+                return;
+            }
             // Should we indicate to the DialogueRunner that we want to
             // interrupt/continue a line? We need to pass a number of
             // checks.
@@ -248,10 +246,10 @@ namespace Yarn.Unity
             }
             
             // The line must not be in the middle of being dismissed.
-            if ((currentLine?.Status) == LineStatus.Dismissed)
-            {
-                return;
-            }
+            // if ((currentLine?.Status) == LineStatus.Dismissed)
+            // {
+            //     return;
+            // }
 
             // We're good to indicate that we want to skip/continue.
             OnContinueClicked();
@@ -286,37 +284,61 @@ namespace Yarn.Unity
             }
         }
 
-        public override void OnLineStatusChanged(LocalizedLine dialogueLine)
-        {
-            switch (dialogueLine.Status)
-            {
-                case LineStatus.Presenting:
-                    break;
-                case LineStatus.Interrupted:
-                    // We have been interrupted. Set our interruption flag,
-                    // so that any animations get skipped.
-                    interruptionFlag.Set();
-                    break;
-                case LineStatus.FinishedPresenting:
-                    // The line has finished being delivered by all views.
-                    // Display the Continue button.
-                    if (continueButton != null)
-                    {
-                        continueButton.SetActive(true);
-                        var selectable = continueButton.GetComponentInChildren<Selectable>();
-                        if (selectable != null)
-                        {
-                            selectable.Select();
-                        }
-                    }
-                    break;
-                case LineStatus.Dismissed:
-                    break;
-            }
-        }
-
         private void OnCharacterTyped() {
             onCharacterTyped?.Invoke();
+        }
+
+        public override void InterruptLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
+        {
+            currentLine = dialogueLine;
+            StopAllCoroutines();
+
+            // for now we are going to just immediately show everything
+            // later we will make it fade in
+            lineText.gameObject.SetActive(true);
+            canvasGroup.gameObject.SetActive(true);
+
+            int length;
+
+            if (continueButton != null)
+            {
+                continueButton.SetActive(false);
+            }
+            if (characterNameText == null)
+            {
+                if (showCharacterNameInLineView)
+                {
+                    lineText.text = dialogueLine.Text.Text;
+                    length = dialogueLine.Text.Text.Length;
+                }
+                else
+                {
+                    lineText.text = dialogueLine.TextWithoutCharacterName.Text;
+                    length = dialogueLine.TextWithoutCharacterName.Text.Length;
+                }
+            }
+            else
+            {
+                characterNameText.text = dialogueLine.CharacterName;
+                lineText.text = dialogueLine.TextWithoutCharacterName.Text;
+                length = dialogueLine.TextWithoutCharacterName.Text.Length;
+            }
+
+            lineText.maxVisibleCharacters = length;
+
+            canvasGroup.interactable = true;
+            canvasGroup.alpha = 1;
+            canvasGroup.blocksRaycasts = true;
+
+            // hold on screen for just a moment because otherwise it looks weird
+            StartCoroutine(TempYield(0.5f, onDialogueLineFinished));
+        }
+
+        // this is such a bad name
+        private IEnumerator TempYield(float holdDelay, Action onDialogueLineFinished)
+        {
+            yield return new WaitForSeconds(holdDelay);
+            onDialogueLineFinished();
         }
 
         public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
@@ -343,8 +365,6 @@ namespace Yarn.Unity
             {
                 continueButton.SetActive(false);
             }
-
-            interruptionFlag.Clear();
 
             if (characterNameText == null)
             {
@@ -379,7 +399,7 @@ namespace Yarn.Unity
                 }
 
                 // Fade up and then call FadeComplete when done
-                StartCoroutine(Effects.FadeAlpha(canvasGroup, 0, 1, fadeInTime, () => FadeComplete(onDialogueLineFinished), interruptionFlag));
+                StartCoroutine(Effects.FadeAlpha(canvasGroup, 0, 1, fadeInTime, () => FadeComplete(onDialogueLineFinished)));
             }
             else
             {
@@ -391,7 +411,7 @@ namespace Yarn.Unity
                 if (useTypewriterEffect)
                 {
                     // Start the typewriter
-                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, OnCharacterTyped, onDialogueLineFinished, interruptionFlag));
+                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, OnCharacterTyped, onDialogueLineFinished));
                 }
                 else
                 {
@@ -403,7 +423,7 @@ namespace Yarn.Unity
             {
                 if (useTypewriterEffect)
                 {
-                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, OnCharacterTyped, onFinished, interruptionFlag));
+                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, OnCharacterTyped, onFinished));
                 }
                 else
                 {

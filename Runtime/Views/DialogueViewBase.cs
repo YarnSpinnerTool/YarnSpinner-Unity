@@ -58,6 +58,21 @@ namespace Yarn.Unity
         }
 
         /// <summary>
+        /// Called by the <see cref="DialogueRunner"/> to signal that a
+        /// line has been interrupted in some manner.
+        /// Functionally identical to RunLine but for interrupts.
+        /// </summary>
+        /// <param name="dialogueLine">The content of the line that should
+        /// be presented to the user.</param>
+        /// <param name="onDialogueLineFinished">The method that should be
+        /// called after the line has been finished.</param>
+        public virtual void InterruptLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
+        {
+            // the default implementation does nothing
+            onDialogueLineFinished?.Invoke();
+        }
+
+        /// <summary>
         /// Called by the DialogueRunner to indicate that the line that
         /// this view is delivering has changed state.
         /// </summary>
@@ -71,10 +86,10 @@ namespace Yarn.Unity
         /// <param name="dialogueLine">The <see cref="LocalizedLine"/> that
         /// has changed state.</param>
         /// <seealso cref="LineStatus"/>
-        public virtual void OnLineStatusChanged(LocalizedLine dialogueLine)
-        {
-            // Default implementation is a no-op.
-        }
+        // public virtual void OnLineStatusChanged(LocalizedLine dialogueLine)
+        // {
+        //     // Default implementation is a no-op.
+        // }
 
         /// <summary>
         /// Called by the <see cref="DialogueRunner"/> to signal that the

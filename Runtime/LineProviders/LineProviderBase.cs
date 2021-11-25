@@ -124,7 +124,7 @@ namespace Yarn.Unity
         /// <summary>
         /// The line's delivery status.
         /// </summary>
-        public LineStatus Status;
+        // public LineStatus Status;
 
         /// <summary>
         /// The name of the character, if present.

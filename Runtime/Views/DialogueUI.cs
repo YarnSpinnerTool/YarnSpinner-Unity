@@ -356,31 +356,31 @@ namespace Yarn.Unity
             onDialogueLineFinished();
         }
 
-        public override void OnLineStatusChanged(LocalizedLine dialogueLine)
-        {
+        // public override void OnLineStatusChanged(LocalizedLine dialogueLine)
+        // {
 
-            switch (dialogueLine.Status)
-            {
-                case LineStatus.Presenting:
-                    // No-op; this line is running
-                    break;
-                case LineStatus.Interrupted:
-                    // The line is now interrupted, and we need to hurry up
-                    // in our delivery
-                    finishCurrentLine = true;
-                    break;
-                case LineStatus.FinishedPresenting:
-                    // The line has now finished its delivery across all
-                    // views, so we can signal call our UnityEvent for it
-                    onLineFinishDisplaying?.Invoke();
-                    break;
-                case LineStatus.Dismissed:
-                    // The line has now Ended. DismissLine will be called
-                    // shortly.
-                    onLineEnd?.Invoke();
-                    break;
-            }
-        }
+        //     switch (dialogueLine.Status)
+        //     {
+        //         case LineStatus.Presenting:
+        //             // No-op; this line is running
+        //             break;
+        //         case LineStatus.Interrupted:
+        //             // The line is now interrupted, and we need to hurry up
+        //             // in our delivery
+        //             finishCurrentLine = true;
+        //             break;
+        //         case LineStatus.FinishedPresenting:
+        //             // The line has now finished its delivery across all
+        //             // views, so we can signal call our UnityEvent for it
+        //             onLineFinishDisplaying?.Invoke();
+        //             break;
+        //         case LineStatus.Dismissed:
+        //             // The line has now Ended. DismissLine will be called
+        //             // shortly.
+        //             onLineEnd?.Invoke();
+        //             break;
+        //     }
+        // }
 
         public override void DismissLine(System.Action onDismissalComplete)
         {
