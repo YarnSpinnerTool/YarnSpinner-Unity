@@ -122,11 +122,6 @@ namespace Yarn.Unity
         public string RawText;
 
         /// <summary>
-        /// The line's delivery status.
-        /// </summary>
-        // public LineStatus Status;
-
-        /// <summary>
         /// The name of the character, if present.
         /// </summary>
         /// <remarks>

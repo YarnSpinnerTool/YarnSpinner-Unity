@@ -73,25 +73,6 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Called by the DialogueRunner to indicate that the line that
-        /// this view is delivering has changed state.
-        /// </summary>
-        /// <remarks>
-        /// Subclasses of <see cref="DialogueViewBase"/> should override
-        /// this method to be notified when a line has become interrupted,
-        /// and when the line has finished being delivered by all views.
-        ///
-        /// The default implementation does nothing.
-        /// </remarks>
-        /// <param name="dialogueLine">The <see cref="LocalizedLine"/> that
-        /// has changed state.</param>
-        /// <seealso cref="LineStatus"/>
-        // public virtual void OnLineStatusChanged(LocalizedLine dialogueLine)
-        // {
-        //     // Default implementation is a no-op.
-        // }
-
-        /// <summary>
         /// Called by the <see cref="DialogueRunner"/> to signal that the
         /// view should dismiss its current line from display, and clean
         /// up.

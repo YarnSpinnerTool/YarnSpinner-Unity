@@ -860,8 +860,6 @@ namespace Yarn.Unity
             // Render the markup
             CurrentLine.Text = Dialogue.ParseMarkup(text);
 
-            // CurrentLine.Status = LineStatus.Presenting;
-
             // Clear the set of active dialogue views, just in case
             ActiveDialogueViews.Clear();
 
@@ -1150,10 +1148,7 @@ namespace Yarn.Unity
 
         /// <summary>
         /// Called when a <see cref="DialogueViewBase"/> has finished
-        /// delivering its line. When all views in <see
-        /// cref="ActiveDialogueViews"/> have called this method, the
-        /// line's status will change to <see
-        /// cref="LineStatus.FinishedPresenting"/>.
+        /// delivering its line.
         /// </summary>
         /// <param name="dialogueView">The view that finished delivering
         /// the line.</param>
@@ -1166,15 +1161,11 @@ namespace Yarn.Unity
             // Have all of the views completed? 
             if (ActiveDialogueViews.Count == 0)
             {
-                // UpdateLineStatus(CurrentLine, LineStatus.FinishedPresenting);
-
                 // Should the line automatically become Ended as soon as
                 // it's Delivered?
                 if (automaticallyContinueLines)
                 {
-                    // Go ahead and notify the views. 
-                    // UpdateLineStatus(CurrentLine, LineStatus.Dismissed);
-
+                    // Go ahead and notify the views.
                     // Additionally, tell the views to dismiss the line
                     // from presentation. When each is done, it will notify
                     // this dialogue runner to call

@@ -115,8 +115,6 @@ namespace Yarn.Unity
             // interrupted. Either way, display everything now.
             text.maxVisibleCharacters = characterCount;
 
-            Debug.Log("typewriter done normally");
-
             // Wrap up by invoking our completion handler.
             onComplete?.Invoke();
         }
@@ -244,12 +242,6 @@ namespace Yarn.Unity
             {
                 return;
             }
-            
-            // The line must not be in the middle of being dismissed.
-            // if ((currentLine?.Status) == LineStatus.Dismissed)
-            // {
-            //     return;
-            // }
 
             // We're good to indicate that we want to skip/continue.
             OnContinueClicked();
