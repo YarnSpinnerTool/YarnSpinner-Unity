@@ -397,6 +397,7 @@ namespace Yarn.Unity
         /// `null` if no node with that name exists.</returns>
         public IEnumerable<string> GetTagsForNode(String nodeName) => Dialogue.GetTagsForNode(nodeName);
 
+#region CommandsAndFunctions
         /// <summary>
         /// Adds a command handler. Dialogue will pause execution after the
         /// command is called.
@@ -580,6 +581,7 @@ namespace Yarn.Unity
         /// <param name="name">The name of the function to remove.</param>
         /// <seealso cref="AddFunction{TResult}(string, Func{TResult})"/>
         public void RemoveFunction(string name) => Dialogue.Library.DeregisterFunction(name);
+#endregion
 
         /// <summary>
         /// Sets the dialogue views and makes sure the callback <see cref="DialogueViewBase.MarkLineComplete"/>
