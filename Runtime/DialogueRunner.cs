@@ -901,7 +901,12 @@ namespace Yarn.Unity
         {
             if (CurrentLine == null)
             {
-                Debug.LogError("Dialogue runner was asked to interrupt the current line but there is no current line");
+                Debug.LogWarning("Dialogue runner was asked to interrupt the current line but there is no current line");
+                return;
+            }
+            if (ActiveDialogueViews.Count == 0)
+            {
+                Debug.LogWarning("Dialogue runner was asked to interrupt the current line but every view has already finished presenting it");
                 return;
             }
 
