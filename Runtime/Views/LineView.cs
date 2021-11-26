@@ -4,10 +4,6 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
-#endif
-
 namespace Yarn.Unity
 {
     public static class Effects
@@ -16,10 +12,7 @@ namespace Yarn.Unity
         /// A coroutine that fades a <see cref="CanvasGroup"/> object's
         /// opacity from <paramref name="from"/> to <paramref name="to"/>
         /// over the course of <see cref="fadeTime"/> seconds, and then
-        /// invokes <paramref name="onComplete"/>. An <see
-        /// cref="InterruptionFlag"/> may be used to signal that the fade
-        /// should be interrupted; if this happens, the opacity is set to
-        /// <paramref name="to"/>.
+        /// invokes <paramref name="onComplete"/>.
         /// </summary>
         /// <param name="from">The opacity value to start fading from,
         /// ranging from 0 to 1.</param>
@@ -167,43 +160,11 @@ namespace Yarn.Unity
         [SerializeField]
         internal GameObject continueButton = null;
 
-        [SerializeField]
-        [UnityEngine.Serialization.FormerlySerializedAs("skipActionType")]
-        internal ContinueActionType continueActionType;
-
-        [SerializeField]
-        [UnityEngine.Serialization.FormerlySerializedAs("skipActionKeyCode")]
-        internal KeyCode continueActionKeyCode = KeyCode.Escape;
-
-
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-        [SerializeField]
-        [UnityEngine.Serialization.FormerlySerializedAs("skipActionReference")]
-        internal InputActionReference continueActionReference = null;
-
-        [SerializeField]
-        [UnityEngine.Serialization.FormerlySerializedAs("skipAction")]
-        internal InputAction continueAction = new InputAction("Skip", InputActionType.Button, CommonUsages.Cancel);
-#endif
-
         LocalizedLine currentLine = null;
 
         public void Start()
         {
             canvasGroup.alpha = 0;
-
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-            // If we are using an action reference, and it's not null,
-            // configure it
-            if (continueActionType == ContinueActionType.InputSystemActionFromAsset && continueActionReference != null)
-            {
-                continueActionReference.action.started += UserPerformedSkipAction;
-            }
-
-            // The custom skip action always starts disabled
-            continueAction?.Disable();
-            continueAction.started += UserPerformedSkipAction;
-#endif
         }
 
 #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
@@ -218,52 +179,11 @@ namespace Yarn.Unity
             canvasGroup = GetComponentInParent<CanvasGroup>();
         }
 
-#if ENABLE_LEGACY_INPUT_MANAGER
-        public void Update()
-        {
-            if (Input.GetKeyUp(KeyCode.L))
-            {
-                FindObjectOfType<DialogueRunner>().InterruptLine();
-                return;
-            }
-            // Should we indicate to the DialogueRunner that we want to
-            // interrupt/continue a line? We need to pass a number of
-            // checks.
-            
-            // We need to be configured to use a keycode to interrupt/continue
-            // lines.
-            if (continueActionType != ContinueActionType.KeyCode)
-            {
-                return;
-            }
-
-            // That keycode needs to have been pressed this frame.
-            if (!UnityEngine.Input.GetKeyDown(continueActionKeyCode))
-            {
-                return;
-            }
-
-            // We're good to indicate that we want to skip/continue.
-            OnContinueClicked();
-        }
-#endif
-
         public override void DismissLine(Action onDismissalComplete)
         {
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-            if (continueActionType == ContinueActionType.InputSystemAction)
-            {
-                continueAction?.Disable();
-            }
-            else if (continueActionType == ContinueActionType.InputSystemActionFromAsset)
-            {
-                continueActionReference?.action?.Disable();
-            }
-#endif
-
             currentLine = null;
 
-            if (useFadeEffect)
+            if (useFadeEffect) 
             {
                 StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeOutTime, onDismissalComplete));
             }
@@ -336,19 +256,6 @@ namespace Yarn.Unity
         public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
             currentLine = dialogueLine;
-
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-            // If we are using a custom Unity Input System action, enable
-            // it now.
-            if (continueActionType == ContinueActionType.InputSystemAction)
-            {
-                continueAction?.Enable();
-            }
-            else if (continueActionType == ContinueActionType.InputSystemActionFromAsset)
-            {
-                continueActionReference?.action.Enable();
-            }
-#endif
 
             lineText.gameObject.SetActive(true);
             canvasGroup.gameObject.SetActive(true);

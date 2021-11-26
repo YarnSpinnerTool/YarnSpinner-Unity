@@ -593,8 +593,10 @@ namespace Yarn.Unity
             dialogueViews = views;
 
             Action continueAction = OnViewUserIntentNextLine;
-            foreach (var dialogueView in dialogueViews) {
-                if (dialogueView == null) {
+            foreach (var dialogueView in dialogueViews) 
+            {
+                if (dialogueView == null) 
+                {
                     Debug.LogWarning("The 'Dialogue Views' field contains a NULL element.", gameObject);
                     continue;
                 }

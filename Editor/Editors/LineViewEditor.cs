@@ -38,8 +38,8 @@ namespace Yarn.Unity.Editor
             onCharacterTypedProperty = serializedObject.FindProperty(nameof(LineView.onCharacterTyped));
             typewriterEffectSpeedProperty = serializedObject.FindProperty(nameof(LineView.typewriterEffectSpeed));
             continueButtonProperty = serializedObject.FindProperty(nameof(LineView.continueButton));
-            continueActionTypeProperty = serializedObject.FindProperty(nameof(LineView.continueActionType));
-            continueActionKeyCodeProperty = serializedObject.FindProperty(nameof(LineView.continueActionKeyCode));
+            // continueActionTypeProperty = serializedObject.FindProperty(nameof(LineView.continueActionType));
+            // continueActionKeyCodeProperty = serializedObject.FindProperty(nameof(LineView.continueActionKeyCode));
 
 #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
             continueActionReferenceProperty = serializedObject.FindProperty(nameof(LineView.continueActionReference));
