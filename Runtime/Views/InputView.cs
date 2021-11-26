@@ -105,16 +105,6 @@ namespace Yarn.Unity
         public override void InterruptLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
             currentLine = dialogueLine;
-            StopAllCoroutines();
-
-            // hold on screen for just a moment because otherwise it looks weird
-            StartCoroutine(TempYield(0.5f, onDialogueLineFinished));
-        }
-
-        // this is such a bad name
-        private IEnumerator TempYield(float holdDelay, Action onDialogueLineFinished)
-        {
-            yield return new WaitForSeconds(holdDelay);
             onDialogueLineFinished();
         }
 

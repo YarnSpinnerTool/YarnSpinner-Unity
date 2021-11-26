@@ -167,12 +167,12 @@ namespace Yarn.Unity
             canvasGroup.alpha = 0;
         }
 
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-        void UserPerformedSkipAction(InputAction.CallbackContext obj)
-        {
-            OnContinueClicked();
-        }
-#endif
+// #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
+//         void UserPerformedSkipAction(InputAction.CallbackContext obj)
+//         {
+//             OnContinueClicked();
+//         }
+// #endif
 
         public void Reset()
         {
