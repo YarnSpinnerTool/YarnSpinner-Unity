@@ -60,13 +60,7 @@ namespace Yarn.Unity
 
 #if ENABLE_LEGACY_INPUT_MANAGER
         public void Update()
-        {
-            if (Input.GetKeyUp(KeyCode.L))
-            {
-                FindObjectOfType<DialogueRunner>().InterruptLine();
-                return;
-            }
-            
+        {   
             // We need to be configured to use a keycode to interrupt/continue
             // lines.
             if (continueActionType != ContinueActionType.KeyCode)

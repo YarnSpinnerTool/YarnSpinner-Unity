@@ -897,19 +897,8 @@ namespace Yarn.Unity
         }
 
         // message you send to the runner to let it know you want to interrupt the current line
-        public void InterruptLine()
+        void InterruptLine()
         {
-            if (CurrentLine == null)
-            {
-                Debug.LogWarning("Dialogue runner was asked to interrupt the current line but there is no current line");
-                return;
-            }
-            if (ActiveDialogueViews.Count == 0)
-            {
-                Debug.LogWarning("Dialogue runner was asked to interrupt the current line but every view has already finished presenting it");
-                return;
-            }
-
             ActiveDialogueViews.Clear();
 
             foreach (var dialogueView in dialogueViews)
@@ -1208,16 +1197,21 @@ namespace Yarn.Unity
         {
             if (CurrentLine == null)
             {
-                // There's no active line, so there's nothing that can be
-                // done here.
-                Debug.LogWarning($"{nameof(OnViewUserIntentNextLine)} was called, but no line was running.");
+                Debug.LogWarning("Dialogue runner was asked to advance but there is no current line");
                 return;
             }
 
-            // every view has flagged that they are done
+            // every view has finished showing its stuff so this is to advance to the next line
+            // so we just send over the dismiss signal and it it go from there
             if (ActiveDialogueViews.Count == 0)
             {
+                Debug.Log("user requested advance, all views finished, showing next line");
                 DismissLineFromViews(dialogueViews);
+            }
+            else // views are still presenting, this is now an interrupt
+            {
+                Debug.Log("user requested advance, all views not finished, interrupting current line");
+                InterruptLine();
             }
         }
 

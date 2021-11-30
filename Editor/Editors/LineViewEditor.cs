@@ -93,29 +93,29 @@ namespace Yarn.Unity.Editor
 
             EditorGUILayout.PropertyField(continueActionTypeProperty);
 
-            switch ((LineView.ContinueActionType)continueActionTypeProperty.enumValueIndex)
-            {
-                case LineView.ContinueActionType.None:
-                    EditorGUI.indentLevel += 1;
-                    EditorGUILayout.HelpBox($"After each line has finished appearing, this line view will stop and wait.\n\nTo continue to the next line, you will need to call {nameof(LineView.OnContinueClicked)} on this component, or turn on the {ObjectNames.NicifyVariableName(nameof(DialogueRunner))}'s \"{ObjectNames.NicifyVariableName(nameof(DialogueRunner.automaticallyContinueLines))}\" setting.", MessageType.Info);
-                    EditorGUI.indentLevel -= 1;
-                    break;
-                case LineView.ContinueActionType.KeyCode:
-                    EditorGUILayout.PropertyField(continueActionKeyCodeProperty);
-                    break;
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-                case LineView.ContinueActionType.InputSystemAction:
-                    EditorGUILayout.PropertyField(continueActionProperty);
-                    break;
-                case LineView.ContinueActionType.InputSystemActionFromAsset:
-                    EditorGUILayout.PropertyField(continueActionReferenceProperty);
-                    break;
-#else
-                default:
-                    EditorGUILayout.HelpBox("Please install and enable the Unity Input System.", MessageType.Warning);
-                    break;
-#endif
-            }
+//             switch ((LineView.ContinueActionType)continueActionTypeProperty.enumValueIndex)
+//             {
+//                 case LineView.ContinueActionType.None:
+//                     EditorGUI.indentLevel += 1;
+//                     EditorGUILayout.HelpBox($"After each line has finished appearing, this line view will stop and wait.\n\nTo continue to the next line, you will need to call {nameof(LineView.OnContinueClicked)} on this component, or turn on the {ObjectNames.NicifyVariableName(nameof(DialogueRunner))}'s \"{ObjectNames.NicifyVariableName(nameof(DialogueRunner.automaticallyContinueLines))}\" setting.", MessageType.Info);
+//                     EditorGUI.indentLevel -= 1;
+//                     break;
+//                 case LineView.ContinueActionType.KeyCode:
+//                     EditorGUILayout.PropertyField(continueActionKeyCodeProperty);
+//                     break;
+// #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
+//                 case LineView.ContinueActionType.InputSystemAction:
+//                     EditorGUILayout.PropertyField(continueActionProperty);
+//                     break;
+//                 case LineView.ContinueActionType.InputSystemActionFromAsset:
+//                     EditorGUILayout.PropertyField(continueActionReferenceProperty);
+//                     break;
+// #else
+//                 default:
+//                     EditorGUILayout.HelpBox("Please install and enable the Unity Input System.", MessageType.Warning);
+//                     break;
+// #endif
+//             }
 
             EditorGUILayout.PropertyField(continueButtonProperty);
 

@@ -115,14 +115,6 @@ namespace Yarn.Unity
 
     public class LineView : DialogueViewBase
     {
-        internal enum ContinueActionType
-        {
-            None,
-            KeyCode,
-            InputSystemAction,
-            InputSystemActionFromAsset,
-        }
-
         [SerializeField]
         internal CanvasGroup canvasGroup;
 
@@ -166,13 +158,6 @@ namespace Yarn.Unity
         {
             canvasGroup.alpha = 0;
         }
-
-// #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-//         void UserPerformedSkipAction(InputAction.CallbackContext obj)
-//         {
-//             OnContinueClicked();
-//         }
-// #endif
 
         public void Reset()
         {
