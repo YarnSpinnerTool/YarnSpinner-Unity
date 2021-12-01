@@ -94,13 +94,6 @@ namespace Yarn.Unity
         public bool startAutomatically = true;
 
         /// <summary>
-        /// Whether the DialogueRunner should automatically proceed to the
-        /// next line once a line has been finished.
-        /// </summary>
-        [UnityEngine.Serialization.FormerlySerializedAs("continueNextLineOnLineFinished")]
-        public bool automaticallyContinueLines;
-
-        /// <summary>
         /// If true, when an option is selected, it's as though it were a
         /// line.
         /// </summary>
@@ -896,7 +889,7 @@ namespace Yarn.Unity
             }
         }
 
-        // message you send to the runner to let it know you want to interrupt the current line
+        // called by the runner when a view has signalled that it needs to interrupt the current line
         void InterruptLine()
         {
             ActiveDialogueViews.Clear();
@@ -1152,20 +1145,7 @@ namespace Yarn.Unity
             // Have all of the views completed? 
             if (ActiveDialogueViews.Count == 0)
             {
-                // Should the line automatically become Ended as soon as
-                // it's Delivered?
-                if (automaticallyContinueLines)
-                {
-                    // Go ahead and notify the views.
-                    // Additionally, tell the views to dismiss the line
-                    // from presentation. When each is done, it will notify
-                    // this dialogue runner to call
-                    // DialogueViewCompletedDismissal; when all have
-                    // finished, this dialogue runner will tell the
-                    // Dialogue to Continue() when all lines are done
-                    // dismissing the line.
-                    DismissLineFromViews(dialogueViews);
-                }
+                DismissLineFromViews(dialogueViews);
             }
         }
 

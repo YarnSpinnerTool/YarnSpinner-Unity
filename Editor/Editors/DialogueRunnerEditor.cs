@@ -32,7 +32,6 @@ namespace Yarn.Unity.Editor
             dialogueViewsProperty = serializedObject.FindProperty(nameof(DialogueRunner.dialogueViews));
             startNodeProperty = serializedObject.FindProperty(nameof(DialogueRunner.startNode));
             startAutomaticallyProperty = serializedObject.FindProperty(nameof(DialogueRunner.startAutomatically));
-            automaticallyContinueLinesProperty = serializedObject.FindProperty(nameof(DialogueRunner.automaticallyContinueLines));
             runSelectedOptionAsLineProperty = serializedObject.FindProperty(nameof(DialogueRunner.runSelectedOptionAsLine));
             lineProviderProperty = serializedObject.FindProperty(nameof(DialogueRunner.lineProvider));
             verboseLoggingProperty = serializedObject.FindProperty(nameof(DialogueRunner.verboseLogging));
