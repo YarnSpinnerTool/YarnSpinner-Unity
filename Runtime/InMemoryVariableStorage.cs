@@ -218,6 +218,14 @@ namespace Yarn.Unity
 
         #endregion
 
+        /// <summary>
+        /// returns a boolean value representing if the particular variable is inside the variable storage
+        /// </summary>
+        public override bool Contains(string variableName)
+        {
+            return variables.ContainsKey(variableName);
+        }
+
 
         #region Save/Load
 

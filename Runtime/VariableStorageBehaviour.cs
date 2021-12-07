@@ -53,5 +53,8 @@ namespace Yarn.Unity
 
         /// <inheritdoc/>        
         public abstract void Clear();
+
+        /// returns a boolean value representing if the particular variable is inside the variable storage
+        public abstract bool Contains(string variableName);
     }
 }

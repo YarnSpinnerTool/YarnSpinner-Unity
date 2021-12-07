@@ -261,8 +261,14 @@ namespace Yarn.Unity
         public override void DismissLine(Action onDismissalComplete)
         {
 #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-            continueAction?.Disable();
-            continueActionReference?.action?.Disable();
+            if (continueActionType == ContinueActionType.InputSystemAction)
+            {
+                continueAction?.Disable();
+            }
+            else if (continueActionType == ContinueActionType.InputSystemActionFromAsset)
+            {
+                continueActionReference?.action?.Disable();
+            }
 #endif
 
             currentLine = null;
