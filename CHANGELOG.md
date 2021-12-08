@@ -131,6 +131,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Removed
 
+- Support for 2018 LTS (currently 2018.4.36f1) has been dropped, and 2019 LTS (currently 2019.4.32f1) will be the minimum supported version. The support scheme for YarnSpinner will be clarified in the [CONTRIBUTING](./CONTRIBUTING.md) docs. If you still require support for 2018, please join our [Discord](https://discord.gg/9CvsQfS)!
+
 ## [v2.0.0-beta5] 2021-08-17
 
 ### Added

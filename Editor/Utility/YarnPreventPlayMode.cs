@@ -14,8 +14,14 @@ namespace Yarn.Unity.Editor
     /// </summary>
     public interface IYarnErrorSource
     {
+#if UNITY_2020_3_OR_NEWER
+        internal
+#endif
         IList<string> CompileErrors { get; }
 
+#if UNITY_2020_3_OR_NEWER
+        internal
+#endif
         bool Destroyed { get; }
     }
 
@@ -44,7 +50,6 @@ namespace Yarn.Unity.Editor
                 {
                     _instance = new YarnPreventPlayMode();
                 }
-
                 return _instance;
             }
         }

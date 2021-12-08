@@ -3,7 +3,7 @@
   "version": "2.0.0-preview",
   "displayName": "Yarn Spinner",
   "description": "Yarn Spinner is the friendly tool for interactive conversations. Write your dialogue in a simple programming language that's designed to be straightforward for writers and powerful for programmers, and then attach it to your scenes to power your conversations.",
-  "unity": "2018.4",
+  "unity": "2019.4",
   "dependencies": {
     "com.unity.textmeshpro": "1.4.1"
   },

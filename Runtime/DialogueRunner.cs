@@ -1,4 +1,4 @@
-﻿/*
+/*
 
 The MIT License (MIT)
 
@@ -1275,7 +1275,7 @@ namespace Yarn.Unity
                 ContinueDialogue();
             }
         }
-        #endregion
+#endregion
 
         /// <summary>
         /// Splits input into a number of non-empty sub-strings, separated
