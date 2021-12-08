@@ -196,7 +196,10 @@ namespace Yarn.Unity.Tests
         private static CustomInjector _instance;
         private static CustomInjector GetInstance(string _)
         {
-            _instance ??= new CustomInjector();
+            if (_instance == null) {
+                _instance = new CustomInjector();
+            }
+            
             Debug.Log(_instance);
             return _instance;
         }
