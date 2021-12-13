@@ -58,7 +58,7 @@ A [full reference to the API of Yarn Spinner](http://yarnspinner.dev/api/), incl
 There are several places to get more help with Yarn Spinner, and stay up to date with what's happening.
 
 * [Follow us on Twitter](https://twitter.com/YarnSpinnerTool)!
-* Join our [narrative game development](http://lab.to/narrativegamedev) Slack!
+* Join the official [Yarn Spinner Discord](http://discord.gg/yarnspinner) !
 
 ## License
 
