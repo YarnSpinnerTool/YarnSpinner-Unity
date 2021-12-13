@@ -1,0 +1,37 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - "*.*.*"
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Extract release notes
+        id: extract-release-notes
+        uses: ffurrer2/extract-release-notes@v1
+      - name: Read release notes preface
+        id: release_preface
+        uses: bluwy/substitute-string-action@v1
+        with:
+          _input_file: .github/RELEASE_TEMPLATE.md
+          _format_key: '{key}'
+          RELEASE_TAG: ${{ github.ref }}
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: true
+          prerelease: true
+          body: |
+            ${{ steps.release_preface.outputs.content }}
+            ${{ steps.extract-release-notes.outputs.release_notes }}
+
