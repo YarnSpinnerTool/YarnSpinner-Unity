@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Removed
 
-## [v2.0.0-rc1] 2021-12-13
+## [2.0.0-rc1] 2021-12-13
 
 ### Added
 
@@ -141,7 +141,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Support for Unity 2018 LTS has been dropped, and 2019 LTS (currently 2019.4.32f1) will be the minimum supported version. The support scheme for Yarn Spinner will be clarified in the [CONTRIBUTING](./CONTRIBUTING.md) docs. If you still require support for 2018, please join our [Discord](https://discord.gg/yarnspinner)!
 
-## [v2.0.0-beta5] 2021-08-17
+## [2.0.0-beta5] 2021-08-17
 
 ### Added
 
@@ -158,7 +158,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 * Yarn Programs: The 'Convert Implicit Declarations' button has been temporarily removed, due to a required compatibility change related to the new type system. It will be restored before final 2.0 release.
 
-## [v2.0.0-beta4] 2021-04-01
+## [2.0.0-beta4] 2021-04-01
 
 Yarn Spinner 2.0 Beta 4 is a hotfix release for Yarn Spinner 2.0 Beta 3. 
 
@@ -166,7 +166,7 @@ Yarn Spinner 2.0 Beta 4 is a hotfix release for Yarn Spinner 2.0 Beta 3.
 
 - Fixed an issue that caused Yarn Spinner to not compile on Unity 2018 or Unity 2019.
 
-## [v2.0.0-beta3] 2021-03-27
+## [2.0.0-beta3] 2021-03-27
 
 ### Added
 
@@ -248,7 +248,7 @@ With this change, you can instead say this:
 - You no longer specify a list of languages available to your project in the Preferences menu or in the project settings. This is now controlled from the Yarn Project.
 - The `StartDialogue()` method (with no parameters) has been removed. Instead, provide a node name to start from when calling `StartDialogue(nodeName)`.
 
-## [v2.0.0-beta2] 2021-01-14
+## [2.0.0-beta2] 2021-01-14
 
 ### Added
 
@@ -295,7 +295,7 @@ Kim: You want a bagel?
 
 - InMemoryVariableStorage no longer manages 'default' variables (this concept has moved to the Yarn Program.) (@radiatoryang)
 
-## [v2.0.0-beta1] 2020-10-19
+## [2.0.0-beta1] 2020-10-19
 
 ### Added
 
@@ -334,13 +334,13 @@ Kim: You want a bagel?
 ### Removed
 - Commands registered via the `YarnCommand` attribute can no longer accept a `params` array of parameters. If your command takes a variable number of parameters, use optional parameters instead.
 
-## [v1.2.7] 
+## [1.2.7] 
 
 ### Changed
 
 - Backported check for Experimental status of AssetImporter (promoted in 2020.2)
 
-## [v1.2.6]
+## [1.2.6]
 
 Note: Versions 1.2.1 through 1.2.5 are identical to v1.2.0; they were version number bumps while we were diagnosing an issue in OpenUPM.
 
@@ -348,7 +348,7 @@ Note: Versions 1.2.1 through 1.2.5 are identical to v1.2.0; they were version nu
 
 - Fixed compiler issues in Unity 2019.3 and later by adding an explicit reference to YarnSpinner.dll in YarnSpinnerTests.asmdef
 
-## [v1.2.0] 2020-05-04
+## [1.2.0] 2020-05-04
 
 This is the first release of v1.2.0 of Yarn Spinner for Unity as a separate project. Previously, this project's source code was part of the Yarn Spinner repository. Version 1.2.0 of Yarn Spinner contains an identical release to this.
 
