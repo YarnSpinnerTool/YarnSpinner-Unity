@@ -49,7 +49,9 @@ namespace Yarn.Unity
 #if UNITY_2020_3_OR_NEWER
             destinationType ??= injectorType;
 #else
-            destinationType = destinationType == null ? null : injectorType;
+            if (destinationType == null) {
+                destinationType = injectorType;
+            }
 #endif
 
             if (injectorFunction == null
