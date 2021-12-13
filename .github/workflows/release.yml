@@ -32,6 +32,6 @@ jobs:
           draft: true
           prerelease: true
           body: |
-            ${{ steps.release_preface.outputs.content }}
+            ${{ steps.release_preface.outputs.result }}
             ${{ steps.extract-release-notes.outputs.release_notes }}
 
