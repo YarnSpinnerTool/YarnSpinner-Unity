@@ -203,6 +203,11 @@ namespace Yarn.Unity
             {
                 aboutViewScrollPos = scroll.scrollPosition;
 
+                GUIStyle logoLabel = new GUIStyle(EditorStyles.label)
+                {
+                    alignment = TextAnchor.MiddleCenter
+                };
+
                 GUIStyle titleLabel = new GUIStyle(EditorStyles.largeLabel)
                 {
                     fontSize = 20,
@@ -212,7 +217,8 @@ namespace Yarn.Unity
                 GUIStyle versionLabel = new GUIStyle(EditorStyles.largeLabel)
                 {
                     fontSize = 12,
-                    alignment = TextAnchor.MiddleCenter
+                    alignment = TextAnchor.MiddleCenter,
+                    wordWrap = true,
                 };
 
                 GUIStyle creditsLabel = new GUIStyle(EditorStyles.wordWrappedLabel)
@@ -226,7 +232,7 @@ namespace Yarn.Unity
                     GUILayout.FlexibleSpace();
                     using (new EditorGUILayout.VerticalScope())
                     {
-                        GUILayout.Label(new GUIContent(Icons.Logo), GUILayout.Width(logoSize), GUILayout.Height(logoSize));
+                        GUILayout.Label(new GUIContent(Icons.Logo), logoLabel, /* GUILayout.Width(logoSize) ,*/ GUILayout.Height(logoSize));
                         GUILayout.Label("Yarn Spinner", titleLabel);
                         GUILayout.Label("Core: " + YarnSpinnerCoreVersion, versionLabel);
                         GUILayout.Label("Compiler: " + YarnSpinnerCompilerVersion, versionLabel);
