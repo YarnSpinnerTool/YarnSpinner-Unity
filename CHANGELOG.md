@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+### Changed
+
+### Removed
+
+## [v2.0.0-rc1] 2021-12-13
+
+### Added
+
 - Command parameters can now be grouped with double quotes. eg. `<<add-recipe "Banana Sensations">` and `<<move "My Game Object" LocationName>>` (@andiCR)
 
 - You can now add dialogue views to dialogue runner at any time.
@@ -131,7 +139,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Removed
 
-- Support for 2018 LTS (currently 2018.4.36f1) has been dropped, and 2019 LTS (currently 2019.4.32f1) will be the minimum supported version. The support scheme for YarnSpinner will be clarified in the [CONTRIBUTING](./CONTRIBUTING.md) docs. If you still require support for 2018, please join our [Discord](https://discord.gg/9CvsQfS)!
+- Support for Unity 2018 LTS has been dropped, and 2019 LTS (currently 2019.4.32f1) will be the minimum supported version. The support scheme for Yarn Spinner will be clarified in the [CONTRIBUTING](./CONTRIBUTING.md) docs. If you still require support for 2018, please join our [Discord](https://discord.gg/yarnspinner)!
 
 ## [v2.0.0-beta5] 2021-08-17
 
