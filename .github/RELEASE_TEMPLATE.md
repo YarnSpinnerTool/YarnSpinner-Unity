@@ -24,7 +24,7 @@ To install this release of Yarn Spinner into your Unity project, follow these st
 * If you already have any previous version of the Yarn Spinner package installed, remove it.
 * Click the `+` button, and click *Add package from git URL...*
 * Enter the following URL:
-  * `https://github.com/YarnSpinnerTool/YarnSpinner-Unity.git#{{RELEASE_TAG}}`
+  * `https://github.com/YarnSpinnerTool/YarnSpinner-Unity.git#{RELEASE_TAG}`
 
 Each release will have a different URL. To upgrade to future versions of Yarn Spinner 2.0, you will need to uninstall the package, and reinstall using the new URL.
 

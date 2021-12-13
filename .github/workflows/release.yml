@@ -21,7 +21,7 @@ jobs:
         with:
           _input-file: .github/RELEASE_TEMPLATE.md
           _format-key: '{key}'
-          RELEASE_TAG: ${{ github.ref }}
+          RELEASE_TAG: ${{ github.ref_name }}
       - name: Create release
         uses: actions/create-release@v1
         env:
