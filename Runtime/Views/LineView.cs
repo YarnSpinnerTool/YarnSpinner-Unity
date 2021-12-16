@@ -174,10 +174,6 @@ namespace Yarn.Unity
             canvasGroup.alpha = 0;
             hasPresented = new PresentationFlag();
             hasPresented.Clear();
-
-            autoAdvance = false;// not sure what is going on with it just doing weird shit
-            // I hate all these custom editor views
-            // they all seem to just be wrappers around the already serialised objects
         }
 
         public void Reset()
