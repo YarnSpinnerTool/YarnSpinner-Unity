@@ -583,19 +583,15 @@ namespace Yarn.Unity
         /// <param name="views">The array of views to be assigned.</param>
         public void SetDialogueViews(DialogueViewBase[] views)
         {
-            dialogueViews = views;
-
-            Action continueAction = OnViewUserIntentNextLine;
-            foreach (var dialogueView in dialogueViews) 
+            foreach (var view in views)
             {
-                if (dialogueView == null) 
+                if (view == null || view.enabled == false)
                 {
-                    Debug.LogWarning("The 'Dialogue Views' field contains a NULL element.", gameObject);
                     continue;
                 }
-
-                dialogueView.onUserWantsLineContinuation = continueAction;
+                view.onUserWantsLineContinuation = OnViewUserIntentNextLine;
             }
+            dialogueViews = views;
         }
 
         #region Private Properties/Variables/Procedures
@@ -624,7 +620,6 @@ namespace Yarn.Unity
         /// <remarks>
         /// Automatically created on first access.
         /// </remarks>
-        
         private Dialogue _dialogue;
 
         /// <summary>
@@ -662,19 +657,13 @@ namespace Yarn.Unity
                 Debug.LogWarning($"Dialogue Runner doesn't have any dialogue views set up. No lines or options will be visible.");
             }
 
-            // Give each dialogue view the continuation action, which
-            // they'll call to pass on the user intent to move on to the
-            // next line (or interrupt the current one).
-            System.Action continueAction = OnViewUserIntentNextLine;
-            foreach (var dialogueView in dialogueViews)
+            foreach (var view in dialogueViews)
             {
-                // Skip any null or disabled dialogue views
-                if (dialogueView == null || dialogueView.enabled == false)
+                if (view == null || view.enabled == false)
                 {
                     continue;
                 }
-
-                dialogueView.onUserWantsLineContinuation = continueAction;
+                view.onUserWantsLineContinuation = OnViewUserIntentNextLine;
             }
 
             if (yarnProject != null)
@@ -1142,6 +1131,7 @@ namespace Yarn.Unity
             // the set of active views.
             ActiveDialogueViews.Remove(dialogueView);
 
+            Debug.Log($"{dialogueView.name} dismissed itself");
             // Have all of the views completed? 
             if (ActiveDialogueViews.Count == 0)
             {
@@ -1181,18 +1171,17 @@ namespace Yarn.Unity
                 return;
             }
 
-            // every view has finished showing its stuff so this is to advance to the next line
-            // so we just send over the dismiss signal and it it go from there
+            // asked to advance when there are no active views
+            // this means the views have already processed the lines as needed
+            // so we can ignore this action
             if (ActiveDialogueViews.Count == 0)
             {
-                Debug.Log("user requested advance, all views finished, showing next line");
-                DismissLineFromViews(dialogueViews);
+                Debug.Log("user requested advance, all views finished, ignoring interrupt");
+                return;
             }
-            else // views are still presenting, this is now an interrupt
-            {
-                Debug.Log("user requested advance, all views not finished, interrupting current line");
-                InterruptLine();
-            }
+
+            // now because lines are fully responsible for advancement the only advancement allowed is interruption
+            InterruptLine();
         }
 
         private void DismissLineFromViews(IEnumerable<DialogueViewBase> dialogueViews)

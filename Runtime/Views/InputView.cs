@@ -8,7 +8,7 @@ using UnityEngine.InputSystem;
 
 namespace Yarn.Unity
 {
-    public class InputView : DialogueViewBase
+    public class InputView : MonoBehaviour
     {
         internal enum ContinueActionType
         {
@@ -17,6 +17,9 @@ namespace Yarn.Unity
             InputSystemAction,
             InputSystemActionFromAsset,
         }
+
+        // the dialogue view that will be told about user skipping events
+        [SerializeField] private DialogueViewBase attachedView;
 
         [SerializeField]
         internal ContinueActionType continueActionType;
@@ -33,34 +36,24 @@ namespace Yarn.Unity
         internal InputAction continueAction = new InputAction("Skip", InputActionType.Button, CommonUsages.Cancel);
 #endif
 
-        LocalizedLine currentLine = null;
-
         public void Start()
         {
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-            // If we are using an action reference, and it's not null,
-            // configure it
-            if (continueActionType == ContinueActionType.InputSystemActionFromAsset && continueActionReference != null)
+            if (attachedView == null)
             {
-                continueActionReference.action.started += UserPerformedSkipAction;
+                attachedView = GetComponent<DialogueViewBase>();
             }
-
-            // The custom skip action always starts disabled
-            continueAction?.Disable();
-            continueAction.started += UserPerformedSkipAction;
-#endif
         }
 
 #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
         void UserPerformedSkipAction(InputAction.CallbackContext obj)
         {
-            OnContinueClicked();
+            attachedView.UserRequestedViewAdvancement();
         }
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
         public void Update()
-        {   
+        {
             // We need to be configured to use a keycode to interrupt/continue
             // lines.
             if (continueActionType != ContinueActionType.KeyCode)
@@ -69,66 +62,14 @@ namespace Yarn.Unity
             }
 
             // That keycode needs to have been pressed this frame.
-            if (!UnityEngine.Input.GetKeyDown(continueActionKeyCode))
+            if (!UnityEngine.Input.GetKeyUp(continueActionKeyCode))
             {
                 return;
             }
 
             // We're good to indicate that we want to skip/continue.
-            OnContinueClicked();
+            attachedView.UserRequestedViewAdvancement();
         }
 #endif
-
-        public override void DismissLine(Action onDismissalComplete)
-        {
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-            if (continueActionType == ContinueActionType.InputSystemAction)
-            {
-                continueAction?.Disable();
-            }
-            else if (continueActionType == ContinueActionType.InputSystemActionFromAsset)
-            {
-                continueActionReference?.action?.Disable();
-            }
-#endif
-            currentLine = null;
-
-            onDismissalComplete();
-        }
-
-        public override void InterruptLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
-        {
-            currentLine = dialogueLine;
-            onDialogueLineFinished();
-        }
-
-        public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
-        {
-            currentLine = dialogueLine;
-
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-            // If we are using a custom Unity Input System action, enable
-            // it now.
-            if (continueActionType == ContinueActionType.InputSystemAction)
-            {
-                continueAction?.Enable();
-            }
-            else if (continueActionType == ContinueActionType.InputSystemActionFromAsset)
-            {
-                continueActionReference?.action.Enable();
-            }
-#endif
-            onDialogueLineFinished();
-        }
-
-        public void OnContinueClicked()
-        {
-            if (currentLine == null)
-            {
-                // We're not actually displaying a line. No-op.
-                return;
-            }
-            ReadyForNextLine();
-        }
     }
 }

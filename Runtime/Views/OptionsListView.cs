@@ -127,7 +127,7 @@ namespace Yarn.Unity
             /// </summary>
             void OptionViewWasSelected(DialogueOption option)
             {
-                StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeTime, () => OnOptionSelected(option.DialogueOptionID)));
+                StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeTime, null, () => OnOptionSelected(option.DialogueOptionID)));
             }
         }
     }

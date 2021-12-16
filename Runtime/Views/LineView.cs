@@ -6,6 +6,12 @@ using UnityEngine.UI;
 
 namespace Yarn.Unity
 {
+    public class PresentationFlag
+    {
+        public bool Presented { get; private set; } = false;
+        public void Set() => Presented = true;
+        public void Clear() => Presented = false;
+    }
     public static class Effects
     {
         /// <summary>
@@ -20,7 +26,7 @@ namespace Yarn.Unity
         /// from 0 to 1.</param>
         /// <param name="onComplete">A delegate to invoke after fading is
         /// complete.</param>
-        public static IEnumerator FadeAlpha(CanvasGroup canvasGroup, float from, float to, float fadeTime, Action onComplete = null)
+        public static IEnumerator FadeAlpha(CanvasGroup canvasGroup, float from, float to, float fadeTime, PresentationFlag presented = null, Action onComplete = null)
         {
             canvasGroup.alpha = from;
 
@@ -50,10 +56,11 @@ namespace Yarn.Unity
                 canvasGroup.blocksRaycasts = true;
             }
 
+            presented?.Set();
             onComplete?.Invoke();
         }
 
-        public static IEnumerator Typewriter(TextMeshProUGUI text, float lettersPerSecond, Action onCharacterTyped = null, Action onComplete = null)
+        public static IEnumerator Typewriter(TextMeshProUGUI text, float lettersPerSecond, PresentationFlag presented, Action onCharacterTyped = null, Action onComplete = null)
         {
             // Start with everything invisible
             text.maxVisibleCharacters = 0;
@@ -108,6 +115,8 @@ namespace Yarn.Unity
             // interrupted. Either way, display everything now.
             text.maxVisibleCharacters = characterCount;
 
+            presented?.Set();
+
             // Wrap up by invoking our completion handler.
             onComplete?.Invoke();
         }
@@ -154,9 +163,21 @@ namespace Yarn.Unity
 
         LocalizedLine currentLine = null;
 
+        // if set to false the view will prevent calling the completion handler until manually made to do so
+        [SerializeField]
+        internal bool autoAdvance = false;
+        // a wrapper around a bool to share around so coroutines can say they have finished presenting stuff
+        internal PresentationFlag hasPresented;
+
         public void Start()
         {
             canvasGroup.alpha = 0;
+            hasPresented = new PresentationFlag();
+            hasPresented.Clear();
+
+            autoAdvance = false;// not sure what is going on with it just doing weird shit
+            // I hate all these custom editor views
+            // they all seem to just be wrappers around the already serialised objects
         }
 
         public void Reset()
@@ -167,10 +188,11 @@ namespace Yarn.Unity
         public override void DismissLine(Action onDismissalComplete)
         {
             currentLine = null;
+            hasPresented.Clear();
 
-            if (useFadeEffect) 
+            if (useFadeEffect)
             {
-                StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeOutTime, onDismissalComplete));
+                StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeOutTime, hasPresented, onDismissalComplete));
             }
             else
             {
@@ -181,14 +203,16 @@ namespace Yarn.Unity
             }
         }
 
-        private void OnCharacterTyped() {
+        private void OnCharacterTyped()
+        {
             onCharacterTyped?.Invoke();
         }
 
-        public override void InterruptLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
+        public override void InterruptLine(LocalizedLine dialogueLine, Action onInterruptLineFinished)
         {
             currentLine = dialogueLine;
             StopAllCoroutines();
+            hasPresented.Clear();
 
             // for now we are going to just immediately show everything
             // later we will make it fade in
@@ -228,7 +252,7 @@ namespace Yarn.Unity
             canvasGroup.blocksRaycasts = true;
 
             // hold on screen for just a moment because otherwise it looks weird
-            StartCoroutine(TempYield(0.5f, onDialogueLineFinished));
+            StartCoroutine(TempYield(0.5f, onInterruptLineFinished));
         }
 
         // this is such a bad name
@@ -238,9 +262,17 @@ namespace Yarn.Unity
             onDialogueLineFinished();
         }
 
+        private Action dialogueFinishedAction;
         public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
             currentLine = dialogueLine;
+            hasPresented.Clear();
+
+            // if we have auto advance on we just hand over the completion handler
+            // if we don't have auto advance we send over no completion handler and store the completion handler
+            // this way it can be called later by the user action
+            var completionHandler = autoAdvance ? onDialogueLineFinished : null;
+            dialogueFinishedAction = onDialogueLineFinished;
 
             lineText.gameObject.SetActive(true);
             canvasGroup.gameObject.SetActive(true);
@@ -283,7 +315,7 @@ namespace Yarn.Unity
                 }
 
                 // Fade up and then call FadeComplete when done
-                StartCoroutine(Effects.FadeAlpha(canvasGroup, 0, 1, fadeInTime, () => FadeComplete(onDialogueLineFinished)));
+                StartCoroutine(Effects.FadeAlpha(canvasGroup, 0, 1, fadeInTime, useTypewriterEffect ? null: hasPresented, () => FadeComplete(completionHandler)));
             }
             else
             {
@@ -295,11 +327,12 @@ namespace Yarn.Unity
                 if (useTypewriterEffect)
                 {
                     // Start the typewriter
-                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, OnCharacterTyped, onDialogueLineFinished));
+                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, hasPresented, OnCharacterTyped, completionHandler));
                 }
                 else
                 {
-                    onDialogueLineFinished();
+                    hasPresented.Set();
+                    completionHandler();
                 }
             }
 
@@ -307,12 +340,38 @@ namespace Yarn.Unity
             {
                 if (useTypewriterEffect)
                 {
-                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, OnCharacterTyped, onFinished));
+                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, hasPresented, OnCharacterTyped, onFinished));
                 }
                 else
                 {
                     onFinished();
                 }
+            }
+        }
+
+        public override void UserRequestedViewAdvancement()
+        {
+            // we have no line, so the user just mashed randomly
+            if (currentLine == null)
+            {
+                Debug.Log("no line, skipping");
+                return;
+            }
+
+            // if we have finished showing what we need to do then depends on if we are configured to auto-advance or not
+            // if auto advance is on then we can safely ignore the request because the autoadvance will take care of it shortly
+            // otherwise we need to manually run the completion handler so that the runner knows the line is finally finished
+            if (hasPresented.Presented)
+            {
+                if (!autoAdvance)
+                {
+                    dialogueFinishedAction?.Invoke();
+                }
+            }
+            else
+            {
+                // we haven't finished showing the line, doesn't matter what the autoadvance state is, we are interrupting
+                onUserWantsLineContinuation?.Invoke();
             }
         }
 
@@ -323,7 +382,11 @@ namespace Yarn.Unity
                 // We're not actually displaying a line. No-op.
                 return;
             }
-            ReadyForNextLine();
+            // if autoadvance is on then we don't need to worry about the button
+            if (hasPresented.Presented && !autoAdvance)
+            {
+                dialogueFinishedAction?.Invoke();
+            }
         }
     }
 }
