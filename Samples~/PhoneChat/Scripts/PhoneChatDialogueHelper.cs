@@ -4,10 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
-#endif
-
 namespace Yarn.Unity.Example {
     /// <summary>
     /// clones dialogue bubbles for the ChatDialogue example
@@ -41,19 +37,6 @@ namespace Yarn.Unity.Example {
             runner.AddCommandHandler( "Them", SetSenderThem ); // registers Yarn Command <<They>>, which sets the current message sender to "Them" (whoever the player is talking to)
 
             optionsContainer.SetActive(false);
-        }
-
-        void Update() {
-//             bool wantsContinue;
-// #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-//             wantsContinue = Keyboard.current.spaceKey.wasPressedThisFrame;
-// #else
-//             wantsContinue = Input.GetKeyDown(KeyCode.Space);
-// #endif
-
-//             if (wantsContinue && showingOptions == false) {
-//                 this.ReadyForNextLine();
-//             }
         }
 
         void Start () {
