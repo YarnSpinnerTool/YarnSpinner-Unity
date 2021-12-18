@@ -10,7 +10,7 @@ namespace Yarn.Unity
         [SerializeField] TextMeshProUGUI text;
         [SerializeField] bool showCharacterName = false;
 
-        internal Action<DialogueOption> OnOptionSelected;
+        public Action<DialogueOption> OnOptionSelected;
 
         DialogueOption _option;
 
@@ -20,7 +20,7 @@ namespace Yarn.Unity
         {
             get => _option;
 
-            internal set
+            set
             {
                 _option = value;
 
