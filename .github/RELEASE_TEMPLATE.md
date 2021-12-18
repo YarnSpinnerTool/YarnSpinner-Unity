@@ -1,7 +1,5 @@
 <!-- RELEASE_TEMPLATE.md is not a formally supported file used by GitHub. This file is used by .github/workflows/release.yml to add a release notes preface. -->
 
-**This is a pre-release version of Yarn Spinner for Unity. It is not yet considered ready for production use.**
-
 Yarn Spinner is made possible by your generous patronage. Please consider supporting Yarn Spinner's development by [becoming a patron](https://patreon.com/secretlab)!
 
 <a href="https://patreon.com/secretlab"><img width="200" src="https://user-images.githubusercontent.com/901768/71883373-6f40ff80-318a-11ea-9d3a-01f1f58cb39e.png"></a>
@@ -16,9 +14,13 @@ There are several places you can go to get help with Yarn Spinner.
 
 ## 📦 How To Install Yarn Spinner
 
-This release is available as a Unity package, using a Git URL. Additional download options will be available for the final release.
+To install the most recent release of Yarn Spinner for Unity, please see the [Installation Instructions](https://docs.yarnspinner.dev/using-yarnspinner-with-unity/installation-and-setup) in the Yarn Spinner documentation.
 
-To install this release of Yarn Spinner into your Unity project, follow these steps:
+If you want to install _this_ particular version of Yarn Spinner for Unity, follow these steps:
+
+<details>
+<summary>Installing Yarn Spinner for Unity {RELEASE_TAG} from Git</summary>
+<p>
 
 * Open the Window menu, and choose Package Manager.
 * If you already have any previous version of the Yarn Spinner package installed, remove it.
@@ -26,7 +28,10 @@ To install this release of Yarn Spinner into your Unity project, follow these st
 * Enter the following URL:
   * `https://github.com/YarnSpinnerTool/YarnSpinner-Unity.git#{RELEASE_TAG}`
 
-Each release will have a different URL. To upgrade to future versions of Yarn Spinner 2.0, you will need to uninstall the package, and reinstall using the new URL.
+Each release will have a different URL. To upgrade to future versions of Yarn Spinner, you will need to uninstall the package, and reinstall using the new URL.
+</p>
+</details>
+
 
 ## 📜 Changes
 
