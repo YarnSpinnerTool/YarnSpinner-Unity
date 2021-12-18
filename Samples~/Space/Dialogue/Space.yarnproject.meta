@@ -14,7 +14,7 @@ ScriptedImporter:
   sourceScripts:
   - {fileID: 4900002, guid: 24f22b038d584445ba4f43344cc5733d, type: 3}
   - {fileID: 4900002, guid: 8b6ae1e8d32e840f0b3fd0b033e52253, type: 3}
-  compileError: 
+  compileErrors: []
   serializedDeclarations:
   - name: $should_see_ship
     typeName: Bool
@@ -40,4 +40,4 @@ ScriptedImporter:
   - languageID: de
     stringsFile: {fileID: 4900000, guid: c7ccc37b05d57b5449cdae7c315d1646, type: 3}
     assetsFolder: {fileID: 102900000, guid: 7ff8e9b3304254b479fd8264873f64d4, type: 3}
-  useAddressableAssets: 1
+  useAddressableAssets: 0
