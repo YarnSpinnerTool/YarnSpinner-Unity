@@ -37,7 +37,7 @@ just read the documentation... www.yarnspinner.dev !
 <<wait 2>>
 but if you want my advice,
 <<wait 5>>
-you should maybe add an automatic delay before a message, based on the length of the message, in DialogueUI.DoRunLine()
+you should maybe add an automatic delay before a message, based on the length of the message, in PhoneChatDialogueHelper.RunLine()
 <<wait 4>>
 otherwise you have to keep typing out "wait" instructions, which is annoying
 

@@ -2,27 +2,58 @@
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using System;
+
+#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace Yarn.Unity.Example {
     /// <summary>
     /// clones dialogue bubbles for the ChatDialogue example
     /// </summary>
-    public class PhoneChatDialogueHelper : MonoBehaviour
+    public class PhoneChatDialogueHelper : DialogueViewBase
     {
         DialogueRunner runner;
 
+
+
+        public TMPro.TextMeshProUGUI text;
+
+        public GameObject optionsContainer;
+        public OptionView optionPrefab;
+
         [Tooltip("This is the chat message bubble UI object (what we are cloning for each message!)... NOT the container group for all chat bubbles")]
         public GameObject dialogueBubblePrefab;
+        public float lettersPerSecond = 10f;
+        
         bool isFirstMessage = true;
 
         // current message bubble styling settings, modified by SetSender
         bool isRightAlignment = true;
         Color currentBGColor = Color.black, currentTextColor = Color.white;
+        
+        private bool showingOptions = false;
 
         void Awake() {
             runner = GetComponent<DialogueRunner>();
             runner.AddCommandHandler( "Me", SetSenderMe ); // registers Yarn Command <<Me>>, which sets the current message sender to "Me"
             runner.AddCommandHandler( "Them", SetSenderThem ); // registers Yarn Command <<They>>, which sets the current message sender to "Them" (whoever the player is talking to)
+
+            optionsContainer.SetActive(false);
+        }
+
+        void Update() {
+//             bool wantsContinue;
+// #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
+//             wantsContinue = Keyboard.current.spaceKey.wasPressedThisFrame;
+// #else
+//             wantsContinue = Input.GetKeyDown(KeyCode.Space);
+// #endif
+
+//             if (wantsContinue && showingOptions == false) {
+//                 this.ReadyForNextLine();
+//             }
         }
 
         void Start () {
@@ -48,7 +79,7 @@ namespace Yarn.Unity.Example {
         void UpdateMessageBoxSettings() {
             var bg = dialogueBubblePrefab.GetComponentInChildren<Image>();
             bg.color = currentBGColor;
-            var message = dialogueBubblePrefab.GetComponentInChildren<Text>();
+            var message = dialogueBubblePrefab.GetComponentInChildren<TMPro.TextMeshProUGUI>();
             message.text = "";
             message.color = currentTextColor;
 
@@ -82,7 +113,51 @@ namespace Yarn.Unity.Example {
             UpdateMessageBoxSettings();
         }
 
+        Coroutine currentTypewriterEffect;
 
+        public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
+        {
+            if (currentTypewriterEffect != null) {
+                StopCoroutine(currentTypewriterEffect);
+            }
+
+            CloneMessageBoxToHistory();
+
+            text.text = dialogueLine.TextWithoutCharacterName.Text;;
+
+            currentTypewriterEffect = StartCoroutine(Effects.Typewriter(text, 10f, null, () =>
+            {
+                currentTypewriterEffect = null;
+                onDialogueLineFinished();
+            }));
+        }
+
+        public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
+        {
+            foreach(Transform child in optionsContainer.transform) {
+                Destroy(child.gameObject);
+            }
+
+            showingOptions = true;
+
+            optionsContainer.SetActive(true);
+
+            for (int i = 0; i < dialogueOptions.Length; i++) {
+                DialogueOption option = dialogueOptions[i];
+                var optionView = Instantiate(optionPrefab);
+                
+                optionView.transform.SetParent(optionsContainer.transform, false);
+
+                optionView.Option = option;
+
+                optionView.OnOptionSelected = (selectedOption) =>
+                {
+                    showingOptions = false;
+                    optionsContainer.SetActive(false);
+                    onOptionSelected(selectedOption.DialogueOptionID);
+                };
+            }
+        }
     }
 
 }
