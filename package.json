@@ -7,6 +7,9 @@
   "dependencies": {
     "com.unity.textmeshpro": "1.4.1"
   },
+  "changelogUrl": "https://github.com/YarnSpinnerTool/YarnSpinner-Unity/blob/main/CHANGELOG.md",
+  "documentationUrl": "https://docs.yarnspinner.dev/",
+  "licensesUrl": "https://github.com/YarnSpinnerTool/YarnSpinner-Unity/blob/main/LICENSE.md",
   "keywords": [
     "Dialogue",
     "Yarn"
