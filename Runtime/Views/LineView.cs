@@ -103,7 +103,7 @@ namespace Yarn.Unity
             // the requested speed.
             var accumulator = Time.deltaTime;
 
-            while (text.maxVisibleCharacters < characterCount && interruption?.Interrupted == false)
+            while (text.maxVisibleCharacters < characterCount && (interruption == null || interruption.Interrupted == false))
             {
                 // We need to show as many letters as we have accumulated
                 // time for.
