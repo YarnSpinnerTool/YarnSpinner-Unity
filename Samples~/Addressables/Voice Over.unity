@@ -579,5 +579,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b6798449caec4a32a5ad27badb06624, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textLanguageCode: en-AU
-  audioLanguage: en-AU
+  textLanguageCode: en
+  audioLanguage: en
