@@ -2,78 +2,49 @@
 
 <img src="https://yarnspinner.dev/img/YarnSpinnerLogo.png" alt="Yarn Spinner logo" width="100px;" align="right">
 
-[Yarn Spinner](https://yarnspinner.dev) is the friendly tool for writing dialogue games. This repo contains the Unity integration; you can find the core [Yarn Spinner compiler](https://github.com/YarnSpinnerTool/YarnSpinner) in its own repository.
+[Yarn Spinner](https://yarnspinner.dev) is the friendly tool for writing dialogue in games. It's easy for writers to use, and has powerful features for programmers.
 
-## Join Our Discord!
+Yarn Spinner is a dialogue system that lets you write interactive conversations in a simple, screenplay-like format, which can be loaded into your game and run. 
 
-For help, support, discussion, and chill community times, come and join the [Yarn Spinner Discord](https://discord.gg/9CvsQfS)!
+When a conversation is running, Yarn Spinner sends your game **lines** of dialogue to show, **options** to let the player choose from, and **commands** to make things happen in your scene. 
 
-## Getting Started
+Yarn Spinner has been used in a number of critically acclaimed games, including [Night in the Woods](http://nightinthewoods.com), [A Short Hike](https://ashorthike.com), [Lost in Random](https://www.ea.com/en-au/games/lost-in-random), and many more.
 
-To get started, you'll need to install Yarn Spinner in your Unity project. Yarn Spinner is available as a package via [OpenUPM](https://openupm.com), and via direct download as a `.unitypackage` file.
+It's free to download and use for free and commercial games, and is open source under the terms of the MIT License.
 
-### Quick Start: Direct download
+This repo contains the Unity integration; you can find the core [Yarn Spinner compiler](https://github.com/YarnSpinnerTool/YarnSpinner) in its own repository.
 
-To install Yarn Spinner via direct download, follow these steps:
+## Getting Started 
 
-1. Go to the [releases page](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/releases/latest), and download the `.unitypackage`.
-2. Open the `.unitypackage`, and import its contents into your project. 
+To install Yarn Spinner for Unity, follow the [Installation Instructions](https://docs.yarnspinner.dev/using-yarnspinner-with-unity/installation-and-setup) available in the Yarn Spinner documentation.
 
-Yarn Spinner will be installed into the `YarnSpinner` folder in your project's Assets.
+## Learning More
 
-### Quick Start: OpenUPM
+Full documentation, tutorials, and additional information is available in the [Yarn Spinner documentation](https://docs.yarnspinner.dev).
 
-To install Yarn Spinner via OpenUPM, follow these steps:
+## Getting Help
 
-1. Install [`openupm-cli`](https://openupm.com/#get-started).
-2. Open a terminal, and navigate to your project's folder.
-3. Run the following command: `openupm add dev.yarnspinner.unity`
-   
-Yarn Spinner will be installed into the `Yarn Spinner` folder in your project's Packages.
+For help, support, discussion, and chill community times, come and join the [Yarn Spinner Discord](https://discord.gg/yarnspinner)!
 
-### More Information
+## Community Projects
 
-More detailed information on how to install Yarn Spinner is available on the [Yarn Spinner site](http://yarnspinner.dev/docs/unity/installing/).
+A number of extremely cool projects by extremely cool people exist to work with Yarn Spinner. 
 
-## Documentation
+If you've written a high-quality project that works with Yarn Spinner, please get in touch via [Twitter](https://twitter.com/YarnSpinnerTool) or [Discord](https://discord.gg/yarnspinner)!
 
-Looking for help with Yarn Spinner? We've got you covered.
-
-### Tutorial
-
-If you're new to Yarn Spinner, we suggest following the [tutorial](http://yarnspinner.dev/docs/tutorial/).
-
-### Guide
-
-Once you've followed the tutorial, you should read the [Yarn language guide](http://yarnspinner.dev/docs/writing/).
-
-For a deeper dive into how Yarn Spinner for Unity works, we've written a [complete guide](http://yarnspinner.dev/docs/unity/) to the various bits and pieces.
-
-### API Reference
-
-A [full reference to the API of Yarn Spinner](http://yarnspinner.dev/api/), including the Unity integration, is available.
-
-## Support
-
-There are several places to get more help with Yarn Spinner, and stay up to date with what's happening.
-
-* [Follow us on Twitter](https://twitter.com/YarnSpinnerTool)!
-* Join the official [Yarn Spinner Discord](http://discord.gg/yarnspinner) !
-
-## License
-
-Yarn Spinner is available under the [MIT License](LICENSE.md). This means that you can use it in any commercial or noncommercial project. The only requirement is that you need to include attribution in your game's docs. A credit would be very, very nice, too, but isn't required. If you'd like to know more about what this license lets you do, tldrlegal.com have a [very nice write up about the MIT license](https://tldrlegal.com/license/mit-license) that you might find useful.
+* [Yarn Spinner Language Server](https://github.com/pappleby/YarnSpinnerLanguageServer), by [pappleby](https://github.com/pappleby): An implementation of a Language Server for the Yarn Spinner compiler, designed for use with Visual Studio and Visual Studio Code.
+* [Crochet](https://github.com/FaultyFunctions/Crochet), by [FaultyFunctions](https://github.com/FaultyFunctions/): A visual editor for writing Yarn script.
+* [GDYarn](https://github.com/kyperbelt/GDYarn), by [Kyperbelt](https://github.com/kyperbelt/): An implementation of the Yarn Spinner compiler in GDScript.
+* [Wol](https://github.com/bram-dingelstad/Wol), by [Bram Dingelstad](https://github.com/bram-dingelstad/): An implementation of Yarn Spinner for the [Godot](http://godotengine.org) game engine, based on GDYarn.
+* [Yarn Loom](https://github.com/TranquilMarmot/YarnLoom), by [TranquilMarmot](https://github.com/TranquilMarmot): A Visual Studio Code extension that embeds the Yarn Classic editor.
 
 ## Credits
 
-Yarn Spinner was originally created by [Secret Lab](http://secretlab.com.au), an Australian game dev studio. [Come say hi](https://twitter.com/thesecretlab)!
+Yarn Spinner is developed by [Secret Lab](https://secretlab.games/), along with a huge community of contributors.
 
 The logo was made by [Cecile Richard](https://www.cecile-richard.com/).
 
-<a href="https://gamecenter.nyu.edu/"><img src="https://yarnspinner.dev/img/NYUGameCenter.png" alt="NYU Game Center logo" width="250px;" align="right"></a>
-
-Yarn Spinner's development is made possible in part by [NYU Game Center](https://gamecenter.nyu.edu/). 
-
+This project has been assisted by the Australian Government through the [Australia Council](https://www.australiacouncil.gov.au/), its arts funding and advisory body. Yarn Spinner's development is made possible in part by [NYU Game Center](https://gamecenter.nyu.edu/). 
 
 ## Help Us Make Yarn Spinner!
 
