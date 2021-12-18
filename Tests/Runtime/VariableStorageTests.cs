@@ -29,10 +29,9 @@ namespace Yarn.Unity.Tests
         // Getters for the various components in the scene that we're
         // working with
         DialogueRunner Runner => GameObject.FindObjectOfType<DialogueRunner>();
-        DialogueUI UI => GameObject.FindObjectOfType<DialogueUI>();
+        LineView UI => GameObject.FindObjectOfType<LineView>();
         InMemoryVariableStorage VarStorage => GameObject.FindObjectOfType<InMemoryVariableStorage>();
-        Text TextCanvas => UI.dialogueContainer.transform.GetComponentsInChildren<Text>()
-                                                         .First(element => element.gameObject.name == "Text");
+        TMPro.TextMeshProUGUI TextCanvas => UI.lineText;
 
         [UnitySetUp]
         public IEnumerator SetUp()
@@ -51,18 +50,9 @@ namespace Yarn.Unity.Tests
         const bool boolTest = true;
         const float floatTest = 4.20f;
 
-        [UnityTest]
-        public IEnumerator SetValue_TryGetValue()
+        public void SetValue_TryGetValue()
         {
-            // run all lines
-            Runner.StartDialogue(Runner.startNode);
-            UI.ReadyForNextLine();
-            yield return null;
-            yield return null;
-            UI.ReadyForNextLine();
-            yield return null;
-            yield return null;
-
+            
             // set, then get, then test equality
             VarStorage.SetValue("$stringVar", stringTest);
             VarStorage.TryGetValue<string>("$stringVar", out var actualStringResult);
@@ -79,8 +69,6 @@ namespace Yarn.Unity.Tests
             VarStorage.SetValue("$totallyNewUndeclaredVar", stringTest);
             VarStorage.TryGetValue<string>("$totallyNewUndeclaredVar", out var actualUndeclaredResult);
             Assert.AreEqual(stringTest, actualUndeclaredResult);
-
-            yield return null;
         }
 
         void TestClearVarStorage() {
@@ -92,7 +80,17 @@ namespace Yarn.Unity.Tests
             Assert.AreEqual(0,varCount);
         }
 
-        void TestVariableValuesFromYarnScript() {
+        [UnityTest]
+        public IEnumerator TestVariableValuesFromYarnScript() {
+            // run all lines
+            Runner.StartDialogue(Runner.startNode);
+            UI.ReadyForNextLine();
+            yield return null;
+            yield return null;
+            UI.ReadyForNextLine();
+            yield return null;
+            yield return null;
+
             VarStorage.TryGetValue<string>("$stringVar", out var actualStringResult);
             Assert.AreEqual("hola", actualStringResult);
             VarStorage.TryGetValue<bool>("$boolVar", out var actualBoolResult);
