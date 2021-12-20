@@ -16,7 +16,7 @@ This repo contains the Unity integration; you can find the core [Yarn Spinner co
 
 ## Getting Started 
 
-To install Yarn Spinner for Unity, follow the [Installation Instructions](https://docs.yarnspinner.dev/using-yarnspinner-with-unity/installation-and-setup) available in the Yarn Spinner documentation.
+To install Yarn Spinner for Unity, head to the [documentation](https://docs.yarnspinner.dev/).
 
 ## Learning More
 
@@ -25,18 +25,6 @@ Full documentation, tutorials, and additional information is available in the [Y
 ## Getting Help
 
 For help, support, discussion, and chill community times, come and join the [Yarn Spinner Discord](https://discord.gg/yarnspinner)!
-
-## Community Projects
-
-A number of extremely cool projects by extremely cool people exist to work with Yarn Spinner. 
-
-If you've written a high-quality project that works with Yarn Spinner, please get in touch via [Twitter](https://twitter.com/YarnSpinnerTool) or [Discord](https://discord.gg/yarnspinner)!
-
-* [Yarn Spinner Language Server](https://github.com/pappleby/YarnSpinnerLanguageServer), by [pappleby](https://github.com/pappleby): An implementation of a Language Server for the Yarn Spinner compiler, designed for use with Visual Studio and Visual Studio Code.
-* [Crochet](https://github.com/FaultyFunctions/Crochet), by [FaultyFunctions](https://github.com/FaultyFunctions/): A visual editor for writing Yarn script.
-* [GDYarn](https://github.com/kyperbelt/GDYarn), by [Kyperbelt](https://github.com/kyperbelt/): An implementation of the Yarn Spinner compiler in GDScript.
-* [Wol](https://github.com/bram-dingelstad/Wol), by [Bram Dingelstad](https://github.com/bram-dingelstad/): An implementation of Yarn Spinner for the [Godot](http://godotengine.org) game engine, based on GDYarn.
-* [Yarn Loom](https://github.com/TranquilMarmot/YarnLoom), by [TranquilMarmot](https://github.com/TranquilMarmot): A Visual Studio Code extension that embeds the Yarn Classic editor.
 
 ## Credits
 
