@@ -104,11 +104,11 @@ namespace Yarn.Unity.Editor
             }
 #endif
 
-            EditorGUILayout.PropertyField(defaultLanguageProperty, new GUIContent("Default Language"));
+            EditorGUILayout.PropertyField(defaultLanguageProperty, new GUIContent("Base Language"));
 
             CurrentProjectDefaultLanguageProperty = defaultLanguageProperty;
 
-            EditorGUILayout.PropertyField(languagesToSourceAssetsProperty);
+            EditorGUILayout.PropertyField(languagesToSourceAssetsProperty, new GUIContent("Localisations"));
 
             CurrentProjectDefaultLanguageProperty = null;
 
