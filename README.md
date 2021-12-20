@@ -14,13 +14,9 @@ It's free to download and use for free and commercial games, and is open source 
 
 This repo contains the Unity integration; you can find the core [Yarn Spinner compiler](https://github.com/YarnSpinnerTool/YarnSpinner) in its own repository.
 
-## Getting Started 
+## Getting Started
 
-To install Yarn Spinner for Unity, head to the [documentation](https://docs.yarnspinner.dev/).
-
-## Learning More
-
-Full documentation, tutorials, and additional information is available in the [Yarn Spinner documentation](https://docs.yarnspinner.dev).
+Installation instructions, documentation, tutorials, plus additional information is available in the [Yarn Spinner documentation](https://docs.yarnspinner.dev).
 
 ## Getting Help
 
