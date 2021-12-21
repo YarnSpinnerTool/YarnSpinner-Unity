@@ -61,6 +61,10 @@ namespace Yarn.Unity
         // The dynamically fetched text to show in the About page.
         static string supportersText = null;
 
+        // Unity requires all directory separators to be forward slashes, on all
+        // platforms.
+        const char DirectorySeparatorChar = '/';
+
         // Shows the window.
         [MenuItem("Window/Yarn Spinner %#y", false, 2000)]
         static void ShowWindow()
@@ -296,7 +300,7 @@ namespace Yarn.Unity
 
                     // All paths will begin with the path to the Assets
                     // folder, so just remove that for tidiness
-                    var displayedScript = script.Replace(Application.dataPath + Path.DirectorySeparatorChar, "");
+                    var displayedScript = script.Replace(Application.dataPath + DirectorySeparatorChar, "");
                     EditorGUILayout.LabelField(displayedScript);
 
                     EditorGUI.EndDisabledGroup();
@@ -354,8 +358,10 @@ namespace Yarn.Unity
                         Debug.Log($@"{upgradedFile.Path}: {diagnostics}");
                     }
 
+                    var realPath = upgradedFile.Path.Replace(DirectorySeparatorChar, Path.DirectorySeparatorChar);
+
                     // Save the text back to disk
-                    File.WriteAllText(upgradedFile.Path, upgradedFile.UpgradedSource, System.Text.Encoding.UTF8);
+                    File.WriteAllText(realPath, upgradedFile.UpgradedSource, System.Text.Encoding.UTF8);
 
                     // (Re-)import the asset
                     AssetDatabase.ImportAsset(upgradedFile.Path);
@@ -375,6 +381,8 @@ namespace Yarn.Unity
             // Search for all Yarn scripts, and load them into the list.
             yarnProjectList = Directory.GetFiles(Application.dataPath, "*.yarn", SearchOption.AllDirectories)
                                 .Concat(Directory.GetFiles(Application.dataPath, "*.yarnproject", SearchOption.AllDirectories))
+                                // Unity requires all paths to use forward slashes
+                                .Select(path => path.Replace(Path.DirectorySeparatorChar, DirectorySeparatorChar))
                                 .ToList();
 
             // Repaint to ensure that any changes to the list are visible
