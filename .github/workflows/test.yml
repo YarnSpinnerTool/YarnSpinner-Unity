@@ -4,6 +4,7 @@ name: Run Tests 🧪
 on: 
   push:
       branches:
+          - main
           - develop
           - 'feature/**'
   workflow_dispatch:
