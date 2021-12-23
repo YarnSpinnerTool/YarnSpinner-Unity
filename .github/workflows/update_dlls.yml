@@ -24,7 +24,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: 6.0.x
 
     - name: Fetch all commits
       run: git fetch --unshallow
@@ -66,12 +66,6 @@ jobs:
       run: |
         cp -v YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/*.dll YarnSpinner-Unity/Runtime/DLLs
         rm -f YarnSpinner-Unity/Runtime/DLLs/Microsoft.CSharp.dll
-    
-    - name: Commit Change
-      run: |
-        git add .
-        git commit -m 
-      working-directory: ./YarnSpinner-Unity
     
     - name: Create pull request
       uses: peter-evans/create-pull-request@v3
