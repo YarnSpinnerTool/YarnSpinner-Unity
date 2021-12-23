@@ -10,9 +10,6 @@ jobs:
     permissions:
       pull-requests: write
     
-    # Don't run this action on forks
-    if: github.event.pull_request.head.repo.full_name == github.repository
-    
     steps:
     - name: Checkout Yarn Spinner for Unity
       uses: actions/checkout@v2
