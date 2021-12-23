@@ -65,7 +65,7 @@ jobs:
     - name: Copy DLLs
       run: |
         cp -v YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/*.dll YarnSpinner-Unity/Runtime/DLLs
-        rm -f YarnSpinner-Unity/Runtime/DLLs/Microsoft.CSharp.dll
+        rm -fv YarnSpinner-Unity/Runtime/DLLs/Microsoft.CSharp.dll
     
     - name: Create pull request
       uses: peter-evans/create-pull-request@v3
