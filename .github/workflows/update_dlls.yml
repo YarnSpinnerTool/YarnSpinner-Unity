@@ -76,7 +76,7 @@ jobs:
         branch: update-dlls
         title: Update Yarn Spinner DLLs to latest (${{ steps.gitversion.outputs.shortSha }})
         body: |
-          This is an automated PR made by ${{ github.actor }} that updates the precompiled Yarn Spinner DLLs (and their dependencies) to YarnSpinnerTool/YarnSpinner@${{ steps.gitversion.outputs.shortSha }} (${{ steps.gitversion.outputs.semVer }}).
+          This is an automated PR made by @${{ github.actor }} that updates the precompiled Yarn Spinner DLLs (and their dependencies) to YarnSpinnerTool/YarnSpinner@${{ steps.gitversion.outputs.shortSha }} (v${{ steps.gitversion.outputs.fullSemVer }}).
 
 
 
