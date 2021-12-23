@@ -7,6 +7,11 @@ on:
           - main
           - develop
           - 'feature/**'
+      paths:
+        - 'Editor/**'
+        - 'Runtime/**'
+        - 'Samples~/**'
+        - 'Tests/**'
   workflow_dispatch:
 
 jobs:
