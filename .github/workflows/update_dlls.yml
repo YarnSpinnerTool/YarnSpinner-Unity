@@ -28,6 +28,7 @@ jobs:
 
     - name: Fetch all commits
       run: git fetch --unshallow
+      working-directory: ./YarnSpinner
     
     - uses: gittools/actions/gitversion/setup@v0.9.10
       name: Install GitVersion
