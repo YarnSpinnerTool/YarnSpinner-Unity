@@ -1,0 +1,92 @@
+name: Update DLLs 📚
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update_dlls:
+    name: Update Yarn Spinner DLLs
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    
+    # Don't run this action on forks
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    
+    steps:
+    - name: Checkout Yarn Spinner for Unity
+      uses: actions/checkout@v2
+      with:
+        path: YarnSpinner-Unity
+    - name: Checkout Yarn Spinner
+      uses: actions/checkout@v2
+      with:
+        repository: YarnSpinnerTool/YarnSpinner
+        path: YarnSpinner
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+
+    - name: Fetch all commits
+      run: git fetch --unshallow
+    
+    - uses: gittools/actions/gitversion/setup@v0.9.10
+      name: Install GitVersion
+      with:
+            versionSpec: '5.x'
+
+    - uses: gittools/actions/gitversion/execute@v0.9.10
+      name: Execute GitVersion
+      id: gitversion # step id used as reference for output values
+      with:
+        updateAssemblyInfo: true
+        targetPath: ./YarnSpinner
+    
+    - name: Print version information
+      run: |
+        echo "Major: ${{ steps.gitversion.outputs.major }}"
+        echo "Minor: ${{ steps.gitversion.outputs.minor }}"
+        echo "Patch: ${{ steps.gitversion.outputs.patch }}"
+        echo "MajorMinorPatch: ${{ steps.gitversion.outputs.majorMinorPatch }}"
+        echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
+
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: ./YarnSpinner
+
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+      working-directory: ./YarnSpinner
+
+    - name: Test
+      run: dotnet test --no-build --configuration Release --verbosity normal
+      working-directory: ./YarnSpinner
+    
+    - name: Copy DLLs
+      run: |
+        cp -v YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/*.dll YarnSpinner-Unity/Runtime/DLLs
+        rm -f YarnSpinner-Unity/Runtime/DLLs/Microsoft.CSharp.dll
+    
+    - name: Commit Change
+      run: |
+        git add .
+        git commit -m 
+      working-directory: ./YarnSpinner-Unity
+    
+    - name: Create pull request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        path: ./YarnSpinner-Unity
+        commit-message: Update Yarn Spinner DLLs to YarnSpinnerTool/YarnSpinner@${{ steps.gitversion.outputs.shortSha }}
+        branch: update-dlls
+        title: Update Yarn Spinner DLLs to latest (${{ steps.gitversion.outputs.shortSha }})
+        body: |
+          This is an automated PR made by ${{ github.actor }} that updates the precompiled Yarn Spinner DLLs (and their dependencies) to YarnSpinnerTool/YarnSpinner@${{ steps.gitversion.outputs.shortSha }} (${{ steps.gitversion.outputs.semVer }}).
+
+
+
+      
+
+      
