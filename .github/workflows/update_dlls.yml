@@ -8,6 +8,9 @@ jobs:
     name: Update Yarn Spinner DLLs
     runs-on: ubuntu-latest
     permissions:
+      # We need to be able to:
+      # 1. create a branch in a repo ('contents'), and 
+      # 2. create a pull request using that branch ('pull-requests')
       pull-requests: write
       contents: write
     
@@ -36,6 +39,8 @@ jobs:
       with:
             versionSpec: '5.x'
 
+    # Update the assembly info for this build of YS, so that the About window is
+    # appropriate
     - uses: gittools/actions/gitversion/execute@v0.9.10
       name: Execute GitVersion
       id: gitversion # step id used as reference for output values
@@ -59,15 +64,21 @@ jobs:
       run: dotnet build --no-restore --configuration Release
       working-directory: ./YarnSpinner
 
+    # Don't proceed unless we're including a build of Yarn Spinner that passes
+    # its tests.
     - name: Test
       run: dotnet test --no-build --configuration Release --verbosity normal
       working-directory: ./YarnSpinner
     
+    # Copy all of the dependency DLLs into the YarnSpinner-Unity repo, except
+    # for Microsoft.CSharp.dll (which is provided by Unity, so including it
+    # would cause an error.)
     - name: Copy DLLs
       run: |
         cp -v YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/*.dll YarnSpinner-Unity/Runtime/DLLs
         rm -fv YarnSpinner-Unity/Runtime/DLLs/Microsoft.CSharp.dll
     
+    # Make the PR against YarnSpinner-Unity that merges this change
     - name: Create pull request
       uses: peter-evans/create-pull-request@v3
       with:
