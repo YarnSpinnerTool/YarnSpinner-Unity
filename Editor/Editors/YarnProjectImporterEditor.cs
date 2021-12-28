@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEditor;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
@@ -126,6 +126,9 @@ namespace Yarn.Unity.Editor
             {
 #if YARNSPINNER_DEBUG
                 Debug.LogWarning($"Encountered in error when checking to see if Yarn Project Importer could generate a strings table: {e}", this);
+#else
+                // Ignore the 'variable e is unused' warning
+                var _ = e;
 #endif
                 canGenerateStringsTable = false;
             }
