@@ -225,7 +225,7 @@ namespace Yarn.Unity.Tests
             runner.StartDialogue("ExternalFunctionTest");
             yield return null;
 
-            Assert.AreEqual("Jane: Here's a function from code that's in another assembly: 1", dialogueUI.CurrentLine);
+            Assert.AreEqual("Jane: Here's a function from code that's in another assembly: 42", dialogueUI.CurrentLine);
 
             runner.Stop();
             runner.StartDialogue("BuiltinsTest");
