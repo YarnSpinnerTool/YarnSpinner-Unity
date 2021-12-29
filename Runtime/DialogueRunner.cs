@@ -38,9 +38,8 @@ using System.Text.RegularExpressions;
 namespace Yarn.Unity
 {
     /// <summary>
-    /// The [DialogueRunner]({{|ref
-    /// "/docs/unity/components/dialogue-runner.md"|}}) component acts as
-    /// the interface between your game and Yarn Spinner.
+    /// The DialogueRunner component acts as the interface between your game and
+    /// Yarn Spinner.
     /// </summary>
     [AddComponentMenu("Scripts/Yarn Spinner/Dialogue Runner"), HelpURL("https://yarnspinner.dev/docs/unity/components/dialogue-runner/")]
     public class DialogueRunner : MonoBehaviour
@@ -179,7 +178,7 @@ namespace Yarn.Unity
         /// </para>
         /// <para>
         /// This method receives the full text of the command, as it appears
-        /// between the <c><![CDATA[<<]]></c> and <c><![CDATA[>>]]></c> markers.
+        /// between the <c>&lt;&lt;</c> and <c>&gt;&gt;</c> markers.
         /// </para>
         /// </remarks>
         /// <seealso cref="AddCommandHandler(string, CommandHandler)"/>
@@ -409,7 +408,7 @@ namespace Yarn.Unity
         /// from your Yarn scripts like so:</para>
         ///
         /// <code lang="yarn">
-        /// <![CDATA[<<commandName param1 param2>>]]>
+        /// &lt;&lt;commandName param1 param2&gt;&gt;
         /// </code>
         ///
         /// <para>When this command handler is called, the <see
@@ -431,87 +430,87 @@ namespace Yarn.Unity
         }
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler(string commandHandler, System.Func<Coroutine> handler)
+        public void AddCommandHandler(string commandName, System.Func<Coroutine> handler)
         {
-            AddCommandHandler(commandHandler, (Delegate)handler);
+            AddCommandHandler(commandName, (Delegate)handler);
         }
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1>(string commandHandler, System.Func<T1, Coroutine> handler)
+        public void AddCommandHandler<T1>(string commandName, System.Func<T1, Coroutine> handler)
         {
-            AddCommandHandler(commandHandler, (Delegate)handler);
+            AddCommandHandler(commandName, (Delegate)handler);
         }
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2>(string commandHandler, System.Func<T1, T2, Coroutine> handler)
+        public void AddCommandHandler<T1, T2>(string commandName, System.Func<T1, T2, Coroutine> handler)
         {
-            AddCommandHandler(commandHandler, (Delegate)handler);
+            AddCommandHandler(commandName, (Delegate)handler);
         }
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2, T3>(string commandHandler, System.Func<T1, T2, T3, Coroutine> handler)
+        public void AddCommandHandler<T1, T2, T3>(string commandName, System.Func<T1, T2, T3, Coroutine> handler)
         {
-            AddCommandHandler(commandHandler, (Delegate)handler);
+            AddCommandHandler(commandName, (Delegate)handler);
         }
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2, T3, T4>(string commandHandler, System.Func<T1, T2, T3, T4, Coroutine> handler)
+        public void AddCommandHandler<T1, T2, T3, T4>(string commandName, System.Func<T1, T2, T3, T4, Coroutine> handler)
         {
-            AddCommandHandler(commandHandler, (Delegate)handler);
+            AddCommandHandler(commandName, (Delegate)handler);
         }
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandHandler, System.Func<T1, T2, T3, T4, T5, Coroutine> handler)
+        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, System.Func<T1, T2, T3, T4, T5, Coroutine> handler)
         {
-            AddCommandHandler(commandHandler, (Delegate)handler);
+            AddCommandHandler(commandName, (Delegate)handler);
         }
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandHandler, System.Func<T1, T2, T3, T4, T5, T6, Coroutine> handler)
+        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, Coroutine> handler)
         {
-            AddCommandHandler(commandHandler, (Delegate)handler);
+            AddCommandHandler(commandName, (Delegate)handler);
         }
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler(string commandHandler, System.Action handler)
+        public void AddCommandHandler(string commandName, System.Action handler)
         {
-            AddCommandHandler(commandHandler, (Delegate)handler);
+            AddCommandHandler(commandName, (Delegate)handler);
         }
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1>(string commandHandler, System.Action<T1> handler)
+        public void AddCommandHandler<T1>(string commandName, System.Action<T1> handler)
         {
-            AddCommandHandler(commandHandler, (Delegate)handler);
+            AddCommandHandler(commandName, (Delegate)handler);
         }
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2>(string commandHandler, System.Action<T1, T2> handler)
+        public void AddCommandHandler<T1, T2>(string commandName, System.Action<T1, T2> handler)
         {
-            AddCommandHandler(commandHandler, (Delegate)handler);
+            AddCommandHandler(commandName, (Delegate)handler);
         }
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2, T3>(string commandHandler, System.Action<T1, T2, T3> handler)
+        public void AddCommandHandler<T1, T2, T3>(string commandName, System.Action<T1, T2, T3> handler)
         {
-            AddCommandHandler(commandHandler, (Delegate)handler);
+            AddCommandHandler(commandName, (Delegate)handler);
         }
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2, T3, T4>(string commandHandler, System.Action<T1, T2, T3, T4> handler)
+        public void AddCommandHandler<T1, T2, T3, T4>(string commandName, System.Action<T1, T2, T3, T4> handler)
         {
-            AddCommandHandler(commandHandler, (Delegate)handler);
+            AddCommandHandler(commandName, (Delegate)handler);
         }
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandHandler, System.Action<T1, T2, T3, T4, T5> handler)
+        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, System.Action<T1, T2, T3, T4, T5> handler)
         {
-            AddCommandHandler(commandHandler, (Delegate)handler);
+            AddCommandHandler(commandName, (Delegate)handler);
         }
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandHandler, System.Action<T1, T2, T3, T4, T5, T6> handler)
+        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, System.Action<T1, T2, T3, T4, T5, T6> handler)
         {
-            AddCommandHandler(commandHandler, (Delegate)handler);
+            AddCommandHandler(commandName, (Delegate)handler);
         }
 
         /// <summary>
@@ -532,13 +531,16 @@ namespace Yarn.Unity
         /// <para>When this function has been registered, it can be called from
         /// your Yarn scripts like so:</para>
         ///
-        /// <code lang="yarn"><![CDATA[<<if myFunction(1, 2) == true>> myFunction
-        /// returned true! <<endif>>]]></code>
+        /// <code lang="yarn">
+        /// &lt;&lt;if myFunction(1, 2) == true&gt;&gt;
+        ///     myFunction returned true!
+        /// &lt;&lt;endif&gt;&gt;
+        /// </code>
         ///
         /// <para>The <c>call</c> command can also be used to invoke the function:</para>
         ///
         /// <code lang="yarn">
-        /// <![CDATA[<<call myFunction(1, 2)>>]]>
+        /// &lt;&lt;call myFunction(1, 2)&gt;&gt;
         /// </code>
         /// </remarks>
         /// <param name="implementation">The <see cref="Delegate"/> that

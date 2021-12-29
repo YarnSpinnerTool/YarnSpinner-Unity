@@ -61,6 +61,8 @@ namespace Yarn.Unity
         /// <summary>
         /// Where we're actually keeping our variables
         /// </summary>
+        private Dictionary<string, object> variables = new Dictionary<string, object>();
+        private Dictionary<string, System.Type> variableTypes = new Dictionary<string, System.Type>(); // needed for serialization
 
         [Header("Optional debugging tools")]
         [HideInInspector] public bool showDebug;
