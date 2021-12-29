@@ -16,10 +16,10 @@ ScriptedImporter:
   script: {fileID: 11500000, guid: 053561912b1654d80a424bb0696a74ae, type: 3}
   sourceScripts:
   - {fileID: 4900000, guid: 40a60c3c28a91d34bbf2088bb0d2824a, type: 3}
-  compileError: 
+  compileErrors: []
   serializedDeclarations:
   - name: $laps
-    typeName: Bool
+    typeName: Number
     defaultValueBool: 0
     defaultValueNumber: 0
     defaultValueString: 
@@ -29,3 +29,6 @@ ScriptedImporter:
   defaultLanguage: en-AU
   languagesToSourceAssets: []
   useAddressableAssets: 0
+  searchAllAssembliesForActions: 1
+  assembliesToSearch:
+  - {fileID: 5897886265953266890, guid: 3e3ba657c9d8045e9aca325bbdc9391a, type: 3}

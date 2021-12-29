@@ -103,6 +103,7 @@ namespace Yarn.Unity.Tests
         [TestCase("testPrivateStaticCommand", "success")]
         [TestCase("testPrivate something", "success")]
         [TestCase("testCustomParameter Sphere", "Got Sphere")]
+        [TestCase("testExternalAssemblyCommand", "success")]
         public void HandleCommand_DispatchesCommands(string test, string expectedLogResult) {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
 
@@ -219,6 +220,12 @@ namespace Yarn.Unity.Tests
             yield return null;
 
             Assert.AreEqual("Jane: Yes! I've already walked arg! i am a pirate no you're not! arg! i am a pirate laps!", dialogueUI.CurrentLine);
+
+            runner.Stop();
+            runner.StartDialogue("ExternalFunctionTest");
+            yield return null;
+
+            Assert.AreEqual("Jane: Here's a function from code that's in another assembly: 1", dialogueUI.CurrentLine);
 
             runner.Stop();
             runner.StartDialogue("BuiltinsTest");

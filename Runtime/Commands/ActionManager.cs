@@ -253,56 +253,107 @@ namespace Yarn.Unity
             return string.IsNullOrEmpty(metadata.Name) ? method.Name : metadata.Name;
         }
 
-        private static void FindAllActions(
-            out Dictionary<string, DispatchCommand> commands, out Dictionary<string, Delegate> functions)
+        private static void FindAllActions(IEnumerable<string> assemblyNames)
         {
-            commands = new Dictionary<string, DispatchCommand>();
-            functions = new Dictionary<string, Delegate>();
+            if (commands == null)
+            {
+                commands = new Dictionary<string, DispatchCommand>();
+            }
+
+            if (functions == null)
+            {
+                functions = new Dictionary<string, Delegate>();
+            }
+
+            if (searchedAssemblyNames == null)
+            {
+                searchedAssemblyNames = new HashSet<string>();
+            }
+
+            var assemblyNamesToLoad = assemblyNames.Except(searchedAssemblyNames);
 
             var injectorCache = new Dictionary<string, Injector>();
 
-            // Find all assemblies
-            var allMethods = AppDomain.CurrentDomain.GetAssemblies()
+            // Find the assemblies we're looking for
+            IEnumerable<Assembly> assemblies = AppDomain.CurrentDomain.GetAssemblies()
+                .Join(
+                        assemblyNamesToLoad,
+                        (assembly => assembly.GetName().Name),
+                        (name => name),
+                        (assembly, name) => assembly
+                    ).ToList();
+
+            // Record that we've searched these assemblies before, so we don't
+            // try and do it again
+            foreach (var assemblyName in assemblyNamesToLoad)
+            {
+                searchedAssemblyNames.Add(assemblyName);
+            }
+
+            // Search for all methods in these assemblies
+            var allMethods = assemblies
                 .SelectMany(assembly => assembly.GetLoadableTypes())
                 .SelectMany(type => type.GetMethods(AllMembers).Select(method => (Type: type, Method: method)))
                 .Where(m => m.Method.DeclaringType == m.Type); // don't register inherited methods
 
             foreach (var (_, method) in allMethods)
             {
-                var command = method.GetCustomAttribute<YarnCommandAttribute>(false);
-                if (command != null)
+                // We only care about methods with a YarnCommand or YarnFunction
+                // attribute. Get the attributes for this method, and see if
+                // it's one we should use.
+                var attributes = method.GetCustomAttributes(false);
+
+                foreach (var attribute in attributes)
                 {
-                    var name = GetActionName(command, method);
-                    try
+                    if (attribute is YarnCommandAttribute command)
                     {
-                        commands.Add(name, CreateCommandRunner(method, command, ref injectorCache));
+                        // It's a command!
+                        var name = GetActionName(command, method);
+                        try
+                        {
+                            commands.Add(name, CreateCommandRunner(method, command, ref injectorCache));
+                            Debug.Log($"Registered command {name}");
+                        }
+                        catch (ArgumentException)
+                        {
+                            MethodInfo existingDefinition = commands[name].Method;
+                            Debug.LogError($"Can't add {method.DeclaringType.FullName}.{method.Name} for command {name} " +
+                                $"because it's already defined on {existingDefinition.DeclaringType.FullName}.{existingDefinition.Name}");
+                        }
                     }
-                    catch (ArgumentException)
+                    else if (attribute is YarnFunctionAttribute function)
                     {
-                        MethodInfo existingDefinition = commands[name].Method;
-                        Debug.LogError($"Can't add {method.DeclaringType.FullName}.{method.Name} for command {name} " +
-                            $"because it's already defined on {existingDefinition.DeclaringType.FullName}.{existingDefinition.Name}");
+                        // It's a function!
+                        var name = GetActionName(function, method);
+                        try
+                        {
+                            functions.Add(name, GetFunctionRunner(method));
+                        }
+                        catch (ArgumentException e)
+                        {
+                            Debug.LogError($"Can't add {method.DeclaringType.FullName}.{method.Name} for command {name}: {e.Message}");
+                        }
                     }
                 }
 
-                var function = method.GetCustomAttribute<YarnFunctionAttribute>(false);
-                if (function != null)
-                {
-                    var name = GetActionName(function, method);
-                    try
-                    {
-                        functions.Add(name, GetFunctionRunner(method));
-                    }
-                    catch (ArgumentException e)
-                    {
-                        Debug.LogError($"Can't add {method.DeclaringType.FullName}.{method.Name} for command {name}: {e.Message}");
-                    }
-                }
             }
         }
 
+        /// <summary>
+        /// The Yarn commands that we have found.
+        /// </summary>
         private static Dictionary<string, DispatchCommand> commands;
+
+        /// <summary>
+        /// The Yarn functions that we have found.
+        /// </summary>
         private static Dictionary<string, Delegate> functions;
+
+        /// <summary>
+        /// A list of names of assemblies that we have searched for commands and
+        /// functions.
+        /// </summary>
+        private static HashSet<string> searchedAssemblyNames;
 
         /// <summary>
         /// Try to execute a command if it exists.
@@ -406,7 +457,30 @@ namespace Yarn.Unity
         
         static ActionManager()
         {
-            FindAllActions(out commands, out functions);
+            // We always want to get actions from the default Unity code
+            // assembly, "Assembly-CSharp". Start by searching it.
+            AddActionsFromAssemblies(new[] {"Assembly-CSharp"});
+        }
+
+        /// <summary>
+        /// Searches all loaded assemblies whose names are equal to those found
+        /// in <paramref name="assemblyNames"/>, and registers all methods that
+        /// have the <see cref="YarnCommandAttribute"/> and <see
+        /// cref="YarnFunctionAttribute"/> attributes.
+        /// </summary>
+        /// <param name="assemblyNames">The names of the assemblies to
+        /// search.</param>
+        public static void AddActionsFromAssemblies(IEnumerable<string> assemblyNames) {
+            FindAllActions(assemblyNames);
+        }
+
+        /// <summary>
+        /// Removes all registered commands and functions.
+        /// </summary>
+        public static void ClearAllActions() {
+            commands.Clear();
+            functions.Clear();
+            searchedAssemblyNames.Clear();
         }
     }
 }

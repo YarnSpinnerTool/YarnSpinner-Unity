@@ -14,7 +14,7 @@ using System.Collections;
 
 namespace Yarn.Unity.Editor
 {
-    [ScriptedImporter(2, new[] { "yarnproject" }, 1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
+    [ScriptedImporter(3, new[] { "yarnproject" }, 1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
     [InitializeOnLoad]
     public class YarnProjectImporter : ScriptedImporter, IYarnErrorSource
     {
@@ -113,6 +113,25 @@ namespace Yarn.Unity.Editor
         public List<LanguageToSourceAsset> languagesToSourceAssets;
 
         public bool useAddressableAssets;
+
+        /// <summary>
+        /// If <see langword="true"/>, <see cref="ActionManager"/> will search
+        /// all assemblies that have been defined using an <see
+        /// cref="AssemblyDefinitionAsset"/> for commands and actions, when this
+        /// project is loaded into a <see cref="DialogueRunner"/>. Otherwise,
+        /// <see cref="assembliesToSearch"/> will be used.
+        /// </summary>
+        /// <seealso cref="assembliesToSearch"/>
+        public bool searchAllAssembliesForActions = true;
+
+        /// <summary>
+        /// If <see cref="searchAllAssembliesForActions"/> is <see
+        /// langword="false"/>, <see cref="ActionManager"/> will search for
+        /// commands and functions in the assemblies defined in this list, when
+        /// this project is loaded into a <see cref="DialogueRunner"/>.
+        /// </summary>
+        /// <seealso cref="searchAllAssembliesForActions"/>
+        public AssemblyDefinitionAsset[] assembliesToSearch;
 
         IList<string> IYarnErrorSource.CompileErrors => compileErrors;
 
@@ -445,10 +464,54 @@ namespace Yarn.Unity.Editor
 
             project.compiledYarnProgram = compiledBytes;
 
+            // Get the list of assembly names we want to search for actions in.
+            IEnumerable<AssemblyDefinitionAsset> assembliesToSearch = this.assembliesToSearch;
+
+            if (searchAllAssembliesForActions) {
+                // We're searching all assemblies for actions. Find all assembly
+                // definitions in the project, including in packages, and load
+                // them.
+                assembliesToSearch = AssetDatabase
+                    .FindAssets($"t:{nameof(AssemblyDefinitionAsset)}")
+                    .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
+                    .Distinct()
+                    .Select(path => AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path));
+            }
+
+            // We won't include any assemblies whose names begin with any of
+            // these prefixes
+            var excludedPrefixes = new[] {
+                "Unity",
+            };
+
+            // Go through each assembly definition asset, figure out its
+            // assembly name, and add it to the project's list of assembly names
+            // to search.
+            foreach (var reference in assembliesToSearch) {
+                if (reference == null) {
+                    continue;
+                }
+                var data = new AssemblyDefinition();
+                EditorJsonUtility.FromJsonOverwrite(reference.text, data);
+
+                if (excludedPrefixes.Any(prefix => data.name.StartsWith(prefix))) {
+                    continue;
+                }
+
+                project.searchAssembliesForActions.Add(data.name);
+            }
+
 #if YARNSPINNER_DEBUG
             UnityEngine.Profiling.Profiler.enabled = false;
 #endif
 
+        }
+
+        // A data class used for deserialising the JSON AssemblyDefinitionAssets
+        // into.
+        [System.Serializable]
+        private class AssemblyDefinition {
+            public string name;
         }
 
         /// <summary>

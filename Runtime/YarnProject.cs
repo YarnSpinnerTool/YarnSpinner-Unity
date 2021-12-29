@@ -21,6 +21,15 @@ namespace Yarn.Unity
         [HideInInspector]
         public List<Localization> localizations = new List<Localization>();
 
+        /// <summary>
+        /// The names of assemblies that <see cref="ActionManager"/> should look
+        /// for commands and functions in when this project is loaded into a
+        /// <see cref="DialogueRunner"/>.
+        /// </summary>
+        [SerializeField]
+        [HideInInspector]
+        public List<string> searchAssembliesForActions = new List<string>();
+
         public Localization GetLocalization(string localeCode)
         {
 

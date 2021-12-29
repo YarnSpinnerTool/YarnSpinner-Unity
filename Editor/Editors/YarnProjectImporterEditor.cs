@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEditor;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
@@ -34,6 +34,8 @@ namespace Yarn.Unity.Editor
         private SerializedProperty useAddressableAssetsProperty;
 
         private ReorderableDeclarationsList serializedDeclarationsList;
+        private SerializedProperty searchAllAssembliesProperty;
+        private SerializedProperty assembliesToSearchProperty;
 
         public override void OnEnable()
         {
@@ -48,6 +50,9 @@ namespace Yarn.Unity.Editor
             useAddressableAssetsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.useAddressableAssets));
 
             serializedDeclarationsList = new ReorderableDeclarationsList(serializedObject, serializedDeclarationsProperty);
+
+            searchAllAssembliesProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.searchAllAssembliesForActions));
+            assembliesToSearchProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.assembliesToSearch));
         }
 
         public override void OnInspectorGUI()
@@ -167,8 +172,26 @@ namespace Yarn.Unity.Editor
                             YarnProjectUtility.UpdateAssetAddresses(yarnProjectImporter);
                         }
                     }
-                } 
+                }
 #endif
+            }
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.LabelField("Commands and Functions", EditorStyles.boldLabel);
+
+            var searchAllAssembliesLabel = new GUIContent("Search All Assemblies", "Search all assembly definitions for commands and functions, as well as code that's not in a folder with an assembly definition");
+            EditorGUILayout.PropertyField(searchAllAssembliesProperty, searchAllAssembliesLabel);
+
+            if (searchAllAssembliesProperty.boolValue == false)
+            {
+                EditorGUI.indentLevel += 1;
+                EditorGUILayout.PropertyField(assembliesToSearchProperty);
+                EditorGUI.indentLevel -= 1;
+            }
+
+            using (new EditorGUI.DisabledGroupScope(canGenerateStringsTable == false))
+            {
                 if (GUILayout.Button("Export Strings as CSV"))
                 {
                     var currentPath = AssetDatabase.GetAssetPath(serializedObject.targetObject);

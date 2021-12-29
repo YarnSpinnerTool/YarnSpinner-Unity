@@ -217,6 +217,10 @@ namespace Yarn.Unity
         /// </summary>        
         public void SetProject(YarnProject newProject)
         {
+            // Load all of the commands and functions from the assemblies that
+            // this project wants to load from.
+            ActionManager.AddActionsFromAssemblies(newProject.searchAssembliesForActions);
+
             Dialogue.SetProgram(newProject.GetProgram());
             lineProvider.YarnProject = newProject;
         }
@@ -683,6 +687,10 @@ namespace Yarn.Unity
                 {
                     Debug.LogError($"DialogueRunner wanted to load a Yarn Project in its Start method, but the Dialogue was already running one. The Dialogue Runner may not behave as you expect.");
                 }
+                
+                // Load all of the commands and functions from the assemblies
+                // that this project wants to load from.
+                ActionManager.AddActionsFromAssemblies(yarnProject.searchAssembliesForActions);
 
                 Dialogue.SetProgram(yarnProject.GetProgram());
 
