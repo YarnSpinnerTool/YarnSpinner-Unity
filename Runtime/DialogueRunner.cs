@@ -123,7 +123,7 @@ namespace Yarn.Unity
 
         /// <summary>
         /// A type of <see cref="UnityEvent"/> that takes a single string
-        /// parameter. 
+        /// parameter.
         /// </summary>
         /// <remarks>
         /// A concrete subclass of <see cref="UnityEvent"/> is needed in
@@ -163,20 +163,24 @@ namespace Yarn.Unity
         /// cref="Command"/> is received.
         /// </summary>
         /// <remarks>
-        /// Use this method to dispatch a command to other parts of your
-        /// game. This method is only called if the <see cref="Command"/>
-        /// has not been handled by a command handler that has been added
-        /// to the <see cref="DialogueRunner"/>, or by a method on a <see
+        /// <para>
+        /// Use this method to dispatch a command to other parts of your game.
+        /// This method is only called if the <see cref="Command"/> has not been
+        /// handled by a command handler that has been added to the <see
+        /// cref="DialogueRunner"/>, or by a method on a <see
         /// cref="MonoBehaviour"/> in the scene with the attribute <see
-        /// cref="YarnCommandAttribute"/>. {{|note|}} When a command is
-        /// delivered in this way, the <see cref="DialogueRunner"/> will
-        /// not pause execution. If you want a command to make the
-        /// DialogueRunner pause execution, see <see
-        /// cref="AddCommandHandler(string, CommandHandler)"/>. {{|/note|}}
-        ///
-        /// This method receives the full text of the command, as it
-        /// appears between the `<![CDATA[<<]]>` and `<![CDATA[>>]]>`
-        /// markers.
+        /// cref="YarnCommandAttribute"/>.
+        /// </para>
+        /// <para style="hint">
+        /// When a command is delivered in this way, the <see
+        /// cref="DialogueRunner"/> will not pause execution. If you want a
+        /// command to make the DialogueRunner pause execution, see <see
+        /// cref="AddCommandHandler(string, CommandHandler)"/>.
+        /// </para>
+        /// <para>
+        /// This method receives the full text of the command, as it appears
+        /// between the <c><![CDATA[<<]]></c> and <c><![CDATA[>>]]></c> markers.
+        /// </para>
         /// </remarks>
         /// <seealso cref="AddCommandHandler(string, CommandHandler)"/>
         /// <seealso cref="AddCommandHandler(string, CommandHandler)"/>
@@ -214,7 +218,7 @@ namespace Yarn.Unity
         /// <summary>
         /// Replaces this DialogueRunner's yarn project with the provided
         /// project.
-        /// </summary>        
+        /// </summary>
         public void SetProject(YarnProject newProject)
         {
             // Load all of the commands and functions from the assemblies that
@@ -401,20 +405,21 @@ namespace Yarn.Unity
         /// command is called.
         /// </summary>
         /// <remarks>
-        /// When this command handler has been added, it can be called from
-        /// your Yarn scripts like so:
+        /// <para>When this command handler has been added, it can be called
+        /// from your Yarn scripts like so:</para>
         ///
-        /// <![CDATA[```yarn <<commandName param1 param2>> ```]]>
+        /// <code lang="yarn">
+        /// <![CDATA[<<commandName param1 param2>>]]>
+        /// </code>
         ///
-        /// When this command handler is called, the <see
-        /// cref="DialogueRunner"/> will stop executing code. To make the
-        /// <see cref="DialogueRunner"/> resume execution, call the
-        /// onComplete action that the <see cref="CommandHandler"/>
-        /// receives. 
+        /// <para>When this command handler is called, the <see
+        /// cref="DialogueRunner"/> will stop executing code. To make the <see
+        /// cref="DialogueRunner"/> resume execution, call the onComplete action
+        /// that the <see cref="CommandHandler"/> receives.</para>
         /// </remarks>
         /// <param name="commandName">The name of the command.</param>
-        /// <param name="handler">The <see cref="CommandHandler"/> that
-        /// will be invoked when the command is called.</param>
+        /// <param name="handler">The <see cref="CommandHandler"/> that will be
+        /// invoked when the command is called.</param>
         private void AddCommandHandler(string commandName, Delegate handler)
         {
             if (commandHandlers.ContainsKey(commandName))
@@ -425,71 +430,85 @@ namespace Yarn.Unity
             commandHandlers.Add(commandName, handler);
         }
 
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public void AddCommandHandler(string commandHandler, System.Func<Coroutine> handler)
         {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public void AddCommandHandler<T1>(string commandHandler, System.Func<T1, Coroutine> handler)
         {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public void AddCommandHandler<T1, T2>(string commandHandler, System.Func<T1, T2, Coroutine> handler)
         {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public void AddCommandHandler<T1, T2, T3>(string commandHandler, System.Func<T1, T2, T3, Coroutine> handler)
         {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public void AddCommandHandler<T1, T2, T3, T4>(string commandHandler, System.Func<T1, T2, T3, T4, Coroutine> handler)
         {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandHandler, System.Func<T1, T2, T3, T4, T5, Coroutine> handler)
         {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandHandler, System.Func<T1, T2, T3, T4, T5, T6, Coroutine> handler)
         {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public void AddCommandHandler(string commandHandler, System.Action handler)
         {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public void AddCommandHandler<T1>(string commandHandler, System.Action<T1> handler)
         {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public void AddCommandHandler<T1, T2>(string commandHandler, System.Action<T1, T2> handler)
         {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public void AddCommandHandler<T1, T2, T3>(string commandHandler, System.Action<T1, T2, T3> handler)
         {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public void AddCommandHandler<T1, T2, T3, T4>(string commandHandler, System.Action<T1, T2, T3, T4> handler)
         {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandHandler, System.Action<T1, T2, T3, T4, T5> handler)
         {
             AddCommandHandler(commandHandler, (Delegate)handler);
         }
 
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandHandler, System.Action<T1, T2, T3, T4, T5, T6> handler)
         {
             AddCommandHandler(commandHandler, (Delegate)handler);
@@ -508,21 +527,23 @@ namespace Yarn.Unity
         /// <summary>
         /// Add a new function that returns a value, so that it can be
         /// called from Yarn scripts.
-        /// </summary>        
+        /// </summary>
         /// <remarks>
-        /// When this function has been registered, it can be called from
-        /// your Yarn scripts like so:
+        /// <para>When this function has been registered, it can be called from
+        /// your Yarn scripts like so:</para>
         ///
-        /// <![CDATA[```yarn <<if myFunction(1, 2) == true>> myFunction
-        /// returned true! <<endif>> ```]]>
+        /// <code lang="yarn"><![CDATA[<<if myFunction(1, 2) == true>> myFunction
+        /// returned true! <<endif>>]]></code>
         ///
-        /// The `call` command can also be used to invoke the function:
+        /// <para>The <c>call</c> command can also be used to invoke the function:</para>
         ///
-        /// <![CDATA[```yarn <<call myFunction(1, 2)>> ```]]>    
+        /// <code lang="yarn">
+        /// <![CDATA[<<call myFunction(1, 2)>>]]>
+        /// </code>
         /// </remarks>
         /// <param name="implementation">The <see cref="Delegate"/> that
         /// should be invoked when this function is called.</param>
-        /// <seealso cref="Library"/> 
+        /// <seealso cref="Library"/>
         private void AddFunction(string name, Delegate implementation)
         {
             if (Dialogue.Library.FunctionExists(name))
@@ -534,36 +555,50 @@ namespace Yarn.Unity
             Dialogue.Library.RegisterFunction(name, implementation);
         }
 
+        /// <inheritdoc cref="AddFunction(string, Delegate)" />
+        /// <typeparam name="TResult">The type of the value that the function should return.</typeparam>
         public void AddFunction<TResult>(string name, System.Func<TResult> implementation)
         {
             AddFunction(name, (Delegate)implementation);
         }
 
+        /// <inheritdoc cref="AddFunction{TResult}(string, Func{TResult})" />
+        /// <typeparam name="T1">The type of the first parameter to the function.</typeparam>
         public void AddFunction<TResult, T1>(string name, System.Func<TResult, T1> implementation)
         {
             AddFunction(name, (Delegate)implementation);
         }
 
+        /// <inheritdoc cref="AddFunction{TResult,T1}(string, Func{TResult,T1})" />
+        /// <typeparam name="T2">The type of the second parameter to the function.</typeparam>
         public void AddFunction<TResult, T1, T2>(string name, System.Func<TResult, T1, T2> implementation)
         {
             AddFunction(name, (Delegate)implementation);
         }
 
+        /// <inheritdoc cref="AddFunction{TResult,T1,T2}(string, Func{TResult,T1,T2})" />
+        /// <typeparam name="T3">The type of the third parameter to the function.</typeparam>
         public void AddFunction<TResult, T1, T2, T3>(string name, System.Func<TResult, T1, T2, T3> implementation)
         {
             AddFunction(name, (Delegate)implementation);
         }
 
+        /// <inheritdoc cref="AddFunction{TResult,T1,T2,T3}(string, Func{TResult,T1,T2,T3})" />
+        /// <typeparam name="T4">The type of the fourth parameter to the function.</typeparam>
         public void AddFunction<TResult, T1, T2, T3, T4>(string name, System.Func<TResult, T1, T2, T3, T4> implementation)
         {
             AddFunction(name, (Delegate)implementation);
         }
 
+        /// <inheritdoc cref="AddFunction{TResult,T1,T2,T3,T4}(string, Func{TResult,T1,T2,T3,T4})" />
+        /// <typeparam name="T5">The type of the fifth parameter to the function.</typeparam>
         public void AddFunction<TResult, T1, T2, T3, T4, T5>(string name, System.Func<TResult, T1, T2, T3, T4, T5> implementation)
         {
             AddFunction(name, (Delegate)implementation);
         }
 
+        /// <inheritdoc cref="AddFunction{TResult,T1,T2,T3,T4,T5}(string, Func{TResult,T1,T2,T3,T4,T5})" />
+        /// <typeparam name="T6">The type of the sixth parameter to the function.</typeparam>
         public void AddFunction<TResult, T1, T2, T3, T4, T5, T6>(string name, System.Func<TResult, T1, T2, T3, T4, T5, T6> implementation)
         {
             AddFunction(name, (Delegate)implementation);
@@ -626,7 +661,6 @@ namespace Yarn.Unity
         /// <remarks>
         /// Automatically created on first access.
         /// </remarks>
-        
         private Dialogue _dialogue;
 
         /// <summary>
@@ -654,12 +688,13 @@ namespace Yarn.Unity
                     Debug.Log($"Dialogue Runner has no LineProvider; creating a {nameof(TextLineProvider)}.", this);
                 }
             }
-
-            
         }
 
-        /// Start the dialogue
-        void Start()
+        /// <summary>
+        /// Prepares the Dialogue Runner for start.
+        /// </summary>
+        /// <remarks>If <see cref="startAutomatically"/> is <see langword="true"/>, the Dialogue Runner will start.</remarks>
+        public void Start()
         {
             if (dialogueViews.Length == 0)
             {
@@ -842,8 +877,11 @@ namespace Yarn.Unity
             return;
         }
 
+        /// <summary>
         /// Forward the line to the dialogue UI.
-        void HandleLine(Line line)
+        /// </summary>
+        /// <param name="line">The line to send to the dialogue views.</param>
+        private void HandleLine(Line line)
         {
             // Get the localized line from our line provider
             CurrentLine = lineProvider.GetLocalizedLine(line);

@@ -1,4 +1,4 @@
-﻿/*
+/*
 
 The MIT License (MIT)
 
@@ -31,42 +31,50 @@ using Yarn.Unity;
 
 namespace Yarn.Unity
 {
-
     /// <summary>
     /// A simple implementation of VariableStorageBehaviour.
     /// </summary>
     /// <remarks>
-    /// As of v2.0, this class has basic serialization and save/load
-    /// example functions. You can also enumerate over the variables by
-    /// using a `foreach` loop:
+    /// <para>This class stores variables in memory, and is erased when the game
+    /// exits.</para>
     ///
-    /// <![CDATA[```csharp    
-    /// // 'storage' is an InMemoryVariableStorage    
-    /// foreach (var variable in storage) {string name = variable.Key;
-    /// System.Object value = variable.Value;}   
-    /// ```]]>
+    /// <para>This class also has basic serialization and save/load example functions.</para>
     ///
-    /// Note that as of v2.0, this class no longer uses Yarn.Value, to
+    /// <para>You can also enumerate over the variables by using a <c>foreach</c>
+    /// loop:</para>
+    ///
+    /// <code lang="csharp">
+    /// // 'storage' is an InMemoryVariableStorage
+    /// foreach (var variable in storage) {
+    ///     string name = variable.Key;
+    ///     System.Object value = variable.Value;
+    /// }
+    /// </code>
+    ///
+    /// <para>Note that as of v2.0, this class no longer uses Yarn.Value, to
     /// enforce static typing of declared variables within the Yarn
-    /// Program.
-    /// </remarks>    
+    /// Program.</para>
+    /// </remarks>
     [HelpURL("https://yarnspinner.dev/docs/unity/components/variable-storage/")]
     public class InMemoryVariableStorage : VariableStorageBehaviour, IEnumerable<KeyValuePair<string, object>>
     {
+        /// <summary>
         /// Where we're actually keeping our variables
-        private Dictionary<string, object> variables = new Dictionary<string, object>();
-        private Dictionary<string, System.Type> variableTypes = new Dictionary<string, System.Type>(); // needed for serialization
+        /// </summary>
 
         [Header("Optional debugging tools")]
         [HideInInspector] public bool showDebug;
-        /// A UI.Text that can show the current list of all variables
-        /// in-game. Optional.
+
+        /// <summary>
+        /// A <see cref="UnityEngine.UI.Text"/> that can show the current list
+        /// of all variables in-game. Optional.
+        /// </summary>
         [SerializeField, Tooltip("(optional) output list of variables and values to Text UI in-game")]
         internal UnityEngine.UI.Text debugTextView = null;
 
-        /// If we have a debug view, show the list of all variables in it
         internal void Update()
         {
+            // If we have a debug view, show the list of all variables in it
             if (debugTextView != null)
             {
                 debugTextView.text = GetDebugList();
@@ -375,12 +383,10 @@ namespace Yarn.Unity
         /// Returns an <see cref="IEnumerator"/> that iterates over all
         /// variables in this object.
         /// </summary>
-        /// <returns>An iterator over the variables.</returns>        
+        /// <returns>An iterator over the variables.</returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return ((IEnumerable<KeyValuePair<string, object>>)variables).GetEnumerator();
         }
-
-
     }
 }

@@ -20,7 +20,6 @@ namespace Yarn.Unity
     /// dictionary.</typeparam>
     /// <typeparam name="TValue">The type of value used in the
     /// dictionary.</typeparam>
-    /// <inheritdoc cref="IDictionary{TKey, TValue}"/>
     [System.Serializable]
     public class SerializedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
@@ -29,66 +28,82 @@ namespace Yarn.Unity
 
         private readonly Dictionary<TKey, TValue> table = new Dictionary<TKey, TValue>();
 
+        /// <inheritdoc/>
         public ICollection<TKey> Keys => ((IDictionary<TKey, TValue>)table).Keys;
 
+        /// <inheritdoc/>
         public ICollection<TValue> Values => ((IDictionary<TKey, TValue>)table).Values;
 
+        /// <inheritdoc/>
         public int Count => ((ICollection<KeyValuePair<TKey, TValue>>)table).Count;
 
+        /// <inheritdoc/>
         public bool IsReadOnly => ((ICollection<KeyValuePair<TKey, TValue>>)table).IsReadOnly;
 
+        /// <inheritdoc/>
         public TValue this[TKey key] { get => ((IDictionary<TKey, TValue>)table)[key]; set => ((IDictionary<TKey, TValue>)table)[key] = value; }
 
+        /// <inheritdoc/>
         public void Add(TKey key, TValue value)
         {
             ((IDictionary<TKey, TValue>)table).Add(key, value);
         }
 
+        /// <inheritdoc/>
         public bool ContainsKey(TKey key)
         {
             return ((IDictionary<TKey, TValue>)table).ContainsKey(key);
         }
 
+        /// <inheritdoc/>
         public bool Remove(TKey key)
         {
             return ((IDictionary<TKey, TValue>)table).Remove(key);
         }
 
+        /// <inheritdoc/>
         public bool TryGetValue(TKey key, out TValue value)
         {
             return ((IDictionary<TKey, TValue>)table).TryGetValue(key, out value);
         }
 
+        /// <inheritdoc/>
         public void Add(KeyValuePair<TKey, TValue> item)
         {
             ((ICollection<KeyValuePair<TKey, TValue>>)table).Add(item);
         }
 
+        /// <inheritdoc/>
         public void Clear()
         {
             ((ICollection<KeyValuePair<TKey, TValue>>)table).Clear();
         }
 
+        /// <inheritdoc/>
         public bool Contains(KeyValuePair<TKey, TValue> item)
         {
             return ((ICollection<KeyValuePair<TKey, TValue>>)table).Contains(item);
         }
 
+        /// <inheritdoc/>
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
             ((ICollection<KeyValuePair<TKey, TValue>>)table).CopyTo(array, arrayIndex);
         }
 
+        /// <inheritdoc/>
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
             return ((ICollection<KeyValuePair<TKey, TValue>>)table).Remove(item);
         }
 
+        /// <inheritdoc/>
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
             return ((IEnumerable<KeyValuePair<TKey, TValue>>)table).GetEnumerator();
         }
 
+        /// <inheritdoc/>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return ((IEnumerable)table).GetEnumerator();

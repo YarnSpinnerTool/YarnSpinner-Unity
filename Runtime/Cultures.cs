@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Linq;
 namespace Yarn.Unity
 {
     /// <summary>
-    /// All <see cref="Culture"/>s supported by YarnSpinner.
+    /// Provides access to all <see cref="Culture"/>s supported by Yarn Spinner.
     /// </summary>
     public static class Cultures
     {
@@ -38,6 +38,16 @@ namespace Yarn.Unity
 
         public static IEnumerable<Culture> GetCultures() => _allCultures.Value;
 
+        /// <summary>
+        /// Returns the <see cref="Culture"/> represented by the language code
+        /// in <paramref name="name"/>.
+        /// </summary>
+        /// <param name="name">The name of the <see cref="Culture"/> to
+        /// retrieve.</param>
+        /// <returns>The <see cref="Culture"/>.</returns>
+        /// <exception cref="ArgumentException">Thrown when no <see
+        /// cref="Culture"/> with the given language ID can be
+        /// found.</exception>
         public static Culture GetCulture(string name)
         {
             var exists = _allCulturesTable.Value.TryGetValue(name, out var result);
@@ -52,6 +62,13 @@ namespace Yarn.Unity
             }
         }
 
+        /// <summary>
+        /// Returns a boolean value indicating whether <paramref name="name"/>
+        /// is a valid identifier for retrieving a <see cref="Culture"/> from
+        /// <see cref="GetCulture"/>.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns><see langword="true"/> if name is a valid <see cref="Culture"/> name; <see langword="false"/> otherwise.</returns>
         public static bool HasCulture(string name)
         {
             return _allCulturesTable.Value.ContainsKey(name);

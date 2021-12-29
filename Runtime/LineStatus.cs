@@ -35,7 +35,7 @@ namespace Yarn.Unity
     {
         /// <summary>
         /// The line is in the process of being presented to the user, but
-        /// has not yet finished appearing. 
+        /// has not yet finished appearing.
         /// </summary>
         /// <remarks>
         /// Lines in this state are in the process of being delivered; for
@@ -60,15 +60,18 @@ namespace Yarn.Unity
         /// The line has finished being delivered to the user.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// When a line has finished being delivered, any animations in
-        /// showing text and any audio playback should now be complete. 
-        ///
+        /// showing text and any audio playback should now be complete.
+        /// </para>
+        /// <para>
         /// A line remains in the <see cref="FinishedPresenting"/> state until a
         /// Dialogue View calls <see
         /// cref="DialogueViewBase.ReadyForNextLine"/>. At this point, the
         /// line will transition to the <see cref="Dismissed"/> state, and <see
         /// cref="DialogueViewBase.DismissLine(Action)"/> will be called on
         /// all views to dismiss the line.
+        /// </para>
         /// </remarks>
         FinishedPresenting,
         /// <summary>

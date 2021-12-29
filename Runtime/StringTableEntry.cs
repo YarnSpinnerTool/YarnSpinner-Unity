@@ -49,19 +49,22 @@ namespace Yarn.Unity
         /// versions of this string are out of date.
         /// </summary>
         /// <remarks>
-        /// This field contains the first 8 characters of the SHA-256 hash
-        /// of the line's text as it appeared in the base localization CSV
-        /// file.
-        ///
-        /// When a new StringTableEntry is created in a localized CSV file
-        /// for a .yarn file, the Lock value is copied over from the base
-        /// CSV file, and used for the translated entry. 
-        ///
+        /// <para>
+        /// This field contains the first 8 characters of the SHA-256 hash of
+        /// the line's text as it appeared in the base localization CSV file.
+        /// </para>
+        /// <para>
+        /// When a new StringTableEntry is created in a localized CSV file for a
+        /// .yarn file, the Lock value is copied over from the base CSV file,
+        /// and used for the translated entry. 
+        /// </para>
+        /// <para>
         /// Because the base localization CSV is regenerated every time the
-        /// .yarn file is imported, the base localization Lock value will
-        /// change if a line's text changes. This means that if the base
-        /// lock and translated lock differ, the translated line is out of
-        /// date, and needs to be updated.
+        /// .yarn file is imported, the base localization Lock value will change
+        /// if a line's text changes. This means that if the base lock and
+        /// translated lock differ, the translated line is out of date, and
+        /// needs to be updated.
+        /// </para>
         /// </remarks>
         public string Lock;
 
@@ -70,6 +73,11 @@ namespace Yarn.Unity
         /// </summary>
         public string Comment;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StringTableEntry"/>
+        /// struct, copying values from an existing instance.
+        /// </summary>
+        /// <param name="s">The instance to copy values from.</param>
         public StringTableEntry(StringTableEntry s)
         {
             ID = s.ID;
@@ -97,16 +105,15 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Reads comma-separated value ata from <paramref
-        /// name="sourceText"/>, and produces a collection of <see
-        /// cref="StringTableEntry"/> structs.
+        /// Reads comma-separated value data from <paramref name="sourceText"/>,
+        /// and produces a collection of <see cref="StringTableEntry"/> structs.
         /// </summary>
         /// <param name="sourceText">A string containing CSV-formatted
         /// data.</param>
-        /// <returns>The parsed collection of <see
-        /// cref="StringTableEntry"/> structs.</returns>
-        /// <exception cref="ArgumentException">Thrown when an error occurs
-        /// when parsing the string.</exception>
+        /// <returns>The parsed collection of <see cref="StringTableEntry"/>
+        /// structs.</returns>
+        /// <exception cref="ArgumentException">Thrown when an error occurs when
+        /// parsing the string.</exception>
         public static IEnumerable<StringTableEntry> ParseFromCSV(string sourceText)
         {
             try
@@ -159,6 +166,13 @@ namespace Yarn.Unity
             }
         }
 
+        /// <summary>
+        /// Creates a CSV-formatted string containing data from <paramref
+        /// name="entries"/>.
+        /// </summary>
+        /// <param name="entries">The <see cref="StringTableEntry"/> values to
+        /// generate the spreadsheet from.</param>
+        /// <returns>A string containing CSV-formatted data.</returns>
         public static string CreateCSV(IEnumerable<StringTableEntry> entries)
         {
             using (var textWriter = new System.IO.StringWriter())
@@ -211,11 +225,13 @@ namespace Yarn.Unity
             }
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"StringTableEntry: lang={Language} id={ID} text=\"{Text}\" file={File} node={Node} line={LineNumber} lock={Lock} comment={Comment}";
         }
 
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
             return obj is StringTableEntry entry &&
@@ -229,6 +245,7 @@ namespace Yarn.Unity
                    Comment == entry.Comment;
         }
 
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             return

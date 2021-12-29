@@ -51,10 +51,18 @@ namespace Yarn.Unity
         /// <inheritdoc/>
         public abstract void SetValue(string variableName, bool boolValue);
 
-        /// <inheritdoc/>        
+        /// <inheritdoc/>
         public abstract void Clear();
 
-        /// returns a boolean value representing if the particular variable is inside the variable storage
+        /// <summary>
+        /// Returns a boolean value representing if a particular variable is
+        /// inside the variable storage.
+        /// </summary>
+        /// <param name="variableName">The name of the variable to check
+        /// for.</param>
+        /// <returns><see langword="true"/> if this variable storage contains a
+        /// value for the variable named <paramref name="variableName"/>; <see
+        /// langword="false"/> otherwise.</returns>
         public abstract bool Contains(string variableName);
     }
 }
