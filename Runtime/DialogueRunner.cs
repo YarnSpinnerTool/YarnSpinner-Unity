@@ -696,7 +696,7 @@ namespace Yarn.Unity
         /// Prepares the Dialogue Runner for start.
         /// </summary>
         /// <remarks>If <see cref="startAutomatically"/> is <see langword="true"/>, the Dialogue Runner will start.</remarks>
-        public void Start()
+        private void Start()
         {
             if (dialogueViews.Length == 0)
             {
