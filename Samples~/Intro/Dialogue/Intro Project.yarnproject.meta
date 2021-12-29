@@ -16,14 +16,15 @@ ScriptedImporter:
   script: {fileID: 11500000, guid: 053561912b1654d80a424bb0696a74ae, type: 3}
   sourceScripts:
   - {fileID: 6391573757903218779, guid: aa20c0d0a35724fbab9776c4c18234ba, type: 3}
-  compileError: 
+  compileErrors: []
   serializedDeclarations:
   - name: $knows_anne_name
-    type: 3
+    typeName: Bool
     defaultValueBool: 0
     defaultValueNumber: 0
     defaultValueString: 
     description: Does Tom know the name of the person he's talking to?
+    isImplicit: 0
     sourceYarnAsset: {fileID: 6391573757903218779, guid: aa20c0d0a35724fbab9776c4c18234ba, type: 3}
   defaultLanguage: en-AU
   languagesToSourceAssets:
@@ -31,3 +32,5 @@ ScriptedImporter:
     stringsFile: {instanceID: 0}
     assetsFolder: {fileID: 102900000, guid: 34865a6c44c3a4f9d8c586b0830b3b2d, type: 3}
   useAddressableAssets: 0
+  searchAllAssembliesForActions: 1
+  assembliesToSearch: []
