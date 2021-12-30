@@ -31,6 +31,9 @@ ScriptedImporter:
   - languageID: en-AU
     stringsFile: {instanceID: 0}
     assetsFolder: {fileID: 102900000, guid: 34865a6c44c3a4f9d8c586b0830b3b2d, type: 3}
+  - languageID: es
+    stringsFile: {fileID: 4900000, guid: 7115b72e50b744add8dc487c684bcbe7, type: 3}
+    assetsFolder: {instanceID: 0}
   useAddressableAssets: 0
   searchAllAssembliesForActions: 1
   assembliesToSearch: []
