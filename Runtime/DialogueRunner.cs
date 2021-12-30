@@ -411,10 +411,10 @@ namespace Yarn.Unity
         /// &lt;&lt;commandName param1 param2&gt;&gt;
         /// </code>
         ///
-        /// <para>When this command handler is called, the <see
-        /// cref="DialogueRunner"/> will stop executing code. To make the <see
-        /// cref="DialogueRunner"/> resume execution, call the onComplete action
-        /// that the <see cref="CommandHandler"/> receives.</para>
+        /// <para>If <paramref name="handler"/> is a method that returns a <see
+        /// cref="Coroutine"/>, when the command is run, the <see
+        /// cref="DialogueRunner"/> will wait for the returned coroutine to stop
+        /// before delivering any more content.</para>
         /// </remarks>
         /// <param name="commandName">The name of the command.</param>
         /// <param name="handler">The <see cref="CommandHandler"/> that will be
