@@ -377,11 +377,13 @@ namespace Yarn.Unity
             // Attempt to invoke the command handler we found, and return a
             // value indicating whether it succeeded or failed.
             var result = command.TryInvoke(args, out returnValue);
-            switch (result) {
-                case true:
-                    return DialogueRunner.CommandDispatchResult.Success;
-                case false:
-                    return DialogueRunner.CommandDispatchResult.Failed;
+            if (result == true)
+            {
+                return DialogueRunner.CommandDispatchResult.Success;
+            }
+            else if (result == false)
+            {
+                return DialogueRunner.CommandDispatchResult.Failed;
             }
         }
 
