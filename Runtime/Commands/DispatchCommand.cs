@@ -25,8 +25,8 @@ namespace Yarn.Unity
 
             try
             {
-                var finalArgs = ActionManager.ParseArgs(Method, Converters, args, Method.IsStatic);
                 var instance = Method.IsStatic ? null : Injector?.Invoke(args[1]);
+                var finalArgs = ActionManager.ParseArgs(Method, Converters, args, Method.IsStatic);
                 returnValue = Method.Invoke(instance, finalArgs);
                 return true;
             }
