@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - ActionManager now only searches for commands and actions in assemblies that Yarn Projects specify. This significantly reduces startup time and memory usage.
+- Improved error messages when calling methods defined via the `YarnCommand` attribute where the specified object can't be found.
 
 ## [2.0.1]
 
