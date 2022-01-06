@@ -28,7 +28,7 @@ namespace Yarn.Unity
                 var gameObject = GameObject.Find(name);
                 if (gameObject == null)
                 {
-                    Debug.LogError($"Can't run command {commandName} on {behaviorType.FullName} for {name}: " +
+                    Debug.LogError($"Can't run command {commandName} on game object {name}'s {behaviorType.FullName} component: " +
                         "an object with that name doesn't exist in the scene.");
                     return null;
                 }
@@ -36,7 +36,7 @@ namespace Yarn.Unity
                 var target = gameObject.GetComponent(behaviorType);
                 if (target == null)
                 {
-                    Debug.LogError($"Can't run command {commandName} on {behaviorType.FullName} for {name}: " +
+                    Debug.LogError($"Can't run command {commandName} on game object {name}: " +
                         $"the command is only defined on {behaviorType.FullName} components, but {name} doesn't have one.");
                     return null;
                 }
