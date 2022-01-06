@@ -110,7 +110,7 @@ namespace Yarn.Unity.Tests
             LogAssert.Expect(LogType.Log, expectedLogResult);
             var methodFound = runner.DispatchCommandToGameObject(test, () => {});
 
-            Assert.True(methodFound);        
+            Assert.AreEqual(methodFound, DialogueRunner.CommandDispatchResult.Success);        
         }
 
         [UnityTest]

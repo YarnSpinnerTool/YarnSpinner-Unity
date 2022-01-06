@@ -45,6 +45,28 @@ namespace Yarn.Unity
     public class DialogueRunner : MonoBehaviour
     {
         /// <summary>
+        /// Represents the result of attempting to locate and call a command.
+        /// </summary>
+        /// <seealso cref="DispatchCommandToGameObject(Command, Action)"/>
+        /// <seealso cref="DispatchCommandToRegisteredHandlers(Command, Action)"/>
+        internal enum CommandDispatchResult {
+            /// <summary>
+            /// The command was located and successfully called.
+            /// </summary>
+            Success,
+
+            /// <summary>
+            /// The command was located, but failed to be called.
+            /// </summary>
+            Failed,
+
+            /// <summary>
+            /// The command could not be found.
+            /// </summary>
+            NotFound,
+        }
+
+        /// <summary>
         /// The <see cref="YarnProject"/> asset that should be loaded on
         /// scene start.
         /// </summary>
@@ -844,39 +866,50 @@ namespace Yarn.Unity
 
         void HandleCommand(Command command)
         {
-            bool wasValidCommand;
+            CommandDispatchResult dispatchResult;
 
             // Try looking in the command handlers first
-            wasValidCommand = DispatchCommandToRegisteredHandlers(command, ContinueDialogue);
+            dispatchResult = DispatchCommandToRegisteredHandlers(command, ContinueDialogue);
 
-            if (wasValidCommand)
+            if (dispatchResult != CommandDispatchResult.NotFound)
             {
-                // This was a valid command.
+                // We found the command! We don't need to keep looking. (It may
+                // have succeeded or failed; if it failed, it logged something
+                // to the console or otherwise communicated to the developer
+                // that something went wrong. Either way, we don't need to do
+                // anything more here.)
                 return;
             }
 
             // We didn't find it in the comand handlers. Try looking in the
             // game objects. If it is, continue dialogue.
-            wasValidCommand = DispatchCommandToGameObject(command, ContinueDialogue);
+            dispatchResult = DispatchCommandToGameObject(command, ContinueDialogue);
 
-            if (wasValidCommand)
+            if (dispatchResult != CommandDispatchResult.NotFound)
             {
-                // We found an object and method to invoke as a Yarn
-                // command. 
+                // As before: we found a handler for this command, so we stop
+                // looking.
                 return;
             }
 
-            // We didn't find a method in our C# code to invoke. Try
-            // invoking on the publicly exposed UnityEvent.
-            onCommand?.Invoke(command.Text);
-
-            if ( onCommand == null || onCommand.GetPersistentEventCount() == 0 ) {
+            // We didn't find a method in our C# code to invoke. Try invoking on
+            // the publicly exposed UnityEvent.
+            //
+            // We can only do this if our onCommand event is not null and would
+            // do something if we invoked it, so test this now.
+            if (onCommand != null && onCommand.GetPersistentEventCount() > 0) {
+                // We can invoke the event!
+                onCommand.Invoke(command.Text);
+            } else {
+                // We're out of ways to handle this command! Log this as an
+                // error.
                 Debug.LogError($"No Command <<{command.Text}>> was found. Did you remember to use the YarnCommand attribute or AddCommandHandler() function in C#?");
             }
 
+            // Whether we successfully handled it via the Unity Event or not,
+            // attempting to handle the command this way doesn't interrupt the
+            // dialogue, so we'll continue it now.
             ContinueDialogue();
-        
-            return;
         }
 
         /// <summary>
@@ -987,7 +1020,7 @@ namespace Yarn.Unity
         /// found.</param>
         /// <returns>True if the command was dispatched to a game object;
         /// false otherwise.</returns>
-        bool DispatchCommandToRegisteredHandlers(Command command, Action onSuccessfulDispatch)
+        CommandDispatchResult DispatchCommandToRegisteredHandlers(Command command, Action onSuccessfulDispatch)
         {
             return DispatchCommandToRegisteredHandlers(command.Text, onSuccessfulDispatch);
         }
@@ -996,14 +1029,14 @@ namespace Yarn.Unity
         /// Action)"/>
         /// <param name="command">The text of the command to
         /// dispatch.</param>
-        internal bool DispatchCommandToRegisteredHandlers(string command, Action onSuccessfulDispatch)
+        internal CommandDispatchResult DispatchCommandToRegisteredHandlers(string command, Action onSuccessfulDispatch)
         {
             var commandTokens = SplitCommandText(command).ToArray();
 
             if (commandTokens.Length == 0)
             {
-                // Nothing to do
-                return false;
+                // Nothing to do.
+                return CommandDispatchResult.NotFound;
             }
 
             var firstWord = commandTokens[0];
@@ -1012,7 +1045,7 @@ namespace Yarn.Unity
             {
                 // We don't have a registered handler for this command, but
                 // some other part of the game might.
-                return false;
+                return CommandDispatchResult.NotFound;
             }
 
             var @delegate = commandHandlers[firstWord];
@@ -1027,7 +1060,7 @@ namespace Yarn.Unity
             catch (ArgumentException e)
             {
                 Debug.LogError($"Can't run command {firstWord}: {e.Message}");
-                return false;
+                return CommandDispatchResult.Failed;
             }
 
             if (typeof(YieldInstruction).IsAssignableFrom(methodInfo.ReturnType))
@@ -1048,10 +1081,10 @@ namespace Yarn.Unity
             else
             {
                 Debug.LogError($"Cannot run command {firstWord}: the provided delegate does not return a valid type (permitted return types are YieldInstruction or void)");
-                return false;
+                return CommandDispatchResult.Failed;
             }
 
-            return true;
+            return CommandDispatchResult.Success;
         }
 
         /// <summary>
@@ -1094,7 +1127,7 @@ namespace Yarn.Unity
         /// <returns><see langword="true"/> if the command was successfully
         /// dispatched to a game object; <see langword="false"/> if no game
         /// object was registered as a handler for the command.</returns>
-        internal bool DispatchCommandToGameObject(Command command, Action onSuccessfulDispatch)
+        internal CommandDispatchResult DispatchCommandToGameObject(Command command, Action onSuccessfulDispatch)
         {
             // Call out to the string version of this method, because
             // Yarn.Command's constructor is only accessible from inside
@@ -1107,7 +1140,7 @@ namespace Yarn.Unity
         /// <inheritdoc cref="DispatchCommandToGameObject(Command, Action)"/>
         /// <param name="command">The text of the command to
         /// dispatch.</param>
-        internal bool DispatchCommandToGameObject(string command, System.Action onSuccessfulDispatch)
+        internal CommandDispatchResult DispatchCommandToGameObject(string command, System.Action onSuccessfulDispatch)
         {
             if (string.IsNullOrEmpty(command))
             {
@@ -1119,9 +1152,11 @@ namespace Yarn.Unity
                 throw new ArgumentNullException(nameof(onSuccessfulDispatch));
             }
 
-            if (!ActionManager.TryExecuteCommand(SplitCommandText(command).ToArray(), out object returnValue))
+
+            CommandDispatchResult commandExecutionResult = ActionManager.TryExecuteCommand(SplitCommandText(command).ToArray(), out object returnValue);
+            if (commandExecutionResult != CommandDispatchResult.Success)
             {
-                return false;
+                return commandExecutionResult;
             }
 
             var enumerator = returnValue as IEnumerator;
@@ -1136,7 +1171,7 @@ namespace Yarn.Unity
                 // no coroutine, so we're done!
                 onSuccessfulDispatch();
             }
-            return true;
+            return CommandDispatchResult.Success;
 
             IEnumerator DoYarnCommand(IEnumerator source, Action onDispatch)
             {
@@ -1443,6 +1478,6 @@ namespace Yarn.Unity
             return results;
         }
 
-        
+
     }
 }

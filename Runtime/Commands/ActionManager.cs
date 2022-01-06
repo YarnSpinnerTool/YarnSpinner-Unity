@@ -364,15 +364,25 @@ namespace Yarn.Unity
         /// </param>
         /// <param name="returnValue">The actual return value of the object.</param>
         /// <returns>Was a command executed?</returns>
-        public static bool TryExecuteCommand(string[] args, out object returnValue)
+        public static DialogueRunner.CommandDispatchResult TryExecuteCommand(string[] args, out object returnValue)
         {
             if (!commands.TryGetValue(args[0], out var command))
             {
                 returnValue = null;
-                return false;
+
+                // We didn't find a command handler with this name. Stop here!
+                return DialogueRunner.CommandDispatchResult.NotFound;
             }
 
-            return command.TryInvoke(args, out returnValue);
+            // Attempt to invoke the command handler we found, and return a
+            // value indicating whether it succeeded or failed.
+            var result = command.TryInvoke(args, out returnValue);
+            switch (result) {
+                case true:
+                    return DialogueRunner.CommandDispatchResult.Success;
+                case false:
+                    return DialogueRunner.CommandDispatchResult.Failed;
+            }
         }
 
         /// <summary>
@@ -418,7 +428,9 @@ namespace Yarn.Unity
             }
             else if (count != required)
             {
-                throw new ArgumentException($"{method.Name} requires {required} parameters, but {count} " +
+                var requiredParameterTypeNames = string.Join(", ", parameters.Where(p => !p.IsOptional).Select(p => p.ParameterType.ToString()));
+            
+                throw new ArgumentException($"{method.Name} requires {required} parameters ({requiredParameterTypeNames}), but {count} " +
                     $"{(count == 1 ? "was" : "were")} provided.");
             }
 
