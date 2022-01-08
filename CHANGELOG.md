@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+### Changed
+
+### Removed
+
+## [2.0.2] 2022-01-08
+
+### Added
+
 - You can now specify which assemblies you want Yarn Spinner to search for `YarnCommand` and `YarnFunction` methods in. 
   - By default, Yarn Spinner will search in your game's code, as well as every assembly definition in your code and your packages.
   - You can choose to make Yarn Spinner only look in specific assembly definitions, which reduces the amount of time needed to search for commands and functions.
@@ -19,7 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - ActionManager now only searches for commands and actions in assemblies that Yarn Projects specify. This significantly reduces startup time and memory usage.
 - Improved error messages when calling methods defined via the `YarnCommand` attribute where the specified object can't be found.
 
-## [2.0.1]
+## [2.0.1] 2021-12-23
 
 ### Added
 
