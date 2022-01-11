@@ -21,6 +21,15 @@ namespace Yarn.Unity
         [HideInInspector]
         public List<Localization> localizations = new List<Localization>();
 
+        [System.Serializable]
+        class StringDictionary : SerializedDictionary<string, string> { }
+
+        /// <summary>
+        /// The metadata contained in each line (if defined).
+        /// </summary>
+        [SerializeField]
+        private StringDictionary _lineMetadata = new StringDictionary();
+
         /// <summary>
         /// The names of assemblies that <see cref="ActionManager"/> should look
         /// for commands and functions in when this project is loaded into a
@@ -59,6 +68,41 @@ namespace Yarn.Unity
         public Program GetProgram()
         {
             return Program.Parser.ParseFrom(compiledYarnProgram);
+        }
+
+        /// <summary>
+        /// Goes through each line from a string table and add any metadata if
+        /// they are defined for the line. The metadata is internally stored as
+        /// a single string with each piece of metadata separated by a single
+        /// whitespace.
+        /// </summary>
+        /// <param name="stringTableEntries">IEnumerable with entries from a string table.</param>
+        internal void AddLineMetadata(IEnumerable<StringTableEntry> stringTableEntries)
+        {
+            foreach (var entry in stringTableEntries)
+            {
+                if (entry.Metadata.Length == 0)
+                {
+                    continue;
+                }
+
+                _lineMetadata.Add(entry.ID, System.String.Join(" ", entry.Metadata));
+            }
+        }
+
+        /// <summary>
+        /// Returns metadata for a given line ID, if any is defined.
+        /// </summary>
+        /// <param name="lineID">The line ID.</param>
+        /// <returns>An array of each piece of metadata if defined, otherwise returns null.</returns>
+        public string[] GetLineMetadata(string lineID)
+        {
+            if (_lineMetadata.TryGetValue(lineID, out var result))
+            {
+                return result.Split(' ');
+            }
+
+            return null;
         }
     }
 }

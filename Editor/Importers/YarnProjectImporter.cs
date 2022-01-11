@@ -408,6 +408,9 @@ namespace Yarn.Unity.Editor
                 {
                     // If this is our default language, set it as such
                     project.baseLocalization = newLocalization;
+                    // Line metadata must be the same for every language, so use the default
+                    // language metadata for the entire project.
+                    project.AddLineMetadata(stringTable);
                 }
                 else
                 {
@@ -436,6 +439,7 @@ namespace Yarn.Unity.Editor
                     Node = x.Value.nodeName,
                     LineNumber = x.Value.lineNumber.ToString(),
                     Lock = YarnImporter.GetHashString(x.Value.text, 8),
+                    Metadata = CleanLineIDFromMetadata(x.Value.metadata),
                 });
 
                 developmentLocalization.AddLocalizedStrings(stringTableEntries);
@@ -443,6 +447,8 @@ namespace Yarn.Unity.Editor
                 project.baseLocalization = developmentLocalization;
 
                 project.localizations.Add(project.baseLocalization);
+
+                project.AddLineMetadata(stringTableEntries);
 
                 developmentLocalization.name = $"Default ({defaultLanguage})";
 
@@ -607,9 +613,15 @@ namespace Yarn.Unity.Editor
                 Node = x.Value.nodeName,
                 LineNumber = x.Value.lineNumber.ToString(),
                 Lock = YarnImporter.GetHashString(x.Value.text, 8),
+                Metadata = CleanLineIDFromMetadata(x.Value.metadata),
             });
 
             return stringTableEntries;
+        }
+
+        private string[] CleanLineIDFromMetadata(string[] metadata)
+        {
+            return metadata.Where(x => !x.StartsWith("line:")).ToArray();
         }
     }
 

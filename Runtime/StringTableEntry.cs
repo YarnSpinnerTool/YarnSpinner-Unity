@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using CsvHelper;
 using CsvHelper.Configuration;
 
@@ -69,6 +70,12 @@ namespace Yarn.Unity
         public string Lock;
 
         /// <summary>
+        /// Additional metadata included in this line. This value must be the
+        /// same across all localizations.
+        /// </summary>
+        public string[] Metadata;
+
+        /// <summary>
         /// A comment used to describe this line to translators.
         /// </summary>
         public string Comment;
@@ -86,6 +93,7 @@ namespace Yarn.Unity
             Node = s.Node;
             LineNumber = s.LineNumber;
             Lock = s.Lock;
+            Metadata = s.Metadata;
             Comment = s.Comment;
             Language = s.Language;
         }
@@ -141,6 +149,7 @@ namespace Yarn.Unity
                         csv.TryGetField<string>("file", out var file);
                         csv.TryGetField<string>("node", out var node);
                         csv.TryGetField<string>("lineNumber", out var lineNumber);
+                        csv.TryGetField<string>("metadata", out var metadata);
 
                         var record = new StringTableEntry
                         {
@@ -151,6 +160,7 @@ namespace Yarn.Unity
                             Node = node ?? string.Empty,
                             LineNumber = lineNumber ?? string.Empty,
                             Lock = lockString ?? string.Empty,
+                            Metadata = metadata?.Split(' ') ?? new string[] { },
                             Comment = comment ?? string.Empty,
                         };
 
@@ -193,6 +203,7 @@ namespace Yarn.Unity
                     "node",
                     "lineNumber",
                     "lock",
+                    "metadata",
                     "comment",
                 };
 
@@ -212,6 +223,7 @@ namespace Yarn.Unity
                         entry.Node,
                         entry.LineNumber,
                         entry.Lock,
+                        System.String.Join(" ", entry.Metadata),
                         entry.Comment,
                     };
                     foreach (var value in values)
@@ -228,7 +240,7 @@ namespace Yarn.Unity
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"StringTableEntry: lang={Language} id={ID} text=\"{Text}\" file={File} node={Node} line={LineNumber} lock={Lock} comment={Comment}";
+            return $"StringTableEntry: lang={Language} id={ID} text=\"{Text}\" file={File} node={Node} line={LineNumber} lock={Lock} metadata={System.String.Join(" ", Metadata)} comment={Comment}";
         }
 
         /// <inheritdoc/>
@@ -242,13 +254,14 @@ namespace Yarn.Unity
                    Node == entry.Node &&
                    LineNumber == entry.LineNumber &&
                    Lock == entry.Lock &&
+                   Enumerable.SequenceEqual(Metadata, entry.Metadata) &&
                    Comment == entry.Comment;
         }
 
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return
+            var result =
                 Language.GetHashCode() ^
                 ID.GetHashCode() ^
                 Text.GetHashCode() ^
@@ -257,6 +270,13 @@ namespace Yarn.Unity
                 LineNumber.GetHashCode() ^
                 Lock.GetHashCode() ^
                 Comment.GetHashCode();
+
+            foreach (var piece in Metadata)
+            {
+                result ^= piece.GetHashCode();
+            }
+
+            return result;
         }
     }
 }

@@ -5,15 +5,15 @@ position: 0,0
 ---
 // A test script used in Editor unit tests
 Spieler: Kannst du mich hören? #line:0e3dc4b
-NPC: Klar und deutlich. #line:0967160
--> Mir reicht es. #line:04e806e
+NPC: Klar und deutlich. #line:0967160 #linemetadata
+-> Mir reicht es. #line:04e806e #linemetadata #linemetadata2
     <<jump Exit>>
 -> Nochmal! #line:0901fb2
     <<jump Start>>
 ===
 title: Exit
-tags: 
+tags:
 colorID: 0
 position: 0,0
---- 
+---
 ===

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -292,7 +293,7 @@ But not all of them are.
 
             // Simplify the results so that we can compare these string
             // table entries based only on specific fields
-            System.Func<StringTableEntry, (string id, string text)> simplifier = e => (id: e.ID, text: e.Text);
+            System.Func<StringTableEntry, (string id, string text, string metadata)> simplifier = e => (id: e.ID, text: e.Text, metadata: String.Join(" ", e.Metadata));
             var simpleExpected = ExpectedStrings.Select(simplifier);
             var simpleResult = generatedStringsTable.Select(simplifier);
 
@@ -588,6 +589,116 @@ But not all of them are.
             // The localizations that were imported are the same as the
             // localizations the asset knows about
             CollectionAssert.AreEquivalent(project.localizations, allAssetsAtPath.OfType<Localization>());
+        }
+
+        [Test]
+        public void YarnProjectImporter_OnLocalizationSuppliedWithoutMetadata_DoesNotClearMetadata()
+        {
+            // Arrange:
+            // A project with a yarn script, configured with a known
+            // default language.
+            const string defaultLanguage = "de";
+            const string otherLanguage = "en";
+
+            var project = SetUpProject(YarnImporterTests.TestYarnScriptSource);
+
+            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
+
+            importer.defaultLanguage = defaultLanguage;
+
+            // Act:
+            // Configure this importer to have two localizations.
+            // - One that:
+            //    - is not the same language as the default language
+            //    - has a strings file without any metadata
+            // - One that:
+            //    - is the same language as the default language (and
+            //      therefore needs no strings file)
+            //    - has lines with metadata
+
+            importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset
+            {
+                languageID = defaultLanguage,
+            });
+
+            importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset
+            {
+                languageID = otherLanguage,
+                stringsFile = GetScriptSource("TestYarnProject-StringsNoMetadata.csv")
+            });
+
+            EditorUtility.SetDirty(importer);
+            importer.SaveAndReimport();
+
+            // Assert:
+            // Metadata in the lines is not erased.
+            bool areAllEmptyLines = true;
+
+            foreach (var lineID in project.baseLocalization.GetLineIDs())
+            {
+                if (project.GetLineMetadata(lineID) != null)
+                {
+                    areAllEmptyLines = false;
+                    break;
+                }
+            }
+
+            Assert.IsFalse(areAllEmptyLines);
+        }
+
+        [Test]
+        public void YarnProjectImporter_OnLocalizationSuppliedWithDifferentMetadata_DoesNotChangeMetadata()
+        {
+            // Arrange:
+            // A project with a yarn script, configured with a single
+            // localization with a known default language.
+            const string defaultLanguage = "de";
+
+            var project = SetUpProject(YarnImporterTests.TestYarnScriptSource);
+
+            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
+
+            importer.defaultLanguage = defaultLanguage;
+
+            importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset
+            {
+                languageID = defaultLanguage,
+            });
+
+            EditorUtility.SetDirty(importer);
+            importer.SaveAndReimport();
+
+            // We'll grab a map of line IDs to metadata before doing anything else
+            // to make sure no metadata will change after adding another localization.
+            Dictionary<string, string[]> lineMetadata = new Dictionary<string, string[]>();
+
+            foreach (var lineID in project.baseLocalization.GetLineIDs())
+            {
+                lineMetadata.Add(lineID, project.GetLineMetadata(lineID));
+            }
+
+            // Act:
+            // Add another localization to this importer with different metadata
+            // (in this case with no metadata at all).
+            const string otherLanguage = "en";
+
+            importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset
+            {
+                languageID = otherLanguage,
+                stringsFile = GetScriptSource("TestYarnProject-StringsNoMetadata.csv")
+            });
+
+            EditorUtility.SetDirty(importer);
+            importer.SaveAndReimport();
+
+            // Assert:
+            // Metadata in the lines is not changed.
+            foreach (var kv in lineMetadata)
+            {
+                var newMetadata = project.GetLineMetadata(kv.Key);
+
+                Assert.AreEqual(kv.Value, newMetadata);
+            }
         }
 
         [Test]
