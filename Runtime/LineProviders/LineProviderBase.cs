@@ -127,6 +127,11 @@ namespace Yarn.Unity
         public LineStatus Status;
 
         /// <summary>
+        /// Any metadata associated with this line.
+        /// </summary>
+        public string[] Metadata;
+
+        /// <summary>
         /// The name of the character, if present.
         /// </summary>
         /// <remarks>

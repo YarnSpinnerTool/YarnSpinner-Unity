@@ -1,27 +1,20 @@
-using System.Collections.Generic;
 using CsvHelper;
-using CsvHelper.Configuration;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Yarn.Unity
 {
-    public struct StringTableEntry
+    /// <summary>
+    /// Struct holding information about a line and its associated metadata.
+    /// Only used internally as an intermediary before persisting information
+    /// in either a `YarnProject` or a CSV file.
+    /// </summary>
+    internal struct LineMetadataTableEntry
     {
         /// <summary>
-        /// The language that the line is written in.
-        /// </summary>
-        public string Language;
-
-        /// <summary>
-        /// The line ID for this line. This value will be the same across
-        /// all localizations.
+        /// The line ID for this line.
         /// </summary>
         public string ID;
-
-        /// <summary>
-        /// The text of this line, in the language specified by <see
-        /// cref="Language"/>.
-        /// </summary>
-        public string Text;
 
         /// <summary>
         /// The name of the Yarn script in which this line was originally
@@ -45,49 +38,22 @@ namespace Yarn.Unity
         public string LineNumber;
 
         /// <summary>
-        /// A string used as part of a mechanism for checking if translated
-        /// versions of this string are out of date.
+        /// Additional metadata included in this line.
         /// </summary>
-        /// <remarks>
-        /// <para>
-        /// This field contains the first 8 characters of the SHA-256 hash of
-        /// the line's text as it appeared in the base localization CSV file.
-        /// </para>
-        /// <para>
-        /// When a new StringTableEntry is created in a localized CSV file for a
-        /// .yarn file, the Lock value is copied over from the base CSV file,
-        /// and used for the translated entry. 
-        /// </para>
-        /// <para>
-        /// Because the base localization CSV is regenerated every time the
-        /// .yarn file is imported, the base localization Lock value will change
-        /// if a line's text changes. This means that if the base lock and
-        /// translated lock differ, the translated line is out of date, and
-        /// needs to be updated.
-        /// </para>
-        /// </remarks>
-        public string Lock;
+        public string[] Metadata;
 
         /// <summary>
-        /// A comment used to describe this line to translators.
-        /// </summary>
-        public string Comment;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StringTableEntry"/>
+        /// Initializes a new instance of the <see cref="LineMetadataTableEntry"/>
         /// struct, copying values from an existing instance.
         /// </summary>
         /// <param name="s">The instance to copy values from.</param>
-        public StringTableEntry(StringTableEntry s)
+        public LineMetadataTableEntry(LineMetadataTableEntry s)
         {
             ID = s.ID;
-            Text = s.Text;
             File = s.File;
             Node = s.Node;
             LineNumber = s.LineNumber;
-            Lock = s.Lock;
-            Comment = s.Comment;
-            Language = s.Language;
+            Metadata = s.Metadata;
         }
 
         private static CsvHelper.Configuration.Configuration CsvConfiguration;
@@ -106,15 +72,15 @@ namespace Yarn.Unity
 
         /// <summary>
         /// Reads comma-separated value data from <paramref name="sourceText"/>,
-        /// and produces a collection of <see cref="StringTableEntry"/> structs.
+        /// and produces a collection of <see cref="LineMetadataTableEntry"/> structs.
         /// </summary>
         /// <param name="sourceText">A string containing CSV-formatted
         /// data.</param>
-        /// <returns>The parsed collection of <see cref="StringTableEntry"/>
+        /// <returns>The parsed collection of <see cref="LineMetadataTableEntry"/>
         /// structs.</returns>
         /// <exception cref="ArgumentException">Thrown when an error occurs when
         /// parsing the string.</exception>
-        public static IEnumerable<StringTableEntry> ParseFromCSV(string sourceText)
+        internal static IEnumerable<LineMetadataTableEntry> ParseFromCSV(string sourceText)
         {
             try
             {
@@ -126,32 +92,26 @@ namespace Yarn.Unity
                     incompatibility with IL2CPP See more:
                     https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/36#issuecomment-691489913
                     */
-                    var records = new List<StringTableEntry>();
+                    var records = new List<LineMetadataTableEntry>();
                     csv.Read();
                     csv.ReadHeader();
                     while (csv.Read())
                     {
                         // Fetch values; if they can't be found, they'll be
                         // defaults.
-                        csv.TryGetField<string>("language", out var language);
-                        csv.TryGetField<string>("lock", out var lockString);
-                        csv.TryGetField<string>("comment", out var comment);
                         csv.TryGetField<string>("id", out var id);
-                        csv.TryGetField<string>("text", out var text);
                         csv.TryGetField<string>("file", out var file);
                         csv.TryGetField<string>("node", out var node);
                         csv.TryGetField<string>("lineNumber", out var lineNumber);
+                        csv.TryGetField<string>("metadata", out var metadata);
 
-                        var record = new StringTableEntry
+                        var record = new LineMetadataTableEntry
                         {
-                            Language = language ?? string.Empty,
                             ID = id ?? string.Empty,
-                            Text = text ?? string.Empty,
                             File = file ?? string.Empty,
                             Node = node ?? string.Empty,
                             LineNumber = lineNumber ?? string.Empty,
-                            Lock = lockString ?? string.Empty,
-                            Comment = comment ?? string.Empty,
+                            Metadata = metadata?.Split(' ') ?? new string[] { },
                         };
 
                         records.Add(record);
@@ -170,30 +130,25 @@ namespace Yarn.Unity
         /// Creates a CSV-formatted string containing data from <paramref
         /// name="entries"/>.
         /// </summary>
-        /// <param name="entries">The <see cref="StringTableEntry"/> values to
+        /// <param name="entries">The <see cref="LineMetadataTableEntry"/> values to
         /// generate the spreadsheet from.</param>
         /// <returns>A string containing CSV-formatted data.</returns>
-        public static string CreateCSV(IEnumerable<StringTableEntry> entries)
+        public static string CreateCSV(IEnumerable<LineMetadataTableEntry> entries)
         {
             using (var textWriter = new System.IO.StringWriter())
             {
-                // Generate the localised .csv file
-
                 // Use the invariant culture when writing the CSV
-                var csv = new CsvHelper.CsvWriter(
+                var csv = new CsvWriter(
                     textWriter, // write into this stream
                     GetConfiguration() // use this configuration
                     );
 
                 var fieldNames = new[] {
-                    "language",
                     "id",
-                    "text",
                     "file",
                     "node",
                     "lineNumber",
-                    "lock",
-                    "comment",
+                    "metadata",
                 };
 
                 foreach (var field in fieldNames)
@@ -205,14 +160,11 @@ namespace Yarn.Unity
                 foreach (var entry in entries)
                 {
                     var values = new[] {
-                        entry.Language,
                         entry.ID,
-                        entry.Text,
                         entry.File,
                         entry.Node,
                         entry.LineNumber,
-                        entry.Lock,
-                        entry.Comment,
+                        string.Join(" ", entry.Metadata),
                     };
                     foreach (var value in values)
                     {
@@ -228,35 +180,35 @@ namespace Yarn.Unity
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"StringTableEntry: lang={Language} id={ID} text=\"{Text}\" file={File} node={Node} line={LineNumber} lock={Lock} comment={Comment}";
+            return $"LineMetadataTableEntry: id={ID} file={File} node={Node} line={LineNumber} metadata={string.Join(" ", Metadata)}";
         }
 
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            return obj is StringTableEntry entry &&
-                   Language == entry.Language &&
+            return obj is LineMetadataTableEntry entry &&
                    ID == entry.ID &&
-                   Text == entry.Text &&
                    File == entry.File &&
                    Node == entry.Node &&
                    LineNumber == entry.LineNumber &&
-                   Lock == entry.Lock &&
-                   Comment == entry.Comment;
+                   Enumerable.SequenceEqual(Metadata, entry.Metadata);
         }
 
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return
-                Language.GetHashCode() ^
+            var result =
                 ID.GetHashCode() ^
-                Text.GetHashCode() ^
                 File.GetHashCode() ^
                 Node.GetHashCode() ^
-                LineNumber.GetHashCode() ^
-                Lock.GetHashCode() ^
-                Comment.GetHashCode();
+                LineNumber.GetHashCode();
+
+            foreach (var piece in Metadata)
+            {
+                result ^= piece.GetHashCode();
+            }
+
+            return result;
         }
     }
 }

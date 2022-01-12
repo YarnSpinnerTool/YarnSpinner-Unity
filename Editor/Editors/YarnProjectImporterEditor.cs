@@ -192,7 +192,7 @@ namespace Yarn.Unity.Editor
 
             using (new EditorGUI.DisabledGroupScope(canGenerateStringsTable == false))
             {
-                if (GUILayout.Button("Export Strings as CSV"))
+                if (GUILayout.Button("Export Strings and Metadata as CSV"))
                 {
                     var currentPath = AssetDatabase.GetAssetPath(serializedObject.targetObject);
                     var currentFileName = Path.GetFileNameWithoutExtension(currentPath);
@@ -204,6 +204,13 @@ namespace Yarn.Unity.Editor
                     {
                         // Generate the file on disk
                         YarnProjectUtility.WriteStringsFile(destinationPath, yarnProjectImporter);
+
+                        // Also generate the metadata file.
+                        var destinationDirectory = Path.GetDirectoryName(destinationPath);
+                        var destinationFileName = Path.GetFileNameWithoutExtension(destinationPath);
+
+                        var metadataDestinationPath = Path.Combine(destinationDirectory, $"{destinationFileName}-metadata.csv");
+                        YarnProjectUtility.WriteMetadataFile(metadataDestinationPath, yarnProjectImporter);
 
                         // destinationPath may have been inside our Assets
                         // directory, so refresh the asset database

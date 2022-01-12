@@ -408,9 +408,9 @@ namespace Yarn.Unity.Editor
                 {
                     // If this is our default language, set it as such
                     project.baseLocalization = newLocalization;
-                    // Line metadata must be the same for every language, so use the default
-                    // language metadata for the entire project.
-                    project.AddLineMetadata(stringTable);
+
+                    // Since this is the default language, also populate the line metadata.
+                    project.lineMetadata = new LineMetadata(LineMetadataTableEntriesFromCompilationResult(compilationResult));
                 }
                 else
                 {
@@ -425,34 +425,19 @@ namespace Yarn.Unity.Editor
             {
                 // We didn't add a localization for the default language.
                 // Create one for it now.
+                var stringTableEntries = StringTableEntriesFromCompilationResult(compilationResult);
 
                 var developmentLocalization = ScriptableObject.CreateInstance<Localization>();
-
+                developmentLocalization.name = $"Default ({defaultLanguage})";
                 developmentLocalization.LocaleCode = defaultLanguage;
-
-                var stringTableEntries = compilationResult.StringTable.Select(x => new StringTableEntry
-                {
-                    ID = x.Key,
-                    Language = defaultLanguage,
-                    Text = x.Value.text,
-                    File = x.Value.fileName,
-                    Node = x.Value.nodeName,
-                    LineNumber = x.Value.lineNumber.ToString(),
-                    Lock = YarnImporter.GetHashString(x.Value.text, 8),
-                    Metadata = CleanLineIDFromMetadata(x.Value.metadata),
-                });
-
                 developmentLocalization.AddLocalizedStrings(stringTableEntries);
 
                 project.baseLocalization = developmentLocalization;
-
                 project.localizations.Add(project.baseLocalization);
-
-                project.AddLineMetadata(stringTableEntries);
-
-                developmentLocalization.name = $"Default ({defaultLanguage})";
-
                 ctx.AddObjectToAsset("default-language", developmentLocalization);
+
+                // Since this is the default language, also populate the line metadata.
+                project.lineMetadata = new LineMetadata(LineMetadataTableEntriesFromCompilationResult(compilationResult));
             }
 
             // Store the compiled program
@@ -568,6 +553,23 @@ namespace Yarn.Unity.Editor
             return importer.LastImportHadImplicitStringIDs == false;
         }
 
+        private CompilationResult? CompileStringsOnly()
+        {
+            var pathsToImporters = sourceScripts.Where(s => s != null).Select(s => AssetDatabase.GetAssetPath(s));
+
+            if (pathsToImporters.Count() == 0)
+            {
+                // We have no scripts to work with.
+                return null;
+            }
+
+            // We now now compile!
+            var job = CompilationJob.CreateFromFiles(pathsToImporters);
+            job.CompilationType = CompilationJob.Type.StringsOnly;
+
+            return Compiler.Compiler.Compile(job);
+        }
+
         /// <summary>
         /// Generates a collection of <see cref="StringTableEntry"/>
         /// objects, one for each line in this Yarn Project's scripts.
@@ -578,25 +580,17 @@ namespace Yarn.Unity.Editor
         /// errors.</returns>
         internal IEnumerable<StringTableEntry> GenerateStringsTable()
         {
-            var pathsToImporters = sourceScripts.Where(s => s != null).Select(s => AssetDatabase.GetAssetPath(s));
+            CompilationResult? compilationResult = CompileStringsOnly();
 
-            if (pathsToImporters.Count() == 0)
+            if (!compilationResult.HasValue)
             {
-                // We have no scripts to work with - return an empty
-                // collection - there's no error, but there's no content
-                // either
+                // We only get no value if we have no scripts to work with.
+                // In this case, return an empty collection - there's no
+                // error, but there's no content either.
                 return new List<StringTableEntry>();
             }
 
-            // We now now compile!
-            var job = CompilationJob.CreateFromFiles(pathsToImporters);
-            job.CompilationType = CompilationJob.Type.StringsOnly;
-
-            CompilationResult compilationResult;
-
-            compilationResult = Compiler.Compiler.Compile(job);
-
-            var errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
+            var errors = compilationResult.Value.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
 
             if (errors.Count() > 0)
             {
@@ -604,7 +598,35 @@ namespace Yarn.Unity.Editor
                 return null;
             }
 
-            IEnumerable<StringTableEntry> stringTableEntries = compilationResult.StringTable.Select(x => new StringTableEntry
+            return StringTableEntriesFromCompilationResult(compilationResult.Value);
+        }
+
+        internal IEnumerable<LineMetadataTableEntry> GenerateLineMetadataEntries()
+        {
+            CompilationResult? compilationResult = CompileStringsOnly();
+
+            if (!compilationResult.HasValue)
+            {
+                // We only get no value if we have no scripts to work with.
+                // In this case, return an empty collection - there's no
+                // error, but there's no content either.
+                return new List<LineMetadataTableEntry>();
+            }
+
+            var errors = compilationResult.Value.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
+
+            if (errors.Count() > 0)
+            {
+                Debug.LogError($"Can't generate line metadata entries from a Yarn Project that contains compile errors", null);
+                return null;
+            }
+
+            return LineMetadataTableEntriesFromCompilationResult(compilationResult.Value);
+        }
+
+        private IEnumerable<StringTableEntry> StringTableEntriesFromCompilationResult(CompilationResult result)
+        {
+            return result.StringTable.Select(x => new StringTableEntry
             {
                 ID = x.Key,
                 Language = defaultLanguage,
@@ -613,15 +635,56 @@ namespace Yarn.Unity.Editor
                 Node = x.Value.nodeName,
                 LineNumber = x.Value.lineNumber.ToString(),
                 Lock = YarnImporter.GetHashString(x.Value.text, 8),
-                Metadata = CleanLineIDFromMetadata(x.Value.metadata),
+                Comment = GenerateCommentWithLineMetadata(x.Value.metadata),
             });
-
-            return stringTableEntries;
         }
 
-        private string[] CleanLineIDFromMetadata(string[] metadata)
+        private IEnumerable<LineMetadataTableEntry> LineMetadataTableEntriesFromCompilationResult(CompilationResult result)
         {
-            return metadata.Where(x => !x.StartsWith("line:")).ToArray();
+            return result.StringTable.Select(x => new LineMetadataTableEntry
+            {
+                ID = x.Key,
+                File = x.Value.fileName,
+                Node = x.Value.nodeName,
+                LineNumber = x.Value.lineNumber.ToString(),
+                Metadata = RemoveLineIDFromMetadata(x.Value.metadata).ToArray(),
+            }).Where(x => x.Metadata.Length > 0);
+        }
+
+        /// <summary>
+        /// Generates a string with the line metadata. This string is intended
+        /// to be used in the "comment" column of a strings table CSV. Because
+        /// of this, it will ignore the line ID if it exists (which is also
+        /// part of the line metadata).
+        /// </summary>
+        /// <param name="metadata">The metadata from a given line.</param>
+        /// <returns>A string prefixed with "Line metadata: ", followed by each
+        /// piece of metadata separated by whitespace. If no metadata exists or
+        /// only the line ID is part of the metadata, returns an empty string
+        /// instead.</returns>
+        private string GenerateCommentWithLineMetadata(string[] metadata)
+        {
+            var cleanedMetadata = RemoveLineIDFromMetadata(metadata);
+
+            if (cleanedMetadata.Count() == 0)
+            {
+                return string.Empty;
+            }
+
+            return $"Line metadata: {string.Join(" ", cleanedMetadata)}";
+        }
+
+        /// <summary>
+        /// Removes any line ID entry from an array of line metadata.
+        /// Line metadata will always contain a line ID entry if it's set. For
+        /// example, if a line contains "#line:1eaf1e55", its line metadata
+        /// will always have an entry with "line:1eaf1e55".
+        /// </summary>
+        /// <param name="metadata">The array with line metadata.</param>
+        /// <returns>An IEnumerable with any line ID entries removed.</returns>
+        private IEnumerable<string> RemoveLineIDFromMetadata(string[] metadata)
+        {
+            return metadata.Where(x => !x.StartsWith("line:"));
         }
     }
 

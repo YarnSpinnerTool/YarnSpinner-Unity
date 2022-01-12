@@ -8,11 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Metadata for each line is exposed through the Yarn Project. Metadata generally comes as hashtags similar to `#line`. They can be used to define line-specific behavior (no particular behavior is supported by default, each user will need to define their own).
+- Metadata for each line is exposed through a Yarn Project. Metadata generally comes as hashtags similar to `#line`. They can be used to define line-specific behavior (no particular behavior is supported by default, each user will need to define their own).
+- When exporting Strings files, a Yarn Project will also export another CSV file with the line metadata (for each line with metadata).
+- `LocalizedLine`s now contain a field for any metadata associated with the line.
 
 ### Changed
-
-- Strings files now include a new column with each line's metadata. This column is used only informatively (similar to the `comment` column). Files without this column will continue to work, but any new strings files generated will always have this new column.
 
 ### Removed
 
