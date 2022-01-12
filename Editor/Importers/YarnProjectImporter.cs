@@ -143,8 +143,6 @@ namespace Yarn.Unity.Editor
             UnityEngine.Profiling.Profiler.enabled = true;
 #endif
 
-            YarnPreventPlayMode.AddYarnErrorSource(this);
-
             var project = ScriptableObject.CreateInstance<YarnProject>();
 
             project.name = Path.GetFileNameWithoutExtension(ctx.assetPath);

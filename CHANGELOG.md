@@ -10,13 +10,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- `YarnPreventPlayMode` no longer uses `WeakReference` pointing to `Unity.Object` (this is unsupported by Unity).
+
 ### Removed
 
 ## [2.0.2] 2022-01-08
 
 ### Added
 
-- You can now specify which assemblies you want Yarn Spinner to search for `YarnCommand` and `YarnFunction` methods in. 
+- You can now specify which assemblies you want Yarn Spinner to search for `YarnCommand` and `YarnFunction` methods in.
   - By default, Yarn Spinner will search in your game's code, as well as every assembly definition in your code and your packages.
   - You can choose to make Yarn Spinner only look in specific assembly definitions, which reduces the amount of time needed to search for commands and functions.
   - To control how Yarn Spinner searches for commands and actions, turn off "Search All Assemblies" in the Inspector for a Yarn Project.
@@ -105,7 +107,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     ```
 
   - You can also define custom getters for better performance.
-  
+
     ```cs
     [YarnStateInjector(nameof(GetBehavior))] // if this is null, the previous behavior of using GameObject.Find will still be available
     class CustomBehavior : MonoBehaviour {
@@ -127,7 +129,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     ```
 
   - You can also define custom getters for Component parameters in the same vein.
-  
+
     ```cs
     class CustomBehavior : MonoBehaviour {
       static Animator GetAnimator(string name) => ...;
@@ -145,10 +147,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Updated to support new error handling in Yarn Spinner. 
+- Updated to support new error handling in Yarn Spinner.
   - Yarn Spinner longer reports errors by throwing an exception, and instead provides a collection of diagnostic messages in the compiler result. In Unity, Yarn Spinner will now show _all_ error messages that the compiler may produce.
 
-- The console will no longer report an error indicating that a command is "already defined" when a subclass of a MonoBehaviour that has `YarnCommand` methods exists. 
+- The console will no longer report an error indicating that a command is "already defined" when a subclass of a MonoBehaviour that has `YarnCommand` methods exists.
 
 - `LocalizedLine.Text`'s setter is now public, not internal.
 
@@ -176,7 +178,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-* `OptionsListView` no longer throws a `NullPointerException` when the dialogue starts with options (instead of a line.) 
+* `OptionsListView` no longer throws a `NullPointerException` when the dialogue starts with options (instead of a line.)
 * When creating a new Yarn Project file from the Assets -> Create menu, the correct icon is now used.
 * Updated to use the new type system in Yarn Spinner 2.0-beta5.
 
@@ -186,9 +188,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [2.0.0-beta4] 2021-04-01
 
-Yarn Spinner 2.0 Beta 4 is a hotfix release for Yarn Spinner 2.0 Beta 3. 
+Yarn Spinner 2.0 Beta 4 is a hotfix release for Yarn Spinner 2.0 Beta 3.
 
-### Changed 
+### Changed
 
 - Fixed an issue that caused Yarn Spinner to not compile on Unity 2018 or Unity 2019.
 
@@ -249,9 +251,9 @@ With this change, you can instead say this:
 - Fixed an issue where dialogue views that are not enabled were still being waited for (@radiatoryang)
 - Upgrader tool now creates new files on disk, where needed (for example, .yarnproject files)
 - `YarnProgram`, the asset that stores references to individual .yarn files for compilation, has been renamed to `YarnProject`. Because this change makes Unity forget any existing references to "YarnProgram" assets, **when upgrading to this version, you must set the Yarn Project field in your Dialogue Runners again.**
-- `Localization`, the asset that mapped line IDs to localized data, is now automatically generated for you by the `YarnProject`. 
-  - You don't create them yourselves, and you no longer need to manually refresh them. 
-  - The `YarnProject` always creates at least one localization: the "Base" localization, which contains the original text found in your `.yarn` files. 
+- `Localization`, the asset that mapped line IDs to localized data, is now automatically generated for you by the `YarnProject`.
+  - You don't create them yourselves, and you no longer need to manually refresh them.
+  - The `YarnProject` always creates at least one localization: the "Base" localization, which contains the original text found in your `.yarn` files.
   - You can create more localizations in the `YarnProject`'s inspector, and supply the language code to use and a `.csv` file containing replacement strings.
 - Renamed the 'StartHere' demo to 'Intro', because it's not actually the first step in installing Yarn Spinner.
 - Simplified the workflow for working with Addressable Assets.
@@ -295,9 +297,9 @@ With this change, you can instead say this:
 ### Removed
 
 - The `[[Destination]]` and `[[Option|Destination]]` syntax has been removed from the language.
-  - This syntax was inherited from the original Yarn language, which itself inherited it from Twine. 
-  - We removed it for four reasons: 
-    - it conflated jumps and options, which are very different operations, with too-similar syntax; 
+  - This syntax was inherited from the original Yarn language, which itself inherited it from Twine.
+  - We removed it for four reasons:
+    - it conflated jumps and options, which are very different operations, with too-similar syntax;
     - the Option-destination syntax for declaring options involved the management of non-obvious state (that is, if an option statement was inside an `if` branch that was never executed, it was not presented, and the runtime needed to keep track of that);
     - it was not obvious that options accumulated and were only presented at the end of the node;
     - finally, shortcut options provide a cleaner way to present the same behaviour.
@@ -342,9 +344,9 @@ Kim: You want a bagel?
   - Variables also have a default value. As a result, variables are never allowed to be `null`.
   - Variable declarations can be in any part of a Yarn script. As long as they're somewhere in the file, they'll be used.
   - Variable declarations don't have to be in the same file as where they're used. If the Yarn Program contains a script that has a variable declaration, other scripts in that Program can use the variable.
-  - To declare a variable on a Yarn Program, select it, and click the `+` button to create the new variable. 
+  - To declare a variable on a Yarn Program, select it, and click the `+` button to create the new variable.
   - To declare a variable in a script, use the following syntax:
-  
+
 ```
 <<declare $variable_name = "hello">> // declares a string
 <<declare $variable_name = 123>> // declares a number
@@ -360,7 +362,7 @@ Kim: You want a bagel?
 ### Removed
 - Commands registered via the `YarnCommand` attribute can no longer accept a `params` array of parameters. If your command takes a variable number of parameters, use optional parameters instead.
 
-## [1.2.7] 
+## [1.2.7]
 
 ### Changed
 
