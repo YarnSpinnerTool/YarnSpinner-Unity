@@ -29,10 +29,9 @@ namespace Yarn.Unity.Tests
         // Getters for the various components in the scene that we're
         // working with
         DialogueRunner Runner => GameObject.FindObjectOfType<DialogueRunner>();
-        DialogueUI UI => GameObject.FindObjectOfType<DialogueUI>();
+        // DialogueUI UI => GameObject.FindObjectOfType<DialogueUI>();
         InMemoryVariableStorage VarStorage => GameObject.FindObjectOfType<InMemoryVariableStorage>();
-        Text TextCanvas => UI.dialogueContainer.transform.GetComponentsInChildren<Text>()
-                                                         .First(element => element.gameObject.name == "Text");
+        // Text TextCanvas => UI.dialogueContainer.transform.GetComponentsInChildren<Text>().First(element => element.gameObject.name == "Text");
 
         [UnitySetUp]
         public IEnumerator SetUp()

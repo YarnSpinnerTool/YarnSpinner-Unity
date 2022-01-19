@@ -16,7 +16,6 @@ namespace Yarn.Unity.Editor
         private SerializedProperty dialogueViewsProperty;
         private SerializedProperty startNodeProperty;
         private SerializedProperty startAutomaticallyProperty;
-        private SerializedProperty automaticallyContinueLinesProperty;
         private SerializedProperty runSelectedOptionAsLineProperty;
         private SerializedProperty lineProviderProperty;
         private SerializedProperty verboseLoggingProperty;
@@ -76,7 +75,6 @@ namespace Yarn.Unity.Editor
                 EditorGUILayout.PropertyField(startNodeProperty);
                 EditorGUI.indentLevel -= 1;
             }
-            EditorGUILayout.PropertyField(automaticallyContinueLinesProperty);
             EditorGUILayout.PropertyField(runSelectedOptionAsLineProperty);
             EditorGUILayout.PropertyField(verboseLoggingProperty);
 
