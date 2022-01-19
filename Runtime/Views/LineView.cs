@@ -286,35 +286,6 @@ namespace Yarn.Unity
             }
         }
 
-        public override void OnLineStatusChanged(LocalizedLine dialogueLine)
-        {
-            switch (dialogueLine.Status)
-            {
-                case LineStatus.Presenting:
-                    break;
-                case LineStatus.Interrupted:
-                    // We have been interrupted. Set our interruption flag,
-                    // so that any animations get skipped.
-                    interruptionFlag.Set();
-                    break;
-                case LineStatus.FinishedPresenting:
-                    // The line has finished being delivered by all views.
-                    // Display the Continue button.
-                    if (continueButton != null)
-                    {
-                        continueButton.SetActive(true);
-                        var selectable = continueButton.GetComponentInChildren<Selectable>();
-                        if (selectable != null)
-                        {
-                            selectable.Select();
-                        }
-                    }
-                    break;
-                case LineStatus.Dismissed:
-                    break;
-            }
-        }
-
         private void OnCharacterTyped() {
             onCharacterTyped?.Invoke();
         }

@@ -26,12 +26,7 @@ namespace Yarn.Unity
     /// <seealso cref="DialogueUI"/>
     public abstract class DialogueViewBase : MonoBehaviour
     {
-        /// <summary>
-        /// Represents the method that should be called when this view
-        /// wants the line to be interrupted or to proceed to the next
-        /// line.
-        /// </summary>
-        internal System.Action onUserWantsLineContinuation;
+        internal Action onUserWantsLineContinuation;
 
         /// <summary>Signals that a conversation has started.</summary>
         public virtual void DialogueStarted()
@@ -58,22 +53,18 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Called by the DialogueRunner to indicate that the line that
-        /// this view is delivering has changed state.
+        /// Called by the <see cref="DialogueRunner"/> to signal that a
+        /// line has been interrupted in some manner.
+        /// Functionally identical to RunLine but for interrupts.
         /// </summary>
-        /// <remarks>
-        /// Subclasses of <see cref="DialogueViewBase"/> should override
-        /// this method to be notified when a line has become interrupted,
-        /// and when the line has finished being delivered by all views.
-        ///
-        /// The default implementation does nothing.
-        /// </remarks>
-        /// <param name="dialogueLine">The <see cref="LocalizedLine"/> that
-        /// has changed state.</param>
-        /// <seealso cref="LineStatus"/>
-        public virtual void OnLineStatusChanged(LocalizedLine dialogueLine)
+        /// <param name="dialogueLine">The content of the line that should
+        /// be presented to the user.</param>
+        /// <param name="onDialogueLineFinished">The method that should be
+        /// called after the line has been finished.</param>
+        public virtual void InterruptLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
-            // Default implementation is a no-op.
+            // the default implementation does nothing
+            onDialogueLineFinished?.Invoke();
         }
 
         /// <summary>
@@ -150,25 +141,10 @@ namespace Yarn.Unity
             // Default implementation does nothing.
         }
 
-        /// <summary>
-        /// Signals that the user wants to go to the next line.
-        /// </summary>
-        /// <remarks>
-        /// This method is generally called by a "continue" button, and
-        /// causes the DialogueUI to signal the <see
-        /// cref="DialogueRunner"/> to proceed to the next piece of
-        /// content.
-        ///
-        /// If this method is called before the line has finished appearing
-        /// (that is, before the line's status changes to <see
-        /// cref="LineStatus.FinishedPresenting"/>), the line's status will change
-        /// to <see cref="LineStatus.Interrupted"/>, and <see
-        /// cref="OnLineStatusChanged"/> will be called to notify the view.
-        /// </remarks>
-        public void ReadyForNextLine()
+        // this method is called by the input view
+        public virtual void UserRequestedViewAdvancement()
         {
-            // Call the continuation callback, if we have it.
-            onUserWantsLineContinuation?.Invoke();
+            // default implementation does nothing
         }
     }
 }

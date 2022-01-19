@@ -139,30 +139,30 @@ namespace Yarn.Unity
             }
         }
 
-        public override void OnLineStatusChanged(LocalizedLine dialogueLine)
-        {
-            switch (dialogueLine.Status)
-            {
-                case LineStatus.Presenting:
-                    // Nothing to do here - continue running.
-                    break;
-                case LineStatus.Interrupted:
-                    // The user wants us to wrap up the audio quickly. The
-                    // DoPlayback coroutine will apply the fade out defined
-                    // by fadeOutTimeOnLineFinish.
-                    interrupted = true;
-                    break;
-                case LineStatus.FinishedPresenting:
-                    // The line has finished delivery on all views. Nothing
-                    // left to do for us, since the audio will have already
-                    // finished playing out.
-                    break;
-                case LineStatus.Dismissed:
-                    // The line is being dismissed; we should ensure that
-                    // audio playback has ended.
-                    audioSource.Stop();
-                    break;
-            }
-        }
+        // public override void OnLineStatusChanged(LocalizedLine dialogueLine)
+        // {
+        //     switch (dialogueLine.Status)
+        //     {
+        //         case LineStatus.Presenting:
+        //             // Nothing to do here - continue running.
+        //             break;
+        //         case LineStatus.Interrupted:
+        //             // The user wants us to wrap up the audio quickly. The
+        //             // DoPlayback coroutine will apply the fade out defined
+        //             // by fadeOutTimeOnLineFinish.
+        //             interrupted = true;
+        //             break;
+        //         case LineStatus.FinishedPresenting:
+        //             // The line has finished delivery on all views. Nothing
+        //             // left to do for us, since the audio will have already
+        //             // finished playing out.
+        //             break;
+        //         case LineStatus.Dismissed:
+        //             // The line is being dismissed; we should ensure that
+        //             // audio playback has ended.
+        //             audioSource.Stop();
+        //             break;
+        //     }
+        // }
     }
 }

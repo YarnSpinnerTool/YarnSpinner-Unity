@@ -1,44 +1,23 @@
 fileFormatVersion: 2
 guid: 28be40ad14f5bf446bbc09afbd3ebcdb
 ScriptedImporter:
-  fileIDToRecycleName:
-    4900000: Strings
-    4900002: Program
-    2186277476908879412: ImportLogs
+  internalIDToNameTable:
+  - first:
+      49: 4900000
+    second: Strings
+  - first:
+      49: 4900002
+    second: Program
+  - first:
+      41386430: 2186277476908879412
+    second: ImportLogs
   externalObjects: {}
+  serializedVersion: 2
   userData: 
   assetBundleName: 
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 94073015eacc34c1d8fc6786e43d60ca, type: 3}
-  baseLanguageID: en
-  stringIDs:
-  - line:3dSampleDialogue-Start-0
-  - line:3dSampleDialogue-Start-1
-  - line:3dSampleDialogue-Start-2
-  - line:3dSampleDialogue-Start-3
-  - line:3dSampleDialogue-Start-4
-  - line:3dSampleDialogue-Start-5
-  - line:3dSampleDialogue-Start-6
-  - line:3dSampleDialogue-Start-7
-  - line:3dSampleDialogue-Start-8
-  - line:3dSampleDialogue-Start-9
-  - line:3dSampleDialogue-Start-10
-  - line:3dSampleDialogue-Start-11
-  - line:3dSampleDialogue-Start-12
-  - line:3dSampleDialogue-Start-13
-  - line:3dSampleDialogue-Start-14
-  - line:3dSampleDialogue-Start-15
-  - line:3dSampleDialogue-Start-16
-  - line:3dSampleDialogue-Start-17
-  - line:3dSampleDialogue-Start-18
-  - line:3dSampleDialogue-Start-19
-  - line:3dSampleDialogue-Start-20
-  - line:3dSampleDialogue-Start-21
-  - line:3dSampleDialogue-Start-22
-  - line:3dSampleDialogue-Start-23
-  AnyImplicitStringIDs: 1
-  isSuccesfullyParsed: 1
-  parseErrorMessage: 
-  baseLanguage: {instanceID: 0}
-  localizations: []
-  localizationDatabase: {instanceID: 0}
+  LastImportHadImplicitStringIDs: 1
+  LastImportHadAnyStrings: 1
+  isSuccessfullyParsed: 1
+  parseErrorMessages: []

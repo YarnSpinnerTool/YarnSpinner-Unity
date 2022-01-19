@@ -108,19 +108,19 @@ namespace Yarn.Unity.Tests
             onDismissalComplete();
         }
 
-        public override void OnLineStatusChanged(LocalizedLine dialogueLine)
-        {
-            switch (dialogueLine.Status)
-            {
-                case LineStatus.Interrupted:
-                    isLineInterrupted = true;
-                    break;
-                default:
-                    // no-op; we don't care about other states in this mock
-                    // view
-                    break;
-            }
-        }
+        // public override void OnLineStatusChanged(LocalizedLine dialogueLine)
+        // {
+        //     switch (dialogueLine.Status)
+        //     {
+        //         case LineStatus.Interrupted:
+        //             isLineInterrupted = true;
+        //             break;
+        //         default:
+        //             // no-op; we don't care about other states in this mock
+        //             // view
+        //             break;
+        //     }
+        // }
 
         // A Yarn command that receives integer parameters
         [YarnCommand("testCommandInteger")]
