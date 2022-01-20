@@ -1407,11 +1407,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1002775747}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca28301cfbfea4c83bae10ed899b6c3c, type: 3}
+  m_Script: {fileID: 11500000, guid: 097b95c9f69f04f2d8c08a817e7786af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   attachedView: {fileID: 0}
-  dialogueRunner: {fileID: 0}
   continueActionType: 1
   continueActionKeyCode: 113
 --- !u!1 &1045999317

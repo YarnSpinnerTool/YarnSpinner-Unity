@@ -83,10 +83,10 @@ namespace Yarn.Unity.Tests
         public IEnumerator TestVariableValuesFromYarnScript() {
             // run all lines
             Runner.StartDialogue(Runner.startNode);
-            UI.ReadyForNextLine();
+            // UI.ReadyForNextLine();
             yield return null;
             yield return null;
-            UI.ReadyForNextLine();
+            // UI.ReadyForNextLine();
             yield return null;
             yield return null;
 
