@@ -52,7 +52,6 @@ namespace Yarn.Unity.Tests
 
         public void SetValue_TryGetValue()
         {
-            
             // set, then get, then test equality
             VarStorage.SetValue("$stringVar", stringTest);
             VarStorage.TryGetValue<string>("$stringVar", out var actualStringResult);
@@ -105,10 +104,10 @@ namespace Yarn.Unity.Tests
         {
             // run all lines
             Runner.StartDialogue(Runner.startNode);
-            UI.ReadyForNextLine();
+            // UI.ReadyForNextLine();
             yield return null;
             yield return null;
-            UI.ReadyForNextLine();
+            // UI.ReadyForNextLine();
             yield return null;
             yield return null;
 
@@ -128,10 +127,10 @@ namespace Yarn.Unity.Tests
         {
             // run all lines
             Runner.StartDialogue(Runner.startNode);
-            UI.ReadyForNextLine();
+            // UI.ReadyForNextLine();
             yield return null;
             yield return null;
-            UI.ReadyForNextLine();
+            // UI.ReadyForNextLine();
             yield return null;
             yield return null;
 
