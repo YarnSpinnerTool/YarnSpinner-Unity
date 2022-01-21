@@ -149,5 +149,15 @@ namespace Yarn.Unity
             audioSource.Stop();
             onDismissalComplete();
         }
+
+        public override void UserRequestedViewAdvancement()
+        {
+            // we arent currently playing a line so the user mashed out of context
+            if (!audioSource.isPlaying)
+            {
+                return;
+            }
+            onUserWantsLineContinuation?.Invoke();
+        }
     }
 }
