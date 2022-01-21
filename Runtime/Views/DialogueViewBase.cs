@@ -26,6 +26,10 @@ namespace Yarn.Unity
     /// <seealso cref="DialogueUI"/>
     public abstract class DialogueViewBase : MonoBehaviour
     {
+        /// <summary>
+        /// Represents the method that should be called when this view
+        /// wants the line to be interrupted.
+        /// </summary>
         internal Action onUserWantsLineContinuation;
 
         /// <summary>Signals that a conversation has started.</summary>
