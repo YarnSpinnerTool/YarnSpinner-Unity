@@ -83,11 +83,6 @@ namespace Yarn.Unity.Tests
         public IEnumerator TestVariableValuesFromYarnScript() {
             // run all lines
             Runner.StartDialogue(Runner.startNode);
-            // UI.ReadyForNextLine();
-            yield return null;
-            yield return null;
-            // UI.ReadyForNextLine();
-            yield return null;
             yield return null;
 
             VarStorage.TryGetValue<string>("$stringVar", out var actualStringResult);
@@ -104,11 +99,6 @@ namespace Yarn.Unity.Tests
         {
             // run all lines
             Runner.StartDialogue(Runner.startNode);
-            // UI.ReadyForNextLine();
-            yield return null;
-            yield return null;
-            // UI.ReadyForNextLine();
-            yield return null;
             yield return null;
 
             // save all variable values to Player Prefs, clear, then load from Player Prefs
@@ -127,11 +117,6 @@ namespace Yarn.Unity.Tests
         {
             // run all lines
             Runner.StartDialogue(Runner.startNode);
-            // UI.ReadyForNextLine();
-            yield return null;
-            yield return null;
-            // UI.ReadyForNextLine();
-            yield return null;
             yield return null;
 
             // save all variable values to a file, clear, then load from a file
