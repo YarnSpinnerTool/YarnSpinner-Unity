@@ -50,10 +50,10 @@ namespace Yarn.Unity.Tests
             yield return null;
 
             Assert.AreEqual("Spieler: Kannst du mich hören? 2", dialogueUI.CurrentLine);
-            // dialogueUI.ReadyForNextLine();
+            dialogueUI.Advance();
 
             Assert.AreEqual("NPC: Klar und deutlich.", dialogueUI.CurrentLine);
-            // dialogueUI.ReadyForNextLine();
+            dialogueUI.Advance();
 
             Assert.AreEqual(2, dialogueUI.CurrentOptions.Count);
             Assert.AreEqual("Mir reicht es.", dialogueUI.CurrentOptions[0]);
@@ -75,10 +75,10 @@ namespace Yarn.Unity.Tests
             yield return null;
 
             Assert.AreEqual("Spieler: Kannst du mich hören? 2", dialogueUI.CurrentLine);
-            // dialogueUI.ReadyForNextLine();
+            dialogueUI.Advance();
 
             Assert.AreEqual("NPC: Klar und deutlich.", dialogueUI.CurrentLine);
-            // dialogueUI.ReadyForNextLine();
+            dialogueUI.Advance();
 
             Assert.AreEqual(2, dialogueUI.CurrentOptions.Count);
             Assert.AreEqual("Mir reicht es.", dialogueUI.CurrentOptions[0]);

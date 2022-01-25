@@ -41,23 +41,32 @@ namespace Yarn.Unity.Tests
             instance = this;
         }
 
+        // runs the line complete callback
+        // without this
+        public void Advance()
+        {
+            lineDelivered();
+        }
+
+        private Action lineDelivered;
         public override void RunLine(LocalizedLine dialogueLine, Action onLineDeliveryComplete)
         {
             // Store the localised text in our CurrentLine property and
             // signal that we're done "delivering" the line after the
             // correct amount of time
             CurrentLine = dialogueLine.Text.Text;
+            lineDelivered = onLineDeliveryComplete;
 
             isLineInterrupted = false;
 
-            if (simulatedLineDeliveryTime > 0)
-            {
-                StartCoroutine(SimulateLineDelivery(onLineDeliveryComplete));
-            }
-            else
-            {
-                onLineDeliveryComplete();
-            }
+            // if (simulatedLineDeliveryTime > 0)
+            // {
+            //     StartCoroutine(SimulateLineDelivery(onLineDeliveryComplete));
+            // }
+            // else
+            // {
+            //     onLineDeliveryComplete();
+            // }
         }
 
         private IEnumerator SimulateLineDelivery(Action onLineDeliveryComplete)
@@ -108,19 +117,11 @@ namespace Yarn.Unity.Tests
             onDismissalComplete();
         }
 
-        // public override void OnLineStatusChanged(LocalizedLine dialogueLine)
-        // {
-        //     switch (dialogueLine.Status)
-        //     {
-        //         case LineStatus.Interrupted:
-        //             isLineInterrupted = true;
-        //             break;
-        //         default:
-        //             // no-op; we don't care about other states in this mock
-        //             // view
-        //             break;
-        //     }
-        // }
+        public override void InterruptLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
+        {
+            isLineInterrupted = true;
+            onDialogueLineFinished();
+        }
 
         // A Yarn command that receives integer parameters
         [YarnCommand("testCommandInteger")]
