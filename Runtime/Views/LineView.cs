@@ -163,6 +163,8 @@ namespace Yarn.Unity
 
         LocalizedLine currentLine = null;
 
+        private float holdTime = 1f;
+
         // if set to false the view will prevent calling the completion handler until manually made to do so
         [SerializeField]
         internal bool autoAdvance = false;
@@ -247,12 +249,13 @@ namespace Yarn.Unity
             canvasGroup.alpha = 1;
             canvasGroup.blocksRaycasts = true;
 
-            // hold on screen for just a moment because otherwise it looks weird
-            StartCoroutine(TempYield(0.5f, onInterruptLineFinished));
+            onInterruptLineFinished();
         }
 
-        // this is such a bad name
-        private IEnumerator TempYield(float holdDelay, Action onDialogueLineFinished)
+        // holds for a moment and then runs the action
+        // designed to be used as part of autoadvancing UI so that the text holds on screen for a little while
+        // otherwise the text just flashes as fast as Unity can make it happen
+        private IEnumerator DelayAction(float holdDelay, Action onDialogueLineFinished)
         {
             yield return new WaitForSeconds(holdDelay);
             onDialogueLineFinished();
@@ -295,6 +298,8 @@ namespace Yarn.Unity
                 lineText.text = dialogueLine.TextWithoutCharacterName.Text;
             }
 
+            bool needsHold = autoAdvance && holdTime > 0;
+
             if (useFadeEffect)
             {
                 if (useTypewriterEffect)
@@ -310,8 +315,18 @@ namespace Yarn.Unity
                     lineText.maxVisibleCharacters = int.MaxValue;
                 }
 
-                // Fade up and then call FadeComplete when done
-                StartCoroutine(Effects.FadeAlpha(canvasGroup, 0, 1, fadeInTime, useTypewriterEffect ? null: hasPresented, () => FadeComplete(completionHandler)));
+                // if we are set to auto advance we want to hold for the
+                // amount of time set in holdTime before calling the
+                // completion handler to continue the dialogue
+                if (needsHold)
+                {
+                    StartCoroutine(Effects.FadeAlpha(canvasGroup, 0, 1, fadeInTime, useTypewriterEffect ? null: hasPresented, () => FadeComplete(() => HoldAndContinue(completionHandler))));
+                }
+                else
+                {
+                    // Fade up and then call FadeComplete when done
+                    StartCoroutine(Effects.FadeAlpha(canvasGroup, 0, 1, fadeInTime, useTypewriterEffect ? null: hasPresented, () => FadeComplete(completionHandler)));
+                }
             }
             else
             {
@@ -322,13 +337,30 @@ namespace Yarn.Unity
 
                 if (useTypewriterEffect)
                 {
-                    // Start the typewriter
-                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, hasPresented, OnCharacterTyped, completionHandler));
+                    if (needsHold)
+                    {
+                        StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, hasPresented, OnCharacterTyped, () => HoldAndContinue(completionHandler)));
+                    }
+                    else
+                    {
+                        StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, hasPresented, OnCharacterTyped, completionHandler));
+                    }
                 }
                 else
                 {
-                    hasPresented.Set();
-                    completionHandler();
+                    if (needsHold)
+                    {
+                        Action hold = () => {
+                            hasPresented.Set();
+                            completionHandler();
+                        };
+                        HoldAndContinue(hold);
+                    }
+                    else
+                    {
+                        hasPresented.Set();
+                        completionHandler();
+                    }
                 }
             }
 
@@ -342,6 +374,10 @@ namespace Yarn.Unity
                 {
                     onFinished();
                 }
+            }
+            void HoldAndContinue(Action onFinished)
+            {
+                StartCoroutine(DelayAction(holdTime, onFinished));
             }
         }
 
