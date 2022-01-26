@@ -3,8 +3,6 @@ tags:
 colorID: 0
 position: 524,111
 ---
-Sally: just writing a very long line that is so long that it will take the typewriter effect a decentish amount of time to finish so that I can test teh various interrupt handling side of things
-Sally: the very next line after the long one
 <<if visited("Sally") is false>>
     Player: Hey, Sally. #line:794945
     Sally: Uah! #line:2dc39b

@@ -1217,7 +1217,6 @@ namespace Yarn.Unity
             // the set of active views.
             ActiveDialogueViews.Remove(dialogueView);
 
-            Debug.Log($"{dialogueView.name} dismissed itself");
             // Have all of the views completed? 
             if (ActiveDialogueViews.Count == 0)
             {
