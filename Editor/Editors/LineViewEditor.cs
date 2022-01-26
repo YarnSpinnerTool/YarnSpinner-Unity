@@ -20,6 +20,7 @@ namespace Yarn.Unity.Editor
         private SerializedProperty continueButtonProperty;
 
         private SerializedProperty autoAdvanceDialogueProperty;
+        private SerializedProperty holdDelayProperty;
 
         public void OnEnable()
         {
@@ -36,6 +37,7 @@ namespace Yarn.Unity.Editor
             typewriterEffectSpeedProperty = serializedObject.FindProperty(nameof(LineView.typewriterEffectSpeed));
             continueButtonProperty = serializedObject.FindProperty(nameof(LineView.continueButton));
             autoAdvanceDialogueProperty = serializedObject.FindProperty(nameof(LineView.autoAdvance));
+            holdDelayProperty = serializedObject.FindProperty(nameof(LineView.holdTime));
         }
 
         public override void OnInspectorGUI()
@@ -50,6 +52,13 @@ namespace Yarn.Unity.Editor
             foreach (var prop in baseProperties)
             {
                 EditorGUILayout.PropertyField(prop);
+            }
+
+            if (autoAdvanceDialogueProperty.boolValue)
+            {
+                EditorGUI.indentLevel += 1;
+                EditorGUILayout.PropertyField(holdDelayProperty);
+                EditorGUI.indentLevel -= 1;
             }
 
             EditorGUILayout.PropertyField(useFadeEffectProperty);

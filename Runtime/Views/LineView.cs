@@ -163,7 +163,9 @@ namespace Yarn.Unity
 
         LocalizedLine currentLine = null;
 
-        private float holdTime = 1f;
+        [SerializeField]
+        [Min(0)]
+        internal float holdTime = 1f;
 
         // if set to false the view will prevent calling the completion handler until manually made to do so
         [SerializeField]
