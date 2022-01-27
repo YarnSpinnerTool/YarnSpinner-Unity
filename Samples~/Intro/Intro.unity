@@ -5206,7 +5206,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attachedView: {fileID: 0}
   continueActionType: 1
-  continueActionKeyCode: 113
+  continueActionKeyCode: 32
 --- !u!1 &424243560
 GameObject:
   m_ObjectHideFlags: 0
@@ -15717,6 +15717,7 @@ MonoBehaviour:
       m_Calls: []
   typewriterEffectSpeed: 120
   continueButton: {fileID: 0}
+  holdTime: 1
   autoAdvance: 1
 --- !u!114 &4935123090840333078
 MonoBehaviour:
