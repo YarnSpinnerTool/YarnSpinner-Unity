@@ -60,7 +60,7 @@ namespace Yarn.Unity
             onComplete?.Invoke();
         }
 
-        public static IEnumerator Typewriter(TextMeshProUGUI text, float lettersPerSecond, PresentationFlag presented, Action onCharacterTyped = null, Action onComplete = null)
+        public static IEnumerator Typewriter(TextMeshProUGUI text, float lettersPerSecond, PresentationFlag presented, Action onCharacterTyped, Action onComplete)
         {
             // Start with everything invisible
             text.maxVisibleCharacters = 0;
