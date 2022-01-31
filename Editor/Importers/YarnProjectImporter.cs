@@ -337,7 +337,11 @@ namespace Yarn.Unity.Editor
                 var newLocalization = ScriptableObject.CreateInstance<Localization>();
                 newLocalization.LocaleCode = pair.languageID;
 
-                newLocalization.AddLocalizedStrings(stringTable);
+                // Add these new lines to the localisation's asset
+                foreach (var entry in stringTable) {
+                    newLocalization.AddLocalisedStringToAsset(entry.ID, entry.Text);
+                }
+
 
                 project.localizations.Add(newLocalization);
                 newLocalization.name = pair.languageID;
@@ -438,7 +442,10 @@ namespace Yarn.Unity.Editor
                     Lock = YarnImporter.GetHashString(x.Value.text, 8),
                 });
 
-                developmentLocalization.AddLocalizedStrings(stringTableEntries);
+                // Add these new lines to the development localisation's asset
+                foreach (var entry in stringTableEntries) {
+                    developmentLocalization.AddLocalisedStringToAsset(entry.ID, entry.Text);
+                }
 
                 project.baseLocalization = developmentLocalization;
 

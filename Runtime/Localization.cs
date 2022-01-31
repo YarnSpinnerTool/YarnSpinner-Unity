@@ -66,16 +66,38 @@ namespace Yarn.Unity
 
         public bool ContainsLocalizedString(string key) => _runtimeStringTable.ContainsKey(key) || _stringTable.ContainsKey(key);
 
+        /// <summary>
+        /// Adds a new string to the string table.
+        /// </summary>
+        /// <remarks>
+        /// This method updates the localisation asset on disk. It is not
+        /// recommended to call this method during play mode, because changes
+        /// will persist after you leave and may cause conflicts.
+        /// </remarks>
+        /// <param name="key">The key for this string (generally, the line
+        /// ID.)</param>
+        /// <param name="value">The user-facing text for this string, in the
+        /// language specified by <see cref="LocaleCode"/>.</param>
+        internal void AddLocalisedStringToAsset(string key, string value) {
+            _stringTable.Add(key, value);
+        }
+
+        /// <summary>
+        /// Adds a new string to the runtime string table.
+        /// </summary>
+        /// <remarks>
+        /// This method updates the localisation's runtime string table, which
+        /// is useful for adding or changing the localisation during gameplay or
+        /// in a built player. It doesn't modify the asset on disk, and any
+        /// changes made will be lost when gameplay ends.
+        /// </remarks>
+        /// <param name="key">The key for this string (generally, the line
+        /// ID.)</param>
+        /// <param name="value">The user-facing text for this string, in the
+        /// language specified by <see cref="LocaleCode"/>.</param>
         public void AddLocalizedString(string key, string value)
         {
-            if (Application.isPlaying)
-            {
-                _runtimeStringTable.Add(key, value);
-            }
-            else
-            {
-                _stringTable.Add(key, value);
-            }
+            _runtimeStringTable.Add(key, value);
         }
 
         public void AddLocalizedStrings(IEnumerable<KeyValuePair<string, string>> strings)
