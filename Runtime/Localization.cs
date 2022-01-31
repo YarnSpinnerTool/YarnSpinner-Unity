@@ -12,11 +12,17 @@ namespace Yarn.Unity
     public class Localization : ScriptableObject
     {
         /// <summary>
-        /// Returns the address that should be used to fetch an asset
-        /// suitable for a specific line in a specific language.
+        /// Returns the address that should be used to fetch an asset suitable
+        /// for a specific line in a specific language.
         /// </summary>
-        /// <param name="lineID">The line ID to use when generating the address.</param>
-        /// <param name="language">The language to use when generating the address.</param>
+        /// <remarks>
+        /// This method is useful for creating an address for use with the
+        /// Addressable Assets system.
+        /// </remarks>
+        /// <param name="lineID">The line ID to use when generating the
+        /// address.</param>
+        /// <param name="language">The language to use when generating the
+        /// address.</param>
         /// <returns>The address to use.</returns>
         internal static string GetAddressForLine(string lineID, string language) {
             return $"line_{language}_{lineID.Replace("line:", "")}";
@@ -37,8 +43,24 @@ namespace Yarn.Unity
 
         private Dictionary<string, string> _runtimeStringTable = new Dictionary<string, string>();
 
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="Localization"/>
+        /// contains assets that are linked to strings.
+        /// </summary>
         public bool ContainsLocalizedAssets { get => _containsLocalizedAssets; internal set => _containsLocalizedAssets = value; }
         
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="Localization"/>
+        /// makes use of Addressable Assets (<see langword="true"/>), or if it
+        /// stores its assets as direct references (<see langword="false"/>).
+        /// </summary>
+        /// <remarks>
+        /// If this property is <see langword="true"/>, <see
+        /// cref="GetLocalizedObject"/> and <see
+        /// cref="ContainsLocalizedObject"/> should not be used to
+        /// retrieve localised objects. Instead, the Addressable Assets API
+        /// should be used.
+        /// </remarks>
         public bool UsesAddressableAssets { get => _usesAddressableAssets; internal set => _usesAddressableAssets = value; }
 
         [SerializeField]
@@ -64,6 +86,13 @@ namespace Yarn.Unity
             return null;
         }
 
+        /// <summary>
+        /// Returns a boolean value indicating whether this <see
+        /// cref="Localization"/> contains a string with the given key.
+        /// </summary>
+        /// <param name="key">The key to search for.</param>
+        /// <returns><see langword="true"/> if this Localization has a string
+        /// for the given key; <see langword="false"/> otherwise.</returns>
         public bool ContainsLocalizedString(string key) => _runtimeStringTable.ContainsKey(key) || _stringTable.ContainsKey(key);
 
         /// <summary>
@@ -100,6 +129,13 @@ namespace Yarn.Unity
             _runtimeStringTable.Add(key, value);
         }
 
+        /// <summary>
+        /// Adds a collection of strings to the runtime string table.
+        /// </summary>
+        /// <inheritdoc cref="AddLocalizedString(string, string)"
+        /// path="/remarks"/>
+        /// <param name="strings">The collection of keys and strings to
+        /// add.</param>
         public void AddLocalizedStrings(IEnumerable<KeyValuePair<string, string>> strings)
         {
             foreach (var entry in strings)
@@ -108,6 +144,13 @@ namespace Yarn.Unity
             }
         }
 
+        /// <summary>
+        /// Adds a collection of strings to the runtime string table.
+        /// </summary>
+        /// <inheritdoc cref="AddLocalizedString(string, string)"
+        /// path="/remarks"/>
+        /// <param name="strings">The collection of <see
+        /// cref="StringTableEntry"/> objects to add.</param>
         public void AddLocalizedStrings(IEnumerable<StringTableEntry> stringTableEntries)
         {
             foreach (var entry in stringTableEntries)
