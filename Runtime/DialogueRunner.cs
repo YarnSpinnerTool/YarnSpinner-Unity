@@ -1478,18 +1478,24 @@ namespace Yarn.Unity
             return results;
         }
         // returns true if it worked
-        // should make this an error though
-        // for now is fine while still testing stuff
-        public bool LoadState()
+        public bool LoadState(string SaveKey = "YarnBasicSave")
         {
-            if (PlayerPrefs.HasKey("YarnBasicSave"))
+            if (PlayerPrefs.HasKey(SaveKey))
             {
-                var saveData = PlayerPrefs.GetString("YarnBasicSave");
+                var saveData = PlayerPrefs.GetString(SaveKey);
 
-                var dictionaries = DeserializeAllVariablesFromJSON(saveData);
-                _variableStorage.BulkLoadVariables(dictionaries.Item1, dictionaries.Item2, dictionaries.Item3);
+                try
+                {
+                    var dictionaries = DeserializeAllVariablesFromJSON(saveData);
+                    _variableStorage.BulkLoadVariables(dictionaries.Item1, dictionaries.Item2, dictionaries.Item3);
 
-                return true;
+                    return true;
+                }
+                catch (ArgumentException e)
+                {
+                    Debug.LogWarning($"Unable to load saved data: {e.Message}");
+                    return false;
+                }
             }
             else
             {
@@ -1497,49 +1503,44 @@ namespace Yarn.Unity
                 return false;
             }
         }
-        public void SaveState()
+        public void SaveState(string SaveKey = "YarnBasicSave")
         {
             var data = SerializeAllVariablesToJSON();
-            PlayerPrefs.SetString("YarnBasicSave", data);
+            PlayerPrefs.SetString(SaveKey, data);
             PlayerPrefs.Save();
-
-            Debug.Log("Dialogue Runner Saved");
         }
-        // this really needs to throw an error...
+        
+        // takes in a JSON string and converts it into a tuple of dictionaries
+        // intended to let you just dump these straight into the variable storage
+        // throws exceptions if unable to convert or if the conversion half works
         private (Dictionary<string, float>, Dictionary<string, string>, Dictionary<string, bool>) DeserializeAllVariablesFromJSON(string jsonData)
         {
-            JSONBlob data = JsonUtility.FromJson<JSONBlob>(jsonData);
+            SaveData data = JsonUtility.FromJson<SaveData>(jsonData);
 
             if (data.floatKeys == null && data.floatValues == null)
             {
-                Debug.LogError("invalid numeric data returned from the save file");
-                return (null, null, null);
+                throw new ArgumentException("Provided JSON string was not able to extract numeric variables");
             }
             if (data.stringKeys == null && data.stringValues == null)
             {
-                Debug.LogError("invalid string data returned from the save file");
-                return (null, null, null);
+                throw new ArgumentException("Provided JSON string was not able to extract string variables");
             }
             if (data.boolKeys == null && data.boolValues == null)
             {
-                Debug.LogError("invalid bool data returned from the save file");
-                return (null, null, null);
+                throw new ArgumentException("Provided JSON string was not able to extract boolean variables");
             }
 
             if (data.floatKeys.Length != data.floatValues.Length)
             {
-                Debug.LogError("number of keys and values of numeric variables does not match");
-                return (null, null, null);
+                throw new ArgumentException("Number of keys and values of numeric variables does not match");
             }
             if (data.stringKeys.Length != data.stringValues.Length)
             {
-                Debug.LogError("number of keys and values of string variables does not match");
-                return (null, null, null);
+                throw new ArgumentException("Number of keys and values of string variables does not match");
             }
             if (data.boolKeys.Length != data.boolValues.Length)
             {
-                Debug.LogError("number of keys and values of boolean variables does not match");
-                return (null, null, null);
+                throw new ArgumentException("Number of keys and values of boolean variables does not match");
             }
 
             var floats = new Dictionary<string, float>();
@@ -1564,7 +1565,7 @@ namespace Yarn.Unity
         {
             (var floats, var strings, var bools) = _variableStorage.DumpVariables();
 
-            JSONBlob data = new JSONBlob();
+            SaveData data = new SaveData();
             data.floatKeys = floats.Keys.ToArray();
             data.floatValues = floats.Values.ToArray();
             data.stringKeys = strings.Keys.ToArray();
@@ -1575,7 +1576,7 @@ namespace Yarn.Unity
             return JsonUtility.ToJson(data, true);
         }
 
-        [System.Serializable] private struct JSONBlob { public string[] floatKeys; public float[] floatValues; public string[] stringKeys; public string[] stringValues; public string[] boolKeys; public bool[] boolValues; }
+        [System.Serializable] private struct SaveData { public string[] floatKeys; public float[] floatValues; public string[] stringKeys; public string[] stringValues; public string[] boolKeys; public bool[] boolValues; }
 
         void Update()
         {
