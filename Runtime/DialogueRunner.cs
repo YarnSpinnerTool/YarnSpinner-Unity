@@ -1477,7 +1477,113 @@ namespace Yarn.Unity
 
             return results;
         }
+        // returns true if it worked
+        // should make this an error though
+        // for now is fine while still testing stuff
+        public bool LoadState()
+        {
+            if (PlayerPrefs.HasKey("YarnBasicSave"))
+            {
+                var saveData = PlayerPrefs.GetString("YarnBasicSave");
 
+                var dictionaries = DeserializeAllVariablesFromJSON(saveData);
+                _variableStorage.BulkLoadVariables(dictionaries.Item1, dictionaries.Item2, dictionaries.Item3);
 
+                return true;
+            }
+            else
+            {
+                Debug.LogWarning("Attempted to load the runner previous state but found none saved");
+                return false;
+            }
+        }
+        public void SaveState()
+        {
+            var data = SerializeAllVariablesToJSON();
+            PlayerPrefs.SetString("YarnBasicSave", data);
+            PlayerPrefs.Save();
+
+            Debug.Log("Dialogue Runner Saved");
+        }
+        // this really needs to throw an error...
+        private (Dictionary<string, float>, Dictionary<string, string>, Dictionary<string, bool>) DeserializeAllVariablesFromJSON(string jsonData)
+        {
+            JSONBlob data = JsonUtility.FromJson<JSONBlob>(jsonData);
+
+            if (data.floatKeys == null && data.floatValues == null)
+            {
+                Debug.LogError("invalid numeric data returned from the save file");
+                return (null, null, null);
+            }
+            if (data.stringKeys == null && data.stringValues == null)
+            {
+                Debug.LogError("invalid string data returned from the save file");
+                return (null, null, null);
+            }
+            if (data.boolKeys == null && data.boolValues == null)
+            {
+                Debug.LogError("invalid bool data returned from the save file");
+                return (null, null, null);
+            }
+
+            if (data.floatKeys.Length != data.floatValues.Length)
+            {
+                Debug.LogError("number of keys and values of numeric variables does not match");
+                return (null, null, null);
+            }
+            if (data.stringKeys.Length != data.stringValues.Length)
+            {
+                Debug.LogError("number of keys and values of string variables does not match");
+                return (null, null, null);
+            }
+            if (data.boolKeys.Length != data.boolValues.Length)
+            {
+                Debug.LogError("number of keys and values of boolean variables does not match");
+                return (null, null, null);
+            }
+
+            var floats = new Dictionary<string, float>();
+            for (int i = 0; i < data.floatValues.Length; i++)
+            {
+                floats.Add(data.floatKeys[i], data.floatValues[i]);
+            }
+            var strings = new Dictionary<string, string>();
+            for (int i = 0; i < data.stringValues.Length; i++)
+            {
+                strings.Add(data.stringKeys[i], data.stringValues[i]);
+            }
+            var bools = new Dictionary<string, bool>();
+            for (int i = 0; i < data.boolValues.Length; i++)
+            {
+                bools.Add(data.boolKeys[i], data.boolValues[i]);
+            }
+
+            return (floats, strings, bools);
+        }
+        private string SerializeAllVariablesToJSON()
+        {
+            (var floats, var strings, var bools) = _variableStorage.DumpVariables();
+
+            JSONBlob data = new JSONBlob();
+            data.floatKeys = floats.Keys.ToArray();
+            data.floatValues = floats.Values.ToArray();
+            data.stringKeys = strings.Keys.ToArray();
+            data.stringValues = strings.Values.ToArray();
+            data.boolKeys = bools.Keys.ToArray();
+            data.boolValues = bools.Values.ToArray();
+
+            return JsonUtility.ToJson(data, true);
+        }
+
+        [System.Serializable] private struct JSONBlob { public string[] floatKeys; public float[] floatValues; public string[] stringKeys; public string[] stringValues; public string[] boolKeys; public bool[] boolValues; }
+
+        void Update()
+        {
+            if (Input.GetKeyUp(KeyCode.R))
+            {
+                SaveState();
+                LoadState();
+            }
+        }
     }
 }

@@ -64,5 +64,20 @@ namespace Yarn.Unity
         /// value for the variable named <paramref name="variableName"/>; <see
         /// langword="false"/> otherwise.</returns>
         public abstract bool Contains(string variableName);
+
+        /// <summary>
+        /// Provides a unified interface for loading many variables all at once.
+        /// Will override anything already in the variable storage.
+        /// </summary>
+        /// <param name="clear">Should the load also wipe the storage.
+        /// Defaults to true so all existing variables will be cleared.
+        /// </param>
+        public abstract void BulkLoadVariables(System.Collections.Generic.Dictionary<string,float> floats, System.Collections.Generic.Dictionary<string,string> strings, System.Collections.Generic.Dictionary<string,bool> bools, bool clear = true);
+
+        /// <summary>
+        /// Provides a unified interface for exporting all variables.
+        /// Intended to be a point for custom saving, editors, etc.
+        /// </summary>
+        public abstract (System.Collections.Generic.Dictionary<string,float>,System.Collections.Generic.Dictionary<string,string>,System.Collections.Generic.Dictionary<string,bool>) DumpVariables();
     }
 }

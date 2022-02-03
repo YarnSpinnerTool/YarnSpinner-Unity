@@ -390,5 +390,63 @@ namespace Yarn.Unity
         {
             return ((IEnumerable<KeyValuePair<string, object>>)variables).GetEnumerator();
         }
+
+        public override (Dictionary<string,float>,Dictionary<string,string>,Dictionary<string,bool>) DumpVariables()
+        {
+            Dictionary<string, float> floatDict = new Dictionary<string, float>();
+            Dictionary<string, string> stringDict = new Dictionary<string, string>();
+            Dictionary<string, bool> boolDict = new Dictionary<string, bool>();
+            
+            foreach (var variable in variables)
+            {
+                var type = variableTypes[variable.Key];
+
+                if (type == typeof(float))
+                {
+                    float value = System.Convert.ToSingle(variable.Value);
+                    floatDict.Add(variable.Key, value);
+                }
+                else if (type == typeof(string))
+                {
+                    string value = System.Convert.ToString(variable.Value);
+                    stringDict.Add(variable.Key, value);
+                }
+                else if (type == typeof(bool))
+                {
+                    bool value = System.Convert.ToBoolean(variable.Value);
+                    boolDict.Add(variable.Key, value);
+                }
+                else
+                {
+                    Debug.Log($"{variable.Key} is not a valid type");
+                }
+            }
+
+            return (floatDict, stringDict, boolDict);
+        }
+
+        public override void BulkLoadVariables(Dictionary<string, float> floats, Dictionary<string, string> strings, Dictionary<string, bool> bools, bool clear = true)
+        {
+            if (clear)
+            {
+                variables.Clear();
+                variableTypes.Clear();
+            }
+
+            foreach (var value in floats)
+            {
+                SetValue(value.Key, value.Value);
+            }
+            foreach (var value in strings)
+            {
+                SetValue(value.Key, value.Value);
+            }
+            foreach (var value in bools)
+            {
+                SetValue(value.Key, value.Value);
+            }
+
+            Debug.Log($"bulk loaded {floats.Count} floats, {strings.Count} strings, {bools.Count} bools");
+        }
     }
 }
