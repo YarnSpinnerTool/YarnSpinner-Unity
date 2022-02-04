@@ -28,9 +28,9 @@ namespace Yarn.Unity
     {
         /// <summary>
         /// Represents the method that should be called when this view
-        /// wants the line to be interrupted.
+        /// wants the line to be continued.
         /// </summary>
-        internal Action onUserWantsLineContinuation;
+        public Action onUserWantsLineContinuation;
 
         /// <summary>Signals that a conversation has started.</summary>
         public virtual void DialogueStarted()
