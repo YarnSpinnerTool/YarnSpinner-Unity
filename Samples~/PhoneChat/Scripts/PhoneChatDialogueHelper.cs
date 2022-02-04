@@ -4,15 +4,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-namespace Yarn.Unity.Example {
+namespace Yarn.Unity.Example 
+{
     /// <summary>
     /// clones dialogue bubbles for the ChatDialogue example
     /// </summary>
     public class PhoneChatDialogueHelper : DialogueViewBase
     {
         DialogueRunner runner;
-
-
 
         public TMPro.TextMeshProUGUI text;
 
@@ -31,7 +30,8 @@ namespace Yarn.Unity.Example {
         
         private bool showingOptions = false;
 
-        void Awake() {
+        void Awake()
+        {
             runner = GetComponent<DialogueRunner>();
             runner.AddCommandHandler( "Me", SetSenderMe ); // registers Yarn Command <<Me>>, which sets the current message sender to "Me"
             runner.AddCommandHandler( "Them", SetSenderThem ); // registers Yarn Command <<They>>, which sets the current message sender to "Them" (whoever the player is talking to)
@@ -39,27 +39,31 @@ namespace Yarn.Unity.Example {
             optionsContainer.SetActive(false);
         }
 
-        void Start () {
+        void Start () 
+        {
             dialogueBubblePrefab.SetActive(false);
             UpdateMessageBoxSettings();
         }
 
         // YarnCommand <<Me>>, but does not use YarnCommand C# attribute, registers in Awake() instead
-        public void SetSenderMe() {
+        public void SetSenderMe() 
+        {
             isRightAlignment = true;
             currentBGColor = Color.blue;
             currentTextColor = Color.white;
         }
 
         // YarnCommand <<Them>> does not use YarnCommand C# attribute, registers in Awake() instead
-        public void SetSenderThem() {
+        public void SetSenderThem() 
+        {
             isRightAlignment = false;
             currentBGColor = Color.white;
             currentTextColor = Color.black;
         }
 
         // when we clone a new message box, re-style the message box based on whether SetSenderMe or SetSenderThem was most recently called
-        void UpdateMessageBoxSettings() {
+        void UpdateMessageBoxSettings() 
+        {
             var bg = dialogueBubblePrefab.GetComponentInChildren<Image>();
             bg.color = currentBGColor;
             var message = dialogueBubblePrefab.GetComponentInChildren<TMPro.TextMeshProUGUI>();
@@ -67,20 +71,25 @@ namespace Yarn.Unity.Example {
             message.color = currentTextColor;
 
             var layoutGroup = dialogueBubblePrefab.GetComponent<HorizontalLayoutGroup>();
-            if ( isRightAlignment ) {
+            if ( isRightAlignment ) 
+            {
                 layoutGroup.padding.left = 32;
                 layoutGroup.padding.right = 0;
                 bg.transform.SetAsLastSibling();
-            } else {
+            }
+            else
+            {
                 layoutGroup.padding.left = 0;
                 layoutGroup.padding.right = 32;
                 bg.transform.SetAsFirstSibling();
             }
         }
 
-        public void CloneMessageBoxToHistory() {
+        public void CloneMessageBoxToHistory()
+        {
             // if this isn't the very first message, then clone current message box and move it up
-            if ( isFirstMessage == false ) {
+            if ( isFirstMessage == false )
+            {
                 var oldClone = Instantiate( 
                     dialogueBubblePrefab, 
                     dialogueBubblePrefab.transform.position, 
@@ -100,7 +109,8 @@ namespace Yarn.Unity.Example {
 
         public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
-            if (currentTypewriterEffect != null) {
+            if (currentTypewriterEffect != null)
+            {
                 StopCoroutine(currentTypewriterEffect);
             }
 
@@ -108,7 +118,7 @@ namespace Yarn.Unity.Example {
 
             text.text = dialogueLine.TextWithoutCharacterName.Text;;
 
-            currentTypewriterEffect = StartCoroutine(Effects.Typewriter(text, 10f, null, () =>
+            currentTypewriterEffect = StartCoroutine(Effects.Typewriter(text, 10f, null, null, () =>
             {
                 currentTypewriterEffect = null;
                 onDialogueLineFinished();
@@ -117,7 +127,8 @@ namespace Yarn.Unity.Example {
 
         public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
         {
-            foreach(Transform child in optionsContainer.transform) {
+            foreach(Transform child in optionsContainer.transform)
+            {
                 Destroy(child.gameObject);
             }
 
@@ -125,7 +136,8 @@ namespace Yarn.Unity.Example {
 
             optionsContainer.SetActive(true);
 
-            for (int i = 0; i < dialogueOptions.Length; i++) {
+            for (int i = 0; i < dialogueOptions.Length; i++)
+            {
                 DialogueOption option = dialogueOptions[i];
                 var optionView = Instantiate(optionPrefab);
                 
