@@ -16,7 +16,6 @@ namespace Yarn.Unity.Editor
         private SerializedProperty dialogueViewsProperty;
         private SerializedProperty startNodeProperty;
         private SerializedProperty startAutomaticallyProperty;
-        private SerializedProperty automaticallyContinueLinesProperty;
         private SerializedProperty runSelectedOptionAsLineProperty;
         private SerializedProperty lineProviderProperty;
         private SerializedProperty verboseLoggingProperty;
@@ -32,7 +31,6 @@ namespace Yarn.Unity.Editor
             dialogueViewsProperty = serializedObject.FindProperty(nameof(DialogueRunner.dialogueViews));
             startNodeProperty = serializedObject.FindProperty(nameof(DialogueRunner.startNode));
             startAutomaticallyProperty = serializedObject.FindProperty(nameof(DialogueRunner.startAutomatically));
-            automaticallyContinueLinesProperty = serializedObject.FindProperty(nameof(DialogueRunner.automaticallyContinueLines));
             runSelectedOptionAsLineProperty = serializedObject.FindProperty(nameof(DialogueRunner.runSelectedOptionAsLine));
             lineProviderProperty = serializedObject.FindProperty(nameof(DialogueRunner.lineProvider));
             verboseLoggingProperty = serializedObject.FindProperty(nameof(DialogueRunner.verboseLogging));
@@ -77,7 +75,6 @@ namespace Yarn.Unity.Editor
                 EditorGUILayout.PropertyField(startNodeProperty);
                 EditorGUI.indentLevel -= 1;
             }
-            EditorGUILayout.PropertyField(automaticallyContinueLinesProperty);
             EditorGUILayout.PropertyField(runSelectedOptionAsLineProperty);
             EditorGUILayout.PropertyField(verboseLoggingProperty);
 

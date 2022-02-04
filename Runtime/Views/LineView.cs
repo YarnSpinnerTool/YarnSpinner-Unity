@@ -4,29 +4,21 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
-#endif
-
 namespace Yarn.Unity
 {
-    public class InterruptionFlag
+    public class PresentationFlag
     {
-        public bool Interrupted { get; private set; } = false;
-        public void Set() => Interrupted = true;
-        public void Clear() => Interrupted = false;
+        public bool Presented { get; private set; } = false;
+        public void Set() => Presented = true;
+        public void Clear() => Presented = false;
     }
-
     public static class Effects
     {
         /// <summary>
         /// A coroutine that fades a <see cref="CanvasGroup"/> object's
         /// opacity from <paramref name="from"/> to <paramref name="to"/>
         /// over the course of <see cref="fadeTime"/> seconds, and then
-        /// invokes <paramref name="onComplete"/>. An <see
-        /// cref="InterruptionFlag"/> may be used to signal that the fade
-        /// should be interrupted; if this happens, the opacity is set to
-        /// <paramref name="to"/>.
+        /// invokes <paramref name="onComplete"/>.
         /// </summary>
         /// <param name="from">The opacity value to start fading from,
         /// ranging from 0 to 1.</param>
@@ -34,13 +26,13 @@ namespace Yarn.Unity
         /// from 0 to 1.</param>
         /// <param name="onComplete">A delegate to invoke after fading is
         /// complete.</param>
-        public static IEnumerator FadeAlpha(CanvasGroup canvasGroup, float from, float to, float fadeTime, Action onComplete = null, InterruptionFlag interruption = null)
+        public static IEnumerator FadeAlpha(CanvasGroup canvasGroup, float from, float to, float fadeTime, PresentationFlag presented = null, Action onComplete = null)
         {
             canvasGroup.alpha = from;
 
             var timeElapsed = 0f;
 
-            while (timeElapsed < fadeTime && (interruption?.Interrupted ?? false) == false)
+            while (timeElapsed < fadeTime)
             {
                 var fraction = timeElapsed / fadeTime;
                 timeElapsed += Time.deltaTime;
@@ -64,10 +56,11 @@ namespace Yarn.Unity
                 canvasGroup.blocksRaycasts = true;
             }
 
+            presented?.Set();
             onComplete?.Invoke();
         }
 
-        public static IEnumerator Typewriter(TextMeshProUGUI text, float lettersPerSecond, Action onCharacterTyped = null, Action onComplete = null, InterruptionFlag interruption = null)
+        public static IEnumerator Typewriter(TextMeshProUGUI text, float lettersPerSecond, PresentationFlag presented, Action onCharacterTyped, Action onComplete)
         {
             // Start with everything invisible
             text.maxVisibleCharacters = 0;
@@ -103,7 +96,7 @@ namespace Yarn.Unity
             // the requested speed.
             var accumulator = Time.deltaTime;
 
-            while (text.maxVisibleCharacters < characterCount && (interruption == null || interruption.Interrupted == false))
+            while (text.maxVisibleCharacters < characterCount)
             {
                 // We need to show as many letters as we have accumulated
                 // time for.
@@ -122,6 +115,8 @@ namespace Yarn.Unity
             // interrupted. Either way, display everything now.
             text.maxVisibleCharacters = characterCount;
 
+            presented?.Set();
+
             // Wrap up by invoking our completion handler.
             onComplete?.Invoke();
         }
@@ -129,14 +124,6 @@ namespace Yarn.Unity
 
     public class LineView : DialogueViewBase
     {
-        internal enum ContinueActionType
-        {
-            None,
-            KeyCode,
-            InputSystemAction,
-            InputSystemActionFromAsset,
-        }
-
         [SerializeField]
         internal CanvasGroup canvasGroup;
 
@@ -174,108 +161,38 @@ namespace Yarn.Unity
         [SerializeField]
         internal GameObject continueButton = null;
 
-        [SerializeField]
-        [UnityEngine.Serialization.FormerlySerializedAs("skipActionType")]
-        internal ContinueActionType continueActionType;
-
-        [SerializeField]
-        [UnityEngine.Serialization.FormerlySerializedAs("skipActionKeyCode")]
-        internal KeyCode continueActionKeyCode = KeyCode.Escape;
-
-
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-        [SerializeField]
-        [UnityEngine.Serialization.FormerlySerializedAs("skipActionReference")]
-        internal InputActionReference continueActionReference = null;
-
-        [SerializeField]
-        [UnityEngine.Serialization.FormerlySerializedAs("skipAction")]
-        internal InputAction continueAction = new InputAction("Skip", InputActionType.Button, CommonUsages.Cancel);
-#endif
-
-        InterruptionFlag interruptionFlag = new InterruptionFlag();
-
         LocalizedLine currentLine = null;
+
+        [SerializeField]
+        [Min(0)]
+        internal float holdTime = 1f;
+
+        // if set to false the view will prevent calling the completion handler until manually made to do so
+        [SerializeField]
+        internal bool autoAdvance = false;
+        // a wrapper around a bool to share around so coroutines can say they have finished presenting stuff
+        internal PresentationFlag hasPresented;
 
         public void Start()
         {
             canvasGroup.alpha = 0;
-
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-            // If we are using an action reference, and it's not null,
-            // configure it
-            if (continueActionType == ContinueActionType.InputSystemActionFromAsset && continueActionReference != null)
-            {
-                continueActionReference.action.started += UserPerformedSkipAction;
-            }
-
-            // The custom skip action always starts disabled
-            continueAction?.Disable();
-            continueAction.started += UserPerformedSkipAction;
-#endif
+            hasPresented = new PresentationFlag();
+            hasPresented.Clear();
         }
-
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-        void UserPerformedSkipAction(InputAction.CallbackContext obj)
-        {
-            OnContinueClicked();
-        }
-#endif
 
         public void Reset()
         {
             canvasGroup = GetComponentInParent<CanvasGroup>();
         }
 
-#if ENABLE_LEGACY_INPUT_MANAGER
-        public void Update()
-        {
-            // Should we indicate to the DialogueRunner that we want to
-            // interrupt/continue a line? We need to pass a number of
-            // checks.
-            
-            // We need to be configured to use a keycode to interrupt/continue
-            // lines.
-            if (continueActionType != ContinueActionType.KeyCode)
-            {
-                return;
-            }
-
-            // That keycode needs to have been pressed this frame.
-            if (!UnityEngine.Input.GetKeyDown(continueActionKeyCode))
-            {
-                return;
-            }
-            
-            // The line must not be in the middle of being dismissed.
-            if ((currentLine?.Status) == LineStatus.Dismissed)
-            {
-                return;
-            }
-
-            // We're good to indicate that we want to skip/continue.
-            OnContinueClicked();
-        }
-#endif
-
         public override void DismissLine(Action onDismissalComplete)
         {
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-            if (continueActionType == ContinueActionType.InputSystemAction)
-            {
-                continueAction?.Disable();
-            }
-            else if (continueActionType == ContinueActionType.InputSystemActionFromAsset)
-            {
-                continueActionReference?.action?.Disable();
-            }
-#endif
-
             currentLine = null;
+            hasPresented.Clear();
 
             if (useFadeEffect)
             {
-                StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeOutTime, onDismissalComplete));
+                StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeOutTime, hasPresented, onDismissalComplete));
             }
             else
             {
@@ -286,55 +203,77 @@ namespace Yarn.Unity
             }
         }
 
-        public override void OnLineStatusChanged(LocalizedLine dialogueLine)
+        private void OnCharacterTyped()
         {
-            switch (dialogueLine.Status)
-            {
-                case LineStatus.Presenting:
-                    break;
-                case LineStatus.Interrupted:
-                    // We have been interrupted. Set our interruption flag,
-                    // so that any animations get skipped.
-                    interruptionFlag.Set();
-                    break;
-                case LineStatus.FinishedPresenting:
-                    // The line has finished being delivered by all views.
-                    // Display the Continue button.
-                    if (continueButton != null)
-                    {
-                        continueButton.SetActive(true);
-                        var selectable = continueButton.GetComponentInChildren<Selectable>();
-                        if (selectable != null)
-                        {
-                            selectable.Select();
-                        }
-                    }
-                    break;
-                case LineStatus.Dismissed:
-                    break;
-            }
-        }
-
-        private void OnCharacterTyped() {
             onCharacterTyped?.Invoke();
         }
 
+        public override void InterruptLine(LocalizedLine dialogueLine, Action onInterruptLineFinished)
+        {
+            currentLine = dialogueLine;
+            StopAllCoroutines();
+            hasPresented.Clear();
+
+            // for now we are going to just immediately show everything
+            // later we will make it fade in
+            lineText.gameObject.SetActive(true);
+            canvasGroup.gameObject.SetActive(true);
+
+            int length;
+
+            if (continueButton != null)
+            {
+                continueButton.SetActive(false);
+            }
+            if (characterNameText == null)
+            {
+                if (showCharacterNameInLineView)
+                {
+                    lineText.text = dialogueLine.Text.Text;
+                    length = dialogueLine.Text.Text.Length;
+                }
+                else
+                {
+                    lineText.text = dialogueLine.TextWithoutCharacterName.Text;
+                    length = dialogueLine.TextWithoutCharacterName.Text.Length;
+                }
+            }
+            else
+            {
+                characterNameText.text = dialogueLine.CharacterName;
+                lineText.text = dialogueLine.TextWithoutCharacterName.Text;
+                length = dialogueLine.TextWithoutCharacterName.Text.Length;
+            }
+
+            lineText.maxVisibleCharacters = length;
+
+            canvasGroup.interactable = true;
+            canvasGroup.alpha = 1;
+            canvasGroup.blocksRaycasts = true;
+
+            onInterruptLineFinished();
+        }
+
+        // holds for a moment and then runs the action
+        // designed to be used as part of autoadvancing UI so that the text holds on screen for a little while
+        // otherwise the text just flashes as fast as Unity can make it happen
+        private IEnumerator DelayAction(float holdDelay, Action onDialogueLineFinished)
+        {
+            yield return new WaitForSeconds(holdDelay);
+            onDialogueLineFinished();
+        }
+
+        private Action dialogueFinishedAction;
         public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
             currentLine = dialogueLine;
+            hasPresented.Clear();
 
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
-            // If we are using a custom Unity Input System action, enable
-            // it now.
-            if (continueActionType == ContinueActionType.InputSystemAction)
-            {
-                continueAction?.Enable();
-            }
-            else if (continueActionType == ContinueActionType.InputSystemActionFromAsset)
-            {
-                continueActionReference?.action.Enable();
-            }
-#endif
+            // if we have auto advance on we just hand over the completion handler
+            // if we don't have auto advance we send over no completion handler and store the completion handler
+            // this way it can be called later by the user action
+            var completionHandler = autoAdvance ? onDialogueLineFinished : null;
+            dialogueFinishedAction = onDialogueLineFinished;
 
             lineText.gameObject.SetActive(true);
             canvasGroup.gameObject.SetActive(true);
@@ -343,8 +282,6 @@ namespace Yarn.Unity
             {
                 continueButton.SetActive(false);
             }
-
-            interruptionFlag.Clear();
 
             if (characterNameText == null)
             {
@@ -363,6 +300,8 @@ namespace Yarn.Unity
                 lineText.text = dialogueLine.TextWithoutCharacterName.Text;
             }
 
+            bool needsHold = autoAdvance && holdTime > 0;
+
             if (useFadeEffect)
             {
                 if (useTypewriterEffect)
@@ -378,8 +317,18 @@ namespace Yarn.Unity
                     lineText.maxVisibleCharacters = int.MaxValue;
                 }
 
-                // Fade up and then call FadeComplete when done
-                StartCoroutine(Effects.FadeAlpha(canvasGroup, 0, 1, fadeInTime, () => FadeComplete(onDialogueLineFinished), interruptionFlag));
+                // if we are set to auto advance we want to hold for the
+                // amount of time set in holdTime before calling the
+                // completion handler to continue the dialogue
+                if (needsHold)
+                {
+                    StartCoroutine(Effects.FadeAlpha(canvasGroup, 0, 1, fadeInTime, useTypewriterEffect ? null: hasPresented, () => FadeComplete(() => HoldAndContinue(completionHandler))));
+                }
+                else
+                {
+                    // Fade up and then call FadeComplete when done
+                    StartCoroutine(Effects.FadeAlpha(canvasGroup, 0, 1, fadeInTime, useTypewriterEffect ? null: hasPresented, () => FadeComplete(completionHandler)));
+                }
             }
             else
             {
@@ -390,12 +339,30 @@ namespace Yarn.Unity
 
                 if (useTypewriterEffect)
                 {
-                    // Start the typewriter
-                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, OnCharacterTyped, onDialogueLineFinished, interruptionFlag));
+                    if (needsHold)
+                    {
+                        StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, hasPresented, OnCharacterTyped, () => HoldAndContinue(completionHandler)));
+                    }
+                    else
+                    {
+                        StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, hasPresented, OnCharacterTyped, completionHandler));
+                    }
                 }
                 else
                 {
-                    onDialogueLineFinished();
+                    if (needsHold)
+                    {
+                        Action hold = () => {
+                            hasPresented.Set();
+                            completionHandler();
+                        };
+                        HoldAndContinue(hold);
+                    }
+                    else
+                    {
+                        hasPresented.Set();
+                        completionHandler();
+                    }
                 }
             }
 
@@ -403,12 +370,42 @@ namespace Yarn.Unity
             {
                 if (useTypewriterEffect)
                 {
-                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, OnCharacterTyped, onFinished, interruptionFlag));
+                    StartCoroutine(Effects.Typewriter(lineText, typewriterEffectSpeed, hasPresented, OnCharacterTyped, onFinished));
                 }
                 else
                 {
                     onFinished();
                 }
+            }
+            void HoldAndContinue(Action onFinished)
+            {
+                StartCoroutine(DelayAction(holdTime, onFinished));
+            }
+        }
+
+        public override void UserRequestedViewAdvancement()
+        {
+            // we have no line, so the user just mashed randomly
+            if (currentLine == null)
+            {
+                Debug.Log("no line, skipping");
+                return;
+            }
+
+            // if we have finished showing what we need to do then depends on if we are configured to auto-advance or not
+            // if auto advance is on then we can safely ignore the request because the autoadvance will take care of it shortly
+            // otherwise we need to manually run the completion handler so that the runner knows the line is finally finished
+            if (hasPresented.Presented)
+            {
+                if (!autoAdvance)
+                {
+                    dialogueFinishedAction?.Invoke();
+                }
+            }
+            else
+            {
+                // we haven't finished showing the line, doesn't matter what the autoadvance state is, we are interrupting
+                onUserWantsLineContinuation?.Invoke();
             }
         }
 
@@ -419,7 +416,11 @@ namespace Yarn.Unity
                 // We're not actually displaying a line. No-op.
                 return;
             }
-            ReadyForNextLine();
+            // if autoadvance is on then we don't need to worry about the button
+            if (hasPresented.Presented && !autoAdvance)
+            {
+                dialogueFinishedAction?.Invoke();
+            }
         }
     }
 }

@@ -5154,6 +5154,7 @@ GameObject:
   m_Component:
   - component: {fileID: 319993981}
   - component: {fileID: 319993980}
+  - component: {fileID: 319993982}
   m_Layer: 0
   m_Name: Voice Over
   m_TagString: Untagged
@@ -5191,6 +5192,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &319993982
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319993979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 097b95c9f69f04f2d8c08a817e7786af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attachedView: {fileID: 0}
+  continueActionType: 1
+  continueActionKeyCode: 32
 --- !u!1 &424243560
 GameObject:
   m_ObjectHideFlags: 0
@@ -10295,7 +10311,6 @@ MonoBehaviour:
   - {fileID: 33153664}
   startNode: Start
   startAutomatically: 1
-  automaticallyContinueLines: 1
   runSelectedOptionAsLine: 1
   lineProvider: {fileID: 1290606834}
   verboseLogging: 1
@@ -15702,8 +15717,8 @@ MonoBehaviour:
       m_Calls: []
   typewriterEffectSpeed: 120
   continueButton: {fileID: 0}
-  continueActionType: 1
-  continueActionKeyCode: 27
+  holdTime: 1
+  autoAdvance: 1
 --- !u!114 &4935123090840333078
 MonoBehaviour:
   m_ObjectHideFlags: 0
