@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Fixed a bug where changing a Yarn script asset in during Play Mode would cause the string table to become empty until the next import (#154)
+- Fixed a bug where Yarn functions outside the default assembly would fail to be loaded.
 
 ### Removed
 

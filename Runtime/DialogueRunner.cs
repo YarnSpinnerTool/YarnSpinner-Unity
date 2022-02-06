@@ -239,8 +239,14 @@ namespace Yarn.Unity
             // this project wants to load from.
             ActionManager.AddActionsFromAssemblies(newProject.searchAssembliesForActions);
 
+            // Register any new functions that we found as part of doing this.
+            ActionManager.RegisterFunctions(Dialogue.Library);
+
             Dialogue.SetProgram(newProject.GetProgram());
-            lineProvider.YarnProject = newProject;
+
+            if (lineProvider != null) {
+                lineProvider.YarnProject = newProject;
+            }
         }
 
         /// <summary>
@@ -738,16 +744,9 @@ namespace Yarn.Unity
                 {
                     Debug.LogError($"DialogueRunner wanted to load a Yarn Project in its Start method, but the Dialogue was already running one. The Dialogue Runner may not behave as you expect.");
                 }
-                
-                // Load all of the commands and functions from the assemblies
-                // that this project wants to load from.
-                ActionManager.AddActionsFromAssemblies(yarnProject.searchAssembliesForActions);
 
-                Dialogue.SetProgram(yarnProject.GetProgram());
-
-                lineProvider.YarnProject = yarnProject;
-
-                SetInitialVariables();
+                // Load this new Yarn Project.
+                SetProject(yarnProject);
 
                 if (startAutomatically)
                 {
@@ -804,7 +803,6 @@ namespace Yarn.Unity
                 PrepareForLinesHandler = PrepareForLines
             };
 
-            ActionManager.RegisterFunctions(dialogue.Library);
             selectAction = SelectedOption;
             return dialogue;
         }
