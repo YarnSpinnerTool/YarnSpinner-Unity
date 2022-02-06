@@ -37,6 +37,7 @@ namespace Yarn.Unity.Tests
             {
                 loaded = true;
             };
+            ActionManager.ClearAllActions();
             yield return new WaitUntil(() => loaded);
         }
 
