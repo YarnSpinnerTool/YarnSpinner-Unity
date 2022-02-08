@@ -8,7 +8,7 @@ using UnityEngine.InputSystem;
 
 namespace Yarn.Unity
 {
-    public class ViewInputAddon : MonoBehaviour
+    public class DialogueAdvanceInput : MonoBehaviour
     {
         internal enum ContinueActionType
         {

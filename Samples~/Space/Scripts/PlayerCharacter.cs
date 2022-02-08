@@ -1,4 +1,4 @@
-﻿/*
+/*
 
 The MIT License (MIT)
 
@@ -47,11 +47,11 @@ namespace Yarn.Unity.Example
 
         // because we are using the same button press for both starting and skipping dialogue they collide
         // so we are going to make it so that the input gets turned off
-        private ViewInputAddon dialogueInput;
+        private DialogueAdvanceInput dialogueInput;
 
         void Start()
         {
-            dialogueInput = FindObjectOfType<ViewInputAddon>();
+            dialogueInput = FindObjectOfType<DialogueAdvanceInput>();
             dialogueInput.enabled = false;
         }
 

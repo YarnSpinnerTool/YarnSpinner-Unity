@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 namespace Yarn.Unity
@@ -283,8 +283,8 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Called by <see cref="ViewInputAddon"/> to signal that the user has
-        /// requested that the dialogue advance.
+        /// Called by <see cref="DialogueAdvanceInput"/> to signal that the user
+        /// has requested that the dialogue advance.
         /// </summary>
         /// <remarks>
         /// <para>
