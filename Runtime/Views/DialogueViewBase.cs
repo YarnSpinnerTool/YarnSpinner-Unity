@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 namespace Yarn.Unity
@@ -107,30 +107,6 @@ namespace Yarn.Unity
         public virtual void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
         {
             // The default implementation does nothing.
-        }
-
-        /// <summary>
-        /// Called by the <see cref="DialogueRunner"/> to signal that the
-        /// end of a node has been reached.
-        /// </summary>
-        /// <remarks>
-        /// This method may be called multiple times before <see
-        /// cref="DialogueComplete"/> is called. If this method returns
-        /// <see cref="Dialogue.HandlerExecutionType.ContinueExecution"/>,
-        /// do not call the <paramref name="onComplete"/> method.
-        ///
-        /// The default implementation does nothing.
-        /// </remarks>
-        /// <param name="nextNode">The name of the next node that is being
-        /// entered.</param>
-        /// <param name="onComplete">A method that should be called to
-        /// /// indicate that the DialogueRunner should continue
-        /// executing.</param>
-        /// <inheritdoc cref="RunLine(Line, ILineLocalisationProvider,
-        /// Action)"/> FIXME: This doesn't seem to be called anymore ...?
-        public virtual void NodeComplete(string nextNode, Action onComplete)
-        {
-            // The default implementation does nothing.            
         }
 
         /// <summary>
