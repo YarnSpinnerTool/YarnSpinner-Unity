@@ -6,14 +6,57 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Dialogue View API Update
+
+The API for creating new Dialogue Views has been updated.
+
+> **Background:** Dialogue Views are objects that receive lines and options from the Dialogue Runner, present them to the player, receive option selections, and signal when the user should see the next piece of content. They're subclasses of the `DialogueViewBase` class. All of our built-in Dialogue Views, such as `LineView` and `OptionsListView`, are examples of this.
+
+Previously, line objects stored information about their current state, and as Dialogue Views reported that they had finished presenting or dismissing their line, all views would receive a signal that the line's state had changed, and respond to those changes by changing the way that the line was presented (such as by dismissing it when the line's state became 'Dismissed').  This meant that every Dialogue View class needed to implement fairly complex logic to handle these changes in state.
+
+In this release, 'line state' is no longer a concept that Dialogue Views need to keep track of. Instead, Dialogue Views that present lines simply need to implement three methods:
+
+- `RunLine` is called when the Dialogue Runner wants to show a line to the player. It receives a line, as well as a completion handler to call when the line view has finished delivering the contents line.
+- `InterruptLine` is called when the Dialogue Runner wants all Dialogue Views to finish presenting their lines as fast as possible. It receives the line that's currently being presented, as well as a new completion handler to call when the presentation is finished (which this method should try and call as quickly as it can.)
+- `DismissLine` is called when all Dialogue Views have finished delivering their line (whether it was interrupted, or whether it completed normally). It receives a completion handler to call when the dismissal is complete.
+
+The updated flow is this:
+
+1. While running a Yarn script, the Dialogue Runner encounters a line of dialogue to show to the user.
+2. It calls `RunLine` on all Dialogue Views, and waits for all of them to call their completion handler to indicate that they're done presenting the line.
+   * At any point, a Dialogue View can call a method that requests that the current line be interrupted. When this happens, the Dialogue Runner calls `InterruptLine` on the Dialogue Views, and waits for them to call the new completion handler to indicate that they've finished presenting the line.
+3. Once all Dialogue Views have reported that they're done, the Dialogue Runner calls `DismissLine` on all Dialogue Views, and waits for them to call the completion handler to indicate that they're done dismissing the line.
+4. The Dialogue Runner then moves on to the next piece of content.
+
+This new flow significantly simplifies the amount of information that a Dialogue View needs to keep track of, as well as the amount of logic that a Dialogue View needs to have to manage this information.
+
+Instead, it's a simpler model of: "when you're told to run a line, run it, and tell us when you're done. When you're told to interrupt the line, finish running it ASAP and tell us when you're done. Finally, when you're told to dismiss your line, do it and let us know when you're done."
+
+We've also moved the user input handling code out of the built-in `LineView` class, and into a new class called `DialogueAdvanceInput`. This class lets you use either of the Unity Input systems to signal to a DialogueView that the user wants to advance the dialogue; by moving it out of our built-in view, it's a little easier for Dialogue View writers, who may not want to have to deal with input.
+
+This hopefully alleviates some of the pain points in issues relating to how Dialogue Views work, like [issue #95](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/95).
+
+There are no changes to how options are handled in this new API.
+
 ### Added
+
+- Added a new component, `DialogueAdvanceInput`, which responds to user input and tells a Dialogue View to advance.
+
+- Added `DialogueViewBase.RunLine` method.
+- Added `DialogueViewBase.InterruptLine` method.
+- Added `DialogueViewBase.DismissLine` method.
 
 ### Changed
 
+- Updated `DialogueRunner` to support a new, simpler API for Dialogue Views; lines no longer have a state for the Dialogue Views to respond to changes to, and instead only receive method calls that tell them what to do next.
 - Fixed a bug where changing a Yarn script asset in during Play Mode would cause the string table to become empty until the next import (#154)
 - Fixed a bug where Yarn functions outside the default assembly would fail to be loaded.
 
 ### Removed
+
+- Removed `LineStatus` enum.
+- Removed `DialogueViewBase.OnLineStatusChanged` method.
+- Removed `DialogueViewBase.ReadyForNextLine` method.
 
 ## [2.0.2] 2022-01-08
 
