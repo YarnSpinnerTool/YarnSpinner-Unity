@@ -658,7 +658,7 @@ namespace Yarn.Unity
                 {
                     continue;
                 }
-                view.requestInterrupt = OnViewUserIntentNextLine;
+                view.requestInterrupt = OnViewRequestedInterrupt;
             }
             dialogueViews = views;
         }
@@ -735,7 +735,7 @@ namespace Yarn.Unity
                 {
                     continue;
                 }
-                view.requestInterrupt = OnViewUserIntentNextLine;
+                view.requestInterrupt = OnViewRequestedInterrupt;
             }
 
             if (yarnProject != null)
@@ -1246,7 +1246,7 @@ namespace Yarn.Unity
         /// cref="DialogueRunner"/> that the user intents to proceed to the
         /// next line.
         /// </summary>
-        public void OnViewUserIntentNextLine()
+        public void OnViewRequestedInterrupt()
         {
             if (CurrentLine == null)
             {
