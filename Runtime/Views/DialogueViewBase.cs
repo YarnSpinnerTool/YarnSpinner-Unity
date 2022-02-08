@@ -42,6 +42,24 @@ namespace Yarn.Unity
         /// Represents the method that should be called when this view wants the
         /// line to be interrupted.
         /// </summary>
+        /// <remarks>
+        /// <para style="info">This value is set by the <see
+        /// cref="DialogueRunner"/> class during initial setup. Do not modify
+        /// this value yourself.
+        /// </para>
+        /// <para>
+        /// When this method is called, the Dialogue Runner that has this
+        /// Dialogue View in its <see cref="DialogueRunner.dialogueViews"/> list
+        /// will call <see cref="InterruptLine(LocalizedLine, Action)"/> on any
+        /// view that has not yet finished presenting its line.
+        /// </para>
+        /// <para>
+        /// A Dialogue View can call this method to signal to the Dialogue
+        /// Runner that the current line should be interrupted. This is usually
+        /// done when it receives some input that the user wants to skip to the
+        /// next line of dialogue.
+        /// </para>
+        /// </remarks>
         public Action requestInterrupt;
 
         /// <summary>Called by the <see cref="DialogueRunner"/> to signal that
@@ -92,8 +110,8 @@ namespace Yarn.Unity
         /// If you want to create a Dialogue View that waits for user input
         /// before continuing, either wait for that input before calling
         /// <paramref name="onDialogueLineFinished"/>, or don't call it at all
-        /// and instead call <see cref="requestInterrupt"/> to tell
-        /// the Dialogue Runner to interrupt the line.
+        /// and instead call <see cref="requestInterrupt"/> to tell the Dialogue
+        /// Runner to interrupt the line.
         /// </para>
         /// <para style="note">
         /// The default implementation of this method immediately calls the
@@ -296,8 +314,8 @@ namespace Yarn.Unity
         /// presenting its line (that is, the <see cref="RunLine(LocalizedLine,
         /// Action)"/> method has been called, but it hasn't yet called its
         /// completion handler), it's sufficient to call the <see
-        /// cref="requestInterrupt"/> method, which tells the
-        /// Dialogue Runner to interrupt the current line.
+        /// cref="requestInterrupt"/> method, which tells the Dialogue Runner to
+        /// interrupt the current line.
         /// </para>
         /// <para>
         /// 'Advancing' the dialogue may not always mean <em>finishing</em> the
