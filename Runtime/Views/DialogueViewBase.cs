@@ -9,11 +9,10 @@ namespace Yarn.Unity
     /// </summary>
     /// <remarks>
     /// <para>When the Dialogue Runner encounters content that the user should
-    /// see - that is, lines or options - it sends that content to
-    /// all of the dialogue views stored in <see
-    /// cref="DialogueRunner.dialogueViews"/>. The Dialogue Runner then waits
-    /// until all Dialogue Views have reported that they have finished
-    /// presenting the content.</para>
+    /// see - that is, lines or options - it sends that content to all of the
+    /// dialogue views stored in <see cref="DialogueRunner.dialogueViews"/>. The
+    /// Dialogue Runner then waits until all Dialogue Views have reported that
+    /// they have finished presenting the content.</para>
     /// <para>
     /// To use this class, subclass it, and override its methods. Some of the
     /// more common methods you may wish to override are: <see cref="RunLine"/>,
@@ -41,9 +40,9 @@ namespace Yarn.Unity
     {
         /// <summary>
         /// Represents the method that should be called when this view wants the
-        /// line to be continued.
+        /// line to be interrupted.
         /// </summary>
-        public Action onUserWantsLineContinuation;
+        public Action requestInterrupt;
 
         /// <summary>Called by the <see cref="DialogueRunner"/> to signal that
         /// dialogue has started.</summary>
@@ -93,7 +92,7 @@ namespace Yarn.Unity
         /// If you want to create a Dialogue View that waits for user input
         /// before continuing, either wait for that input before calling
         /// <paramref name="onDialogueLineFinished"/>, or don't call it at all
-        /// and instead call <see cref="onUserWantsLineContinuation"/> to tell
+        /// and instead call <see cref="requestInterrupt"/> to tell
         /// the Dialogue Runner to interrupt the line.
         /// </para>
         /// <para style="note">
@@ -297,7 +296,7 @@ namespace Yarn.Unity
         /// presenting its line (that is, the <see cref="RunLine(LocalizedLine,
         /// Action)"/> method has been called, but it hasn't yet called its
         /// completion handler), it's sufficient to call the <see
-        /// cref="onUserWantsLineContinuation"/> method, which tells the
+        /// cref="requestInterrupt"/> method, which tells the
         /// Dialogue Runner to interrupt the current line.
         /// </para>
         /// <para>

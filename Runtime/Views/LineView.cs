@@ -405,7 +405,7 @@ namespace Yarn.Unity
             else
             {
                 // we haven't finished showing the line, doesn't matter what the autoadvance state is, we are interrupting
-                onUserWantsLineContinuation?.Invoke();
+                requestInterrupt?.Invoke();
             }
         }
 

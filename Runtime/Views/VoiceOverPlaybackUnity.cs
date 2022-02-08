@@ -157,7 +157,7 @@ namespace Yarn.Unity
             {
                 return;
             }
-            onUserWantsLineContinuation?.Invoke();
+            requestInterrupt?.Invoke();
         }
     }
 }

@@ -658,7 +658,7 @@ namespace Yarn.Unity
                 {
                     continue;
                 }
-                view.onUserWantsLineContinuation = OnViewUserIntentNextLine;
+                view.requestInterrupt = OnViewUserIntentNextLine;
             }
             dialogueViews = views;
         }
@@ -735,7 +735,7 @@ namespace Yarn.Unity
                 {
                     continue;
                 }
-                view.onUserWantsLineContinuation = OnViewUserIntentNextLine;
+                view.requestInterrupt = OnViewUserIntentNextLine;
             }
 
             if (yarnProject != null)
