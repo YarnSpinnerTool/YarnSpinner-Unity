@@ -5,22 +5,26 @@ namespace Yarn.Unity
 {
     /// <summary>
     /// A <see cref="MonoBehaviour"/> that produces <see
-    /// cref="LocalizedLine"/>s.
+    /// cref="LocalizedLine"/>s, for use in Dialogue Views.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// <see cref="DialogueRunner"/>s use a <see
     /// cref="LineProviderBehaviour"/> to get <see cref="LocalizedLine"/>s,
     /// which contain the localized information that <see
     /// cref="DialogueViewBase"/> classes use to present content to the
     /// player. 
-    ///
+    /// </para>
+    /// <para>
     /// Subclasses of this abstract class may return subclasses of <see
     /// cref="LocalizedLine"/>. For example, <see
     /// cref="AudioLineProvider"/> returns an <see
     /// cref="AudioLocalizedLine"/>, which includes <see
     /// cref="AudioClip"/>; views that make use of audio can then access
     /// this additional data.
+    /// </para>
     /// </remarks>
+    /// <seealso cref="DialogueViewBase"/>
     public abstract class LineProviderBehaviour : MonoBehaviour
     {
         /// <summary>Specifies the language code to use for text content
@@ -55,18 +59,22 @@ namespace Yarn.Unity
         /// IDs may be presented shortly.        
         /// </summary>
         /// <remarks>
+        /// <para>
         /// Subclasses of <see cref="LineProviderBehaviour"/> can override
         /// this to prepare any neccessary resources needed to present
         /// these lines, like pre-loading voice-over audio. The default
         /// implementation does nothing.
-        ///
+        /// </para>
+        /// <para style="info">
         /// Not every line may run; this method serves as a way to give the
-        /// line provider advance notice that a line _may_ run, not _will_
+        /// line provider advance notice that a line <i>may</i> run, not <i>will</i>
         /// run.
-        ///
+        /// </para>
+        /// <para>
         /// When this method is run, the value returned by the <see
         /// cref="LinesAvailable"/> property should change to false until the
         /// necessary resources have loaded.
+        /// </para>
         /// </remarks>
         /// <param name="lineIDs">A collection of line IDs that the line
         /// provider should prepare for.</param>

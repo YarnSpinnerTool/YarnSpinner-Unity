@@ -26,8 +26,8 @@ namespace Yarn.Unity
     /// <para>Dialogue Views do not need to handle every kind of content that
     /// the Dialogue Runner might produce. For example, you might have one
     /// Dialogue View that handles Lines, and another that handles Options. The
-    /// built-in LineView class is an example of this, in that it only handles
-    /// Lines and does nothing when it receives Options.</para>
+    /// built-in <see cref="LineView"/> class is an example of this, in that it
+    /// only handles Lines and does nothing when it receives Options.</para>
     /// <para>
     /// You may also have multiple Dialogue Views that handle the <i>same</i>
     /// kind of content. For example, you may have a Dialogue View that receives
@@ -35,6 +35,7 @@ namespace Yarn.Unity
     /// that also receives Lines and uses them to display on-screen subtitles.
     /// </para>
     /// </remarks>
+    /// <seealso cref="LineProviderBehaviour"/>
     /// <seealso cref="DialogueRunner.dialogueViews"/>
     public abstract class DialogueViewBase : MonoBehaviour
     {
@@ -106,12 +107,19 @@ namespace Yarn.Unity
         /// presenting the line, the Dialogue Runner calls <see
         /// cref="DismissLine(Action)"/> to signal that the views should get rid
         /// of the line.</para>
-        /// <para style="note">
+        /// <para>
         /// If you want to create a Dialogue View that waits for user input
         /// before continuing, either wait for that input before calling
         /// <paramref name="onDialogueLineFinished"/>, or don't call it at all
         /// and instead call <see cref="requestInterrupt"/> to tell the Dialogue
         /// Runner to interrupt the line.
+        /// </para>
+        /// <para style="danger">
+        /// The <paramref name="onDialogueLineFinished"/> method should only be
+        /// called when <see cref="RunLine"/> finishes its presentation
+        /// normally. If <see cref="InterruptLine"/> has been called, you must
+        /// call the completion handler that it receives, and not the completion
+        /// handler that <see cref="RunLine"/> has received.
         /// </para>
         /// <para style="note">
         /// The default implementation of this method immediately calls the
@@ -163,6 +171,11 @@ namespace Yarn.Unity
         /// name="onDialogueLineFinished"/> method must be called, which
         /// indicates to the Dialogue Runner that this line is ready to be
         /// dismissed.
+        /// </para>
+        /// <para style="danger">
+        /// When <see cref="InterruptLine"/> is called, you must not call the
+        /// completion handler that <see cref="RunLine"/> has previously
+        /// received - this completion handler is no longer valid. Call this method's <paramref name="onDialogueLineFinished"/> instead.
         /// </para>
         /// <para style="note">
         /// The default implementation of this method immediately calls the
