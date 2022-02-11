@@ -89,7 +89,12 @@ namespace Yarn.Unity.Editor
             var anyAssetsFound = false;
 
 #if USE_ADDRESSABLES
-        var allAddressEntries = AddressableAssetSettingsDefaultObject.Settings.groups.SelectMany(g => g.entries).ToDictionary(e => e.address);
+            Dictionary<string, UnityEditor.AddressableAssets.Settings.AddressableAssetEntry> allAddressEntries = null;
+
+            if (target.ContainsLocalizedAssets && target.UsesAddressableAssets) {
+                 allAddressEntries = AddressableAssetSettingsDefaultObject.Settings.groups.SelectMany(g => g.entries).ToDictionary(e => e.address);
+
+            }
 #endif
 
             foreach (var key in lineKeys)
