@@ -130,10 +130,10 @@ namespace Yarn.Unity
             {
                 StartCoroutine(OptionViewWasSelectedInternal(option));
 
-                IEnumerator OptionViewWasSelectedInternal(DialogueOption option)
+                IEnumerator OptionViewWasSelectedInternal(DialogueOption selectedOption)
                 {
                     yield return StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeTime));
-                    OnOptionSelected(option.DialogueOptionID);
+                    OnOptionSelected(selectedOption.DialogueOptionID);
                 }
             }
         }
