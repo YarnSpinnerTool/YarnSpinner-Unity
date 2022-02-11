@@ -55,7 +55,9 @@ namespace Yarn.Unity.Example
             dialogueInput.enabled = false;
         }
 
+        /// <summary>
         /// Draw the range at which we'll start talking to people.
+        /// </summary>
         void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.blue;
@@ -69,7 +71,9 @@ namespace Yarn.Unity.Example
             Gizmos.DrawWireSphere(Vector3.zero, interactionRadius);
         }
 
+        /// <summary>
         /// Update is called once per frame
+        /// </summary>
         void Update()
         {
             // Remove all player control when we're in dialogue
@@ -120,10 +124,13 @@ namespace Yarn.Unity.Example
 #endif
         }
 
+        /// <summary>
         /// Find all DialogueParticipants
-        /** Filter them to those that have a Yarn start node and are in
-         * range; then start a conversation with the first one
-         */
+        /// </summary>
+        /// <remarks>
+        /// Filter them to those that have a Yarn start node and are in
+        /// range; then start a conversation with the first one
+        /// </remarks>
         public void CheckForNearbyNPC()
         {
             var allParticipants = new List<NPC>(FindObjectsOfType<NPC>());
