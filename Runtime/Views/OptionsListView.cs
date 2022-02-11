@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -127,7 +128,13 @@ namespace Yarn.Unity
             /// </summary>
             void OptionViewWasSelected(DialogueOption option)
             {
-                StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeTime, null, () => OnOptionSelected(option.DialogueOptionID)));
+                StartCoroutine(OptionViewWasSelectedInternal(option));
+
+                IEnumerator OptionViewWasSelectedInternal(DialogueOption option)
+                {
+                    yield return StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeTime));
+                    OnOptionSelected(option.DialogueOptionID);
+                }
             }
         }
     }

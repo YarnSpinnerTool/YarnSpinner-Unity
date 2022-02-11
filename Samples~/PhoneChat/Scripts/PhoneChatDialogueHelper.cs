@@ -116,13 +116,15 @@ namespace Yarn.Unity.Example
 
             CloneMessageBoxToHistory();
 
-            text.text = dialogueLine.TextWithoutCharacterName.Text;;
+            text.text = dialogueLine.TextWithoutCharacterName.Text;
 
-            currentTypewriterEffect = StartCoroutine(Effects.Typewriter(text, 10f, null, null, () =>
-            {
+            currentTypewriterEffect = StartCoroutine(ShowTextAndNotify());
+
+            IEnumerator ShowTextAndNotify() {
+                yield return StartCoroutine(Effects.Typewriter(text, lettersPerSecond, null));
                 currentTypewriterEffect = null;
                 onDialogueLineFinished();
-            }));
+            }
         }
 
         public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
