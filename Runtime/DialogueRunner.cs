@@ -654,7 +654,7 @@ namespace Yarn.Unity
         {
             foreach (var view in views)
             {
-                if (view == null || view.enabled == false)
+                if (view == null)
                 {
                     continue;
                 }
@@ -731,7 +731,7 @@ namespace Yarn.Unity
 
             foreach (var view in dialogueViews)
             {
-                if (view == null || view.enabled == false)
+                if (view == null)
                 {
                     continue;
                 }
