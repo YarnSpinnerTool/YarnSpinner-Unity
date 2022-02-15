@@ -89,11 +89,11 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: 'Test Results ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}'
+          checkName: 'Test Results ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }} Input System = ${{ matrix.inputSystemEnabled }}'
       
       - name: Upload test results
         uses: actions/upload-artifact@v2
         if: always()
         with:
-          name: Test results (edit + play, ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }})
+          name: Test results (edit + play, ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}, Input System = ${{ matrix.inputSystemEnabled }})
           path: ${{ steps.testRunner.outputs.artifactsPath }}
