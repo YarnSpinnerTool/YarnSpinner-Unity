@@ -211,17 +211,15 @@ namespace Yarn.Unity
 #endif
         }
 
+#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
         private void UserPerformedAdvanceAction(InputAction.CallbackContext obj)
         {
-#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
             dialogueView.UserRequestedViewAdvancement();
-#else
-            Debug.LogError($"{nameof(UserPerformedAdvanceAction)} was called, but the Input System is not available. Check your project configuration!");
-#endif
         }
+#endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-        public void Update()
+        internal void Update()
         {
             // We need to be configured to use a keycode to interrupt/continue
             // lines.
