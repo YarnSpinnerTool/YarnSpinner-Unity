@@ -317,7 +317,7 @@ namespace Yarn.Unity
             // Stop any processes that might be running already
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false) 
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false) 
                 {
                     continue;
                 }
@@ -333,7 +333,7 @@ namespace Yarn.Unity
             // Signal that we're starting up.
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false)
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false)
                 {
                     continue;
                 }
@@ -834,7 +834,7 @@ namespace Yarn.Unity
 
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false) continue;
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false) continue;
 
                 dialogueView.RunOptions(optionSet, selectAction);
             }
@@ -847,7 +847,7 @@ namespace Yarn.Unity
             IsDialogueRunning = false;
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false) continue;
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false) continue;
 
                 dialogueView.DialogueComplete();
             }
@@ -940,7 +940,7 @@ namespace Yarn.Unity
             // Mark this dialogue view as active
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false)
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false)
                 {
                     continue;
                 }
@@ -950,7 +950,7 @@ namespace Yarn.Unity
             // Send line to all active dialogue views
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false)
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false)
                 {
                     continue;
                 }
@@ -967,7 +967,7 @@ namespace Yarn.Unity
 
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false)
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false)
                 {
                     continue;
                 }
@@ -1274,7 +1274,7 @@ namespace Yarn.Unity
             foreach (var dialogueView in dialogueViews)
             {
                 // Skip any dialogueView that is null or not enabled
-                if (dialogueView == null || dialogueView.enabled == false)
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false)
                 {
                     continue;
                 }
@@ -1292,7 +1292,7 @@ namespace Yarn.Unity
 
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false) 
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false) 
                 {
                     continue;
                 }
