@@ -502,6 +502,13 @@ namespace Yarn.Unity.Editor
                     // Produce a version of this file that contains line
                     // tags added where they're needed.
                     var taggedVersion = Yarn.Compiler.Utility.AddTagsToLines(contents, allExistingTags);
+                    
+                    // if the file has an error it returns null
+                    // we want to bail out then otherwise we'd wipe the yarn file
+                    if (taggedVersion == null)
+                    {
+                        continue;
+                    }
 
                     // If this produced a modified version of the file,
                     // write it out and re-import it.
