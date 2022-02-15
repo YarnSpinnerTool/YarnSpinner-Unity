@@ -27,9 +27,6 @@ jobs:
           - 2019.4.31f1
           - 2020.3.22f1
           - 2021.1.26f1
-        inputSystemEnabled:
-          - true
-          - false
         targetPlatform:
           # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
@@ -44,8 +41,9 @@ jobs:
           mkdir -p ${{ matrix.projectPath }}/ProjectSettings 
           mkdir -p ${{ matrix.projectPath }}/Packages
       
-      - name: Enable Input System
-        if: matrix.inputSystemEnabled == true
+      # Add the Unity Input System package, and configure the new project to use
+      # both the Input System and the legacy Input Manager.
+      - name: Add Input System package
         run: |
           cat <<EOF > ${{ matrix.projectPath }}/ProjectSettings/ProjectSettings.asset
           %YAML 1.1
@@ -89,11 +87,11 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: 'Test Results ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }} Input System = ${{ matrix.inputSystemEnabled }}'
+          checkName: 'Test Results ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}'
       
       - name: Upload test results
         uses: actions/upload-artifact@v2
         if: always()
         with:
-          name: Test results (edit + play, ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}, Input System = ${{ matrix.inputSystemEnabled }})
+          name: Test results (edit + play, ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}
           path: ${{ steps.testRunner.outputs.artifactsPath }}
