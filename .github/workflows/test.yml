@@ -24,9 +24,12 @@ jobs:
         projectPath:
           - YarnSpinner
         unityVersion:
-          - 2019.4.31f1
+          # - 2019.4.31f1
           - 2020.3.22f1
-          - 2021.1.26f1
+          # - 2021.1.26f1
+        inputSystemEnabled:
+          - true
+          - false
         targetPlatform:
           # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
@@ -40,6 +43,25 @@ jobs:
           mkdir -p ${{ matrix.projectPath }}/Assets
           mkdir -p ${{ matrix.projectPath }}/ProjectSettings 
           mkdir -p ${{ matrix.projectPath }}/Packages
+      
+      - name: Enable Input System
+        if: matrix.inputSystemEnabled == true
+        run: |
+          cat <<EOF > ${{ matrix.projectPath }}/ProjectSettings/ProjectSettings.asset
+          %YAML 1.1
+          %TAG !u! tag:unity3d.com,2011:
+          --- !u!129 &1
+          PlayerSettings:
+            activeInputHandler: 2
+          EOF
+
+          cat <<EOF > ${{ matrix.projectPath }}/Packages/manifest.json
+          {
+            "dependencies": {
+              "com.unity.inputsystem": "1.0.2"
+            }
+          }
+          EOF
       
       - name: Check out to Packages/YarnSpinner
         uses: actions/checkout@v2
