@@ -54,13 +54,13 @@ There are no changes to how options are handled in this new API.
 ### Added
 
 - Added a new component, `DialogueAdvanceInput`, which responds to user input and tells a Dialogue View to advance.
-
 - Added `DialogueViewBase.RunLine` method.
 - Added `DialogueViewBase.InterruptLine` method.
 - Added `DialogueViewBase.DismissLine` method.
 
 ### Changed
 
+- Updated to Yarn Spinner Core 2.1.0.
 - Updated `DialogueRunner` to support a new, simpler API for Dialogue Views; lines no longer have a state for the Dialogue Views to respond to changes to, and instead only receive method calls that tell them what to do next.
 - Fixed a bug where changing a Yarn script asset in during Play Mode would cause the string table to become empty until the next import (#154)
 - Fixed a bug where Yarn functions outside the default assembly would fail to be loaded.
