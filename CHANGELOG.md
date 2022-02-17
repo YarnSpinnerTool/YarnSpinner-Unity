@@ -57,6 +57,8 @@ There are no changes to how options are handled in this new API.
 - Removed `LineStatus` enum.
 - Removed `DialogueViewBase.OnLineStatusChanged` method.
 - Removed `DialogueViewBase.ReadyForNextLine` method.
+- Removed `VoiceOverPlaybackFmod` class. (This view was largely unmaintained, and we feel that it's best for end users to customise their FMOD integration to suit their own needs.)
+- Renamed `VoiceOverPlaybackUnity` to `VoiceOverView`.
 
 ## [2.0.2] 2022-01-08
 
