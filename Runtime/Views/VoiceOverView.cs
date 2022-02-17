@@ -8,7 +8,7 @@ namespace Yarn.Unity
     /// Handles playback of voice over <see cref="AudioClip"/>s referenced
     /// on <see cref="YarnScript"/>s.
     /// </summary>
-    public class VoiceOverPlaybackUnity : DialogueViewBase
+    public class VoiceOverView : DialogueViewBase
     {
         /// <summary>
         /// The fade out time when <see cref="FinishCurrentLine"/> is
