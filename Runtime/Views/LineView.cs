@@ -37,7 +37,7 @@ namespace Yarn.Unity
         /// cref="WasInterrupted"/> property to determine if the coroutine
         /// should exit. If it is <see langword="true"/>, the coroutine should
         /// exit (via the <c>yield break</c> statement.) At the normal exit of
-        /// your coroutine, call the <see cref="Reset"/> method to mark that the
+        /// your coroutine, call the <see cref="Complete"/> method to mark that the
         /// coroutine is no longer running. To make a coroutine stop, call the
         /// <see cref="Interrupt"/> method.
         /// </para>
@@ -70,7 +70,7 @@ namespace Yarn.Unity
                 state = State.Interrupted;
             }
 
-            public void Reset() => state = State.NotRunning;
+            public void Complete() => state = State.NotRunning;
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace Yarn.Unity
                 canvasGroup.blocksRaycasts = true;
             }
 
-            stopToken?.Reset();
+            stopToken?.Complete();
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace Yarn.Unity
             {
                 // Show everything and return
                 text.maxVisibleCharacters = characterCount;
-                stopToken.Reset();
+                stopToken.Complete();
                 yield break;
             }
 
@@ -204,7 +204,7 @@ namespace Yarn.Unity
             // interrupted. Either way, display everything now.
             text.maxVisibleCharacters = characterCount;
 
-            stopToken?.Reset();
+            stopToken?.Complete();
         }
     }
 
@@ -429,7 +429,7 @@ namespace Yarn.Unity
             if (useFadeEffect)
             {
                 yield return StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeOutTime, currentStopToken));
-                currentStopToken.Reset();
+                currentStopToken.Complete();
             }
             
             canvasGroup.alpha = 0;
@@ -586,7 +586,7 @@ namespace Yarn.Unity
             // of the animations at once.
             yield return StartCoroutine(PresentLine());
 
-            currentStopToken.Reset();
+            currentStopToken.Complete();
 
             // All of our text should now be visible.
             lineText.maxVisibleCharacters = int.MaxValue;
