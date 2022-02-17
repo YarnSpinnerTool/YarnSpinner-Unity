@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [2.1.0] 2022-02-17
 
 ### Dialogue View API Update
 
@@ -37,6 +37,19 @@ We've also moved the user input handling code out of the built-in [`LineView`](h
 This hopefully alleviates some of the pain points in issues relating to how Dialogue Views work, like [issue #95](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/95).
 
 There are no changes to how options are handled in this new API.
+
+### Jump to Expressions
+
+- The `<<jump>>` statement can now take an expression.
+
+```yarn
+<<set $myDestination = "Home">>
+<<jump {$myDestination}>>
+```
+
+- Previously, the `jump` statement required the name of a node. With this change, it can now also take an expression that resolves to the name of a node.
+- Jump expressions may be a constant string, a variable, a function call, or any other type of expression.
+- These expressions must be wrapped in curly braces (`{` `}`), and must produce a string.
 
 ### Added
 
