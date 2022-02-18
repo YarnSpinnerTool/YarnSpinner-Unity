@@ -7,10 +7,10 @@ using UnityEngine;
 namespace Yarn.Unity.Editor
 {
     using TypeRegistrationQuery = ValueTuple<Func<AssetImporter, IYarnErrorSource>, string>;
-    using ErrorSourceSet = HashSet<WeakReference<IYarnErrorSource>>;
 
     /// <summary>
-    /// Interface to prevent play mode if there's errors.
+    /// Interface to be implemented by any Yarn-specific importer to prevent play
+    /// mode if there are any errors.
     /// </summary>
     public interface IYarnErrorSource
     {
@@ -25,22 +25,11 @@ namespace Yarn.Unity.Editor
         bool Destroyed { get; }
     }
 
+    /// <summary>
+    /// Prevents play mode if there are any errors in any Yarn projects or scripts.
+    /// </summary>
     public class YarnPreventPlayMode
     {
-        /// <summary>
-        /// Comparer to proxy comparison to objects themselves.
-        /// </summary>
-        /// <typeparam name="T">Passed directly to <see
-        /// cref="WeakReference{T}"/></typeparam>
-        private class WeakRefComparer<T> : IEqualityComparer<WeakReference<T>> where T : class
-        {
-            public bool Equals(WeakReference<T> x, WeakReference<T> y)
-                => x.TryGetTarget(out T xVal) && y.TryGetTarget(out T yVal) && ReferenceEquals(xVal, yVal);
-
-            public int GetHashCode(WeakReference<T> obj)
-                => obj.TryGetTarget(out var result) ? result.GetHashCode() : 0;
-        }
-
         private static YarnPreventPlayMode _instance;
         private static YarnPreventPlayMode Instance
         {
@@ -55,7 +44,7 @@ namespace Yarn.Unity.Editor
         }
 
         /// <summary>
-        /// Register a error source type to gather initial asset state.
+        /// Register an error source type.
         ///
         /// Note that you may have to use <see
         /// cref="InitializeOnLoadAttribute"/> on your class to get it to
@@ -68,20 +57,11 @@ namespace Yarn.Unity.Editor
         /// cref="AssetDatabase.FindAssets(string)"/> documentation for
         /// formatting).</param>
         public static void AddYarnErrorSourceType<T>(string filterQuery) where T : AssetImporter, IYarnErrorSource
-            => Instance.assetSearchQueries.Enqueue((importer => importer as T, filterQuery));
-
-        /// <summary>
-        /// Use this error source to prevent play mode if there are errors.
-        /// </summary>
-        /// <param name="source">Source to register.</param>
-        public static void AddYarnErrorSource(IYarnErrorSource source)
-            => Instance.errorSources.Add(new WeakReference<IYarnErrorSource>(source));
+            => Instance.assetSearchQueries.Add((importer => importer as T, filterQuery));
 
         public static bool HasCompileErrors() => Instance.CompilerErrors().Any();
 
-        private readonly Queue<TypeRegistrationQuery> assetSearchQueries = new Queue<TypeRegistrationQuery>();
-
-        private readonly ErrorSourceSet errorSources = new ErrorSourceSet(new WeakRefComparer<IYarnErrorSource>());
+        private readonly List<TypeRegistrationQuery> assetSearchQueries = new List<TypeRegistrationQuery>();
 
         private YarnPreventPlayMode() => EditorApplication.playModeStateChanged += OnPlayModeChanged;
 
@@ -89,45 +69,42 @@ namespace Yarn.Unity.Editor
         {
             if (state != PlayModeStateChange.ExitingEditMode) { return; }
 
-            bool isValid = true;
-            foreach (string error in CompilerErrors())
+            var compilerErrors = CompilerErrors();
+
+            if (!compilerErrors.Any())
             {
-                isValid = false;
-                Debug.LogError(error);
+                return;
             }
 
-            if (isValid) { return; }
+            foreach (var error in compilerErrors)
+            {
+                Debug.LogError(error);
+            }
 
             EditorApplication.isPlaying = false;
             Debug.LogError("There were import errors. Please fix them to continue.");
 
-            // usually the scene view should be initialized, but if it
-            // isn't then it isn't a huge deal
             SceneView sceneView = EditorWindow.GetWindow<SceneView>();
 
-            if (sceneView != null) {
+            // Usually the scene view should be initialized, but if it
+            // isn't then it isn't a huge deal.
+            if (sceneView != null)
+            {
                 sceneView.ShowNotification(new GUIContent("All Yarn compiler errors must be fixed before entering Play Mode."));
             }
         }
 
         private IEnumerable<string> CompilerErrors()
         {
-            // delete expired weak refs
-            errorSources.RemoveWhere(weakRef => !weakRef.TryGetTarget(out var source) || source.Destroyed);
+            var allImporters = new List<IYarnErrorSource>();
 
-            // import all unloaded assets
-            while (assetSearchQueries.Count > 0)
+            foreach (var query in assetSearchQueries)
             {
-                (var converter, string filterQuery) = assetSearchQueries.Dequeue();
-
-                errorSources.UnionWith(
-                    YarnEditorUtility.GetAllAssetsOf(filterQuery, converter)
-                        .Select(source => new WeakReference<IYarnErrorSource>(source)));
+                allImporters.AddRange(YarnEditorUtility.GetAllAssetsOf(query.Item2, query.Item1));
             }
 
-            return errorSources
-                .Select(errorRef => errorRef.TryGetTarget(out IYarnErrorSource errorSource) ? errorSource : null)
-                .Where(errorSource => errorSource != null && errorSource.CompileErrors.Count > 0)
+            return allImporters
+                .Where(errorSource => errorSource != null && !errorSource.Destroyed && errorSource.CompileErrors.Count > 0)
                 .SelectMany(errorSource => errorSource.CompileErrors);
         }
     }
