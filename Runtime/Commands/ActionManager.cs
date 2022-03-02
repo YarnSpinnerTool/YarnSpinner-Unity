@@ -463,7 +463,8 @@ namespace Yarn.Unity
         {
             foreach (var kv in functions)
             {
-                if (library.FunctionExists(kv.Key) == false) {
+                if (library.FunctionExists(kv.Key) == false)
+                {
                     library.RegisterFunction(kv.Key, kv.Value);
                 }
             }

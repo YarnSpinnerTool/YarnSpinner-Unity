@@ -169,6 +169,11 @@ namespace Yarn.Unity.Editor
             var localDeclarationsCompileJob = CompilationJob.CreateFromFiles(ctx.assetPath);
             localDeclarationsCompileJob.CompilationType = CompilationJob.Type.DeclarationsOnly;
 
+            var library = new Library();
+            ActionManager.AddActionsFromAssemblies(AssemblySearchList());
+            ActionManager.RegisterFunctions(library);
+            localDeclarationsCompileJob.Library = library;
+
             IEnumerable<Declaration> localDeclarations;
 
             compileErrors.Clear();
@@ -231,6 +236,8 @@ namespace Yarn.Unity.Editor
             // We now now compile!
             var job = CompilationJob.CreateFromFiles(pathsToImporters.Keys);
             job.VariableDeclarations = localDeclarations;
+
+            job.Library = library;
 
             CompilationResult compilationResult;
 
@@ -469,10 +476,21 @@ namespace Yarn.Unity.Editor
 
             project.compiledYarnProgram = compiledBytes;
 
+            project.searchAssembliesForActions = AssemblySearchList();
+
+#if YARNSPINNER_DEBUG
+            UnityEngine.Profiling.Profiler.enabled = false;
+#endif
+
+        }
+
+        private List<string> AssemblySearchList()
+        {
             // Get the list of assembly names we want to search for actions in.
             IEnumerable<AssemblyDefinitionAsset> assembliesToSearch = this.assembliesToSearch;
 
-            if (searchAllAssembliesForActions) {
+            if (searchAllAssembliesForActions) 
+            {
                 // We're searching all assemblies for actions. Find all assembly
                 // definitions in the project, including in packages, and load
                 // them.
@@ -492,24 +510,24 @@ namespace Yarn.Unity.Editor
             // Go through each assembly definition asset, figure out its
             // assembly name, and add it to the project's list of assembly names
             // to search.
-            foreach (var reference in assembliesToSearch) {
-                if (reference == null) {
+            var validAssemblies = new List<string>();
+            foreach (var reference in assembliesToSearch) 
+            {
+                if (reference == null)
+                {
                     continue;
                 }
                 var data = new AssemblyDefinition();
                 EditorJsonUtility.FromJsonOverwrite(reference.text, data);
 
-                if (excludedPrefixes.Any(prefix => data.name.StartsWith(prefix))) {
+                if (excludedPrefixes.Any(prefix => data.name.StartsWith(prefix))) 
+                {
                     continue;
                 }
 
-                project.searchAssembliesForActions.Add(data.name);
+                validAssemblies.Add(data.name);
             }
-
-#if YARNSPINNER_DEBUG
-            UnityEngine.Profiling.Profiler.enabled = false;
-#endif
-
+            return validAssemblies;
         }
 
         // A data class used for deserialising the JSON AssemblyDefinitionAssets
@@ -590,6 +608,10 @@ namespace Yarn.Unity.Editor
             // We now now compile!
             var job = CompilationJob.CreateFromFiles(pathsToImporters);
             job.CompilationType = CompilationJob.Type.StringsOnly;
+
+            var library = new Library();
+            ActionManager.RegisterFunctions(library);
+            job.Library = library;
 
             CompilationResult compilationResult;
 
