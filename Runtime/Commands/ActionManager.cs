@@ -312,7 +312,6 @@ namespace Yarn.Unity
                         try
                         {
                             commands.Add(name, CreateCommandRunner(method, command, ref injectorCache));
-                            Debug.Log($"Registered command {name}");
                         }
                         catch (ArgumentException)
                         {
