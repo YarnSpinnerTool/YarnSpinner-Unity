@@ -133,6 +133,8 @@ namespace Yarn.Unity.Editor
         /// <seealso cref="searchAllAssembliesForActions"/>
         public AssemblyDefinitionAsset[] assembliesToSearch;
 
+        public FunctionInfo[] ListOfFunctions;
+
         IList<string> IYarnErrorSource.CompileErrors => compileErrors;
 
         bool IYarnErrorSource.Destroyed => this == null;
@@ -173,6 +175,7 @@ namespace Yarn.Unity.Editor
             ActionManager.AddActionsFromAssemblies(AssemblySearchList());
             ActionManager.RegisterFunctions(library);
             localDeclarationsCompileJob.Library = library;
+            ListOfFunctions = predeterminedFunctions().ToArray();
 
             IEnumerable<Declaration> localDeclarations;
 
@@ -245,13 +248,15 @@ namespace Yarn.Unity.Editor
 
             errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
         
-            if (errors.Count() > 0) {
+            if (errors.Count() > 0) 
+            {
                 var errorGroups = errors.GroupBy(e => e.FileName);
-                foreach (var errorGroup in errorGroups) {
-
+                foreach (var errorGroup in errorGroups)
+                {
                     var errorMessages = errorGroup.Select(e => e.ToString());
 
-                    foreach (var message in errorMessages) {
+                    foreach (var message in errorMessages)
+                    {
                         ctx.LogImportError($"Error compiling: {message}");
                     }
 
@@ -528,6 +533,22 @@ namespace Yarn.Unity.Editor
                 validAssemblies.Add(data.name);
             }
             return validAssemblies;
+        }
+
+        private List<FunctionInfo> predeterminedFunctions()
+        {
+            var library = new Library();
+            ActionManager.AddActionsFromAssemblies(AssemblySearchList());
+            ActionManager.RegisterFunctions(library);
+
+            var things = ActionManager.FunctionsInfo();
+
+            List<FunctionInfo> f = new List<FunctionInfo>();
+            foreach(var thing in things)
+            {
+                f.Add(FunctionInfo.CreateFunctionInfoFromMethodGroup(thing));
+            }
+            return f;
         }
 
         // A data class used for deserialising the JSON AssemblyDefinitionAssets
@@ -867,7 +888,6 @@ namespace Yarn.Unity.Editor
     [CustomPropertyDrawer(typeof(YarnProjectImporter.SerializedDeclaration))]
     public class DeclarationPropertyDrawer : PropertyDrawer
     {
-
         /// <summary>
         /// Draws either a property field or a label field for <paramref
         /// name="property"/> at <paramref name="position"/>, depending on
@@ -1113,6 +1133,102 @@ namespace Yarn.Unity.Editor
                 // called.
                 return 0;
             }
+        }
+    }
+
+    [CustomPropertyDrawer(typeof(FunctionInfo))]
+    public class DerivedFunctionsPropertyDrawer : PropertyDrawer
+    {
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            EditorGUI.BeginProperty(position, label, property);
+
+            const float leftInset = 8;
+
+            Rect RectForFieldIndex(int index, int lineCount = 1)
+            {
+                float verticalOffset = EditorGUIUtility.singleLineHeight * index + EditorGUIUtility.standardVerticalSpacing * index;
+                float height = EditorGUIUtility.singleLineHeight * lineCount + EditorGUIUtility.standardVerticalSpacing * (lineCount - 1);
+
+                return new Rect(
+                    position.x + leftInset,
+                    position.y + verticalOffset,
+                    position.width - leftInset,
+                    height
+                );
+            }
+
+            var foldoutPosition = RectForFieldIndex(0);
+
+            SerializedProperty nameProperty = property.FindPropertyRelative("Name");
+            string name = nameProperty?.stringValue ?? "FUNCTION NAME";
+
+            property.isExpanded = EditorGUI.Foldout(foldoutPosition, property.isExpanded, name);
+
+            if (property.isExpanded)
+            {
+                EditorGUI.indentLevel += 1;
+                var typePosition = RectForFieldIndex(1);
+                var paramPosition = RectForFieldIndex(2);
+
+                SerializedProperty typeProperty = property.FindPropertyRelative("ReturnType");
+                EditorGUI.LabelField(typePosition, typeProperty?.stringValue ?? "RETURN");
+
+                SerializedProperty paramProperty = property.FindPropertyRelative("Parameters");
+                int count = paramProperty?.arraySize ?? 0;
+                if (count > 0)
+                {
+                    EditorGUI.LabelField(paramPosition, $"{count} Parameters");
+                }
+                else
+                {
+                    EditorGUI.LabelField(paramPosition, $"No Parameters");
+                }
+                EditorGUI.indentLevel -= 1;
+            }
+
+            EditorGUI.EndProperty();
+        }
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+
+            int lines = 1;
+
+            if (property.isExpanded)
+            {
+                lines = 3;
+            }
+
+            return EditorGUIUtility.singleLineHeight * lines + EditorGUIUtility.standardVerticalSpacing * lines + 1;
+        }
+    }
+
+    [System.Serializable]
+    public class FunctionInfo
+    {
+        public string Name;
+        public string ReturnType;
+        public string[] Parameters;
+
+        public static FunctionInfo CreateFunctionInfoFromMethodGroup(System.Reflection.MethodInfo method)
+        {
+            var returnType = $"-> {method.ReturnType.Name}";
+
+            var parameters = method.GetParameters();
+            var p = new string[parameters.Count()];
+            for (int i = 0; i < parameters.Count(); i++)
+            {
+                var q = parameters[i].ParameterType;
+                p[i] = parameters[i].Name;
+            }
+
+            return new FunctionInfo
+            {
+                Name = method.Name,
+                ReturnType = returnType,
+                Parameters = p,
+            };
         }
     }
 }

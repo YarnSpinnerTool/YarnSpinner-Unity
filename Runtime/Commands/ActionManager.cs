@@ -497,5 +497,15 @@ namespace Yarn.Unity
             functions.Clear();
             searchedAssemblyNames.Clear();
         }
+
+        public static List<MethodInfo> FunctionsInfo()
+        {
+            var funcs = new List<MethodInfo>();
+            foreach (var func in functions.Values)
+            {
+                funcs.Add(func.Method);
+            }
+            return funcs;
+        }
     }
 }
