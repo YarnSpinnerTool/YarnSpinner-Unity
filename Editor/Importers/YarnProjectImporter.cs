@@ -133,6 +133,7 @@ namespace Yarn.Unity.Editor
         /// <seealso cref="searchAllAssembliesForActions"/>
         public AssemblyDefinitionAsset[] assembliesToSearch;
 
+        [NonReorderable]
         public FunctionInfo[] ListOfFunctions;
 
         IList<string> IYarnErrorSource.CompileErrors => compileErrors;
@@ -537,16 +538,12 @@ namespace Yarn.Unity.Editor
 
         private List<FunctionInfo> predeterminedFunctions()
         {
-            var library = new Library();
-            ActionManager.AddActionsFromAssemblies(AssemblySearchList());
-            ActionManager.RegisterFunctions(library);
-
-            var things = ActionManager.FunctionsInfo();
+            var functions = ActionManager.FunctionsInfo();
 
             List<FunctionInfo> f = new List<FunctionInfo>();
-            foreach(var thing in things)
+            foreach(var func in functions)
             {
-                f.Add(FunctionInfo.CreateFunctionInfoFromMethodGroup(thing));
+                f.Add(FunctionInfo.CreateFunctionInfoFromMethodGroup(func));
             }
             return f;
         }
@@ -629,10 +626,6 @@ namespace Yarn.Unity.Editor
             // We now now compile!
             var job = CompilationJob.CreateFromFiles(pathsToImporters);
             job.CompilationType = CompilationJob.Type.StringsOnly;
-
-            var library = new Library();
-            ActionManager.RegisterFunctions(library);
-            job.Library = library;
 
             CompilationResult compilationResult;
 

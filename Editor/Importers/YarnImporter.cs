@@ -192,10 +192,6 @@ namespace Yarn.Unity.Editor
             var compilationJob = CompilationJob.CreateFromString(fileName, sourceText, null);
             compilationJob.CompilationType = CompilationJob.Type.StringsOnly;
 
-            var library = new Library();
-            ActionManager.RegisterFunctions(library);
-            compilationJob.Library = library;
-
             var result = Yarn.Compiler.Compiler.Compile(compilationJob);
 
             IEnumerable<Diagnostic> errors = result.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
