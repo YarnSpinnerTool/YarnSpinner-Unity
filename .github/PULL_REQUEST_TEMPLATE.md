@@ -3,7 +3,6 @@
   - [ ] Does it pass all existing unit tests without modification?
     - If not, what did you change?
     - If you altered it significantly, what coverage issue did you fix?
-  - [ ] Did you make sure to check that the tests compile & run in [the supported versions](../CONTRIBUTING.md#unity--lts-support)?
 - [ ] Docs have been added / updated (for bug fixes / features)
 - [ ] CHANGELOG.md has been updated to describe this change
 
