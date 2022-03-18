@@ -1171,7 +1171,6 @@ namespace Yarn.Unity.Editor
                 int count = paramProperty?.arraySize ?? 0;
                 if (count > 0)
                 {
-                    // EditorGUI.LabelField(paramPosition, $"{count} Parameters");
                     string[] p = new string[count];
                     for (int i = 0; i < count; i++)
                     {
