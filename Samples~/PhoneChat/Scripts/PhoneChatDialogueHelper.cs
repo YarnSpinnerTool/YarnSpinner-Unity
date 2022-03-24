@@ -27,8 +27,6 @@ namespace Yarn.Unity.Example
         // current message bubble styling settings, modified by SetSender
         bool isRightAlignment = true;
         Color currentBGColor = Color.black, currentTextColor = Color.white;
-        
-        private bool showingOptions = false;
 
         void Awake()
         {
@@ -134,8 +132,6 @@ namespace Yarn.Unity.Example
                 Destroy(child.gameObject);
             }
 
-            showingOptions = true;
-
             optionsContainer.SetActive(true);
 
             for (int i = 0; i < dialogueOptions.Length; i++)
@@ -149,7 +145,6 @@ namespace Yarn.Unity.Example
 
                 optionView.OnOptionSelected = (selectedOption) =>
                 {
-                    showingOptions = false;
                     optionsContainer.SetActive(false);
                     onOptionSelected(selectedOption.DialogueOptionID);
                 };
