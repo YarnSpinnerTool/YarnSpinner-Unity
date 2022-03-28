@@ -1,11 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-/// Removes an object from the scene when the game is running on a non-mobile platform.
-/*** used to disable the mobile controls when running outside of a phone or WebGL platform.
-*/
 namespace Yarn.Unity.Example
 {
+    /// <summary>
+    /// Removes an object from the scene when the game is running on a
+    /// non-mobile platform.
+    /// </summary>
+    /// <remarks>
+    /// This class is used to disable the mobile controls when running outside
+    /// of a phone or WebGL platform.
+    /// </remarks>
     public class MobileOnly : MonoBehaviour
     {
 

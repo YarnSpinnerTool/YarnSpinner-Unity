@@ -44,7 +44,7 @@ namespace Yarn.Unity.Editor
                 currentCultureIndex = -1;
             }
 
-            var allCultureDisplayNames = allCultures.Select(c => c.DisplayName).Select(n => new GUIContent(n)).ToArray();
+            var allCultureDisplayNames = allCultures.Select(c => (c.DisplayName + $":({c.Name})")).Select(n => new GUIContent(n)).ToArray();
 
             using (var changeCheck = new EditorGUI.ChangeCheckScope())
             {

@@ -133,6 +133,9 @@ namespace Yarn.Unity.Editor
         /// <seealso cref="searchAllAssembliesForActions"/>
         public AssemblyDefinitionAsset[] assembliesToSearch;
 
+        [NonReorderable]
+        public FunctionInfo[] ListOfFunctions;
+
         IList<string> IYarnErrorSource.CompileErrors => compileErrors;
 
         bool IYarnErrorSource.Destroyed => this == null;
@@ -142,8 +145,6 @@ namespace Yarn.Unity.Editor
 #if YARNSPINNER_DEBUG
             UnityEngine.Profiling.Profiler.enabled = true;
 #endif
-
-            YarnPreventPlayMode.AddYarnErrorSource(this);
 
             var project = ScriptableObject.CreateInstance<YarnProject>();
 
@@ -170,6 +171,12 @@ namespace Yarn.Unity.Editor
             // Parse declarations 
             var localDeclarationsCompileJob = CompilationJob.CreateFromFiles(ctx.assetPath);
             localDeclarationsCompileJob.CompilationType = CompilationJob.Type.DeclarationsOnly;
+
+            var library = new Library();
+            ActionManager.AddActionsFromAssemblies(AssemblySearchList());
+            ActionManager.RegisterFunctions(library);
+            localDeclarationsCompileJob.Library = library;
+            ListOfFunctions = predeterminedFunctions().ToArray();
 
             IEnumerable<Declaration> localDeclarations;
 
@@ -234,19 +241,23 @@ namespace Yarn.Unity.Editor
             var job = CompilationJob.CreateFromFiles(pathsToImporters.Keys);
             job.VariableDeclarations = localDeclarations;
 
+            job.Library = library;
+
             CompilationResult compilationResult;
 
             compilationResult = Compiler.Compiler.Compile(job);
 
             errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
         
-            if (errors.Count() > 0) {
+            if (errors.Count() > 0) 
+            {
                 var errorGroups = errors.GroupBy(e => e.FileName);
-                foreach (var errorGroup in errorGroups) {
-
+                foreach (var errorGroup in errorGroups)
+                {
                     var errorMessages = errorGroup.Select(e => e.ToString());
 
-                    foreach (var message in errorMessages) {
+                    foreach (var message in errorMessages)
+                    {
                         ctx.LogImportError($"Error compiling: {message}");
                     }
 
@@ -337,7 +348,11 @@ namespace Yarn.Unity.Editor
                 var newLocalization = ScriptableObject.CreateInstance<Localization>();
                 newLocalization.LocaleCode = pair.languageID;
 
-                newLocalization.AddLocalizedStrings(stringTable);
+                // Add these new lines to the localisation's asset
+                foreach (var entry in stringTable) {
+                    newLocalization.AddLocalisedStringToAsset(entry.ID, entry.Text);
+                }
+
 
                 project.localizations.Add(newLocalization);
                 newLocalization.name = pair.languageID;
@@ -430,7 +445,12 @@ namespace Yarn.Unity.Editor
                 var developmentLocalization = ScriptableObject.CreateInstance<Localization>();
                 developmentLocalization.name = $"Default ({defaultLanguage})";
                 developmentLocalization.LocaleCode = defaultLanguage;
-                developmentLocalization.AddLocalizedStrings(stringTableEntries);
+
+
+                // Add these new lines to the development localisation's asset
+                foreach (var entry in stringTableEntries) {
+                    developmentLocalization.AddLocalisedStringToAsset(entry.ID, entry.Text);
+                }
 
                 project.baseLocalization = developmentLocalization;
                 project.localizations.Add(project.baseLocalization);
@@ -455,10 +475,21 @@ namespace Yarn.Unity.Editor
 
             project.compiledYarnProgram = compiledBytes;
 
+            project.searchAssembliesForActions = AssemblySearchList();
+
+#if YARNSPINNER_DEBUG
+            UnityEngine.Profiling.Profiler.enabled = false;
+#endif
+
+        }
+
+        private List<string> AssemblySearchList()
+        {
             // Get the list of assembly names we want to search for actions in.
             IEnumerable<AssemblyDefinitionAsset> assembliesToSearch = this.assembliesToSearch;
 
-            if (searchAllAssembliesForActions) {
+            if (searchAllAssembliesForActions) 
+            {
                 // We're searching all assemblies for actions. Find all assembly
                 // definitions in the project, including in packages, and load
                 // them.
@@ -478,24 +509,36 @@ namespace Yarn.Unity.Editor
             // Go through each assembly definition asset, figure out its
             // assembly name, and add it to the project's list of assembly names
             // to search.
-            foreach (var reference in assembliesToSearch) {
-                if (reference == null) {
+            var validAssemblies = new List<string>();
+            foreach (var reference in assembliesToSearch) 
+            {
+                if (reference == null)
+                {
                     continue;
                 }
                 var data = new AssemblyDefinition();
                 EditorJsonUtility.FromJsonOverwrite(reference.text, data);
 
-                if (excludedPrefixes.Any(prefix => data.name.StartsWith(prefix))) {
+                if (excludedPrefixes.Any(prefix => data.name.StartsWith(prefix))) 
+                {
                     continue;
                 }
 
-                project.searchAssembliesForActions.Add(data.name);
+                validAssemblies.Add(data.name);
             }
+            return validAssemblies;
+        }
 
-#if YARNSPINNER_DEBUG
-            UnityEngine.Profiling.Profiler.enabled = false;
-#endif
+        private List<FunctionInfo> predeterminedFunctions()
+        {
+            var functions = ActionManager.FunctionsInfo();
 
+            List<FunctionInfo> f = new List<FunctionInfo>();
+            foreach(var func in functions)
+            {
+                f.Add(FunctionInfo.CreateFunctionInfoFromMethodGroup(func));
+            }
+            return f;
         }
 
         // A data class used for deserialising the JSON AssemblyDefinitionAssets
@@ -915,7 +958,6 @@ namespace Yarn.Unity.Editor
     [CustomPropertyDrawer(typeof(YarnProjectImporter.SerializedDeclaration))]
     public class DeclarationPropertyDrawer : PropertyDrawer
     {
-
         /// <summary>
         /// Draws either a property field or a label field for <paramref
         /// name="property"/> at <paramref name="position"/>, depending on
@@ -1161,6 +1203,107 @@ namespace Yarn.Unity.Editor
                 // called.
                 return 0;
             }
+        }
+    }
+
+    [CustomPropertyDrawer(typeof(FunctionInfo))]
+    public class DerivedFunctionsPropertyDrawer : PropertyDrawer
+    {
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            EditorGUI.BeginProperty(position, label, property);
+
+            const float leftInset = 8;
+
+            Rect RectForFieldIndex(int index, int lineCount = 1)
+            {
+                float verticalOffset = EditorGUIUtility.singleLineHeight * index + EditorGUIUtility.standardVerticalSpacing * index;
+                float height = EditorGUIUtility.singleLineHeight * lineCount + EditorGUIUtility.standardVerticalSpacing * (lineCount - 1);
+
+                return new Rect(
+                    position.x + leftInset,
+                    position.y + verticalOffset,
+                    position.width - leftInset,
+                    height
+                );
+            }
+
+            var foldoutPosition = RectForFieldIndex(0);
+
+            SerializedProperty nameProperty = property.FindPropertyRelative("Name");
+            string name = nameProperty?.stringValue ?? "FUNCTION NAME";
+
+            property.isExpanded = EditorGUI.Foldout(foldoutPosition, property.isExpanded, name);
+
+            if (property.isExpanded)
+            {
+                EditorGUI.indentLevel += 1;
+                var typePosition = RectForFieldIndex(1);
+                var paramPosition = RectForFieldIndex(2);
+
+                SerializedProperty typeProperty = property.FindPropertyRelative("ReturnType");
+                EditorGUI.LabelField(typePosition, typeProperty?.stringValue ?? "RETURN");
+
+                SerializedProperty paramProperty = property.FindPropertyRelative("Parameters");
+                int count = paramProperty?.arraySize ?? 0;
+                if (count > 0)
+                {
+                    string[] p = new string[count];
+                    for (int i = 0; i < count; i++)
+                    {
+                        p[i] = paramProperty.GetArrayElementAtIndex(i).stringValue;
+                    }
+                    EditorGUI.LabelField(paramPosition, $"({string.Join(", ", p)})");
+                }
+                else
+                {
+                    EditorGUI.LabelField(paramPosition, $"No Parameters");
+                }
+                EditorGUI.indentLevel -= 1;
+            }
+
+            EditorGUI.EndProperty();
+        }
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+
+            int lines = 1;
+
+            if (property.isExpanded)
+            {
+                lines = 3;
+            }
+
+            return EditorGUIUtility.singleLineHeight * lines + EditorGUIUtility.standardVerticalSpacing * lines + 1;
+        }
+    }
+
+    [System.Serializable]
+    public class FunctionInfo
+    {
+        public string Name;
+        public string ReturnType;
+        public string[] Parameters;
+
+        public static FunctionInfo CreateFunctionInfoFromMethodGroup(System.Reflection.MethodInfo method)
+        {
+            var returnType = $"-> {method.ReturnType.Name}";
+
+            var parameters = method.GetParameters();
+            var p = new string[parameters.Count()];
+            for (int i = 0; i < parameters.Count(); i++)
+            {
+                var q = parameters[i].ParameterType;
+                p[i] = parameters[i].Name;
+            }
+
+            return new FunctionInfo
+            {
+                Name = method.Name,
+                ReturnType = returnType,
+                Parameters = p,
+            };
         }
     }
 }

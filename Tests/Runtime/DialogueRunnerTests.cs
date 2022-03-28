@@ -37,6 +37,7 @@ namespace Yarn.Unity.Tests
             {
                 loaded = true;
             };
+            ActionManager.ClearAllActions();
             yield return new WaitUntil(() => loaded);
         }
 
@@ -50,10 +51,10 @@ namespace Yarn.Unity.Tests
             yield return null;
 
             Assert.AreEqual("Spieler: Kannst du mich hören? 2", dialogueUI.CurrentLine);
-            dialogueUI.ReadyForNextLine();
+            dialogueUI.Advance();
 
             Assert.AreEqual("NPC: Klar und deutlich.", dialogueUI.CurrentLine);
-            dialogueUI.ReadyForNextLine();
+            dialogueUI.Advance();
 
             Assert.AreEqual(2, dialogueUI.CurrentOptions.Count);
             Assert.AreEqual("Mir reicht es.", dialogueUI.CurrentOptions[0]);
@@ -75,10 +76,10 @@ namespace Yarn.Unity.Tests
             yield return null;
 
             Assert.AreEqual("Spieler: Kannst du mich hören? 2", dialogueUI.CurrentLine);
-            dialogueUI.ReadyForNextLine();
+            dialogueUI.Advance();
 
             Assert.AreEqual("NPC: Klar und deutlich.", dialogueUI.CurrentLine);
-            dialogueUI.ReadyForNextLine();
+            dialogueUI.Advance();
 
             Assert.AreEqual(2, dialogueUI.CurrentOptions.Count);
             Assert.AreEqual("Mir reicht es.", dialogueUI.CurrentOptions[0]);
@@ -233,7 +234,7 @@ namespace Yarn.Unity.Tests
 
             Assert.AreEqual("Jane: round(3.522) = 4; round_places(3.522, 2) = 3.52; floor(3.522) = 3; floor(-3.522) = -4; ceil(3.522) = 4; ceil(-3.522) = -3; inc(3.522) = 4; inc(4) = 5; dec(3.522) = 3; dec(3) = 2; decimal(3.522) = 0.5220001; int(3.522) = 3; int(-3.522) = -3;", dialogueUI.CurrentLine);
 
-            dialogueUI.ReadyForNextLine();
+            // dialogueUI.ReadyForNextLine();
         }   
 
         [TestCase(@"one two three four", new[] {"one", "two", "three", "four"})]

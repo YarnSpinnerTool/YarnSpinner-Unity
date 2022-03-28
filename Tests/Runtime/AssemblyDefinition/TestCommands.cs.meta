@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD:Tests/Runtime/AssemblyDefinition/TestCommands.cs.meta
 guid: 36d12434272144830aed6106488edee7
+=======
+guid: ca28301cfbfea4c83bae10ed899b6c3c
+>>>>>>> a066b5d070402f58ae17de3338d995203e890fcf:Runtime/Views/ViewInputAddon.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

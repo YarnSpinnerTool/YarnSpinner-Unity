@@ -37,6 +37,8 @@ namespace Yarn.Unity.Editor
         private SerializedProperty searchAllAssembliesProperty;
         private SerializedProperty assembliesToSearchProperty;
 
+        private SerializedProperty predeterminedFunctionsProperty;
+
         public override void OnEnable()
         {
             base.OnEnable();
@@ -53,6 +55,8 @@ namespace Yarn.Unity.Editor
 
             searchAllAssembliesProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.searchAllAssembliesForActions));
             assembliesToSearchProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.assembliesToSearch));
+
+            predeterminedFunctionsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.ListOfFunctions));
         }
 
         public override void OnInspectorGUI()
@@ -189,6 +193,8 @@ namespace Yarn.Unity.Editor
                 EditorGUILayout.PropertyField(assembliesToSearchProperty);
                 EditorGUI.indentLevel -= 1;
             }
+
+            EditorGUILayout.PropertyField(predeterminedFunctionsProperty, true);
 
             using (new EditorGUI.DisabledGroupScope(canGenerateStringsTable == false))
             {

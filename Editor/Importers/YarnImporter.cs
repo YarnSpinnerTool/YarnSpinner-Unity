@@ -102,8 +102,6 @@ namespace Yarn.Unity.Editor
             var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
 
-            YarnPreventPlayMode.AddYarnErrorSource(this);
-
             var extension = System.IO.Path.GetExtension(ctx.assetPath);
 
             // Clear the 'strings available' flags in case this import

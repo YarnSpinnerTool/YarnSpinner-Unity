@@ -1,45 +1,23 @@
 fileFormatVersion: 2
 guid: e97694a934236874ca36566028366c88
 ScriptedImporter:
-  fileIDToRecycleName:
-    4900000: Strings
-    4900002: Program
-    2186277476908879412: ImportLogs
+  internalIDToNameTable:
+  - first:
+      49: 4900000
+    second: Strings
+  - first:
+      49: 4900002
+    second: Program
+  - first:
+      41386430: 2186277476908879412
+    second: ImportLogs
   externalObjects: {}
+  serializedVersion: 2
   userData: 
   assetBundleName: 
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 94073015eacc34c1d8fc6786e43d60ca, type: 3}
-  baseLanguageID: en-AU
-  stringIDs:
-  - line:PhoneChatDialogue-Start-0
-  - line:PhoneChatDialogue-Start-1
-  - line:PhoneChatDialogue-Start-2
-  - line:PhoneChatDialogue-Start-3
-  - line:PhoneChatDialogue-Start-4
-  - line:PhoneChatDialogue-Start-5
-  - line:PhoneChatDialogue-Start-6
-  - line:PhoneChatDialogue-Start-7
-  - line:PhoneChatDialogue-Start-8
-  - line:PhoneChatDialogue-Start-9
-  - line:PhoneChatDialogue-Start-10
-  - line:PhoneChatDialogue-Start-11
-  - line:PhoneChatDialogue-Start-12
-  - line:PhoneChatDialogue-Start-13
-  - line:PhoneChatDialogue-Start-14
-  - line:PhoneChatDialogue-Start-15
-  - line:PhoneChatDialogue-Start-16
-  - line:PhoneChatDialogue-Start-17
-  - line:PhoneChatDialogue-Start-18
-  - line:PhoneChatDialogue-Start-19
-  - line:PhoneChatDialogue-Start-20
-  - line:PhoneChatDialogue-Bye-21
-  - line:PhoneChatDialogue-Bye-22
-  AnyImplicitStringIDs: 1
-  isSuccesfullyParsed: 1
-  parseErrorMessage: 
-  baseLanguage: {instanceID: 0}
-  localizations:
-  - languageName: de
-    text: {fileID: 4900000, guid: 816b6de293b849a4fad13d5caca52524, type: 3}
-  localizationDatabase: {instanceID: 0}
+  LastImportHadImplicitStringIDs: 1
+  LastImportHadAnyStrings: 1
+  isSuccessfullyParsed: 1
+  parseErrorMessages: []

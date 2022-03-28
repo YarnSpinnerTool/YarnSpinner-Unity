@@ -71,3 +71,7 @@ Temporary Items
 # .NET symbols files, for debugging
 *.pdb
 *.pdb.meta 
+
+# Symlink to Samples~ (development environments use this so we can work with the samples all at once, but we don't want to ship the symlink)
+Samples
+Samples.meta
