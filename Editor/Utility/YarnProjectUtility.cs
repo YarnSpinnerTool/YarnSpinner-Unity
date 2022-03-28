@@ -459,6 +459,9 @@ namespace Yarn.Unity.Editor
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 #endif
 
+            var library = new Library();
+            ActionManager.RegisterFunctions(library);
+
             // Compile all of these, and get whatever existing string tags
             // they had. Do each in isolation so that we can continue even
             // if a file contains a parse error.
@@ -468,6 +471,7 @@ namespace Yarn.Unity.Editor
                 // string entries
                 var compilationJob = Yarn.Compiler.CompilationJob.CreateFromFiles(path);
                 compilationJob.CompilationType = Yarn.Compiler.CompilationJob.Type.StringsOnly;
+                compilationJob.Library = library;
 
                 var result = Yarn.Compiler.Compiler.Compile(compilationJob);
 
@@ -502,6 +506,13 @@ namespace Yarn.Unity.Editor
                     // Produce a version of this file that contains line
                     // tags added where they're needed.
                     var taggedVersion = Yarn.Compiler.Utility.AddTagsToLines(contents, allExistingTags);
+                    
+                    // if the file has an error it returns null
+                    // we want to bail out then otherwise we'd wipe the yarn file
+                    if (taggedVersion == null)
+                    {
+                        continue;
+                    }
 
                     // If this produced a modified version of the file,
                     // write it out and re-import it.
@@ -576,6 +587,38 @@ namespace Yarn.Unity.Editor
             return true;
         }
 
+        /// <summary>
+        /// Writes a .csv file to disk at the path indicated by <paramref
+        /// name="destination"/>, containing all of the lines found in the
+        /// scripts referred to by <paramref name="yarnProjectImporter"/>
+        /// that contain any metadata associated with them.
+        /// </summary>
+        /// <param name="yarnProjectImporter">The YarnProjectImporter to
+        /// extract strings from.</param>
+        /// <param name="destination">The path to write the file
+        /// to.</param>
+        /// <returns><see langword="true"/> if the file was written
+        /// successfully, <see langword="false"/> otherwise.</returns>
+        /// <exception cref="CsvHelper.CsvHelperException">Thrown when an
+        /// error is encountered when generating the CSV data.</exception>
+        /// <exception cref="IOException">Thrown when an error is
+        /// encountered when writing the data to disk.</exception>
+        internal static bool WriteMetadataFile(string destination, YarnProjectImporter yarnProjectImporter)
+        {
+            var lineMetadataEntries = yarnProjectImporter.GenerateLineMetadataEntries();
+
+            // If there was an error, bail out here.
+            if (lineMetadataEntries == null)
+            {
+                return false;
+            }
+
+            var outputCSV = LineMetadataTableEntry.CreateCSV(lineMetadataEntries);
+            File.WriteAllText(destination, outputCSV);
+
+            return true;
+        }
+
         internal static void ConvertImplicitVariableDeclarationsToExplicit(YarnProjectImporter yarnProjectImporter) {
             var allFilePaths = yarnProjectImporter.sourceScripts.Select(textAsset => AssetDatabase.GetAssetPath(textAsset));
 
@@ -583,6 +626,7 @@ namespace Yarn.Unity.Editor
             ActionManager.RegisterFunctions(library);
 
             var explicitDeclarationsCompilerJob = Compiler.CompilationJob.CreateFromFiles(AssetDatabase.GetAssetPath(yarnProjectImporter));
+            explicitDeclarationsCompilerJob.Library = library;
 
             Compiler.CompilationResult explicitResult;
 
@@ -592,7 +636,6 @@ namespace Yarn.Unity.Editor
                 Debug.LogError($"Compile error: {e}");
                 return;
             }
-
 
             var implicitDeclarationsCompilerJob = Compiler.CompilationJob.CreateFromFiles(allFilePaths, library);
             implicitDeclarationsCompilerJob.CompilationType = Compiler.CompilationJob.Type.DeclarationsOnly;
@@ -615,7 +658,5 @@ namespace Yarn.Unity.Editor
             AssetDatabase.ImportAsset(yarnProjectImporter.assetPath);
 
         }
-
-
     }
 }

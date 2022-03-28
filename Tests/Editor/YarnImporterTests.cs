@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -55,7 +56,11 @@ namespace Yarn.Unity.Tests
 
         private static string TestYarnScriptSourceModified => GetScriptSource("TestYarnScript-Modified.yarn").text;
 
+        private static string TestYarnScriptSourceNoMetadata => GetScriptSource("TestYarnScript-NoMetadata.yarn").text;
+
         private static IEnumerable<StringTableEntry> ExpectedStrings => StringTableEntry.ParseFromCSV(GetScriptSource("TestYarnProject-Strings.csv").text);
+
+        private static IEnumerable<LineMetadataTableEntry> ExpectedMetadata => LineMetadataTableEntry.ParseFromCSV(GetScriptSource("TestYarnProject-Metadata.csv").text);
 
         // The files that a test created, stored as paths. These files are
         // deleted in TearDown.
@@ -300,6 +305,93 @@ But not all of them are.
             // The two string tables should be identical.
 
             Assert.AreEqual(simpleExpected, simpleResult);
+        }
+
+        [Test]
+        public void YarnProjectImporter_OnValidYarnFileWithMetadata_GeneratesLineMetadata()
+        {
+            // Arrange:
+            // Set up a project with a Yarn file with metadata in some lines.
+            var project = SetUpProject(TestYarnScriptSource);
+
+            // Assert:
+            // Line metadata entry is generated for the project.
+            Assert.NotNull(project.lineMetadata);
+            Assert.Greater(project.lineMetadata.GetLineIDs().Count(), 0);
+        }
+
+        [Test]
+        public void YarnProjectImporter_OnValidYarnFileWithoutMetadata_GeneratesEmptyLineMetadata()
+        {
+            // Arrange:
+            // Set up a project with a Yarn file with metadata in some lines.
+            var project = SetUpProject(TestYarnScriptSourceNoMetadata);
+
+            // Assert:
+            // Line metadata entry is generated for the project.
+            Assert.NotNull(project.lineMetadata);
+            Assert.IsEmpty(project.lineMetadata.GetLineIDs());
+        }
+
+        [Test]
+        public void YarnProjectImporter_OnValidYarnFileWithMetadata_GetExpectedLineMetadata()
+        {
+            // Arrange:
+            // Set up a project with a Yarn file with metadata in some lines.
+            var project = SetUpProject(TestYarnScriptSource);
+            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
+
+            // Act:
+            var metadataEntries = importer.GenerateLineMetadataEntries();
+
+            // Simplify the results so that we can compare these metadata
+            // table entries based only on specific fields.
+            System.Func<LineMetadataTableEntry, (string id, string node, string lineNo, string metadata)> simplifier =
+                e => (id: e.ID, node: e.Node, lineNo: e.LineNumber, metadata: string.Join(" ", e.Metadata));
+            var simpleExpected = ExpectedMetadata.Select(simplifier);
+            var simpleResult = metadataEntries.Select(simplifier);
+
+            // Assert:
+            // Metadata entries should be identical to what we expect.
+            CollectionAssert.AreEquivalent(simpleResult, simpleExpected);
+        }
+
+        [Test]
+        public void YarnProjectImporter_UpdatesLineMetadata_WhenBaseScriptChanges()
+        {
+            // Arrange:
+            // Set up a project with a Yarn file with metadata in some lines.
+            var project = SetUpProject(TestYarnScriptSource);
+            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
+            var scriptPath = AssetDatabase.GetAssetPath(importer.sourceScripts[0]);
+
+            // Act:
+            // Modify the original source script.
+            File.WriteAllText(scriptPath, TestYarnScriptSourceModified);
+            AssetDatabase.Refresh();
+
+            // Assert: verify the line metadata exists and contains the expected number of entries.
+            Assert.NotNull(project.lineMetadata);
+            Assert.AreEqual(project.lineMetadata.GetLineIDs().Count(), 1);
+        }
+
+        [Test]
+        public void YarnProjectImporter_UpdatesLineMetadata_WhenBaseScriptChangesWithoutMetadata()
+        {
+            // Arrange:
+            // Set up a project with a Yarn file with metadata in some lines.
+            var project = SetUpProject(TestYarnScriptSource);
+            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
+            var scriptPath = AssetDatabase.GetAssetPath(importer.sourceScripts[0]);
+
+            // Act:
+            // Modify the original source script to a script without any metadata.
+            File.WriteAllText(scriptPath, TestYarnScriptSourceNoMetadata);
+            AssetDatabase.Refresh();
+
+            // Assert: verify the line metadata exists and is empty.
+            Assert.NotNull(project.lineMetadata);
+            Assert.IsEmpty(project.lineMetadata.GetLineIDs());
         }
 
         [Test]

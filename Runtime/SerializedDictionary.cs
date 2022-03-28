@@ -129,6 +129,12 @@ namespace Yarn.Unity
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
             table.Clear();
+
+            if (keys == null || values == null)
+            {
+                return;
+            }
+
             for (int i = 0; i != Mathf.Min(keys.Count, values.Count); i++)
             {
                 table.Add(keys[i], values[i]);

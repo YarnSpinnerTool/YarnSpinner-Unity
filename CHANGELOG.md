@@ -8,17 +8,98 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Metadata for each line is exposed through a Yarn Project. Metadata generally comes as hashtags similar to `#line`. They can be used to define line-specific behavior (no particular behavior is supported by default, each user will need to define their own).
+- When exporting Strings files, a Yarn Project will also export another CSV file with the line metadata (for each line with metadata).
+- `LocalizedLine`s now contain a field for any metadata associated with the line.
+- `YarnFunction` tagged methods now appear in the inspector window for the project, letting you view their basic info.
+
 ### Changed
 
-- Fixed a bug where changing a Yarn script asset in during Play Mode would cause the string table to become empty until the next import (#154)
+- `YarnPreventPlayMode` no longer uses `WeakReference` pointing to `Unity.Object` (this is unsupported by Unity).
+- `ActionManager` no longer logs every single command that it registers. (#165)
+- Improved the type inference system around the use of functions.
+
+This has two pieces, the first is in YarnSpinner Core and adds in support for partial backwards type inference.
+This means in many situations where either the l-value or r-value of an expression is known that can be used to provide a type to the other side of the equation.
+Additionally now functions tagged with the `YarnFunction` attribute are sent along to the compiler so that they can be used to inform values.
+The upside of this is in situations like `<<set $cats = get_cats()>>` if either `$cats` is declared or `get_cats` is tagged as a `YarnFunction` there won't be an error anymore.
 
 ### Removed
+
+## [2.1.0] 2022-02-17
+
+### Dialogue View API Update
+
+The API for creating new Dialogue Views has been updated.
+
+> **Background:** Dialogue Views are objects that receive lines and options from the Dialogue Runner, present them to the player, receive option selections, and signal when the user should see the next piece of content. They're subclasses of the [`DialogueViewBase`](https://docs.yarnspinner.dev/api/csharp/yarn.unity/yarn.unity.dialogueviewbase) class. All of our built-in Dialogue Views, such as [`LineView`](https://docs.yarnspinner.dev/api/csharp/yarn.unity/yarn.unity.lineview) and [`OptionsListView`](https://docs.yarnspinner.dev/api/csharp/yarn.unity/yarn.unity.optionslistview), are examples of this.
+
+Previously, line objects stored information about their current state, and as Dialogue Views reported that they had finished presenting or dismissing their line, all views would receive a signal that the line's state had changed, and respond to those changes by changing the way that the line was presented (such as by dismissing it when the line's state became 'Dismissed').  This meant that every Dialogue View class needed to implement fairly complex logic to handle these changes in state.
+
+In this release, 'line state' is no longer a concept that Dialogue Views need to keep track of. Instead, Dialogue Views that present lines simply need to implement three methods:
+
+- [`RunLine`](https://docs.yarnspinner.dev/api/csharp/yarn.unity/yarn.unity.dialogueviewbase/yarn.unity.dialogueviewbase.runline) is called when the Dialogue Runner wants to show a line to the player. It receives a line, as well as a completion handler to call when the line view has finished delivering the contents line.
+- [`InterruptLine`](https://docs.yarnspinner.dev/api/csharp/yarn.unity/yarn.unity.dialogueviewbase/yarn.unity.dialogueviewbase.interruptline) is called when the Dialogue Runner wants all Dialogue Views to finish presenting their lines as fast as possible. It receives the line that's currently being presented, as well as a new completion handler to call when the presentation is finished (which this method should try and call as quickly as it can.)
+- [`DismissLine`](https://docs.yarnspinner.dev/api/csharp/yarn.unity/yarn.unity.dialogueviewbase/yarn.unity.dialogueviewbase.dismissline) is called when all Dialogue Views have finished delivering their line (whether it was interrupted, or whether it completed normally). It receives a completion handler to call when the dismissal is complete.
+
+The updated flow is this:
+
+1. While running a Yarn script, the Dialogue Runner encounters a line of dialogue to show to the user.
+2. It calls [`RunLine`](https://docs.yarnspinner.dev/api/csharp/yarn.unity/yarn.unity.dialogueviewbase/yarn.unity.dialogueviewbase.runline) on all Dialogue Views, and waits for all of them to call their completion handler to indicate that they're done presenting the line.
+  * At any point, a Dialogue View can call a method that requests that the current line be interrupted. When this happens, the Dialogue Runner calls [`InterruptLine`](https://docs.yarnspinner.dev/api/csharp/yarn.unity/yarn.unity.dialogueviewbase/yarn.unity.dialogueviewbase.interruptline) on the Dialogue Views, and waits for them to call the new completion handler to indicate that they've finished presenting the line.
+3. Once all Dialogue Views have reported that they're done, the Dialogue Runner calls [`DismissLine`](https://docs.yarnspinner.dev/api/csharp/yarn.unity/yarn.unity.dialogueviewbase/yarn.unity.dialogueviewbase.dismissline) on all Dialogue Views, and waits for them to call the completion handler to indicate that they're done dismissing the line.
+4. The Dialogue Runner then moves on to the next piece of content.
+
+This new flow significantly simplifies the amount of information that a Dialogue View needs to keep track of, as well as the amount of logic that a Dialogue View needs to have to manage this information.
+
+Instead, it's a simpler model of: "when you're told to run a line, run it, and tell us when you're done. When you're told to interrupt the line, finish running it ASAP and tell us when you're done. Finally, when you're told to dismiss your line, do it and let us know when you're done."
+
+We've also moved the user input handling code out of the built-in [`LineView`](https://docs.yarnspinner.dev/api/csharp/yarn.unity/yarn.unity.lineview) class, and into a new class called [`DialogueAdvanceInput`](https://docs.yarnspinner.dev/api/csharp/yarn.unity/yarn.unity.dialogueadvanceinput). This class lets you use either of the Unity Input systems to signal to a DialogueView that the user wants to advance the dialogue; by moving it out of our built-in view, it's a little easier for Dialogue View writers, who may not want to have to deal with input.
+
+This hopefully alleviates some of the pain points in issues relating to how Dialogue Views work, like [issue #95](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/95).
+
+There are no changes to how options are handled in this new API.
+
+### Jump to Expressions
+
+- The `<<jump>>` statement can now take an expression.
+
+```yarn
+<<set $myDestination = "Home">>
+<<jump {$myDestination}>>
+```
+
+- Previously, the `jump` statement required the name of a node. With this change, it can now also take an expression that resolves to the name of a node.
+- Jump expressions may be a constant string, a variable, a function call, or any other type of expression.
+- These expressions must be wrapped in curly braces (`{` `}`), and must produce a string.
+
+### Added
+
+- Added a new component, `DialogueAdvanceInput`, which responds to user input and tells a Dialogue View to advance.
+- Added `DialogueViewBase.RunLine` method.
+- Added `DialogueViewBase.InterruptLine` method.
+- Added `DialogueViewBase.DismissLine` method.
+
+### Changed
+
+- Updated to Yarn Spinner Core 2.1.0.
+- Updated `DialogueRunner` to support a new, simpler API for Dialogue Views; lines no longer have a state for the Dialogue Views to respond to changes to, and instead only receive method calls that tell them what to do next.
+- Fixed a bug where changing a Yarn script asset in during Play Mode would cause the string table to become empty until the next import (#154)
+- Fixed a bug where Yarn functions outside the default assembly would fail to be loaded.
+
+### Removed
+
+- Removed `LineStatus` enum.
+- Removed `DialogueViewBase.OnLineStatusChanged` method.
+- Removed `DialogueViewBase.ReadyForNextLine` method.
+- Removed `VoiceOverPlaybackFmod` class. (This view was largely unmaintained, and we feel that it's best for end users to customise their FMOD integration to suit their own needs.)
+- Renamed `VoiceOverPlaybackUnity` to `VoiceOverView`.
 
 ## [2.0.2] 2022-01-08
 
 ### Added
 
-- You can now specify which assemblies you want Yarn Spinner to search for `YarnCommand` and `YarnFunction` methods in. 
+- You can now specify which assemblies you want Yarn Spinner to search for `YarnCommand` and `YarnFunction` methods in.
   - By default, Yarn Spinner will search in your game's code, as well as every assembly definition in your code and your packages.
   - You can choose to make Yarn Spinner only look in specific assembly definitions, which reduces the amount of time needed to search for commands and functions.
   - To control how Yarn Spinner searches for commands and actions, turn off "Search All Assemblies" in the Inspector for a Yarn Project.
@@ -107,7 +188,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     ```
 
   - You can also define custom getters for better performance.
-  
+
     ```cs
     [YarnStateInjector(nameof(GetBehavior))] // if this is null, the previous behavior of using GameObject.Find will still be available
     class CustomBehavior : MonoBehaviour {
@@ -129,7 +210,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     ```
 
   - You can also define custom getters for Component parameters in the same vein.
-  
+
     ```cs
     class CustomBehavior : MonoBehaviour {
       static Animator GetAnimator(string name) => ...;
@@ -147,10 +228,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Updated to support new error handling in Yarn Spinner. 
+- Updated to support new error handling in Yarn Spinner.
   - Yarn Spinner longer reports errors by throwing an exception, and instead provides a collection of diagnostic messages in the compiler result. In Unity, Yarn Spinner will now show _all_ error messages that the compiler may produce.
 
-- The console will no longer report an error indicating that a command is "already defined" when a subclass of a MonoBehaviour that has `YarnCommand` methods exists. 
+- The console will no longer report an error indicating that a command is "already defined" when a subclass of a MonoBehaviour that has `YarnCommand` methods exists.
 
 - `LocalizedLine.Text`'s setter is now public, not internal.
 
@@ -178,7 +259,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-* `OptionsListView` no longer throws a `NullPointerException` when the dialogue starts with options (instead of a line.) 
+* `OptionsListView` no longer throws a `NullPointerException` when the dialogue starts with options (instead of a line.)
 * When creating a new Yarn Project file from the Assets -> Create menu, the correct icon is now used.
 * Updated to use the new type system in Yarn Spinner 2.0-beta5.
 
@@ -188,9 +269,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [2.0.0-beta4] 2021-04-01
 
-Yarn Spinner 2.0 Beta 4 is a hotfix release for Yarn Spinner 2.0 Beta 3. 
+Yarn Spinner 2.0 Beta 4 is a hotfix release for Yarn Spinner 2.0 Beta 3.
 
-### Changed 
+### Changed
 
 - Fixed an issue that caused Yarn Spinner to not compile on Unity 2018 or Unity 2019.
 
@@ -251,9 +332,9 @@ With this change, you can instead say this:
 - Fixed an issue where dialogue views that are not enabled were still being waited for (@radiatoryang)
 - Upgrader tool now creates new files on disk, where needed (for example, .yarnproject files)
 - `YarnProgram`, the asset that stores references to individual .yarn files for compilation, has been renamed to `YarnProject`. Because this change makes Unity forget any existing references to "YarnProgram" assets, **when upgrading to this version, you must set the Yarn Project field in your Dialogue Runners again.**
-- `Localization`, the asset that mapped line IDs to localized data, is now automatically generated for you by the `YarnProject`. 
-  - You don't create them yourselves, and you no longer need to manually refresh them. 
-  - The `YarnProject` always creates at least one localization: the "Base" localization, which contains the original text found in your `.yarn` files. 
+- `Localization`, the asset that mapped line IDs to localized data, is now automatically generated for you by the `YarnProject`.
+  - You don't create them yourselves, and you no longer need to manually refresh them.
+  - The `YarnProject` always creates at least one localization: the "Base" localization, which contains the original text found in your `.yarn` files.
   - You can create more localizations in the `YarnProject`'s inspector, and supply the language code to use and a `.csv` file containing replacement strings.
 - Renamed the 'StartHere' demo to 'Intro', because it's not actually the first step in installing Yarn Spinner.
 - Simplified the workflow for working with Addressable Assets.
@@ -297,9 +378,9 @@ With this change, you can instead say this:
 ### Removed
 
 - The `[[Destination]]` and `[[Option|Destination]]` syntax has been removed from the language.
-  - This syntax was inherited from the original Yarn language, which itself inherited it from Twine. 
-  - We removed it for four reasons: 
-    - it conflated jumps and options, which are very different operations, with too-similar syntax; 
+  - This syntax was inherited from the original Yarn language, which itself inherited it from Twine.
+  - We removed it for four reasons:
+    - it conflated jumps and options, which are very different operations, with too-similar syntax;
     - the Option-destination syntax for declaring options involved the management of non-obvious state (that is, if an option statement was inside an `if` branch that was never executed, it was not presented, and the runtime needed to keep track of that);
     - it was not obvious that options accumulated and were only presented at the end of the node;
     - finally, shortcut options provide a cleaner way to present the same behaviour.
@@ -344,9 +425,9 @@ Kim: You want a bagel?
   - Variables also have a default value. As a result, variables are never allowed to be `null`.
   - Variable declarations can be in any part of a Yarn script. As long as they're somewhere in the file, they'll be used.
   - Variable declarations don't have to be in the same file as where they're used. If the Yarn Program contains a script that has a variable declaration, other scripts in that Program can use the variable.
-  - To declare a variable on a Yarn Program, select it, and click the `+` button to create the new variable. 
+  - To declare a variable on a Yarn Program, select it, and click the `+` button to create the new variable.
   - To declare a variable in a script, use the following syntax:
-  
+
 ```
 <<declare $variable_name = "hello">> // declares a string
 <<declare $variable_name = 123>> // declares a number
@@ -362,7 +443,7 @@ Kim: You want a bagel?
 ### Removed
 - Commands registered via the `YarnCommand` attribute can no longer accept a `params` array of parameters. If your command takes a variable number of parameters, use optional parameters instead.
 
-## [1.2.7] 
+## [1.2.7]
 
 ### Changed
 

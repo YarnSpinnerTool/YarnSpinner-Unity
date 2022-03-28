@@ -1,30 +1,23 @@
 fileFormatVersion: 2
 guid: 8e3b0eabc14eb4e4cb5da356b457ab83
 ScriptedImporter:
-  fileIDToRecycleName:
-    4900000: Program
-    4900002: Strings
-    2186277476908879412: ImportLogs
+  internalIDToNameTable:
+  - first:
+      49: 4900000
+    second: Program
+  - first:
+      49: 4900002
+    second: Strings
+  - first:
+      41386430: 2186277476908879412
+    second: ImportLogs
   externalObjects: {}
+  serializedVersion: 2
   userData: 
   assetBundleName: 
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 94073015eacc34c1d8fc6786e43d60ca, type: 3}
-  baseLanguageID: en
-  stringIDs:
-  - line:01bbe32
-  - line:0ff5d85
-  - line:02d8e0d
-  - line:0cabcd2
-  - line:0718c80
-  - line:05073d5
-  - line:071d8ad
-  AnyImplicitStringIDs: 0
-  isSuccesfullyParsed: 1
-  parseErrorMessage: 
-  baseLanguage: {instanceID: 0}
-  localizations:
-  - languageName: de
-    text: {fileID: 4900000, guid: a74afbcd340a1134e9a812870eebe8b9, type: 3}
-  localizationDatabase: {fileID: 11400000, guid: 97b74ba4989424dc19afeaa3dc8a00cc,
-    type: 2}
+  LastImportHadImplicitStringIDs: 0
+  LastImportHadAnyStrings: 1
+  isSuccessfullyParsed: 1
+  parseErrorMessages: []

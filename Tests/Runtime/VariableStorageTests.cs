@@ -52,7 +52,6 @@ namespace Yarn.Unity.Tests
 
         public void SetValue_TryGetValue()
         {
-            
             // set, then get, then test equality
             VarStorage.SetValue("$stringVar", stringTest);
             VarStorage.TryGetValue<string>("$stringVar", out var actualStringResult);
@@ -84,11 +83,6 @@ namespace Yarn.Unity.Tests
         public IEnumerator TestVariableValuesFromYarnScript() {
             // run all lines
             Runner.StartDialogue(Runner.startNode);
-            UI.ReadyForNextLine();
-            yield return null;
-            yield return null;
-            UI.ReadyForNextLine();
-            yield return null;
             yield return null;
 
             VarStorage.TryGetValue<string>("$stringVar", out var actualStringResult);
@@ -104,16 +98,32 @@ namespace Yarn.Unity.Tests
         {
             // ok I need to test that the bulk load and save works
             Runner.StartDialogue(Runner.startNode);
-            UI.ReadyForNextLine();
-            yield return null;
-            yield return null;
-            UI.ReadyForNextLine();
-            yield return null;
             yield return null;
             var dump = VarStorage.DumpVariables();
             TestClearVarStorage();
             VarStorage.BulkLoadVariables(dump.Item1, dump.Item2, dump.Item3);
             TestVariableValuesFromYarnScript();
+
+            // cleanup
+            PlayerPrefs.DeleteKey( testPlayerPrefsKey );
+        }
+
+        string testFilePath { get { return Application.persistentDataPath + Path.DirectorySeparatorChar + "YarnVariableStorageTest.json" ;} }
+        [UnityTest]
+        public IEnumerator SaveLoadFile()
+        {
+            // run all lines
+            Runner.StartDialogue(Runner.startNode);
+            yield return null;
+
+            // save all variable values to a file, clear, then load from a file
+            VarStorage.SaveToFile( testFilePath );
+            TestClearVarStorage();
+            VarStorage.LoadFromFile( testFilePath );
+            TestVariableValuesFromYarnScript();
+
+            // cleanup
+            File.Delete( testFilePath );
         }
 
         [Test]

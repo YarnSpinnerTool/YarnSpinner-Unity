@@ -312,7 +312,6 @@ namespace Yarn.Unity
                         try
                         {
                             commands.Add(name, CreateCommandRunner(method, command, ref injectorCache));
-                            Debug.Log($"Registered command {name}");
                         }
                         catch (ArgumentException)
                         {
@@ -451,22 +450,23 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Register a function into a given library.
+        /// Registers all functions known to this <see cref="ActionManager"/>
+        /// into a <see cref="Library"/>.
         /// </summary>
-        /// <param name="library">Library instance to register.</param>
+        /// <remarks>
+        /// Existing functions in the Library will not be modified.
+        /// </remarks>
+        /// <param name="library">Library instance to register functions
+        /// into.</param>
         public static void RegisterFunctions(Library library)
         {
-#if NET_STANDARD // c# 8+ (Unity 2022)
-            foreach (var (name, implementation) in functions)
-            {
-                library.RegisterFunction(name, implementation);
-            }
-#else
             foreach (var kv in functions)
             {
-                library.RegisterFunction(kv.Key, kv.Value);
+                if (library.FunctionExists(kv.Key) == false)
+                {
+                    library.RegisterFunction(kv.Key, kv.Value);
+                }
             }
-#endif
         }
         
         static ActionManager()
@@ -495,6 +495,16 @@ namespace Yarn.Unity
             commands.Clear();
             functions.Clear();
             searchedAssemblyNames.Clear();
+        }
+
+        public static List<MethodInfo> FunctionsInfo()
+        {
+            var funcs = new List<MethodInfo>();
+            foreach (var func in functions.Values)
+            {
+                funcs.Add(func.Method);
+            }
+            return funcs;
         }
     }
 }

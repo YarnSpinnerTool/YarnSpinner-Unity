@@ -115,13 +115,6 @@ namespace Yarn.Unity
         public bool startAutomatically = true;
 
         /// <summary>
-        /// Whether the DialogueRunner should automatically proceed to the
-        /// next line once a line has been finished.
-        /// </summary>
-        [UnityEngine.Serialization.FormerlySerializedAs("continueNextLineOnLineFinished")]
-        public bool automaticallyContinueLines;
-
-        /// <summary>
         /// If true, when an option is selected, it's as though it were a
         /// line.
         /// </summary>
@@ -246,8 +239,14 @@ namespace Yarn.Unity
             // this project wants to load from.
             ActionManager.AddActionsFromAssemblies(newProject.searchAssembliesForActions);
 
+            // Register any new functions that we found as part of doing this.
+            ActionManager.RegisterFunctions(Dialogue.Library);
+
             Dialogue.SetProgram(newProject.GetProgram());
-            lineProvider.YarnProject = newProject;
+
+            if (lineProvider != null) {
+                lineProvider.YarnProject = newProject;
+            }
         }
 
         /// <summary>
@@ -257,7 +256,7 @@ namespace Yarn.Unity
         /// </summary>
         public void SetInitialVariables(bool overrideExistingValues = false)
         {
-            if (yarnProject == null) 
+            if (yarnProject == null)
             {
                 Debug.LogError("Unable to set default values, there is no project set");
                 return;
@@ -309,7 +308,8 @@ namespace Yarn.Unity
             // If the dialogue is currently executing instructions, then
             // calling ContinueDialogue() at the end of this method will
             // cause confusing results. Report an error and stop here.
-            if (Dialogue.IsActive) {
+            if (Dialogue.IsActive) 
+            {
                 Debug.LogError($"Can't start dialogue from node {startNode}: the dialogue is currently in the middle of running. Stop the dialogue first.");
                 return;
             }
@@ -317,7 +317,8 @@ namespace Yarn.Unity
             // Stop any processes that might be running already
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false) {
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false) 
+                {
                     continue;
                 }
 
@@ -332,7 +333,10 @@ namespace Yarn.Unity
             // Signal that we're starting up.
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false) continue;
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false)
+                {
+                    continue;
+                }
 
                 dialogueView.DialogueStarted();
             }
@@ -421,6 +425,7 @@ namespace Yarn.Unity
         /// `null` if no node with that name exists.</returns>
         public IEnumerable<string> GetTagsForNode(String nodeName) => Dialogue.GetTagsForNode(nodeName);
 
+#region CommandsAndFunctions
         /// <summary>
         /// Adds a command handler. Dialogue will pause execution after the
         /// command is called.
@@ -638,6 +643,7 @@ namespace Yarn.Unity
         /// <param name="name">The name of the function to remove.</param>
         /// <seealso cref="AddFunction{TResult}(string, Func{TResult})"/>
         public void RemoveFunction(string name) => Dialogue.Library.DeregisterFunction(name);
+#endregion
 
         /// <summary>
         /// Sets the dialogue views and makes sure the callback <see cref="DialogueViewBase.MarkLineComplete"/>
@@ -646,17 +652,15 @@ namespace Yarn.Unity
         /// <param name="views">The array of views to be assigned.</param>
         public void SetDialogueViews(DialogueViewBase[] views)
         {
-            dialogueViews = views;
-
-            Action continueAction = OnViewUserIntentNextLine;
-            foreach (var dialogueView in dialogueViews) {
-                if (dialogueView == null) {
-                    Debug.LogWarning("The 'Dialogue Views' field contains a NULL element.", gameObject);
+            foreach (var view in views)
+            {
+                if (view == null)
+                {
                     continue;
                 }
-
-                dialogueView.onUserWantsLineContinuation = continueAction;
+                view.requestInterrupt = OnViewRequestedInterrupt;
             }
+            dialogueViews = views;
         }
 
         #region Private Properties/Variables/Procedures
@@ -725,19 +729,13 @@ namespace Yarn.Unity
                 Debug.LogWarning($"Dialogue Runner doesn't have any dialogue views set up. No lines or options will be visible.");
             }
 
-            // Give each dialogue view the continuation action, which
-            // they'll call to pass on the user intent to move on to the
-            // next line (or interrupt the current one).
-            System.Action continueAction = OnViewUserIntentNextLine;
-            foreach (var dialogueView in dialogueViews)
+            foreach (var view in dialogueViews)
             {
-                // Skip any null or disabled dialogue views
-                if (dialogueView == null || dialogueView.enabled == false)
+                if (view == null)
                 {
                     continue;
                 }
-
-                dialogueView.onUserWantsLineContinuation = continueAction;
+                view.requestInterrupt = OnViewRequestedInterrupt;
             }
 
             if (yarnProject != null)
@@ -746,16 +744,9 @@ namespace Yarn.Unity
                 {
                     Debug.LogError($"DialogueRunner wanted to load a Yarn Project in its Start method, but the Dialogue was already running one. The Dialogue Runner may not behave as you expect.");
                 }
-                
-                // Load all of the commands and functions from the assemblies
-                // that this project wants to load from.
-                ActionManager.AddActionsFromAssemblies(yarnProject.searchAssembliesForActions);
 
-                Dialogue.SetProgram(yarnProject.GetProgram());
-
-                lineProvider.YarnProject = yarnProject;
-
-                SetInitialVariables();
+                // Load this new Yarn Project.
+                SetProject(yarnProject);
 
                 if (startAutomatically)
                 {
@@ -812,7 +803,6 @@ namespace Yarn.Unity
                 PrepareForLinesHandler = PrepareForLines
             };
 
-            ActionManager.RegisterFunctions(dialogue.Library);
             selectAction = SelectedOption;
             return dialogue;
         }
@@ -827,6 +817,8 @@ namespace Yarn.Unity
                 // Localize the line associated with the option
                 var localisedLine = lineProvider.GetLocalizedLine(options.Options[i].Line);
                 var text = Dialogue.ExpandSubstitutions(localisedLine.RawText, options.Options[i].Line.Substitutions);
+                
+                Dialogue.LanguageCode = lineProvider.textLanguageCode;
                 localisedLine.Text = Dialogue.ParseMarkup(text);
 
                 optionSet[i] = new DialogueOption
@@ -844,7 +836,7 @@ namespace Yarn.Unity
 
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false) continue;
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false) continue;
 
                 dialogueView.RunOptions(optionSet, selectAction);
             }
@@ -857,7 +849,7 @@ namespace Yarn.Unity
             IsDialogueRunning = false;
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false) continue;
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false) continue;
 
                 dialogueView.DialogueComplete();
             }
@@ -934,9 +926,8 @@ namespace Yarn.Unity
             }
 
             // Render the markup
+            Dialogue.LanguageCode = lineProvider.textLanguageCode;
             CurrentLine.Text = Dialogue.ParseMarkup(text);
-
-            CurrentLine.Status = LineStatus.Presenting;
 
             // Clear the set of active dialogue views, just in case
             ActiveDialogueViews.Clear();
@@ -952,17 +943,44 @@ namespace Yarn.Unity
             // Mark this dialogue view as active
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false) continue;
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false)
+                {
+                    continue;
+                }
 
                 ActiveDialogueViews.Add(dialogueView);
             }
             // Send line to all active dialogue views
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false) continue;
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false)
+                {
+                    continue;
+                }
 
                 dialogueView.RunLine(CurrentLine,
                     () => DialogueViewCompletedDelivery(dialogueView));
+            }
+        }
+
+        // called by the runner when a view has signalled that it needs to interrupt the current line
+        void InterruptLine()
+        {
+            ActiveDialogueViews.Clear();
+
+            foreach (var dialogueView in dialogueViews)
+            {
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false)
+                {
+                    continue;
+                }
+
+                ActiveDialogueViews.Add(dialogueView);
+            }
+
+            foreach (var dialogueView in dialogueViews)
+            {
+                dialogueView.InterruptLine(CurrentLine, () => DialogueViewCompletedInterrupt(dialogueView));
             }
         }
 
@@ -1190,10 +1208,7 @@ namespace Yarn.Unity
 
         /// <summary>
         /// Called when a <see cref="DialogueViewBase"/> has finished
-        /// delivering its line. When all views in <see
-        /// cref="ActiveDialogueViews"/> have called this method, the
-        /// line's status will change to <see
-        /// cref="LineStatus.FinishedPresenting"/>.
+        /// delivering its line.
         /// </summary>
         /// <param name="dialogueView">The view that finished delivering
         /// the line.</param>
@@ -1206,45 +1221,19 @@ namespace Yarn.Unity
             // Have all of the views completed? 
             if (ActiveDialogueViews.Count == 0)
             {
-                UpdateLineStatus(CurrentLine, LineStatus.FinishedPresenting);
-
-                // Should the line automatically become Ended as soon as
-                // it's Delivered?
-                if (automaticallyContinueLines)
-                {
-                    // Go ahead and notify the views. 
-                    UpdateLineStatus(CurrentLine, LineStatus.Dismissed);
-
-                    // Additionally, tell the views to dismiss the line
-                    // from presentation. When each is done, it will notify
-                    // this dialogue runner to call
-                    // DialogueViewCompletedDismissal; when all have
-                    // finished, this dialogue runner will tell the
-                    // Dialogue to Continue() when all lines are done
-                    // dismissing the line.
-                    DismissLineFromViews(dialogueViews);
-                }
+                DismissLineFromViews(dialogueViews);
             }
         }
 
-        /// <summary>
-        /// Updates a <see cref="LocalizedLine"/>'s status to <paramref
-        /// name="newStatus"/>, and notifies all dialogue views that the
-        /// line about the state change.
-        /// </summary>
-        /// <param name="line">The line whose state is changing.</param>
-        /// <param name="newStatus">The <see cref="LineStatus"/> that the
-        /// line now has.</param>
-        private void UpdateLineStatus(LocalizedLine line, LineStatus newStatus)
+        // this is similar to the above but for the interrupt
+        // main difference is a line continues automatically every interrupt finishes
+        private void DialogueViewCompletedInterrupt(DialogueViewBase dialogueView)
         {
-            // Update the state of the line and let the views know.
-            line.Status = newStatus;
+            ActiveDialogueViews.Remove(dialogueView);
 
-            foreach (var dialogueView in dialogueViews)
+            if (ActiveDialogueViews.Count == 0)
             {
-                if (dialogueView == null || dialogueView.enabled == false) continue;
-
-                dialogueView.OnLineStatusChanged(line);
+                DismissLineFromViews(dialogueViews);
             }
         }
 
@@ -1260,57 +1249,25 @@ namespace Yarn.Unity
         /// cref="DialogueRunner"/> that the user intents to proceed to the
         /// next line.
         /// </summary>
-        public void OnViewUserIntentNextLine()
+        public void OnViewRequestedInterrupt()
         {
-
             if (CurrentLine == null)
             {
-                // There's no active line, so there's nothing that can be
-                // done here.
-                Debug.LogWarning($"{nameof(OnViewUserIntentNextLine)} was called, but no line was running.");
+                Debug.LogWarning("Dialogue runner was asked to advance but there is no current line");
                 return;
             }
 
-            switch (CurrentLine.Status)
+            // asked to advance when there are no active views
+            // this means the views have already processed the lines as needed
+            // so we can ignore this action
+            if (ActiveDialogueViews.Count == 0)
             {
-                case LineStatus.Presenting:
-                    // The line has been Interrupted. Dialogue views should
-                    // proceed to finish the delivery of the line as
-                    // quickly as they can. (When all views have finished
-                    // their expedited delivery, they call their completion
-                    // handler as normal, and the line becomes Delivered.)
-                    UpdateLineStatus(CurrentLine, LineStatus.Interrupted);
-                    break;
-                case LineStatus.Interrupted:
-                    // The line was already interrupted, and the user has
-                    // requested the next line again. We interpret this as
-                    // the user being insistent. This means the line is now
-                    // Ended, and the dialogue views must dismiss the line
-                    // immediately.
-                    UpdateLineStatus(CurrentLine, LineStatus.Dismissed);
-                    break;
-                case LineStatus.FinishedPresenting:
-                    // The line had finished delivery (either normally or
-                    // because it was Interrupted), and the user has
-                    // indicated they want to proceed to the next line. The
-                    // line is therefore Ended.
-                    UpdateLineStatus(CurrentLine, LineStatus.Dismissed);
-                    break;
-                case LineStatus.Dismissed:
-                    // The line has already been ended, so there's nothing
-                    // further for the views to do. (This will only happen
-                    // during the interval of time between a line becoming
-                    // Ended and the next line appearing.)
-                    break;
+                Debug.Log("user requested advance, all views finished, ignoring interrupt");
+                return;
             }
 
-            if (CurrentLine.Status == LineStatus.Dismissed)
-            {
-                // This line is Ended, so we need to tell the dialogue
-                // views to dismiss it. 
-                DismissLineFromViews(dialogueViews);
-            }
-
+            // now because lines are fully responsible for advancement the only advancement allowed is interruption
+            InterruptLine();
         }
 
         private void DismissLineFromViews(IEnumerable<DialogueViewBase> dialogueViews)
@@ -1320,7 +1277,7 @@ namespace Yarn.Unity
             foreach (var dialogueView in dialogueViews)
             {
                 // Skip any dialogueView that is null or not enabled
-                if (dialogueView == null || dialogueView.enabled == false)
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false)
                 {
                     continue;
                 }
@@ -1338,7 +1295,10 @@ namespace Yarn.Unity
 
             foreach (var dialogueView in dialogueViews)
             {
-                if (dialogueView == null || dialogueView.enabled == false) continue;
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false) 
+                {
+                    continue;
+                }
 
                 dialogueView.DismissLine(() => DialogueViewCompletedDismissal(dialogueView));
             }

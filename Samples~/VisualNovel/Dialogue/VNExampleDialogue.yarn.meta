@@ -1,38 +1,23 @@
 fileFormatVersion: 2
 guid: 6b44f042c1cbdef40bdfd6ac1be41890
 ScriptedImporter:
-  fileIDToRecycleName:
-    4900000: Strings
-    4900002: Program
-    2186277476908879412: ImportLogs
+  internalIDToNameTable:
+  - first:
+      49: 4900000
+    second: Strings
+  - first:
+      49: 4900002
+    second: Program
+  - first:
+      41386430: 2186277476908879412
+    second: ImportLogs
   externalObjects: {}
+  serializedVersion: 2
   userData: 
   assetBundleName: 
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 94073015eacc34c1d8fc6786e43d60ca, type: 3}
-  baseLanguageID: en-US
-  stringIDs:
-  - line:VNExampleDialogue-Start-0
-  - line:VNExampleDialogue-Start-1
-  - line:VNExampleDialogue-Start-2
-  - line:VNExampleDialogue-Start-3
-  - line:VNExampleDialogue-Start-4
-  - line:VNExampleDialogue-Start-5
-  - line:VNExampleDialogue-Start-6
-  - line:VNExampleDialogue-Start-7
-  - line:VNExampleDialogue-Start-8
-  - line:VNExampleDialogue-Start-9
-  - line:VNExampleDialogue-Start-10
-  - line:VNExampleDialogue-Start-11
-  - line:VNExampleDialogue-Start-12
-  - line:VNExampleDialogue-Start-13
-  - line:VNExampleDialogue-Start-14
-  - line:VNExampleDialogue-Start-15
-  - line:VNExampleDialogue-Start-16
-  - line:VNExampleDialogue-Start-17
-  AnyImplicitStringIDs: 1
-  isSuccesfullyParsed: 1
-  parseErrorMessage: 
-  baseLanguage: {instanceID: 0}
-  localizations: []
-  localizationDatabase: {instanceID: 0}
+  LastImportHadImplicitStringIDs: 1
+  LastImportHadAnyStrings: 1
+  isSuccessfullyParsed: 1
+  parseErrorMessages: []

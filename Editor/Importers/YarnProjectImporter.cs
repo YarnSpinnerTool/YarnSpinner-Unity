@@ -133,6 +133,9 @@ namespace Yarn.Unity.Editor
         /// <seealso cref="searchAllAssembliesForActions"/>
         public AssemblyDefinitionAsset[] assembliesToSearch;
 
+        [NonReorderable]
+        public FunctionInfo[] ListOfFunctions;
+
         IList<string> IYarnErrorSource.CompileErrors => compileErrors;
 
         bool IYarnErrorSource.Destroyed => this == null;
@@ -142,8 +145,6 @@ namespace Yarn.Unity.Editor
 #if YARNSPINNER_DEBUG
             UnityEngine.Profiling.Profiler.enabled = true;
 #endif
-
-            YarnPreventPlayMode.AddYarnErrorSource(this);
 
             var project = ScriptableObject.CreateInstance<YarnProject>();
 
@@ -170,6 +171,12 @@ namespace Yarn.Unity.Editor
             // Parse declarations 
             var localDeclarationsCompileJob = CompilationJob.CreateFromFiles(ctx.assetPath);
             localDeclarationsCompileJob.CompilationType = CompilationJob.Type.DeclarationsOnly;
+
+            var library = new Library();
+            ActionManager.AddActionsFromAssemblies(AssemblySearchList());
+            ActionManager.RegisterFunctions(library);
+            localDeclarationsCompileJob.Library = library;
+            ListOfFunctions = predeterminedFunctions().ToArray();
 
             IEnumerable<Declaration> localDeclarations;
 
@@ -234,19 +241,23 @@ namespace Yarn.Unity.Editor
             var job = CompilationJob.CreateFromFiles(pathsToImporters.Keys);
             job.VariableDeclarations = localDeclarations;
 
+            job.Library = library;
+
             CompilationResult compilationResult;
 
             compilationResult = Compiler.Compiler.Compile(job);
 
             errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
         
-            if (errors.Count() > 0) {
+            if (errors.Count() > 0) 
+            {
                 var errorGroups = errors.GroupBy(e => e.FileName);
-                foreach (var errorGroup in errorGroups) {
-
+                foreach (var errorGroup in errorGroups)
+                {
                     var errorMessages = errorGroup.Select(e => e.ToString());
 
-                    foreach (var message in errorMessages) {
+                    foreach (var message in errorMessages)
+                    {
                         ctx.LogImportError($"Error compiling: {message}");
                     }
 
@@ -412,6 +423,9 @@ namespace Yarn.Unity.Editor
                 {
                     // If this is our default language, set it as such
                     project.baseLocalization = newLocalization;
+
+                    // Since this is the default language, also populate the line metadata.
+                    project.lineMetadata = new LineMetadata(LineMetadataTableEntriesFromCompilationResult(compilationResult));
                 }
                 else
                 {
@@ -426,21 +440,12 @@ namespace Yarn.Unity.Editor
             {
                 // We didn't add a localization for the default language.
                 // Create one for it now.
+                var stringTableEntries = StringTableEntriesFromCompilationResult(compilationResult);
 
                 var developmentLocalization = ScriptableObject.CreateInstance<Localization>();
-
+                developmentLocalization.name = $"Default ({defaultLanguage})";
                 developmentLocalization.LocaleCode = defaultLanguage;
 
-                var stringTableEntries = compilationResult.StringTable.Select(x => new StringTableEntry
-                {
-                    ID = x.Key,
-                    Language = defaultLanguage,
-                    Text = x.Value.text,
-                    File = x.Value.fileName,
-                    Node = x.Value.nodeName,
-                    LineNumber = x.Value.lineNumber.ToString(),
-                    Lock = YarnImporter.GetHashString(x.Value.text, 8),
-                });
 
                 // Add these new lines to the development localisation's asset
                 foreach (var entry in stringTableEntries) {
@@ -448,12 +453,11 @@ namespace Yarn.Unity.Editor
                 }
 
                 project.baseLocalization = developmentLocalization;
-
                 project.localizations.Add(project.baseLocalization);
-
-                developmentLocalization.name = $"Default ({defaultLanguage})";
-
                 ctx.AddObjectToAsset("default-language", developmentLocalization);
+
+                // Since this is the default language, also populate the line metadata.
+                project.lineMetadata = new LineMetadata(LineMetadataTableEntriesFromCompilationResult(compilationResult));
             }
 
             // Store the compiled program
@@ -471,10 +475,21 @@ namespace Yarn.Unity.Editor
 
             project.compiledYarnProgram = compiledBytes;
 
+            project.searchAssembliesForActions = AssemblySearchList();
+
+#if YARNSPINNER_DEBUG
+            UnityEngine.Profiling.Profiler.enabled = false;
+#endif
+
+        }
+
+        private List<string> AssemblySearchList()
+        {
             // Get the list of assembly names we want to search for actions in.
             IEnumerable<AssemblyDefinitionAsset> assembliesToSearch = this.assembliesToSearch;
 
-            if (searchAllAssembliesForActions) {
+            if (searchAllAssembliesForActions) 
+            {
                 // We're searching all assemblies for actions. Find all assembly
                 // definitions in the project, including in packages, and load
                 // them.
@@ -494,24 +509,36 @@ namespace Yarn.Unity.Editor
             // Go through each assembly definition asset, figure out its
             // assembly name, and add it to the project's list of assembly names
             // to search.
-            foreach (var reference in assembliesToSearch) {
-                if (reference == null) {
+            var validAssemblies = new List<string>();
+            foreach (var reference in assembliesToSearch) 
+            {
+                if (reference == null)
+                {
                     continue;
                 }
                 var data = new AssemblyDefinition();
                 EditorJsonUtility.FromJsonOverwrite(reference.text, data);
 
-                if (excludedPrefixes.Any(prefix => data.name.StartsWith(prefix))) {
+                if (excludedPrefixes.Any(prefix => data.name.StartsWith(prefix))) 
+                {
                     continue;
                 }
 
-                project.searchAssembliesForActions.Add(data.name);
+                validAssemblies.Add(data.name);
             }
+            return validAssemblies;
+        }
 
-#if YARNSPINNER_DEBUG
-            UnityEngine.Profiling.Profiler.enabled = false;
-#endif
+        private List<FunctionInfo> predeterminedFunctions()
+        {
+            var functions = ActionManager.FunctionsInfo();
 
+            List<FunctionInfo> f = new List<FunctionInfo>();
+            foreach(var func in functions)
+            {
+                f.Add(FunctionInfo.CreateFunctionInfoFromMethodGroup(func));
+            }
+            return f;
         }
 
         // A data class used for deserialising the JSON AssemblyDefinitionAssets
@@ -569,6 +596,23 @@ namespace Yarn.Unity.Editor
             return importer.LastImportHadImplicitStringIDs == false;
         }
 
+        private CompilationResult? CompileStringsOnly()
+        {
+            var pathsToImporters = sourceScripts.Where(s => s != null).Select(s => AssetDatabase.GetAssetPath(s));
+
+            if (pathsToImporters.Count() == 0)
+            {
+                // We have no scripts to work with.
+                return null;
+            }
+
+            // We now now compile!
+            var job = CompilationJob.CreateFromFiles(pathsToImporters);
+            job.CompilationType = CompilationJob.Type.StringsOnly;
+
+            return Compiler.Compiler.Compile(job);
+        }
+
         /// <summary>
         /// Generates a collection of <see cref="StringTableEntry"/>
         /// objects, one for each line in this Yarn Project's scripts.
@@ -579,25 +623,17 @@ namespace Yarn.Unity.Editor
         /// errors.</returns>
         internal IEnumerable<StringTableEntry> GenerateStringsTable()
         {
-            var pathsToImporters = sourceScripts.Where(s => s != null).Select(s => AssetDatabase.GetAssetPath(s));
+            CompilationResult? compilationResult = CompileStringsOnly();
 
-            if (pathsToImporters.Count() == 0)
+            if (!compilationResult.HasValue)
             {
-                // We have no scripts to work with - return an empty
-                // collection - there's no error, but there's no content
-                // either
+                // We only get no value if we have no scripts to work with.
+                // In this case, return an empty collection - there's no
+                // error, but there's no content either.
                 return new List<StringTableEntry>();
             }
 
-            // We now now compile!
-            var job = CompilationJob.CreateFromFiles(pathsToImporters);
-            job.CompilationType = CompilationJob.Type.StringsOnly;
-
-            CompilationResult compilationResult;
-
-            compilationResult = Compiler.Compiler.Compile(job);
-
-            var errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
+            var errors = compilationResult.Value.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
 
             if (errors.Count() > 0)
             {
@@ -605,7 +641,35 @@ namespace Yarn.Unity.Editor
                 return null;
             }
 
-            IEnumerable<StringTableEntry> stringTableEntries = compilationResult.StringTable.Select(x => new StringTableEntry
+            return StringTableEntriesFromCompilationResult(compilationResult.Value);
+        }
+
+        internal IEnumerable<LineMetadataTableEntry> GenerateLineMetadataEntries()
+        {
+            CompilationResult? compilationResult = CompileStringsOnly();
+
+            if (!compilationResult.HasValue)
+            {
+                // We only get no value if we have no scripts to work with.
+                // In this case, return an empty collection - there's no
+                // error, but there's no content either.
+                return new List<LineMetadataTableEntry>();
+            }
+
+            var errors = compilationResult.Value.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
+
+            if (errors.Count() > 0)
+            {
+                Debug.LogError($"Can't generate line metadata entries from a Yarn Project that contains compile errors", null);
+                return null;
+            }
+
+            return LineMetadataTableEntriesFromCompilationResult(compilationResult.Value);
+        }
+
+        private IEnumerable<StringTableEntry> StringTableEntriesFromCompilationResult(CompilationResult result)
+        {
+            return result.StringTable.Select(x => new StringTableEntry
             {
                 ID = x.Key,
                 Language = defaultLanguage,
@@ -614,9 +678,56 @@ namespace Yarn.Unity.Editor
                 Node = x.Value.nodeName,
                 LineNumber = x.Value.lineNumber.ToString(),
                 Lock = YarnImporter.GetHashString(x.Value.text, 8),
+                Comment = GenerateCommentWithLineMetadata(x.Value.metadata),
             });
+        }
 
-            return stringTableEntries;
+        private IEnumerable<LineMetadataTableEntry> LineMetadataTableEntriesFromCompilationResult(CompilationResult result)
+        {
+            return result.StringTable.Select(x => new LineMetadataTableEntry
+            {
+                ID = x.Key,
+                File = x.Value.fileName,
+                Node = x.Value.nodeName,
+                LineNumber = x.Value.lineNumber.ToString(),
+                Metadata = RemoveLineIDFromMetadata(x.Value.metadata).ToArray(),
+            }).Where(x => x.Metadata.Length > 0);
+        }
+
+        /// <summary>
+        /// Generates a string with the line metadata. This string is intended
+        /// to be used in the "comment" column of a strings table CSV. Because
+        /// of this, it will ignore the line ID if it exists (which is also
+        /// part of the line metadata).
+        /// </summary>
+        /// <param name="metadata">The metadata from a given line.</param>
+        /// <returns>A string prefixed with "Line metadata: ", followed by each
+        /// piece of metadata separated by whitespace. If no metadata exists or
+        /// only the line ID is part of the metadata, returns an empty string
+        /// instead.</returns>
+        private string GenerateCommentWithLineMetadata(string[] metadata)
+        {
+            var cleanedMetadata = RemoveLineIDFromMetadata(metadata);
+
+            if (cleanedMetadata.Count() == 0)
+            {
+                return string.Empty;
+            }
+
+            return $"Line metadata: {string.Join(" ", cleanedMetadata)}";
+        }
+
+        /// <summary>
+        /// Removes any line ID entry from an array of line metadata.
+        /// Line metadata will always contain a line ID entry if it's set. For
+        /// example, if a line contains "#line:1eaf1e55", its line metadata
+        /// will always have an entry with "line:1eaf1e55".
+        /// </summary>
+        /// <param name="metadata">The array with line metadata.</param>
+        /// <returns>An IEnumerable with any line ID entries removed.</returns>
+        private IEnumerable<string> RemoveLineIDFromMetadata(string[] metadata)
+        {
+            return metadata.Where(x => !x.StartsWith("line:"));
         }
     }
 
@@ -847,7 +958,6 @@ namespace Yarn.Unity.Editor
     [CustomPropertyDrawer(typeof(YarnProjectImporter.SerializedDeclaration))]
     public class DeclarationPropertyDrawer : PropertyDrawer
     {
-
         /// <summary>
         /// Draws either a property field or a label field for <paramref
         /// name="property"/> at <paramref name="position"/>, depending on
@@ -1093,6 +1203,107 @@ namespace Yarn.Unity.Editor
                 // called.
                 return 0;
             }
+        }
+    }
+
+    [CustomPropertyDrawer(typeof(FunctionInfo))]
+    public class DerivedFunctionsPropertyDrawer : PropertyDrawer
+    {
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            EditorGUI.BeginProperty(position, label, property);
+
+            const float leftInset = 8;
+
+            Rect RectForFieldIndex(int index, int lineCount = 1)
+            {
+                float verticalOffset = EditorGUIUtility.singleLineHeight * index + EditorGUIUtility.standardVerticalSpacing * index;
+                float height = EditorGUIUtility.singleLineHeight * lineCount + EditorGUIUtility.standardVerticalSpacing * (lineCount - 1);
+
+                return new Rect(
+                    position.x + leftInset,
+                    position.y + verticalOffset,
+                    position.width - leftInset,
+                    height
+                );
+            }
+
+            var foldoutPosition = RectForFieldIndex(0);
+
+            SerializedProperty nameProperty = property.FindPropertyRelative("Name");
+            string name = nameProperty?.stringValue ?? "FUNCTION NAME";
+
+            property.isExpanded = EditorGUI.Foldout(foldoutPosition, property.isExpanded, name);
+
+            if (property.isExpanded)
+            {
+                EditorGUI.indentLevel += 1;
+                var typePosition = RectForFieldIndex(1);
+                var paramPosition = RectForFieldIndex(2);
+
+                SerializedProperty typeProperty = property.FindPropertyRelative("ReturnType");
+                EditorGUI.LabelField(typePosition, typeProperty?.stringValue ?? "RETURN");
+
+                SerializedProperty paramProperty = property.FindPropertyRelative("Parameters");
+                int count = paramProperty?.arraySize ?? 0;
+                if (count > 0)
+                {
+                    string[] p = new string[count];
+                    for (int i = 0; i < count; i++)
+                    {
+                        p[i] = paramProperty.GetArrayElementAtIndex(i).stringValue;
+                    }
+                    EditorGUI.LabelField(paramPosition, $"({string.Join(", ", p)})");
+                }
+                else
+                {
+                    EditorGUI.LabelField(paramPosition, $"No Parameters");
+                }
+                EditorGUI.indentLevel -= 1;
+            }
+
+            EditorGUI.EndProperty();
+        }
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+
+            int lines = 1;
+
+            if (property.isExpanded)
+            {
+                lines = 3;
+            }
+
+            return EditorGUIUtility.singleLineHeight * lines + EditorGUIUtility.standardVerticalSpacing * lines + 1;
+        }
+    }
+
+    [System.Serializable]
+    public class FunctionInfo
+    {
+        public string Name;
+        public string ReturnType;
+        public string[] Parameters;
+
+        public static FunctionInfo CreateFunctionInfoFromMethodGroup(System.Reflection.MethodInfo method)
+        {
+            var returnType = $"-> {method.ReturnType.Name}";
+
+            var parameters = method.GetParameters();
+            var p = new string[parameters.Count()];
+            for (int i = 0; i < parameters.Count(); i++)
+            {
+                var q = parameters[i].ParameterType;
+                p[i] = parameters[i].Name;
+            }
+
+            return new FunctionInfo
+            {
+                Name = method.Name,
+                ReturnType = returnType,
+                Parameters = p,
+            };
         }
     }
 }

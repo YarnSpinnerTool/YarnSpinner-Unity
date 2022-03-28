@@ -87,6 +87,7 @@ namespace Yarn.Unity
                 TextID = line.ID,
                 RawText = text,
                 Substitutions = line.Substitutions,
+                Metadata = YarnProject.lineMetadata.GetMetadata(line.ID),
                 AudioClip = audioClip,
             };
         }

@@ -1,4 +1,4 @@
-﻿/*
+/*
 
 The MIT License (MIT)
 
@@ -36,7 +36,6 @@ namespace Yarn.Unity.Example
 {
     public class PlayerCharacter : MonoBehaviour
     {
-
         public float minPosition = -5.3f;
         public float maxPosition = 5.3f;
 
@@ -46,7 +45,19 @@ namespace Yarn.Unity.Example
 
         public float movementFromButtons { get; set; }
 
+        // because we are using the same button press for both starting and skipping dialogue they collide
+        // so we are going to make it so that the input gets turned off
+        private DialogueAdvanceInput dialogueInput;
+
+        void Start()
+        {
+            dialogueInput = FindObjectOfType<DialogueAdvanceInput>();
+            dialogueInput.enabled = false;
+        }
+
+        /// <summary>
         /// Draw the range at which we'll start talking to people.
+        /// </summary>
         void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.blue;
@@ -60,14 +71,21 @@ namespace Yarn.Unity.Example
             Gizmos.DrawWireSphere(Vector3.zero, interactionRadius);
         }
 
+        /// <summary>
         /// Update is called once per frame
+        /// </summary>
         void Update()
         {
-
             // Remove all player control when we're in dialogue
             if (FindObjectOfType<DialogueRunner>().IsDialogueRunning == true)
             {
                 return;
+            }
+
+            // every time we LEAVE dialogue we have to make sure we disable the input again
+            if (dialogueInput.enabled)
+            {
+                dialogueInput.enabled = false;
             }
 
             // Move the player, clamping them to within the boundaries of
@@ -95,7 +113,7 @@ namespace Yarn.Unity.Example
                 CheckForNearbyNPC ();
             }
 #elif ENABLE_LEGACY_INPUT_MANAGER
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyUp(KeyCode.Space))
             {
                 CheckForNearbyNPC();
             }
@@ -106,10 +124,13 @@ namespace Yarn.Unity.Example
 #endif
         }
 
+        /// <summary>
         /// Find all DialogueParticipants
-        /** Filter them to those that have a Yarn start node and are in
-         * range; then start a conversation with the first one
-         */
+        /// </summary>
+        /// <remarks>
+        /// Filter them to those that have a Yarn start node and are in
+        /// range; then start a conversation with the first one
+        /// </remarks>
         public void CheckForNearbyNPC()
         {
             var allParticipants = new List<NPC>(FindObjectsOfType<NPC>());
@@ -123,6 +144,8 @@ namespace Yarn.Unity.Example
             {
                 // Kick off the dialogue at this node.
                 FindObjectOfType<DialogueRunner>().StartDialogue(target.talkToNode);
+                // reenabling the input on the dialogue
+                dialogueInput.enabled = true;
             }
         }
     }
