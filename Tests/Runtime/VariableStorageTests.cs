@@ -94,7 +94,7 @@ namespace Yarn.Unity.Tests
         }
 
         [UnityTest]
-        public IEnumerator DumpAndLoadVariables()
+        public IEnumerator TestLoadingAndSettingAllVariables()
         {
             // ok I need to test that the bulk load and save works
             Runner.StartDialogue(Runner.startNode);
@@ -103,23 +103,20 @@ namespace Yarn.Unity.Tests
             TestClearVarStorage();
             VarStorage.SetAllVariables(dump.Item1, dump.Item2, dump.Item3);
             TestVariableValuesFromYarnScript();
-
-            // cleanup
-            PlayerPrefs.DeleteKey( testPlayerPrefsKey );
         }
 
         string testFilePath { get { return Application.persistentDataPath + Path.DirectorySeparatorChar + "YarnVariableStorageTest.json" ;} }
         [UnityTest]
-        public IEnumerator SaveLoadFile()
+        public IEnumerator TestSavingAndLoadingFile()
         {
             // run all lines
             Runner.StartDialogue(Runner.startNode);
             yield return null;
 
             // save all variable values to a file, clear, then load from a file
-            VarStorage.SaveToFile( testFilePath );
+            Runner.SaveState();
             TestClearVarStorage();
-            VarStorage.LoadFromFile( testFilePath );
+            Runner.LoadState();
             TestVariableValuesFromYarnScript();
 
             // cleanup
