@@ -459,6 +459,9 @@ namespace Yarn.Unity.Editor
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 #endif
 
+            var library = new Library();
+            ActionManager.RegisterFunctions(library);
+
             // Compile all of these, and get whatever existing string tags
             // they had. Do each in isolation so that we can continue even
             // if a file contains a parse error.
@@ -468,6 +471,7 @@ namespace Yarn.Unity.Editor
                 // string entries
                 var compilationJob = Yarn.Compiler.CompilationJob.CreateFromFiles(path);
                 compilationJob.CompilationType = Yarn.Compiler.CompilationJob.Type.StringsOnly;
+                compilationJob.Library = library;
 
                 var result = Yarn.Compiler.Compiler.Compile(compilationJob);
 
@@ -590,6 +594,7 @@ namespace Yarn.Unity.Editor
             ActionManager.RegisterFunctions(library);
 
             var explicitDeclarationsCompilerJob = Compiler.CompilationJob.CreateFromFiles(AssetDatabase.GetAssetPath(yarnProjectImporter));
+            explicitDeclarationsCompilerJob.Library = library;
 
             Compiler.CompilationResult explicitResult;
 
@@ -599,7 +604,6 @@ namespace Yarn.Unity.Editor
                 Debug.LogError($"Compile error: {e}");
                 return;
             }
-
 
             var implicitDeclarationsCompilerJob = Compiler.CompilationJob.CreateFromFiles(allFilePaths, library);
             implicitDeclarationsCompilerJob.CompilationType = Compiler.CompilationJob.Type.DeclarationsOnly;
@@ -622,7 +626,5 @@ namespace Yarn.Unity.Editor
             AssetDatabase.ImportAsset(yarnProjectImporter.assetPath);
 
         }
-
-
     }
 }

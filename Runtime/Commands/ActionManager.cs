@@ -312,7 +312,6 @@ namespace Yarn.Unity
                         try
                         {
                             commands.Add(name, CreateCommandRunner(method, command, ref injectorCache));
-                            Debug.Log($"Registered command {name}");
                         }
                         catch (ArgumentException)
                         {
@@ -463,7 +462,8 @@ namespace Yarn.Unity
         {
             foreach (var kv in functions)
             {
-                if (library.FunctionExists(kv.Key) == false) {
+                if (library.FunctionExists(kv.Key) == false)
+                {
                     library.RegisterFunction(kv.Key, kv.Value);
                 }
             }
@@ -495,6 +495,16 @@ namespace Yarn.Unity
             commands.Clear();
             functions.Clear();
             searchedAssemblyNames.Clear();
+        }
+
+        public static List<MethodInfo> FunctionsInfo()
+        {
+            var funcs = new List<MethodInfo>();
+            foreach (var func in functions.Values)
+            {
+                funcs.Add(func.Method);
+            }
+            return funcs;
         }
     }
 }
