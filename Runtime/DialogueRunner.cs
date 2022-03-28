@@ -1536,7 +1536,16 @@ namespace Yarn.Unity
             return JsonUtility.ToJson(data, true);
         }
 
-        [System.Serializable] private struct SaveData { public string[] floatKeys; public float[] floatValues; public string[] stringKeys; public string[] stringValues; public string[] boolKeys; public bool[] boolValues; }
+        [System.Serializable]
+        private struct SaveData
+        {
+            public string[] floatKeys;
+            public float[] floatValues;
+            public string[] stringKeys;
+            public string[] stringValues;
+            public string[] boolKeys;
+            public bool[] boolValues;
+        }
 
         void Update()
         {
