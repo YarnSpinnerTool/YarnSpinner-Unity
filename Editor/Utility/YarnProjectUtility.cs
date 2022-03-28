@@ -587,6 +587,38 @@ namespace Yarn.Unity.Editor
             return true;
         }
 
+        /// <summary>
+        /// Writes a .csv file to disk at the path indicated by <paramref
+        /// name="destination"/>, containing all of the lines found in the
+        /// scripts referred to by <paramref name="yarnProjectImporter"/>
+        /// that contain any metadata associated with them.
+        /// </summary>
+        /// <param name="yarnProjectImporter">The YarnProjectImporter to
+        /// extract strings from.</param>
+        /// <param name="destination">The path to write the file
+        /// to.</param>
+        /// <returns><see langword="true"/> if the file was written
+        /// successfully, <see langword="false"/> otherwise.</returns>
+        /// <exception cref="CsvHelper.CsvHelperException">Thrown when an
+        /// error is encountered when generating the CSV data.</exception>
+        /// <exception cref="IOException">Thrown when an error is
+        /// encountered when writing the data to disk.</exception>
+        internal static bool WriteMetadataFile(string destination, YarnProjectImporter yarnProjectImporter)
+        {
+            var lineMetadataEntries = yarnProjectImporter.GenerateLineMetadataEntries();
+
+            // If there was an error, bail out here.
+            if (lineMetadataEntries == null)
+            {
+                return false;
+            }
+
+            var outputCSV = LineMetadataTableEntry.CreateCSV(lineMetadataEntries);
+            File.WriteAllText(destination, outputCSV);
+
+            return true;
+        }
+
         internal static void ConvertImplicitVariableDeclarationsToExplicit(YarnProjectImporter yarnProjectImporter) {
             var allFilePaths = yarnProjectImporter.sourceScripts.Select(textAsset => AssetDatabase.GetAssetPath(textAsset));
 

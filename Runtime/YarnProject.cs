@@ -21,6 +21,10 @@ namespace Yarn.Unity
         [HideInInspector]
         public List<Localization> localizations = new List<Localization>();
 
+        [SerializeField]
+        [HideInInspector]
+        public LineMetadata lineMetadata;
+
         /// <summary>
         /// The names of assemblies that <see cref="ActionManager"/> should look
         /// for commands and functions in when this project is loaded into a

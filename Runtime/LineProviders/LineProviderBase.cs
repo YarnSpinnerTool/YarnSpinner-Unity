@@ -130,6 +130,11 @@ namespace Yarn.Unity
         public string RawText;
 
         /// <summary>
+        /// Any metadata associated with this line.
+        /// </summary>
+        public string[] Metadata;
+
+        /// <summary>
         /// The name of the character, if present.
         /// </summary>
         /// <remarks>

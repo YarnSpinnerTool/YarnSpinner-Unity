@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Metadata for each line is exposed through a Yarn Project. Metadata generally comes as hashtags similar to `#line`. They can be used to define line-specific behavior (no particular behavior is supported by default, each user will need to define their own).
+- When exporting Strings files, a Yarn Project will also export another CSV file with the line metadata (for each line with metadata).
+- `LocalizedLine`s now contain a field for any metadata associated with the line.
 - `YarnFunction` tagged methods now appear in the inspector window for the project, letting you view their basic info.
 
 ### Changed
