@@ -1546,14 +1546,5 @@ namespace Yarn.Unity
             public string[] boolKeys;
             public bool[] boolValues;
         }
-
-        void Update()
-        {
-            if (Input.GetKeyUp(KeyCode.R))
-            {
-                SaveState();
-                LoadState();
-            }
-        }
     }
 }
