@@ -406,6 +406,7 @@ namespace Yarn.Unity
         private void Start()
         {
             canvasGroup.alpha = 0;
+            canvasGroup.blocksRaycasts = false;
         }
 
         private void Reset()

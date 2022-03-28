@@ -817,6 +817,8 @@ namespace Yarn.Unity
                 // Localize the line associated with the option
                 var localisedLine = lineProvider.GetLocalizedLine(options.Options[i].Line);
                 var text = Dialogue.ExpandSubstitutions(localisedLine.RawText, options.Options[i].Line.Substitutions);
+                
+                Dialogue.LanguageCode = lineProvider.textLanguageCode;
                 localisedLine.Text = Dialogue.ParseMarkup(text);
 
                 optionSet[i] = new DialogueOption
@@ -924,6 +926,7 @@ namespace Yarn.Unity
             }
 
             // Render the markup
+            Dialogue.LanguageCode = lineProvider.textLanguageCode;
             CurrentLine.Text = Dialogue.ParseMarkup(text);
 
             // Clear the set of active dialogue views, just in case
