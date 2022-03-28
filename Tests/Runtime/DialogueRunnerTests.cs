@@ -42,6 +42,102 @@ namespace Yarn.Unity.Tests
         }
 
         [UnityTest]
+        public IEnumerator SaveAndLoad_EndToEnd()
+        {
+            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            var storage = runner.VariableStorage;
+
+            var testKey = "TemporaryTestingKey";
+            runner.StartDialogue("LotsOfVars");
+            yield return null;
+
+            var originals = storage.GetAllVariables();
+
+            runner.SaveStateToPlayerPrefs(testKey);
+            yield return null;
+
+            bool success = runner.LoadStateFromPlayerPrefs(testKey);
+            PlayerPrefs.DeleteKey(testKey);
+            Assert.IsTrue(success);
+
+            SaveAndLoad_StorageIntegrity(storage, originals.Item1, originals.Item2, originals.Item3);
+        }
+        [UnityTest]
+        public IEnumerator SaveAndLoad_BadLoad()
+        {
+            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            var storage = runner.VariableStorage;
+
+            runner.StartDialogue("LotsOfVars");
+            yield return null;
+
+            var originals = storage.GetAllVariables();
+
+            bool success = runner.LoadStateFromPlayerPrefs("invalid key");
+
+            // because the load should have failed this should still be fine
+            SaveAndLoad_StorageIntegrity(storage, originals.Item1, originals.Item2, originals.Item3);
+
+            Assert.IsFalse(success);
+        }
+        [UnityTest]
+        public IEnumerator SaveAndLoad_BadSave()
+        {
+            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            var storage = runner.VariableStorage;
+
+            runner.StartDialogue("LotsOfVars");
+            yield return null;
+
+            var testKey = "TemporaryTestingKey";
+            PlayerPrefs.SetString(testKey,"{}");
+            
+            var originals = storage.GetAllVariables();
+
+            bool success = runner.LoadStateFromPlayerPrefs(testKey);
+
+            // because the load should have failed this should still be fine
+            SaveAndLoad_StorageIntegrity(storage, originals.Item1, originals.Item2, originals.Item3);
+
+            Assert.IsFalse(success);
+        }
+        private void SaveAndLoad_StorageIntegrity(VariableStorageBehaviour storage, Dictionary<string, float> testFloats, Dictionary<string, string> testStrings, Dictionary<string, bool> testBools)
+        {
+            var current = storage.GetAllVariables();
+
+            SaveAndLoad_VerifyFloats(current.Item1, testFloats);
+            SaveAndLoad_VerifyStrings(current.Item2, testStrings);
+            SaveAndLoad_VerifyBools(current.Item3, testBools);
+        }
+        private void SaveAndLoad_VerifyFloats(Dictionary<string, float> current, Dictionary<string, float> original)
+        {
+            foreach (var pair in current)
+            {
+                float originalFloat;
+                Assert.IsTrue(original.TryGetValue(pair.Key, out originalFloat),"new key is not inside the original set of variables");
+                Assert.AreEqual(originalFloat, pair.Value, "values under the same key are different");
+            }
+        }
+        private void SaveAndLoad_VerifyStrings(Dictionary<string, string> current, Dictionary<string, string> original)
+        {
+            foreach (var pair in current)
+            {
+                string originalString;
+                Assert.IsTrue(original.TryGetValue(pair.Key, out originalString),"new key is not inside the original set of variables");
+                Assert.AreEqual(originalString, pair.Value, "values under the same key are different");
+            }
+        }
+        private void SaveAndLoad_VerifyBools(Dictionary<string, bool> current, Dictionary<string, bool> original)
+        {
+            foreach (var pair in current)
+            {
+                bool originalBool;
+                Assert.IsTrue(original.TryGetValue(pair.Key, out originalBool),"new key is not inside the original set of variables");
+                Assert.AreEqual(originalBool, pair.Value, "values under the same key are different");
+            }
+        }
+
+        [UnityTest]
         public IEnumerator HandleLine_OnValidYarnFile_SendCorrectLinesToUI()
         {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();

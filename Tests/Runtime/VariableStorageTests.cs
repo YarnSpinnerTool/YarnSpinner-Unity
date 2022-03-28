@@ -93,36 +93,30 @@ namespace Yarn.Unity.Tests
             Assert.AreEqual(1.420f, actualFloatResult);
         }
 
-        const string testPlayerPrefsKey = "TemporaryPlayerPrefsYarnTestKey";
         [UnityTest]
-        public IEnumerator SaveLoadPlayerPrefs()
+        public IEnumerator TestLoadingAndSettingAllVariables()
         {
-            // run all lines
+            // ok I need to test that the bulk load and save works
             Runner.StartDialogue(Runner.startNode);
             yield return null;
-
-            // save all variable values to Player Prefs, clear, then load from Player Prefs
-            VarStorage.SaveToPlayerPrefs( testPlayerPrefsKey );
+            var dump = VarStorage.GetAllVariables();
             TestClearVarStorage();
-            VarStorage.LoadFromPlayerPrefs( testPlayerPrefsKey );
+            VarStorage.SetAllVariables(dump.Item1, dump.Item2, dump.Item3);
             TestVariableValuesFromYarnScript();
-
-            // cleanup
-            PlayerPrefs.DeleteKey( testPlayerPrefsKey );
         }
 
         string testFilePath { get { return Application.persistentDataPath + Path.DirectorySeparatorChar + "YarnVariableStorageTest.json" ;} }
         [UnityTest]
-        public IEnumerator SaveLoadFile()
+        public IEnumerator TestSavingAndLoadingFile()
         {
             // run all lines
             Runner.StartDialogue(Runner.startNode);
             yield return null;
 
             // save all variable values to a file, clear, then load from a file
-            VarStorage.SaveToFile( testFilePath );
+            Runner.SaveStateToPlayerPrefs();
             TestClearVarStorage();
-            VarStorage.LoadFromFile( testFilePath );
+            Runner.LoadStateFromPlayerPrefs();
             TestVariableValuesFromYarnScript();
 
             // cleanup

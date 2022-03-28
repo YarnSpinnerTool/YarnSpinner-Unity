@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- A simple, built-in system for saving and loading Yarn variables to the built-in PlayerPrefs object has been added.
+  - Call `DialogueRunner.SaveStateToPlayerPrefs` to save all variables to the `PlayerPrefs` system, and `DialogueRunner.LoadStateFromPlayerPrefs` to load from `PlayerPrefs` into the variable storage.
+  - These methods do not write to file (except via `PlayerPrefs`, which handles disk writing on its own), and only work with variables (and not information like which line is currently being run.)
 - Metadata for each line is exposed through a Yarn Project. Metadata generally comes as hashtags similar to `#line`. They can be used to define line-specific behavior (no particular behavior is supported by default, each user will need to define their own).
 - When exporting Strings files, a Yarn Project will also export another CSV file with the line metadata (for each line with metadata).
 - `LocalizedLine`s now contain a field for any metadata associated with the line.

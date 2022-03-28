@@ -38,3 +38,12 @@ title: BuiltinsTest
 Jane: round(3.522) = {round(3.522)}; round_places(3.522, 2) = {round_places(3.522, 2)}; floor(3.522) = {floor(3.522)}; floor(-3.522) = {floor(-3.522)}; ceil(3.522) = {ceil(3.522)}; ceil(-3.522) = {ceil(-3.522)}; inc(3.522) = {inc(3.522)}; inc(4) = {inc(4)}; dec(3.522) = {dec(3.522)}; dec(3) = {dec(3)}; decimal(3.522) = {decimal(3.522)}; int(3.522) = {int(3.522)}; int(-3.522) = {int(-3.522)};
 // actual function unit testing should go in the YarnSpinner core
 ===
+title: LotsOfVars
+---
+<<declare $float = 1>>
+<<set $float = 2>>
+<<declare $string = "this is a string">>
+<<set $string = "this is a different string now">>
+<<declare $bool = true>>
+<<set $true = false>>
+===

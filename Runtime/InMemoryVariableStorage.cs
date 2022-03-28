@@ -236,141 +236,6 @@ namespace Yarn.Unity
             return variables.ContainsKey(variableName);
         }
 
-
-        #region Save/Load
-
-        [System.Serializable] class StringDictionary : SerializedDictionary<string, string> { } // serializable dictionary workaround
-
-        static string[] SEPARATOR = new string[] { "/" }; // used for serialization
-
-        /// <summary>
-        /// Export variable storage to a JSON string, like when writing
-        /// save game data.
-        /// </summary>
-        public string SerializeAllVariablesToJSON(bool prettyPrint = false)
-        {
-            // "objects" aren't serializable by JsonUtility... 
-            var serializableVariables = new StringDictionary();
-            foreach (var variable in variables)
-            {
-                var jsonType = variableTypes[variable.Key];
-                var jsonKey = $"{jsonType}{SEPARATOR[0]}{variable.Key}"; // ... so we have to encode the System.Object type into the JSON key
-                var jsonValue = System.Convert.ChangeType(variable.Value, jsonType);
-                serializableVariables.Add(jsonKey, jsonValue.ToString());
-            }
-            var saveData = JsonUtility.ToJson(serializableVariables, prettyPrint);
-            // Debug.Log(saveData);
-            return saveData;
-        }
-
-        /// <summary>
-        /// Import a JSON string into variable storage, like when loading
-        /// save game data.
-        /// </summary>
-        public void DeserializeAllVariablesFromJSON(string jsonData)
-        {
-            // Debug.Log(jsonData);
-            var serializedVariables = JsonUtility.FromJson<StringDictionary>(jsonData);
-            foreach (var variable in serializedVariables)
-            {
-                var serializedKey = variable.Key.Split(SEPARATOR, 2, System.StringSplitOptions.None);
-                var jsonType = System.Type.GetType(serializedKey[0]);
-                var jsonKey = serializedKey[1];
-                var jsonValue = variable.Value;
-                SetVariable(jsonKey, TypeMappings[jsonType], jsonValue);
-            }
-        }
-
-        const string DEFAULT_PLAYER_PREFS_KEY = "DefaultYarnVariableStorage";
-
-        /// <summary>
-        /// Serialize all variables to JSON, then save data to Unity's
-        /// built-in PlayerPrefs with default playerPrefsKey.
-        /// </summary>
-        public void SaveToPlayerPrefs()
-        {
-            SaveToPlayerPrefs(DEFAULT_PLAYER_PREFS_KEY);
-        }
-
-        /// <summary>
-        /// Serialize all variables to JSON, then save data to Unity's
-        /// built-in PlayerPrefs under playerPrefsKey parameter.
-        /// </summary>
-        public void SaveToPlayerPrefs(string playerPrefsKey)
-        {
-            var saveData = SerializeAllVariablesToJSON();
-            PlayerPrefs.SetString(playerPrefsKey, saveData);
-            PlayerPrefs.Save();
-            Debug.Log($"Variables saved to PlayerPrefs with key {playerPrefsKey}");
-        }
-
-
-        /// <summary>
-        /// Serialize all variables to JSON, then write the data to a file.
-        /// </summary>
-        public void SaveToFile(string filepath)
-        {
-            var saveData = SerializeAllVariablesToJSON();
-            System.IO.File.WriteAllText(filepath, saveData, System.Text.Encoding.UTF8);
-            Debug.Log($"Variables saved to file {filepath}");
-        }
-
-        /// <summary>
-        /// Load JSON data from Unity's built-in PlayerPrefs with default
-        /// playerPrefsKey, and deserialize as variables.
-        /// </summary>
-        public void LoadFromPlayerPrefs()
-        {
-            LoadFromPlayerPrefs(DEFAULT_PLAYER_PREFS_KEY);
-        }
-
-        /// <summary>
-        /// Load JSON data from Unity's built-in PlayerPrefs with defined
-        /// playerPrefsKey parameter, and deserialize as variables.
-        /// </summary>
-        public void LoadFromPlayerPrefs(string playerPrefsKey)
-        {
-            if (PlayerPrefs.HasKey(playerPrefsKey))
-            {
-                var saveData = PlayerPrefs.GetString(playerPrefsKey);
-                DeserializeAllVariablesFromJSON(saveData);
-                Debug.Log($"Variables loaded from PlayerPrefs under key {playerPrefsKey}");
-            }
-            else
-            {
-                Debug.LogWarning($"No PlayerPrefs key {playerPrefsKey} found, so no variables loaded.");
-            }
-        }
-
-        /// <summary>
-        /// Load JSON data from a file, then deserialize as variables.
-        /// </summary>
-        public void LoadFromFile(string filepath)
-        {
-            var saveData = System.IO.File.ReadAllText(filepath, System.Text.Encoding.UTF8);
-            DeserializeAllVariablesFromJSON(saveData);
-            Debug.Log($"Variables loaded from file {filepath}");
-        }
-
-        public static readonly Dictionary<System.Type, Yarn.IType> TypeMappings = new Dictionary<System.Type, Yarn.IType>
-            {
-                { typeof(string), Yarn.BuiltinTypes.String },
-                { typeof(bool), Yarn.BuiltinTypes.Boolean },
-                { typeof(int), Yarn.BuiltinTypes.Number },
-                { typeof(float), Yarn.BuiltinTypes.Number },
-                { typeof(double), Yarn.BuiltinTypes.Number },
-                { typeof(sbyte), Yarn.BuiltinTypes.Number },
-                { typeof(byte), Yarn.BuiltinTypes.Number },
-                { typeof(short), Yarn.BuiltinTypes.Number },
-                { typeof(ushort), Yarn.BuiltinTypes.Number },
-                { typeof(uint), Yarn.BuiltinTypes.Number },
-                { typeof(long), Yarn.BuiltinTypes.Number },
-                { typeof(ulong), Yarn.BuiltinTypes.Number },
-                { typeof(decimal), Yarn.BuiltinTypes.Number },
-            };
-
-        #endregion
-
         /// <summary>
         /// Returns an <see cref="IEnumerator{T}"/> that iterates over all
         /// variables in this object.
@@ -390,5 +255,65 @@ namespace Yarn.Unity
         {
             return ((IEnumerable<KeyValuePair<string, object>>)variables).GetEnumerator();
         }
+
+        #region Save/Load
+        public override (Dictionary<string,float>,Dictionary<string,string>,Dictionary<string,bool>) GetAllVariables()
+        {
+            Dictionary<string, float> floatDict = new Dictionary<string, float>();
+            Dictionary<string, string> stringDict = new Dictionary<string, string>();
+            Dictionary<string, bool> boolDict = new Dictionary<string, bool>();
+            
+            foreach (var variable in variables)
+            {
+                var type = variableTypes[variable.Key];
+
+                if (type == typeof(float))
+                {
+                    float value = System.Convert.ToSingle(variable.Value);
+                    floatDict.Add(variable.Key, value);
+                }
+                else if (type == typeof(string))
+                {
+                    string value = System.Convert.ToString(variable.Value);
+                    stringDict.Add(variable.Key, value);
+                }
+                else if (type == typeof(bool))
+                {
+                    bool value = System.Convert.ToBoolean(variable.Value);
+                    boolDict.Add(variable.Key, value);
+                }
+                else
+                {
+                    Debug.Log($"{variable.Key} is not a valid type");
+                }
+            }
+
+            return (floatDict, stringDict, boolDict);
+        }
+
+        public override void SetAllVariables(Dictionary<string, float> floats, Dictionary<string, string> strings, Dictionary<string, bool> bools, bool clear = true)
+        {
+            if (clear)
+            {
+                variables.Clear();
+                variableTypes.Clear();
+            }
+
+            foreach (var value in floats)
+            {
+                SetValue(value.Key, value.Value);
+            }
+            foreach (var value in strings)
+            {
+                SetValue(value.Key, value.Value);
+            }
+            foreach (var value in bools)
+            {
+                SetValue(value.Key, value.Value);
+            }
+
+            Debug.Log($"bulk loaded {floats.Count} floats, {strings.Count} strings, {bools.Count} bools");
+        }
+        #endregion
     }
 }

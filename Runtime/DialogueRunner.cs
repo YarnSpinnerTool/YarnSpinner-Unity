@@ -1437,5 +1437,160 @@ namespace Yarn.Unity
 
             return results;
         }
+        
+
+        /// <summary>
+        /// Loads all variables from the <see cref="PlayerPrefs"/> object into
+        /// the Dialogue Runner's variable storage.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method loads a string containing JSON from the <see
+        /// cref="PlayerPrefs"/> object under the key <see cref="SaveKey"/>,
+        /// deserializes that JSON, and then uses the resulting object to set
+        /// all variables in <see cref="VariableStorage"/>.
+        /// </para>
+        /// <para>
+        /// The loaded information can be stored via the <see
+        /// cref="SaveStateToPlayerPrefs(string)"/> method.
+        /// </para>
+        /// </remarks>
+        /// <param name="SaveKey">The key to use when storing the
+        /// variables.</param>
+        /// <returns><see langword="true"/> if the variables were successfully
+        /// loaded from the player preferences; <see langword="false"/>
+        /// otherwise.</returns>
+        /// <seealso
+        /// cref="VariableStorageBehaviour.SetAllVariables(Dictionary{string,
+        /// float}, Dictionary{string, string}, Dictionary{string, bool},
+        /// bool)"/>
+        public bool LoadStateFromPlayerPrefs(string SaveKey = "YarnBasicSave")
+        {
+            if (PlayerPrefs.HasKey(SaveKey))
+            {
+                var saveData = PlayerPrefs.GetString(SaveKey);
+
+                try
+                {
+                    var dictionaries = DeserializeAllVariablesFromJSON(saveData);
+                    _variableStorage.SetAllVariables(dictionaries.Item1, dictionaries.Item2, dictionaries.Item3);
+
+                    return true;
+                }
+                catch (ArgumentException e)
+                {
+                    Debug.LogWarning($"Unable to load saved data: {e.Message}");
+                    return false;
+                }
+            }
+            else
+            {
+                Debug.LogWarning("Attempted to load the runner previous state but found none saved");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Saves all variables in the Dialogue Runner's variable storage into
+        /// the <see cref="PlayerPrefs"/> object.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method serializes all variables in <see
+        /// cref="VariableStorage"/> into a string containing JSON, and then
+        /// stores that string in the <see cref="PlayerPrefs"/> object under the
+        /// key <paramref name="SaveKey"/>.
+        /// </para>
+        /// <para>
+        /// The stored information can be restored via the <see
+        /// cref="LoadStateFromPlayerPrefs(string)"/> method.
+        /// </para>
+        /// </remarks>
+        /// <param name="SaveKey">The key to use when storing the
+        /// variables.</param>
+        /// <seealso cref="VariableStorageBehaviour.GetAllVariables"/>
+        public void SaveStateToPlayerPrefs(string SaveKey = "YarnBasicSave")
+        {
+            var data = SerializeAllVariablesToJSON();
+            PlayerPrefs.SetString(SaveKey, data);
+            PlayerPrefs.Save();
+        }
+        
+        // takes in a JSON string and converts it into a tuple of dictionaries
+        // intended to let you just dump these straight into the variable storage
+        // throws exceptions if unable to convert or if the conversion half works
+        private (Dictionary<string, float>, Dictionary<string, string>, Dictionary<string, bool>) DeserializeAllVariablesFromJSON(string jsonData)
+        {
+            SaveData data = JsonUtility.FromJson<SaveData>(jsonData);
+
+            if (data.floatKeys == null && data.floatValues == null)
+            {
+                throw new ArgumentException("Provided JSON string was not able to extract numeric variables");
+            }
+            if (data.stringKeys == null && data.stringValues == null)
+            {
+                throw new ArgumentException("Provided JSON string was not able to extract string variables");
+            }
+            if (data.boolKeys == null && data.boolValues == null)
+            {
+                throw new ArgumentException("Provided JSON string was not able to extract boolean variables");
+            }
+
+            if (data.floatKeys.Length != data.floatValues.Length)
+            {
+                throw new ArgumentException("Number of keys and values of numeric variables does not match");
+            }
+            if (data.stringKeys.Length != data.stringValues.Length)
+            {
+                throw new ArgumentException("Number of keys and values of string variables does not match");
+            }
+            if (data.boolKeys.Length != data.boolValues.Length)
+            {
+                throw new ArgumentException("Number of keys and values of boolean variables does not match");
+            }
+
+            var floats = new Dictionary<string, float>();
+            for (int i = 0; i < data.floatValues.Length; i++)
+            {
+                floats.Add(data.floatKeys[i], data.floatValues[i]);
+            }
+            var strings = new Dictionary<string, string>();
+            for (int i = 0; i < data.stringValues.Length; i++)
+            {
+                strings.Add(data.stringKeys[i], data.stringValues[i]);
+            }
+            var bools = new Dictionary<string, bool>();
+            for (int i = 0; i < data.boolValues.Length; i++)
+            {
+                bools.Add(data.boolKeys[i], data.boolValues[i]);
+            }
+
+            return (floats, strings, bools);
+        }
+        private string SerializeAllVariablesToJSON()
+        {
+            (var floats, var strings, var bools) = _variableStorage.GetAllVariables();
+
+            SaveData data = new SaveData();
+            data.floatKeys = floats.Keys.ToArray();
+            data.floatValues = floats.Values.ToArray();
+            data.stringKeys = strings.Keys.ToArray();
+            data.stringValues = strings.Values.ToArray();
+            data.boolKeys = bools.Keys.ToArray();
+            data.boolValues = bools.Values.ToArray();
+
+            return JsonUtility.ToJson(data, true);
+        }
+
+        [System.Serializable]
+        private struct SaveData
+        {
+            public string[] floatKeys;
+            public float[] floatValues;
+            public string[] stringKeys;
+            public string[] stringValues;
+            public string[] boolKeys;
+            public bool[] boolValues;
+        }
     }
 }
