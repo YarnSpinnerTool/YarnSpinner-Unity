@@ -72,12 +72,12 @@ namespace Yarn.Unity
         /// <param name="clear">Should the load also wipe the storage.
         /// Defaults to true so all existing variables will be cleared.
         /// </param>
-        public abstract void BulkLoadVariables(System.Collections.Generic.Dictionary<string,float> floats, System.Collections.Generic.Dictionary<string,string> strings, System.Collections.Generic.Dictionary<string,bool> bools, bool clear = true);
+        public abstract void SetAllVariables(System.Collections.Generic.Dictionary<string,float> floats, System.Collections.Generic.Dictionary<string,string> strings, System.Collections.Generic.Dictionary<string,bool> bools, bool clear = true);
 
         /// <summary>
         /// Provides a unified interface for exporting all variables.
         /// Intended to be a point for custom saving, editors, etc.
         /// </summary>
-        public abstract (System.Collections.Generic.Dictionary<string,float>,System.Collections.Generic.Dictionary<string,string>,System.Collections.Generic.Dictionary<string,bool>) DumpVariables();
+        public abstract (System.Collections.Generic.Dictionary<string,float>,System.Collections.Generic.Dictionary<string,string>,System.Collections.Generic.Dictionary<string,bool>) GetAllVariables();
     }
 }

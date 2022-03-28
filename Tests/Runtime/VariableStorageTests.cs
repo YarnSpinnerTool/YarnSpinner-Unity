@@ -99,9 +99,9 @@ namespace Yarn.Unity.Tests
             // ok I need to test that the bulk load and save works
             Runner.StartDialogue(Runner.startNode);
             yield return null;
-            var dump = VarStorage.DumpVariables();
+            var dump = VarStorage.GetAllVariables();
             TestClearVarStorage();
-            VarStorage.BulkLoadVariables(dump.Item1, dump.Item2, dump.Item3);
+            VarStorage.SetAllVariables(dump.Item1, dump.Item2, dump.Item3);
             TestVariableValuesFromYarnScript();
 
             // cleanup

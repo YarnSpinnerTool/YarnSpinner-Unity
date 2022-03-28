@@ -51,7 +51,7 @@ namespace Yarn.Unity.Tests
             runner.StartDialogue("LotsOfVars");
             yield return null;
 
-            var originals = storage.DumpVariables();
+            var originals = storage.GetAllVariables();
 
             runner.SaveState(testKey);
             yield return null;
@@ -71,7 +71,7 @@ namespace Yarn.Unity.Tests
             runner.StartDialogue("LotsOfVars");
             yield return null;
 
-            var originals = storage.DumpVariables();
+            var originals = storage.GetAllVariables();
 
             bool success = runner.LoadState("invalid key");
 
@@ -92,7 +92,7 @@ namespace Yarn.Unity.Tests
             var testKey = "TemporaryTestingKey";
             PlayerPrefs.SetString(testKey,"{}");
             
-            var originals = storage.DumpVariables();
+            var originals = storage.GetAllVariables();
 
             bool success = runner.LoadState(testKey);
 
@@ -103,7 +103,7 @@ namespace Yarn.Unity.Tests
         }
         private void SaveAndLoad_StorageIntegrity(VariableStorageBehaviour storage, Dictionary<string, float> testFloats, Dictionary<string, string> testStrings, Dictionary<string, bool> testBools)
         {
-            var current = storage.DumpVariables();
+            var current = storage.GetAllVariables();
 
             SaveAndLoad_VerifyFloats(current.Item1, testFloats);
             SaveAndLoad_VerifyStrings(current.Item2, testStrings);

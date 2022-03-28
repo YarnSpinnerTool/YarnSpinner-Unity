@@ -1447,7 +1447,7 @@ namespace Yarn.Unity
                 try
                 {
                     var dictionaries = DeserializeAllVariablesFromJSON(saveData);
-                    _variableStorage.BulkLoadVariables(dictionaries.Item1, dictionaries.Item2, dictionaries.Item3);
+                    _variableStorage.SetAllVariables(dictionaries.Item1, dictionaries.Item2, dictionaries.Item3);
 
                     return true;
                 }
@@ -1523,7 +1523,7 @@ namespace Yarn.Unity
         }
         private string SerializeAllVariablesToJSON()
         {
-            (var floats, var strings, var bools) = _variableStorage.DumpVariables();
+            (var floats, var strings, var bools) = _variableStorage.GetAllVariables();
 
             SaveData data = new SaveData();
             data.floatKeys = floats.Keys.ToArray();

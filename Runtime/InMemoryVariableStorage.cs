@@ -257,7 +257,7 @@ namespace Yarn.Unity
         }
 
         #region Save/Load
-        public override (Dictionary<string,float>,Dictionary<string,string>,Dictionary<string,bool>) DumpVariables()
+        public override (Dictionary<string,float>,Dictionary<string,string>,Dictionary<string,bool>) GetAllVariables()
         {
             Dictionary<string, float> floatDict = new Dictionary<string, float>();
             Dictionary<string, string> stringDict = new Dictionary<string, string>();
@@ -291,7 +291,7 @@ namespace Yarn.Unity
             return (floatDict, stringDict, boolDict);
         }
 
-        public override void BulkLoadVariables(Dictionary<string, float> floats, Dictionary<string, string> strings, Dictionary<string, bool> bools, bool clear = true)
+        public override void SetAllVariables(Dictionary<string, float> floats, Dictionary<string, string> strings, Dictionary<string, bool> bools, bool clear = true)
         {
             if (clear)
             {
