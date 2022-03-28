@@ -1437,7 +1437,33 @@ namespace Yarn.Unity
 
             return results;
         }
-        // returns true if it worked
+        
+
+        /// <summary>
+        /// Loads all variables from the <see cref="PlayerPrefs"/> object into
+        /// the Dialogue Runner's variable storage.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method loads a string containing JSON from the <see
+        /// cref="PlayerPrefs"/> object under the key <see cref="SaveKey"/>,
+        /// deserializes that JSON, and then uses the resulting object to set
+        /// all variables in <see cref="VariableStorage"/>.
+        /// </para>
+        /// <para>
+        /// The loaded information can be stored via the <see
+        /// cref="SaveStateToPlayerPrefs(string)"/> method.
+        /// </para>
+        /// </remarks>
+        /// <param name="SaveKey">The key to use when storing the
+        /// variables.</param>
+        /// <returns><see langword="true"/> if the variables were successfully
+        /// loaded from the player preferences; <see langword="false"/>
+        /// otherwise.</returns>
+        /// <seealso
+        /// cref="VariableStorageBehaviour.SetAllVariables(Dictionary{string,
+        /// float}, Dictionary{string, string}, Dictionary{string, bool},
+        /// bool)"/>
         public bool LoadStateFromPlayerPrefs(string SaveKey = "YarnBasicSave")
         {
             if (PlayerPrefs.HasKey(SaveKey))
@@ -1463,6 +1489,26 @@ namespace Yarn.Unity
                 return false;
             }
         }
+
+        /// <summary>
+        /// Saves all variables in the Dialogue Runner's variable storage into
+        /// the <see cref="PlayerPrefs"/> object.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method serializes all variables in <see
+        /// cref="VariableStorage"/> into a string containing JSON, and then
+        /// stores that string in the <see cref="PlayerPrefs"/> object under the
+        /// key <paramref name="SaveKey"/>.
+        /// </para>
+        /// <para>
+        /// The stored information can be restored via the <see
+        /// cref="LoadStateFromPlayerPrefs(string)"/> method.
+        /// </para>
+        /// </remarks>
+        /// <param name="SaveKey">The key to use when storing the
+        /// variables.</param>
+        /// <seealso cref="VariableStorageBehaviour.GetAllVariables"/>
         public void SaveStateToPlayerPrefs(string SaveKey = "YarnBasicSave")
         {
             var data = SerializeAllVariablesToJSON();
