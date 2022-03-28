@@ -114,9 +114,9 @@ namespace Yarn.Unity.Tests
             yield return null;
 
             // save all variable values to a file, clear, then load from a file
-            Runner.SaveState();
+            Runner.SaveStateToPlayerPrefs();
             TestClearVarStorage();
-            Runner.LoadState();
+            Runner.LoadStateFromPlayerPrefs();
             TestVariableValuesFromYarnScript();
 
             // cleanup

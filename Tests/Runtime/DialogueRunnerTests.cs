@@ -53,10 +53,10 @@ namespace Yarn.Unity.Tests
 
             var originals = storage.GetAllVariables();
 
-            runner.SaveState(testKey);
+            runner.SaveStateToPlayerPrefs(testKey);
             yield return null;
 
-            bool success = runner.LoadState(testKey);
+            bool success = runner.LoadStateFromPlayerPrefs(testKey);
             PlayerPrefs.DeleteKey(testKey);
             Assert.IsTrue(success);
 
@@ -73,7 +73,7 @@ namespace Yarn.Unity.Tests
 
             var originals = storage.GetAllVariables();
 
-            bool success = runner.LoadState("invalid key");
+            bool success = runner.LoadStateFromPlayerPrefs("invalid key");
 
             // because the load should have failed this should still be fine
             SaveAndLoad_StorageIntegrity(storage, originals.Item1, originals.Item2, originals.Item3);
@@ -94,7 +94,7 @@ namespace Yarn.Unity.Tests
             
             var originals = storage.GetAllVariables();
 
-            bool success = runner.LoadState(testKey);
+            bool success = runner.LoadStateFromPlayerPrefs(testKey);
 
             // because the load should have failed this should still be fine
             SaveAndLoad_StorageIntegrity(storage, originals.Item1, originals.Item2, originals.Item3);

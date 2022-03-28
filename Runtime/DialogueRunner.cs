@@ -1438,7 +1438,7 @@ namespace Yarn.Unity
             return results;
         }
         // returns true if it worked
-        public bool LoadState(string SaveKey = "YarnBasicSave")
+        public bool LoadStateFromPlayerPrefs(string SaveKey = "YarnBasicSave")
         {
             if (PlayerPrefs.HasKey(SaveKey))
             {
@@ -1463,7 +1463,7 @@ namespace Yarn.Unity
                 return false;
             }
         }
-        public void SaveState(string SaveKey = "YarnBasicSave")
+        public void SaveStateToPlayerPrefs(string SaveKey = "YarnBasicSave")
         {
             var data = SerializeAllVariablesToJSON();
             PlayerPrefs.SetString(SaveKey, data);
