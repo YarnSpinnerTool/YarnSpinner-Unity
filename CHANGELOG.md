@@ -27,6 +27,8 @@ This means in many situations where either the l-value or r-value of an expressi
 Additionally now functions tagged with the `YarnFunction` attribute are sent along to the compiler so that they can be used to inform values.
 The upside of this is in situations like `<<set $cats = get_cats()>>` if either `$cats` is declared or `get_cats` is tagged as a `YarnFunction` there won't be an error anymore.
 
+- Line view should no longer have unusual interactions around enabling and disabling different effects (#161 and #153).
+
 ### Removed
 
 ## [2.1.0] 2022-02-17
