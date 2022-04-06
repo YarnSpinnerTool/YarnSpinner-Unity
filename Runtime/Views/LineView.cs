@@ -163,7 +163,7 @@ namespace Yarn.Unity
             {
                 // Show everything and return
                 text.maxVisibleCharacters = characterCount;
-                stopToken.Complete();
+                stopToken?.Complete();
                 yield break;
             }
 
@@ -362,7 +362,7 @@ namespace Yarn.Unity
         internal GameObject continueButton = null;
 
         /// <summary>
-        /// The amount of time to wait after any lin
+        /// The amount of time to wait after any line
         /// </summary>
         [SerializeField]
         [Min(0)]
@@ -403,7 +403,7 @@ namespace Yarn.Unity
         /// </summary>
         Effects.CoroutineInterruptToken currentStopToken = new Effects.CoroutineInterruptToken();
 
-        private void Start()
+        private void Awake()
         {
             canvasGroup.alpha = 0;
             canvasGroup.blocksRaycasts = false;
@@ -422,8 +422,11 @@ namespace Yarn.Unity
             StartCoroutine(DismissLineInternal(onDismissalComplete));
         }
 
-        private IEnumerator DismissLineInternal(Action onDismissalComplete) {
-
+        private IEnumerator DismissLineInternal(Action onDismissalComplete)
+        {
+            // disabling interaction temporarily while dismissing the line
+            // we don't want people to interrupt a dismissal
+            var interactable = canvasGroup.interactable;
             canvasGroup.interactable = false;
 
             // If we're using a fade effect, run it, and wait for it to finish.
@@ -435,6 +438,8 @@ namespace Yarn.Unity
             
             canvasGroup.alpha = 0;
             canvasGroup.blocksRaycasts = false;
+            // turning interaction back on, if it needs it
+            canvasGroup.interactable = interactable;
             onDismissalComplete();
         }
 
@@ -565,6 +570,10 @@ namespace Yarn.Unity
                 // it to finish.
                 if (useTypewriterEffect)
                 {
+                    // setting the canvas all back to its defaults because if we didn't also fade we don't have anything visible
+                    canvasGroup.alpha = 1f;
+                    canvasGroup.interactable = true;
+                    canvasGroup.blocksRaycasts = true;
                     yield return StartCoroutine(
                         Effects.Typewriter(
                             lineText,
@@ -594,6 +603,7 @@ namespace Yarn.Unity
 
             // Our view should at be at full opacity.
             canvasGroup.alpha = 1f;
+            canvasGroup.blocksRaycasts = true;
 
             // Show the continue button, if we have one.
             if (continueButton != null)
@@ -635,16 +645,19 @@ namespace Yarn.Unity
                 return;
             }
 
+            // we may want to change this later so the interrupted
+            // animation coroutine is what actually interrupts
+            // for now this is fine.
             // Is an animation running that we can stop?
-            if (currentStopToken.CanInterrupt) {
+            if (currentStopToken.CanInterrupt) 
+            {
                 // Stop the current animation, and skip to the end of whatever
                 // started it.
                 currentStopToken.Interrupt();
-            } else {
-                // No animation is currently running. Signal that we want to
-                // interrupt the line instead.
-                requestInterrupt?.Invoke();
             }
+            // No animation is now running. Signal that we want to
+            // interrupt the line instead.
+            requestInterrupt?.Invoke();
         }
 
         /// <summary>
