@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [2.2.0] 2022-04-08
+
 ### Added
 
 - A simple, built-in system for saving and loading Yarn variables to the built-in PlayerPrefs object has been added.
@@ -20,16 +22,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - `YarnPreventPlayMode` no longer uses `WeakReference` pointing to `Unity.Object` (this is unsupported by Unity).
 - `ActionManager` no longer logs every single command that it registers. (#165)
+- Line view should no longer have unusual interactions around enabling and disabling different effects (#161 and #153).
 - Improved the type inference system around the use of functions.
 
 This has two pieces, the first is in YarnSpinner Core and adds in support for partial backwards type inference.
 This means in many situations where either the l-value or r-value of an expression is known that can be used to provide a type to the other side of the equation.
 Additionally now functions tagged with the `YarnFunction` attribute are sent along to the compiler so that they can be used to inform values.
 The upside of this is in situations like `<<set $cats = get_cats()>>` if either `$cats` is declared or `get_cats` is tagged as a `YarnFunction` there won't be an error anymore.
-
-- Line view should no longer have unusual interactions around enabling and disabling different effects (#161 and #153).
-
-### Removed
 
 ## [2.1.0] 2022-02-17
 
