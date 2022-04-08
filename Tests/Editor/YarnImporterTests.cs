@@ -372,7 +372,7 @@ But not all of them are.
 
             // Assert: verify the line metadata exists and contains the expected number of entries.
             Assert.NotNull(project.lineMetadata);
-            Assert.AreEqual(project.lineMetadata.GetLineIDs().Count(), 1);
+            Assert.AreEqual(project.lineMetadata.GetLineIDs().Count(), 2);
         }
 
         [Test]
