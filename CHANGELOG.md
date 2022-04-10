@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `ActionManager` no longer logs every single command that it registers. (#165)
 - Line view should no longer have unusual interactions around enabling and disabling different effects (#161 and #153).
 - Improved the type inference system around the use of functions.
+- Fixed exception when viewing a Yarn Project in the inspector that contains no declarations, in Unity 2021.2 and earlier (#168)
 
 This has two pieces, the first is in YarnSpinner Core and adds in support for partial backwards type inference.
 This means in many situations where either the l-value or r-value of an expression is known that can be used to provide a type to the other side of the equation.

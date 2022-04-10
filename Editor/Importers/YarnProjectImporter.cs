@@ -855,6 +855,15 @@ namespace Yarn.Unity.Editor
 
         private float GetElementHeight(int index, bool useSearch)
         {
+#if !UNITY_2022_1_OR_NEWER
+            // Before Unity 2022.1, this callback gets called with 
+            // index 0 even if the list is empty
+            if (serializedProperty.arraySize == 0)
+            {
+                return 0;
+            }
+#endif
+
             if (useSearch == false || ShouldShowElement(index))
             {
                 var item = serializedProperty.GetArrayElementAtIndex(index);
