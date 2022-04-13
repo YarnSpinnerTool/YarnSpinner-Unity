@@ -2,16 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// This class exists to provide some support structure for the minimal dialogue system, it does two things:
+// 1. gives a means to start the dialogue
+// 2. "handles" commands in the dialogue
+// It does these in a very basic manner, just calling start on the runner and logging the commands
+// and is not designed to be a full solution for either of these, just something to make the sample work.
 public class DialogueSupportComponent : MonoBehaviour
 {
     MinimalDialogueRunner runner;
-    // Start is called before the first frame update
     void Start()
     {
         runner = FindObjectOfType<MinimalDialogueRunner>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyUp(KeyCode.Space))

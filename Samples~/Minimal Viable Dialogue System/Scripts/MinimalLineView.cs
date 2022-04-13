@@ -5,6 +5,9 @@ using TMPro;
 using UnityEngine.UI;
 using Yarn.Unity;
 
+// this class is based on the full LineView in Runtime/Views/LineView.cs
+// unlike that view this is not a subclass of DialogueViewBase but just a regular game object/
+// Reason we used the existing line view was just to reduce the amount of code needed to be written
 public class MinimalLineView : MonoBehaviour
 {
     [SerializeField] internal CanvasGroup canvasGroup;

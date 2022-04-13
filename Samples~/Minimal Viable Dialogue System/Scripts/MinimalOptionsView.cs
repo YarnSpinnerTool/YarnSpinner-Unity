@@ -4,6 +4,12 @@ using UnityEngine;
 using Yarn.Unity;
 using TMPro;
 
+// this class is based on the OptionListView in Runtime/Views/OptionListView.cs
+// unlike that class however this is not a subclass of DialogueViewBase but a regular gameobject.
+// This does still use the the OptionView subclass for handling the individual options
+// but this is for time saving and maintenance, not necessarily the approach you would take.
+// Because this uses the OptionView it has a weird callback action which obscures to the option view
+// that it is no longer part of a Dialogue View system but something else entirely.
 public class MinimalOptionsView : MonoBehaviour
 {
     [SerializeField] CanvasGroup canvasGroup;

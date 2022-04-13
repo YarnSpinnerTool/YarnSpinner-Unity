@@ -5,6 +5,16 @@ using Yarn.Unity;
 using UnityEngine.Events;
 using System.Linq;
 
+// This class is an example of how you can make your own dialogue runners for when you need total control over the dialogue.
+// This runner is about as basic as it can be and does no checking or timing and will just move through dialogue when told.
+// This is designed purely as an example of how you can do this all yourself if you want/need to
+// and is based on the more complete and fancy runner in Runtime/DialogueRunner.cs
+// At each relevant moment (so commands, lines, options) it halts and awaits instructions.
+// When a line is reached the Continue() method must be called or else the dialogue will halt.
+// When a command is reached the Continue() method must be called or the dialogue will halt.
+// When an option is reached the SetSelectedOption(index) method must be called, Continue() must NOT be called.
+// This runner works by sending out Unity events for relevant situations, which ANY object can respond to.
+// As these are events you can hook them up to their relevant responders in the editor.
 public class MinimalDialogueRunner : MonoBehaviour
 {
     public YarnProject project;
@@ -61,6 +71,7 @@ public class MinimalDialogueRunner : MonoBehaviour
         return dialogue;
     }
 
+    // call to start dialogue
     public void StartDialogue(string nodeName = "Start")
     {
         if (isRunning)
@@ -72,6 +83,7 @@ public class MinimalDialogueRunner : MonoBehaviour
         dialogue.SetNode(nodeName);
         dialogue.Continue();
     }
+    // call to stop dialogue
     public void StopDialogue()
     {
         dialogue.Stop();
@@ -80,6 +92,7 @@ public class MinimalDialogueRunner : MonoBehaviour
 
     public bool NodeExists(string nodeName) => dialogue.NodeExists(nodeName);
 
+    // called when options are encountered in the dialogue
     public OptionArrayEvent OptionsNeedPresentation;
     private void HandleOptions(Yarn.OptionSet options)
     {
@@ -102,6 +115,8 @@ public class MinimalDialogueRunner : MonoBehaviour
         OptionsNeedPresentation?.Invoke(optionSet);
     }
 
+    // called when a command is encountered in the dialogue
+    // wait is handled here, all other commands are not
     public CommandUnityEvent CommandNeedsHandling;
     private void HandleCommand(Yarn.Command command)
     {
@@ -136,6 +151,7 @@ public class MinimalDialogueRunner : MonoBehaviour
         }
     }
 
+    // called when a line is reached in the dialogue
     public LineUnityEvent LineNeedsPresentation;
     private void HandleLine(Yarn.Line line)
     {
@@ -147,16 +163,19 @@ public class MinimalDialogueRunner : MonoBehaviour
         LineNeedsPresentation?.Invoke(finalLine);
     }
 
+    // called when a node is entered
     public StringUnityEvent NodeStarted;
     private void HandleNodeStarted(string nodeName)
     {
         NodeStarted?.Invoke(nodeName);
     }
+    // called when a node is finished
     public StringUnityEvent NodeEnded;
     private void HandleNodeEnded(string nodeName)
     {
         NodeEnded?.Invoke(nodeName);
     }
+    // called when all dialogue is finished
     public UnityEvent DialogueComplete;
     private void HandleDialogueComplete()
     {
@@ -169,6 +188,9 @@ public class MinimalDialogueRunner : MonoBehaviour
         LineProvider.PrepareForLines(lineIDs);
     }
 
+    // call this method to advance the dialogue
+    // if you spam this it will blitz through and not care
+    // you have the power, use it wisely.
     public void Continue()
     {
         if (!isRunning)
@@ -179,6 +201,8 @@ public class MinimalDialogueRunner : MonoBehaviour
 
         dialogue.Continue();
     }
+    // call this method when you need to choice which option is selected
+    // do not call continue afterwards, this method handles that itself
     public void SetSelectedOption(int optionIndex)
     {
         if (!isRunning)
