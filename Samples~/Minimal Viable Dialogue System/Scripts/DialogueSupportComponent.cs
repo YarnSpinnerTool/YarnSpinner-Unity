@@ -19,7 +19,10 @@ public class DialogueSupportComponent : MonoBehaviour
     {
         if (Input.GetKeyUp(KeyCode.Space))
         {
-            runner.StartDialogue();
+            if (!runner.isRunning)
+            {
+                runner.StartDialogue();
+            }
         }
     }
 
@@ -27,5 +30,17 @@ public class DialogueSupportComponent : MonoBehaviour
     {
         Debug.Log($"Received a command: {commandText[0]}");
         runner.Continue();
+    }
+    public void LogNodeStarted(string node)
+    {
+        Debug.Log($"entered node {node}");
+    }
+    public void LogNodeEnded(string node)
+    {
+        Debug.Log($"exited node {node}");
+    }
+    public void LogDialogueEnded()
+    {
+        Debug.Log("Dialogue has finished");
     }
 }

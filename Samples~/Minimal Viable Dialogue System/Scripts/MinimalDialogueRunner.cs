@@ -22,7 +22,7 @@ public class MinimalDialogueRunner : MonoBehaviour
     public Yarn.Unity.LineProviderBehaviour LineProvider;
 
     private Yarn.Dialogue dialogue;
-    private bool isRunning = false;
+    public bool isRunning { get; internal set; } = false;
 
     void Awake()
     {
