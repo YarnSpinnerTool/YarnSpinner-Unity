@@ -93,7 +93,7 @@ public class MinimalDialogueRunner : MonoBehaviour
     public bool NodeExists(string nodeName) => dialogue.NodeExists(nodeName);
 
     // called when options are encountered in the dialogue
-    public OptionArrayEvent OptionsNeedPresentation;
+    public UnityEvent<Yarn.Unity.DialogueOption[]> OptionsNeedPresentation;
     private void HandleOptions(Yarn.OptionSet options)
     {
         DialogueOption[] optionSet = new DialogueOption[options.Options.Length];
@@ -117,7 +117,7 @@ public class MinimalDialogueRunner : MonoBehaviour
 
     // called when a command is encountered in the dialogue
     // wait is handled here, all other commands are not
-    public CommandUnityEvent CommandNeedsHandling;
+    public UnityEvent<string[]> CommandNeedsHandling;
     private void HandleCommand(Yarn.Command command)
     {
         // yes I do see the irony in using the full dialogue runner to make a minimal one
@@ -152,7 +152,7 @@ public class MinimalDialogueRunner : MonoBehaviour
     }
 
     // called when a line is reached in the dialogue
-    public LineUnityEvent LineNeedsPresentation;
+    public UnityEvent<Yarn.Unity.LocalizedLine> LineNeedsPresentation;
     private void HandleLine(Yarn.Line line)
     {
         var finalLine = LineProvider.GetLocalizedLine(line);
@@ -164,13 +164,13 @@ public class MinimalDialogueRunner : MonoBehaviour
     }
 
     // called when a node is entered
-    public StringUnityEvent NodeStarted;
+    public UnityEvent<string> NodeStarted;
     private void HandleNodeStarted(string nodeName)
     {
         NodeStarted?.Invoke(nodeName);
     }
     // called when a node is finished
-    public StringUnityEvent NodeEnded;
+    public UnityEvent<string> NodeEnded;
     private void HandleNodeEnded(string nodeName)
     {
         NodeEnded?.Invoke(nodeName);
@@ -214,9 +214,3 @@ public class MinimalDialogueRunner : MonoBehaviour
         dialogue.Continue();
     }
 }
-
-[System.Serializable] public class StringUnityEvent : UnityEvent<string> {}
-[System.Serializable] public class LineUnityEvent : UnityEvent<Yarn.Unity.LocalizedLine> {}
-[System.Serializable] public class LineArrayUnityEvent : UnityEvent<Yarn.Unity.LocalizedLine[]> {}
-[System.Serializable] public class CommandUnityEvent : UnityEvent<string[]> {}
-[System.Serializable] public class OptionArrayEvent : UnityEvent<Yarn.Unity.DialogueOption[]> {}

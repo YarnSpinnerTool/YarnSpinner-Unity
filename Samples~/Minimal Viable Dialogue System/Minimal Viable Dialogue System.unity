@@ -462,7 +462,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 73230560}
-  - component: {fileID: 73230564}
   - component: {fileID: 73230563}
   - component: {fileID: 73230562}
   - component: {fileID: 73230561}
@@ -547,23 +546,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &73230564
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 73230559}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ac0c40fc910845709d9cef7c876cb99, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  canvasGroup: {fileID: 73230561}
-  optionViewPrefab: {fileID: 5665317717604146022, guid: 3ff4e0d87ab7d4789a1565ac303e8261, type: 3}
-  lastLineText: {fileID: 2135216849}
-  fadeTime: 0.1
-  showUnavailableOptions: 0
 --- !u!114 &73230565
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1186,6 +1168,18 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 536211373}
         m_TargetAssemblyTypeName: MinimalLineView, YarnSpinner.Unity.Example
+        m_MethodName: RunLine
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 73230565}
+        m_TargetAssemblyTypeName: MinimalOptionsView, YarnSpinner.Unity.Example
         m_MethodName: RunLine
         m_Mode: 0
         m_Arguments:
