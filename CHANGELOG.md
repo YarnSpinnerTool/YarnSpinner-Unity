@@ -31,6 +31,12 @@ This means in many situations where either the l-value or r-value of an expressi
 Additionally now functions tagged with the `YarnFunction` attribute are sent along to the compiler so that they can be used to inform values.
 The upside of this is in situations like `<<set $cats = get_cats()>>` if either `$cats` is declared or `get_cats` is tagged as a `YarnFunction` there won't be an error anymore.
 
+### Removed
+
+- The `SerializeAllVariablesToJSON` and `DeserializeAllVariablesFromJSON` methods have been removed.
+  - If you need a simple way to save all variables, use `DialogueRunner.SaveStateToPlayerPrefs` and `DialogueRunner.LoadStateFromPlayerPrefs` instead, which save directly to Unity's PlayerPrefs system and don't require reading or writing files.
+  - If your saving or loading needs are more complex, use the `VariableStorageBehaviour` class's `GetAllVariables()` and `SetAllVariables()` methods to get and set the value of all values at once, and handle the serialization and deserialization the way your game needs it.
+
 ## [2.1.0] 2022-02-17
 
 ### Dialogue View API Update
