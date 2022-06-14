@@ -204,6 +204,9 @@ namespace Yarn.Unity.Editor
                 return;
             }
 
+            localDeclarations = localDeclarations
+                .Where(decl => decl.Name.StartsWith("$Yarn.Internal") == false);
+
             // Store these so that we can continue displaying them after
             // this import step, in case there are compile errors later.
             // We'll replace this with a more complete list later if
@@ -283,9 +286,15 @@ namespace Yarn.Unity.Editor
             }
 
             // Store _all_ declarations - both the ones in this
-            // .yarnproject file, and the ones inside the .yarn files
+            // .yarnproject file, and the ones inside the .yarn files.
+
+            // While we're here, filter out any declarations that begin with our
+            // Yarn internal prefix. These are synthesized variables that are
+            // generated as a result of the compilation, and are not declared by
+            // the user.
             serializedDeclarations = localDeclarations
                 .Concat(compilationResult.Declarations)
+                .Where(decl => !decl.Name.StartsWith("$Yarn.Internal."))
                 .Where(decl => !(decl.Type is FunctionType))
                 .Select(decl => new SerializedDeclaration(decl)).ToList();
 
