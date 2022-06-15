@@ -12,6 +12,11 @@ using System.IO;
 using UnityEditorInternal;
 using System.Collections;
 
+#if USE_UNITY_LOCALIZATION
+using UnityEditor.Localization;
+using UnityEngine.Localization.Tables;
+#endif
+
 namespace Yarn.Unity.Editor
 {
     [ScriptedImporter(3, new[] { "yarnproject" }, 1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
@@ -141,6 +146,9 @@ namespace Yarn.Unity.Editor
         IList<string> IYarnErrorSource.CompileErrors => compileErrors;
 
         bool IYarnErrorSource.Destroyed => this == null;
+
+        public bool UseUnityLocalisationSystem = false;
+        public StringTableCollection unityLocalisationStringTableCollection;
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
@@ -462,6 +470,11 @@ namespace Yarn.Unity.Editor
                 project.lineMetadata = new LineMetadata(LineMetadataTableEntriesFromCompilationResult(compilationResult));
             }
 
+            if (UseUnityLocalisationSystem)
+            {
+                ConvertInternalYarnStringTableEntriesIntoUnityLocalisedStringTableEntries(StringTableEntriesFromCompilationResult(compilationResult));
+            }
+
             // Store the compiled program
             byte[] compiledBytes = null;
 
@@ -483,6 +496,38 @@ namespace Yarn.Unity.Editor
             UnityEngine.Profiling.Profiler.enabled = false;
 #endif
 
+        }
+
+        private void ConvertInternalYarnStringTableEntriesIntoUnityLocalisedStringTableEntries(IEnumerable<StringTableEntry> entries)
+        {
+            if (this.unityLocalisationStringTableCollection == null)
+            {
+                Debug.LogError("Unable to generate String Table Entries as the string collection is null");
+                return;
+            }
+
+            var defaultCulture = new System.Globalization.CultureInfo(defaultLanguage);
+
+            foreach (var table in unityLocalisationStringTableCollection.StringTables)
+            {
+                if (table.LocaleIdentifier.CultureInfo != defaultCulture)
+                {
+                    var neutralTable = table.LocaleIdentifier.CultureInfo.IsNeutralCulture ? table.LocaleIdentifier.CultureInfo : table.LocaleIdentifier.CultureInfo.Parent;
+                    var defaultNeutral = defaultCulture.IsNeutralCulture ? defaultCulture : defaultCulture.Parent;
+
+                    if (!neutralTable.Equals(defaultNeutral))
+                    {
+                        continue;
+                    }
+                }
+
+                foreach (var entry in entries)
+                {
+                    table.AddEntry(entry.ID, entry.Text);
+                }
+                return;
+            }
+            Debug.LogWarning($"Unable to find a locale in the string table that matches the default locale {defaultLanguage}");
         }
 
         private List<string> AssemblySearchList()

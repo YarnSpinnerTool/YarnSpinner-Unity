@@ -17,6 +17,11 @@ using System.Reflection;
 using UnityEditor.AddressableAssets;
 #endif
 
+#if USE_UNITY_LOCALIZATION
+using UnityEditor.Localization;
+using UnityEngine.Localization.Tables;
+#endif
+
 namespace Yarn.Unity.Editor
 {
     [CustomEditor(typeof(YarnProjectImporter))]
@@ -39,6 +44,9 @@ namespace Yarn.Unity.Editor
 
         private SerializedProperty predeterminedFunctionsProperty;
 
+        private SerializedProperty useUnityLocalisationSystemProperty;
+        private SerializedProperty unityLocalisationTableCollectionProperty;
+
         public override void OnEnable()
         {
             base.OnEnable();
@@ -57,6 +65,9 @@ namespace Yarn.Unity.Editor
             assembliesToSearchProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.assembliesToSearch));
 
             predeterminedFunctionsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.ListOfFunctions));
+
+            useUnityLocalisationSystemProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.UseUnityLocalisationSystem));
+            unityLocalisationTableCollectionProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.unityLocalisationStringTableCollection));
         }
 
         public override void OnInspectorGUI()
@@ -117,7 +128,21 @@ namespace Yarn.Unity.Editor
 
             CurrentProjectDefaultLanguageProperty = defaultLanguageProperty;
 
-            EditorGUILayout.PropertyField(languagesToSourceAssetsProperty, new GUIContent("Localisations"));
+            EditorGUILayout.PropertyField(useUnityLocalisationSystemProperty, new GUIContent("Use Unity's Built-in Localisation System"));
+
+            // if we are using the unity localisation system we need a field to add in the string table
+            // and we also disable the in-built localisation system while we are at it for its unnecessary
+            if (useUnityLocalisationSystemProperty.boolValue)
+            {
+                EditorGUI.indentLevel += 1;
+                EditorGUILayout.PropertyField(unityLocalisationTableCollectionProperty, new GUIContent("String Table Collection"));
+                EditorGUI.indentLevel -= 1;
+                EditorGUILayout.Space();
+            }
+            else
+            {
+                EditorGUILayout.PropertyField(languagesToSourceAssetsProperty, new GUIContent("Localisations"));
+            }
 
             CurrentProjectDefaultLanguageProperty = null;
 
