@@ -32,7 +32,7 @@ ScriptedImporter:
     description: Ship.yarn, node Ship, line 14
     isImplicit: 0
     sourceYarnAsset: {instanceID: 0}
-  defaultLanguage: en
+  defaultLanguage: en-AU
   languagesToSourceAssets:
   - languageID: en
     stringsFile: {fileID: 4900000, guid: c7ccc37b05d57b5449cdae7c315d1646, type: 3}
@@ -41,3 +41,64 @@ ScriptedImporter:
     stringsFile: {fileID: 4900000, guid: c7ccc37b05d57b5449cdae7c315d1646, type: 3}
     assetsFolder: {fileID: 102900000, guid: 7ff8e9b3304254b479fd8264873f64d4, type: 3}
   useAddressableAssets: 0
+  searchAllAssembliesForActions: 1
+  assembliesToSearch: []
+  ListOfFunctions:
+  - Name: Random
+    ReturnType: -> Single
+    Parameters: []
+  - Name: RandomRange
+    ReturnType: -> Single
+    Parameters:
+    - minInclusive
+    - maxInclusive
+  - Name: Dice
+    ReturnType: -> Int32
+    Parameters:
+    - sides
+  - Name: Round
+    ReturnType: -> Int32
+    Parameters:
+    - num
+  - Name: RoundPlaces
+    ReturnType: -> Single
+    Parameters:
+    - num
+    - places
+  - Name: Floor
+    ReturnType: -> Int32
+    Parameters:
+    - num
+  - Name: Ceil
+    ReturnType: -> Int32
+    Parameters:
+    - num
+  - Name: Inc
+    ReturnType: -> Int32
+    Parameters:
+    - num
+  - Name: Dec
+    ReturnType: -> Int32
+    Parameters:
+    - num
+  - Name: Decimal
+    ReturnType: -> Single
+    Parameters:
+    - num
+  - Name: Int
+    ReturnType: -> Int32
+    Parameters:
+    - num
+  - Name: CoolFunction
+    ReturnType: -> Int32
+    Parameters: []
+  - Name: TestFunctionVariable
+    ReturnType: -> Int32
+    Parameters:
+    - num
+  - Name: TestFunctionVariable
+    ReturnType: -> String
+    Parameters:
+    - text
+  UseUnityLocalisationSystem: 1
+  unityLocalisationStringTableCollection: {fileID: 11400000, guid: 88208b7eaa8384415af2c6fe79e452f5, type: 2}

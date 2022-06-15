@@ -66,8 +66,10 @@ namespace Yarn.Unity.Editor
 
             predeterminedFunctionsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.ListOfFunctions));
 
+#if USE_UNITY_LOCALIZATION
             useUnityLocalisationSystemProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.UseUnityLocalisationSystem));
             unityLocalisationTableCollectionProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.unityLocalisationStringTableCollection));
+#endif
         }
 
         public override void OnInspectorGUI()
@@ -128,6 +130,7 @@ namespace Yarn.Unity.Editor
 
             CurrentProjectDefaultLanguageProperty = defaultLanguageProperty;
 
+#if USE_UNITY_LOCALIZATION
             EditorGUILayout.PropertyField(useUnityLocalisationSystemProperty, new GUIContent("Use Unity's Built-in Localisation System"));
 
             // if we are using the unity localisation system we need a field to add in the string table
@@ -143,6 +146,9 @@ namespace Yarn.Unity.Editor
             {
                 EditorGUILayout.PropertyField(languagesToSourceAssetsProperty, new GUIContent("Localisations"));
             }
+#else
+            EditorGUILayout.PropertyField(languagesToSourceAssetsProperty, new GUIContent("Localisations"));
+#endif
 
             CurrentProjectDefaultLanguageProperty = null;
 

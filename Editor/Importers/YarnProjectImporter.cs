@@ -147,8 +147,10 @@ namespace Yarn.Unity.Editor
 
         bool IYarnErrorSource.Destroyed => this == null;
 
+#if USE_UNITY_LOCALIZATION
         public bool UseUnityLocalisationSystem = false;
         public StringTableCollection unityLocalisationStringTableCollection;
+#endif
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
@@ -507,6 +509,7 @@ namespace Yarn.Unity.Editor
 
         }
 
+#if USE_UNITY_LOCALIZATION
         private void ConvertInternalYarnStringTableEntriesIntoUnityLocalisedStringTableEntries(IEnumerable<StringTableEntry> entries)
         {
             if (this.unityLocalisationStringTableCollection == null)
@@ -538,6 +541,7 @@ namespace Yarn.Unity.Editor
             }
             Debug.LogWarning($"Unable to find a locale in the string table that matches the default locale {defaultLanguage}");
         }
+#endif
 
         private List<string> AssemblySearchList()
         {

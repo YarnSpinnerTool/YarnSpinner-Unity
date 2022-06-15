@@ -1,0 +1,136 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: Space Scene_de
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: de
+  m_SharedData: {fileID: 11400000, guid: defcfdb6f089d4b0396cbb3399f58f12, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 1817561699180544
+    m_Localized: 'Schiff: Hey Kumpel.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561707569152
+    m_Localized: 'Spieler: Hey Schiff.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561711763456
+    m_Localized: 'Spieler: Wie geht''s dem Weltraum?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561711763457
+    m_Localized: 'Schiff: Oh man.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957760
+    m_Localized: 'Schiff: Der ist RIESIG!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957761
+    m_Localized: 'Schiff: Hey!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957762
+    m_Localized: 'Spieler: Sally hat mir gesagt, dass du mich sehen willst?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957763
+    m_Localized: 'Schiff: Aber wie!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957764
+    m_Localized: 'Schiff: Ich soll dir von ihr ausrichten: '
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957765
+    m_Localized: "Schiff: Wenn du nochmal deine Schicht verl\xE4sst ohne die Konsole
+      zur\xFCckzusetzen ..."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957766
+    m_Localized: "Schiff: Wird sie dich lebendig zerhackst\xFCckeln!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957767
+    m_Localized: 'Spieler: Oh.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957768
+    m_Localized: 'Spieler: Hey Sally.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957769
+    m_Localized: 'Sally: Uah! Hey.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957770
+    m_Localized: 'Sally: Du hast dich einfach so angeschlichen.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957771
+    m_Localized: 'Sally: Lass das.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957772
+    m_Localized: 'Spieler: Hey.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957773
+    m_Localized: 'Sally: Hi.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957774
+    m_Localized: "Ist was w\xE4hrend deiner Schicht passiert?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957775
+    m_Localized: Entschuldigung wegen der Konsole.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957776
+    m_Localized: Mach's gut.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957777
+    m_Localized: 'Sally: Nicht wirklich.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957778
+    m_Localized: 'Sally: Der Nebel nebelt halt vor sich hin.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957779
+    m_Localized: "Sally: Ach, das Schiff wollte mit dir reden. Geh mal r\xFCber."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957780
+    m_Localized: 'Spieler: Schon geschehen!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957781
+    m_Localized: 'Sally: Rede nochmal mit dem Schiff.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957782
+    m_Localized: 'Sally: Mach''s gut.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957783
+    m_Localized: 'Sally: Ja. Mach das nicht nochmal.'
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

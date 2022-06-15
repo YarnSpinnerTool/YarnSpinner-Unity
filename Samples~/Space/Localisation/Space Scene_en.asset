@@ -1,0 +1,135 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: Space Scene_en
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: defcfdb6f089d4b0396cbb3399f58f12, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 1817561699180544
+    m_Localized: 'Ship: Hey, friend.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561707569152
+    m_Localized: 'Player: Hi, Ship.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561711763456
+    m_Localized: 'Player: How''s space?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561711763457
+    m_Localized: 'Ship: Oh, man.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957760
+    m_Localized: 'Ship: It''s HUGE!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957761
+    m_Localized: 'Ship: Hey!!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957762
+    m_Localized: 'Player: Sally said you wanted to see me?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957763
+    m_Localized: 'Ship: She totally did!!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957764
+    m_Localized: 'Ship: She wanted me to tell you...'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957765
+    m_Localized: 'Ship: If you ever go off-watch without resetting the console again...'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957766
+    m_Localized: 'Ship: She''ll flay you alive!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957767
+    m_Localized: 'Player: Uh.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957768
+    m_Localized: 'Player: Hey, Sally.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957769
+    m_Localized: 'Sally: Uah!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957770
+    m_Localized: 'Sally: You snuck up on me.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957771
+    m_Localized: 'Sally: Don''t do that.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957772
+    m_Localized: 'Player: Hey.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957773
+    m_Localized: 'Sally: Hi.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957774
+    m_Localized: Anything exciting happen on your watch?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957775
+    m_Localized: Sorry about the console.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957776
+    m_Localized: See you later.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957777
+    m_Localized: 'Sally: Not really.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957778
+    m_Localized: 'Sally: Same old nebula, doing the same old thing.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957779
+    m_Localized: 'Sally: Oh, Ship wanted to see you. Go say hi to it.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957780
+    m_Localized: 'Player: Already done!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957781
+    m_Localized: 'Sally: Go say hi again.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957782
+    m_Localized: 'Sally: Bye.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1817561715957783
+    m_Localized: 'Sally: Yeah. Don''t do it again.'
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []
