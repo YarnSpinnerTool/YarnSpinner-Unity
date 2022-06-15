@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [2.2.1] 2022-06-14
+
+### Changed
+
+- Fixed an issue where Yarn projects that made use of the `visited` or `visit_count` functions could produce errors when re-importing the project.
+
 ## [2.2.0] 2022-04-08
 
 ### Added
