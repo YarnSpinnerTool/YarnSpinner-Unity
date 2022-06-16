@@ -481,10 +481,12 @@ namespace Yarn.Unity.Editor
                 project.lineMetadata = new LineMetadata(LineMetadataTableEntriesFromCompilationResult(compilationResult));
             }
 
+#if USE_UNITY_LOCALIZATION
             if (UseUnityLocalisationSystem)
             {
                 ConvertInternalYarnStringTableEntriesIntoUnityLocalisedStringTableEntries(StringTableEntriesFromCompilationResult(compilationResult));
             }
+#endif
 
             // Store the compiled program
             byte[] compiledBytes = null;
