@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- A Unity Localization package localised line provider subclass, `UnityLocalisedLineProvider.cs`, is now provided alongside the other lineproviders.
+
+### Changed
+
+- Space sample now has two scenes to show both approaches to localisation.
+  - `Space-UnityLocalization.unity` uses the Unity Localization package
+  - `Space-InbuiltLocalisation.unity` uses the inbuilt localisation system.
+  - both are functionally identical.
+
 ## [2.2.1] 2022-06-14
 
 ### Changed
