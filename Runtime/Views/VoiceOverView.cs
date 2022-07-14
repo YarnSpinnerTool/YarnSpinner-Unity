@@ -213,6 +213,7 @@ namespace Yarn.Unity
             }
 
             completionHandler?.Invoke();
+            interruptToken.Complete();
         }
 
         /// <summary>
@@ -230,6 +231,9 @@ namespace Yarn.Unity
             {
                 completionHandler = onDialogueLineFinished;
                 interruptToken.Interrupt();
+            } else
+            {
+                onDialogueLineFinished();
             }
         }
 
