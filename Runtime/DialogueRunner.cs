@@ -716,14 +716,7 @@ namespace Yarn.Unity
                     Debug.Log($"Dialogue Runner has no LineProvider; creating a {nameof(TextLineProvider)}.", this);
                 }
             }
-        }
 
-        /// <summary>
-        /// Prepares the Dialogue Runner for start.
-        /// </summary>
-        /// <remarks>If <see cref="startAutomatically"/> is <see langword="true"/>, the Dialogue Runner will start.</remarks>
-        private void Start()
-        {
             if (dialogueViews.Length == 0)
             {
                 Debug.LogWarning($"Dialogue Runner doesn't have any dialogue views set up. No lines or options will be visible.");
@@ -747,11 +740,18 @@ namespace Yarn.Unity
 
                 // Load this new Yarn Project.
                 SetProject(yarnProject);
+            }
+        }
 
-                if (startAutomatically)
-                {
-                    StartDialogue(startNode);
-                }
+        /// <summary>
+        /// Prepares the Dialogue Runner for start.
+        /// </summary>
+        /// <remarks>If <see cref="startAutomatically"/> is <see langword="true"/>, the Dialogue Runner will start.</remarks>
+        private void Start()
+        {
+            if (yarnProject != null && startAutomatically)
+            {
+                StartDialogue(startNode);
             }
         }
 
