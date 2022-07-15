@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- A Unity Localization package localised line provider subclass, `UnityLocalisedLineProvider.cs`, is now provided alongside the other lineproviders.
+- Yarn Project importer now has initial support for unity' Localization system
+
 ### Changed
 
 - Fixed interrupt token handling in `VoiceOverView` that would cause it to permanently stop a Dialogue Runner's ability to progress through dialogue lines.
