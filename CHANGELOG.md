@@ -9,15 +9,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - A Unity Localization package localised line provider subclass, `UnityLocalisedLineProvider.cs`, is now provided alongside the other lineproviders.
+- Yarn Project importer now has initial support for unity' Localization system
 
 ### Changed
 
 - Fixed interrupt token handling in `VoiceOverView` that would cause it to permanently stop a Dialogue Runner's ability to progress through dialogue lines.
-
-- Space sample now has two scenes to show both approaches to localisation.
-  - `Space-UnityLocalization.unity` uses the Unity Localization package
-  - `Space-InbuiltLocalisation.unity` uses the inbuilt localisation system.
-  - both are functionally identical.
 
 ## [2.2.1] 2022-06-14
 
