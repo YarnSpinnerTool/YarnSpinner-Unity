@@ -1668,7 +1668,7 @@ MonoBehaviour:
   textLanguageCode: en-AU
   strings:
     m_TableReference:
-      m_TableCollectionName: GUID:defcfdb6f089d4b0396cbb3399f58f12
+      m_TableCollectionName: GUID:fdc8092835fe9451db8e5dde1d809494
 --- !u!4 &1394342922
 Transform:
   m_ObjectHideFlags: 0
