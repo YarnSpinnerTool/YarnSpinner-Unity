@@ -77,12 +77,12 @@ namespace Yarn.Unity
         /// The variable storage object.
         /// </summary>
         [UnityEngine.Serialization.FormerlySerializedAs("variableStorage")]
-        [SerializeField] internal VariableStorageBehaviour _variableStorage;
+        [SerializeField] internal IExtendedVariableStorage _variableStorage;
 
         /// <inheritdoc cref="_variableStorage"/>
-        public VariableStorageBehaviour VariableStorage
+        public IExtendedVariableStorage VariableStorage
         {
-            get => _variableStorage; 
+            get => _variableStorage;
             set
             {
                 _variableStorage = value;
