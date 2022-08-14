@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- `DialogueRunner.VariableStorage` property is now an interface instead of a class, this allow users to implement their own `VariableStorage` without the restriction of being a MonoBehaviour.
+- `DialogueRunner.VariableStorage` property is now an interface instead of a class, this allow users to implement their own `VariableStorage` without the restriction of being a `MonoBehaviour`.
 
 ## [Unreleased]
 
