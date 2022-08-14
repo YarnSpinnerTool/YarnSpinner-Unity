@@ -74,18 +74,42 @@ namespace Yarn.Unity
         public YarnProject yarnProject;
 
         /// <summary>
+        /// If true, the DialogueRunner will use the _variableStorage field as the Variable Storage.
+        /// If false, you should set your own variable storage by using the VariableStorage property.
+        /// </summary>
+        [SerializeField] public bool _useMonoBehaviourAsVariableStorage;
+
+        /// <summary>
         /// The variable storage object.
         /// </summary>
         [UnityEngine.Serialization.FormerlySerializedAs("variableStorage")]
-        [SerializeField] internal IExtendedVariableStorage _variableStorage;
+        [SerializeField] public VariableStorageBehaviour _variableStorage;
+
+        public IExtendedVariableStorage NonSerializedVariableStorage;
 
         /// <inheritdoc cref="_variableStorage"/>
         public IExtendedVariableStorage VariableStorage
         {
-            get => _variableStorage;
+            get => _useMonoBehaviourAsVariableStorage ? _variableStorage : NonSerializedVariableStorage;
             set
             {
-                _variableStorage = value;
+                if (_useMonoBehaviourAsVariableStorage && value is VariableStorageBehaviour behaviour)
+                {
+                    _variableStorage = behaviour;
+                }
+                else if (_useMonoBehaviourAsVariableStorage)
+                {
+                    _variableStorage = null;
+                    NonSerializedVariableStorage = value;
+                    _useMonoBehaviourAsVariableStorage = false;
+                    Debug.LogWarning($"Trying to set {nameof(VariableStorage)} with a value that does not inherit {nameof(VariableStorageBehaviour)} when {nameof(_useMonoBehaviourAsVariableStorage)} is true, this is not supported, switching to non-serialized variable instead.");
+                }
+                else
+                {
+                    _variableStorage = null;
+                    NonSerializedVariableStorage = value;
+                }
+                
                 if (_dialogue != null)
                 {
                     _dialogue.VariableStorage = value;

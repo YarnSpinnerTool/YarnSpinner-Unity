@@ -13,6 +13,7 @@ namespace Yarn.Unity.Editor
 
         private SerializedProperty yarnProjectProperty;
         private SerializedProperty variableStorageProperty;
+        private SerializedProperty useMonobehaviourAsVariableStorageProperty;
         private SerializedProperty dialogueViewsProperty;
         private SerializedProperty startNodeProperty;
         private SerializedProperty startAutomaticallyProperty;
@@ -28,6 +29,7 @@ namespace Yarn.Unity.Editor
         {
             yarnProjectProperty = serializedObject.FindProperty(nameof(DialogueRunner.yarnProject));
             variableStorageProperty = serializedObject.FindProperty(nameof(DialogueRunner._variableStorage));
+            useMonobehaviourAsVariableStorageProperty = serializedObject.FindProperty(nameof(DialogueRunner._useMonoBehaviourAsVariableStorage));
             dialogueViewsProperty = serializedObject.FindProperty(nameof(DialogueRunner.dialogueViews));
             startNodeProperty = serializedObject.FindProperty(nameof(DialogueRunner.startNode));
             startAutomaticallyProperty = serializedObject.FindProperty(nameof(DialogueRunner.startAutomatically));
@@ -43,12 +45,21 @@ namespace Yarn.Unity.Editor
         public override void OnInspectorGUI()
         {
             EditorGUILayout.PropertyField(yarnProjectProperty);
-            EditorGUILayout.PropertyField(variableStorageProperty);
-
-            if (variableStorageProperty.objectReferenceValue == null)
+            EditorGUILayout.PropertyField(useMonobehaviourAsVariableStorageProperty);
+            if (useMonobehaviourAsVariableStorageProperty.boolValue)
+            {
+                EditorGUILayout.PropertyField(variableStorageProperty);
+                if (variableStorageProperty.objectReferenceValue == null)
+                {
+                    EditorGUI.indentLevel += 1;
+                    EditorGUILayout.HelpBox($"An {ObjectNames.NicifyVariableName(nameof(InMemoryVariableStorage))} component will be added at run time.", MessageType.Info);
+                    EditorGUI.indentLevel -= 1;
+                }
+            }
+            else
             {
                 EditorGUI.indentLevel += 1;
-                EditorGUILayout.HelpBox($"An {ObjectNames.NicifyVariableName(nameof(InMemoryVariableStorage))} component will be added at run time.", MessageType.Info);
+                EditorGUILayout.HelpBox($"You will need to manually set the variable storage using the {nameof(DialogueRunner.VariableStorage)} property.", MessageType.Info);
                 EditorGUI.indentLevel -= 1;
             }
 

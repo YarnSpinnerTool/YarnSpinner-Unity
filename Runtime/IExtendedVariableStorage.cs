@@ -1,5 +1,4 @@
-﻿namespace Yarn.Unity;
-
+﻿namespace Yarn.Unity
 {
     public interface IExtendedVariableStorage : Yarn.IVariableStorage
     {

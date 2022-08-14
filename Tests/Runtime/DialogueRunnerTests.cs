@@ -101,7 +101,7 @@ namespace Yarn.Unity.Tests
 
             Assert.IsFalse(success);
         }
-        private void SaveAndLoad_StorageIntegrity(VariableStorageBehaviour storage, Dictionary<string, float> testFloats, Dictionary<string, string> testStrings, Dictionary<string, bool> testBools)
+        private void SaveAndLoad_StorageIntegrity(IExtendedVariableStorage storage, Dictionary<string, float> testFloats, Dictionary<string, string> testStrings, Dictionary<string, bool> testBools)
         {
             var current = storage.GetAllVariables();
 
