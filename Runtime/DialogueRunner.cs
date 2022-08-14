@@ -77,20 +77,20 @@ namespace Yarn.Unity
         /// If true, the DialogueRunner will use the _variableStorage field as the Variable Storage.
         /// If false, you should set your own variable storage by using the VariableStorage property.
         /// </summary>
-        [SerializeField] public bool _useMonoBehaviourAsVariableStorage;
+        [SerializeField] public bool _useMonoBehaviourAsVariableStorage = true;
 
         /// <summary>
         /// The variable storage object.
         /// </summary>
         [UnityEngine.Serialization.FormerlySerializedAs("variableStorage")]
-        [SerializeField] public VariableStorageBehaviour _variableStorage;
+        [SerializeField] internal VariableStorageBehaviour _variableStorage;
 
-        public IExtendedVariableStorage NonSerializedVariableStorage;
+        internal IExtendedVariableStorage _nonMonoBehaviourVariableStorage;
 
         /// <inheritdoc cref="_variableStorage"/>
         public IExtendedVariableStorage VariableStorage
         {
-            get => _useMonoBehaviourAsVariableStorage ? _variableStorage : NonSerializedVariableStorage;
+            get => _useMonoBehaviourAsVariableStorage ? _variableStorage : _nonMonoBehaviourVariableStorage;
             set
             {
                 if (_useMonoBehaviourAsVariableStorage && value is VariableStorageBehaviour behaviour)
@@ -100,14 +100,14 @@ namespace Yarn.Unity
                 else if (_useMonoBehaviourAsVariableStorage)
                 {
                     _variableStorage = null;
-                    NonSerializedVariableStorage = value;
+                    _nonMonoBehaviourVariableStorage = value;
                     _useMonoBehaviourAsVariableStorage = false;
-                    Debug.LogWarning($"Trying to set {nameof(VariableStorage)} with a value that does not inherit {nameof(VariableStorageBehaviour)} when {nameof(_useMonoBehaviourAsVariableStorage)} is true, this is not supported, switching to non-serialized variable instead.");
+                    Debug.LogWarning($"Trying to set {nameof(VariableStorage)} with a value that does not inherit {nameof(VariableStorageBehaviour)} when {nameof(_useMonoBehaviourAsVariableStorage)} is true, this is not supported, switching to non-MonoBehaviour variable instead.");
                 }
                 else
                 {
                     _variableStorage = null;
-                    NonSerializedVariableStorage = value;
+                    _nonMonoBehaviourVariableStorage = value;
                 }
                 
                 if (_dialogue != null)
@@ -1497,7 +1497,7 @@ namespace Yarn.Unity
                 try
                 {
                     var dictionaries = DeserializeAllVariablesFromJSON(saveData);
-                    _variableStorage.SetAllVariables(dictionaries.Item1, dictionaries.Item2, dictionaries.Item3);
+                    VariableStorage.SetAllVariables(dictionaries.Item1, dictionaries.Item2, dictionaries.Item3);
 
                     return true;
                 }
@@ -1593,7 +1593,7 @@ namespace Yarn.Unity
         }
         private string SerializeAllVariablesToJSON()
         {
-            (var floats, var strings, var bools) = _variableStorage.GetAllVariables();
+            (var floats, var strings, var bools) = VariableStorage.GetAllVariables();
 
             SaveData data = new SaveData();
             data.floatKeys = floats.Keys.ToArray();
