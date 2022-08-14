@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+##[2.2.1] 2022-06-14
+
+### Added
+
+- `DialogueRunner.VariableStorage` property is now an interface instead of a class, this allow users to implement their own `VariableStorage` without the restriction of being a MonoBehaviour.
+
 ## [Unreleased]
 
 ### Added
