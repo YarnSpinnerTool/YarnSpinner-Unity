@@ -817,9 +817,24 @@ namespace Yarn.Unity
                 // Localize the line associated with the option
                 var localisedLine = lineProvider.GetLocalizedLine(options.Options[i].Line);
                 var text = Dialogue.ExpandSubstitutions(localisedLine.RawText, options.Options[i].Line.Substitutions);
-                
+
                 Dialogue.LanguageCode = lineProvider.textLanguageCode;
-                localisedLine.Text = Dialogue.ParseMarkup(text);
+
+                try
+                {
+                    localisedLine.Text = Dialogue.ParseMarkup(text);
+                }
+                catch (Yarn.Markup.MarkupParseException e)
+                {
+                    // Parsing the markup failed. We'll log a warning, and
+                    // produce a markup result that just contains the raw text.
+                    Debug.LogWarning($"Failed to parse markup in \"{text}\": {e.Message}");
+                    localisedLine.Text = new Yarn.Markup.MarkupParseResult
+                    {
+                        Text = text,
+                        Attributes = new List<Yarn.Markup.MarkupAttribute>()
+                    };
+                }
 
                 optionSet[i] = new DialogueOption
                 {
@@ -927,7 +942,22 @@ namespace Yarn.Unity
 
             // Render the markup
             Dialogue.LanguageCode = lineProvider.textLanguageCode;
-            CurrentLine.Text = Dialogue.ParseMarkup(text);
+
+            try
+            {
+                CurrentLine.Text = Dialogue.ParseMarkup(text);
+            }
+            catch (Yarn.Markup.MarkupParseException e)
+            {
+                // Parsing the markup failed. We'll log a warning, and
+                // produce a markup result that just contains the raw text.
+                Debug.LogWarning($"Failed to parse markup in \"{text}\": {e.Message}");
+                CurrentLine.Text = new Yarn.Markup.MarkupParseResult
+                {
+                    Text = text,
+                    Attributes = new List<Yarn.Markup.MarkupAttribute>()
+                };
+            }
 
             // Clear the set of active dialogue views, just in case
             ActiveDialogueViews.Clear();
