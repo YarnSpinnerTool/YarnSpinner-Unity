@@ -14,7 +14,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Fixed interrupt token handling in `VoiceOverView` that would cause it to permanently stop a Dialogue Runner's ability to progress through dialogue lines.
-- Added OnDialogueStart and OnDialogueStop events to DialogueRunner
 
 ## [2.2.1] 2022-06-14
 
