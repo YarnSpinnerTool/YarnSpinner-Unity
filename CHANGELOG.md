@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Fixed interrupt token handling in `VoiceOverView` that would cause it to permanently stop a Dialogue Runner's ability to progress through dialogue lines.
+- Fixed an issue where lines and options that contain invalid markup would cause an exception to be thrown, breaking dialogue. A warning message is now logged instead, and the original text of the line (with any invalid markup present) is delivered.
 
 ## [2.2.1] 2022-06-14
 
