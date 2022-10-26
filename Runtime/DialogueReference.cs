@@ -89,21 +89,21 @@ namespace Yarn.Unity
                 project = (YarnProject)projectProp.objectReferenceValue;
             }
 
-            var showNodeDropdown = (projectProp.hasMultipleDifferentValues || project != null);
-            if (showNodeDropdown)
-            {
-                position.width /= 2f;
-            }
+            var projectFieldPosition = position;
+            projectFieldPosition.height = EditorGUIUtility.singleLineHeight;
+            
+            var nodeNameFieldPosition = position;
+            nodeNameFieldPosition.height = EditorGUIUtility.singleLineHeight;
+            nodeNameFieldPosition.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+            
 
-            EditorGUI.PropertyField(position, projectProp, GUIContent.none);
-
-            if (showNodeDropdown)
-            {
-                position.x += position.width;
-            }
+            EditorGUI.PropertyField(projectFieldPosition, projectProp, GUIContent.none);
 
             // -- Node name drop down
             var nodeNameProp = property.FindPropertyRelative(nameof(DialogueReference.nodeName));
+
+            // If we want to edit this nodes name as a text field, or if we have
+            // multiple values, show a text field and not a dropdown.
             if (editNodeAsText || projectProp.hasMultipleDifferentValues)
             {
                 var controlName = NodeTextControlNamePrefix + controlId;
@@ -112,7 +112,7 @@ namespace Yarn.Unity
                 // field to edit the node name. Most of the time, it will show
                 // the mixed value dash (—).
                 GUI.SetNextControlName(controlName);
-                EditorGUI.PropertyField(position, nodeNameProp, GUIContent.none);
+                EditorGUI.PropertyField(nodeNameFieldPosition, nodeNameProp, GUIContent.none);
 
                 if (editNodeAsText)
                 {
@@ -131,98 +131,149 @@ namespace Yarn.Unity
                     }
                 }
             }
-            else if (showNodeDropdown)
+            else
             {
-                var nodeName = nodeNameProp.stringValue;
-                var nodeNameSet = !string.IsNullOrEmpty(nodeName);
+                // Show a dropdown that lets the user choose a node from the
+                // ones present in the Yarn Project.
 
-                // Cached check if node exists in project
-                if (lastProject != project || lastNodeName != nodeName)
+                // If the Yarn Project is not set, this dropdown is empty and
+                // disabled.
+                if (project == null)
                 {
-                    lastProject = project;
-                    lastNodeName = nodeName;
-                    referenceExists = project.GetProgram().Nodes.ContainsKey(nodeName);
-                }
-
-                if (nodenameContent == null)
-                {
-                    nodenameContent = new GUIContent();
-                }
-
-                // Show warning icon if not does not exist in selected project
-                nodenameContent.text = nodeName;
-                if (referenceExists || !nodeNameSet)
-                {
-                    nodenameContent.image = null;
-                }
-                else if (nodenameContent.image == null)
-                {
-                    nodenameContent.image = EditorGUIUtility.IconContent("d_console.warnicon.sml").image;
-                }
-
-                var hasMixedNodeValues = nodeNameProp.hasMultipleDifferentValues;
-                EditorGUI.showMixedValue = hasMixedNodeValues;
-
-                // Generate menu with node list only when user actually opens it
-                if (EditorGUI.DropdownButton(position, nodenameContent, FocusType.Keyboard))
-                {
-                    var menu = new GenericMenu();
-
-                    menu.AddItem(new GUIContent("Edit..."), false, () => {
-                        editNodeAsText = true;
-                        focusNodeTextField = true;
-                    });
-
-                    GenericMenu.MenuFunction copyAction = null;
-                    if (nodeNameSet && !hasMixedNodeValues)
+                    using (new EditorGUI.DisabledGroupScope(true))
                     {
-                        copyAction = () => {
-                            EditorGUIUtility.systemCopyBuffer = nodeName;
-                        };
+                        EditorGUI.DropdownButton(nodeNameFieldPosition, GUIContent.none, FocusType.Passive);
                     }
-                    menu.AddItem(new GUIContent("Copy"), false, copyAction);
+                }
+                else
+                {
+                    var nodeName = nodeNameProp.stringValue;
+                    var nodeNameSet = !string.IsNullOrEmpty(nodeName);
 
-                    GenericMenu.MenuFunction pasteAction = null;
-                    var pasteNode = EditorGUIUtility.systemCopyBuffer;
-                    if (!string.IsNullOrEmpty(pasteNode))
+                    // Cached check if node exists in project
+                    if (lastProject != project || lastNodeName != nodeName)
                     {
-                        pasteAction = () => {
-                            nodeNameProp.stringValue = pasteNode;
-                            nodeNameProp.serializedObject.ApplyModifiedProperties();
-                        };
+                        lastProject = project;
+                        lastNodeName = nodeName;
+                        referenceExists = project.Program.Nodes.ContainsKey(nodeName);
                     }
-                    menu.AddItem(new GUIContent("Paste"), false, pasteAction);
 
-                    menu.AddSeparator("");
-
-                    menu.AddItem(new GUIContent("<None>"), !nodeNameSet, () => {
-                        nodeNameProp.stringValue = "";
-                        nodeNameProp.serializedObject.ApplyModifiedProperties();
-                    });
-
-                    if (!referenceExists && nodeNameSet && !hasMixedNodeValues)
+                    if (nodenameContent == null)
                     {
-                        menu.AddItem(new GUIContent(nodeName + " (Missing)"), true, () => { 
-                            nodeNameProp.stringValue = nodeName;
+                        nodenameContent = new GUIContent();
+                    }
+
+                    // Show warning icon if not does not exist in selected project
+
+                    if (nodeNameSet) {
+                        nodenameContent.text = nodeName;
+                    } else {
+                        nodenameContent.text = "(Choose Node)";
+                    }
+
+                    MessageType iconType = MessageType.None;
+
+                    if (!nodeNameSet) {
+                        iconType = MessageType.Info;
+                    } else if (!referenceExists)
+                    {
+                        iconType = MessageType.Warning;
+                    }
+                    else
+                    {
+                        iconType = MessageType.None;
+                    }
+                
+                    switch (iconType) {
+                        case MessageType.Info:
+                            nodenameContent.image = EditorGUIUtility.isProSkin ? EditorGUIUtility.IconContent("d_console.infoicon.sml").image : EditorGUIUtility.IconContent("console.infoicon.sml").image;
+                            break;
+                        case MessageType.Warning:
+                            nodenameContent.image = EditorGUIUtility.isProSkin ? EditorGUIUtility.IconContent("d_console.warnicon.sml").image : EditorGUIUtility.IconContent("console.warnicon.sml").image;
+                            break;
+                        default:
+                            nodenameContent.image = null;
+                            break;
+                    }
+
+                    var hasMixedNodeValues = nodeNameProp.hasMultipleDifferentValues;
+                    EditorGUI.showMixedValue = hasMixedNodeValues;
+
+                    // Generate menu with node list only when user actually opens it
+                    if (EditorGUI.DropdownButton(nodeNameFieldPosition, nodenameContent, FocusType.Keyboard))
+                    {
+                        var menu = new GenericMenu();
+
+                        menu.AddItem(new GUIContent("Edit..."), false, () =>
+                        {
+                            editNodeAsText = true;
+                            focusNodeTextField = true;
+                        });
+
+                        GenericMenu.MenuFunction copyAction = null;
+                        if (nodeNameSet && !hasMixedNodeValues)
+                        {
+                            copyAction = () =>
+                            {
+                                EditorGUIUtility.systemCopyBuffer = nodeName;
+                            };
+                        }
+                        menu.AddItem(new GUIContent("Copy"), false, copyAction);
+
+                        GenericMenu.MenuFunction pasteAction = null;
+                        var pasteNode = EditorGUIUtility.systemCopyBuffer;
+                        if (!string.IsNullOrEmpty(pasteNode))
+                        {
+                            pasteAction = () =>
+                            {
+                                nodeNameProp.stringValue = pasteNode;
+                                nodeNameProp.serializedObject.ApplyModifiedProperties();
+                            };
+                        }
+                        menu.AddItem(new GUIContent("Paste"), false, pasteAction);
+
+                        menu.AddSeparator("");
+
+                        menu.AddItem(new GUIContent("<None>"), !nodeNameSet, () =>
+                        {
+                            nodeNameProp.stringValue = "";
                             nodeNameProp.serializedObject.ApplyModifiedProperties();
                         });
-                    }
 
-                    foreach (var name in project.GetProgram().Nodes.Keys)
-                    {
-                        menu.AddItem(new GUIContent(name), (name == nodeName && !hasMixedNodeValues), () => { 
-                            nodeNameProp.stringValue = name;
-                            nodeNameProp.serializedObject.ApplyModifiedProperties();
-                        });
-                    }
+                        if (!referenceExists && nodeNameSet && !hasMixedNodeValues)
+                        {
+                            menu.AddItem(new GUIContent(nodeName + " (Missing)"), true, () =>
+                            {
+                                nodeNameProp.stringValue = nodeName;
+                                nodeNameProp.serializedObject.ApplyModifiedProperties();
+                            });
+                        }
 
-                    menu.DropDown(position);
+                        foreach (var name in project.GetProgram().Nodes.Keys)
+                        {
+                            menu.AddItem(new GUIContent(name), (name == nodeName && !hasMixedNodeValues), () =>
+                            {
+                                nodeNameProp.stringValue = name;
+                                nodeNameProp.serializedObject.ApplyModifiedProperties();
+                            });
+                        }
+
+                        menu.DropDown(nodeNameFieldPosition);
+                    }
                 }
             }
 
             EditorGUI.indentLevel = indent;
 
             EditorGUI.EndProperty();
+        }
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            var lineCount = 2;
+
+            return EditorGUIUtility.singleLineHeight * lineCount
+                 + EditorGUIUtility.standardVerticalSpacing * (lineCount - 1);
         }
 
         static bool ShouldEndEditing(string controlName)
