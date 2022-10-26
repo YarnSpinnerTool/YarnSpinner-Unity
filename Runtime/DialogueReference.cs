@@ -8,13 +8,12 @@ using UnityEditor;
 namespace Yarn.Unity
 {
     /// <summary>
-    /// Reference to a dialogue node in a Yarn Project.
+    /// Stores a reference to a dialogue node in a Yarn Project.
     /// </summary>
     /// <remarks>
-    /// A combination of Yarn Project asset reference and dialog name,
-    /// allowing to check if the node exists in the project.
-    /// Comes with a property drawer that allows to select the node
-    /// from a drop-down and warns if the node doesn't exist.
+    /// A Dialogue Reference is a reference to a named node inside a given Yarn
+    /// Project. This allows the editor to warn the user if node doesn't exist
+    /// in the specified project.
     /// </remarks>
     [Serializable]
     public class DialogueReference
@@ -23,6 +22,7 @@ namespace Yarn.Unity
         /// The Yarn Project asset containing the dialogue node.
         /// </summary>
         public YarnProject project;
+
         /// <summary>
         /// The name of the dialogue node in the project.
         /// </summary>
@@ -35,15 +35,17 @@ namespace Yarn.Unity
         public bool IsValid => project != null && !string.IsNullOrEmpty(nodeName) && project.Program.Nodes.ContainsKey(nodeName);
 
         /// <summary>
-        /// Create an empty dialogue reference.
+        /// Creates an empty dialogue reference.
         /// </summary>
         public DialogueReference() { }
 
         /// <summary>
-        /// Create a dialogue reference with a given project and node name.
+        /// Creates a dialogue reference with a given project and node name.
         /// </summary>
-        /// <param name="project">Yarn Project asset containing the node.</param>
-        /// <param name="nodeName">Name of the node in the project asset.</param>
+        /// <param name="project">Yarn Project asset containing the
+        /// node.</param>
+        /// <param name="nodeName">Name of the node in the project
+        /// asset.</param>
         public DialogueReference(YarnProject project, string nodeName)
         {
             this.project = project;
@@ -106,9 +108,9 @@ namespace Yarn.Unity
             {
                 var controlName = NodeTextControlNamePrefix + controlId;
 
-                // Multi-selection with different projects,
-                // just show a text field to edit the node name.
-                // Most of the time, it will show the mixed value dash (—).
+                // Multi-selection with different projects, just show a text
+                // field to edit the node name. Most of the time, it will show
+                // the mixed value dash (—).
                 GUI.SetNextControlName(controlName);
                 EditorGUI.PropertyField(position, nodeNameProp, GUIContent.none);
 
@@ -117,7 +119,8 @@ namespace Yarn.Unity
                     if (focusNodeTextField)
                     {
                         // Focusing the text field is delayed like this because
-                        // the control needs to exist first before we can focus it
+                        // the control needs to exist first before we can focus
+                        // it
                         focusNodeTextField = false;
                         EditorGUI.FocusTextInControl(controlName); 
                     }
