@@ -11,8 +11,19 @@
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Yarn.Antlr4.Runtime.Standard.dll",
+        "Yarn.CsvHelper.dll",
+        "Yarn.Google.Protobuf.dll",
+        "Yarn.System.Buffers.dll",
+        "Yarn.System.Memory.dll",
+        "Yarn.System.Numerics.Vectors.dll",
+        "Yarn.System.Reflection.TypeExtensions.dll",
+        "Yarn.System.Runtime.CompilerServices.Unsafe.dll",
+        "YarnSpinner.Compiler.dll",
+        "YarnSpinner.dll"
+    ],
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [

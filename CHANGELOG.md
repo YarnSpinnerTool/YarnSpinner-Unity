@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - These methods allow you to register a `Delegate` object as a command or function. 
     > **Note:**
     > We recommand that you use the pre-existing `AddCommandHandler` and `AddFunction` methods that take `System.Action` or `System.Func` parameters unless you have a very specific reason for using this, as the pre-existing methods allow the compiler to do type-checking on your command and function implementations.
+- Fixed an issue that would cause compilation errors if a Unity project using Yarn Spinner also used a DLL with the same name as one of Yarn Spinner's dependencies (for example Google Protocol Buffers).
+  - The dependency DLLs that come with Yarn Spinner (for example, `Antlr.Runtime`, `Google.Probuf`, and others) have been renamed to have the prefix `Yarn.`, and the assembly definition files for Yarn Spinner have been updated to use the renamed files. 
 
 ## [2.2.1] 2022-06-14
 

@@ -15,8 +15,12 @@
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Yarn.Google.Protobuf.dll",
+        "YarnSpinner.dll",
+        "YarnSpinner.Compiler.dll"
+    ],
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [

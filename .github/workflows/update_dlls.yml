@@ -69,6 +69,22 @@ jobs:
     - name: Test
       run: dotnet test --no-build --configuration Release --verbosity normal
       working-directory: ./YarnSpinner
+
+    # We need to copy dependency DLLs into the project, but if a Unity project
+    # contains multiple DLLs with the same name (even from a package), that's an
+    # error. This causes problems for users who want to use, for example,
+    # Google.Protobuf (especially if they want to use a different version). 
+    #
+    # Our solution partly involves renaming the dependency DLLs to have the
+    # prefix 'Yarn.'. For more information on this fix, see
+    # https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/15#issuecomment-1036162152.
+    - name: Rename vendored DLLs
+      run: |
+        cd YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/
+        ls | grep -v 'Yarn.*' | grep -e '.*dll' | while read filename; do
+          mv -v $filename Yarn.$filename
+        done
+
     
     # Copy all of the dependency DLLs into the YarnSpinner-Unity repo, except
     # for Microsoft.CSharp.dll (which is provided by Unity, so including it
@@ -76,7 +92,7 @@ jobs:
     - name: Copy DLLs
       run: |
         cp -v YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/*.dll YarnSpinner-Unity/Runtime/DLLs
-        rm -fv YarnSpinner-Unity/Runtime/DLLs/Microsoft.CSharp.dll
+        rm -fv YarnSpinner-Unity/Runtime/DLLs/Yarn.Microsoft.CSharp.dll
     
     # Make the PR against YarnSpinner-Unity that merges this change
     - name: Create pull request
