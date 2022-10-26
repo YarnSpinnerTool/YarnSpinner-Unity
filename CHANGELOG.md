@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed interrupt token handling in `VoiceOverView` that would cause it to permanently stop a Dialogue Runner's ability to progress through dialogue lines.
 - Fixed an issue where lines and options that contain invalid markup would cause an exception to be thrown, breaking dialogue. A warning message is now logged instead, and the original text of the line (with any invalid markup present) is delivered.
 - Fixed a compiler error that made Yarn Spinner fail to compile on Unity 2020.1.
+- The `AddCommandHandler(string name, Delegate handler)` and `AddFunction(string name, Delegate handler)` methods on `DialogueRunner` are now `public`.
+  - These methods allow you to register a `Delegate` object as a command or function. 
+    > **Note:**
+    > We recommand that you use the pre-existing `AddCommandHandler` and `AddFunction` methods that take `System.Action` or `System.Func` parameters unless you have a very specific reason for using this, as the pre-existing methods allow the compiler to do type-checking on your command and function implementations.
 
 ## [2.2.1] 2022-06-14
 

@@ -446,7 +446,7 @@ namespace Yarn.Unity
         /// <param name="commandName">The name of the command.</param>
         /// <param name="handler">The <see cref="CommandHandler"/> that will be
         /// invoked when the command is called.</param>
-        private void AddCommandHandler(string commandName, Delegate handler)
+        public void AddCommandHandler(string commandName, Delegate handler)
         {
             if (commandHandlers.ContainsKey(commandName))
             {
@@ -573,7 +573,7 @@ namespace Yarn.Unity
         /// <param name="implementation">The <see cref="Delegate"/> that
         /// should be invoked when this function is called.</param>
         /// <seealso cref="Library"/>
-        private void AddFunction(string name, Delegate implementation)
+        public void AddFunction(string name, Delegate implementation)
         {
             if (Dialogue.Library.FunctionExists(name))
             {
