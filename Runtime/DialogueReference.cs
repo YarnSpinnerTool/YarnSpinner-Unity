@@ -60,15 +60,15 @@ namespace Yarn.Unity
     [CustomPropertyDrawer(typeof(DialogueReference))]
     public class DialogueReferenceDrawer : PropertyDrawer
     {
-        const string NodeTextControlNamePrefix = "DialogueReference.NodeName.";
+        private const string NodeTextControlNamePrefix = "DialogueReference.NodeName.";
 
-        YarnProject lastProject;
-        string lastNodeName;
-        bool referenceExists;
-        bool editNodeAsText;
-        bool focusNodeTextField;
+        private YarnProject lastProject;
+        private string lastNodeName;
+        private bool referenceExists;
+        private bool editNodeAsText;
+        private bool focusNodeTextField;
 
-        GUIContent nodenameContent;
+        private GUIContent nodenameContent;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -91,11 +91,10 @@ namespace Yarn.Unity
 
             var projectFieldPosition = position;
             projectFieldPosition.height = EditorGUIUtility.singleLineHeight;
-            
+
             var nodeNameFieldPosition = position;
             nodeNameFieldPosition.height = EditorGUIUtility.singleLineHeight;
             nodeNameFieldPosition.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
-            
 
             EditorGUI.PropertyField(projectFieldPosition, projectProp, GUIContent.none);
 
@@ -122,7 +121,7 @@ namespace Yarn.Unity
                         // the control needs to exist first before we can focus
                         // it
                         focusNodeTextField = false;
-                        EditorGUI.FocusTextInControl(controlName); 
+                        EditorGUI.FocusTextInControl(controlName);
                     }
                     else if (ShouldEndEditing(controlName))
                     {
@@ -165,17 +164,22 @@ namespace Yarn.Unity
 
                     // Show warning icon if not does not exist in selected project
 
-                    if (nodeNameSet) {
+                    if (nodeNameSet)
+                    {
                         nodenameContent.text = nodeName;
-                    } else {
+                    }
+                    else
+                    {
                         nodenameContent.text = "(Choose Node)";
                     }
 
                     MessageType iconType = MessageType.None;
 
-                    if (!nodeNameSet) {
+                    if (!nodeNameSet)
+                    {
                         iconType = MessageType.Info;
-                    } else if (!referenceExists)
+                    }
+                    else if (!referenceExists)
                     {
                         iconType = MessageType.Warning;
                     }
@@ -183,8 +187,9 @@ namespace Yarn.Unity
                     {
                         iconType = MessageType.None;
                     }
-                
-                    switch (iconType) {
+
+                    switch (iconType)
+                    {
                         case MessageType.Info:
                             nodenameContent.image = EditorGUIUtility.isProSkin ? EditorGUIUtility.IconContent("d_console.infoicon.sml").image : EditorGUIUtility.IconContent("console.infoicon.sml").image;
                             break;
@@ -249,9 +254,9 @@ namespace Yarn.Unity
                             });
                         }
 
-                        foreach (var name in project.GetProgram().Nodes.Keys)
+                        foreach (var name in project.Program.Nodes.Keys)
                         {
-                            menu.AddItem(new GUIContent(name), (name == nodeName && !hasMixedNodeValues), () =>
+                            menu.AddItem(new GUIContent(name), name == nodeName && !hasMixedNodeValues, () =>
                             {
                                 nodeNameProp.stringValue = name;
                                 nodeNameProp.serializedObject.ApplyModifiedProperties();
@@ -272,18 +277,22 @@ namespace Yarn.Unity
         {
             var lineCount = 2;
 
-            return EditorGUIUtility.singleLineHeight * lineCount
-                 + EditorGUIUtility.standardVerticalSpacing * (lineCount - 1);
+            return (EditorGUIUtility.singleLineHeight * lineCount)
+                 + (EditorGUIUtility.standardVerticalSpacing * (lineCount - 1));
         }
 
-        static bool ShouldEndEditing(string controlName)
+        private static bool ShouldEndEditing(string controlName)
         {
             if (GUI.GetNameOfFocusedControl() != controlName)
+            {
                 return false;
+            }
 
             var keyCode = Event.current.keyCode;
             if (keyCode != KeyCode.Return && keyCode != KeyCode.KeypadEnter)
+            {
                 return false;
+            }
 
             return true;
         }
