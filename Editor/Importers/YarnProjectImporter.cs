@@ -138,7 +138,7 @@ namespace Yarn.Unity.Editor
         /// <seealso cref="searchAllAssembliesForActions"/>
         public AssemblyDefinitionAsset[] assembliesToSearch;
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2020_2_OR_NEWER
         [NonReorderable]
 #endif
         public FunctionInfo[] ListOfFunctions;
