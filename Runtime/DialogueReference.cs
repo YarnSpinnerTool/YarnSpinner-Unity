@@ -215,28 +215,6 @@ namespace Yarn.Unity
                             focusNodeTextField = true;
                         });
 
-                        GenericMenu.MenuFunction copyAction = null;
-                        if (nodeNameSet && !hasMixedNodeValues)
-                        {
-                            copyAction = () =>
-                            {
-                                EditorGUIUtility.systemCopyBuffer = nodeName;
-                            };
-                        }
-                        menu.AddItem(new GUIContent("Copy"), false, copyAction);
-
-                        GenericMenu.MenuFunction pasteAction = null;
-                        var pasteNode = EditorGUIUtility.systemCopyBuffer;
-                        if (!string.IsNullOrEmpty(pasteNode))
-                        {
-                            pasteAction = () =>
-                            {
-                                nodeNameProp.stringValue = pasteNode;
-                                nodeNameProp.serializedObject.ApplyModifiedProperties();
-                            };
-                        }
-                        menu.AddItem(new GUIContent("Paste"), false, pasteAction);
-
                         menu.AddSeparator("");
 
                         menu.AddItem(new GUIContent("<None>"), !nodeNameSet, () =>
