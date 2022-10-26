@@ -29,18 +29,10 @@ namespace Yarn.Unity
         public string nodeName;
 
         /// <summary>
-        /// Wether the reference has project and node name set.
-        /// Does not check if the node exists in the project.
+        /// Gets a value indicating that this reference is valid - that is, the
+        /// project and node name are set, and the node exists in the project.
         /// </summary>
-        public bool IsSet => project != null && !string.IsNullOrEmpty(nodeName);
-
-        /// <summary>
-        /// Wether project and node name are set and the node exists in the project.
-        /// </summary>
-        /// <remarks>
-        /// This loads the compiled Yarn program, might be expensive to call frequently.
-        /// </remarks>
-        public bool IsSetAndExists => IsSet && project.GetProgram().Nodes.ContainsKey(nodeName);
+        public bool IsValid => project != null && !string.IsNullOrEmpty(nodeName) && project.Program.Nodes.ContainsKey(nodeName);
 
         /// <summary>
         /// Create an empty dialogue reference.
