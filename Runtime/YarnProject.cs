@@ -26,6 +26,12 @@ namespace Yarn.Unity
         public LineMetadata lineMetadata;
 
         /// <summary>
+        /// The cached result of deserializing <see
+        /// cref="compiledYarnProgram"/>.
+        /// </summary>
+        private Program cachedProgram = null;
+
+        /// <summary>
         /// The names of assemblies that <see cref="ActionManager"/> should look
         /// for commands and functions in when this project is loaded into a
         /// <see cref="DialogueRunner"/>.
@@ -57,12 +63,32 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Deserializes a compiled Yarn program from the stored bytes in
-        /// this object.
+        /// Gets the Yarn Program stored in this project.
         /// </summary>
+        [System.Obsolete("Use the Program property instead, which caches its return value.")]
         public Program GetProgram()
         {
             return Program.Parser.ParseFrom(compiledYarnProgram);
+        }
+
+        /// <summary>
+        /// Gets the Yarn Program stored in this project.
+        /// </summary>
+        /// <remarks>
+        /// The first time this is called, the program stored in <see
+        /// cref="compiledYarnProgram"/> is deserialized and cached. Future
+        /// calls to this method will return the cached value.
+        /// </remarks>
+        public Program Program
+        {
+            get
+            {
+                if (cachedProgram == null)
+                {
+                    cachedProgram = Program.Parser.ParseFrom(compiledYarnProgram);
+                }
+                return cachedProgram;
+            }
         }
     }
 }
