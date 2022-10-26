@@ -19,7 +19,14 @@
     "precompiledReferences": [
         "Yarn.Google.Protobuf.dll",
         "YarnSpinner.dll",
-        "YarnSpinner.Compiler.dll"
+        "YarnSpinner.Compiler.dll",
+        "Yarn.Antlr4.Runtime.Standard.dll",
+        "Yarn.CsvHelper.dll",
+        "Yarn.System.Buffers.dll",
+        "Yarn.System.Memory.dll",
+        "Yarn.System.Numerics.Vectors.dll",
+        "Yarn.System.Reflection.TypeExtensions.dll",
+        "Yarn.System.Runtime.CompilerServices.Unsafe.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],
