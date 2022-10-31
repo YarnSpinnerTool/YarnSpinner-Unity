@@ -17,7 +17,7 @@ using System.Reflection;
 using UnityEditor.AddressableAssets;
 #endif
 
-#if USE_UNITY_LOCALIZATION
+#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
 using UnityEditor.Localization;
 using UnityEngine.Localization.Tables;
 #endif
@@ -44,8 +44,10 @@ namespace Yarn.Unity.Editor
 
         private SerializedProperty predeterminedFunctionsProperty;
 
+#if YARN_ENABLE_EXPERIMENTAL_FEATURES
         private SerializedProperty useUnityLocalisationSystemProperty;
         private SerializedProperty unityLocalisationTableCollectionProperty;
+#endif
 
         public override void OnEnable()
         {
@@ -66,7 +68,7 @@ namespace Yarn.Unity.Editor
 
             predeterminedFunctionsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.ListOfFunctions));
 
-#if USE_UNITY_LOCALIZATION
+#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
             useUnityLocalisationSystemProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.UseUnityLocalisationSystem));
             unityLocalisationTableCollectionProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.unityLocalisationStringTableCollection));
 #endif
@@ -130,7 +132,7 @@ namespace Yarn.Unity.Editor
 
             CurrentProjectDefaultLanguageProperty = defaultLanguageProperty;
 
-#if USE_UNITY_LOCALIZATION
+#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
             EditorGUILayout.PropertyField(useUnityLocalisationSystemProperty, new GUIContent("Use Unity's Built-in Localisation System"));
 
             // if we are using the unity localisation system we need a field to add in the string table

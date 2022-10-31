@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity;
 
+#if YARN_ENABLE_EXPERIMENTAL_FEATURES
+
 #if USE_UNITY_LOCALIZATION
 using UnityEngine.Localization.Tables;
 using UnityEngine.Localization;
@@ -17,17 +19,21 @@ namespace Yarn.Unity
 
 #if USE_UNITY_LOCALIZATION
         // the string table asset that has all of our (hopefully) localised strings inside
-        [SerializeField] private LocalizedStringTable strings;
+        [SerializeField] private LocalizedStringTable stringsTable;
+        [SerializeField] private LocalizedAssetTable assetTable;
+
         // the runtime table we actually get our strings out of
         // this changes at runtime depending on the language
-        private StringTable table;
+        private StringTable currentStringsTable;
+        private AssetTable currentAssetTable;
+
 
         public override LocalizedLine GetLocalizedLine(Yarn.Line line)
         {
             var text = line.ID;
-            if (table != null)
+            if (currentStringsTable != null)
             {
-                text = table[line.ID]?.LocalizedValue ?? line.ID;
+                text = currentStringsTable[line.ID]?.LocalizedValue ?? line.ID;
             }
 
             return new LocalizedLine()
@@ -42,18 +48,33 @@ namespace Yarn.Unity
         public override void Start()
         {
             // doing an initial load of the strings
-            var loading = strings.GetTable();
-            table = loading;
+            if (stringsTable != null) {
+                currentStringsTable = stringsTable.GetTable();
+            }
+
+            if (assetTable != null) {
+                currentAssetTable = assetTable.GetTable();
+            }
 
             // registering for any changes to the string table so we can update as needed
-            strings.TableChanged += OnStringTableChanged;
+            stringsTable.TableChanged += OnStringTableChanged;
+            assetTable.TableChanged += OnAssetTableChanged;
         }
 
-        // if the strings change, either by actual modifications at runtime or locale change we update our strings
+        // if the strings change, either by actual modifications at runtime or
+        // locale change we update our strings
         private void OnStringTableChanged(StringTable newTable)
         {
-            table = newTable;
+            currentStringsTable = newTable;
         }
+
+        // if the assets change, either by actual modifications at runtime or
+        // locale change we update our assets
+        private void OnAssetTableChanged(AssetTable value)
+        {
+            currentAssetTable = value;
+        }
+
 #else
         public override void Start()
         {
@@ -73,3 +94,5 @@ namespace Yarn.Unity
 #endif
     }
 }
+
+#endif

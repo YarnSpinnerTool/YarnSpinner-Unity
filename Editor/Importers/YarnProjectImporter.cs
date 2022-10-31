@@ -147,7 +147,7 @@ namespace Yarn.Unity.Editor
 
         bool IYarnErrorSource.Destroyed => this == null;
 
-#if USE_UNITY_LOCALIZATION
+#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
         public bool UseUnityLocalisationSystem = false;
         public StringTableCollection unityLocalisationStringTableCollection;
 #endif
@@ -481,7 +481,7 @@ namespace Yarn.Unity.Editor
                 project.lineMetadata = new LineMetadata(LineMetadataTableEntriesFromCompilationResult(compilationResult));
             }
 
-#if USE_UNITY_LOCALIZATION
+#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
             if (UseUnityLocalisationSystem)
             {
                 ConvertInternalYarnStringTableEntriesIntoUnityLocalisedStringTableEntries(StringTableEntriesFromCompilationResult(compilationResult));
@@ -511,7 +511,7 @@ namespace Yarn.Unity.Editor
 
         }
 
-#if USE_UNITY_LOCALIZATION
+#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
         private void ConvertInternalYarnStringTableEntriesIntoUnityLocalisedStringTableEntries(IEnumerable<StringTableEntry> entries)
         {
             if (this.unityLocalisationStringTableCollection == null)

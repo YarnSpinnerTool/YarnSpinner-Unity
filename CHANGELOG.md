@@ -16,9 +16,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- A Unity Localization package localised line provider subclass, `UnityLocalisedLineProvider.cs`, is now provided alongside the other line providers.
-- Yarn Project importer now has initial support for Unity's Localization system.
 - The `DialogueReference` class, which stores a reference to a named node in a given project (and shows a warning in the Inspector if the reference can't be found) has been added. Thanks to [@sttz](https://github.com/sttz) for the [contribution](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/pull/189)! 
+- Initial work on support for the Unity Localization system has been added.
+  - These features are currently behind a feature flag. They are not yet considered ready for production use, and we aren't offering support for it yet.
+  - To access them, add the scripting define symbol `YARN_ENABLE_EXPERIMENTAL_FEATURES`. You should only do this if you know what this involves.
+  - Yarn Project importer now has initial support for Unity's Localization system.
+  - A new localised line provider subclass, `UnityLocalisedLineProvider.cs` has been added.
 
 ### Changed
 
