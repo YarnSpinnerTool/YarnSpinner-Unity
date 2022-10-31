@@ -57,16 +57,16 @@ namespace Yarn.Unity
 #else
         public override void Start()
         {
-            Debug.LogError("Unable to use the localised line provider without also including the Unity Localization package.");
+            Debug.LogError($"{nameof(UnityLocalisedLineProvider)} requires that the Unity Localization package is installed in the project. To fix this, install Unity Localization.");
         }
         public override LocalizedLine GetLocalizedLine(Yarn.Line line)
         {
-            Debug.LogError("Unable to create a localised line, this class does not work without also uncluding the Unity Localization package");
+            Debug.LogError($"{nameof(UnityLocalisedLineProvider)}: Can't create a localised line for ID {line.ID} because the Unity Localization package is not installed in this project. To fix this, install Unity Localization.");
             
             return new LocalizedLine()
             {
                 TextID = line.ID,
-                RawText = $"{line.ID}: Unable to create a localised line, this line provider does not work without also uncluding the Unity Localization package",
+                RawText = $"{line.ID}: Unable to create a localised line, because the Unity Localization package is not installed in this project.",
                 Substitutions = line.Substitutions,
             };
         }
