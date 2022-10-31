@@ -242,7 +242,7 @@ namespace Yarn.Unity
             // Register any new functions that we found as part of doing this.
             ActionManager.RegisterFunctions(Dialogue.Library);
 
-            Dialogue.SetProgram(newProject.GetProgram());
+            Dialogue.SetProgram(newProject.Program);
 
             if (lineProvider != null) {
                 lineProvider.YarnProject = newProject;
@@ -264,7 +264,7 @@ namespace Yarn.Unity
 
             // grabbing all the initial values from the program and inserting them into the storage
             // we first need to make sure that the value isn't already set in the storage
-            var values = yarnProject.GetProgram().InitialValues;
+            var values = yarnProject.Program.InitialValues;
             foreach (var pair in values)
             {
                 if (!overrideExistingValues && VariableStorage.Contains(pair.Key))
