@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Added a check for `IsEmpty` in `UnityLocalisedLineProvider.cs` to ensure `stringsTable` and `assetTable` exist and are selected in the editor
+
 ### Removed
 
 ## [2.2.2] 2022-10-31
