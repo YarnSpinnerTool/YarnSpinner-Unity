@@ -48,11 +48,11 @@ namespace Yarn.Unity
         public override void Start()
         {
             // doing an initial load of the strings
-            if (stringsTable != null) {
+            if (stringsTable != null && !stringsTable.IsEmpty) {
                 currentStringsTable = stringsTable.GetTable();
             }
 
-            if (assetTable != null) {
+            if (assetTable != null && !assetTable.IsEmpty) {
                 currentAssetTable = assetTable.GetTable();
             }
 
