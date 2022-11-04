@@ -13,55 +13,6 @@ namespace Yarn.Unity.Tests
 {
     public class YarnImporterTests
     {
-
-        private static DefaultAsset GetFolder(string directoryName)
-        {
-            var path = AssetDatabase.FindAssets(Path.GetFileNameWithoutExtension(directoryName) + " t:DefaultAsset")
-                                    .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
-                                    .FirstOrDefault(p => Path.GetFileName(p) == directoryName);
-
-            if (path == null)
-            {
-                throw new DirectoryNotFoundException(path);
-            }
-            if (Directory.Exists(path) == false)
-            {
-                throw new DirectoryNotFoundException(path);
-            }
-
-            return AssetDatabase.LoadAssetAtPath<DefaultAsset>(path);
-        }
-
-        private static TextAsset GetScriptSource(string fileName)
-        {
-            var path = AssetDatabase.FindAssets(Path.GetFileNameWithoutExtension(fileName))
-                                    .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
-                                    .FirstOrDefault(p => Path.GetFileName(p) == fileName);
-
-            if (path == null)
-            {
-                throw new FileNotFoundException(path);
-            }
-
-            Debug.Log($"Resolved {fileName} to {path}");
-
-            return AssetDatabase.LoadAssetAtPath<TextAsset>(path);
-        }
-
-        // A sample Yarn script that we'll store in an asset as part of
-        // these tests
-        private static string TestYarnScriptSource => GetScriptSource("TestYarnScript.yarn").text;
-
-        private static string TestYarnProgramSource => GetScriptSource("TestYarnProject.yarnproject").text;
-
-        private static string TestYarnScriptSourceModified => GetScriptSource("TestYarnScript-Modified.yarn").text;
-
-        private static string TestYarnScriptSourceNoMetadata => GetScriptSource("TestYarnScript-NoMetadata.yarn").text;
-
-        private static IEnumerable<StringTableEntry> ExpectedStrings => StringTableEntry.ParseFromCSV(GetScriptSource("TestYarnProject-Strings.csv").text);
-
-        private static IEnumerable<LineMetadataTableEntry> ExpectedMetadata => LineMetadataTableEntry.ParseFromCSV(GetScriptSource("TestYarnProject-Metadata.csv").text);
-
         // The files that a test created, stored as paths. These files are
         // deleted in TearDown.
         List<string> createdFilePaths = new List<string>();
@@ -75,97 +26,18 @@ namespace Yarn.Unity.Tests
         [TearDown]
         public void TearDown()
         {
-            foreach (var path in createdFilePaths)
-            {
-                Debug.Log($"Cleanup: Deleting {path}");
-                File.Delete(path);
-
-                string metaFilePath = path + ".meta";
-
-                if (File.Exists(metaFilePath))
-                {
-                    File.Delete(metaFilePath);
-                }
-            }
-
-            AssetDatabase.Refresh();
+            YarnTestUtility.DeleteFilesAndMetadata(createdFilePaths);
         }
+
 
         // Sets up a YarnProject, and as many yarn scripts as there are
         // parameters. All files will have random filenames.
         public YarnProject SetUpProject(params string[] yarnScriptText)
         {
-
-            // Disable errors causing failures, in case the yarn script
-            // text contains deliberately invalid code
-            var wasIgnoringFailingMessages = LogAssert.ignoreFailingMessages;
-            LogAssert.ignoreFailingMessages = true;
-
-            string yarnProjectName = Path.GetRandomFileName();
-            string yarnProjectPath = $"Assets/{yarnProjectName}.yarnproject";
-            createdFilePaths.Add(yarnProjectPath);
-
-            var project = YarnEditorUtility.CreateYarnProject(yarnProjectPath) as YarnProject;
-            var yarnProjectImporter = AssetImporter.GetAtPath(yarnProjectPath) as YarnProjectImporter;
-
-            var pathsToAdd = new List<string>();
-
-            foreach (var scriptText in yarnScriptText)
-            {
-
-                string yarnScriptName = Path.GetRandomFileName();
-                string yarnScriptPath = $"Assets/{yarnScriptName}.yarn";
-                createdFilePaths.Add(yarnScriptPath);
-                pathsToAdd.Add(yarnScriptPath);
-
-                string textToWrite;
-
-                if (string.IsNullOrEmpty(scriptText))
-                {
-                    textToWrite = $"title: {yarnScriptName.Replace(".", "_")}\n---\n===\n";
-                }
-                else
-                {
-                    textToWrite = scriptText;
-                }
-
-                File.WriteAllText(yarnScriptPath, textToWrite);
-            }
-
-            // Import all these files
-            AssetDatabase.Refresh();
-
-            foreach (var path in pathsToAdd)
-            {
-                var textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
-
-                // We should have a text asset, imported by a YarnImporter
-                Assert.IsNotNull(textAsset);
-                Assert.IsInstanceOf<YarnImporter>(AssetImporter.GetAtPath(path));
-
-                // Make the yarn project use this script
-                yarnProjectImporter.sourceScripts.Add(textAsset);
-            }
-
-            // Reimport the project to make it set up the links
-            EditorUtility.SetDirty(yarnProjectImporter);
-            yarnProjectImporter.SaveAndReimport();
-
-            foreach (var path in pathsToAdd)
-            {
-                var scriptImporter = AssetImporter.GetAtPath(path) as YarnImporter;
-
-                Assert.AreSame(project, scriptImporter.DestinationProject);
-            }
-
-            // As a final check, make sure the project is referencing the
-            // right number of scripts
-            Assert.AreEqual(yarnScriptText.Length, yarnProjectImporter.sourceScripts.Count);
-
-            LogAssert.ignoreFailingMessages = wasIgnoringFailingMessages;
-
-            return project;
+            YarnTestUtility.SetupYarnProject(yarnScriptText, ref createdFilePaths, out var yarnProject);
+            return yarnProject;
         }
+
 
         /// <summary>
         /// Formats a string with a random file name, registers that path
@@ -190,7 +62,7 @@ namespace Yarn.Unity.Tests
             var path = Application.dataPath + "/" + fileName + ".yarn";
             createdFilePaths.Add(path);
 
-            File.WriteAllText(path, TestYarnScriptSource, System.Text.Encoding.UTF8);
+            File.WriteAllText(path, YarnTestUtility.TestYarnScriptSource, System.Text.Encoding.UTF8);
             AssetDatabase.Refresh();
             var result = AssetImporter.GetAtPath("Assets/" + fileName + ".yarn") as YarnImporter;
 
@@ -288,7 +160,7 @@ But not all of them are.
         {
             // Arrange:
             // Set up a project with a Yarn file filled with tagged lines.
-            var project = SetUpProject(TestYarnScriptSource);
+            var project = SetUpProject(YarnTestUtility.TestYarnScriptSource);
             var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
 
             // Act: 
@@ -298,7 +170,7 @@ But not all of them are.
             // Simplify the results so that we can compare these string
             // table entries based only on specific fields
             System.Func<StringTableEntry, (string id, string text)> simplifier = e => (id: e.ID, text: e.Text);
-            var simpleExpected = ExpectedStrings.Select(simplifier);
+            var simpleExpected = YarnTestUtility.ExpectedStrings.Select(simplifier);
             var simpleResult = generatedStringsTable.Select(simplifier);
 
             // Assert:
@@ -312,7 +184,7 @@ But not all of them are.
         {
             // Arrange:
             // Set up a project with a Yarn file with metadata in some lines.
-            var project = SetUpProject(TestYarnScriptSource);
+            var project = SetUpProject(YarnTestUtility.TestYarnScriptSource);
 
             // Assert:
             // Line metadata entry is generated for the project.
@@ -325,7 +197,7 @@ But not all of them are.
         {
             // Arrange:
             // Set up a project with a Yarn file with metadata in some lines.
-            var project = SetUpProject(TestYarnScriptSourceNoMetadata);
+            var project = SetUpProject(YarnTestUtility.TestYarnScriptSourceNoMetadata);
 
             // Assert:
             // Line metadata entry is generated for the project.
@@ -338,7 +210,7 @@ But not all of them are.
         {
             // Arrange:
             // Set up a project with a Yarn file with metadata in some lines.
-            var project = SetUpProject(TestYarnScriptSource);
+            var project = SetUpProject(YarnTestUtility.TestYarnScriptSource);
             var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
 
             // Act:
@@ -348,7 +220,7 @@ But not all of them are.
             // table entries based only on specific fields.
             System.Func<LineMetadataTableEntry, (string id, string node, string lineNo, string metadata)> simplifier =
                 e => (id: e.ID, node: e.Node, lineNo: e.LineNumber, metadata: string.Join(" ", e.Metadata));
-            var simpleExpected = ExpectedMetadata.Select(simplifier);
+            var simpleExpected = YarnTestUtility.ExpectedMetadata.Select(simplifier);
             var simpleResult = metadataEntries.Select(simplifier);
 
             // Assert:
@@ -361,13 +233,13 @@ But not all of them are.
         {
             // Arrange:
             // Set up a project with a Yarn file with metadata in some lines.
-            var project = SetUpProject(TestYarnScriptSource);
+            var project = SetUpProject(YarnTestUtility.TestYarnScriptSource);
             var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
             var scriptPath = AssetDatabase.GetAssetPath(importer.sourceScripts[0]);
 
             // Act:
             // Modify the original source script.
-            File.WriteAllText(scriptPath, TestYarnScriptSourceModified);
+            File.WriteAllText(scriptPath, YarnTestUtility.TestYarnScriptSourceModified);
             AssetDatabase.Refresh();
 
             // Assert: verify the line metadata exists and contains the expected number of entries.
@@ -380,13 +252,13 @@ But not all of them are.
         {
             // Arrange:
             // Set up a project with a Yarn file with metadata in some lines.
-            var project = SetUpProject(TestYarnScriptSource);
+            var project = SetUpProject(YarnTestUtility.TestYarnScriptSource);
             var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
             var scriptPath = AssetDatabase.GetAssetPath(importer.sourceScripts[0]);
 
             // Act:
             // Modify the original source script to a script without any metadata.
-            File.WriteAllText(scriptPath, TestYarnScriptSourceNoMetadata);
+            File.WriteAllText(scriptPath, YarnTestUtility.TestYarnScriptSourceNoMetadata);
             AssetDatabase.Refresh();
 
             // Assert: verify the line metadata exists and is empty.
@@ -399,7 +271,7 @@ But not all of them are.
         {
             // Arrange:
             // Set up a project with a Yarn file filled with tagged lines.
-            var project = SetUpProject(TestYarnScriptSource);
+            var project = SetUpProject(YarnTestUtility.TestYarnScriptSource);
             var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
 
             // Assert:
@@ -409,7 +281,7 @@ But not all of them are.
             Assert.IsNotNull(project.baseLocalization);
             Assert.AreEqual(1, project.localizations.Count());
             Assert.AreSame(project.baseLocalization, project.localizations[0]);
-            CollectionAssert.AreEquivalent(project.baseLocalization.GetLineIDs(), ExpectedStrings.Select(l => l.ID));
+            CollectionAssert.AreEquivalent(project.baseLocalization.GetLineIDs(), YarnTestUtility.ExpectedStrings.Select(l => l.ID));
         }
 
         [Test]
@@ -417,7 +289,7 @@ But not all of them are.
         {
             // Arrange:
             // Set up a project with a Yarn file filled with tagged lines.
-            var project = SetUpProject(TestYarnScriptSource);
+            var project = SetUpProject(YarnTestUtility.TestYarnScriptSource);
             var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
 
             var destinationStringsFilePath = "Assets/" + Path.GetRandomFileName() + ".csv";
@@ -439,7 +311,7 @@ But not all of them are.
             Assert.IsNotNull(project.baseLocalization);
             Assert.IsNotEmpty(project.localizations);
             Assert.AreEqual("test", project.localizations[0].LocaleCode);
-            CollectionAssert.AreEquivalent(project.localizations[0].GetLineIDs(), ExpectedStrings.Select(l => l.ID));
+            CollectionAssert.AreEquivalent(project.localizations[0].GetLineIDs(), YarnTestUtility.ExpectedStrings.Select(l => l.ID));
         }
 
         [Test]
@@ -447,7 +319,7 @@ But not all of them are.
         {
             // Arrange:
             // Set up a project with a Yarn file filled with tagged lines.
-            var project = SetUpProject(TestYarnScriptSource);
+            var project = SetUpProject(YarnTestUtility.TestYarnScriptSource);
             var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
             var scriptPath = AssetDatabase.GetAssetPath(importer.sourceScripts[0]);
 
@@ -470,7 +342,7 @@ But not all of them are.
             var unmodifiedLocalizedStringsTable = StringTableEntry.ParseFromCSV(File.ReadAllText(destinationStringsFilePath));
 
             // Next, modify the original source script.
-            File.WriteAllText(scriptPath, TestYarnScriptSourceModified);
+            File.WriteAllText(scriptPath, YarnTestUtility.TestYarnScriptSourceModified);
 
             AssetDatabase.Refresh();
 
@@ -532,7 +404,7 @@ But not all of them are.
             // default language.
             const string defaultLanguage = "de";
 
-            var project = SetUpProject(YarnImporterTests.TestYarnScriptSource);
+            var project = SetUpProject(YarnTestUtility.TestYarnScriptSource);
 
             var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
 
@@ -569,7 +441,7 @@ But not all of them are.
             const string defaultLanguage = "de";
             const string otherLanguage = "en";
 
-            var project = SetUpProject(YarnImporterTests.TestYarnScriptSource);
+            var project = SetUpProject(YarnTestUtility.TestYarnScriptSource);
 
             var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
 
@@ -582,7 +454,7 @@ But not all of them are.
             importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset
             {
                 languageID = otherLanguage,
-                stringsFile = GetScriptSource("TestYarnProject-Strings.csv")
+                stringsFile = YarnTestUtility.GetScriptSource("TestYarnProject-Strings.csv")
             });
 
             EditorUtility.SetDirty(importer);
@@ -625,7 +497,7 @@ But not all of them are.
             const string defaultLanguage = "de";
             const string otherLanguage = "en";
 
-            var project = SetUpProject(YarnImporterTests.TestYarnScriptSource);
+            var project = SetUpProject(YarnTestUtility.TestYarnScriptSource);
 
             var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
 
@@ -648,7 +520,7 @@ But not all of them are.
             importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset
             {
                 languageID = otherLanguage,
-                stringsFile = GetScriptSource("TestYarnProject-Strings.csv")
+                stringsFile = YarnTestUtility.GetScriptSource("TestYarnProject-Strings.csv")
             });
 
             EditorUtility.SetDirty(importer);
@@ -691,7 +563,7 @@ But not all of them are.
             // default language.
             const string defaultLanguage = "de";
 
-            var project = SetUpProject(YarnImporterTests.TestYarnScriptSource);
+            var project = SetUpProject(YarnTestUtility.TestYarnScriptSource);
 
             var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
 
@@ -705,7 +577,7 @@ But not all of them are.
             importer.languagesToSourceAssets.Add(new YarnProjectImporter.LanguageToSourceAsset
             {
                 languageID = defaultLanguage,
-                assetsFolder = GetFolder("Editor Test Resources"),
+                assetsFolder = YarnTestUtility.GetFolder("Editor Test Resources"),
             });
 
             EditorUtility.SetDirty(importer);
@@ -721,8 +593,8 @@ But not all of them are.
                                                                .Select(id => localization.GetLocalizedObject<AudioClip>(id));
 
             Assert.AreEqual(defaultLanguage, localization.LocaleCode);
-            CollectionAssert.AreEquivalent(ExpectedStrings.Select(l => l.ID), localization.GetLineIDs());
-            Assert.AreEqual(ExpectedStrings.Count(), allAudioClips.Count());
+            CollectionAssert.AreEquivalent(YarnTestUtility.ExpectedStrings.Select(l => l.ID), localization.GetLineIDs());
+            Assert.AreEqual(YarnTestUtility.ExpectedStrings.Count(), allAudioClips.Count());
             CollectionAssert.AllItemsAreNotNull(allAudioClips);
             CollectionAssert.AllItemsAreUnique(allAudioClips);
         }
