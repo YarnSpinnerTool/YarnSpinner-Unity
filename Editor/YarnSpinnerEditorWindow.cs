@@ -66,7 +66,7 @@ namespace Yarn.Unity
         const char DirectorySeparatorChar = '/';
 
         // Shows the window.
-        [MenuItem("Window/Yarn Spinner %#y", false, 2000)]
+        [MenuItem("Window/Yarn Spinner/About Yarn Spinner... %#y", false, 2000)]
         static void ShowWindow()
         {
             EditorWindow.GetWindow<YarnSpinnerEditorWindow>();
