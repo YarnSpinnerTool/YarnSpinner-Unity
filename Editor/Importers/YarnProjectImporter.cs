@@ -263,7 +263,7 @@ namespace Yarn.Unity.Editor
             compilationResult = Compiler.Compiler.Compile(job);
 
             errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
-        
+
             if (errors.Count() > 0) 
             {
                 var errorGroups = errors.GroupBy(e => e.FileName);
@@ -316,6 +316,45 @@ namespace Yarn.Unity.Editor
                 EditorUtility.SetDirty(importer);
             }
 
+#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
+            if (UseUnityLocalisationSystem)
+            {
+                AddStringTableEntries(compilationResult, this.unityLocalisationStringTableCollection);
+                project.localizationType = LocalizationType.Unity;
+            } else {
+                CreateYarnInternalLocalizationAssets(ctx, project, compilationResult);
+                project.localizationType = LocalizationType.YarnInternal;
+            }
+#else
+            CreateYarnInternalLocalizationAssets(ctx, project, compilationResult);
+            project.localizationType = LocalizationType.YarnInternal;
+#endif
+
+            // Store the compiled program
+            byte[] compiledBytes = null;
+
+            using (var memoryStream = new MemoryStream())
+            using (var outputStream = new Google.Protobuf.CodedOutputStream(memoryStream))
+            {
+                // Serialize the compiled program to memory
+                compilationResult.Program.WriteTo(outputStream);
+                outputStream.Flush();
+
+                compiledBytes = memoryStream.ToArray();
+            }
+
+            project.compiledYarnProgram = compiledBytes;
+
+            project.searchAssembliesForActions = AssemblySearchList();
+
+#if YARNSPINNER_DEBUG
+            UnityEngine.Profiling.Profiler.enabled = false;
+#endif
+
+        }
+
+        private void CreateYarnInternalLocalizationAssets(AssetImportContext ctx, YarnProject project, CompilationResult compilationResult)
+        {
             // Will we need to create a default localization? This variable
             // will be set to false if any of the languages we've
             // configured in languagesToSourceAssets is the default
@@ -461,7 +500,7 @@ namespace Yarn.Unity.Editor
             {
                 // We didn't add a localization for the default language.
                 // Create one for it now.
-                var stringTableEntries = StringTableEntriesFromCompilationResult(compilationResult);
+                var stringTableEntries = GetStringTableEntries(compilationResult);
 
                 var developmentLocalization = ScriptableObject.CreateInstance<Localization>();
                 developmentLocalization.name = $"Default ({defaultLanguage})";
@@ -469,7 +508,8 @@ namespace Yarn.Unity.Editor
 
 
                 // Add these new lines to the development localisation's asset
-                foreach (var entry in stringTableEntries) {
+                foreach (var entry in stringTableEntries)
+                {
                     developmentLocalization.AddLocalisedStringToAsset(entry.ID, entry.Text);
                 }
 
@@ -480,41 +520,12 @@ namespace Yarn.Unity.Editor
                 // Since this is the default language, also populate the line metadata.
                 project.lineMetadata = new LineMetadata(LineMetadataTableEntriesFromCompilationResult(compilationResult));
             }
-
-#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
-            if (UseUnityLocalisationSystem)
-            {
-                ConvertInternalYarnStringTableEntriesIntoUnityLocalisedStringTableEntries(StringTableEntriesFromCompilationResult(compilationResult));
-            }
-#endif
-
-            // Store the compiled program
-            byte[] compiledBytes = null;
-
-            using (var memoryStream = new MemoryStream())
-            using (var outputStream = new Google.Protobuf.CodedOutputStream(memoryStream))
-            {
-                // Serialize the compiled program to memory
-                compilationResult.Program.WriteTo(outputStream);
-                outputStream.Flush();
-
-                compiledBytes = memoryStream.ToArray();
-            }
-
-            project.compiledYarnProgram = compiledBytes;
-
-            project.searchAssembliesForActions = AssemblySearchList();
-
-#if YARNSPINNER_DEBUG
-            UnityEngine.Profiling.Profiler.enabled = false;
-#endif
-
         }
 
 #if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
-        private void ConvertInternalYarnStringTableEntriesIntoUnityLocalisedStringTableEntries(IEnumerable<StringTableEntry> entries)
+        private void AddStringTableEntries(CompilationResult compilationResult, StringTableCollection unityLocalisationStringTableCollection)
         {
-            if (this.unityLocalisationStringTableCollection == null)
+            if (unityLocalisationStringTableCollection == null)
             {
                 Debug.LogError("Unable to generate String Table Entries as the string collection is null");
                 return;
@@ -535,9 +546,24 @@ namespace Yarn.Unity.Editor
                     }
                 }
 
-                foreach (var entry in entries)
+                foreach (var entry in compilationResult.StringTable)
                 {
-                    table.AddEntry(entry.ID, entry.Text);
+                    var lineID = entry.Key;
+                    var stringInfo = entry.Value;
+
+                    var lineEntry = table.AddEntry(lineID, stringInfo.text);
+
+                    var existingMetadata = lineEntry.GetMetadata<UnityLocalization.LineMetadata>();
+
+                    if (existingMetadata != null) {
+                        lineEntry.RemoveMetadata(existingMetadata);
+                    }
+
+                    lineEntry.AddMetadata(new UnityLocalization.LineMetadata
+                    {
+                        nodeName = stringInfo.nodeName,
+                        tags = RemoveLineIDFromMetadata(stringInfo.metadata).ToArray(),
+                    });
                 }
                 return;
             }
@@ -703,7 +729,7 @@ namespace Yarn.Unity.Editor
                 return null;
             }
 
-            return StringTableEntriesFromCompilationResult(compilationResult.Value);
+            return GetStringTableEntries(compilationResult.Value);
         }
 
         internal IEnumerable<LineMetadataTableEntry> GenerateLineMetadataEntries()
@@ -729,8 +755,9 @@ namespace Yarn.Unity.Editor
             return LineMetadataTableEntriesFromCompilationResult(compilationResult.Value);
         }
 
-        private IEnumerable<StringTableEntry> StringTableEntriesFromCompilationResult(CompilationResult result)
+        private IEnumerable<StringTableEntry> GetStringTableEntries(CompilationResult result)
         {
+            
             return result.StringTable.Select(x => new StringTableEntry
             {
                 ID = x.Key,

@@ -152,6 +152,21 @@ namespace Yarn.Unity.Editor
             EditorGUILayout.PropertyField(languagesToSourceAssetsProperty, new GUIContent("Localisations"));
 #endif
 
+
+            // Determines whether or not we draw the GUI for the internal Yarn
+            // localisation system.
+            bool showInternalLocalizationGUI;
+
+#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
+            // If Unity Localization is available, then we draw the internal
+            // localization system's UI if we've chosen not to use Unity's.
+            showInternalLocalizationGUI = !useUnityLocalisationSystemProperty.boolValue;
+#else
+            // If Unity Localization is not available, we always draw the
+            // internal localization system UI.
+            showInternalLocalizationGUI = true;
+#endif
+
             CurrentProjectDefaultLanguageProperty = null;
 
             // Ask the project importer if it can generate a strings table.
@@ -175,42 +190,53 @@ namespace Yarn.Unity.Editor
                 canGenerateStringsTable = false;
             }
 
-            // The following controls only do something useful if all of
-            // the lines in the project have tags, which means the project
-            // can generate a string table.
-            using (new EditorGUI.DisabledScope(canGenerateStringsTable == false))
+            if (showInternalLocalizationGUI)
             {
+                // The following controls only do something useful if all of the
+                // lines in the project have tags, which means the project can
+                // generate a string table.
+                using (new EditorGUI.DisabledScope(canGenerateStringsTable == false))
+                {
 #if USE_ADDRESSABLES
-                
-                // If the addressable assets package is available, show a
-                // checkbox for using it.
-                var hasAnySourceAssetFolders = yarnProjectImporter.languagesToSourceAssets.Any(l => l.assetsFolder != null);
-                if (hasAnySourceAssetFolders == false) {
-                    // Disable this checkbox if there are no assets
-                    // available.
-                    using (new EditorGUI.DisabledScope(true)) {
-                        EditorGUILayout.Toggle(useAddressableAssetsProperty.displayName, false);
-                    }
-                } else {
-                    EditorGUILayout.PropertyField(useAddressableAssetsProperty);
 
-                    // Show a warning if we've requested addressables but
-                    // haven't set it up.
-                    if (useAddressableAssetsProperty.boolValue && AddressableAssetSettingsDefaultObject.SettingsExists == false) {
-                        EditorGUILayout.HelpBox("Please set up Addressable Assets in this project.", MessageType.Warning);
-                    }
-                }
-
-                // Add a button for updating asset addresses, if any asset
-                // source folders exist
-                if (useAddressableAssetsProperty.boolValue && AddressableAssetSettingsDefaultObject.SettingsExists) {
-                    using (new EditorGUI.DisabledScope(hasAnySourceAssetFolders == false)) {
-                        if (GUILayout.Button($"Update Asset Addresses")) {
-                            YarnProjectUtility.UpdateAssetAddresses(yarnProjectImporter);
+                    // If the addressable assets package is available, show a
+                    // checkbox for using it.
+                    var hasAnySourceAssetFolders = yarnProjectImporter.languagesToSourceAssets.Any(l => l.assetsFolder != null);
+                    if (hasAnySourceAssetFolders == false)
+                    {
+                        // Disable this checkbox if there are no assets
+                        // available.
+                        using (new EditorGUI.DisabledScope(true))
+                        {
+                            EditorGUILayout.Toggle(useAddressableAssetsProperty.displayName, false);
                         }
                     }
-                }
+                    else
+                    {
+                        EditorGUILayout.PropertyField(useAddressableAssetsProperty);
+
+                        // Show a warning if we've requested addressables but
+                        // haven't set it up.
+                        if (useAddressableAssetsProperty.boolValue && AddressableAssetSettingsDefaultObject.SettingsExists == false)
+                        {
+                            EditorGUILayout.HelpBox("Please set up Addressable Assets in this project.", MessageType.Warning);
+                        }
+                    }
+
+                    // Add a button for updating asset addresses, if any asset
+                    // source folders exist
+                    if (useAddressableAssetsProperty.boolValue && AddressableAssetSettingsDefaultObject.SettingsExists)
+                    {
+                        using (new EditorGUI.DisabledScope(hasAnySourceAssetFolders == false))
+                        {
+                            if (GUILayout.Button($"Update Asset Addresses"))
+                            {
+                                YarnProjectUtility.UpdateAssetAddresses(yarnProjectImporter);
+                            }
+                        }
+                    }
 #endif
+                }
             }
 
             EditorGUILayout.Space();
@@ -229,38 +255,42 @@ namespace Yarn.Unity.Editor
 
             EditorGUILayout.PropertyField(predeterminedFunctionsProperty, true);
 
-            using (new EditorGUI.DisabledGroupScope(canGenerateStringsTable == false))
+            if (showInternalLocalizationGUI)
             {
-                if (GUILayout.Button("Export Strings and Metadata as CSV"))
+
+                using (new EditorGUI.DisabledGroupScope(canGenerateStringsTable == false))
                 {
-                    var currentPath = AssetDatabase.GetAssetPath(serializedObject.targetObject);
-                    var currentFileName = Path.GetFileNameWithoutExtension(currentPath);
-                    var currentDirectory = Path.GetDirectoryName(currentPath);
-
-                    var destinationPath = EditorUtility.SaveFilePanel("Export Strings CSV", currentDirectory, $"{currentFileName}.csv", "csv");
-
-                    if (string.IsNullOrEmpty(destinationPath) == false)
+                    if (GUILayout.Button("Export Strings and Metadata as CSV"))
                     {
-                        // Generate the file on disk
-                        YarnProjectUtility.WriteStringsFile(destinationPath, yarnProjectImporter);
+                        var currentPath = AssetDatabase.GetAssetPath(serializedObject.targetObject);
+                        var currentFileName = Path.GetFileNameWithoutExtension(currentPath);
+                        var currentDirectory = Path.GetDirectoryName(currentPath);
 
-                        // Also generate the metadata file.
-                        var destinationDirectory = Path.GetDirectoryName(destinationPath);
-                        var destinationFileName = Path.GetFileNameWithoutExtension(destinationPath);
+                        var destinationPath = EditorUtility.SaveFilePanel("Export Strings CSV", currentDirectory, $"{currentFileName}.csv", "csv");
 
-                        var metadataDestinationPath = Path.Combine(destinationDirectory, $"{destinationFileName}-metadata.csv");
-                        YarnProjectUtility.WriteMetadataFile(metadataDestinationPath, yarnProjectImporter);
+                        if (string.IsNullOrEmpty(destinationPath) == false)
+                        {
+                            // Generate the file on disk
+                            YarnProjectUtility.WriteStringsFile(destinationPath, yarnProjectImporter);
 
-                        // destinationPath may have been inside our Assets
-                        // directory, so refresh the asset database
-                        AssetDatabase.Refresh();
+                            // Also generate the metadata file.
+                            var destinationDirectory = Path.GetDirectoryName(destinationPath);
+                            var destinationFileName = Path.GetFileNameWithoutExtension(destinationPath);
+
+                            var metadataDestinationPath = Path.Combine(destinationDirectory, $"{destinationFileName}-metadata.csv");
+                            YarnProjectUtility.WriteMetadataFile(metadataDestinationPath, yarnProjectImporter);
+
+                            // destinationPath may have been inside our Assets
+                            // directory, so refresh the asset database
+                            AssetDatabase.Refresh();
+                        }
                     }
-                }
-                if (yarnProjectImporter.languagesToSourceAssets.Count > 0)
-                {
-                    if (GUILayout.Button("Update Existing Strings Files"))
+                    if (yarnProjectImporter.languagesToSourceAssets.Count > 0)
                     {
-                        YarnProjectUtility.UpdateLocalizationCSVs(yarnProjectImporter);
+                        if (GUILayout.Button("Update Existing Strings Files"))
+                        {
+                            YarnProjectUtility.UpdateLocalizationCSVs(yarnProjectImporter);
+                        }
                     }
                 }
             }

@@ -25,6 +25,10 @@ namespace Yarn.Unity
         [HideInInspector]
         public LineMetadata lineMetadata;
 
+        [SerializeField]
+        [HideInInspector]
+        public LocalizationType localizationType;
+
         /// <summary>
         /// The cached result of deserializing <see
         /// cref="compiledYarnProgram"/>.
@@ -90,5 +94,10 @@ namespace Yarn.Unity
                 return cachedProgram;
             }
         }
+    }
+
+    public enum LocalizationType {
+        YarnInternal,
+        Unity,
     }
 }
