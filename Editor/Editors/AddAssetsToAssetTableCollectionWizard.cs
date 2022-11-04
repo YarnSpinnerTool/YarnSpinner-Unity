@@ -16,7 +16,6 @@ using System.Collections;
 using UnityEditor.Localization;
 using UnityEngine.Localization.Tables;
 using System;
-#endif
 
 public class AddAssetsToAssetTableCollectionWizard : EditorWindow {
     private AssetTableCollection assetTableCollection;
@@ -161,3 +160,4 @@ public class AddAssetsToAssetTableCollectionWizard : EditorWindow {
                 
     }
 }
+#endif
