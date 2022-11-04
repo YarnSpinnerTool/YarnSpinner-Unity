@@ -702,21 +702,7 @@ namespace Yarn.Unity
 
         void Awake()
         {
-            if (lineProvider == null)
-            {
-                // If we don't have a line provider, create a
-                // TextLineProvider and make it use that.
-
-                // Create the temporary line provider and the line database
-                lineProvider = gameObject.AddComponent<TextLineProvider>();
-
-                // Let the user know what we're doing.
-                if (verboseLogging)
-                {
-                    Debug.Log($"Dialogue Runner has no LineProvider; creating a {nameof(TextLineProvider)}.", this);
-                }
-            }
-
+            
             if (dialogueViews.Length == 0)
             {
                 Debug.LogWarning($"Dialogue Runner doesn't have any dialogue views set up. No lines or options will be visible.");
@@ -740,6 +726,30 @@ namespace Yarn.Unity
 
                 // Load this new Yarn Project.
                 SetProject(yarnProject);
+            }
+
+            if (lineProvider == null)
+            {
+                // If we don't have a line provider, create a
+                // TextLineProvider and make it use that.
+
+                if (yarnProject == null || yarnProject.localizationType == LocalizationType.YarnInternal) {
+                    // Create the temporary line provider and the line database
+                    lineProvider = gameObject.AddComponent<TextLineProvider>();
+                    lineProvider.YarnProject = yarnProject;
+
+                    // Let the user know what we're doing.
+                    if (verboseLogging)
+                    {
+                        Debug.Log($"Dialogue Runner has no LineProvider; creating a {nameof(TextLineProvider)}.", this);
+                    }
+                } else {
+#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
+                    Debug.LogError($"The Yarn Project \"{yarnProject.name}\" uses the Unity Localization system. Please add a {nameof(UnityLocalization.UnityLocalisedLineProvider)} component.");
+#else
+                    Debug.LogError($"The Yarn Project \"{yarnProject.name}\" uses the Unity Localization system, but the Unity Localization system is not currently installed. Please install it.");
+#endif
+                }
             }
         }
 
