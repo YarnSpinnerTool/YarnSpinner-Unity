@@ -101,7 +101,7 @@ public class MinimalDialogueRunner : MonoBehaviour
         {
             var line = LineProvider.GetLocalizedLine(options.Options[i].Line);
             var text = Yarn.Dialogue.ExpandSubstitutions(line.RawText, options.Options[i].Line.Substitutions);
-            dialogue.LanguageCode = LineProvider.textLanguageCode;
+            dialogue.LanguageCode = LineProvider.LocaleCode;
             line.Text = dialogue.ParseMarkup(text);
 
             optionSet[i] = new DialogueOption
@@ -157,7 +157,7 @@ public class MinimalDialogueRunner : MonoBehaviour
     {
         var finalLine = LineProvider.GetLocalizedLine(line);
         var text = Yarn.Dialogue.ExpandSubstitutions(finalLine.RawText, line.Substitutions);
-        dialogue.LanguageCode = LineProvider.textLanguageCode;
+        dialogue.LanguageCode = LineProvider.LocaleCode;
         finalLine.Text = dialogue.ParseMarkup(text);
         
         LineNeedsPresentation?.Invoke(finalLine);

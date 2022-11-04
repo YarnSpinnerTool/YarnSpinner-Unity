@@ -82,13 +82,13 @@ namespace Yarn.Unity
                 }
             }
 
-            return new AudioLocalizedLine()
+            return new LocalizedLine()
             {
                 TextID = line.ID,
                 RawText = text,
                 Substitutions = line.Substitutions,
                 Metadata = YarnProject.lineMetadata.GetMetadata(line.ID),
-                AudioClip = audioClip,
+                Asset = audioClip,
             };
         }
 
@@ -189,13 +189,4 @@ namespace Yarn.Unity
 #endif
 
     }
-
-    public class AudioLocalizedLine : LocalizedLine
-    {
-        /// <summary>
-        /// DialogueLine's voice over clip
-        /// </summary>
-        public AudioClip AudioClip;
-    }
-
 }

@@ -157,6 +157,11 @@ namespace Yarn.Unity
         }
 
         /// <summary>
+        /// The asset associated with this line, if any.
+        /// </summary>
+        public Object Asset;
+
+        /// <summary>
         /// The underlying <see cref="Yarn.Markup.MarkupParseResult"/> for
         /// this line.
         /// </summary>

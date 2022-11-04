@@ -115,25 +115,18 @@ namespace Yarn.Unity
 
         private IEnumerator DoRunLine(LocalizedLine dialogueLine)
         {
-
-            if (!(dialogueLine is AudioLocalizedLine audioLine))
-            {
-                Debug.LogError($"Playing voice over failed because {nameof(RunLine)} expected to receive an {nameof(AudioLocalizedLine)}, but instead received a {dialogueLine?.GetType().ToString() ?? "null"}. Is your {nameof(DialogueRunner)} set up to use a {nameof(AudioLineProvider)}?", gameObject);
-
-                completionHandler?.Invoke();
-                yield break;
-            }
-
             // Get the localized voice over audio clip
-            var voiceOverClip = audioLine.AudioClip;
+            var voiceOverClip = dialogueLine.Asset as AudioClip;
 
-            if (!voiceOverClip)
+            if (voiceOverClip == null)
             {
-                Debug.LogWarning($"Playing voice over failed since the {nameof(AudioClip)} of the voice over audio language or the base language was null.", gameObject);
+                Debug.LogError($"Playing voice over failed because the localised line {dialogueLine.TextID} either didn't have an asset, or its asset was not an {nameof(AudioClip)}.", gameObject);
+                
                 completionHandler?.Invoke();
                 yield break;
             }
 
+            
             if (audioSource.isPlaying)
             {
                 // Usually, this shouldn't happen because the DialogueRunner
