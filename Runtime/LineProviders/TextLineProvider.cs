@@ -8,6 +8,11 @@ namespace Yarn.Unity
 {
     public class TextLineProvider : LineProviderBehaviour
     {
+        /// <summary>Specifies the language code to use for text content
+        /// for this <see cref="TextLineProvider"/>.
+        [Language]
+        public string textLanguageCode = System.Globalization.CultureInfo.CurrentCulture.Name;
+
         public override LocalizedLine GetLocalizedLine(Yarn.Line line)
         {
             var text = YarnProject.GetLocalization(textLanguageCode).GetLocalizedString(line.ID);
@@ -26,5 +31,7 @@ namespace Yarn.Unity
         }
 
         public override bool LinesAvailable => true;
+
+        public override string LocaleCode => textLanguageCode;
     }
 }

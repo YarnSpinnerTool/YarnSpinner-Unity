@@ -13,10 +13,17 @@ namespace Yarn.Unity
     public class AudioLineProvider : LineProviderBehaviour
     {
 
+        /// <summary>Specifies the language code to use for text content
+        /// for this <see cref="AudioLineProvider"/>.
+        [Language]
+        public string textLanguageCode = System.Globalization.CultureInfo.CurrentCulture.Name;
+
         /// <summary>Specifies the language code to use for audio content
         /// for this <see cref="AudioLineProvider"/>.
         [Language]
         public string audioLanguage = System.Globalization.CultureInfo.CurrentCulture.Name;
+
+        public override string LocaleCode => textLanguageCode;
 
 #if USE_ADDRESSABLES
         // Lines are available if there are no outstanding load operations

@@ -818,7 +818,7 @@ namespace Yarn.Unity
                 var localisedLine = lineProvider.GetLocalizedLine(options.Options[i].Line);
                 var text = Dialogue.ExpandSubstitutions(localisedLine.RawText, options.Options[i].Line.Substitutions);
 
-                Dialogue.LanguageCode = lineProvider.textLanguageCode;
+                Dialogue.LanguageCode = lineProvider.LocaleCode;
 
                 try
                 {
@@ -941,7 +941,7 @@ namespace Yarn.Unity
             }
 
             // Render the markup
-            Dialogue.LanguageCode = lineProvider.textLanguageCode;
+            Dialogue.LanguageCode = lineProvider.LocaleCode;
 
             try
             {

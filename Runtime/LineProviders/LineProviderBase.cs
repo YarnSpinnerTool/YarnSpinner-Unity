@@ -27,11 +27,6 @@ namespace Yarn.Unity
     /// <seealso cref="DialogueViewBase"/>
     public abstract class LineProviderBehaviour : MonoBehaviour
     {
-        /// <summary>Specifies the language code to use for text content
-        /// for this <see cref="LineProviderBehaviour"/>.
-        [Language]
-        public string textLanguageCode = System.Globalization.CultureInfo.CurrentCulture.Name;
-
         /// <summary>
         /// Prepares and returns a <see cref="LocalizedLine"/> from the
         /// specified <see cref="Yarn.Line"/>.
@@ -94,6 +89,17 @@ namespace Yarn.Unity
         /// and <see langword="true"/> when they are.
         /// </remarks>
         public virtual bool LinesAvailable => true;
+
+        /// <summary>
+        /// Gets the user's current locale identifier, as a BCP-47 code.
+        /// </summary>
+        /// <remarks>
+        /// This value is used by the <see cref="DialogueRunner"/> to control
+        /// how certain replacement markers behave (for example, the
+        /// <c>[plural]</c> marker, which behaves differently depending on the
+        /// user's locale.)
+        /// </remarks>
+        public abstract string LocaleCode { get; }
 
         /// <summary>
         /// Called by Unity when the <see cref="LineProviderBehaviour"/>
