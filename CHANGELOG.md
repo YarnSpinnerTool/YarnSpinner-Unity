@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Dependency DLLs are now aliased to prevent compilation errors with Burst.
+  - In v2.2.2, Yarn Spinner's dependency DLLs were renamed to have the prefix `Yarn.` to prevent errors when two DLLs of the same name (e.g. `Google.Protobuf.dll`) are present in the same project. 
+  - This fix solved the edit-time problem, but introduced a new error when the project used Unity's Burst compiler, which looks for DLL files based on their assembly name.
+  - When compiling with Burst, Unity looks for the DLL file based on the name of the assembly, so when it goes searching for (for example) `Google.Protobuf`, it will _only_ look for the file `Google.Protobuf.dll`, and not the renamed file.
+  - With this change, the `update_dlls.yml` build script, which pulls in the latest version of Yarn Spinner and its dependencies, now uses the [dotnet-assembly-alias](https://github.com/getsentry/dotnet-assembly-alias/) tool to rename the DLLs _and_ their assembly names.
+
 ### Removed
 
 ## [2.2.2] 2022-10-31
