@@ -39,6 +39,9 @@ jobs:
       with:
             versionSpec: '5.x'
 
+    - name: Install dotnet-assembly-alias
+      run: dotnet tool install -g Alias
+
     # Update the assembly info for this build of YS, so that the About window is
     # appropriate
     - uses: gittools/actions/gitversion/execute@v0.9.10
@@ -76,15 +79,14 @@ jobs:
     # Google.Protobuf (especially if they want to use a different version). 
     #
     # Our solution partly involves renaming the dependency DLLs to have the
-    # prefix 'Yarn.'. For more information on this fix, see
+    # prefix 'Yarn.', and updating all references to these renamed DLLs, using
+    # dotnet-assembly-alias
+    # (https://github.com/getsentry/dotnet-assembly-alias/). For more
+    # information on this fix, see
     # https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/15#issuecomment-1036162152.
     - name: Rename vendored DLLs
       run: |
-        cd YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/
-        ls | grep -v 'Yarn.*' | grep -e '.*dll' | while read filename; do
-          mv -v $filename Yarn.$filename
-        done
-
+        assemblyalias --target-directory "YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/" --prefix "Yarn." --assemblies-to-alias "System*;Antlr*;Csv*;Google*"
     
     # Copy all of the dependency DLLs into the YarnSpinner-Unity repo, except
     # for Microsoft.CSharp.dll (which is provided by Unity, so including it
@@ -92,7 +94,7 @@ jobs:
     - name: Copy DLLs
       run: |
         cp -v YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/*.dll YarnSpinner-Unity/Runtime/DLLs
-        rm -fv YarnSpinner-Unity/Runtime/DLLs/Yarn.Microsoft.CSharp.dll
+        rm -fv YarnSpinner-Unity/Runtime/DLLs/Microsoft.CSharp.dll
     
     # Make the PR against YarnSpinner-Unity that merges this change
     - name: Create pull request
