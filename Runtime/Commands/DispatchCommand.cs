@@ -8,6 +8,7 @@ namespace Yarn.Unity
     using Injector = Func<string, object>;
     using Converter = Func<string, object>;
 
+    #if YARN_LEGACY_ACTIONMANAGER
     internal class DispatchCommand
     {
         public MethodInfo Method { get; set; }
@@ -40,4 +41,5 @@ namespace Yarn.Unity
             }
         }
     }
+    #endif
 }

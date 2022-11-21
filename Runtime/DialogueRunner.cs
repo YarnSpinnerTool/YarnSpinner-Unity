@@ -235,12 +235,16 @@ namespace Yarn.Unity
         /// </summary>
         public void SetProject(YarnProject newProject)
         {
+#if YARN_LEGACY_ACTIONMANAGER
             // Load all of the commands and functions from the assemblies that
             // this project wants to load from.
             ActionManager.AddActionsFromAssemblies(newProject.searchAssembliesForActions);
 
             // Register any new functions that we found as part of doing this.
             ActionManager.RegisterFunctions(Dialogue.Library);
+#else
+            Actions.RegisterActions(this);
+#endif
 
             Dialogue.SetProgram(newProject.Program);
 
@@ -1113,7 +1117,11 @@ namespace Yarn.Unity
 
             try
             {
+#if YARN_LEGACY_ACTIONMANAGER
                 finalParameters = ActionManager.ParseArgs(methodInfo, commandTokens);
+#else
+                finalParameters = Yarn.Unity.Actions.ParseArgs(commandTokens);
+#endif
             }
             catch (ArgumentException e)
             {
@@ -1211,7 +1219,14 @@ namespace Yarn.Unity
             }
 
 
-            CommandDispatchResult commandExecutionResult = ActionManager.TryExecuteCommand(SplitCommandText(command).ToArray(), out object returnValue);
+            CommandDispatchResult commandExecutionResult;
+            
+            #if YARN_LEGACY_ACTIONMANAGER
+            commandExecutionResult = ActionManager.TryExecuteCommand(SplitCommandText(command).ToArray(), out object returnValue);
+            #else
+            commandExecutionResult = Actions.TryExecuteCommand(SplitCommandText(command).ToArray(), out object returnValue);
+            #endif
+
             if (commandExecutionResult != CommandDispatchResult.Success)
             {
                 return commandExecutionResult;

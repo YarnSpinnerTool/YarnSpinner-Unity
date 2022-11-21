@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
+#if YARN_LEGACY_ACTIONMANAGER
 namespace Yarn.Unity
 {
     using Injector = Func<string, object>;
@@ -508,3 +509,4 @@ namespace Yarn.Unity
         }
     }
 }
+#endif

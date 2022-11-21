@@ -185,8 +185,13 @@ namespace Yarn.Unity.Editor
             localDeclarationsCompileJob.CompilationType = CompilationJob.Type.DeclarationsOnly;
 
             var library = new Library();
+
+#if YARN_LEGACY_ACTIONMANAGER
             ActionManager.AddActionsFromAssemblies(AssemblySearchList());
             ActionManager.RegisterFunctions(library);
+#else
+            library = Actions.GetLibrary();
+#endif
             localDeclarationsCompileJob.Library = library;
             ListOfFunctions = predeterminedFunctions().ToArray();
 
@@ -622,6 +627,7 @@ namespace Yarn.Unity.Editor
 
         private List<FunctionInfo> predeterminedFunctions()
         {
+#if YARN_LEGACY_ACTIONMANAGER
             var functions = ActionManager.FunctionsInfo();
 
             List<FunctionInfo> f = new List<FunctionInfo>();
@@ -630,6 +636,9 @@ namespace Yarn.Unity.Editor
                 f.Add(FunctionInfo.CreateFunctionInfoFromMethodGroup(func));
             }
             return f;
+#else
+            throw new System.NotImplementedException();
+#endif
         }
 
         // A data class used for deserialising the JSON AssemblyDefinitionAssets
