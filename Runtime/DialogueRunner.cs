@@ -229,22 +229,28 @@ namespace Yarn.Unity
         /// </remarks>
         private bool IsOptionSelectionAllowed = false;
 
+        private ICommandDispatcher commandDispatcher;
+
+        internal ICommandDispatcher CommandDispatcher {
+            get {
+                if (commandDispatcher == null) {
+#if YARN_LEGACY_ACTIONMANAGER
+                    commandDispatcher = new LegacyActionManagerDispatcher(this);
+#else
+                    throw new System.NotImplementedException();
+#endif
+                }
+                return commandDispatcher;
+            }
+        }
+
         /// <summary>
         /// Replaces this DialogueRunner's yarn project with the provided
         /// project.
         /// </summary>
         public void SetProject(YarnProject newProject)
         {
-#if YARN_LEGACY_ACTIONMANAGER
-            // Load all of the commands and functions from the assemblies that
-            // this project wants to load from.
-            ActionManager.AddActionsFromAssemblies(newProject.searchAssembliesForActions);
-
-            // Register any new functions that we found as part of doing this.
-            ActionManager.RegisterFunctions(Dialogue.Library);
-#else
-            Actions.RegisterActions(this);
-#endif
+            CommandDispatcher.SetupForProject(newProject);
 
             Dialogue.SetProgram(newProject.Program);
 
@@ -429,7 +435,6 @@ namespace Yarn.Unity
         /// `null` if no node with that name exists.</returns>
         public IEnumerable<string> GetTagsForNode(String nodeName) => Dialogue.GetTagsForNode(nodeName);
 
-#region CommandsAndFunctions
         /// <summary>
         /// Adds a command handler. Dialogue will pause execution after the
         /// command is called.
@@ -450,109 +455,69 @@ namespace Yarn.Unity
         /// <param name="commandName">The name of the command.</param>
         /// <param name="handler">The <see cref="CommandHandler"/> that will be
         /// invoked when the command is called.</param>
-        public void AddCommandHandler(string commandName, Delegate handler)
-        {
-            if (commandHandlers.ContainsKey(commandName))
-            {
-                Debug.LogError($"Cannot add a command handler for {commandName}: one already exists");
-                return;
-            }
-            commandHandlers.Add(commandName, handler);
-        }
+        public void AddCommandHandler(string commandName, Delegate handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler(string commandName, System.Func<Coroutine> handler)
-        {
-            AddCommandHandler(commandName, (Delegate)handler);
-        }
+        public void AddCommandHandler(string commandName, System.Func<Coroutine> handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1>(string commandName, System.Func<T1, Coroutine> handler)
-        {
-            AddCommandHandler(commandName, (Delegate)handler);
-        }
+        public void AddCommandHandler<T1>(string commandName, System.Func<T1, Coroutine> handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
+
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2>(string commandName, System.Func<T1, T2, Coroutine> handler)
-        {
-            AddCommandHandler(commandName, (Delegate)handler);
-        }
+        public void AddCommandHandler<T1, T2>(string commandName, System.Func<T1, T2, Coroutine> handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2, T3>(string commandName, System.Func<T1, T2, T3, Coroutine> handler)
-        {
-            AddCommandHandler(commandName, (Delegate)handler);
-        }
+        public void AddCommandHandler<T1, T2, T3>(string commandName, System.Func<T1, T2, T3, Coroutine> handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
+
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2, T3, T4>(string commandName, System.Func<T1, T2, T3, T4, Coroutine> handler)
-        {
-            AddCommandHandler(commandName, (Delegate)handler);
-        }
+        public void AddCommandHandler<T1, T2, T3, T4>(string commandName, System.Func<T1, T2, T3, T4, Coroutine> handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
+
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, System.Func<T1, T2, T3, T4, T5, Coroutine> handler)
-        {
-            AddCommandHandler(commandName, (Delegate)handler);
-        }
+        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, System.Func<T1, T2, T3, T4, T5, Coroutine> handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
+
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, Coroutine> handler)
-        {
-            AddCommandHandler(commandName, (Delegate)handler);
-        }
+        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, Coroutine> handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
+
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler(string commandName, System.Action handler)
-        {
-            AddCommandHandler(commandName, (Delegate)handler);
-        }
+        public void AddCommandHandler(string commandName, System.Action handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
+
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1>(string commandName, System.Action<T1> handler)
-        {
-            AddCommandHandler(commandName, (Delegate)handler);
-        }
+        public void AddCommandHandler<T1>(string commandName, System.Action<T1> handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
+
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2>(string commandName, System.Action<T1, T2> handler)
-        {
-            AddCommandHandler(commandName, (Delegate)handler);
-        }
+        public void AddCommandHandler<T1, T2>(string commandName, System.Action<T1, T2> handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
+
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2, T3>(string commandName, System.Action<T1, T2, T3> handler)
-        {
-            AddCommandHandler(commandName, (Delegate)handler);
-        }
+        public void AddCommandHandler<T1, T2, T3>(string commandName, System.Action<T1, T2, T3> handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
+
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2, T3, T4>(string commandName, System.Action<T1, T2, T3, T4> handler)
-        {
-            AddCommandHandler(commandName, (Delegate)handler);
-        }
+        public void AddCommandHandler<T1, T2, T3, T4>(string commandName, System.Action<T1, T2, T3, T4> handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
+
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, System.Action<T1, T2, T3, T4, T5> handler)
-        {
-            AddCommandHandler(commandName, (Delegate)handler);
-        }
+        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, System.Action<T1, T2, T3, T4, T5> handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
+
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, System.Action<T1, T2, T3, T4, T5, T6> handler)
-        {
-            AddCommandHandler(commandName, (Delegate)handler);
-        }
+        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, System.Action<T1, T2, T3, T4, T5, T6> handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
+
 
         /// <summary>
         /// Removes a command handler.
         /// </summary>
         /// <param name="commandName">The name of the command to
         /// remove.</param>
-        public void RemoveCommandHandler(string commandName)
-        {
-            commandHandlers.Remove(commandName);
-        }
+        public void RemoveCommandHandler(string commandName) => CommandDispatcher.RemoveCommandHandler(commandName);
+
 
         /// <summary>
         /// Add a new function that returns a value, so that it can be
@@ -577,65 +542,36 @@ namespace Yarn.Unity
         /// <param name="implementation">The <see cref="Delegate"/> that
         /// should be invoked when this function is called.</param>
         /// <seealso cref="Library"/>
-        public void AddFunction(string name, Delegate implementation)
-        {
-            if (Dialogue.Library.FunctionExists(name))
-            {
-                Debug.LogError($"Cannot add function {name}: one already exists");
-                return;
-            }
+        public void AddFunction(string name, Delegate implementation) => CommandDispatcher.AddFunction(name, implementation);
 
-            Dialogue.Library.RegisterFunction(name, implementation);
-        }
 
         /// <inheritdoc cref="AddFunction(string, Delegate)" />
         /// <typeparam name="TResult">The type of the value that the function should return.</typeparam>
-        public void AddFunction<TResult>(string name, System.Func<TResult> implementation)
-        {
-            AddFunction(name, (Delegate)implementation);
-        }
+        public void AddFunction<TResult>(string name, System.Func<TResult> implementation) => CommandDispatcher.AddFunction(name, implementation);
 
         /// <inheritdoc cref="AddFunction{TResult}(string, Func{TResult})" />
         /// <typeparam name="T1">The type of the first parameter to the function.</typeparam>
-        public void AddFunction<TResult, T1>(string name, System.Func<TResult, T1> implementation)
-        {
-            AddFunction(name, (Delegate)implementation);
-        }
+        public void AddFunction<TResult, T1>(string name, System.Func<TResult, T1> implementation) => CommandDispatcher.AddFunction(name, implementation);
 
         /// <inheritdoc cref="AddFunction{TResult,T1}(string, Func{TResult,T1})" />
         /// <typeparam name="T2">The type of the second parameter to the function.</typeparam>
-        public void AddFunction<TResult, T1, T2>(string name, System.Func<TResult, T1, T2> implementation)
-        {
-            AddFunction(name, (Delegate)implementation);
-        }
+        public void AddFunction<TResult, T1, T2>(string name, System.Func<TResult, T1, T2> implementation) => CommandDispatcher.AddFunction(name, implementation);
 
         /// <inheritdoc cref="AddFunction{TResult,T1,T2}(string, Func{TResult,T1,T2})" />
         /// <typeparam name="T3">The type of the third parameter to the function.</typeparam>
-        public void AddFunction<TResult, T1, T2, T3>(string name, System.Func<TResult, T1, T2, T3> implementation)
-        {
-            AddFunction(name, (Delegate)implementation);
-        }
+        public void AddFunction<TResult, T1, T2, T3>(string name, System.Func<TResult, T1, T2, T3> implementation) => CommandDispatcher.AddFunction(name, implementation);
 
         /// <inheritdoc cref="AddFunction{TResult,T1,T2,T3}(string, Func{TResult,T1,T2,T3})" />
         /// <typeparam name="T4">The type of the fourth parameter to the function.</typeparam>
-        public void AddFunction<TResult, T1, T2, T3, T4>(string name, System.Func<TResult, T1, T2, T3, T4> implementation)
-        {
-            AddFunction(name, (Delegate)implementation);
-        }
+        public void AddFunction<TResult, T1, T2, T3, T4>(string name, System.Func<TResult, T1, T2, T3, T4> implementation) => CommandDispatcher.AddFunction(name, implementation);
 
         /// <inheritdoc cref="AddFunction{TResult,T1,T2,T3,T4}(string, Func{TResult,T1,T2,T3,T4})" />
         /// <typeparam name="T5">The type of the fifth parameter to the function.</typeparam>
-        public void AddFunction<TResult, T1, T2, T3, T4, T5>(string name, System.Func<TResult, T1, T2, T3, T4, T5> implementation)
-        {
-            AddFunction(name, (Delegate)implementation);
-        }
+        public void AddFunction<TResult, T1, T2, T3, T4, T5>(string name, System.Func<TResult, T1, T2, T3, T4, T5> implementation) => CommandDispatcher.AddFunction(name, implementation);
 
         /// <inheritdoc cref="AddFunction{TResult,T1,T2,T3,T4,T5}(string, Func{TResult,T1,T2,T3,T4,T5})" />
         /// <typeparam name="T6">The type of the sixth parameter to the function.</typeparam>
-        public void AddFunction<TResult, T1, T2, T3, T4, T5, T6>(string name, System.Func<TResult, T1, T2, T3, T4, T5, T6> implementation)
-        {
-            AddFunction(name, (Delegate)implementation);
-        }
+        public void AddFunction<TResult, T1, T2, T3, T4, T5, T6>(string name, System.Func<TResult, T1, T2, T3, T4, T5, T6> implementation) => CommandDispatcher.AddFunction(name, implementation);
 
         /// <summary>
         /// Remove a registered function.
@@ -646,9 +582,7 @@ namespace Yarn.Unity
         /// </remarks>
         /// <param name="name">The name of the function to remove.</param>
         /// <seealso cref="AddFunction{TResult}(string, Func{TResult})"/>
-        public void RemoveFunction(string name) => Dialogue.Library.DeregisterFunction(name);
-#endregion
-
+        public void RemoveFunction(string name) => CommandDispatcher.RemoveFunction(name);
         /// <summary>
         /// Sets the dialogue views and makes sure the callback <see cref="DialogueViewBase.MarkLineComplete"/>
         /// will respond correctly.
@@ -682,9 +616,6 @@ namespace Yarn.Unity
         private readonly HashSet<DialogueViewBase> ActiveDialogueViews = new HashSet<DialogueViewBase>();
 
         Action<int> selectAction;
-
-        /// Maps the names of commands to action delegates.
-        Dictionary<string, Delegate> commandHandlers = new Dictionary<string, Delegate>();
 
         /// <summary>
         /// The underlying object that executes Yarn instructions
@@ -887,50 +818,46 @@ namespace Yarn.Unity
 
         void HandleCommand(Command command)
         {
-            CommandDispatchResult dispatchResult;
+            var dispatchResult = CommandDispatcher.DispatchCommand(command.Text, out Coroutine awaitCoroutine);
 
-            // Try looking in the command handlers first
-            dispatchResult = DispatchCommandToRegisteredHandlers(command, ContinueDialogue);
-
-            if (dispatchResult != CommandDispatchResult.NotFound)
+            switch (dispatchResult)
             {
-                // We found the command! We don't need to keep looking. (It may
-                // have succeeded or failed; if it failed, it logged something
-                // to the console or otherwise communicated to the developer
-                // that something went wrong. Either way, we don't need to do
-                // anything more here.)
-                return;
+                case CommandDispatchResult.Success:
+                    if (awaitCoroutine != null)
+                    {
+                        // We got a coroutine to wait for. Wait for it, and call
+                        // Continue.
+                        StartCoroutine(WaitForYieldInstruction(awaitCoroutine, ContinueDialogue));
+                    }
+                    else
+                    {
+                        // No need to wait; continue immediately.
+                        ContinueDialogue();
+                    }
+                    return;
+                case CommandDispatchResult.Failed:
+                    // The command dispatch failed; log it and continue.
+                    Debug.LogError($"Attempting to call {command.Text} failed. Continuing execution.", this);
+                    ContinueDialogue();
+                    return;
+                case CommandDispatchResult.NotFound:
+                    // Attempt a last-ditch dispatch by invoking our 'onCommand'
+                    // Unity Event.
+                    if (onCommand != null && onCommand.GetPersistentEventCount() > 0) {
+                        // We can invoke the event!
+                        onCommand.Invoke(command.Text);
+                    } else {
+                        // We're out of ways to handle this command! Log this as an
+                        // error.
+                        Debug.LogError($"No Command <<{command.Text}>> was found. Did you remember to use the YarnCommand attribute or AddCommandHandler() function in C#?");
+                    }
+
+                    // In either case, continue.
+                    ContinueDialogue();
+                    return;
+                default:
+                    throw new ArgumentOutOfRangeException($"Unknown command dispatch result {dispatchResult}");
             }
-
-            // We didn't find it in the comand handlers. Try looking in the
-            // game objects. If it is, continue dialogue.
-            dispatchResult = DispatchCommandToGameObject(command, ContinueDialogue);
-
-            if (dispatchResult != CommandDispatchResult.NotFound)
-            {
-                // As before: we found a handler for this command, so we stop
-                // looking.
-                return;
-            }
-
-            // We didn't find a method in our C# code to invoke. Try invoking on
-            // the publicly exposed UnityEvent.
-            //
-            // We can only do this if our onCommand event is not null and would
-            // do something if we invoked it, so test this now.
-            if (onCommand != null && onCommand.GetPersistentEventCount() > 0) {
-                // We can invoke the event!
-                onCommand.Invoke(command.Text);
-            } else {
-                // We're out of ways to handle this command! Log this as an
-                // error.
-                Debug.LogError($"No Command <<{command.Text}>> was found. Did you remember to use the YarnCommand attribute or AddCommandHandler() function in C#?");
-            }
-
-            // Whether we successfully handled it via the Unity Event or not,
-            // attempting to handle the command this way doesn't interrupt the
-            // dialogue, so we'll continue it now.
-            ContinueDialogue();
         }
 
         /// <summary>
@@ -1070,191 +997,14 @@ namespace Yarn.Unity
 
         }
 
-        /// <summary>
-        /// Parses the command string inside <paramref name="command"/>,
-        /// attempts to find a suitable handler from <see
-        /// cref="commandHandlers"/>, and invokes it if found.
-        /// </summary>
-        /// <param name="command">The <see cref="Command"/> to run.</param>
-        /// <param name="onSuccessfulDispatch">A method to run if a command
-        /// was successfully dispatched to a game object. This method is
-        /// not called if a registered command handler is not
-        /// found.</param>
-        /// <returns>True if the command was dispatched to a game object;
-        /// false otherwise.</returns>
-        CommandDispatchResult DispatchCommandToRegisteredHandlers(Command command, Action onSuccessfulDispatch)
+        private static IEnumerator WaitForYieldInstruction(YieldInstruction yieldInstruction, Action onSuccessfulDispatch)
         {
-            return DispatchCommandToRegisteredHandlers(command.Text, onSuccessfulDispatch);
-        }
-
-        /// <inheritdoc cref="DispatchCommandToRegisteredHandlers(Command,
-        /// Action)"/>
-        /// <param name="command">The text of the command to
-        /// dispatch.</param>
-        internal CommandDispatchResult DispatchCommandToRegisteredHandlers(string command, Action onSuccessfulDispatch)
-        {
-            var commandTokens = SplitCommandText(command).ToArray();
-
-            if (commandTokens.Length == 0)
-            {
-                // Nothing to do.
-                return CommandDispatchResult.NotFound;
-            }
-
-            var firstWord = commandTokens[0];
-
-            if (commandHandlers.ContainsKey(firstWord) == false)
-            {
-                // We don't have a registered handler for this command, but
-                // some other part of the game might.
-                return CommandDispatchResult.NotFound;
-            }
-
-            var @delegate = commandHandlers[firstWord];
-            var methodInfo = @delegate.Method;
-
-            object[] finalParameters;
-
-            try
-            {
-#if YARN_LEGACY_ACTIONMANAGER
-                finalParameters = ActionManager.ParseArgs(methodInfo, commandTokens);
-#else
-                finalParameters = Yarn.Unity.Actions.ParseArgs(commandTokens);
-#endif
-            }
-            catch (ArgumentException e)
-            {
-                Debug.LogError($"Can't run command {firstWord}: {e.Message}");
-                return CommandDispatchResult.Failed;
-            }
-
-            if (typeof(YieldInstruction).IsAssignableFrom(methodInfo.ReturnType))
-            {
-                // This delegate returns a YieldInstruction of some kind
-                // (e.g. a Coroutine). Run it, and wait for it to finish
-                // before calling onSuccessfulDispatch.
-                StartCoroutine(WaitForYieldInstruction(@delegate, finalParameters, onSuccessfulDispatch));
-            }
-            else if (typeof(void) == methodInfo.ReturnType)
-            {
-                // This method does not return anything. Invoke it and call
-                // our completion handler.
-                @delegate.DynamicInvoke(finalParameters);
-
-                onSuccessfulDispatch();
-            }
-            else
-            {
-                Debug.LogError($"Cannot run command {firstWord}: the provided delegate does not return a valid type (permitted return types are YieldInstruction or void)");
-                return CommandDispatchResult.Failed;
-            }
-
-            return CommandDispatchResult.Success;
-        }
-
-        /// <summary>
-        /// A coroutine that invokes @<paramref name="theDelegate"/> that
-        /// returns a <see cref="YieldInstruction"/>, yields on that
-        /// result, and then invokes <paramref
-        /// name="onSuccessfulDispatch"/>.
-        /// </summary>
-        /// <param name="theDelegate">The method to call. This must return
-        /// a value of type <see cref="YieldInstruction"/>.</param>
-        /// <param name="finalParametersToUse">The parameters to pass to
-        /// the call to <paramref name="theDelegate"/>.</param>
-        /// <param name="onSuccessfulDispatch">The method to call after the
-        /// <see cref="YieldInstruction"/> returned by <paramref
-        /// name="theDelegate"/> has finished.</param>
-        /// <returns>An <see cref="IEnumerator"/> to use with <see
-        /// cref="StartCoroutine"/>.</returns>
-        private static IEnumerator WaitForYieldInstruction(Delegate @theDelegate, object[] finalParametersToUse, Action onSuccessfulDispatch)
-        {
-            // Invoke the delegate.
-            var yieldInstruction = @theDelegate.DynamicInvoke(finalParametersToUse);
-
-            // Yield on the return result.
             yield return yieldInstruction;
 
-            // Call the completion handler.
             onSuccessfulDispatch();
         }
 
-        /// <summary>
-        /// Parses the command string inside <paramref name="command"/>,
-        /// attempts to locate a suitable method on a suitable game object,
-        /// and the invokes the method.
-        /// </summary>
-        /// <param name="command">The <see cref="Command"/> to run.</param>
-        /// <param name="onSuccessfulDispatch">A method to run if a command
-        /// was successfully dispatched to a game object. This method is
-        /// not called if a registered command handler is not
-        /// found.</param>
-        /// <returns><see langword="true"/> if the command was successfully
-        /// dispatched to a game object; <see langword="false"/> if no game
-        /// object was registered as a handler for the command.</returns>
-        internal CommandDispatchResult DispatchCommandToGameObject(Command command, Action onSuccessfulDispatch)
-        {
-            // Call out to the string version of this method, because
-            // Yarn.Command's constructor is only accessible from inside
-            // Yarn Spinner, but we want to be able to unit test. So, we
-            // extract it, and call the underlying implementation, which is
-            // testable.
-            return DispatchCommandToGameObject(command.Text, onSuccessfulDispatch);
-        }
-
-        /// <inheritdoc cref="DispatchCommandToGameObject(Command, Action)"/>
-        /// <param name="command">The text of the command to
-        /// dispatch.</param>
-        internal CommandDispatchResult DispatchCommandToGameObject(string command, System.Action onSuccessfulDispatch)
-        {
-            if (string.IsNullOrEmpty(command))
-            {
-                throw new ArgumentException($"'{nameof(command)}' cannot be null or empty.", nameof(command));
-            }
-
-            if (onSuccessfulDispatch is null)
-            {
-                throw new ArgumentNullException(nameof(onSuccessfulDispatch));
-            }
-
-
-            CommandDispatchResult commandExecutionResult;
-            
-            #if YARN_LEGACY_ACTIONMANAGER
-            commandExecutionResult = ActionManager.TryExecuteCommand(SplitCommandText(command).ToArray(), out object returnValue);
-            #else
-            commandExecutionResult = Actions.TryExecuteCommand(SplitCommandText(command).ToArray(), out object returnValue);
-            #endif
-
-            if (commandExecutionResult != CommandDispatchResult.Success)
-            {
-                return commandExecutionResult;
-            }
-
-            var enumerator = returnValue as IEnumerator;
-
-            if (enumerator != null)
-            {
-                // Start the coroutine. When it's done, it will continue execution.
-                StartCoroutine(DoYarnCommand(enumerator, onSuccessfulDispatch));
-            }
-            else
-            {
-                // no coroutine, so we're done!
-                onSuccessfulDispatch();
-            }
-            return CommandDispatchResult.Success;
-
-            IEnumerator DoYarnCommand(IEnumerator source, Action onDispatch)
-            {
-                // Wait for this command coroutine to complete
-                yield return StartCoroutine(source);
-
-                // And then signal that we're done
-                onDispatch();
-            }
-        }
+        
 
         private void PrepareForLines(IEnumerable<string> lineIDs)
         {

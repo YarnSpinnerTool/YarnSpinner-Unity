@@ -325,20 +325,28 @@ namespace Yarn.Unity.Tests
         [TestCase("testExternalAssemblyCommand", "success")]
         public void HandleCommand_DispatchesCommands(string test, string expectedLogResult) {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            var dispatcher = runner.CommandDispatcher;
 
             LogAssert.Expect(LogType.Log, expectedLogResult);
-            var methodFound = runner.DispatchCommandToGameObject(test, () => {});
-
-            Assert.AreEqual(methodFound, DialogueRunner.CommandDispatchResult.Success);        
+            var result = dispatcher.DispatchCommand(test, out var commandCoroutine);
+            
+            Assert.AreEqual(result, DialogueRunner.CommandDispatchResult.Success);
+            Assert.IsNull(commandCoroutine);
         }
 
         [UnityTest]
         public IEnumerator HandleCommand_DispatchedCommands_StartCoroutines() {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            var dispatcher = runner.CommandDispatcher;
 
             var framesToWait = 5;
 
-            runner.DispatchCommandToGameObject($"testCommandCoroutine DialogueRunner {framesToWait}", () => {});
+            var result = dispatcher.DispatchCommand($"testCommandCoroutine DialogueRunner {framesToWait}", out var commandCoroutine);
+
+            Assert.AreEqual(result, DialogueRunner.CommandDispatchResult.Success);
+            Assert.IsNotNull(commandCoroutine);
+
+            // commandCoroutine will already be running on runner, so now we wait for it
 
             LogAssert.Expect(LogType.Log, $"success {Time.frameCount + framesToWait}");
 
@@ -353,23 +361,26 @@ namespace Yarn.Unity.Tests
         [TestCase("testCommandOptionalParams DialogueRunner 1 2 3", "requires between 1 and 2 parameters, but 3 were provided")]
         public void HandleCommand_FailsWhenParameterCountNotCorrect(string command, string error) {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            var dispatcher = runner.CommandDispatcher;
 
             LogAssert.Expect(LogType.Error, new Regex(error));
-            runner.DispatchCommandToGameObject(command, () => {});
+            dispatcher.DispatchCommand(command, out _);
         }
 
         [TestCase("testCommandInteger DialogueRunner 1 not_an_integer", "Can't convert the given parameter")]
         [TestCase("testCommandCustomInjector asdf", "Non-static method requires a target")]
         public void HandleCommand_FailsWhenParameterTypesNotValid(string command, string error) {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            var dispatcher = runner.CommandDispatcher;
 
             LogAssert.Expect(LogType.Error, new Regex(error));
-            runner.DispatchCommandToGameObject(command, () => {});
+            dispatcher.DispatchCommand(command, out _);
         }
 
         [Test]
         public void AddCommandHandler_RegistersCommands() {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            var dispatcher = runner.CommandDispatcher;
 
             runner.AddCommandHandler("test1", () => { Debug.Log("success 1"); } );
             runner.AddCommandHandler("test2", (int val) => { Debug.Log($"success {val}"); } );
@@ -377,13 +388,14 @@ namespace Yarn.Unity.Tests
             LogAssert.Expect(LogType.Log, "success 1");
             LogAssert.Expect(LogType.Log, "success 2");
 
-            runner.DispatchCommandToRegisteredHandlers("test1", () => {});
-            runner.DispatchCommandToRegisteredHandlers("test2 2", () => {});
+            dispatcher.DispatchCommand("test1", out _);
+            dispatcher.DispatchCommand("test2 2", out _);
         }
 
         [UnityTest]
         public IEnumerator AddCommandHandler_RegistersCoroutineCommands() {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            var dispatcher = runner.CommandDispatcher;
 
              IEnumerator TestCommandCoroutine(int frameDelay) {
                 // Wait the specified number of frames
@@ -400,7 +412,9 @@ namespace Yarn.Unity.Tests
 
             LogAssert.Expect(LogType.Log, $"success {Time.frameCount + framesToWait}");
 
-            runner.DispatchCommandToRegisteredHandlers("test", () => {});
+            dispatcher.DispatchCommand("test", out var coroutine);
+
+            Assert.IsNotNull(coroutine);
 
             // After framesToWait frames, we should have seen the log
             while (framesToWait > 0) {
