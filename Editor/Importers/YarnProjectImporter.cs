@@ -840,6 +840,8 @@ namespace Yarn.Unity.Editor
         private SerializedObject serializedObject;
         private SerializedProperty serializedProperty;
 
+        private Dictionary<int, float> _lineHeights = new Dictionary<int, float>();
+
         public ReorderableDeclarationsList(SerializedObject serializedObject, SerializedProperty property)
         {
             this.serializedObject = serializedObject;
@@ -953,8 +955,12 @@ namespace Yarn.Unity.Editor
 
             if (useSearch == false || ShouldShowElement(index))
             {
-                var item = serializedProperty.GetArrayElementAtIndex(index);
-                return DeclarationPropertyDrawer.GetPropertyHeightImpl(item, null);
+                if (!_lineHeights.ContainsKey(index))
+                {
+                    var item = serializedProperty.GetArrayElementAtIndex(index);
+                    _lineHeights[index] = DeclarationPropertyDrawer.GetPropertyHeightImpl(item, null);
+                }
+                return _lineHeights[index];
             }
             else
             {
@@ -978,6 +984,7 @@ namespace Yarn.Unity.Editor
 
         public void DrawLayout()
         {
+            _lineHeights.Clear();
             //serializedObject.Update();
             EditorGUILayout.Space();
 
