@@ -271,14 +271,17 @@ namespace Yarn.Unity.Editor
                 {
                     var errorMessages = errorGroup.Select(e => e.ToString());
 
-                    foreach (var message in errorMessages)
+                    var asset = AssetDatabase.LoadAssetAtPath<Object>(errorGroup.Key);
+
+                    foreach (var error in errorGroup)
                     {
-                        ctx.LogImportError($"Error compiling: {message}");
+                        ctx.LogImportError($"Error compiling <a href=\"{error.FileName}\">{error.FileName}</a> line {error.Range.Start.Line + 1}: {error.Message}", asset);
                     }
 
                     // Associate this compile error to the corresponding
                     // script's importer.
                     var importer = pathsToImporters[errorGroup.Key];
+                    var path = errorGroup.Key;
 
                     compileErrors.AddRange(errorMessages);
 
