@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+#if YARN_LEGACY_ACTIONMANAGER
 namespace Yarn.Unity {
 
     internal class LegacyActionManagerDispatcher : ICommandDispatcher
@@ -414,3 +415,4 @@ namespace Yarn.Unity {
         #endregion
     }
 }
+#endif
