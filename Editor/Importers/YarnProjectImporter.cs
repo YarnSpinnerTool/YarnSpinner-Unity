@@ -119,6 +119,7 @@ namespace Yarn.Unity.Editor
 
         public bool useAddressableAssets;
 
+#if YARN_USE_LEGACY_ACTIONMANAGER
         /// <summary>
         /// If <see langword="true"/>, <see cref="ActionManager"/> will search
         /// all assemblies that have been defined using an <see
@@ -142,6 +143,7 @@ namespace Yarn.Unity.Editor
         [NonReorderable]
 #endif
         public FunctionInfo[] ListOfFunctions;
+#endif
 
         IList<string> IYarnErrorSource.CompileErrors => compileErrors;
 
@@ -189,11 +191,11 @@ namespace Yarn.Unity.Editor
 #if YARN_LEGACY_ACTIONMANAGER
             ActionManager.AddActionsFromAssemblies(AssemblySearchList());
             ActionManager.RegisterFunctions(library);
+            ListOfFunctions = predeterminedFunctions().ToArray();
 #else
             library = Actions.GetLibrary();
 #endif
             localDeclarationsCompileJob.Library = library;
-            ListOfFunctions = predeterminedFunctions().ToArray();
 
             IEnumerable<Declaration> localDeclarations;
 
@@ -353,7 +355,9 @@ namespace Yarn.Unity.Editor
 
             project.compiledYarnProgram = compiledBytes;
 
+#if YARN_USE_LEGACY_ACTIONMANAGER
             project.searchAssembliesForActions = AssemblySearchList();
+#endif
 
 #if YARNSPINNER_DEBUG
             UnityEngine.Profiling.Profiler.enabled = false;
@@ -579,6 +583,7 @@ namespace Yarn.Unity.Editor
         }
 #endif
 
+#if YARN_USE_LEGACY_ACTIONMANAGER
         private List<string> AssemblySearchList()
         {
             // Get the list of assembly names we want to search for actions in.
@@ -627,7 +632,6 @@ namespace Yarn.Unity.Editor
 
         private List<FunctionInfo> predeterminedFunctions()
         {
-#if YARN_LEGACY_ACTIONMANAGER
             var functions = ActionManager.FunctionsInfo();
 
             List<FunctionInfo> f = new List<FunctionInfo>();
@@ -636,9 +640,6 @@ namespace Yarn.Unity.Editor
                 f.Add(FunctionInfo.CreateFunctionInfoFromMethodGroup(func));
             }
             return f;
-#else
-            throw new System.NotImplementedException();
-#endif
         }
 
         // A data class used for deserialising the JSON AssemblyDefinitionAssets
@@ -647,6 +648,7 @@ namespace Yarn.Unity.Editor
         private class AssemblyDefinition {
             public string name;
         }
+#endif
 
         /// <summary>
         /// Gets a value indicating whether this Yarn Project is able to

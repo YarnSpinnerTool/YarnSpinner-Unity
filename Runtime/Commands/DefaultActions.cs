@@ -7,6 +7,36 @@ namespace Yarn.Unity
 {
     internal class DefaultActions : MonoBehaviour
     {
+#if UNITY_EDITOR
+        [UnityEditor.InitializeOnLoadMethod]
+#endif
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        public static void AddRegisterFunction() {
+            // When the domain is reloaded, scripts are recompiled, or the game
+            // starts, add RegisterActions as a method that populates a
+            // DialogueRunner or Library with commands and functions.
+            Actions.AddRegistrationMethod(RegisterActions);
+        }
+
+        [System.CodeDom.Compiler.GeneratedCode("YarnActionAnalyzer", "1.0.0.0")]
+        public static void RegisterActions(global::Yarn.Unity.IActionRegistration target)
+        {
+            // Actions from file:
+            // /Users/desplesda/Work/YarnSpinner-Unity/Packages/YarnSpinner/Runtime/Commands/DefaultActions.cs
+            target.AddCommandHandler<float>("wait", global::Yarn.Unity.DefaultActions.Wait);
+            target.AddFunction<float>("random", global::Yarn.Unity.DefaultActions.Random);
+            target.AddFunction<float, float, float>("random_range", global::Yarn.Unity.DefaultActions.RandomRange);
+            target.AddFunction<int, int>("dice", global::Yarn.Unity.DefaultActions.Dice);
+            target.AddFunction<float, int>("round", global::Yarn.Unity.DefaultActions.Round);
+            target.AddFunction<float, int, float>("round_places", global::Yarn.Unity.DefaultActions.RoundPlaces);
+            target.AddFunction<float, int>("floor", global::Yarn.Unity.DefaultActions.Floor);
+            target.AddFunction<float, int>("ceil", global::Yarn.Unity.DefaultActions.Ceil);
+            target.AddFunction<float, int>("inc", global::Yarn.Unity.DefaultActions.Inc);
+            target.AddFunction<float, int>("dec", global::Yarn.Unity.DefaultActions.Dec);
+            target.AddFunction<float, float>("decimal", global::Yarn.Unity.DefaultActions.Decimal);
+            target.AddFunction<float, int>("int", global::Yarn.Unity.DefaultActions.Int);
+        }
+
         #region Commands
         /// <summary>
         /// Yarn Spinner defines two built-in commands: "wait", and "stop".

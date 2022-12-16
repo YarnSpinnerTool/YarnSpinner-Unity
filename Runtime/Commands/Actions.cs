@@ -148,6 +148,12 @@ namespace Yarn.Unity
             DialogueRunner = dialogueRunner;
         }
 
+        public void RegisterActions() {
+            foreach (var registrationFunction in ActionRegistrationMethods) {
+                registrationFunction.Invoke(DialogueRunner);
+            }
+        }
+
         public void AddCommandHandler(string commandName, Delegate handler)
         {
             bool added = Commands.TryAdd(commandName, new CommandRegistration(commandName, handler));
@@ -381,6 +387,119 @@ namespace Yarn.Unity
                         $"{parameter.Name} of type {targetType.FullName}: {e}");
                 }
             };
+        }
+
+
+        private static HashSet<System.Action<IActionRegistration>> ActionRegistrationMethods = new HashSet<Action<IActionRegistration>>();
+
+
+        public static void AddRegistrationMethod(Action<IActionRegistration> registerActions)
+        {
+            Debug.Log($"Adding registration method {registerActions.Method.DeclaringType.FullName}.{registerActions.Method.Name}");
+            ActionRegistrationMethods.Add(registerActions);
+        }
+
+        public static Yarn.Library GetLibrary() {
+            var library = new Yarn.Library();
+
+            var proxy = new LibraryRegistrationProxy(library);
+
+            foreach (var registrationMethod in ActionRegistrationMethods) {
+                registrationMethod.Invoke(proxy);
+            }
+
+            return library;
+        }
+
+        /// <summary>
+        /// A helper class that registers functions into a <see
+        /// cref="Yarn.Library"/>.
+        /// </summary>
+        private class LibraryRegistrationProxy : IActionRegistration
+        {
+            private Library library;
+
+            public LibraryRegistrationProxy(Library library)
+            {
+                this.library = library;
+            }
+
+            public void AddCommandHandler(string commandName, Delegate handler)
+            {
+                // No action; this class does not handle commands, only functions.
+                return;
+            }
+
+            public void AddCommandHandler(string commandName, Func<Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1>(string commandName, Func<T1, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1, T2>(string commandName, Func<T1, T2, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1, T2, T3>(string commandName, Func<T1, T2, T3, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Func<T1, T2, T3, T4, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Func<T1, T2, T3, T4, T5, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Func<T1, T2, T3, T4, T5, T6, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler(string commandName, Func<IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1>(string commandName, Func<T1, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1, T2>(string commandName, Func<T1, T2, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1, T2, T3>(string commandName, Func<T1, T2, T3, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Func<T1, T2, T3, T4, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Func<T1, T2, T3, T4, T5, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Func<T1, T2, T3, T4, T5, T6, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler(string commandName, Action handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1>(string commandName, Action<T1> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1, T2>(string commandName, Action<T1, T2> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1, T2, T3>(string commandName, Action<T1, T2, T3> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Action<T1, T2, T3, T4> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Action<T1, T2, T3, T4, T5> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Action<T1, T2, T3, T4, T5, T6> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddFunction(string name, Delegate implementation) {
+                // Check to see if the function already exists in our Library,
+                // and error out if it does
+                if (library.FunctionExists(name)) {
+                    throw new ArgumentException($"Cannot register function {name}: a function with this name already exists");
+                }
+                // Register this function in the library
+                Debug.Log($"Registered function {name} to method {implementation.Method.DeclaringType}.{implementation.Method.Name}");
+                library.RegisterFunction(name, implementation);
+            }
+
+            public void AddFunction<TResult>(string name, Func<TResult> implementation) => AddFunction(name, (Delegate)implementation);
+
+            public void AddFunction<TResult, T1>(string name, Func<TResult, T1> implementation) => AddFunction(name, (Delegate)implementation);
+
+            public void AddFunction<TResult, T1, T2>(string name, Func<TResult, T1, T2> implementation) => AddFunction(name, (Delegate)implementation);
+
+            public void AddFunction<TResult, T1, T2, T3>(string name, Func<TResult, T1, T2, T3> implementation) => AddFunction(name, (Delegate)implementation);
+
+            public void AddFunction<TResult, T1, T2, T3, T4>(string name, Func<TResult, T1, T2, T3, T4> implementation) => AddFunction(name, (Delegate)implementation);
+
+            public void AddFunction<TResult, T1, T2, T3, T4, T5>(string name, Func<TResult, T1, T2, T3, T4, T5> implementation) => AddFunction(name, (Delegate)implementation);
+
+            public void AddFunction<TResult, T1, T2, T3, T4, T5, T6>(string name, Func<TResult, T1, T2, T3, T4, T5, T6> implementation) => AddFunction(name, (Delegate)implementation);
+
+            public void RemoveCommandHandler(string commandName) => throw new NotImplementedException("This class does not support removing actions.");
+
+            public void RemoveFunction(string name) => throw new NotImplementedException("This class does not support removing actions.");
         }
     }
 }

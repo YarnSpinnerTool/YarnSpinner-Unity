@@ -39,10 +39,13 @@ namespace Yarn.Unity.Editor
         private SerializedProperty useAddressableAssetsProperty;
 
         private ReorderableDeclarationsList serializedDeclarationsList;
+
+#if YARN_USE_LEGACY_ACTIONMANAGER
         private SerializedProperty searchAllAssembliesProperty;
         private SerializedProperty assembliesToSearchProperty;
 
         private SerializedProperty predeterminedFunctionsProperty;
+#endif
 
 #if YARN_ENABLE_EXPERIMENTAL_FEATURES
         private SerializedProperty useUnityLocalisationSystemProperty;
@@ -63,10 +66,12 @@ namespace Yarn.Unity.Editor
 
             serializedDeclarationsList = new ReorderableDeclarationsList(serializedObject, serializedDeclarationsProperty);
 
+#if YARN_USE_LEGACY_ACTIONMANAGER
             searchAllAssembliesProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.searchAllAssembliesForActions));
             assembliesToSearchProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.assembliesToSearch));
 
             predeterminedFunctionsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.ListOfFunctions));
+#endif
 
 #if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
             useUnityLocalisationSystemProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.UseUnityLocalisationSystem));
@@ -241,6 +246,8 @@ namespace Yarn.Unity.Editor
 
             EditorGUILayout.Space();
 
+#if YARN_USE_LEGACY_ACTIONMANAGER
+
             EditorGUILayout.LabelField("Commands and Functions", EditorStyles.boldLabel);
 
             var searchAllAssembliesLabel = new GUIContent("Search All Assemblies", "Search all assembly definitions for commands and functions, as well as code that's not in a folder with an assembly definition");
@@ -254,6 +261,7 @@ namespace Yarn.Unity.Editor
             }
 
             EditorGUILayout.PropertyField(predeterminedFunctionsProperty, true);
+#endif
 
             if (showInternalLocalizationGUI)
             {
