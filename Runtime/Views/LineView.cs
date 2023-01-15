@@ -655,9 +655,12 @@ namespace Yarn.Unity
                 // started it.
                 currentStopToken.Interrupt();
             }
-            // No animation is now running. Signal that we want to
-            // interrupt the line instead.
-            requestInterrupt?.Invoke();
+            else
+            {
+                // No animation is now running. Signal that we want to
+                // interrupt the line instead.
+                requestInterrupt?.Invoke();
+            }
         }
 
         /// <summary>
