@@ -10,7 +10,7 @@ There are several places you can go to get help with Yarn Spinner.
 
 * Join the [Yarn Spinner Discord](https://discord.gg/yarnspinner).
 * Tweet at us, at [@YarnSpinnerTool](https://twitter.com/YarnSpinnerTool).
-* To report a bug, [file an issue on GitHub](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/new?labels=bug+beta&template=bug_report_beta.md&title=).
+* To report a bug, [file an issue on GitHub](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/new?labels=bug+beta&template=bug_report.md&title=).
 
 ## 📦 How To Install Yarn Spinner
 
