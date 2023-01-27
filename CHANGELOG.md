@@ -10,9 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Fixed an issue where pluralisation markup (i.e. the `plural` and `ordinal` tags) would not work correctly with country-specific locales (for example "en-AU").
+### Removed
 
-### Removed 
+## [2.2.4] 2023-01-27
+
+### Changed
+
+- Number pluralisation rules have been updated. The rules have now use CLDR version 42.0 (previously, 36.1)
+- Fixed an issue where pluralisation markup (i.e. the `plural` and `ordinal` tags) would not work correctly with country-specific locales (for example "en-AU").
 
 ## [2.2.3] 2022-11-14
 
