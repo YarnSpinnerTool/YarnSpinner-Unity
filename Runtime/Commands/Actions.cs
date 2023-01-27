@@ -15,28 +15,26 @@ namespace Yarn.Unity
     {
         private class CommandRegistration
         {
-            public CommandRegistration(string name, Delegate @delegate)
+            public CommandRegistration(string name, MethodInfo method)
             {
-                Name = name;
-                Delegate = @delegate;
-
-                if (@delegate.Method.IsStatic == false
-                    && typeof(Component).IsAssignableFrom(@delegate.Method.DeclaringType) == false)
+                if (method.IsStatic == false && typeof(Component).IsAssignableFrom(method.DeclaringType) == false)
                 {
-                    // This is an instance method, but the delegate's delcaring
-                    // type is not a Component, which means we won't be able to
-                    // look up a target.
-                    throw new ArgumentException($"Cannot register command {@delegate.Method.Name} as a command: instance methods must declared on {nameof(Component)} classes.");
+                    // The instance method's declaring type is not a Component,
+                    // which means we won't be able to look up a target.
+                    throw new ArgumentException($"Cannot register command {GetFullMethodName(method)} as a command: instance methods must declared on {nameof(Component)} classes.");
                 }
 
-                Converters = CreateConverters(@delegate.Method);
+                Name = name;
+                Method = method;
+                
+                Converters = CreateConverters(method);
             }
 
             public string Name { get; set; }
-            public Delegate Delegate { get; set; }
-            public Type DeclaringType => Delegate.Method.DeclaringType;
-            public Type ReturnType => Delegate.Method.ReturnType;
-            public bool IsStatic => Delegate.Method.IsStatic;
+            public MethodInfo Method { get; set; }
+            public Type DeclaringType => Method.DeclaringType;
+            public Type ReturnType => Method.ReturnType;
+            public bool IsStatic => Method.IsStatic;
 
             public readonly Converter[] Converters;
 
@@ -84,7 +82,7 @@ namespace Yarn.Unity
             /// <returns>The parsed arguments.</returns>
             public object[] ParseArgs(string[] args)
             {
-                var parameters = Delegate.Method.GetParameters();
+                var parameters = Method.GetParameters();
                 int optional = 0;
                 foreach (var parameter in parameters)
                 {
@@ -148,6 +146,10 @@ namespace Yarn.Unity
             DialogueRunner = dialogueRunner;
         }
 
+        private static string GetFullMethodName(MethodInfo method) {
+            return $"{method.DeclaringType.FullName}.{method.Name}";
+        }
+
         public void RegisterActions() {
             foreach (var registrationFunction in ActionRegistrationMethods) {
                 registrationFunction.Invoke(DialogueRunner);
@@ -156,7 +158,7 @@ namespace Yarn.Unity
 
         public void AddCommandHandler(string commandName, Delegate handler)
         {
-            bool added = Commands.TryAdd(commandName, new CommandRegistration(commandName, handler));
+            bool added = Commands.TryAdd(commandName, new CommandRegistration(commandName, handler.Method));
 
             if (!added)
             {
@@ -172,6 +174,15 @@ namespace Yarn.Unity
                 return;
             }
             Library.RegisterFunction(name, implementation);
+        }
+
+        public void AddCommandHandler(string commandName, MethodInfo methodInfo) {
+            bool added = Commands.TryAdd(commandName, new CommandRegistration(commandName, methodInfo));
+
+            if (!added)
+            {
+                Debug.LogError($"Failed to register command {commandName}: a command by this name has already been registered.");
+            }
         }
 
         public void AddCommandHandler(string commandName, Func<Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
@@ -218,6 +229,7 @@ namespace Yarn.Unity
 
         public void RemoveCommandHandler(string commandName)
         {
+            #warning Not implemented
             throw new NotImplementedException();
         }
 
@@ -299,7 +311,7 @@ namespace Yarn.Unity
 
             object[] finalParameters = registration.ParseArgs(parameters.ToArray());
 
-            var returnValue = registration.Delegate.Method.Invoke(target, finalParameters);
+            var returnValue = registration.Method.Invoke(target, finalParameters);
 
             if (returnValue is Coroutine coro)
             {
@@ -411,6 +423,41 @@ namespace Yarn.Unity
             return library;
         }
 
+        public void AddCommandHandler(string commandName, Func<IEnumerator> handler)
+        {
+            this.AddCommandHandler(commandName, (Delegate)handler);
+        }
+
+        public void AddCommandHandler<T1>(string commandName, Func<T1, IEnumerator> handler)
+        {
+            this.AddCommandHandler(commandName, (Delegate)handler);
+        }
+
+        public void AddCommandHandler<T1, T2>(string commandName, Func<T1, T2, IEnumerator> handler)
+        {
+            this.AddCommandHandler(commandName, (Delegate)handler);
+        }
+
+        public void AddCommandHandler<T1, T2, T3>(string commandName, Func<T1, T2, T3, IEnumerator> handler)
+        {
+            this.AddCommandHandler(commandName, (Delegate)handler);
+        }
+
+        public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Func<T1, T2, T3, T4, IEnumerator> handler)
+        {
+            this.AddCommandHandler(commandName, (Delegate)handler);
+        }
+
+        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Func<T1, T2, T3, T4, T5, IEnumerator> handler)
+        {
+            this.AddCommandHandler(commandName, (Delegate)handler);
+        }
+
+        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Func<T1, T2, T3, T4, T5, T6, IEnumerator> handler)
+        {
+            this.AddCommandHandler(commandName, (Delegate)handler);
+        }
+
         /// <summary>
         /// A helper class that registers functions into a <see
         /// cref="Yarn.Library"/>.
@@ -431,6 +478,8 @@ namespace Yarn.Unity
             }
 
             public void AddCommandHandler(string commandName, Func<Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
+
+            public void AddCommandHandler(string commandName, MethodInfo methodInfo) => AddCommandHandler(commandName, (Delegate)null!);
 
             public void AddCommandHandler<T1>(string commandName, Func<T1, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
 

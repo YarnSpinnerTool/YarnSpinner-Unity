@@ -66,6 +66,11 @@ namespace Yarn.Unity
         public void AddCommandHandler(string commandName, Delegate handler);
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        /// <param name="methodInfo">The method that will be invoked when the
+        /// command is called.</param>
+        public void AddCommandHandler(string commandName, MethodInfo methodInfo);
+
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public void AddCommandHandler(string commandName, System.Func<Coroutine> handler);
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
@@ -635,6 +640,11 @@ namespace Yarn.Unity
         /// <param name="handler">The <see cref="CommandHandler"/> that will be
         /// invoked when the command is called.</param>
         public void AddCommandHandler(string commandName, Delegate handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
+
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        /// <param name="method">The method that will be invoked when the
+        /// command is called.</param>
+        public void AddCommandHandler(string commandName, MethodInfo method) => CommandDispatcher.AddCommandHandler(commandName, method);
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public void AddCommandHandler(string commandName, System.Func<Coroutine> handler) => CommandDispatcher.AddCommandHandler(commandName, handler);

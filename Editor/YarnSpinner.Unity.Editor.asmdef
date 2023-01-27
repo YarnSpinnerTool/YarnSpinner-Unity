@@ -26,7 +26,12 @@
         "Yarn.System.Memory.dll",
         "Yarn.System.Numerics.Vectors.dll",
         "Yarn.System.Reflection.TypeExtensions.dll",
-        "Yarn.System.Runtime.CompilerServices.Unsafe.dll"
+        "Yarn.System.Runtime.CompilerServices.Unsafe.dll",
+        "Microsoft.CodeAnalysis.dll",
+        "Microsoft.CodeAnalysis.CSharp.dll",
+        "System.Collections.Immutable.dll",
+        "System.Reflection.Metadata.dll",
+        "System.Runtime.CompilerServices.Unsafe.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],
