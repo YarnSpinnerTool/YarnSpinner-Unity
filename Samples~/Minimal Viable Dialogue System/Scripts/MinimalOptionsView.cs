@@ -58,10 +58,10 @@ public class MinimalOptionsView : MonoBehaviour
         System.Action<Yarn.Unity.DialogueOption> onOptionSelected = delegate(DialogueOption selectedOption)
         {
             StartCoroutine(OptionViewWasSelectedInternal(selectedOption));
-            IEnumerator OptionViewWasSelectedInternal(DialogueOption selectedOption)
+            IEnumerator OptionViewWasSelectedInternal(DialogueOption option)
             {
                 yield return StartCoroutine(Yarn.Unity.Effects.FadeAlpha(canvasGroup, 1, 0, fadeTime));
-                runner.SetSelectedOption(selectedOption.DialogueOptionID);
+                runner.SetSelectedOption(option.DialogueOptionID);
             }
         };
         
