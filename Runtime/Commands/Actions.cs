@@ -12,7 +12,7 @@ namespace Yarn.Unity
 
     public class Actions : ICommandDispatcher
     {
-        private class CommandRegistration
+        public class CommandRegistration
         {
             public CommandRegistration(string name, MethodInfo method)
             {
@@ -401,7 +401,7 @@ namespace Yarn.Unity
         }
 
 
-        private static HashSet<System.Action<IActionRegistration>> ActionRegistrationMethods = new HashSet<Action<IActionRegistration>>();
+        internal static HashSet<System.Action<IActionRegistration>> ActionRegistrationMethods = new HashSet<Action<IActionRegistration>>();
 
 
         public static void AddRegistrationMethod(Action<IActionRegistration> registerActions)
