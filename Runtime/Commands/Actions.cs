@@ -5,7 +5,6 @@ using System.Globalization;
 using System.Reflection;
 using UnityEngine;
 
-#nullable enable
 
 namespace Yarn.Unity
 {
@@ -135,7 +134,7 @@ namespace Yarn.Unity
             }
         }
 
-        private Dictionary<string, CommandRegistration> Commands = new Dictionary<string, CommandRegistration>();
+        private Dictionary<string, CommandRegistration> _commands = new Dictionary<string, CommandRegistration>();
 
         public Library Library { get; }
         public DialogueRunner DialogueRunner { get; }
@@ -158,11 +157,11 @@ namespace Yarn.Unity
 
         public void AddCommandHandler(string commandName, Delegate handler)
         {
-            bool added = Commands.TryAdd(commandName, new CommandRegistration(commandName, handler.Method));
-
-            if (!added)
-            {
+            if (_commands.ContainsKey(commandName)) {
                 Debug.LogError($"Failed to register command {commandName}: a command by this name has already been registered.");
+                return;
+            } else {
+                _commands.Add(commandName, new CommandRegistration(commandName, handler.Method));
             }
         }
 
@@ -177,11 +176,11 @@ namespace Yarn.Unity
         }
 
         public void AddCommandHandler(string commandName, MethodInfo methodInfo) {
-            bool added = Commands.TryAdd(commandName, new CommandRegistration(commandName, methodInfo));
-
-            if (!added)
-            {
+            if (_commands.ContainsKey(commandName)) {
                 Debug.LogError($"Failed to register command {commandName}: a command by this name has already been registered.");
+                return;
+            } else {
+                _commands.Add(commandName, new CommandRegistration(commandName, methodInfo));
             }
         }
 
@@ -248,7 +247,7 @@ namespace Yarn.Unity
             // no-op
         }
 
-        DialogueRunner.CommandDispatchResult ICommandDispatcher.DispatchCommand(string command, out Coroutine? commandCoroutine)
+        DialogueRunner.CommandDispatchResult ICommandDispatcher.DispatchCommand(string command, out Coroutine commandCoroutine)
         {
             commandCoroutine = null;
 
@@ -262,7 +261,7 @@ namespace Yarn.Unity
             var commandName = commandPieces[0];
 
 
-            var found = Commands.TryGetValue(commandPieces[0], out var registration);
+            var found = _commands.TryGetValue(commandPieces[0], out var registration);
             if (!found)
             {
                 return DialogueRunner.CommandDispatchResult.NotFound;
@@ -271,7 +270,7 @@ namespace Yarn.Unity
             commandPieces.RemoveAt(0);
             var parameters = commandPieces;
 
-            object? target = null;
+            object target = null;
 
             if (registration.IsStatic == false)
             {
@@ -366,7 +365,7 @@ namespace Yarn.Unity
                     GameObject gameObject = GameObject.Find(arg);
                     if (gameObject == null)
                     {
-                        return null!;
+                        return null;
                     }
                     return gameObject.GetComponentInChildren(targetType);
                 };
@@ -479,7 +478,7 @@ namespace Yarn.Unity
 
             public void AddCommandHandler(string commandName, Func<Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
 
-            public void AddCommandHandler(string commandName, MethodInfo methodInfo) => AddCommandHandler(commandName, (Delegate)null!);
+            public void AddCommandHandler(string commandName, MethodInfo methodInfo) => AddCommandHandler(commandName, (Delegate)null);
 
             public void AddCommandHandler<T1>(string commandName, Func<T1, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
 
