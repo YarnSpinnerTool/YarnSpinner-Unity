@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -67,7 +67,9 @@ namespace Yarn.Unity.ActionAnalyser
                 {
                     output.AddRange(GetActions(compilation, tree));
                 }
-            } catch (System.Exception e) {
+            }
+            catch (System.Exception e)
+            {
                 throw new AnalyserException(e.Message, e, diagnostics);
             }
 
@@ -395,7 +397,7 @@ namespace Yarn.Unity.ActionAnalyser
                 .Select(pair =>
                 {
                     var actionType = GetActionType(model, pair.MethodDeclaration, out var attr);
-                    
+
                     return (pair.MethodDeclaration, pair.Symbol, ActionType: actionType, ActionAttribute: attr);
                 })
                 .Where(info => info.ActionType != ActionType.NotAnAction);
@@ -414,7 +416,9 @@ namespace Yarn.Unity.ActionAnalyser
                     && commandName.Token.Value is string name)
                 {
                     actionName = name;
-                } else {
+                }
+                else
+                {
                     // Otherwise, use the method's name.
                     actionName = methodInfo.MethodDeclaration.Identifier.ToString();
                 }
@@ -498,7 +502,7 @@ namespace Yarn.Unity.ActionAnalyser
 
         internal static ActionType GetActionType(SemanticModel model, MethodDeclarationSyntax decl, out AttributeSyntax actionAttribute)
         {
-            var attributes =  GetAttributes(decl, model);
+            var attributes = GetAttributes(decl, model);
 
             var actionTypes = attributes
                 .Select(attr => (Syntax: attr.Item1, Data: attr.Item2, Type: GetActionType(attr.Item2)))
@@ -532,9 +536,9 @@ namespace Yarn.Unity.ActionAnalyser
         public static IEnumerable<(AttributeSyntax, AttributeData)> GetAttributes(MethodDeclarationSyntax method, SemanticModel model)
         {
             var methodSymbol = model.GetDeclaredSymbol(method);
-            
+
             var methodAttributes = methodSymbol.GetAttributes();
-            
+
             foreach (var attribute in methodAttributes)
             {
                 var syntax = attribute.ApplicationSyntaxReference.GetSyntax() as AttributeSyntax;

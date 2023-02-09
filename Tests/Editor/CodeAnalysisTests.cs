@@ -17,22 +17,24 @@ namespace Yarn.Unity.Tests
         const string testScriptGUID = "32f15ac5211d54a68825dfb9532e93f4";
 
         string TestFolderName => TestContext.CurrentContext.Test.FullName;
-
         string TestFilesDirectoryPath => $"Assets/{TestFolderName}/";
 
         string TestScriptPathSource => AssetDatabase.GUIDToAssetPath(testScriptGUID);
         string TestScriptPathInProject => TestFilesDirectoryPath + Path.GetFileName(TestScriptPathSource);
 
         [SetUp]
-        public void SetUp() {
-            if (Directory.Exists(TestFilesDirectoryPath) == false) {
+        public void SetUp()
+        {
+            if (Directory.Exists(TestFilesDirectoryPath) == false)
+            {
                 AssetDatabase.CreateFolder("Assets", TestFolderName);
                 AssetDatabase.CopyAsset(TestScriptPathSource, TestScriptPathInProject);
             }
         }
 
         [TearDown]
-        public void TearDown() {
+        public void TearDown()
+        {
             AssetDatabase.DeleteAsset(TestFilesDirectoryPath);
             AssetDatabase.Refresh();
         }
@@ -46,22 +48,23 @@ namespace Yarn.Unity.Tests
             var analysis = new Yarn.Unity.ActionAnalyser.Analyser(TestScriptPathInProject);
             var actions = analysis.GetActions();
             var source = analysis.GenerateRegistrationFileSource(actions);
-            
+
             System.IO.File.WriteAllText(outputFilePath, source);
-            
+
             AssetDatabase.Refresh();
             yield return new RecompileScripts(expectScriptCompilation: true, expectScriptCompilationSuccess: true);
         }
 
         [UnityTest]
-        public IEnumerator CodeAnalysis_GeneratedSourceCode_RegistersExpectedActions() {
+        public IEnumerator CodeAnalysis_GeneratedSourceCode_RegistersExpectedActions()
+        {
             // Generate source code from our test script, save the resulting
             // source code in the proejct, and when recompilation is complete, validate that it registered a method with the name that we expect.
 
             var analysis = new Yarn.Unity.ActionAnalyser.Analyser(TestScriptPathInProject);
             var actions = analysis.GetActions();
             var source = analysis.GenerateRegistrationFileSource(actions);
-            
+
             System.IO.File.WriteAllText(outputFilePath, source);
 
             AssetDatabase.Refresh();
@@ -82,7 +85,8 @@ namespace Yarn.Unity.Tests
 
             Assert.Contains(expectedFullMethodName, registrationMethodNames, $"Actions should have registered method {expectedFullMethodName}");
 
-            string GetFullMethodName(System.Reflection.MethodInfo method) {
+            string GetFullMethodName(System.Reflection.MethodInfo method)
+            {
                 if (method is null)
                 {
                     throw new ArgumentNullException(nameof(method));
