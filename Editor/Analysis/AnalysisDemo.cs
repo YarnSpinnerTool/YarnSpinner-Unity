@@ -5,7 +5,7 @@ using UnityEditor;
 namespace MyGame
 {
 
-    public class WooAmazing : MonoBehaviour
+    public class Unity2019Test : MonoBehaviour
     {
         [YarnCommand]
         public void InstanceDemoActionWithNoName()
