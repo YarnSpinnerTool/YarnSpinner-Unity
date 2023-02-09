@@ -1,11 +1,11 @@
 {
     "name": "YarnSpinnerTests",
-    "rootNamespace": "",
     "references": [
         "YarnSpinner.Unity",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "YarnSpinner.Unity.Editor"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

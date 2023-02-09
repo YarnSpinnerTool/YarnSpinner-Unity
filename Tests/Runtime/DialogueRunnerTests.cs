@@ -18,14 +18,17 @@ namespace Yarn.Unity.Tests
     public class DialogueRunnerTests: IPrebuildSetup, IPostBuildCleanup
     {
         const string DialogueRunnerTestSceneGUID = "a04d7174042154a47a29ac4f924e0474";
+        const string TestResourcesFolderGUID = "be395506411a5a74eb2458a5cf1de710";
 
         public void Setup()
         {
+            RuntimeTestUtility.GenerateRegistrationSource(TestResourcesFolderGUID);
             RuntimeTestUtility.AddSceneToBuild(DialogueRunnerTestSceneGUID);
         }
 
         public void Cleanup()
         {
+            RuntimeTestUtility.CleanupGeneratedSource();
             RuntimeTestUtility.RemoveSceneFromBuild(DialogueRunnerTestSceneGUID);
         }
 
@@ -316,12 +319,7 @@ namespace Yarn.Unity.Tests
         [TestCase("testCommandOptionalParams DialogueRunner 1", "3")]
         [TestCase("testCommandOptionalParams DialogueRunner 1 3", "4")]
         [TestCase("testCommandDefaultName DialogueRunner", "success")]
-        [TestCase("testCommandCustomInjector custom", "success")]
         [TestCase("testStaticCommand", "success")]
-        [TestCase("testClassWideCustomInjector something", "success")]
-        [TestCase("testPrivateStaticCommand", "success")]
-        [TestCase("testPrivate something", "success")]
-        [TestCase("testCustomParameter Sphere", "Got Sphere")]
         [TestCase("testExternalAssemblyCommand", "success")]
         public void HandleCommand_DispatchesCommands(string test, string expectedLogResult) {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
@@ -330,7 +328,7 @@ namespace Yarn.Unity.Tests
             LogAssert.Expect(LogType.Log, expectedLogResult);
             var result = dispatcher.DispatchCommand(test, out var commandCoroutine);
             
-            Assert.AreEqual(result, DialogueRunner.CommandDispatchResult.Success);
+            Assert.AreEqual(DialogueRunner.CommandDispatchResult.StatusType.SucceededSync, result.Status);
             Assert.IsNull(commandCoroutine);
         }
 
@@ -343,7 +341,7 @@ namespace Yarn.Unity.Tests
 
             var result = dispatcher.DispatchCommand($"testCommandCoroutine DialogueRunner {framesToWait}", out var commandCoroutine);
 
-            Assert.AreEqual(result, DialogueRunner.CommandDispatchResult.Success);
+            Assert.AreEqual(DialogueRunner.CommandDispatchResult.StatusType.SucceededAsync, result.Status);
             Assert.IsNotNull(commandCoroutine);
 
             // commandCoroutine will already be running on runner, so now we wait for it
@@ -362,19 +360,23 @@ namespace Yarn.Unity.Tests
         public void HandleCommand_FailsWhenParameterCountNotCorrect(string command, string error) {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
             var dispatcher = runner.CommandDispatcher;
+            var regex = new Regex(error);
 
-            LogAssert.Expect(LogType.Error, new Regex(error));
-            dispatcher.DispatchCommand(command, out _);
+            var result = dispatcher.DispatchCommand(command, out _);
+
+            Assert.AreEqual(DialogueRunner.CommandDispatchResult.StatusType.InvalidParameterCount, result.Status);
+            Assert.That(regex.IsMatch(result.Message));
         }
 
         [TestCase("testCommandInteger DialogueRunner 1 not_an_integer", "Can't convert the given parameter")]
-        [TestCase("testCommandCustomInjector asdf", "Non-static method requires a target")]
         public void HandleCommand_FailsWhenParameterTypesNotValid(string command, string error) {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
             var dispatcher = runner.CommandDispatcher;
+            var regex = new Regex(error);
 
-            LogAssert.Expect(LogType.Error, new Regex(error));
-            dispatcher.DispatchCommand(command, out _);
+            var result = dispatcher.DispatchCommand(command, out _);
+            Assert.AreEqual(DialogueRunner.CommandDispatchResult.StatusType.InvalidParameterCount, result.Status);
+            Assert.That(regex.IsMatch(result.Message));
         }
 
         [Test]
@@ -388,8 +390,13 @@ namespace Yarn.Unity.Tests
             LogAssert.Expect(LogType.Log, "success 1");
             LogAssert.Expect(LogType.Log, "success 2");
 
-            dispatcher.DispatchCommand("test1", out _);
-            dispatcher.DispatchCommand("test2 2", out _);
+            var result1 = dispatcher.DispatchCommand("test1", out _);
+            var result2 = dispatcher.DispatchCommand("test2 2", out _);
+
+            Assert.IsNull(result1.Message);
+            Assert.IsNull(result2.Message);
+            Assert.AreEqual(result1.Status, DialogueRunner.CommandDispatchResult.StatusType.SucceededSync, "test1 should succeed synchronously");
+            Assert.AreEqual(result1.Status, DialogueRunner.CommandDispatchResult.StatusType.SucceededSync, "test2 should succeed synchronously");
         }
 
         [UnityTest]

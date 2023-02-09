@@ -124,41 +124,8 @@ namespace Yarn.Unity.Tests
             Debug.Log("success");
         }
 
-        [YarnCommand("testCommandCustomInjector", Injector = nameof(GetInstance))]
-        public void TestCommandCustomInjector()
-        {
-            Debug.Log("success");
-        }
-    }
-
-    [YarnStateInjector(nameof(GetInstance))]
-    public class CustomInjector
-    {
-        private static CustomInjector _instance;
-        private static CustomInjector GetInstance(string _)
-        {
-            if (_instance == null) {
-                _instance = new CustomInjector();
-            }
-            
-            Debug.Log(_instance);
-            return _instance;
-        }
-
-        private static MeshRenderer CustomGetComponent(string name)
-        {
-            Debug.Log($"Got {name}");
-            return GameObject.Find(name)?.GetComponent<MeshRenderer>();
-        }
-
         [YarnCommand("testStaticCommand")]
         public static void TestStaticCommand()
-        {
-            Debug.Log("success");
-        }
-
-        [YarnCommand("testPrivateStaticCommand")]
-        private static void TestPrivateStaticCommand()
         {
             Debug.Log("success");
         }
@@ -174,26 +141,6 @@ namespace Yarn.Unity.Tests
         {
             return $"{text} no you're not! {text}";
         }
-
-        [YarnCommand("testCustomParameter")]
-        private static void TestCustomParameter([YarnParameter(nameof(CustomGetComponent))] MeshRenderer _)
-        {
-            // no-op
-        }
-
-        [YarnCommand("testClassWideCustomInjector")]
-        public void TestClassWideCustomInjector()
-        {
-            Debug.Log("success");
-        }
-
-        [YarnCommand("testPrivate")]
-        private void TestPrivate()
-        {
-            Debug.Log("success");
-        }
     }
 
-    // test that derived methods don't register
-    public class CustomInjectorDerived : CustomInjector { }
 }
