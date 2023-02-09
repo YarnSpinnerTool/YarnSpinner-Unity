@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -530,25 +530,14 @@ namespace Yarn.Unity.ActionAnalyser
 
         public static IEnumerable<(AttributeSyntax, AttributeData)> GetAttributes(MethodDeclarationSyntax method, SemanticModel model)
         {
-            var attributeLists = method.AttributeLists;
-            var attributes = attributeLists.SelectMany(list => list.Attributes);
-
-            var attributeSyntaxTrees = new Dictionary<SyntaxTree, AttributeSyntax>();
-            foreach (var attribute in attributes) {
-                attributeSyntaxTrees.Add(attribute.SyntaxTree, attribute);
-            }
-
             var methodSymbol = model.GetDeclaredSymbol(method);
             
             var methodAttributes = methodSymbol.GetAttributes();
             
             foreach (var attribute in methodAttributes)
             {
-                var tree = attribute.ApplicationSyntaxReference.SyntaxTree;
-                if (attributeSyntaxTrees.ContainsKey(tree)) {
-                    var syntax = attributeSyntaxTrees[tree];
-                    yield return (syntax, attribute);
-                }
+                var syntax = attribute.ApplicationSyntaxReference.GetSyntax() as AttributeSyntax;
+                yield return (syntax, attribute);
             }
         }
 
