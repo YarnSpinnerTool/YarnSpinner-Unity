@@ -388,7 +388,8 @@ namespace Yarn.Unity.ActionAnalyser
 
             var methodsAndSymbols = methodInfos
                 .Select(decl => (MethodDeclaration: decl, Symbol: model.GetDeclaredSymbol(decl)))
-                .Where(pair => pair.Symbol != null);
+                .Where(pair => pair.Symbol != null)
+                .Where(pair => pair.Symbol.DeclaredAccessibility == Accessibility.Public);
 
             var actionMethods = methodsAndSymbols
                 .Select(pair =>
