@@ -10,32 +10,90 @@ namespace Yarn.Unity
 {
     using Converter = System.Func<string, object>;
 
+    public interface ICommand {
+        string Name { get; }
+    }
+
+    internal static class DiagnosticUtility {
+        public static string EnglishPluraliseNounCount(int count, string name, bool prefixCount = false) {
+            string result;
+            if (count == 1) {
+                result = name;
+            } else {
+                result = name + "s";
+            }
+            if (prefixCount) {
+                return count.ToString() + " " + result;
+            } else {
+                return result;
+            }
+        }
+
+        public static string EnglishPluraliseWasVerb(int count) {
+            if (count == 1) {
+                return "was";
+            } else {
+                return "were";
+            }
+        }
+    }
+
+    
+
     public class Actions : ICommandDispatcher
     {
-        public class CommandRegistration
+        internal class CommandRegistration : ICommand
         {
+            public CommandRegistration(string name, Delegate @delegate) {
+                Name = name;
+                Method = @delegate.Method;
+                Target = @delegate.Target;
+                Converters = CreateConverters(Method);
+                DynamicallyFindsTarget = false;
+            }
+
             public CommandRegistration(string name, MethodInfo method)
             {
-                if (method.IsStatic == false && typeof(Component).IsAssignableFrom(method.DeclaringType) == false)
+                if (method.IsStatic)
+                {
+                    DynamicallyFindsTarget = false;
+                }
+                else if (typeof(Component).IsAssignableFrom(method.DeclaringType))
+                {
+                    // This method is an instance method on a Component (or one
+                    // of its subclasses). We'll dynamically find a target to
+                    // invoke the method on at runtime.
+                    DynamicallyFindsTarget = true;
+                }
+                else
                 {
                     // The instance method's declaring type is not a Component,
                     // which means we won't be able to look up a target.
-                    throw new ArgumentException($"Cannot register command {GetFullMethodName(method)} as a command: instance methods must declared on {nameof(Component)} classes.");
+                    throw new ArgumentException($"Cannot register method {GetFullMethodName(method)} as a command: instance methods must declared on {nameof(Component)} classes.");
                 }
 
                 Name = name;
                 Method = method;
-                
+                Target = null;
+
                 Converters = CreateConverters(method);
             }
 
             public string Name { get; set; }
             public MethodInfo Method { get; set; }
+            private object Target { get; set; }
+
             public Type DeclaringType => Method.DeclaringType;
             public Type ReturnType => Method.ReturnType;
             public bool IsStatic => Method.IsStatic;
 
             public readonly Converter[] Converters;
+
+            /// <summary>
+            /// Gets a value indicating that this command finds a target to
+            /// invoke its method on by name, each time it is invoked.
+            /// </summary>
+            private bool DynamicallyFindsTarget { get; }
 
             public CommandType Type
             {
@@ -61,76 +119,204 @@ namespace Yarn.Unity
 
             public enum CommandType
             {
+                /// <summary>
+                /// The method returns <see cref="void"/>.
+                /// </summary>
                 IsVoid,
+                /// <summary>
+                /// The method returns a <see cref="Coroutine"/> object.
+                /// </summary>
+                /// <remarks>
                 ReturnsCoroutine,
+                /// <summary>
+                /// The method returns <see cref="IEnumerator"/> (that is, it is
+                /// a coroutine).
+                /// </summary>
+                /// <remarks>
+                /// Code that invokes this command should use <see
+                /// cref="MonoBehaviour.StartCoroutine(IEnumerator)"/> to begin
+                /// the coroutine.
+                /// </remarks>
                 IsCoroutine,
+                /// <summary>
+                /// The method is not a valid command (that is, it does not
+                /// return <see cref="void"/>, <see cref="Coroutine"/>, or <see
+                /// cref="IEnumerator"/>.)
+                /// </summary>
                 Invalid,
             }
 
             /// <summary>
             /// Attempt to parse the arguments with cached converters.
             /// </summary>
-            /// <param name="method">The method to parse args for.</param>
-            /// <param name="converters">Converters to use. Will be assumed that
-            /// the converters correctly correspond to <paramref name="method"/>.
-            /// </param>
-            /// <param name="args">The raw list of arguments, including command and
-            /// instance name.</param>
-            /// <param name="isStatic">Should we treat this function as static?
-            /// </param>
-            /// <returns>The parsed arguments.</returns>
-            public object[] ParseArgs(string[] args)
+            public bool TryParseArgs(string[] args, out object[] result, out string message)
             {
                 var parameters = Method.GetParameters();
-                int optional = 0;
-                foreach (var parameter in parameters)
-                {
-                    if (parameter.IsOptional)
-                    {
-                        optional += 1;
+
+                var (min, max) = ParameterCount;
+
+                int argumentCount = args.Length;
+                if (argumentCount < min || argumentCount > max) {
+                    // Wrong number of arguments.
+                    string requirementDescription;
+                    if (min == 0) {
+                        requirementDescription = $"at most {max} {DiagnosticUtility.EnglishPluraliseNounCount(max, "parameter")}";
+                    } else if (min != max) {
+                        requirementDescription = $"between {min} and {max} {DiagnosticUtility.EnglishPluraliseNounCount(max, "parameter")}";
+                    } else {
+                        requirementDescription = $"{min} {DiagnosticUtility.EnglishPluraliseNounCount(max, "parameter")}";
                     }
-                }
-
-                int required = parameters.Length - optional;
-                var count = args.Length;
-
-                if (optional > 0)
-                {
-                    if (count < required || count > parameters.Length)
-                    {
-                        throw new ArgumentException(
-                            $"{this.Name} requires between {required} and {parameters.Length} parameters, but {count} " +
-                            $"{(count == 1 ? "was" : "were")} provided.");
-                    }
-                }
-                else if (count != required)
-                {
-                    var requiredParameterTypeNames = new List<string>();
-
-                    foreach (var p in parameters)
-                    {
-                        if (!p.IsOptional)
-                        {
-                            requiredParameterTypeNames.Add(p.ParameterType.ToString());
-                        }
-                    }
-
-                    throw new ArgumentException($"{this.Name} requires {required} parameters ({string.Join(", ", requiredParameterTypeNames)}), but {count} " +
-                        $"{(count == 1 ? "was" : "were")} provided.");
+                    message = $"{this.Name} requires {requirementDescription}, but {argumentCount} {DiagnosticUtility.EnglishPluraliseWasVerb(argumentCount)} provided.";
+                    result = default;
+                    return false;
                 }
 
                 var finalArgs = new object[parameters.Length];
 
-                for (int i = 0; i < count; i++)
+                for (int i = 0; i < argumentCount; i++)
                 {
                     string arg = args[i];
-                    finalArgs[i] = Converters[i] == null ? arg : Converters[i].Invoke(arg);
+                    if (Converters[i] == null) {
+                        finalArgs[i] = arg;
+                    } else {
+                        try {
+                            finalArgs[i] = Converters[i].Invoke(arg);
+                        } catch (Exception e) {
+                            message = $"Can't convert parameter {i} to {parameters[i].ParameterType.Name}: {e.Message}";
+                            result = default;
+                            return false;
+                        }
+                    }
                 }
-                for (int i = count; i < finalArgs.Length; i++)
+                for (int i = argumentCount; i < finalArgs.Length; i++)
                 {
                     finalArgs[i] = System.Type.Missing;
                 }
-                return finalArgs;
+                result = finalArgs;
+                message = default;
+                return true;
+            }
+
+            private (int Min, int Max) ParameterCount {
+                get {
+                    var parameters = Method.GetParameters();
+                    int optional = 0;
+                    foreach (var parameter in parameters)
+                    {
+                        if (parameter.IsOptional)
+                        {
+                            optional += 1;
+                        }
+                    }
+
+                    int min = parameters.Length - optional;
+                    int max = parameters.Length;
+                    return (min, max);
+                }
+            }
+
+            internal DialogueRunner.CommandDispatchResult Invoke(DialogueRunner dispatcher, List<string> parameters, out Coroutine commandCoroutine)
+            {
+                object target;
+
+                if (DynamicallyFindsTarget)
+                {
+                    // We need to find a target to call this method on.
+
+                    if (parameters.Count == 0)
+                    {
+                        // We need at least one parameter, which is the
+                        // component to look for
+                        commandCoroutine = default;
+                        return new DialogueRunner.CommandDispatchResult
+                        {
+                            Message = $"{this.Name} needs a target, but none was specified",
+                            Status = DialogueRunner.CommandDispatchResult.StatusType.InvalidParameterCount
+                        };
+                    }
+
+                    // First parameter is the name of a game object that has the
+                    // component we're trying to call.
+
+                    var gameObjectName = parameters[0];
+
+                    parameters.RemoveAt(0);
+
+                    var gameObject = GameObject.Find(gameObjectName);
+
+                    if (gameObject == null)
+                    {
+                        // We couldn't find a target with this name.
+                        commandCoroutine = default;
+                        return new DialogueRunner.CommandDispatchResult
+                        {
+                            Message = $"No game object named \"{gameObjectName}\" exists",
+                            Status = DialogueRunner.CommandDispatchResult.StatusType.TargetMissingComponent
+                        };
+                    }
+
+                    // We've found a target.  Does it have a component that's
+                    // the right type of object to call the method on?
+                    var targetComponent = gameObject.GetComponent(this.DeclaringType);
+
+                    if (targetComponent == null)
+                    {
+                        commandCoroutine = default;
+                        return new DialogueRunner.CommandDispatchResult
+                        {
+                            Message = $"{this.Name} can't be called on {gameObjectName}, because it doesn't have a {this.DeclaringType.Name}",
+                            Status = DialogueRunner.CommandDispatchResult.StatusType.TargetMissingComponent
+                        };
+                    }
+
+                    target = targetComponent;
+                } else if (Method.IsStatic) {
+                    // The method is static; it therefore doesn't need a target.
+                    target = null;
+                } else if (Target != null) {
+                    // The method is an instance method, so use the target we've
+                    // stored.
+                    target = Target;
+                } else {
+                    // We don't know what to call this method on.
+                    throw new InvalidOperationException($"Internal error: {nameof(CommandRegistration)} \"{this.Name}\" has no {nameof(Target)}, but method is not static and ${DynamicallyFindsTarget} is false");
+                }
+
+                if (this.TryParseArgs(parameters.ToArray(), out var finalParameters, out var errorMessage) == false) {
+                    commandCoroutine = default;
+                    return new DialogueRunner.CommandDispatchResult
+                    {
+                        Status = DialogueRunner.CommandDispatchResult.StatusType.InvalidParameterCount,
+                        Message = errorMessage,
+                };
+                }
+
+                var returnValue = this.Method.Invoke(target, finalParameters);
+
+                if (returnValue is Coroutine coro)
+                {
+                    commandCoroutine = coro;
+                    return new DialogueRunner.CommandDispatchResult
+                    {
+                        Status = DialogueRunner.CommandDispatchResult.StatusType.SucceededAsync
+                    };
+                }
+                else if (returnValue is IEnumerator enumerator)
+                {
+                    commandCoroutine = dispatcher.StartCoroutine(enumerator);
+                    return new DialogueRunner.CommandDispatchResult
+                    {
+                        Status = DialogueRunner.CommandDispatchResult.StatusType.SucceededAsync
+                    };
+                }
+                else
+                {
+                    commandCoroutine = null;
+                    return new DialogueRunner.CommandDispatchResult
+                    {
+                        Status = DialogueRunner.CommandDispatchResult.StatusType.SucceededSync
+                    };
+                }
             }
         }
 
@@ -138,6 +324,8 @@ namespace Yarn.Unity
 
         public Library Library { get; }
         public DialogueRunner DialogueRunner { get; }
+
+        public IEnumerable<ICommand> Commands => _commands.Values;
 
         public Actions(DialogueRunner dialogueRunner, Library library)
         {
@@ -148,7 +336,7 @@ namespace Yarn.Unity
         private static string GetFullMethodName(MethodInfo method) {
             return $"{method.DeclaringType.FullName}.{method.Name}";
         }
-
+ 
         public void RegisterActions() {
             foreach (var registrationFunction in ActionRegistrationMethods) {
                 registrationFunction.Invoke(DialogueRunner);
@@ -161,7 +349,7 @@ namespace Yarn.Unity
                 Debug.LogError($"Failed to register command {commandName}: a command by this name has already been registered.");
                 return;
             } else {
-                _commands.Add(commandName, new CommandRegistration(commandName, handler.Method));
+                _commands.Add(commandName, new CommandRegistration(commandName, handler));
             }
         }
 
@@ -249,83 +437,34 @@ namespace Yarn.Unity
 
         DialogueRunner.CommandDispatchResult ICommandDispatcher.DispatchCommand(string command, out Coroutine commandCoroutine)
         {
-            commandCoroutine = null;
-
             var commandPieces = new List<string>(DialogueRunner.SplitCommandText(command));
 
             if (commandPieces.Count == 0)
             {
-                return DialogueRunner.CommandDispatchResult.NotFound;
-            }
-
-            var commandName = commandPieces[0];
-
-
-            var found = _commands.TryGetValue(commandPieces[0], out var registration);
-            if (!found)
-            {
-                return DialogueRunner.CommandDispatchResult.NotFound;
-            }
-
-            commandPieces.RemoveAt(0);
-            var parameters = commandPieces;
-
-            object target = null;
-
-            if (registration.IsStatic == false)
-            {
-                // This is an instance method.
-
-                if (parameters.Count == 0)
+                // No text was found inside the command, so we won't be able to
+                // find it.
+                commandCoroutine = default;
+                return new DialogueRunner.CommandDispatchResult
                 {
-                    Debug.LogError($"Can't call command {commandName}: not enough parameters");
-                    return DialogueRunner.CommandDispatchResult.Failed;
-                }
+                    Status = DialogueRunner.CommandDispatchResult.StatusType.CommandUnknown
+                };
+            }
 
-                // First parameter is the name of a game object that has the
-                // component we're trying to call.
+            if (_commands.TryGetValue(commandPieces[0], out var registration))
+            {
+                // The first part of the command is the command name itself. Remove
+                // it to get the collection of parameters that were passed to the
+                // command.
+                commandPieces.RemoveAt(0);
 
-                var gameObjectName = parameters[0];
-
-                parameters.RemoveAt(0);
-
-                var gameObject = GameObject.Find(gameObjectName);
-
-                if (gameObject == null)
+                return registration.Invoke(DialogueRunner, commandPieces, out commandCoroutine);
+            } else {
+                commandCoroutine = default;
+                return new DialogueRunner.CommandDispatchResult
                 {
-                    Debug.LogError($"Can't call command {commandName}: failed to find a game object named {gameObjectName}");
-                    return DialogueRunner.CommandDispatchResult.Failed;
-                }
-
-                var targetComponent = gameObject.GetComponent(registration.DeclaringType);
-
-                if (targetComponent == null)
-                {
-                    Debug.LogError($"Can't call command {commandName}, because it doesn't have a {registration.DeclaringType.Name} component");
-                    return DialogueRunner.CommandDispatchResult.Failed;
-                }
-
-                target = targetComponent;
+                    Status = DialogueRunner.CommandDispatchResult.StatusType.CommandUnknown
+                };
             }
-
-            object[] finalParameters = registration.ParseArgs(parameters.ToArray());
-
-            var returnValue = registration.Method.Invoke(target, finalParameters);
-
-            if (returnValue is Coroutine coro)
-            {
-                commandCoroutine = coro;
-            }
-            else if (returnValue is IEnumerator enumerator)
-            {
-                commandCoroutine = DialogueRunner.StartCoroutine(enumerator);
-            }
-            else
-            {
-                commandCoroutine = null;
-            }
-            return DialogueRunner.CommandDispatchResult.Success;
-
         }
 
         private static Converter[] CreateConverters(MethodInfo method)
@@ -395,7 +534,7 @@ namespace Yarn.Unity
                 {
                     throw new ArgumentException(
                         $"Can't convert the given parameter at position {index + 1} (\"{arg}\") to parameter " +
-                        $"{parameter.Name} of type {targetType.FullName}: {e}");
+                        $"{parameter.Name} of type {targetType.FullName}: {e}", e);
                 }
             };
         }

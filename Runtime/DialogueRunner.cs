@@ -226,21 +226,45 @@ namespace Yarn.Unity
         /// </summary>
         /// <seealso cref="DispatchCommandToGameObject(Command, Action)"/>
         /// <seealso cref="DispatchCommandToRegisteredHandlers(Command, Action)"/>
-        internal enum CommandDispatchResult {
-            /// <summary>
-            /// The command was located and successfully called.
-            /// </summary>
-            Success,
+        internal struct CommandDispatchResult
+        {
 
-            /// <summary>
-            /// The command was located, but failed to be called.
-            /// </summary>
-            Failed,
+            internal enum StatusType
+            {
 
-            /// <summary>
-            /// The command could not be found.
-            /// </summary>
-            NotFound,
+                SucceededAsync,
+
+                SucceededSync,
+
+                NoTargetFound,
+
+                TargetMissingComponent,
+
+                InvalidParameterCount,
+
+                /// <summary>
+                /// The command could not be found.
+                /// </summary>
+                CommandUnknown,
+
+                /// <summary>
+                /// The command was located and successfully called.
+                /// </summary>
+                [Obsolete("Use a more specific enum case", true)]
+                Success,
+
+                /// <summary>
+                /// The command was located, but failed to be called.
+                /// </summary>
+                [Obsolete("Use a more specific enum case", true)]
+                Failed,
+            };
+
+            internal StatusType Status;
+
+            internal string Message;
+
+            internal bool IsSuccess => this.Status == StatusType.SucceededAsync || this.Status == StatusType.SucceededSync;
         }
 
         /// <summary>
@@ -273,7 +297,7 @@ namespace Yarn.Unity
         /// <summary>
         /// The View classes that will present the dialogue to the user.
         /// </summary>
-        public DialogueViewBase[] dialogueViews;
+        public DialogueViewBase[] dialogueViews = new DialogueViewBase[0];
 
         /// <summary>The name of the node to start from.</summary>
         /// <remarks>
@@ -1034,27 +1058,33 @@ namespace Yarn.Unity
         {
             var dispatchResult = CommandDispatcher.DispatchCommand(command.Text, out Coroutine awaitCoroutine);
 
-            switch (dispatchResult)
+            switch (dispatchResult.Status)
             {
-                case CommandDispatchResult.Success:
-                    if (awaitCoroutine != null)
-                    {
-                        // We got a coroutine to wait for. Wait for it, and call
-                        // Continue.
-                        StartCoroutine(WaitForYieldInstruction(awaitCoroutine, ContinueDialogue));
-                    }
-                    else
-                    {
-                        // No need to wait; continue immediately.
-                        ContinueDialogue();
-                    }
-                    return;
-                case CommandDispatchResult.Failed:
-                    // The command dispatch failed; log it and continue.
-                    Debug.LogError($"Attempting to call {command.Text} failed. Continuing execution.", this);
+                case CommandDispatchResult.StatusType.SucceededSync:
+                    // No need to wait; continue immediately.
                     ContinueDialogue();
                     return;
-                case CommandDispatchResult.NotFound:
+                case CommandDispatchResult.StatusType.SucceededAsync:
+                    // We got a coroutine to wait for. Wait for it, and call
+                    // Continue.
+                    StartCoroutine(WaitForYieldInstruction(awaitCoroutine, ContinueDialogue));
+                    return;
+            }
+
+            var parts = SplitCommandText(command.Text);
+            string commandName = parts.ElementAtOrDefault(0);
+
+            switch (dispatchResult.Status) {
+                case CommandDispatchResult.StatusType.NoTargetFound:
+                    Debug.LogError($"Can't call command {commandName}: failed to find a game object named {parts.ElementAtOrDefault(1)}", this);
+                    break;
+                case CommandDispatchResult.StatusType.TargetMissingComponent:
+                    Debug.LogError($"Can't call command {commandName}, because {parts.ElementAtOrDefault(1)} doesn't have the correct component");
+                    break;
+                case CommandDispatchResult.StatusType.InvalidParameterCount:
+                    Debug.LogError($"Can't call command {commandName}: incorrect number of parameters");
+                    break;
+                case CommandDispatchResult.StatusType.CommandUnknown:
                     // Attempt a last-ditch dispatch by invoking our 'onCommand'
                     // Unity Event.
                     if (onCommand != null && onCommand.GetPersistentEventCount() > 0) {
@@ -1063,15 +1093,13 @@ namespace Yarn.Unity
                     } else {
                         // We're out of ways to handle this command! Log this as an
                         // error.
-                        Debug.LogError($"No Command <<{command.Text}>> was found. Did you remember to use the YarnCommand attribute or AddCommandHandler() function in C#?");
+                        Debug.LogError($"No Command \"{commandName}\" was found. Did you remember to use the YarnCommand attribute or AddCommandHandler() function in C#?");
                     }
-
-                    // In either case, continue.
-                    ContinueDialogue();
                     return;
                 default:
-                    throw new ArgumentOutOfRangeException($"Unknown command dispatch result {dispatchResult}");
+                    throw new ArgumentOutOfRangeException($"Internal error: Unknown command dispatch result status {dispatchResult}");
             }
+            ContinueDialogue();
         }
 
         /// <summary>

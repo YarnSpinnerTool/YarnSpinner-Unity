@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Yarn.Unity
@@ -8,5 +9,7 @@ namespace Yarn.Unity
         DialogueRunner.CommandDispatchResult DispatchCommand(string command, out Coroutine commandCoroutine);
 
         void SetupForProject(YarnProject yarnProject);
+
+        IEnumerable<ICommand> Commands { get; }
     }
 }
