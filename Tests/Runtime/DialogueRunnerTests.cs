@@ -138,6 +138,125 @@ namespace Yarn.Unity.Tests
         }
 
         [UnityTest]
+        public IEnumerator VerifyAccessors_NodeHeaders()
+        {
+            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+
+            // these are all set inside of TestHeadersAreAccessible.yarn
+            // which is part of the test scene project
+            var allHeaders = new Dictionary<string, Dictionary<string, List<string>>>();
+            var headers = new Dictionary<string, List<string>>();
+
+            headers.Add("title", new List<string>(){"EmptyTags"});
+            headers.Add("tags", new List<string>() {string.Empty});
+            allHeaders.Add("EmptyTags", headers);
+            headers = new Dictionary<string, List<string>>();
+
+            headers.Add("title", new List<string>() {"ArbitraryHeaderWithValue"});
+            headers.Add("arbitraryheader", new List<string>() {"some-arbitrary-text"});
+            allHeaders.Add("ArbitraryHeaderWithValue", headers);
+            headers = new Dictionary<string, List<string>>();
+
+            headers.Add("title", new List<string>(){"Tags"});
+            headers.Add("tags",new List<string>(){"one two three"});
+            allHeaders.Add("Tags", headers);
+            headers = new Dictionary<string, List<string>>();
+
+            headers.Add("title", new List<string>(){"SingleTagOnly"});
+            allHeaders.Add("SingleTagOnly",headers);
+            headers = new Dictionary<string, List<string>>();
+
+            headers.Add("title", new List<string>() {"Comments"});
+            headers.Add("tags", new List<string>() {"one two three"});
+            allHeaders.Add("Comments", headers);
+            headers = new Dictionary<string, List<string>>();
+
+            headers.Add("contains", new List<string>() {"lots"});
+            headers.Add("title", new List<string>() {"LotsOfHeaders"});
+            headers.Add("this", new List<string>() {"node"});
+            headers.Add("of", new List<string>() {string.Empty});
+            headers.Add("blank", new List<string>() {string.Empty});
+            headers.Add("others", new List<string>() {"are"});
+            headers.Add("headers", new List<string>() {""});
+            headers.Add("some", new List<string>() {"are"});
+            headers.Add("not", new List<string>() {""});
+            allHeaders.Add("LotsOfHeaders", headers);
+            headers = new Dictionary<string, List<string>>();
+
+            headers.Add("title", new List<string>() {"DuplicateHeaders"});
+            headers.Add("repeat", new List<string>() {"tag1", "tag2", "tag3"});
+            allHeaders.Add("DuplicateHeaders", headers);
+
+            foreach (var headerTestData in allHeaders)
+            {
+                var yarnHeaders = runner.yarnProject.GetHeaders(headerTestData.Key);
+
+                // its possible we got no headers or more/less headers
+                // so we need to check we found all the ones we expected to see
+                Assert.AreEqual(headerTestData.Value.Count, yarnHeaders.Count);
+
+                foreach (var pair in headerTestData.Value)
+                {
+                    // is the lust of strings the same as what the yarn program thinks?
+                    // ie do we a value that matches each and every one of our tests?
+                    CollectionAssert.AreEquivalent(pair.Value, yarnHeaders[pair.Key]);
+                }
+            }
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator VerifyAccessors_InitialValues()
+        {
+            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+
+            // these are derived from the declares and sets inside of DialogueRunnerTest.yarn
+            var testDefaults = new Dictionary<string, System.IConvertible>();
+            testDefaults.Add("$laps", 0);
+            testDefaults.Add("$float", 1);
+            testDefaults.Add("$string", "this is a string");
+            testDefaults.Add("$bool", true);
+            testDefaults.Add("$true", false);
+
+            CollectionAssert.AreEquivalent(runner.yarnProject.InitialValues, testDefaults);
+
+            yield return null;
+        }
+        [UnityTest]
+        public IEnumerator VerifyAccessors_NodeNames()
+        {
+            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+
+            // these are derived from the nodes inside of:
+            //   - DialogueTest.yarn
+            //   - TestHeadersAreAccessible.yarn
+            // which are part of the default test scene's project
+            var testNodes = new string[]
+            {
+                "Start",
+                "Exit",
+                "VariableTest",
+                "FunctionTest",
+                "FunctionTest2",
+                "ExternalFunctionTest",
+                "BuiltinsTest",
+                "LotsOfVars",
+                "EmptyTags",
+                "Tags",
+                "ArbitraryHeaderWithValue",
+                "Comments",
+                "SingleTagOnly",
+                "LotsOfHeaders",
+                "DuplicateHeaders",
+            };
+
+            CollectionAssert.AreEquivalent(runner.yarnProject.NodeNames, testNodes);
+
+            yield return null;
+        }
+
+        [UnityTest]
         public IEnumerator HandleLine_OnValidYarnFile_SendCorrectLinesToUI()
         {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
