@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Reflection;
+using System.Linq;
 
 namespace Yarn.Unity
 {
@@ -43,6 +44,135 @@ namespace Yarn.Unity
         [SerializeField]
         [HideInInspector]
         public List<string> searchAssembliesForActions = new List<string>();
+
+        /// <summary>
+        /// The names of all nodes contained within the <see cref="Program"/>.
+        /// </summary>
+        public string[] NodeNames
+        {
+            get
+            {
+                return Program.Nodes.Keys.ToArray();
+            }
+        }
+        
+        /// <summary>
+        /// The cached result of reading the default values from the <see
+        /// cref="Program"/>.
+        /// </summary>
+        private Dictionary<string, System.IConvertible> initialValues;
+        /// <summary>
+        /// The default values of all declared or inferred variables in the
+        /// <see cref="Program"/>.
+        /// Organised by their name as written in the yarn files.
+        /// </summary>
+        public Dictionary<string, System.IConvertible> InitialValues
+        {
+            get
+            {
+                if (initialValues != null)
+                {
+                    return initialValues;
+                }
+
+                initialValues = new Dictionary<string, System.IConvertible>();
+
+                foreach (var pair in Program.InitialValues)
+                {
+                    var value = pair.Value;
+                    switch (value.ValueCase)
+                    {
+                        case Yarn.Operand.ValueOneofCase.StringValue:
+                        {
+                            initialValues[pair.Key] = value.StringValue;
+                            break;
+                        }
+                        case Yarn.Operand.ValueOneofCase.BoolValue:
+                        {
+                            initialValues[pair.Key] = value.BoolValue;
+                            break;
+                        }
+                        case Yarn.Operand.ValueOneofCase.FloatValue:
+                        {
+                            initialValues[pair.Key] = value.FloatValue;
+                            break;
+                        }
+                        default:
+                        {
+                            Debug.LogWarning($"{pair.Key} is of an invalid type: {value.ValueCase}");
+                            break;
+                        }
+                    }
+                }
+                return initialValues;
+            }
+        }
+
+        // ok assumption is that this can be lazy loaded and then kept around
+        // as not every node has headers you care about but some will and be read A LOT
+        // so we will fill a dict on request and just keep it around
+        // is somewhat unnecessary as people can get this out themselves if they want
+        // but I think peeps will wanna use headers like a dictionary
+        // so we will do the transformation for you
+        private Dictionary<string, Dictionary<string, List<string>>>nodeHeaders = new Dictionary<string, Dictionary<string, List<string>>>();
+        
+        /// <summary>
+        /// Gets the headers for the requested node.
+        /// </summary>
+        /// <remarks>
+        /// The first time this is called, the values are extracted from
+        /// <see cref="Program"/> and cached inside <see cref="nodeHeaders"/>.
+        /// Future calls will then return the cached values.
+        /// </remarks>
+        public Dictionary<string, List<string>> GetHeaders(string nodeName)
+        {
+            // if the headers have already been extracted just return that
+            Dictionary<string, List<string>> existingValues;
+            if (this.nodeHeaders.TryGetValue(nodeName, out existingValues))
+            {
+                return existingValues;
+            }
+
+            // headers haven't been extracted so we look inside the program
+            Node rawNode;
+            if (!Program.Nodes.TryGetValue(nodeName, out rawNode))
+            {
+                return new Dictionary<string, List<string>>();
+            }
+
+            var rawHeaders = rawNode.Headers;
+
+            // this should NEVER happen
+            // because there will always be at least the title, right?
+            if (rawHeaders == null || rawHeaders.Count == 0)
+            {
+                return new Dictionary<string, List<string>>();
+            }
+
+            // ok so this is an array of (string, string) tuples
+            // with potentially duplicated keys inside the array
+            // we'll convert it all into a dict of string arrays
+            Dictionary<string, List<string>> headers = new Dictionary<string, List<string>>();
+            foreach (var pair in rawHeaders)
+            {
+                List<string> values;
+
+                if (headers.TryGetValue(pair.Key, out values))
+                {
+                    values.Add(pair.Value);
+                }
+                else
+                {
+                    values = new List<string>();
+                    values.Add(pair.Value);
+                }
+                headers[pair.Key] = values;
+            }
+
+            // this.nodeHeaders[nodeName] = headers;
+
+            return headers;
+        }
 
         public Localization GetLocalization(string localeCode)
         {
