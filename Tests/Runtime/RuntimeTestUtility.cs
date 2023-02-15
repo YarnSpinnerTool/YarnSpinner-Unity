@@ -60,12 +60,12 @@ namespace Yarn.Unity.Tests
             foreach (string asmDef in asmDefs) {
                 var guid = AssetDatabase.AssetPathToGUID(asmDef);
 
-                asmDefSourceBuilder.AppendLine(@$"""GUID:{guid}"",");
+                asmDefSourceBuilder.AppendLine($@"""GUID:{guid}"",");
                 
             }
 
             // Finally, add a reference to Yarn Spinner itself
-            asmDefSourceBuilder.AppendLine(@$"""GUID:{YarnSpinnerRuntimeAsmDefGUID}""");
+            asmDefSourceBuilder.AppendLine($@"""GUID:{YarnSpinnerRuntimeAsmDefGUID}""");
             asmDefSourceBuilder.AppendLine(@"]");
             asmDefSourceBuilder.AppendLine("}");
 
