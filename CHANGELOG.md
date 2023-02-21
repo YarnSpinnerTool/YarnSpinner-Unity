@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- `DialogueReference` objects can now be implicitly converted to `string`s.
+
 ### Changed
 
 - Fixed a compile error in the Minimal Viable Dialogue System sample in Unity 2019.

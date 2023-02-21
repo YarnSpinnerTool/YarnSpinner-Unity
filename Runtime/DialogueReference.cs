@@ -51,6 +51,11 @@ namespace Yarn.Unity
             this.project = project;
             this.nodeName = nodeName;
         }
+
+        // DialogueReferences can be implicitly converted to strings
+        public static implicit operator string(DialogueReference reference) {
+            return reference.nodeName;
+        }
     }
 
 #if UNITY_EDITOR
