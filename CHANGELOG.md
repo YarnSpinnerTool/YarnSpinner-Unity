@@ -9,6 +9,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - `DialogueReference` objects can now be implicitly converted to `string`s.
+- The `YarnNode` attribute can be attached to a `string` property to turn it into a drop-down menu for choosing nodes in a Yarn Project.
+  ```csharp
+   // A reference to a Yarn Project
+  public Yarn.Unity.YarnProject project;
+
+  // A node in 'project'
+  [Yarn.Unity.YarnNode(nameof(project))]
+  public string node1;
+
+  // Another node in 'project'
+  [Yarn.Unity.YarnNode(nameof(project))]
+  public string node2;
+  ```
 
 ### Changed
 
