@@ -17,6 +17,11 @@ namespace Yarn.Unity.ActionAnalyser
         const string targetParameterName = "target";
         const string initialisationMethodName = "AddRegisterFunction";
 
+        /// <summary>
+        /// The name of a scripting define symbol that, if set, indicates that Yarn actions specific to unit tests should be generated.
+        /// </summary>
+        public const string GenerateTestActionRegistrationSymbol = "YARN_GENERATE_TEST_ACTION_REGISTRATIONS";
+
         public Analyser(string sourcePath)
         {
             this.SourcePath = sourcePath;
@@ -42,7 +47,7 @@ namespace Yarn.Unity.ActionAnalyser
                 MetadataReference.CreateFromFile(
                     typeof(object).Assembly.Location),
                 MetadataReference.CreateFromFile(
-                    typeof(Yarn.Unity.YarnCommandAttribute).Assembly.Location),
+                    GetTypeByName("Yarn.Unity.YarnCommandAttribute").Assembly.Location),
                 MetadataReference.CreateFromFile(
                     GetTypeByName("UnityEngine.MonoBehaviour").Assembly.Location),
                 MetadataReference.CreateFromFile(
@@ -76,11 +81,11 @@ namespace Yarn.Unity.ActionAnalyser
             return output;
         }
 
-        public string GenerateRegistrationFileSource(IEnumerable<Action> actions)
+        public static string GenerateRegistrationFileSource(IEnumerable<Action> actions, string @namespace = "Yarn.Unity.Generated", string className = "ActionRegistration")
         {
-            var @namespace = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName("Yarn.Unity.Generated"));
+            var namespaceDecl = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(@namespace));
 
-            var classDeclaration = SyntaxFactory.ClassDeclaration("ActionRegistration");
+            var classDeclaration = SyntaxFactory.ClassDeclaration(className);
             classDeclaration = classDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
             classDeclaration = classDeclaration.AddAttributeLists(GeneratedCodeAttributeList);
 
@@ -93,9 +98,9 @@ namespace Yarn.Unity.ActionAnalyser
             );
 
 
-            @namespace = @namespace.AddMembers(classDeclaration);
+            namespaceDecl = namespaceDecl.AddMembers(classDeclaration);
 
-            return @namespace.NormalizeWhitespace().ToFullString();
+            return namespaceDecl.NormalizeWhitespace().ToFullString();
         }
 
         private static MethodDeclarationSyntax GenerateInitialisationMethod()
@@ -228,7 +233,7 @@ namespace Yarn.Unity.ActionAnalyser
             .NormalizeWhitespace();
         }
 
-        public MethodDeclarationSyntax GenerateRegistrationMethod(IEnumerable<Action> actions)
+        public static MethodDeclarationSyntax GenerateRegistrationMethod(IEnumerable<Action> actions)
         {
             var actionGroups = actions.GroupBy(a => a.SourceFileName);
 
@@ -315,11 +320,15 @@ namespace Yarn.Unity.ActionAnalyser
             }
         }
 
-        private static IEnumerable<Action> GetActions(CSharpCompilation compilation, SyntaxTree tree)
+        public static IEnumerable<Action> GetActions(CSharpCompilation compilation, SyntaxTree tree)
         {
             var root = tree.GetCompilationUnitRoot();
 
-            SemanticModel model = compilation.GetSemanticModel(tree);
+            SemanticModel model = null;
+
+            if (compilation != null) {
+                model = compilation.GetSemanticModel(tree);
+            }
 
             return GetAttributeActions(root, model).Concat(GetRuntimeDefinedActions(root, model));
         }
@@ -376,6 +385,7 @@ namespace Yarn.Unity.ActionAnalyser
                     MethodSymbol = targetSymbol,
                     Declaration = null,
                     SourceFileName = root.SyntaxTree.FilePath,
+                    DeclarationType = DeclarationType.DirectRegistration,
                 };
             }
         }
@@ -389,7 +399,10 @@ namespace Yarn.Unity.ActionAnalyser
                 .Where(decl => decl.Parent is ClassDeclarationSyntax);
 
             var methodsAndSymbols = methodInfos
-                .Select(decl => (MethodDeclaration: decl, Symbol: model.GetDeclaredSymbol(decl)))
+                .Select(decl =>
+                {
+                    return (MethodDeclaration: decl, Symbol: model.GetDeclaredSymbol(decl));
+                })
                 .Where(pair => pair.Symbol != null)
                 .Where(pair => pair.Symbol.DeclaredAccessibility == Accessibility.Public);
 
@@ -442,6 +455,7 @@ namespace Yarn.Unity.ActionAnalyser
                     AsyncType = GetAsyncType(methodInfo.Symbol),
                     SemanticModel = model,
                     SourceFileName = root.SyntaxTree.FilePath,
+                    DeclarationType = DeclarationType.Attribute,
                 };
             }
         }

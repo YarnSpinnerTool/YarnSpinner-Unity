@@ -75,3 +75,9 @@ Temporary Items
 # Symlink to Samples~ (development environments use this so we can work with the samples all at once, but we don't want to ship the symlink)
 Samples
 Samples.meta
+
+# Intermediate files from Editor/Analysis/Generator~
+Editor/Analysis/ActionsRegistrationGenerator~/bin
+Editor/Analysis/ActionsRegistrationGenerator~/obj
+
+SourceGenerator/YarnSpinner.Unity.SourceCodeGenerator.deps.json*

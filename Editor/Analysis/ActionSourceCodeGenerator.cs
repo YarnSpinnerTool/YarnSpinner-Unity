@@ -46,7 +46,7 @@ namespace Yarn.Unity.Editor
             try
             {
                 var actions = analysis.GetActions();
-                var source = analysis.GenerateRegistrationFileSource(actions);
+                var source = Yarn.Unity.ActionAnalyser.Analyser.GenerateRegistrationFileSource(actions);
 
                 var path = GeneratedSourcePath;
 

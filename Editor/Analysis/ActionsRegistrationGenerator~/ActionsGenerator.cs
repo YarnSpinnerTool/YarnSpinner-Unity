@@ -1,0 +1,400 @@
+// Uncomment to enable logging to /tmp
+#define LOGGING
+
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
+using System.Text;
+using System;
+using System.Linq;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using Yarn.Unity.ActionAnalyser;
+using YarnAction = Yarn.Unity.ActionAnalyser.Action;
+using System.IO;
+
+[Generator]
+public class ExampleSourceGenerator : ISourceGenerator
+{
+    public void Execute(GeneratorExecutionContext context)
+    {
+        var output = GetOutput(context);
+        
+        try
+        {
+            output.WriteLine(DateTime.Now);
+
+            output.WriteLine("Source code generation for assembly " + context.Compilation.AssemblyName);
+
+            if (context.AdditionalFiles.Any()) {
+                output.WriteLine($"Additional files:");
+                foreach (var item in context.AdditionalFiles) {
+                    output.WriteLine("  " + item.Path);
+                }
+            }
+
+            // Don't generate source code for assembly that comes from Unity -
+            // they don't contain Yarn actions that the player will want in
+            // their game, so no need to do any work on them.
+            var prefixesToIgnore = new List<string>()
+            {
+                "Unity.",
+                "UnityEngine.",
+                "UnityEditor.",
+                "YarnSpinner.Unity",
+                "YarnSpinner.Editor",
+            };
+
+            // If the GenerateTestActionRegistrationSymbol is not defined, then
+            // we don't want to generate registration code for Yarn unit tests,
+            // so add the Yarn Spinner tests assembly to the ignore list.
+            if (context.ParseOptions.PreprocessorSymbolNames.Contains(Analyser.GenerateTestActionRegistrationSymbol) == false) {
+                prefixesToIgnore.Add("YarnSpinnerTests");
+            }
+
+            foreach (var prefix in prefixesToIgnore)
+            {
+                if (context.Compilation.AssemblyName.StartsWith(prefix))
+                {
+                    output.WriteLine($"No action registration code generation required for " + context.Compilation.AssemblyName + " because it's a Unity internal assembly");
+                    return;
+                }
+            }
+
+            var compilation = context.Compilation as CSharpCompilation;
+
+            if (compilation == null)
+            {
+                output.WriteLine($"Stopping code generation because compilation is not a {nameof(CSharpCompilation)}.");
+                // This is not a C# compilation, so we can't do analysis.
+                return;
+            }
+
+            var actions = new List<YarnAction>();
+            foreach (var tree in compilation.SyntaxTrees)
+            {
+                actions.AddRange(Analyser.GetActions(compilation, tree).Where(a => a.DeclarationType == DeclarationType.Attribute));
+            }
+
+            foreach (var action in actions)
+            {
+                if (action == null)
+                {
+                    output.WriteLine($"Action is null??");
+                    continue;
+                }
+                output.WriteLine($"Action {action.Name}: {action.SourceFileName}:{action.Declaration?.GetLocation()?.GetLineSpan().StartLinePosition.Line} ({action.Type})");
+            }
+
+            output.Write($"Generating source code... ");
+
+            var source = Analyser.GenerateRegistrationFileSource(actions);
+
+            output.WriteLine($"Done.");
+
+            SourceText sourceText = SourceText.From(source, Encoding.UTF8);
+
+            output.Write($"Writing generated source...");
+
+            DumpGeneratedFile(context, source);
+
+            output.WriteLine($"Done.");
+
+            context.AddSource($"YarnActionRegistration-{compilation.AssemblyName}.Generated.cs", sourceText);
+
+
+            return;
+
+        }
+        catch (Exception e)
+        {
+            output.WriteLine($"{e}");
+        }
+        finally
+        {
+            output.Dispose();
+        }
+    }
+
+    private MethodDeclarationSyntax GenerateLoggingMethod(string methodName, string sourceExpression, string prefix)
+    {
+        return SyntaxFactory.MethodDeclaration(
+    SyntaxFactory.PredefinedType(
+        SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
+    SyntaxFactory.Identifier(methodName))
+.WithModifiers(
+    SyntaxFactory.TokenList(
+        new[]{
+            SyntaxFactory.Token(SyntaxKind.PublicKeyword),
+            SyntaxFactory.Token(SyntaxKind.StaticKeyword)}))
+.WithBody(
+    SyntaxFactory.Block(
+        SyntaxFactory.LocalDeclarationStatement(
+            SyntaxFactory.VariableDeclaration(
+                SyntaxFactory.GenericName(
+                    SyntaxFactory.Identifier("IEnumerable"))
+                .WithTypeArgumentList(
+                    SyntaxFactory.TypeArgumentList(
+                        SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
+                            SyntaxFactory.PredefinedType(
+                                SyntaxFactory.Token(SyntaxKind.StringKeyword))))))
+            .WithVariables(
+                SyntaxFactory.SingletonSeparatedList<VariableDeclaratorSyntax>(
+                    SyntaxFactory.VariableDeclarator(
+                        SyntaxFactory.Identifier("source"))
+                    .WithInitializer(
+                        SyntaxFactory.EqualsValueClause(
+                            SyntaxFactory.ParseExpression(sourceExpression)))))),
+        SyntaxFactory.LocalDeclarationStatement(
+            SyntaxFactory.VariableDeclaration(
+                SyntaxFactory.IdentifierName(
+                    SyntaxFactory.Identifier(
+                        SyntaxFactory.TriviaList(),
+                        SyntaxKind.VarKeyword,
+                        "var",
+                        "var",
+                        SyntaxFactory.TriviaList())))
+            .WithVariables(
+                SyntaxFactory.SingletonSeparatedList<VariableDeclaratorSyntax>(
+                    SyntaxFactory.VariableDeclarator(
+                        SyntaxFactory.Identifier("prefix"))
+                    .WithInitializer(
+                        SyntaxFactory.EqualsValueClause(
+                            SyntaxFactory.LiteralExpression(
+                                SyntaxKind.StringLiteralExpression,
+                                SyntaxFactory.Literal(prefix))))))),
+        SyntaxFactory.ExpressionStatement(
+            SyntaxFactory.InvocationExpression(
+                SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    SyntaxFactory.IdentifierName("Debug"),
+                    SyntaxFactory.IdentifierName("Log")
+                )
+            )
+            .WithArgumentList(
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
+                        SyntaxFactory.Argument(
+                            SyntaxFactory.InterpolatedStringExpression(
+                                SyntaxFactory.Token(SyntaxKind.InterpolatedVerbatimStringStartToken)
+                            )
+                            .WithContents(
+                                SyntaxFactory.List<InterpolatedStringContentSyntax>(
+                                    new InterpolatedStringContentSyntax[]{
+                                        SyntaxFactory.Interpolation(
+                                            SyntaxFactory.IdentifierName("prefix")
+                                        ),
+                                        SyntaxFactory.InterpolatedStringText()
+                                        .WithTextToken(
+                                            SyntaxFactory.Token(
+                                                SyntaxFactory.TriviaList(),
+                                                SyntaxKind.InterpolatedStringTextToken,
+                                                " ",
+                                                " ",
+                                                SyntaxFactory.TriviaList()
+                                            )
+                                        ),
+                                        SyntaxFactory.Interpolation(
+                                            SyntaxFactory.InvocationExpression(
+                                                SyntaxFactory.MemberAccessExpression(
+                                                    SyntaxKind.SimpleMemberAccessExpression,
+                                                    SyntaxFactory.PredefinedType(
+                                                        SyntaxFactory.Token(SyntaxKind.StringKeyword)
+                                                    ),
+                                                    SyntaxFactory.IdentifierName("Join")
+                                                )
+                                            )
+                                            .WithArgumentList(
+                                                SyntaxFactory.ArgumentList(
+                                                    SyntaxFactory.SeparatedList<ArgumentSyntax>(
+                                                        new SyntaxNodeOrToken[]{
+                                                            SyntaxFactory.Argument(
+                                                                SyntaxFactory.LiteralExpression(
+                                                                    SyntaxKind.CharacterLiteralExpression,
+                                                                    SyntaxFactory.Literal(';')
+                                                                )
+                                                            ),
+                                                            SyntaxFactory.Token(SyntaxKind.CommaToken),
+                                                            SyntaxFactory.Argument(
+                                                                SyntaxFactory.IdentifierName("source")
+                                                            )
+                                                        }
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    }
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+)
+.NormalizeWhitespace();
+    }
+
+    public static MethodDeclarationSyntax GenerateSingleLogMethod(string methodName, string text, string prefix)
+    {
+        return SyntaxFactory.MethodDeclaration(
+            SyntaxFactory.PredefinedType(
+                SyntaxFactory.Token(SyntaxKind.VoidKeyword)
+            ),
+            SyntaxFactory.Identifier(methodName)
+        )
+        .WithModifiers(
+            SyntaxFactory.TokenList(
+                new[]{
+                    SyntaxFactory.Token(SyntaxKind.PublicKeyword),
+                    SyntaxFactory.Token(SyntaxKind.StaticKeyword)
+                }
+            )
+        )
+        .WithBody(
+            SyntaxFactory.Block(
+                SyntaxFactory.SingletonList<StatementSyntax>(
+                    SyntaxFactory.ExpressionStatement(
+                        SyntaxFactory.InvocationExpression(
+                            SyntaxFactory.MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                SyntaxFactory.IdentifierName("Debug"),
+                                SyntaxFactory.IdentifierName("Log")
+                            )
+                        )
+                        .WithArgumentList(
+                            SyntaxFactory.ArgumentList(
+                                SyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
+                                    SyntaxFactory.Argument(
+                                        SyntaxFactory.InterpolatedStringExpression(
+                                            SyntaxFactory.Token(SyntaxKind.InterpolatedStringStartToken)
+                                        )
+                                        .WithContents(
+                                            SyntaxFactory.List<InterpolatedStringContentSyntax>(
+                                                new InterpolatedStringContentSyntax[]{
+                                                    SyntaxFactory.Interpolation(
+                                                        SyntaxFactory.LiteralExpression(
+                                                            SyntaxKind.StringLiteralExpression,
+                                                            SyntaxFactory.Literal(prefix)
+                                                        )
+                                                    ),
+                                                    SyntaxFactory.InterpolatedStringText()
+                                                    .WithTextToken(
+                                                        SyntaxFactory.Token(
+                                                            SyntaxFactory.TriviaList(),
+                                                            SyntaxKind.InterpolatedStringTextToken,
+                                                            " ",
+                                                            " ",
+                                                            SyntaxFactory.TriviaList()
+                                                        )
+                                                    ),
+                                                    SyntaxFactory.Interpolation(
+                                                        SyntaxFactory.LiteralExpression(
+                                                            SyntaxKind.StringLiteralExpression,
+                                                            SyntaxFactory.Literal(text)
+                                                        )
+                                                    )
+                                                }
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        .NormalizeWhitespace();
+    }
+
+    public void Initialize(GeneratorInitializationContext context)
+    {
+        context.RegisterForSyntaxNotifications(() => new ClassDeclarationSyntaxReceiver());
+    }
+
+    public ILogger GetOutput(GeneratorExecutionContext context)
+    {
+#if LOGGING
+        var path = $"/tmp/{nameof(ExampleSourceGenerator)}-{context.Compilation.AssemblyName}.txt";
+
+        var outFile = System.IO.File.Open(path, System.IO.FileMode.Create);
+
+        return new FileLogger(new System.IO.StreamWriter(outFile));
+#else
+        return new NullLogger();
+#endif
+    }
+
+    public void DumpGeneratedFile(GeneratorExecutionContext context, string text)
+    {
+#if LOGGING
+        var path = $"/tmp/{nameof(ExampleSourceGenerator)}-{context.Compilation.AssemblyName}.cs";
+        System.IO.File.WriteAllText(path, text);
+#endif
+    }
+}
+
+internal class ClassDeclarationSyntaxReceiver : ISyntaxReceiver
+{
+    public List<ClassDeclarationSyntax> Classes { get; private set; } = new List<ClassDeclarationSyntax>();
+
+    public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
+    {
+        // Business logic to decide what we're interested in goes here
+        if (syntaxNode is ClassDeclarationSyntax cds)
+        {
+            Classes.Add(cds);
+        }
+    }
+}
+
+public interface ILogger : IDisposable
+{
+    void Write(object obj);
+    void WriteLine(object obj);
+}
+
+public class FileLogger : ILogger
+{
+    System.IO.TextWriter writer;
+
+    public FileLogger(TextWriter writer)
+    {
+        this.writer = writer;
+    }
+
+    public void Dispose()
+    {
+        writer.Dispose();
+    }
+
+    public void Write(object text)
+    {
+        writer.Write(text);
+    }
+
+    public void WriteLine(object text)
+    {
+        writer.WriteLine(text);
+    }
+}
+
+public class NullLogger : ILogger
+{
+    public void Dispose()
+    {
+
+    }
+
+    public void Write(object text)
+    {
+
+    }
+
+    public void WriteLine(object text)
+    {
+
+    }
+}

@@ -56,6 +56,19 @@ namespace Yarn.Unity.ActionAnalyser
         NotAnAction,
     }
 
+    public enum DeclarationType
+    {
+        /// <summary>
+        /// The action is declared via a YarnCommand or YarnFunction attribute.
+        /// </summary>
+        Attribute,
+        /// <summary>
+        /// The action is declared by calling AddCommandHandler or AddFunction
+        /// on a DialogueRunner.
+        /// </summary>
+        DirectRegistration
+    }
+
     public enum AsyncType
     {
         /// <summary>
@@ -127,6 +140,11 @@ namespace Yarn.Unity.ActionAnalyser
         /// The type of the action.
         /// </summary>
         public ActionType Type { get; internal set; }
+
+        /// <summary>
+        /// The declaration type of the action.
+        /// </summary>
+        public DeclarationType DeclarationType { get; internal set; }
 
         /// <summary>
         /// The sync/async type of the action.
