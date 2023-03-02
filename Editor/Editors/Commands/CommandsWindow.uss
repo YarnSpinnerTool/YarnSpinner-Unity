@@ -1,0 +1,22 @@
+.header #Title {
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.commandListItem {
+    background-color: unset;
+}
+
+.command {
+    padding-left: 20px;
+}
+
+.header #Subtitle {
+    display: none;
+}
+
+.command #Subtitle {
+    white-space: normal;
+    padding-left: 20px;
+    opacity: 0.5;
+}

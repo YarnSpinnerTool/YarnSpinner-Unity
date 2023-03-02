@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <uie:Toolbar>
+        <uie:ToolbarSearchField focusable="true" style="flex-grow: 1;" />
+    </uie:Toolbar>
+    <ui:ListView focusable="true" fixed-item-height="20" selection-type="None" virtualization-method="DynamicHeight" />
+</ui:UXML>

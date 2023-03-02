@@ -318,6 +318,49 @@ namespace Yarn.Unity
                     };
                 }
             }
+
+            public string UsageString {
+                get {
+                    var components = new List<string>();
+
+                    components.Add(Name);
+
+                    if (DynamicallyFindsTarget) {
+                        var declaringTypeName = DeclaringType.Name;
+                        components.Add($"target <i>({declaringTypeName})</i>");
+                    }
+
+                    foreach (var parameter in Method.GetParameters()) {
+                        var type = parameter.ParameterType;
+                        string typeName;
+
+                        if (TypeFriendlyNames.TryGetValue(type, out typeName) == false) {
+                            typeName = type.Name;
+                        }
+
+                        string displayName = $"{parameter.Name} <i>({typeName})</i>";
+
+                        if (parameter.IsOptional) {
+                            displayName = $"[{displayName} = {parameter.DefaultValue}]";
+                            
+                        }
+
+                        components.Add(displayName);
+                    }
+
+                    return string.Join(" ", components);
+                }
+            }
+
+            readonly Dictionary<Type, string> TypeFriendlyNames = new Dictionary<Type, string> {
+                { typeof(int), "number" },
+                { typeof(float), "number" },
+                { typeof(double), "number" },
+                { typeof(Decimal), "number" },
+                { typeof(string), "string" },
+                { typeof(bool), "bool" },
+            };
+
         }
 
         private Dictionary<string, CommandRegistration> _commands = new Dictionary<string, CommandRegistration>();
