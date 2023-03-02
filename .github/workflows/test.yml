@@ -98,4 +98,4 @@ jobs:
         with:
           name: Test results (edit + play, ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}
           # path: ${{ steps.testRunner.outputs.artifactsPath }}
-          path: /github/workspace/artifacts
+          path: artifacts
