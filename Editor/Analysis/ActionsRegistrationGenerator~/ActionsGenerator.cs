@@ -11,7 +11,7 @@ using YarnAction = Yarn.Unity.ActionAnalyser.Action;
 using System.IO;
 
 [Generator]
-public class ExampleSourceGenerator : ISourceGenerator
+public class ActionRegistrationSourceGenerator : ISourceGenerator
 {
     const string YarnSpinnerUnityAssemblyName = "YarnSpinner.Unity";
     const string DebugLoggingPreprocessorSymbol = "YARN_SOURCE_GENERATION_DEBUG_LOGGING";
@@ -57,7 +57,7 @@ public class ExampleSourceGenerator : ISourceGenerator
                 "YarnSpinner.Editor",
             };
 
-            // If the GenerateTestActionRegistrationSymbol is not defined, then
+            // If the GenerateTestActionRegistrationSymbol is NOT defined, then
             // we don't want to generate registration code for Yarn unit tests,
             // so add the Yarn Spinner tests assembly to the ignore list.
             if (context.ParseOptions.PreprocessorSymbolNames.Contains(Analyser.GenerateTestActionRegistrationSymbol) == false) {
@@ -334,7 +334,7 @@ public class ExampleSourceGenerator : ISourceGenerator
         if (GetShouldLogToFile(context))
         {
             var tempPath = System.IO.Path.GetTempPath();
-            var path = System.IO.Path.Combine(tempPath, $"{nameof(ExampleSourceGenerator)}-{context.Compilation.AssemblyName}.txt");
+            var path = System.IO.Path.Combine(tempPath, $"{nameof(ActionRegistrationSourceGenerator)}-{context.Compilation.AssemblyName}.txt");
 
             Console.WriteLine($"Logging code generation for {context.Compilation.AssemblyName} to {path}");
 
@@ -356,7 +356,7 @@ public class ExampleSourceGenerator : ISourceGenerator
     {
         if (GetShouldLogToFile(context)) {
             var tempPath = System.IO.Path.GetTempPath();
-            var path = System.IO.Path.Combine(tempPath, $"{nameof(ExampleSourceGenerator)}-{context.Compilation.AssemblyName}.cs");
+            var path = System.IO.Path.Combine(tempPath, $"{nameof(ActionRegistrationSourceGenerator)}-{context.Compilation.AssemblyName}.cs");
             Console.WriteLine($"Wrote generated source code to {path}");
             System.IO.File.WriteAllText(path, text);
         }
