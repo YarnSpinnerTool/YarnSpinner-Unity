@@ -78,7 +78,7 @@ jobs:
             Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-
             
       - name: Run tests
-        uses: game-ci/unity-test-runner@v2
+        uses: game-ci/unity-test-runner@v2.0.0
         id: testRunner
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
