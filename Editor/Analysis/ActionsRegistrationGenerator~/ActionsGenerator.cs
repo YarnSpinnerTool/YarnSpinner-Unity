@@ -61,12 +61,10 @@ public class ExampleSourceGenerator : ISourceGenerator
                 }
             }
 
-            var compilation = context.Compilation as CSharpCompilation;
-
-            if (compilation == null)
+            if (!(context.Compilation is CSharpCompilation compilation))
             {
-                output.WriteLine($"Stopping code generation because compilation is not a {nameof(CSharpCompilation)}.");
                 // This is not a C# compilation, so we can't do analysis.
+                output.WriteLine($"Stopping code generation because compilation is not a {nameof(CSharpCompilation)}.");
                 return;
             }
 
