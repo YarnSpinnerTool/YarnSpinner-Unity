@@ -91,6 +91,7 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: 'Test Results ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}'
+          customParameters: -nographics
       
       - name: Upload test results
         uses: actions/upload-artifact@v2
