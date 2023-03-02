@@ -26,7 +26,9 @@ namespace Yarn.Unity.Tests
         public static void GenerateRegistrationSource(string scriptFolderGUID)
         {
 #if UNITY_EDITOR
+#if false
             Yarn.Unity.Editor.ScriptingDefineSymbol.GetSymbol(Yarn.Unity.ActionAnalyser.Analyser.GenerateTestActionRegistrationSymbol).Value = true;
+#endif
 
 #if !SOURCE_GENERATOR_AVAILABLE
             // On Unity 2021.1 and earlier, we need to manually generate the
@@ -90,7 +92,9 @@ namespace Yarn.Unity.Tests
         public static void CleanupGeneratedSource()
         {
 #if UNITY_EDITOR
+#if false
             Yarn.Unity.Editor.ScriptingDefineSymbol.GetSymbol(Yarn.Unity.ActionAnalyser.Analyser.GenerateTestActionRegistrationSymbol).Value = false;
+#endif
 #if !SOURCE_GENERATOR_AVAILABLE
             AssetDatabase.DeleteAsset(TestFilesDirectoryPath);
             AssetDatabase.Refresh();
