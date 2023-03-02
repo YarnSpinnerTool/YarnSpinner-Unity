@@ -68,7 +68,7 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
             {
                 if (context.Compilation.AssemblyName.StartsWith(prefix))
                 {
-                    output.WriteLine($"No action registration code generation required for " + context.Compilation.AssemblyName + " because it's a Unity internal assembly");
+                    output.WriteLine($"Not generating registration code for {context.Compilation.AssemblyName}: we've been told to exclude it, because its name begins with one of these prefixes: {string.Join(", ", prefixesToIgnore)}");
                     return;
                 }
             }
