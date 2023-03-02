@@ -86,6 +86,11 @@ public class ExampleSourceGenerator : ISourceGenerator
                 actions.AddRange(Analyser.GetActions(compilation, tree).Where(a => a.DeclarationType == DeclarationType.Attribute));
             }
 
+            if (actions.Any() == false) {
+                output.WriteLine($"Didn't find any Yarn Actions in {context.Compilation.AssemblyName}. Not generating any source code for it.");
+                return;
+            }
+
             foreach (var action in actions)
             {
                 if (action == null)
