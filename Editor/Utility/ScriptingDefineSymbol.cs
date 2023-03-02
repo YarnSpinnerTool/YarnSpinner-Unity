@@ -1,0 +1,94 @@
+#define LOGGING
+
+using UnityEditor;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Yarn.Unity.Editor
+{
+    /// <summary>
+    /// Represents a scripting define symbol used in the current platform's
+    /// build settings.
+    /// </summary>
+    /// <remarks>
+    /// This class provides a way to get or set whether a scripting define
+    /// symbol is present in the current build settings, represented as a
+    /// boolean value: <see langword="true"/> if the symbol is present, and <see
+    /// langword="false"/> if not.
+    /// </remarks>
+    public class ScriptingDefineSymbol
+    {
+        /// <summary>
+        /// Creates a new <see cref="ScriptingDefineSymbol"/> that represents
+        /// <paramref name="name"/>.
+        /// </summary>
+        /// <param name="name">The name of the scripting define symbol.</param>
+        /// <returns>A <see cref="ScriptingDefineSymbol"/> object that
+        /// represents <paramref name="name"/>.</returns>
+        public static ScriptingDefineSymbol GetSymbol(string name)
+        {
+            return new ScriptingDefineSymbol(name);
+        }
+
+        /// <summary>
+        /// Gets the name of the symbol that this object represents.
+        /// </summary>
+        public string SymbolName { get; }
+
+        /// <summary>
+        /// Creates a new instance of ScriptingDefineSymbol that represents a
+        /// symbol named <paramref name="symbolName"/>.
+        /// </summary>
+        /// <param name="symbolName">The name of the scripting define
+        /// symbol.</param>
+        private ScriptingDefineSymbol(string symbolName)
+        {
+            this.SymbolName = symbolName;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the scripting define symbol
+        /// is present in the current platform's build settings.
+        /// </summary>
+        public bool Value
+        {
+            get
+            {
+                var currentGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
+                return PlayerSettings
+                    .GetScriptingDefineSymbolsForGroup(currentGroup)
+                    .Split(new[] {';'}, System.StringSplitOptions.RemoveEmptyEntries)
+                    .Contains(SymbolName);
+            }
+
+            set
+            {
+                var currentGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
+                var currentDefines = PlayerSettings
+                    .GetScriptingDefineSymbolsForGroup(currentGroup)
+                    .Split(new[] {';'}, System.StringSplitOptions.RemoveEmptyEntries);
+
+                var currentDefinesList = new List<string>(currentDefines);
+
+                var isPresent = currentDefines.Contains(SymbolName);
+
+                if (value && !isPresent)
+                {
+                    currentDefinesList.Add(SymbolName);
+                }
+                else if (!value && isPresent)
+                {
+                    currentDefinesList.Remove(SymbolName);
+                }
+
+                var newDefinesList = string.Join(";", currentDefinesList);
+
+#if LOGGING
+                UnityEngine.Debug.Log($"SetScriptingDefineSymbolsForGroup '{newDefinesList}'");
+#endif
+
+                PlayerSettings.SetScriptingDefineSymbolsForGroup(currentGroup, newDefinesList);
+            }
+        }
+    }
+}

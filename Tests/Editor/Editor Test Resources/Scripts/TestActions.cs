@@ -52,5 +52,17 @@ namespace Yarn.Unity
         {
             Debug.Log($"Demo action: {param}!");
         }
+
+        [YarnFunction("int_void")]
+        public static int DemoFunction1() {
+            Debug.Log($"Demo function {nameof(DemoFunction1)}");
+            return 1;
+        }
+
+        [YarnFunction("int_params")]
+        public static int DemoFunction2(int input) {
+            Debug.Log($"Demo function {nameof(DemoFunction2)}");
+            return 1;
+        }
     }
 }

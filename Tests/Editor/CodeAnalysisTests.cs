@@ -22,6 +22,8 @@ namespace Yarn.Unity.Tests
         string TestScriptPathSource => AssetDatabase.GUIDToAssetPath(testScriptGUID);
         string TestScriptPathInProject => TestFilesDirectoryPath + Path.GetFileName(TestScriptPathSource);
 
+        string TestNamespace => "Yarn.Unity.Generated." + TestContext.CurrentContext.Test.MethodName;
+
         [SetUp]
         public void SetUp()
         {
@@ -32,11 +34,12 @@ namespace Yarn.Unity.Tests
             }
         }
 
-        [TearDown]
-        public void TearDown()
+        [UnityTearDown]
+        public IEnumerator TearDown()
         {
             AssetDatabase.DeleteAsset(TestFilesDirectoryPath);
             AssetDatabase.Refresh();
+            yield return new RecompileScripts(expectScriptCompilation: true, expectScriptCompilationSuccess: true);
         }
 
         [UnityTest]
@@ -47,7 +50,7 @@ namespace Yarn.Unity.Tests
             // compiles.
             var analysis = new Yarn.Unity.ActionAnalyser.Analyser(TestScriptPathInProject);
             var actions = analysis.GetActions();
-            var source = analysis.GenerateRegistrationFileSource(actions);
+            var source = Yarn.Unity.ActionAnalyser.Analyser.GenerateRegistrationFileSource(actions, TestNamespace);
 
             System.IO.File.WriteAllText(outputFilePath, source);
 
@@ -63,7 +66,7 @@ namespace Yarn.Unity.Tests
 
             var analysis = new Yarn.Unity.ActionAnalyser.Analyser(TestScriptPathInProject);
             var actions = analysis.GetActions();
-            var source = analysis.GenerateRegistrationFileSource(actions);
+            var source = Yarn.Unity.ActionAnalyser.Analyser.GenerateRegistrationFileSource(actions, TestNamespace);
 
             System.IO.File.WriteAllText(outputFilePath, source);
 
@@ -73,7 +76,7 @@ namespace Yarn.Unity.Tests
             var registrationMethods = Actions.ActionRegistrationMethods;
 
             // The generated source code should have this fully qualified name:
-            const string expectedFullMethodName = "Yarn.Unity.Generated.ActionRegistration.RegisterActions";
+            string expectedFullMethodName = TestNamespace + ".ActionRegistration.RegisterActions";
 
             var registrationMethodNames = registrationMethods.Select(m => GetFullMethodName(m.Method)).ToList();
 

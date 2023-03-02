@@ -27,28 +27,29 @@ namespace Yarn.Unity.Tests
 
         public void Setup()
         {
-#if UNITY_EDITOR
             if (Directory.Exists(TestFilesDirectoryPath) == false) {
                 UnityEditor.AssetDatabase.CreateFolder("Assets", TestFolderName);
                 UnityEditor.AssetDatabase.CopyAsset(TestScriptPathSource, TestScriptPathInProject);
             }
 
+#if UNITY_EDITOR && !UNITY_2021_2_OR_NEWER
+            // On Unity 2021.1 and earlier, we need to manually generate the
+            // registration code. On later versions, the source code generator
+            // will handle it for us.
+
             var analysis = new Yarn.Unity.ActionAnalyser.Analyser(TestScriptPathInProject);
             var actions = analysis.GetActions();
-            var source = analysis.GenerateRegistrationFileSource(actions);
+            var source = Yarn.Unity.ActionAnalyser.Analyser.GenerateRegistrationFileSource(actions, "Yarn.Unity.Tests.Generated");
             
             System.IO.File.WriteAllText(outputFilePath, source);
-            
-            UnityEditor.AssetDatabase.Refresh();
 #endif
+            UnityEditor.AssetDatabase.Refresh();
         }
 
         public void Cleanup()
         {
-#if UNITY_EDITOR
             UnityEditor.AssetDatabase.DeleteAsset(TestFilesDirectoryPath);
             UnityEditor.AssetDatabase.Refresh();
-#endif
         }
 
         [Test]
@@ -69,10 +70,21 @@ namespace Yarn.Unity.Tests
                 "static_demo_action_with_optional_params",
             };
 
+            var expectedFunctionNames = new[] {
+                "int_void",
+                "int_params",
+            };
+
             var actualCommandNames = dispatcher.Commands.Select(c => c.Name).ToList();
 
-            foreach (var expectedCommandName in expectedCommandNames) {
+            foreach (var expectedCommandName in expectedCommandNames)
+            {
                 Assert.Contains(expectedCommandName, actualCommandNames, "expected command {0} to be registered", expectedCommandName);
+            }
+
+            foreach (var expectedFunctionName in expectedFunctionNames)
+            {
+                Assert.True(dialogueRunner.Dialogue.Library.FunctionExists(expectedFunctionName), "expected function {0} to be registered", expectedFunctionName);
             }
         }
     }

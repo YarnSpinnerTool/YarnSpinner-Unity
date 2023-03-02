@@ -1,5 +1,10 @@
+#if UNITY_2021_2_OR_NEWER
+    #define SOURCE_GENERATOR_AVAILABLE
+#endif
+
 using NUnit.Framework;
 using System.Linq;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -21,6 +26,12 @@ namespace Yarn.Unity.Tests
         public static void GenerateRegistrationSource(string scriptFolderGUID)
         {
 #if UNITY_EDITOR
+            Yarn.Unity.Editor.ScriptingDefineSymbol.GetSymbol(Yarn.Unity.ActionAnalyser.Analyser.GenerateTestActionRegistrationSymbol).Value = true;
+
+#if !SOURCE_GENERATOR_AVAILABLE
+            // On Unity 2021.1 and earlier, we need to manually generate the
+            // registration code. On later versions, the source code generator
+            // will handle it for us.
             if (System.IO.Directory.Exists(TestFilesDirectoryPath) == false)
             {
                 AssetDatabase.CreateFolder("Assets", TestFolderName);
@@ -34,7 +45,7 @@ namespace Yarn.Unity.Tests
 
             var analysis = new ActionAnalyser.Analyser(scriptFolderPath);
             var actions = analysis.GetActions();
-            var source = analysis.GenerateRegistrationFileSource(actions);
+            var source = Yarn.Unity.ActionAnalyser.Analyser.GenerateRegistrationFileSource(actions, "Yarn.Unity.Tests.Generated");
 
             System.IO.File.WriteAllText(GeneratedRegistrationPath, source);
 
@@ -73,14 +84,18 @@ namespace Yarn.Unity.Tests
 
             AssetDatabase.Refresh();
 #endif
+#endif
         }
 
         public static void CleanupGeneratedSource()
         {
-// #if UNITY_EDITOR
-//             AssetDatabase.DeleteAsset(TestFilesDirectoryPath);
-//             AssetDatabase.Refresh();
-// #endif
+#if UNITY_EDITOR
+            Yarn.Unity.Editor.ScriptingDefineSymbol.GetSymbol(Yarn.Unity.ActionAnalyser.Analyser.GenerateTestActionRegistrationSymbol).Value = false;
+#if !SOURCE_GENERATOR_AVAILABLE
+            AssetDatabase.DeleteAsset(TestFilesDirectoryPath);
+            AssetDatabase.Refresh();
+#endif
+#endif
         }
         
         public static void AddSceneToBuild(string GUID)
