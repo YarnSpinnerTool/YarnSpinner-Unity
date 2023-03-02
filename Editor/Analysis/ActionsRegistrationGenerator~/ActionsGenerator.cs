@@ -1,6 +1,3 @@
-// Uncomment to enable logging to /tmp
-#define LOGGING
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Text;
@@ -16,6 +13,8 @@ using System.IO;
 [Generator]
 public class ExampleSourceGenerator : ISourceGenerator
 {
+    const string DebugLoggingPreprocessorSymbol = "YARN_SOURCE_GENERATION_DEBUG_LOGGING";
+
     public void Execute(GeneratorExecutionContext context)
     {
         var output = GetOutput(context);
@@ -314,23 +313,35 @@ public class ExampleSourceGenerator : ISourceGenerator
 
     public ILogger GetOutput(GeneratorExecutionContext context)
     {
-#if LOGGING
-        var path = $"/tmp/{nameof(ExampleSourceGenerator)}-{context.Compilation.AssemblyName}.txt";
+        if (GetShouldLogToFile(context))
+        {
+            var tempPath = System.IO.Path.GetTempPath();
+            var path = System.IO.Path.Combine(tempPath, $"{nameof(ExampleSourceGenerator)}-{context.Compilation.AssemblyName}.txt");
 
-        var outFile = System.IO.File.Open(path, System.IO.FileMode.Create);
+            Console.WriteLine($"Logging code generation for {context.Compilation.AssemblyName} to {path}");
 
-        return new FileLogger(new System.IO.StreamWriter(outFile));
-#else
-        return new NullLogger();
-#endif
+            var outFile = System.IO.File.Open(path, System.IO.FileMode.Create);
+
+            return new FileLogger(new System.IO.StreamWriter(outFile));
+        } else {
+            Console.WriteLine($"Not logging code generation for {context.Compilation.AssemblyName} because {DebugLoggingPreprocessorSymbol} is not defined for this compilation");
+            return new NullLogger();
+        }
+    }
+
+    private static bool GetShouldLogToFile(GeneratorExecutionContext context)
+    {
+        return context.ParseOptions.PreprocessorSymbolNames.Contains(DebugLoggingPreprocessorSymbol);
     }
 
     public void DumpGeneratedFile(GeneratorExecutionContext context, string text)
     {
-#if LOGGING
-        var path = $"/tmp/{nameof(ExampleSourceGenerator)}-{context.Compilation.AssemblyName}.cs";
-        System.IO.File.WriteAllText(path, text);
-#endif
+        if (GetShouldLogToFile(context)) {
+            var tempPath = System.IO.Path.GetTempPath();
+            var path = System.IO.Path.Combine(tempPath, $"{nameof(ExampleSourceGenerator)}-{context.Compilation.AssemblyName}.cs");
+            Console.WriteLine($"Wrote generated source code to {path}");
+            System.IO.File.WriteAllText(path, text);
+        }
     }
 }
 
