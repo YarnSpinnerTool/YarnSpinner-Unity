@@ -75,7 +75,6 @@ jobs:
           key: Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-${{ matrix.unityVersion }}-${{ hashFiles(matrix.projectPath) }}
           restore-keys: |
             Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-${{ matrix.unityVersion }}-
-            Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-
             
       - name: Run tests
         uses: game-ci/unity-test-runner@v2.1.1
