@@ -13,6 +13,7 @@ using System.IO;
 [Generator]
 public class ExampleSourceGenerator : ISourceGenerator
 {
+    const string YarnSpinnerUnityAssemblyName = "YarnSpinner.Unity";
     const string DebugLoggingPreprocessorSymbol = "YARN_SOURCE_GENERATION_DEBUG_LOGGING";
 
     public void Execute(GeneratorExecutionContext context)
@@ -32,14 +33,26 @@ public class ExampleSourceGenerator : ISourceGenerator
                 }
             }
 
-            // Don't generate source code for assembly that comes from Unity -
-            // they don't contain Yarn actions that the player will want in
-            // their game, so no need to do any work on them.
+            output.WriteLine("Referenced assemblies for this compilation:");
+            foreach (var referencedAssembly in context.Compilation.ReferencedAssemblyNames) {
+                output.WriteLine(" - " + referencedAssembly.Name);
+            }
+
+            bool compilationReferencesYarnSpinner = context.Compilation.ReferencedAssemblyNames
+                .Any(name => name.Name == YarnSpinnerUnityAssemblyName);
+
+            if (compilationReferencesYarnSpinner == false) {
+                // This compilation doesn't reference YarnSpinner.Unity. Any
+                // code that we generate that references symbols in that
+                // assembly won't work.
+                output.WriteLine($"Assembly {context.Compilation.AssemblyName} doesn't reference {YarnSpinnerUnityAssemblyName}. Not generating any code for it.");
+                return;
+            }
+
+            // Don't generate source code for certain Yarn Spinner provided
+            // assemblies - these always manually register any actions in them.
             var prefixesToIgnore = new List<string>()
             {
-                "Unity.",
-                "UnityEngine.",
-                "UnityEditor.",
                 "YarnSpinner.Unity",
                 "YarnSpinner.Editor",
             };
