@@ -33,7 +33,7 @@ namespace Yarn.Unity
                 if (propertyPathComponents.Count == 0) {
                     testPath = attribute.yarnProjectAttribute;
                 } else {
-                    testPath = string.Join('.', propertyPathComponents) + '.' + attribute.yarnProjectAttribute;
+                    testPath = string.Join(".", propertyPathComponents) + "." + attribute.yarnProjectAttribute;
                 }
 
                 projectProp = property.serializedObject.FindProperty(testPath);
@@ -42,7 +42,9 @@ namespace Yarn.Unity
                     break;
                 }
 
-                if (propertyPathComponents.TryPop(out _) == false) {
+                if (propertyPathComponents.Count > 0) {
+                    propertyPathComponents.Pop();
+                } else {
                     break;
                 }
             }
