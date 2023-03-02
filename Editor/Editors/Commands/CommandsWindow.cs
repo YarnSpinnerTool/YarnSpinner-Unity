@@ -14,18 +14,27 @@ internal class CommandsCollection : IActionRegistration
 
     public List<(string Name, Delegate Function)> functionRegistrations = new List<(string Name, Delegate Function)>();
 
-    public IEnumerable<CommandsWindow.IListItem> GetListItems() {
-        foreach (var registrationMethod in Actions.ActionRegistrationMethods) {
+    public IEnumerable<CommandsWindow.IListItem> GetListItems()
+    {
+        foreach (var registrationMethod in Actions.ActionRegistrationMethods)
+        {
             registrationMethod.Invoke(this);
         }
 
-        if (commandRegistrations.Count > 0) {
-            yield return new CommandsWindow.HeaderListItem { DisplayName = "Commands" };
-
-            foreach (var command in commandRegistrations.OrderBy(c => c.Name)) {
-                yield return new CommandsWindow.CommandListItem { Command = command };
-            }
+        yield return new CommandsWindow.HeaderListItem { DisplayName = "Commands" };
+        
+        foreach (var command in commandRegistrations)
+        {
+            yield return new CommandsWindow.CommandListItem { Command = command };
         }
+
+        // Add a fake 'stop' command to the list, so that it appears in the
+        // window
+        System.Action fakeStop = () => { };
+        yield return new CommandsWindow.CommandListItem
+        {
+            Command = new Actions.CommandRegistration("stop", fakeStop)
+        };
     }
 
     public void AddCommandHandler(string commandName, Delegate handler)
@@ -244,7 +253,7 @@ public class CommandsWindow : EditorWindow
 
         var commandsCollection = new CommandsCollection();
 
-        listItems = new List<IListItem>(commandsCollection.GetListItems());
+        listItems = new List<IListItem>(commandsCollection.GetListItems().OrderBy(item => item.DisplayName));
 
         UpdateFilter(listView, searchField.value);
 
