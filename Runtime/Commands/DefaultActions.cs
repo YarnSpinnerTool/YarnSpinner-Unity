@@ -18,23 +18,22 @@ namespace Yarn.Unity
             Actions.AddRegistrationMethod(RegisterActions);
         }
 
-        [System.CodeDom.Compiler.GeneratedCode("YarnActionAnalyzer", "1.0.0.0")]
-        public static void RegisterActions(global::Yarn.Unity.IActionRegistration target)
+        public static void RegisterActions(IActionRegistration target)
         {
-            // Actions from file:
-            // /Users/desplesda/Work/YarnSpinner-Unity/Packages/YarnSpinner/Runtime/Commands/DefaultActions.cs
-            target.AddCommandHandler<float>("wait", global::Yarn.Unity.DefaultActions.Wait);
-            target.AddFunction<float>("random", global::Yarn.Unity.DefaultActions.Random);
-            target.AddFunction<float, float, float>("random_range", global::Yarn.Unity.DefaultActions.RandomRange);
-            target.AddFunction<int, int>("dice", global::Yarn.Unity.DefaultActions.Dice);
-            target.AddFunction<float, int>("round", global::Yarn.Unity.DefaultActions.Round);
-            target.AddFunction<float, int, float>("round_places", global::Yarn.Unity.DefaultActions.RoundPlaces);
-            target.AddFunction<float, int>("floor", global::Yarn.Unity.DefaultActions.Floor);
-            target.AddFunction<float, int>("ceil", global::Yarn.Unity.DefaultActions.Ceil);
-            target.AddFunction<float, int>("inc", global::Yarn.Unity.DefaultActions.Inc);
-            target.AddFunction<float, int>("dec", global::Yarn.Unity.DefaultActions.Dec);
-            target.AddFunction<float, float>("decimal", global::Yarn.Unity.DefaultActions.Decimal);
-            target.AddFunction<float, int>("int", global::Yarn.Unity.DefaultActions.Int);
+            // Register the built-in methods and commands from Yarn Spinner for Unity.
+            target.AddCommandHandler<float>("wait", Wait);
+
+            target.AddFunction<float>("random", Random);
+            target.AddFunction<float, float, float>("random_range", RandomRange);
+            target.AddFunction<int, int>("dice", Dice);
+            target.AddFunction<float, int>("round", Round);
+            target.AddFunction<float, int, float>("round_places", RoundPlaces);
+            target.AddFunction<float, int>("floor", Floor);
+            target.AddFunction<float, int>("ceil", Ceil);
+            target.AddFunction<float, int>("inc", Inc);
+            target.AddFunction<float, int>("dec", Dec);
+            target.AddFunction<float, float>("decimal", Decimal);
+            target.AddFunction<float, int>("int", Int);
         }
 
         #region Commands
