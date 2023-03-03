@@ -29,7 +29,7 @@ jobs:
         unityVersion:
           - 2019.4.40f1
           - 2020.3.41f1
-          - 2021.3.9f1
+          # - 2021.3.9f1
           - 2022.2.1f1
         targetPlatform:
           # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).

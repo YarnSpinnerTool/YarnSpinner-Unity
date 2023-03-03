@@ -57,14 +57,14 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 "YarnSpinner.Editor",
             };
 
-#if false
+// #if false
             // If the GenerateTestActionRegistrationSymbol is NOT defined, then
             // we don't want to generate registration code for Yarn unit tests,
             // so add the Yarn Spinner tests assembly to the ignore list.
             if (context.ParseOptions.PreprocessorSymbolNames.Contains(Analyser.GenerateTestActionRegistrationSymbol) == false) {
                 prefixesToIgnore.Add("YarnSpinnerTests");
             }
-#endif
+// #endif
 
             foreach (var prefix in prefixesToIgnore)
             {
