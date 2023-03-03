@@ -79,6 +79,12 @@ namespace Yarn.Unity.Editor
                 else if (!value && isPresent)
                 {
                     currentDefinesList.Remove(SymbolName);
+                } else {
+                    // Nothing to do
+#if LOGGING
+                    UnityEngine.Debug.Log($"SetScriptingDefineSymbolsForGroup: not {(value ? "adding" : "removing")} symbol {SymbolName} because it already {(value ? "is" : "isn't")} in the existing symbols");
+#endif
+                    return;
                 }
 
                 var newDefinesList = string.Join(";", currentDefinesList);
