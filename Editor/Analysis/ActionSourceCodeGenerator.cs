@@ -65,7 +65,7 @@ namespace Yarn.Unity.Editor
             }
         }
 
-#if SOURCE_GENERATOR_AVAILABLE
+#if !SOURCE_GENERATOR_AVAILABLE
 #pragma warning disable IDE0051 // private member is unused
 
         // On versions of Unity where source generators are not available, we
