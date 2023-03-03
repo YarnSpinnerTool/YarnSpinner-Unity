@@ -25,12 +25,7 @@ namespace Yarn.Unity.Tests
 
         public static void GenerateRegistrationSource(string scriptFolderGUID)
         {
-#if UNITY_EDITOR
-// #if false
-            Yarn.Unity.Editor.ScriptingDefineSymbol.GetSymbol(Yarn.Unity.ActionAnalyser.Analyser.GenerateTestActionRegistrationSymbol).Value = true;
-// #endif
-
-#if !SOURCE_GENERATOR_AVAILABLE
+#if UNITY_EDITOR && !SOURCE_GENERATOR_AVAILABLE
             // On Unity 2021.1 and earlier, we need to manually generate the
             // registration code. On later versions, the source code generator
             // will handle it for us.
@@ -86,19 +81,13 @@ namespace Yarn.Unity.Tests
 
             AssetDatabase.Refresh();
 #endif
-#endif
         }
 
         public static void CleanupGeneratedSource()
         {
-#if UNITY_EDITOR
-// #if false
-            Yarn.Unity.Editor.ScriptingDefineSymbol.GetSymbol(Yarn.Unity.ActionAnalyser.Analyser.GenerateTestActionRegistrationSymbol).Value = false;
-// #endif
-#if !SOURCE_GENERATOR_AVAILABLE
+#if UNITY_EDITOR && !SOURCE_GENERATOR_AVAILABLE
             AssetDatabase.DeleteAsset(TestFilesDirectoryPath);
             AssetDatabase.Refresh();
-#endif
 #endif
         }
         
