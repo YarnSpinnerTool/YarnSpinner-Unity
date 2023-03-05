@@ -100,11 +100,20 @@ namespace Yarn.Unity
     /// <para>This attribute may be attached to a coroutine. </para>
     /// <para style="note">
     /// The <see cref="DialogueRunner"/> determines if the method is a coroutine
-    /// if the method returns <see cref="IEnumerator"/>. 
+    /// if the method returns <see cref="IEnumerator"/>, or if the method
+    /// returns a <see cref="Coroutine"/>. 
     /// </para>
     /// <para>
-    /// If the method is a coroutine, the DialogueRunner will pause execution
-    /// until the coroutine ends.
+    /// If the method is a coroutine, or returns a <see cref="Coroutine"/>, the
+    /// DialogueRunner will pause execution until the coroutine ends.
+    /// </para>
+    /// <para>
+    /// Yarn Spinner for Unity finds methods with the YarnCommand attribute by
+    /// reading your source code. If your project uses Unity 2021.1 or earlier,
+    /// you will need to tell Yarn Spinner for Unity to do this manually, by
+    /// opening the Window method and choosing Yarn Spinner -&gt; Update Yarn
+    /// Commands. You don't need to do this on later versions of Unity, as it
+    /// will be done for you automatically when your code compiles.
     /// </para>
     /// </remarks>
     public class YarnCommandAttribute : YarnActionAttribute
