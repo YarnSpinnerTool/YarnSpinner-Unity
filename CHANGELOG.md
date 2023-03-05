@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Methods tagged with the `YarnCommand` and `YarnFunction` attribute are now discovered at compile time, rather than at run-time. This makes game start-up significantly faster.
+  - The way this works is that Yarn Spinner for Unity will search your source code for methods with the `YarnCommand` and `YarnFunction` attributes, and generate source code that registers these methods when the game starts up, or when you enter Play Mode in the editor.
+  - This search is done automatically in Unity 2021.2 and later. In earlier versions of Unity, you will need to manually tell Yarn Spinner for Unity to check your code, by opening the Window menu and choosing Yarn Spinner -> Update Yarn Commands.
+- In Unity 2021.2 and later, you can now see which commands have been registered using `YarnCommand` by opening the Window menu and choosing Yarn Spinner -> Commands...
 - `DialogueReference` objects can now be implicitly converted to `string`s.
 - The `YarnNode` attribute can be attached to a `string` property to turn it into a drop-down menu for choosing nodes in a Yarn Project.
   ```csharp
