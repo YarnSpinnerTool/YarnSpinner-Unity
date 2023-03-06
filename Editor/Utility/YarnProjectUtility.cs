@@ -459,12 +459,7 @@ namespace Yarn.Unity.Editor
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 #endif
 
-#if YARN_LEGACY_ACTIONMANAGER
-            var library = new Library();
-            ActionManager.RegisterFunctions(library);
-#else
             var library = Actions.GetLibrary();
-#endif
 
             // Compile all of these, and get whatever existing string tags
             // they had. Do each in isolation so that we can continue even
@@ -626,12 +621,7 @@ namespace Yarn.Unity.Editor
         internal static void ConvertImplicitVariableDeclarationsToExplicit(YarnProjectImporter yarnProjectImporter) {
             var allFilePaths = yarnProjectImporter.sourceScripts.Select(textAsset => AssetDatabase.GetAssetPath(textAsset));
 
-#if YARN_LEGACY_ACTIONMANAGER
-            var library = new Library();
-            ActionManager.RegisterFunctions(library);
-#else
             var library = Actions.GetLibrary();
-#endif
 
             var explicitDeclarationsCompilerJob = Compiler.CompilationJob.CreateFromFiles(AssetDatabase.GetAssetPath(yarnProjectImporter));
             explicitDeclarationsCompilerJob.Library = library;

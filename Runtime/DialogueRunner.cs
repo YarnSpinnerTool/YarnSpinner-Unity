@@ -435,13 +435,9 @@ namespace Yarn.Unity
         internal ICommandDispatcher CommandDispatcher {
             get {
                 if (commandDispatcher == null) {
-#if YARN_LEGACY_ACTIONMANAGER
-                    commandDispatcher = new LegacyActionManagerDispatcher(this);
-#else
                     var actions = new Actions(this, Dialogue.Library);
                     commandDispatcher = actions;
                     actions.RegisterActions();
-#endif
                 }
                 return commandDispatcher;
             }

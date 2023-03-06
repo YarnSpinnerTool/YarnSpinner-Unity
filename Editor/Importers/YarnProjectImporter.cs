@@ -119,32 +119,6 @@ namespace Yarn.Unity.Editor
 
         public bool useAddressableAssets;
 
-#if YARN_USE_LEGACY_ACTIONMANAGER
-        /// <summary>
-        /// If <see langword="true"/>, <see cref="ActionManager"/> will search
-        /// all assemblies that have been defined using an <see
-        /// cref="AssemblyDefinitionAsset"/> for commands and actions, when this
-        /// project is loaded into a <see cref="DialogueRunner"/>. Otherwise,
-        /// <see cref="assembliesToSearch"/> will be used.
-        /// </summary>
-        /// <seealso cref="assembliesToSearch"/>
-        public bool searchAllAssembliesForActions = true;
-
-        /// <summary>
-        /// If <see cref="searchAllAssembliesForActions"/> is <see
-        /// langword="false"/>, <see cref="ActionManager"/> will search for
-        /// commands and functions in the assemblies defined in this list, when
-        /// this project is loaded into a <see cref="DialogueRunner"/>.
-        /// </summary>
-        /// <seealso cref="searchAllAssembliesForActions"/>
-        public AssemblyDefinitionAsset[] assembliesToSearch;
-
-#if UNITY_2020_2_OR_NEWER
-        [NonReorderable]
-#endif
-        public FunctionInfo[] ListOfFunctions;
-#endif
-
         IList<string> IYarnErrorSource.CompileErrors => compileErrors;
 
         bool IYarnErrorSource.Destroyed => this == null;
@@ -188,13 +162,7 @@ namespace Yarn.Unity.Editor
 
             var library = new Library();
 
-#if YARN_LEGACY_ACTIONMANAGER
-            ActionManager.AddActionsFromAssemblies(AssemblySearchList());
-            ActionManager.RegisterFunctions(library);
-            ListOfFunctions = predeterminedFunctions().ToArray();
-#else
             library = Actions.GetLibrary();
-#endif
             localDeclarationsCompileJob.Library = library;
 
             IEnumerable<Declaration> localDeclarations;
@@ -354,10 +322,6 @@ namespace Yarn.Unity.Editor
             }
 
             project.compiledYarnProgram = compiledBytes;
-
-#if YARN_USE_LEGACY_ACTIONMANAGER
-            project.searchAssembliesForActions = AssemblySearchList();
-#endif
 
 #if YARNSPINNER_DEBUG
             UnityEngine.Profiling.Profiler.enabled = false;
@@ -580,73 +544,6 @@ namespace Yarn.Unity.Editor
                 return;
             }
             Debug.LogWarning($"Unable to find a locale in the string table that matches the default locale {defaultLanguage}");
-        }
-#endif
-
-#if YARN_USE_LEGACY_ACTIONMANAGER
-        private List<string> AssemblySearchList()
-        {
-            // Get the list of assembly names we want to search for actions in.
-            IEnumerable<AssemblyDefinitionAsset> assembliesToSearch = this.assembliesToSearch;
-
-            if (searchAllAssembliesForActions) 
-            {
-                // We're searching all assemblies for actions. Find all assembly
-                // definitions in the project, including in packages, and load
-                // them.
-                assembliesToSearch = AssetDatabase
-                    .FindAssets($"t:{nameof(AssemblyDefinitionAsset)}")
-                    .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
-                    .Distinct()
-                    .Select(path => AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path));
-            }
-
-            // We won't include any assemblies whose names begin with any of
-            // these prefixes
-            var excludedPrefixes = new[] {
-                "Unity",
-            };
-
-            // Go through each assembly definition asset, figure out its
-            // assembly name, and add it to the project's list of assembly names
-            // to search.
-            var validAssemblies = new List<string>();
-            foreach (var reference in assembliesToSearch) 
-            {
-                if (reference == null)
-                {
-                    continue;
-                }
-                var data = new AssemblyDefinition();
-                EditorJsonUtility.FromJsonOverwrite(reference.text, data);
-
-                if (excludedPrefixes.Any(prefix => data.name.StartsWith(prefix))) 
-                {
-                    continue;
-                }
-
-                validAssemblies.Add(data.name);
-            }
-            return validAssemblies;
-        }
-
-        private List<FunctionInfo> predeterminedFunctions()
-        {
-            var functions = ActionManager.FunctionsInfo();
-
-            List<FunctionInfo> f = new List<FunctionInfo>();
-            foreach(var func in functions)
-            {
-                f.Add(FunctionInfo.CreateFunctionInfoFromMethodGroup(func));
-            }
-            return f;
-        }
-
-        // A data class used for deserialising the JSON AssemblyDefinitionAssets
-        // into.
-        [System.Serializable]
-        private class AssemblyDefinition {
-            public string name;
         }
 #endif
 

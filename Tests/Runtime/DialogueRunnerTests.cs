@@ -41,9 +41,6 @@ namespace Yarn.Unity.Tests
                 loaded = true;
             };
 
-#if YARN_LEGACY_ACTIONMANAGER
-            ActionManager.ClearAllActions();
-#endif
             yield return new WaitUntil(() => loaded);
         }
 
