@@ -16,7 +16,7 @@ ScriptedImporter:
   script: {fileID: 11500000, guid: 053561912b1654d80a424bb0696a74ae, type: 3}
   sourceScripts:
   - {fileID: 4900000, guid: 40a60c3c28a91d34bbf2088bb0d2824a, type: 3}
-  - {fileID: 6391573757903218779, guid: 151e95bc7212a4f6ca3047b270514aae, type: 3}
+  - {fileID: 6391573757903218779, guid: 74180fb8dc9ae4d99b133006b66dbf69, type: 3}
   compileErrors: []
   serializedDeclarations:
   - name: $laps
@@ -111,6 +111,9 @@ ScriptedImporter:
     ReturnType: -> Int32
     Parameters:
     - num
+  - Name: CoolFunction
+    ReturnType: -> Int32
+    Parameters: []
   - Name: TestFunctionVariable
     ReturnType: -> Int32
     Parameters:
@@ -119,6 +122,3 @@ ScriptedImporter:
     ReturnType: -> String
     Parameters:
     - text
-  - Name: CoolFunction
-    ReturnType: -> Int32
-    Parameters: []

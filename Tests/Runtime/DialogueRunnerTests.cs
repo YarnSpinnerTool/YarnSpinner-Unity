@@ -138,7 +138,7 @@ namespace Yarn.Unity.Tests
         }
 
         [UnityTest]
-        public IEnumerator VerifyAccessors_NodeHeaders()
+        public IEnumerator DialogueRunner_CanAccessNodeHeaders()
         {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
 
@@ -207,7 +207,7 @@ namespace Yarn.Unity.Tests
         }
 
         [UnityTest]
-        public IEnumerator VerifyAccessors_InitialValues()
+        public IEnumerator DialogueRunner_CanAccessInitialValues()
         {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
 
@@ -224,7 +224,7 @@ namespace Yarn.Unity.Tests
             yield return null;
         }
         [UnityTest]
-        public IEnumerator VerifyAccessors_NodeNames()
+        public IEnumerator DialogueRunner_CanAccessNodeNames()
         {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
 
