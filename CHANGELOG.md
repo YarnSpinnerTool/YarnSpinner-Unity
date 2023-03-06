@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+### Changed
+
+### Removed
+
+## [2.3.0-beta1] 2023-03-06
+
+### Added
+
 - Methods tagged with the `YarnCommand` and `YarnFunction` attribute are now discovered at compile time, rather than at run-time. This makes game start-up significantly faster.
   - Yarn Spinner for Unity will search your source code for methods with the `YarnCommand` and `YarnFunction` attributes, and generate source code that registers these methods when the game starts up, or when you enter Play Mode in the editor.
   
