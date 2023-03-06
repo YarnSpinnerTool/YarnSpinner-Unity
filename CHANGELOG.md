@@ -45,8 +45,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed a compile error in the Minimal Viable Dialogue System sample in Unity 2019.
 
-### Removed
-
 ## [2.2.4] 2023-01-27
 
 ### Changed
