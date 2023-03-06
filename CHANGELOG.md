@@ -30,6 +30,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   public string node2;
   ```
 
+- The `YarnProject.GetHeaders` method has been added, which fetches all headers for a node.
+- The `YarnProject.InitialValues` property has been added, which fetches a dictionary containing the initial values for every variable in the project.
+
 ### Changed
 
 - Fixed a compile error in the Minimal Viable Dialogue System sample in Unity 2019.
