@@ -17,7 +17,7 @@ using System.Reflection;
 using UnityEditor.AddressableAssets;
 #endif
 
-#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
+#if USE_UNITY_LOCALIZATION
 using UnityEditor.Localization;
 using UnityEngine.Localization.Tables;
 #endif
@@ -40,10 +40,8 @@ namespace Yarn.Unity.Editor
 
         private ReorderableDeclarationsList serializedDeclarationsList;
 
-#if YARN_ENABLE_EXPERIMENTAL_FEATURES
         private SerializedProperty useUnityLocalisationSystemProperty;
         private SerializedProperty unityLocalisationTableCollectionProperty;
-#endif
 
         public override void OnEnable()
         {
@@ -59,7 +57,7 @@ namespace Yarn.Unity.Editor
 
             serializedDeclarationsList = new ReorderableDeclarationsList(serializedObject, serializedDeclarationsProperty);
 
-#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
+#if USE_UNITY_LOCALIZATION
             useUnityLocalisationSystemProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.UseUnityLocalisationSystem));
             unityLocalisationTableCollectionProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.unityLocalisationStringTableCollection));
 #endif
@@ -123,7 +121,7 @@ namespace Yarn.Unity.Editor
 
             CurrentProjectDefaultLanguageProperty = defaultLanguageProperty;
 
-#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
+#if USE_UNITY_LOCALIZATION
             EditorGUILayout.PropertyField(useUnityLocalisationSystemProperty, new GUIContent("Use Unity's Built-in Localisation System"));
 
             // if we are using the unity localisation system we need a field to add in the string table
@@ -148,7 +146,7 @@ namespace Yarn.Unity.Editor
             // localisation system.
             bool showInternalLocalizationGUI;
 
-#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
+#if USE_UNITY_LOCALIZATION
             // If Unity Localization is available, then we draw the internal
             // localization system's UI if we've chosen not to use Unity's.
             showInternalLocalizationGUI = !useUnityLocalisationSystemProperty.boolValue;
@@ -231,6 +229,23 @@ namespace Yarn.Unity.Editor
             }
 
             EditorGUILayout.Space();
+
+#if YARN_USE_LEGACY_ACTIONMANAGER
+
+            EditorGUILayout.LabelField("Commands and Functions", EditorStyles.boldLabel);
+
+            var searchAllAssembliesLabel = new GUIContent("Search All Assemblies", "Search all assembly definitions for commands and functions, as well as code that's not in a folder with an assembly definition");
+            EditorGUILayout.PropertyField(searchAllAssembliesProperty, searchAllAssembliesLabel);
+
+            if (searchAllAssembliesProperty.boolValue == false)
+            {
+                EditorGUI.indentLevel += 1;
+                EditorGUILayout.PropertyField(assembliesToSearchProperty);
+                EditorGUI.indentLevel -= 1;
+            }
+
+            EditorGUILayout.PropertyField(predeterminedFunctionsProperty, true);
+#endif
 
             if (showInternalLocalizationGUI)
             {

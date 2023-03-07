@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity;
 
-#if YARN_ENABLE_EXPERIMENTAL_FEATURES
-
 #if USE_UNITY_LOCALIZATION
 using UnityEngine.Localization.Tables;
 using UnityEngine.Localization;
@@ -337,4 +335,3 @@ namespace Yarn.Unity.UnityLocalization
 
 }
 
-#endif

@@ -121,7 +121,7 @@ namespace Yarn.Unity.Editor
 
         bool IYarnErrorSource.Destroyed => this == null;
 
-#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
+#if USE_UNITY_LOCALIZATION
         public bool UseUnityLocalisationSystem = false;
         public StringTableCollection unityLocalisationStringTableCollection;
 #endif
@@ -149,7 +149,8 @@ namespace Yarn.Unity.Editor
                 {
                     // This is, for some reason, not a valid script we can
                     // use. Don't add a dependency on it.
-                    continue;
+                    ctx.LogImportError($"Error importing Yarn Project at {ctx.assetPath}: one of its source assets is missing");
+                    return;
                 }
                 ctx.DependsOnSourceAsset(path);
             }
@@ -292,7 +293,7 @@ namespace Yarn.Unity.Editor
                 EditorUtility.SetDirty(importer);
             }
 
-#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
+#if USE_UNITY_LOCALIZATION
             if (UseUnityLocalisationSystem)
             {
                 AddStringTableEntries(compilationResult, this.unityLocalisationStringTableCollection);
@@ -496,7 +497,7 @@ namespace Yarn.Unity.Editor
             }
         }
 
-#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
+#if USE_UNITY_LOCALIZATION
         private void AddStringTableEntries(CompilationResult compilationResult, StringTableCollection unityLocalisationStringTableCollection)
         {
             if (unityLocalisationStringTableCollection == null)

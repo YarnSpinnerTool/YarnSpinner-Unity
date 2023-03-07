@@ -1,5 +1,10 @@
 using UnityEngine;
 using UnityEditor;
+
+#if USE_UNITY_LOCALIZATION
+using UnityEngine.Localization;
+#endif
+
 using Yarn.Unity;
 using System.Linq;
 using System.Collections.Generic;
@@ -59,7 +64,7 @@ namespace Yarn.Unity.Editor
                 var yarnProject = yarnProjectProperty.objectReferenceValue as YarnProject;
                 EditorGUI.indentLevel += 1;
                 if (yarnProject != null && yarnProject.localizationType == LocalizationType.Unity) {
-#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
+#if USE_UNITY_LOCALIZATION
                     // If this is a project using Unity localisation, we can't add a
                     // line provider at runtime because we won't know what string
                     // table it should use. In this situation, we'll show a warning

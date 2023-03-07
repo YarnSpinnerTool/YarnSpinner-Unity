@@ -35,6 +35,10 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Text.RegularExpressions;
 
+#if USE_UNITY_LOCALIZATION
+using UnityEngine.Localization;
+#endif
+
 namespace Yarn.Unity
 {
     public interface IActionRegistration {
@@ -913,7 +917,7 @@ namespace Yarn.Unity
                         Debug.Log($"Dialogue Runner has no LineProvider; creating a {nameof(TextLineProvider)}.", this);
                     }
                 } else {
-#if USE_UNITY_LOCALIZATION && YARN_ENABLE_EXPERIMENTAL_FEATURES
+#if USE_UNITY_LOCALIZATION
                     Debug.LogError($"The Yarn Project \"{yarnProject.name}\" uses the Unity Localization system. Please add a {nameof(UnityLocalization.UnityLocalisedLineProvider)} component.");
 #else
                     Debug.LogError($"The Yarn Project \"{yarnProject.name}\" uses the Unity Localization system, but the Unity Localization system is not currently installed. Please install it.");
