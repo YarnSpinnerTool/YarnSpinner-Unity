@@ -511,8 +511,13 @@ namespace Yarn.Unity.Editor
             {
                 if (table.LocaleIdentifier.CultureInfo != defaultCulture)
                 {
-                    var neutralTable = table.LocaleIdentifier.CultureInfo.IsNeutralCulture ? table.LocaleIdentifier.CultureInfo : table.LocaleIdentifier.CultureInfo.Parent;
-                    var defaultNeutral = defaultCulture.IsNeutralCulture ? defaultCulture : defaultCulture.Parent;
+                    var neutralTable = table.LocaleIdentifier.CultureInfo.IsNeutralCulture 
+                        ? table.LocaleIdentifier.CultureInfo 
+                        : table.LocaleIdentifier.CultureInfo.Parent;
+
+                    var defaultNeutral = defaultCulture.IsNeutralCulture 
+                        ? defaultCulture 
+                        : defaultCulture.Parent;
 
                     if (!neutralTable.Equals(defaultNeutral))
                     {
