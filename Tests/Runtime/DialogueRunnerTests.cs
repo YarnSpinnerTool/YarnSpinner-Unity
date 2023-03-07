@@ -8,9 +8,6 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using Yarn.Unity;
 
-#if UNITY_EDITOR
-#endif
-
 namespace Yarn.Unity.Tests
 {
 
@@ -45,7 +42,7 @@ namespace Yarn.Unity.Tests
         }
 
         [UnityTest]
-        public IEnumerator SaveAndLoad_EndToEnd()
+        public IEnumerator DialogueRunner_WhenStateSaved_CanRestoreState()
         {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
             var storage = runner.VariableStorage;
@@ -63,10 +60,10 @@ namespace Yarn.Unity.Tests
             PlayerPrefs.DeleteKey(testKey);
             Assert.IsTrue(success);
 
-            SaveAndLoad_StorageIntegrity(storage, originals.Item1, originals.Item2, originals.Item3);
+            VerifySaveAndLoadStorageIntegrity(storage, originals.Item1, originals.Item2, originals.Item3);
         }
         [UnityTest]
-        public IEnumerator SaveAndLoad_BadLoad()
+        public IEnumerator DialogueRunner_WhenRestoringInvalidKey_FailsToLoad()
         {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
             var storage = runner.VariableStorage;
@@ -79,7 +76,7 @@ namespace Yarn.Unity.Tests
             bool success = runner.LoadStateFromPlayerPrefs("invalid key");
 
             // because the load should have failed this should still be fine
-            SaveAndLoad_StorageIntegrity(storage, originals.Item1, originals.Item2, originals.Item3);
+            VerifySaveAndLoadStorageIntegrity(storage, originals.Item1, originals.Item2, originals.Item3);
 
             Assert.IsFalse(success);
         }
@@ -100,46 +97,30 @@ namespace Yarn.Unity.Tests
             bool success = runner.LoadStateFromPlayerPrefs(testKey);
 
             // because the load should have failed this should still be fine
-            SaveAndLoad_StorageIntegrity(storage, originals.Item1, originals.Item2, originals.Item3);
+            VerifySaveAndLoadStorageIntegrity(storage, originals.Item1, originals.Item2, originals.Item3);
 
             Assert.IsFalse(success);
         }
-        private void SaveAndLoad_StorageIntegrity(VariableStorageBehaviour storage, Dictionary<string, float> testFloats, Dictionary<string, string> testStrings, Dictionary<string, bool> testBools)
+        
+        private void VerifySaveAndLoadStorageIntegrity(VariableStorageBehaviour storage, Dictionary<string, float> testFloats, Dictionary<string, string> testStrings, Dictionary<string, bool> testBools)
         {
             var current = storage.GetAllVariables();
 
-            SaveAndLoad_VerifyFloats(current.Item1, testFloats);
-            SaveAndLoad_VerifyStrings(current.Item2, testStrings);
-            SaveAndLoad_VerifyBools(current.Item3, testBools);
-        }
-        private void SaveAndLoad_VerifyFloats(Dictionary<string, float> current, Dictionary<string, float> original)
-        {
-            foreach (var pair in current)
-            {
-                float originalFloat;
-                Assert.IsTrue(original.TryGetValue(pair.Key, out originalFloat),"new key is not inside the original set of variables");
-                Assert.AreEqual(originalFloat, pair.Value, "values under the same key are different");
-            }
-        }
-        private void SaveAndLoad_VerifyStrings(Dictionary<string, string> current, Dictionary<string, string> original)
-        {
-            foreach (var pair in current)
-            {
-                string originalString;
-                Assert.IsTrue(original.TryGetValue(pair.Key, out originalString),"new key is not inside the original set of variables");
-                Assert.AreEqual(originalString, pair.Value, "values under the same key are different");
-            }
-        }
-        private void SaveAndLoad_VerifyBools(Dictionary<string, bool> current, Dictionary<string, bool> original)
-        {
-            foreach (var pair in current)
-            {
-                bool originalBool;
-                Assert.IsTrue(original.TryGetValue(pair.Key, out originalBool),"new key is not inside the original set of variables");
-                Assert.AreEqual(originalBool, pair.Value, "values under the same key are different");
-            }
-        }
+            VerifySaveAndLoad(current.Item1, testFloats);
+            VerifySaveAndLoad(current.Item2, testStrings);
+            VerifySaveAndLoad(current.Item3, testBools);
 
+            void VerifySaveAndLoad<T>(Dictionary<string, T> current, Dictionary<string, T> original)
+            {
+                foreach (var pair in current)
+                {
+                    T originalValue;
+                    Assert.IsTrue(original.TryGetValue(pair.Key, out originalValue), "new key is not inside the original set of variables");
+                    Assert.AreEqual(originalValue, pair.Value, "values under the same key are different");
+                }
+            }
+        }
+        
         [UnityTest]
         public IEnumerator DialogueRunner_CanAccessNodeHeaders()
         {
