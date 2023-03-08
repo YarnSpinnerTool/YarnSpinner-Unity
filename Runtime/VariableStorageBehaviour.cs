@@ -78,6 +78,6 @@ namespace Yarn.Unity
         /// Provides a unified interface for exporting all variables.
         /// Intended to be a point for custom saving, editors, etc.
         /// </summary>
-        public abstract (System.Collections.Generic.Dictionary<string,float>,System.Collections.Generic.Dictionary<string,string>,System.Collections.Generic.Dictionary<string,bool>) GetAllVariables();
+        public abstract (System.Collections.Generic.Dictionary<string,float> FloatVariables,System.Collections.Generic.Dictionary<string,string> StringVariables, System.Collections.Generic.Dictionary<string,bool> BoolVariables) GetAllVariables();
     }
 }

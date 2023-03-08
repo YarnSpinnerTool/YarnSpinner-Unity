@@ -60,7 +60,7 @@ namespace Yarn.Unity.Tests
             PlayerPrefs.DeleteKey(testKey);
             Assert.IsTrue(success);
 
-            VerifySaveAndLoadStorageIntegrity(storage, originals.Item1, originals.Item2, originals.Item3);
+            VerifySaveAndLoadStorageIntegrity(storage, originals.FloatVariables, originals.StringVariables, originals.BoolVariables);
         }
         [UnityTest]
         public IEnumerator DialogueRunner_WhenRestoringInvalidKey_FailsToLoad()
@@ -76,7 +76,7 @@ namespace Yarn.Unity.Tests
             bool success = runner.LoadStateFromPlayerPrefs("invalid key");
 
             // because the load should have failed this should still be fine
-            VerifySaveAndLoadStorageIntegrity(storage, originals.Item1, originals.Item2, originals.Item3);
+            VerifySaveAndLoadStorageIntegrity(storage, originals.FloatVariables, originals.StringVariables, originals.BoolVariables);
 
             Assert.IsFalse(success);
         }
@@ -97,7 +97,7 @@ namespace Yarn.Unity.Tests
             bool success = runner.LoadStateFromPlayerPrefs(testKey);
 
             // because the load should have failed this should still be fine
-            VerifySaveAndLoadStorageIntegrity(storage, originals.Item1, originals.Item2, originals.Item3);
+            VerifySaveAndLoadStorageIntegrity(storage, originals.FloatVariables, originals.StringVariables, originals.BoolVariables);
 
             Assert.IsFalse(success);
         }
@@ -106,9 +106,9 @@ namespace Yarn.Unity.Tests
         {
             var current = storage.GetAllVariables();
 
-            VerifySaveAndLoad(current.Item1, testFloats);
-            VerifySaveAndLoad(current.Item2, testStrings);
-            VerifySaveAndLoad(current.Item3, testBools);
+            VerifySaveAndLoad(current.FloatVariables, testFloats);
+            VerifySaveAndLoad(current.StringVariables, testStrings);
+            VerifySaveAndLoad(current.BoolVariables, testBools);
 
             void VerifySaveAndLoad<T>(Dictionary<string, T> current, Dictionary<string, T> original)
             {
