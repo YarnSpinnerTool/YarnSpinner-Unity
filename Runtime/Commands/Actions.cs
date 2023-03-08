@@ -215,7 +215,7 @@ namespace Yarn.Unity
                 }
             }
 
-            internal DialogueRunner.CommandDispatchResult Invoke(DialogueRunner dispatcher, List<string> parameters, out Coroutine commandCoroutine)
+            internal CommandDispatchResult Invoke(DialogueRunner dispatcher, List<string> parameters, out Coroutine commandCoroutine)
             {
                 object target;
 
@@ -228,10 +228,10 @@ namespace Yarn.Unity
                         // We need at least one parameter, which is the
                         // component to look for
                         commandCoroutine = default;
-                        return new DialogueRunner.CommandDispatchResult
+                        return new CommandDispatchResult
                         {
                             Message = $"{this.Name} needs a target, but none was specified",
-                            Status = DialogueRunner.CommandDispatchResult.StatusType.InvalidParameterCount
+                            Status = CommandDispatchResult.StatusType.InvalidParameterCount
                         };
                     }
 
@@ -248,10 +248,10 @@ namespace Yarn.Unity
                     {
                         // We couldn't find a target with this name.
                         commandCoroutine = default;
-                        return new DialogueRunner.CommandDispatchResult
+                        return new CommandDispatchResult
                         {
                             Message = $"No game object named \"{gameObjectName}\" exists",
-                            Status = DialogueRunner.CommandDispatchResult.StatusType.TargetMissingComponent
+                            Status = CommandDispatchResult.StatusType.TargetMissingComponent
                         };
                     }
 
@@ -262,10 +262,10 @@ namespace Yarn.Unity
                     if (targetComponent == null)
                     {
                         commandCoroutine = default;
-                        return new DialogueRunner.CommandDispatchResult
+                        return new CommandDispatchResult
                         {
                             Message = $"{this.Name} can't be called on {gameObjectName}, because it doesn't have a {this.DeclaringType.Name}",
-                            Status = DialogueRunner.CommandDispatchResult.StatusType.TargetMissingComponent
+                            Status = CommandDispatchResult.StatusType.TargetMissingComponent
                         };
                     }
 
@@ -284,9 +284,9 @@ namespace Yarn.Unity
 
                 if (this.TryParseArgs(parameters.ToArray(), out var finalParameters, out var errorMessage) == false) {
                     commandCoroutine = default;
-                    return new DialogueRunner.CommandDispatchResult
+                    return new CommandDispatchResult
                     {
-                        Status = DialogueRunner.CommandDispatchResult.StatusType.InvalidParameterCount,
+                        Status = CommandDispatchResult.StatusType.InvalidParameterCount,
                         Message = errorMessage,
                 };
                 }
@@ -296,25 +296,25 @@ namespace Yarn.Unity
                 if (returnValue is Coroutine coro)
                 {
                     commandCoroutine = coro;
-                    return new DialogueRunner.CommandDispatchResult
+                    return new CommandDispatchResult
                     {
-                        Status = DialogueRunner.CommandDispatchResult.StatusType.SucceededAsync
+                        Status = CommandDispatchResult.StatusType.SucceededAsync
                     };
                 }
                 else if (returnValue is IEnumerator enumerator)
                 {
                     commandCoroutine = dispatcher.StartCoroutine(enumerator);
-                    return new DialogueRunner.CommandDispatchResult
+                    return new CommandDispatchResult
                     {
-                        Status = DialogueRunner.CommandDispatchResult.StatusType.SucceededAsync
+                        Status = CommandDispatchResult.StatusType.SucceededAsync
                     };
                 }
                 else
                 {
                     commandCoroutine = null;
-                    return new DialogueRunner.CommandDispatchResult
+                    return new CommandDispatchResult
                     {
-                        Status = DialogueRunner.CommandDispatchResult.StatusType.SucceededSync
+                        Status = CommandDispatchResult.StatusType.SucceededSync
                     };
                 }
             }
@@ -478,7 +478,7 @@ namespace Yarn.Unity
             // no-op
         }
 
-        DialogueRunner.CommandDispatchResult ICommandDispatcher.DispatchCommand(string command, out Coroutine commandCoroutine)
+        CommandDispatchResult ICommandDispatcher.DispatchCommand(string command, out Coroutine commandCoroutine)
         {
             var commandPieces = new List<string>(DialogueRunner.SplitCommandText(command));
 
@@ -487,9 +487,9 @@ namespace Yarn.Unity
                 // No text was found inside the command, so we won't be able to
                 // find it.
                 commandCoroutine = default;
-                return new DialogueRunner.CommandDispatchResult
+                return new CommandDispatchResult
                 {
-                    Status = DialogueRunner.CommandDispatchResult.StatusType.CommandUnknown
+                    Status = CommandDispatchResult.StatusType.CommandUnknown
                 };
             }
 
@@ -503,9 +503,9 @@ namespace Yarn.Unity
                 return registration.Invoke(DialogueRunner, commandPieces, out commandCoroutine);
             } else {
                 commandCoroutine = default;
-                return new DialogueRunner.CommandDispatchResult
+                return new CommandDispatchResult
                 {
-                    Status = DialogueRunner.CommandDispatchResult.StatusType.CommandUnknown
+                    Status = CommandDispatchResult.StatusType.CommandUnknown
                 };
             }
         }

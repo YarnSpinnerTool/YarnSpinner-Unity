@@ -6,7 +6,7 @@ namespace Yarn.Unity
 {
     interface ICommandDispatcher : IActionRegistration
     {
-        DialogueRunner.CommandDispatchResult DispatchCommand(string command, out Coroutine commandCoroutine);
+        CommandDispatchResult DispatchCommand(string command, out Coroutine commandCoroutine);
 
         void SetupForProject(YarnProject yarnProject);
 

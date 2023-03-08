@@ -306,7 +306,7 @@ namespace Yarn.Unity.Tests
             LogAssert.Expect(LogType.Log, expectedLogResult);
             var result = dispatcher.DispatchCommand(test, out var commandCoroutine);
             
-            Assert.AreEqual(DialogueRunner.CommandDispatchResult.StatusType.SucceededSync, result.Status);
+            Assert.AreEqual(CommandDispatchResult.StatusType.SucceededSync, result.Status);
             Assert.IsNull(commandCoroutine);
         }
 
@@ -319,7 +319,7 @@ namespace Yarn.Unity.Tests
 
             var result = dispatcher.DispatchCommand($"testCommandCoroutine DialogueRunner {framesToWait}", out var commandCoroutine);
 
-            Assert.AreEqual(DialogueRunner.CommandDispatchResult.StatusType.SucceededAsync, result.Status);
+            Assert.AreEqual(CommandDispatchResult.StatusType.SucceededAsync, result.Status);
             Assert.IsNotNull(commandCoroutine);
 
             // commandCoroutine will already be running on runner, so now we wait for it
@@ -342,7 +342,7 @@ namespace Yarn.Unity.Tests
 
             var result = dispatcher.DispatchCommand(command, out _);
 
-            Assert.AreEqual(DialogueRunner.CommandDispatchResult.StatusType.InvalidParameterCount, result.Status);
+            Assert.AreEqual(CommandDispatchResult.StatusType.InvalidParameterCount, result.Status);
             Assert.That(regex.IsMatch(result.Message));
         }
 
@@ -353,7 +353,7 @@ namespace Yarn.Unity.Tests
             var regex = new Regex(error);
 
             var result = dispatcher.DispatchCommand(command, out _);
-            Assert.AreEqual(DialogueRunner.CommandDispatchResult.StatusType.InvalidParameterCount, result.Status);
+            Assert.AreEqual(CommandDispatchResult.StatusType.InvalidParameterCount, result.Status);
             Assert.That(regex.IsMatch(result.Message));
         }
 
@@ -373,8 +373,8 @@ namespace Yarn.Unity.Tests
 
             Assert.IsNull(result1.Message);
             Assert.IsNull(result2.Message);
-            Assert.AreEqual(result1.Status, DialogueRunner.CommandDispatchResult.StatusType.SucceededSync, "test1 should succeed synchronously");
-            Assert.AreEqual(result1.Status, DialogueRunner.CommandDispatchResult.StatusType.SucceededSync, "test2 should succeed synchronously");
+            Assert.AreEqual(result1.Status, CommandDispatchResult.StatusType.SucceededSync, "test1 should succeed synchronously");
+            Assert.AreEqual(result1.Status, CommandDispatchResult.StatusType.SucceededSync, "test2 should succeed synchronously");
         }
 
         [UnityTest]
