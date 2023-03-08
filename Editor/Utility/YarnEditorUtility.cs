@@ -12,14 +12,22 @@ namespace Yarn.Unity.Editor
     /// </summary>
     public static class YarnEditorUtility
     {
-
+        
         // GUID for editor assets. (Doing it like this means that we don't
         // have to worry about where the assets are on disk, if the user
         // has moved Yarn Spinner around.)
         const string DocumentIconTextureGUID = "0ed312066ea6f40f6af965f21c818b34";
         const string ProjectIconTextureGUID = "f6a533d9225cd40ea9ded31d4f686e3b";
         const string TemplateFileGUID = "4f4ca4a46020a454f80e2ac78eda5aa1";
-
+        
+        /// <summary>
+        /// By default, we search for Yarn files throughout the entire project.
+        /// However, as the project grows, this can get slow.
+        /// To address this issue, you can define a custom list of folders to search in.
+        /// Keep in mind that all Yarn files must be located within these folders or their subfolders to be detected.
+        /// </summary>
+        public static string[] AssetSearchFolders = null;
+        
         /// <summary>
         /// Returns a <see cref="Texture2D"/> that can be used to represent
         /// Yarn files.
@@ -223,7 +231,7 @@ namespace Yarn.Unity.Editor
         /// <param name="converter">Custom type caster.</param>
         /// <returns>Enumerable of all assets of a given type.</returns>
         public static IEnumerable<T> GetAllAssetsOf<T>(string filterQuery, System.Func<AssetImporter, T> converter = null) where T : class
-            => AssetDatabase.FindAssets(filterQuery)
+            => AssetDatabase.FindAssets(filterQuery, AssetSearchFolders)
                 .Select(AssetDatabase.GUIDToAssetPath)
                 .Select(AssetImporter.GetAtPath)
                 .Select(importer => converter?.Invoke(importer) ?? importer as T)
