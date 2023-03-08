@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - The Unity Localization integration is now available when the Localization package is installed.
   - Prior to this change, the `YARN_USE_EXPERIMENTAL_FEATURES` scripting definition symbol needed to be added to the Player settings.
+- Added `YarnEditorUtility.AssetSearchFolders` to allow defining custom Yarn asset folders via script.
+  - This can speed up the time to enter PlayMode significantly, because YarnSpinner no longer scans the entire project for Yarn Files.
 
 ### Changed
 
