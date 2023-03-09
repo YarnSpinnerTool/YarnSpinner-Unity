@@ -329,13 +329,10 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
             var tempPath = System.IO.Path.GetTempPath();
             var path = System.IO.Path.Combine(tempPath, $"{nameof(ActionRegistrationSourceGenerator)}-{context.Compilation.AssemblyName}.txt");
 
-            Console.WriteLine($"Logging code generation for {context.Compilation.AssemblyName} to {path}");
-
             var outFile = System.IO.File.Open(path, System.IO.FileMode.Create);
 
             return new FileLogger(new System.IO.StreamWriter(outFile));
         } else {
-            Console.WriteLine($"Not logging code generation for {context.Compilation.AssemblyName} because {DebugLoggingPreprocessorSymbol} is not defined for this compilation");
             return new NullLogger();
         }
     }
@@ -350,7 +347,6 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
         if (GetShouldLogToFile(context)) {
             var tempPath = System.IO.Path.GetTempPath();
             var path = System.IO.Path.Combine(tempPath, $"{nameof(ActionRegistrationSourceGenerator)}-{context.Compilation.AssemblyName}.cs");
-            Console.WriteLine($"Wrote generated source code to {path}");
             System.IO.File.WriteAllText(path, text);
         }
     }
