@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - The Unity Localization integration is now available when the Localization package is installed.
   - Prior to this change, the `YARN_USE_EXPERIMENTAL_FEATURES` scripting definition symbol needed to be added to the Player settings.
+- You can now add a Dialogue System prefab to your scene by opening the GameObject menu and choosing Yarn Spinner -> Dialogue Runner.
 
 ### Changed
 
