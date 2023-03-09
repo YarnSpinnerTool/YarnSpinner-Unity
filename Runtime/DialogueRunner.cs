@@ -767,7 +767,7 @@ namespace Yarn.Unity
             return dialogue;
         }
 
-        void HandleOptions(OptionSet options)
+        internal void HandleOptions(OptionSet options)
         {
             currentOptions = options;
 
@@ -831,7 +831,7 @@ namespace Yarn.Unity
             onDialogueComplete.Invoke();
         }
 
-        void HandleCommand(Command command)
+        internal void HandleCommand(Command command)
         {
             var dispatchResult = CommandDispatcher.DispatchCommand(command.Text, out Coroutine awaitCoroutine);
 
@@ -883,7 +883,7 @@ namespace Yarn.Unity
         /// Forward the line to the dialogue UI.
         /// </summary>
         /// <param name="line">The line to send to the dialogue views.</param>
-        private void HandleLine(Line line)
+        internal void HandleLine(Line line)
         {
             // Get the localized line from our line provider
             CurrentLine = lineProvider.GetLocalizedLine(line);
