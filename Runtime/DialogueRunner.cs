@@ -31,13 +31,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System;
-using System.Threading.Tasks;
 using System.Linq;
-using System.Text.RegularExpressions;
-
-#if USE_UNITY_LOCALIZATION
-using UnityEngine.Localization;
-#endif
 
 namespace Yarn.Unity
 {

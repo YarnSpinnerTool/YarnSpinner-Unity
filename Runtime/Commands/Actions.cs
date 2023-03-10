@@ -560,15 +560,28 @@ namespace Yarn.Unity
             {
                 return arg =>
                 {
-                    if (arg.Equals(parameter.Name, StringComparison.InvariantCultureIgnoreCase)) { return true; }
-                    if (bool.TryParse(arg, out bool res)) { return res; }
+                    // If the argument is the name of the parameter, interpret
+                    // the argument as 'true'.
+                    if (arg.Equals(parameter.Name, StringComparison.InvariantCultureIgnoreCase)) 
+                    {
+                        return true;
+                    }
+
+                    // If the argument can be parsed as boolean true or false,
+                    // return that result.
+                    if (bool.TryParse(arg, out bool res))
+                    {
+                        return res;
+                    }
+
+                    // We can't parse the argument.
                     throw new ArgumentException(
                         $"Can't convert the given parameter at position {index + 1} (\"{arg}\") to parameter " +
                         $"{parameter.Name} of type {typeof(bool).FullName}.");
                 };
             }
 
-            // try converting using IConvertible.
+            // Fallback: try converting using IConvertible.
             return arg =>
             {
                 try
