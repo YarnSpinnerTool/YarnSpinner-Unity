@@ -11,6 +11,9 @@ namespace Yarn.Unity.Tests
 {
     public static class YarnTestUtility {
 
+        public static string TestFolderName => TestContext.CurrentContext.Test.FullName;
+        public static string TestFilesDirectoryPath => $"Assets/{TestFolderName}/";
+
         internal static DefaultAsset GetFolder(string directoryName)
         {
             var path = AssetDatabase.FindAssets(Path.GetFileNameWithoutExtension(directoryName) + " t:DefaultAsset")
@@ -79,7 +82,7 @@ namespace Yarn.Unity.Tests
         }
 
 
-        internal static void SetupYarnProject(string[] yarnScriptText, ref List<string> createdFilePaths, out YarnProject yarnProject)
+        internal static void SetupYarnProject(string[] yarnScriptText, ref List<string> createdFilePaths, Yarn.Compiler.Project projectData, out YarnProject yarnProject)
         {
             // Disable errors causing failures, in case the yarn script
             // text contains deliberately invalid code
@@ -90,7 +93,7 @@ namespace Yarn.Unity.Tests
             string yarnProjectPath = $"Assets/{yarnProjectName}.yarnproject";
             createdFilePaths.Add(yarnProjectPath);
 
-            var project = YarnEditorUtility.CreateYarnProject(yarnProjectPath) as YarnProject;
+            var project = YarnEditorUtility.CreateYarnProject(yarnProjectPath, projectData) as YarnProject;
             var yarnProjectImporter = AssetImporter.GetAtPath(yarnProjectPath) as YarnProjectImporter;
 
             var pathsToAdd = new List<string>();
@@ -126,26 +129,17 @@ namespace Yarn.Unity.Tests
 
                 // We should have a text asset, imported by a YarnImporter
                 Assert.IsNotNull(textAsset);
-                Assert.IsInstanceOf<YarnImporter>(AssetImporter.GetAtPath(path));
+                AssetImporter actual = AssetImporter.GetAtPath(path);
+                Assert.IsInstanceOf<YarnImporter>(actual);
 
-                // Make the yarn project use this script
-                yarnProjectImporter.sourceScripts.Add(textAsset);
-            }
-
-            // Reimport the project to make it set up the links
-            EditorUtility.SetDirty(yarnProjectImporter);
-            yarnProjectImporter.SaveAndReimport();
-
-            foreach (var path in pathsToAdd)
-            {
                 var scriptImporter = AssetImporter.GetAtPath(path) as YarnImporter;
 
-                Assert.AreSame(project, scriptImporter.DestinationProject);
+                Assert.True(scriptImporter.DestinationProjects.Contains(project));
             }
 
             // As a final check, make sure the project is referencing the
             // right number of scripts
-            Assert.AreEqual(yarnScriptText.Length, yarnProjectImporter.sourceScripts.Count);
+            Assert.AreEqual(yarnScriptText.Length, yarnProjectImporter.ImportData.yarnFiles.Count);
 
             LogAssert.ignoreFailingMessages = wasIgnoringFailingMessages;
 
