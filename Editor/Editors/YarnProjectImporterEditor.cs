@@ -24,7 +24,7 @@ using UnityEngine.Localization.Tables;
 
 namespace Yarn.Unity.Editor
 {
-    [CustomEditor(typeof(YarnProjectImporter))]
+    // [CustomEditor(typeof(YarnProjectImporter))]
     public class YarnProjectImporterEditor : ScriptedImporterEditor
     {
         // A runtime-only field that stores the defaultLanguage of the
@@ -46,16 +46,8 @@ namespace Yarn.Unity.Editor
         public override void OnEnable()
         {
             base.OnEnable();
-            sourceScriptsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.sourceScripts));
-            compileErrorsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.compileErrors));
-            serializedDeclarationsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.serializedDeclarations));
-
-            defaultLanguageProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.defaultLanguage));
-            languagesToSourceAssetsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.languagesToSourceAssets));
 
             useAddressableAssetsProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.useAddressableAssets));
-
-            serializedDeclarationsList = new ReorderableDeclarationsList(serializedObject, serializedDeclarationsProperty);
 
 #if USE_UNITY_LOCALIZATION
             useUnityLocalisationSystemProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.UseUnityLocalisationSystem));
@@ -190,7 +182,7 @@ namespace Yarn.Unity.Editor
 
                     // If the addressable assets package is available, show a
                     // checkbox for using it.
-                    var hasAnySourceAssetFolders = yarnProjectImporter.languagesToSourceAssets.Any(l => l.assetsFolder != null);
+                    var hasAnySourceAssetFolders = yarnProjectImporter.ImportData.localizations.Any(l => l.assetsFolder != null);
                     if (hasAnySourceAssetFolders == false)
                     {
                         // Disable this checkbox if there are no assets
@@ -277,7 +269,7 @@ namespace Yarn.Unity.Editor
                             AssetDatabase.Refresh();
                         }
                     }
-                    if (yarnProjectImporter.languagesToSourceAssets.Count > 0)
+                    if (yarnProjectImporter.ImportData.localizations.Count > 0)
                     {
                         if (GUILayout.Button("Update Existing Strings Files"))
                         {
@@ -291,7 +283,7 @@ namespace Yarn.Unity.Editor
             // assets? (It can have a count of >0 and still have no assets
             // when, for example, you've just clicked the + button but
             // haven't dragged an asset in yet.)
-            var hasAnyTextAssets = yarnProjectImporter.sourceScripts.Where(s => s != null).Count() > 0;
+            var hasAnyTextAssets = yarnProjectImporter.ImportData.yarnFiles.Where(s => s != null).Count() > 0;
 
             // Disable this button if 1. all lines already have tags or 2.
             // no actual source files exist

@@ -12,34 +12,33 @@ using Yarn.Unity;
 
 namespace Yarn.Unity.Editor
 {
-    [CustomEditor(typeof(YarnImporter))]
+    // [CustomEditor(typeof(YarnImporter))]
     public class YarnImporterEditor : ScriptedImporterEditor
     {
         private SerializedProperty isSuccessfullyCompiledProperty;
         private SerializedProperty parseErrorMessagesProperty;
         
-        public IEnumerable<string> DestinationProjectError => destinationYarnProjectImporter?.compileErrors ?? new List<string>();
+        public IEnumerable<string> DestinationProjectErrors => destinationYarnProjectImporters.SelectMany(i => i.GetErrorsForScript(assetTarget as TextAsset)) ?? new List<string>();
 
-        private YarnProject destinationYarnProject;
-        private YarnProjectImporter destinationYarnProjectImporter;
+        private IEnumerable<YarnProject> destinationYarnProjects;
+        private IEnumerable<YarnProjectImporter> destinationYarnProjectImporters;
+
+        public bool HasErrors => DestinationProjectErrors.Any();
 
         public override void OnEnable()
         {
             base.OnEnable();
 
-            isSuccessfullyCompiledProperty = serializedObject.FindProperty(nameof(YarnImporter.isSuccessfullyParsed));
-            parseErrorMessagesProperty = serializedObject.FindProperty(nameof(YarnImporter.parseErrorMessages));
-            
             UpdateDestinationProject();
         }
 
         private void UpdateDestinationProject()
         {
-            destinationYarnProject = (target as YarnImporter).DestinationProject;
+            destinationYarnProjects = (target as YarnImporter).DestinationProjects;
 
-            if (destinationYarnProject != null)
+            if (destinationYarnProjects != null)
             {
-                destinationYarnProjectImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(destinationYarnProject)) as YarnProjectImporter;
+                destinationYarnProjectImporters = destinationYarnProjects.Select(project => AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter);
             }
         }
 
@@ -66,13 +65,24 @@ namespace Yarn.Unity.Editor
                     }
                 }
             }
-            else if (DestinationProjectError.Count() > 0)
+            else if (DestinationProjectErrors.Count() > 0)
             {
-                var displayMessage = string.Join("\n", DestinationProjectError);
+                var displayMessage = string.Join("\n", DestinationProjectErrors);
                 EditorGUILayout.HelpBox(displayMessage, MessageType.Error);
             }
 
-            if (destinationYarnProject == null)
+            if (destinationYarnProjects.Any() != false)
+            {
+                if (destinationYarnProjects.Count() == 1) {
+                    EditorGUILayout.ObjectField("Project", destinationYarnProjects.First(), typeof(YarnProject), false);
+                } else {
+                    EditorGUILayout.LabelField("Projects", EditorStyles.boldLabel);
+                    foreach (var project in destinationYarnProjects) {
+                        EditorGUILayout.ObjectField(destinationYarnProjects.First(), typeof(YarnProject), false);
+                    }
+                }
+            }
+            else
             {
                 EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project, so it can't be compiled or loaded into a Dialogue Runner. Either click Create New Yarn Project, or add a Yarn project to the field below.", MessageType.Info);
                 if (GUILayout.Button("Create New Yarn Project..."))
@@ -83,22 +93,7 @@ namespace Yarn.Unity.Editor
 
                 }
             }
-            
-            using (var change = new EditorGUI.ChangeCheckScope())
-            {
-                var project = EditorGUILayout.ObjectField("Project", destinationYarnProject, typeof(YarnProject), false);
 
-                if (change.changed) {
-                    string programPath = null;
-                    if (project != null) {
-                        programPath = AssetDatabase.GetAssetPath(project);
-                    }
-                    YarnProjectUtility.AssignScriptToProject( (target as YarnImporter).assetPath, programPath);
-                    
-                    UpdateDestinationProject();
-                }
-
-            }
 
             EditorGUILayout.Space();
 

@@ -25,51 +25,24 @@ namespace Yarn.Unity.Editor
     /// </summary>
     [ScriptedImporter(3, new[] { "yarn", "yarnc" }, -1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
     [InitializeOnLoad]
-    public class YarnImporter : ScriptedImporter, IYarnErrorSource
+    public class YarnImporter : ScriptedImporter
     {
-        static YarnImporter() => YarnPreventPlayMode.AddYarnErrorSourceType<YarnImporter>("t:TextAsset");
+        public IEnumerable<YarnProject> DestinationProjects
+        {
+            get
+            {
+                return DestinationProjectImporters
+                    .Select(importer => AssetDatabase.LoadAssetAtPath<YarnProject>(AssetDatabase.GetAssetPath(importer)));
+            }
+        }
 
-        /// <summary>
-        /// Indicates whether the last time this file was imported, the
-        /// file contained lines that did not have a line tag (and
-        /// therefore were assigned an automatically-generated, 'implicit'
-        /// string tag.) 
-        /// </summary>
-        public bool LastImportHadImplicitStringIDs;
-
-        /// <summary>
-        /// Indicates whether the last time this file was imported, the
-        /// file contained any string tags.
-        /// </summary>
-        public bool LastImportHadAnyStrings;
-
-        /// <summary>
-        /// Indicates whether the last time this file was imported, the
-        /// file was able to be parsed without errors. 
-        /// </summary>
-        /// <remarks>
-        /// This value only represents whether syntactic errors exist or
-        /// not. Other errors may exist that prevent this script from being
-        /// compiled into a full program.
-        /// </remarks>
-        public bool isSuccessfullyParsed = false;
-
-        /// <summary>
-        /// Contains the text of the most recent parser error message.
-        /// </summary>
-        public List<string> parseErrorMessages = new List<string>();
-
-        IList<string> IYarnErrorSource.CompileErrors => parseErrorMessages;
-
-        bool IYarnErrorSource.Destroyed => this == null;
-
-        public YarnProject DestinationProject
+        public IEnumerable<YarnProjectImporter> DestinationProjectImporters
         {
             get
             {
                 var myAssetPath = assetPath;
-                var destinationProjectPath = YarnEditorUtility.GetAllAssetsOf<YarnProjectImporter>("t:YarnProject")
-                    .FirstOrDefault(importer =>
+                var destinationProjectImporters = YarnEditorUtility.GetAllAssetsOf<YarnProjectImporter>("t:YarnProject")
+                    .Where(importer =>
                     {
                         // Does this importer depend on this asset? If so,
                         // then this is our destination asset.
@@ -77,45 +50,77 @@ namespace Yarn.Unity.Editor
                         var importerDependsOnThisAsset = dependencies.Contains(myAssetPath);
 
                         return importerDependsOnThisAsset;
-                    })?.assetPath;
+                    });
+                return destinationProjectImporters;
+            }
+        }
 
-                if (destinationProjectPath == null)
-                {
-                    return null;
+        public bool HasErrors {
+            get {
+                foreach (var projectImporter in DestinationProjectImporters) {
+                    if (projectImporter.GetErrorsForScript(ImportedScript).Any()) {
+                        return true;
+                    }
                 }
-
-                return AssetDatabase.LoadAssetAtPath<YarnProject>(destinationProjectPath);
+                return false;
             }
         }
 
-        public override bool SupportsRemappedAssetType(System.Type type)
-        {
-            if (type.IsAssignableFrom(typeof(TextAsset)))
-            {
-                return true;
-            }
-            return false;
-        }
+        private TextAsset ImportedScript => AssetDatabase.LoadAssetAtPath<TextAsset>(this.assetPath);
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
+            Debug.Log("Import script " + ctx.assetPath);
             var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
 
             var extension = System.IO.Path.GetExtension(ctx.assetPath);
 
-            // Clear the 'strings available' flags in case this import
-            // fails
-            LastImportHadAnyStrings = false;
-            LastImportHadImplicitStringIDs = false;
-
-            parseErrorMessages.Clear();
-
-            isSuccessfullyParsed = false;
-
             if (extension == ".yarn")
             {
-                ImportYarn(ctx);
+                // Import this file as a TextAsset.
+                var textAsset = new TextAsset(File.ReadAllText(ctx.assetPath));
+                ctx.AddObjectToAsset("Script", textAsset, YarnEditorUtility.GetYarnDocumentIconTexture());
+                ctx.SetMainObject(textAsset);
+
+
+                // Next, if we're a brand-new script, ensure that project
+                // importers that need to depend on this script have a chance to
+                // re-import.
+
+                // Find all Yarn Project importers that _should_ be using this file.
+                var projectsThatReferenceThisFile = YarnEditorUtility
+                    .GetAllAssetsOf<YarnProjectImporter>("t:YarnProject")
+                    .Where(importer => importer.GetProjectReferencesYarnFile(this));
+
+                var missingProjectImporters = projectsThatReferenceThisFile
+                    .Where(importer =>
+                    {
+                        var dependencies = AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(importer));
+                        var importerDependsOnThisAsset = dependencies.Contains(ctx.assetPath);
+                        return importerDependsOnThisAsset == false;
+                    });
+
+                // We now have a list of project importers that SHOULD be
+                // depending on this script, but currently aren't (because this
+                // script was created after the project was last imported.)
+
+                // Re-import each project.
+                try
+                {
+                    AssetDatabase.StartAssetEditing();
+                    foreach (var importer in missingProjectImporters)
+                    {
+                        Debug.Log($"Project {importer.assetPath} needs to be reimported");
+                        EditorUtility.SetDirty(importer);
+                        importer.SaveAndReimport();
+                    }
+                }
+                finally
+                {
+                    AssetDatabase.StopAssetEditing();
+                }
+
             }
             else if (extension == ".yarnc")
             {
@@ -170,53 +175,6 @@ namespace Yarn.Unity.Editor
             }
         }
 
-        private void ImportYarn(AssetImportContext ctx)
-        {
-            var sourceText = File.ReadAllText(ctx.assetPath);
-            string fileName = System.IO.Path.GetFileNameWithoutExtension(ctx.assetPath);
-
-            var text = new TextAsset(File.ReadAllText(ctx.assetPath));
-
-            // Add this container to the imported asset; it will be what
-            // the user interacts with in Unity
-            ctx.AddObjectToAsset("Program", text, YarnEditorUtility.GetYarnDocumentIconTexture());
-            ctx.SetMainObject(text);
-
-            Yarn.Program compiledProgram = null;
-            IDictionary<string, Yarn.Compiler.StringInfo> stringTable = null;
-
-            parseErrorMessages.Clear();
-
-            // Compile the source code into a compiled Yarn program (or
-            // generate a parse error)
-            var compilationJob = CompilationJob.CreateFromString(fileName, sourceText, null);
-            compilationJob.CompilationType = CompilationJob.Type.StringsOnly;
-
-            var result = Yarn.Compiler.Compiler.Compile(compilationJob);
-
-            IEnumerable<Diagnostic> errors = result.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
-
-            if (errors.Count() > 0)
-            {
-                isSuccessfullyParsed = false;
-
-                parseErrorMessages.AddRange(errors.Select(e => {
-                    string message = $"{ctx.assetPath}: {e}";
-                    ctx.LogImportError($"Error importing {message}");
-                    return message;
-                }));
-            }
-            else
-            {
-                isSuccessfullyParsed = true;
-                LastImportHadImplicitStringIDs = result.ContainsImplicitStringTags;
-                LastImportHadAnyStrings = result.StringTable.Count > 0;
-
-                stringTable = result.StringTable;
-                compiledProgram = result.Program;
-            }
-        }
-
         private void ImportCompiledYarn(AssetImportContext ctx)
         {
 
@@ -232,8 +190,6 @@ namespace Yarn.Unity.Editor
                 ctx.LogImportError("Invalid compiled yarn file. Please re-compile the source code.");
                 return;
             }
-
-            isSuccessfullyParsed = true;
 
             // Create a container for storing the bytes
             var programContainer = new TextAsset("<pre-compiled Yarn script>");

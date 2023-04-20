@@ -91,7 +91,7 @@ namespace Yarn.Unity.Editor
             // to create other kinds of assets (scripts, textures, etc).
             ProjectWindowUtil.StartNameEditingIfProjectWindowExists(
                 0,
-                ScriptableObject.CreateInstance<DoCreateYarnScriptAsset>(),
+                ScriptableObject.CreateInstance<DoCreateYarnProjectAsset>(),
                 "NewProject.yarnproject",
                 GetYarnProjectIconTexture(),
                 GetTemplateYarnScriptPath());
@@ -103,9 +103,12 @@ namespace Yarn.Unity.Editor
         /// </summary>
         /// <param name="path">The path at which to create the
         /// script.</param>
-        public static Object CreateYarnProject(string path)
+        public static Object CreateYarnProject(string path, Compiler.Project project)
         {
-            return CreateYarnScriptAssetFromTemplate(path, GetTemplateYarnScriptPath());
+            var text = project.GetJson();
+            File.WriteAllText(path, text);
+            AssetDatabase.ImportAsset(path);
+            return AssetDatabase.LoadAssetAtPath<Object>(path);
         }
 
         /// <summary>
@@ -134,19 +137,8 @@ namespace Yarn.Unity.Editor
                 templateContent = "---\n===\n";
             }
 
-            // Figure out the 'file name' that the user entered
-            string scriptName;
-            if (Path.GetExtension(pathName).Equals(".yarnproject", System.StringComparison.InvariantCultureIgnoreCase))
-            {
-                // This is a .yarnproject file; the script "name" is always
-                // "Project".
-                scriptName = "Project";
-            }
-            else
-            {
-                // The script name is the name of the file, sans extension.
-                scriptName = Path.GetFileNameWithoutExtension(pathName);
-            }
+            // The script name is the name of the file, sans extension.
+            string scriptName = Path.GetFileNameWithoutExtension(pathName);
 
             // Replace any spaces with underscores - these aren't allowed
             // in node names
@@ -209,6 +201,33 @@ namespace Yarn.Unity.Editor
             {
                 // Produce the asset.
                 Object o = CreateYarnScriptAssetFromTemplate(pathName, resourceFile);
+
+                // Reveal it on disk.
+                ProjectWindowUtil.ShowCreatedAsset(o);
+            }
+        }
+
+        // A handler that receives a callback after the user finishes
+        // naming a new file.
+        private class DoCreateYarnProjectAsset : UnityEditor.ProjectWindowCallback.EndNameEditAction
+        {
+            // The user just finished typing (and didn't cancel it by
+            // pressing escape or anything.) Commit the action by
+            // generating the file on disk.
+            public override void Action(int instanceId, string pathName, string resourceFile)
+            {
+                // Produce the asset.
+                var project = new Yarn.Compiler.Project();
+                var json = project.GetJson();
+
+                // Write it all out to disk as UTF-8
+                var fullPath = Path.GetFullPath(pathName);
+                File.WriteAllText(fullPath, json, System.Text.Encoding.UTF8);
+
+                // Force Unity to notice the new asset.
+                AssetDatabase.ImportAsset(pathName);
+
+                Object o = AssetDatabase.LoadAssetAtPath<Object>(pathName);
 
                 // Reveal it on disk.
                 ProjectWindowUtil.ShowCreatedAsset(o);

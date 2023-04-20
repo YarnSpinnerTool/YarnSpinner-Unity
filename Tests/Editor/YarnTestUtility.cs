@@ -82,28 +82,27 @@ namespace Yarn.Unity.Tests
         }
 
 
-        internal static void SetupYarnProject(string[] yarnScriptText, ref List<string> createdFilePaths, Yarn.Compiler.Project projectData, out YarnProject yarnProject)
+        internal static void SetupYarnProject(string[] yarnScriptText, Yarn.Compiler.Project projectData, out YarnProject yarnProject)
         {
             // Disable errors causing failures, in case the yarn script
             // text contains deliberately invalid code
             var wasIgnoringFailingMessages = LogAssert.ignoreFailingMessages;
             LogAssert.ignoreFailingMessages = true;
 
-            string yarnProjectName = Path.GetRandomFileName();
-            string yarnProjectPath = $"Assets/{yarnProjectName}.yarnproject";
-            createdFilePaths.Add(yarnProjectPath);
-
-            var project = YarnEditorUtility.CreateYarnProject(yarnProjectPath, projectData) as YarnProject;
-            var yarnProjectImporter = AssetImporter.GetAtPath(yarnProjectPath) as YarnProjectImporter;
+            // Write the scripts first, and then write the project - that way,
+            // the project will detect its scripts on its first import, and the
+            // YarnImporter won't need to reimport the Yarn Project
 
             var pathsToAdd = new List<string>();
 
+            int fileCount = 1;
+
             foreach (var scriptText in yarnScriptText)
             {
+                string yarnScriptName = $"YarnScript{fileCount}";
+                fileCount += 1;
 
-                string yarnScriptName = Path.GetRandomFileName();
-                string yarnScriptPath = $"Assets/{yarnScriptName}.yarn";
-                createdFilePaths.Add(yarnScriptPath);
+                string yarnScriptPath = $"{TestFilesDirectoryPath}/{yarnScriptName}.yarn";
                 pathsToAdd.Add(yarnScriptPath);
 
                 string textToWrite;
@@ -123,6 +122,13 @@ namespace Yarn.Unity.Tests
             // Import all these files
             AssetDatabase.Refresh();
 
+            // Now create and import the project
+
+            string yarnProjectPath = $"{TestFilesDirectoryPath}/Project.yarnproject";
+            
+            var project = YarnEditorUtility.CreateYarnProject(yarnProjectPath, projectData) as YarnProject;
+            var yarnProjectImporter = AssetImporter.GetAtPath(yarnProjectPath) as YarnProjectImporter;
+
             foreach (var path in pathsToAdd)
             {
                 var textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
@@ -133,7 +139,8 @@ namespace Yarn.Unity.Tests
                 Assert.IsInstanceOf<YarnImporter>(actual);
 
                 var scriptImporter = AssetImporter.GetAtPath(path) as YarnImporter;
-
+                
+                // The created script should have the newly-created project in its destinations list
                 Assert.True(scriptImporter.DestinationProjects.Contains(project));
             }
 
