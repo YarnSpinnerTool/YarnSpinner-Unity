@@ -6,7 +6,7 @@ MonoImporter:
   defaultReferences:
   - editorUI: {instanceID: 0}
   - localizationUIAsset: {fileID: 9197481963319205126, guid: de04e2bdef0b44420ace51d11acb9a26, type: 3}
-  - upgradeYarnProjectAsset: {fileID: 9197481963319205126, guid: e50ef7fa3752848388b02941bd9baf8d, type: 3}
+  - yarnProjectStyleSheet: {fileID: 7433441132597879392, guid: cb55d9cdb86eb461d9bf7e96af6e9c1e, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

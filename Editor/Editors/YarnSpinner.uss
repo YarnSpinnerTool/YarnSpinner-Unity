@@ -10,10 +10,11 @@
 .help-box Label {
     white-space: normal;
     padding-bottom: 8px;
+    
 }
-
 
 .help-box Label.link {
     white-space: normal;
     color: var(--unity-colors-link-text);
+    cursor: link;
 }

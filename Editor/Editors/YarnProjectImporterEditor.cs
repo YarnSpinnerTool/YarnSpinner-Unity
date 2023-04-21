@@ -198,7 +198,7 @@ namespace Yarn.Unity.Editor
 
         public VisualTreeAsset editorUI;
         public VisualTreeAsset localizationUIAsset;
-        public VisualTreeAsset upgradeYarnProjectAsset;
+        public StyleSheet yarnProjectStyleSheet;
 
         private string baseLanguage = null;
         private List<LocalizationEntryElement> localizationEntryFields = new List<LocalizationEntryElement>();
@@ -326,12 +326,15 @@ namespace Yarn.Unity.Editor
         {
             YarnProjectImporter yarnProjectImporter = target as YarnProjectImporter;
             var importData = yarnProjectImporter.ImportData;
+            
+            var ui = new VisualElement();
+
+            ui.styleSheets.Add(yarnProjectStyleSheet);
 
             if (importData == null || importData.ImportStatus == ProjectImportData.ImportStatusCode.NeedsUpgradeFromV1) {
-                return CreateUpgradeUI(yarnProjectImporter);
+                ui.Add(CreateUpgradeUI(yarnProjectImporter));
+                return ui;
             }
-
-            var ui = new VisualElement();
 
             var yarnInternalControls = new VisualElement();
 
@@ -762,17 +765,33 @@ namespace Yarn.Unity.Editor
         }
 
         public VisualElement CreateUpgradeUI(YarnProjectImporter importer) {
-            var ui = upgradeYarnProjectAsset.CloneTree();
-            var upgradeButton = ui.Q<Button>();
-            upgradeButton.clicked += () =>
-            {
-                YarnProjectUtility.UpgradeYarnProject(importer);
-            };
-            var learnMoreLink = ui.Q<Label>("learnMoreLink");
+            var ui = new VisualElement();
+
+            var box = new VisualElement();
+            box.AddToClassList("help-box");
+
+            Label header = new Label("This project needs to be upgraded.");
+            header.style.unityFontStyleAndWeight = FontStyle.Bold;
+            box.Add(header);
+            box.Add(new Label("After upgrading, you will need to update your localisations, and ensure that all of the Yarn scripts for this project are in the same folder as the project."));
+            box.Add(new Label("Your Yarn scripts will not be modified."));
+
+            var learnMoreLink = new Label("Learn more...");
             learnMoreLink.RegisterCallback<MouseDownEvent>(evt =>
             {
                 Application.OpenURL(ProjectUpgradeHelpURL);
             });
+            learnMoreLink.AddToClassList("link");
+            box.Add(learnMoreLink);
+
+            var upgradeButton = new Button(() =>
+            {
+                YarnProjectUtility.UpgradeYarnProject(importer);
+            });
+            upgradeButton.text = "Upgrade Yarn Project";
+            box.Add(upgradeButton);
+
+            ui.Add(box);
 
             ui.Add(new IMGUIContainer(ApplyRevertGUI));
 
