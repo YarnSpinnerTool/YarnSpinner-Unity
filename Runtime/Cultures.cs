@@ -23,7 +23,7 @@ namespace Yarn.Unity
         });
 
         /// <summary>
-        /// Get all <see cref="Culture"/>s supported by YarnSpinner.
+        /// Get all <see cref="Culture"/>s supported by Yarn Spinner.
         /// </summary>
         private static IEnumerable<Culture> MakeCultureList() => CultureInfo.GetCultures(CultureTypes.AllCultures)
             .Where(c => c.Name != "")
@@ -32,8 +32,9 @@ namespace Yarn.Unity
                 Name = c.Name,
                 DisplayName = c.DisplayName,
                 NativeName = c.NativeName,
+                IsNeutralCulture = c.IsNeutralCulture,
             })
-            .Append(new Culture { Name = "mi", DisplayName = "Maori", NativeName = "Māori" })
+            .Append(new Culture { Name = "mi", DisplayName = "Maori", NativeName = "Māori", IsNeutralCulture = true })
             .OrderBy(c => c.DisplayName);
 
         public static IEnumerable<Culture> GetCultures() => _allCultures.Value;
@@ -72,6 +73,19 @@ namespace Yarn.Unity
         public static bool HasCulture(string name)
         {
             return _allCulturesTable.Value.ContainsKey(name);
+        }
+
+        public static Culture CurrentNeutralCulture
+        {
+            get
+            {
+                var current = System.Globalization.CultureInfo.CurrentCulture;
+                if (current.IsNeutralCulture == false)
+                {
+                    current = current.Parent;
+                }
+                return GetCulture(current.Name); ;
+            }
         }
     }
 }

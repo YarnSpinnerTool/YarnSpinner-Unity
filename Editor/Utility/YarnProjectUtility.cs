@@ -79,6 +79,8 @@ namespace Yarn.Unity.Editor
                 return;
             }
 
+            var importData = yarnProjectImporter.ImportData;
+
             var baseLocalizationStrings = yarnProjectImporter.GenerateStringsTable();
 
             var localizations = yarnProjectImporter.ImportData.localizations;
@@ -91,7 +93,7 @@ namespace Yarn.Unity.Editor
 
                 foreach (var loc in localizations)
                 {
-                    if (loc.isBaseLanguage) {
+                    if (loc.languageID == importData.baseLanguageName) {
                         // This is the base language - no strings file to
                         // update.
                         continue;
@@ -379,6 +381,8 @@ namespace Yarn.Unity.Editor
                 .Select(path => AssetImporter.GetAtPath(path))
                 // Ensure it's a YarnProjectImporter
                 .OfType<YarnProjectImporter>()
+                // Ensure that its import data is present
+                .Where(i => i.ImportData != null)
                 // Get all of their source scripts, as a single sequence
                 .SelectMany(i => i.ImportData.yarnFiles)
                 // Get the path for each asset

@@ -265,8 +265,9 @@ But not all of them are.
             // Add a new fake localisation to the project by adding it to the
             // project file and saving it
             var projectFile = Yarn.Compiler.Project.LoadFromFile(projectFilePath);
+            
             projectFile.Localisation.Add("test", new Compiler.Project.LocalizationInfo {
-                Strings = Path.GetRelativePath(Path.GetDirectoryName(projectFilePath), destinationStringsFilePath)
+                Strings = YarnProjectImporter.UnityProjectRootVariable + "/" + destinationStringsFilePath,
             });
 
             projectFile.SaveToFile(projectFilePath);

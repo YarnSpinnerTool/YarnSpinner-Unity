@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <ui:Foldout text="Language" name="foldout">
+        <ui:VisualElement style="flex-direction: row; flex-shrink: 0; flex-grow: 1; justify-content: space-between;">
+            <ui:Label text="(Language placeholder)" display-tooltip-when-elided="true" name="languagePlaceholder" style="flex-grow: 1;" />
+            <ui:Button name="deleteButton" text="Delete" style="flex-shrink: 1; align-items: flex-end;" />
+        </ui:VisualElement>
+        <uie:ObjectField label="Strings File" allow-scene-objects="false" type="UnityEngine.TextAsset, UnityEngine.CoreModule" name="stringsFile" />
+        <ui:VisualElement name="stringsFileNotUsed" class="stringsFileNotUsed" style="flex-direction: row;">
+            <ui:Label text="Strings File" display-tooltip-when-elided="true" class="unity-base-field__label" style="margin-left: 3px;" />
+            <ui:Label text="Automatically included" display-tooltip-when-elided="true" class="unity-base-field__label" />
+        </ui:VisualElement>
+        <uie:ObjectField label="Assets Folder" allow-scene-objects="false" type="UnityEditor.DefaultAsset, UnityEditor" name="assetFolder" />
+        <ui:VisualElement style="align-items: flex-end;" />
+    </ui:Foldout>
+</ui:UXML>

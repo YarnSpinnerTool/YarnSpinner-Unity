@@ -12,12 +12,9 @@ using Yarn.Unity;
 
 namespace Yarn.Unity.Editor
 {
-    // [CustomEditor(typeof(YarnImporter))]
+    [CustomEditor(typeof(YarnImporter))]
     public class YarnImporterEditor : ScriptedImporterEditor
     {
-        private SerializedProperty isSuccessfullyCompiledProperty;
-        private SerializedProperty parseErrorMessagesProperty;
-        
         public IEnumerable<string> DestinationProjectErrors => destinationYarnProjectImporters.SelectMany(i => i.GetErrorsForScript(assetTarget as TextAsset)) ?? new List<string>();
 
         private IEnumerable<YarnProject> destinationYarnProjects;
@@ -29,10 +26,10 @@ namespace Yarn.Unity.Editor
         {
             base.OnEnable();
 
-            UpdateDestinationProject();
+            UpdateDestinationProjects();
         }
 
-        private void UpdateDestinationProject()
+        private void UpdateDestinationProjects()
         {
             destinationYarnProjects = (target as YarnImporter).DestinationProjects;
 
@@ -52,7 +49,7 @@ namespace Yarn.Unity.Editor
             // show an error. If the selected objects have the same
             // destination program, and there's a compile error in it, show
             // that. 
-            if (parseErrorMessagesProperty.arraySize > 0)
+            if (HasErrors)
             {
                 if (serializedObject.isEditingMultipleObjects)
                 {
@@ -60,15 +57,10 @@ namespace Yarn.Unity.Editor
                 }
                 else
                 {
-                    foreach (SerializedProperty errorProperty in parseErrorMessagesProperty) {
-                        EditorGUILayout.HelpBox(errorProperty.stringValue, MessageType.Error);
+                    foreach (string error in DestinationProjectErrors) {
+                        EditorGUILayout.HelpBox(error, MessageType.Error);
                     }
                 }
-            }
-            else if (DestinationProjectErrors.Count() > 0)
-            {
-                var displayMessage = string.Join("\n", DestinationProjectErrors);
-                EditorGUILayout.HelpBox(displayMessage, MessageType.Error);
             }
 
             if (destinationYarnProjects.Any() != false)
@@ -77,9 +69,11 @@ namespace Yarn.Unity.Editor
                     EditorGUILayout.ObjectField("Project", destinationYarnProjects.First(), typeof(YarnProject), false);
                 } else {
                     EditorGUILayout.LabelField("Projects", EditorStyles.boldLabel);
+                    EditorGUI.indentLevel += 1;
                     foreach (var project in destinationYarnProjects) {
-                        EditorGUILayout.ObjectField(destinationYarnProjects.First(), typeof(YarnProject), false);
+                        EditorGUILayout.ObjectField(project, typeof(YarnProject), false);
                     }
+                    EditorGUI.indentLevel -= 1;
                 }
             }
             else
@@ -89,7 +83,7 @@ namespace Yarn.Unity.Editor
                 {
                     YarnProjectUtility.CreateYarnProject(target as YarnImporter);
 
-                    UpdateDestinationProject();
+                    UpdateDestinationProjects();
 
                 }
             }

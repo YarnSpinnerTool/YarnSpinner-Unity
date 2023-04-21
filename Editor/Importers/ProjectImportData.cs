@@ -20,7 +20,6 @@ namespace Yarn.Unity
 
         [System.Serializable]
         public struct LocalizationEntry {
-            public bool isBaseLanguage;
             public string languageID;
             public DefaultAsset assetsFolder;
             public TextAsset stringsFile;
@@ -45,12 +44,14 @@ namespace Yarn.Unity
 
         public List<LocalizationEntry> localizations = new List<LocalizationEntry>();
 
+        public string baseLanguageName;
+
         public LocalizationEntry BaseLocalizationEntry
         {
             get
             {
                 try {
-                    return localizations.First(l => l.isBaseLanguage);
+                    return localizations.First(l => l.languageID == baseLanguageName);
                 } catch (System.Exception e) {
                     throw new System.InvalidOperationException("Project import data has no base localisation", e);
                 }

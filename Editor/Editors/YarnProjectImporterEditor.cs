@@ -22,14 +22,167 @@ using UnityEditor.Localization;
 using UnityEngine.Localization.Tables;
 #endif
 
+using UnityEngine.UIElements;
+using UnityEditor.UIElements;
+
 namespace Yarn.Unity.Editor
 {
-    // [CustomEditor(typeof(YarnProjectImporter))]
+    public static class LanguagePopup
+    {
+        
+        static string FormatCulture(string cultureName) {
+            Culture culture = Cultures.GetCulture(cultureName);
+            return $"{culture.DisplayName} ({culture.Name})";
+        }
+
+        public static PopupField<string> Create(string label) {
+            var allNeutralCultures = Cultures.GetCultures().Where(c => c.IsNeutralCulture);
+
+            var defaultCulture = System.Globalization.CultureInfo.CurrentCulture;
+
+            if (defaultCulture.IsNeutralCulture == false) {
+                defaultCulture = defaultCulture.Parent;
+            }
+
+            var cultureChoices = allNeutralCultures.Select(c => c.Name).ToList();
+
+            var popup = new PopupField<string>(label, cultureChoices, defaultCulture.Name, FormatCulture, FormatCulture);
+
+            popup.style.flexGrow = 1;
+
+            return popup;
+        }
+
+        public static T ReplaceElement<T>(VisualElement oldElement, T newElement) where T : VisualElement {
+            oldElement.parent.Insert(oldElement.parent.IndexOf(oldElement)+1, newElement);
+            oldElement.RemoveFromHierarchy();
+            return newElement;
+        }
+    }
+    public class LocalizationEntryElement : VisualElement, INotifyValueChanged<ProjectImportData.LocalizationEntry> {
+        private readonly Foldout foldout;
+        private readonly ObjectField assetFolderField;
+        private readonly ObjectField stringsFileField;
+        private readonly Button deleteButton;
+        private readonly VisualElement stringsFileNotUsedLabel;
+        private readonly PopupField<string> languagePopup;
+        public event System.Action onDelete;
+        ProjectImportData.LocalizationEntry data;
+
+        public bool IsModified { get; private set; }
+
+        private string _projectBaseLanguage;
+        public string ProjectBaseLanguage {
+            get => _projectBaseLanguage;
+            set { 
+                _projectBaseLanguage = value;
+                SetValueWithoutNotify(this.data); 
+            }
+        }
+
+        public LocalizationEntryElement(VisualTreeAsset asset, ProjectImportData.LocalizationEntry data, string baseLanguage) {
+            asset.CloneTree(this);
+
+            foldout = this.Q<Foldout>("foldout");
+            assetFolderField = this.Q<ObjectField>("assetFolder");
+            stringsFileField = this.Q<ObjectField>("stringsFile");
+            deleteButton = this.Q<Button>("deleteButton");
+            stringsFileNotUsedLabel = this.Q("stringsFileNotUsed");
+
+            IsModified = false;
+
+            // Dropdowns don't exist in Unity 2019/20(?), so we need to create
+            // one at runtime and swap out a placeholder.
+            var existingPopup = this.Q("languagePlaceholder");
+            languagePopup = LanguagePopup.Create("Language");
+            LanguagePopup.ReplaceElement(existingPopup, languagePopup);
+
+            _projectBaseLanguage = baseLanguage;
+
+            languagePopup.RegisterValueChangedCallback((evt) =>
+            {
+                IsModified = true;
+                var newEntry = this.value;
+                newEntry.languageID = evt.newValue;
+                this.value = newEntry;
+            });
+
+            stringsFileField.RegisterValueChangedCallback((evt) =>
+            {
+                IsModified = true;
+                var newEntry = this.value;
+                newEntry.stringsFile = evt.newValue as TextAsset;
+                this.value = newEntry;
+            });
+            assetFolderField.RegisterValueChangedCallback((evt) =>
+            {
+                IsModified = true;
+                var newEntry = this.value;
+                newEntry.assetsFolder = evt.newValue as DefaultAsset;
+                this.value = newEntry;
+            });
+
+            deleteButton.clicked += () => onDelete();
+
+            SetValueWithoutNotify(data);
+
+        }
+
+        public ProjectImportData.LocalizationEntry value
+        {
+            get => data;
+            set
+            {
+                var previous = data;
+                SetValueWithoutNotify(value);
+                using (var evt = ChangeEvent<ProjectImportData.LocalizationEntry>.GetPooled(previous, value))
+                {
+                    evt.target = this;
+                    SendEvent(evt);
+                }
+            }
+        }
+
+        public void SetValueWithoutNotify(ProjectImportData.LocalizationEntry data)
+        {
+            this.data = data;
+            Culture culture;
+            culture = Cultures.GetCulture(data.languageID);
+            
+            languagePopup.SetValueWithoutNotify(data.languageID);
+            assetFolderField.SetValueWithoutNotify(data.assetsFolder);
+            stringsFileField.SetValueWithoutNotify(data.stringsFile);
+
+            bool isBaseLanguage = data.languageID == ProjectBaseLanguage;
+
+            if (isBaseLanguage) {
+                stringsFileField.style.display = DisplayStyle.None;
+                stringsFileNotUsedLabel.style.display = DisplayStyle.Flex;
+            } else {
+                stringsFileField.style.display = DisplayStyle.Flex;
+                stringsFileNotUsedLabel.style.display = DisplayStyle.None;
+            }
+
+            deleteButton.SetEnabled(isBaseLanguage == false);
+
+            foldout.text = $"{culture.DisplayName} ({culture.Name})";
+        }
+
+        internal void ClearModified()
+        {
+            IsModified = false;
+        }
+    }
+    
+
+    [CustomEditor(typeof(YarnProjectImporter))]
     public class YarnProjectImporterEditor : ScriptedImporterEditor
     {
         // A runtime-only field that stores the defaultLanguage of the
         // YarnProjectImporter. Used during Inspector GUI drawing.
         internal static SerializedProperty CurrentProjectDefaultLanguageProperty;
+
+        const string ProjectUpgradeHelpURL = "https://docs.yarnspinner.dev";
 
         private SerializedProperty compileErrorsProperty;
         private SerializedProperty serializedDeclarationsProperty;
@@ -43,6 +196,25 @@ namespace Yarn.Unity.Editor
         private SerializedProperty useUnityLocalisationSystemProperty;
         private SerializedProperty unityLocalisationTableCollectionProperty;
 
+        public VisualTreeAsset editorUI;
+        public VisualTreeAsset localizationUIAsset;
+        public VisualTreeAsset upgradeYarnProjectAsset;
+
+        private string baseLanguage = null;
+        private List<LocalizationEntryElement> localizationEntryFields = new List<LocalizationEntryElement>();
+        private VisualElement localisationFieldsContainer;
+
+        private bool AnyModifications
+        {
+            get {
+                return LocalisationsAddedOrRemoved
+                || localizationEntryFields.Any(f => f.IsModified)
+                || BaseLanguageNameModified;
+            }
+        }
+        private bool LocalisationsAddedOrRemoved = false;
+        private bool BaseLanguageNameModified = false;
+
         public override void OnEnable()
         {
             base.OnEnable();
@@ -55,8 +227,274 @@ namespace Yarn.Unity.Editor
 #endif
         }
 
+        public override void OnDisable()
+        {
+            base.OnDisable();
+
+            if (AnyModifications) {
+                if (EditorUtility.DisplayDialog("Unapplied Localisation Changes", "The currently selected Yarn Project has unapplied localisation changes. Do you want to apply them or revert?", "Apply", "Revert")) {
+                    this.ApplyAndImport();
+                }
+            }
+        }
+
+        protected override void Apply() {
+            base.Apply();
+
+            var importer = (this.target as YarnProjectImporter);
+            var data = importer.GetProject();
+            var importerFolder = Path.GetDirectoryName(importer.assetPath);
+
+            var removedLocalisations = data.Localisation.Keys.Except(localizationEntryFields.Select(f => f.value.languageID)).ToList();
+
+            foreach (var removedLocalisation in removedLocalisations) {
+                data.Localisation.Remove(removedLocalisation);
+            }
+
+            foreach (var locField in localizationEntryFields) {
+
+                // Does this localisation field represent a localisation that
+                // used to be the base localisation, but is now no longer? If it
+                // is, even if it's unmodified, we need to make sure we add it
+                // to the project data.
+                bool wasPreviouslyBaseLocalisation = 
+                    locField.value.languageID == data.BaseLanguage 
+                    && BaseLanguageNameModified;
+
+                // Skip any records that we don't need to touch
+                if (locField.IsModified == false && !wasPreviouslyBaseLocalisation) {
+                    continue;
+                }
+
+                var stringFile = locField.value.stringsFile;
+                var assetFolder = locField.value.assetsFolder;
+
+                var locInfo = new Project.LocalizationInfo();
+
+                if (stringFile != null) {
+                    string stringFilePath = AssetDatabase.GetAssetPath(stringFile);
+#if UNITY_2021
+                    locInfo.Strings = Path.GetRelativePath(importerFolder, stringFilePath);
+#else
+                    locInfo.Strings = YarnProjectImporter.UnityProjectRootVariable + "/" + stringFilePath;
+#endif
+                }
+                if (assetFolder != null) {
+                    string assetFolderPath = AssetDatabase.GetAssetPath(assetFolder);
+#if UNITY_2021
+                    locInfo.Assets = Path.GetRelativePath(importerFolder, assetFolderPath);
+#else
+                    locInfo.Assets = YarnProjectImporter.UnityProjectRootVariable + "/" + assetFolderPath;
+#endif
+                }
+
+                data.Localisation[locField.value.languageID] = locInfo;
+                locField.ClearModified();
+            }
+
+            data.BaseLanguage = this.baseLanguage;
+
+            if (data.Localisation.TryGetValue(data.BaseLanguage, out var baseLanguageInfo)) {
+                if (string.IsNullOrEmpty(baseLanguageInfo.Strings)
+                    && string.IsNullOrEmpty(baseLanguageInfo.Assets)) {
+                    // We have a localisation info entry, but it doesn't provide
+                    // any useful information (the strings field is unused, and
+                    // the assets field defaults to empty anyway). Trim it from
+                    // the data.
+                    data.Localisation.Remove(data.BaseLanguage);
+                }
+            }
+
+            BaseLanguageNameModified = false;
+            LocalisationsAddedOrRemoved = false;
+
+            data.SaveToFile(importer.assetPath);
+
+            if (localizationEntryFields.Any(f => f.value.languageID == this.baseLanguage) == false) {
+                var newBaseLanguageField = CreateLocalisationEntryElement(new ProjectImportData.LocalizationEntry
+                {
+                    assetsFolder = null,
+                    stringsFile = null,
+                    languageID = baseLanguage,
+                }, baseLanguage);
+                localizationEntryFields.Add(newBaseLanguageField);
+                localisationFieldsContainer.Add(newBaseLanguageField);
+            }
+        }
+
+        public override VisualElement CreateInspectorGUI()
+        {
+            YarnProjectImporter yarnProjectImporter = target as YarnProjectImporter;
+            var importData = yarnProjectImporter.ImportData;
+
+            if (importData == null || importData.ImportStatus == ProjectImportData.ImportStatusCode.NeedsUpgradeFromV1) {
+                return CreateUpgradeUI(yarnProjectImporter);
+            }
+
+            var ui = new VisualElement();
+
+            var yarnInternalControls = new VisualElement();
+
+            var unityControls = new VisualElement();
+
+            var useAddressableAssetsField = new PropertyField(useAddressableAssetsProperty);
+
+#if USE_UNITY_LOCALIZATION
+            var useUnityLocalisationSystemField = new PropertyField(useUnityLocalisationSystemProperty);
+            var unityLocalisationTableCollectionField = new PropertyField(unityLocalisationTableCollectionProperty);
+#endif
+
+            localisationFieldsContainer = new VisualElement();
+
+            var languagePopup = LanguagePopup.Create("Base Language");
+            var generateStringsFileButton = new Button();
+            var addStringTagsButton = new Button();
+
+
+            baseLanguage = importData.baseLanguageName;
+
+            yarnInternalControls.Add(useAddressableAssetsField);
+
+            languagePopup.SetValueWithoutNotify(baseLanguage);
+            languagePopup.RegisterValueChangedCallback(evt =>
+            {
+                baseLanguage = evt.newValue;
+                foreach (var loc in localizationEntryFields) {
+                    loc.ProjectBaseLanguage = baseLanguage;
+                }
+                BaseLanguageNameModified = true;
+            });
+
+            yarnInternalControls.Add(languagePopup);
+
+            yarnInternalControls.Add(localisationFieldsContainer);
+
+            foreach (var localisation in importData.localizations) {
+                var locElement = CreateLocalisationEntryElement(localisation, baseLanguage);
+                localisationFieldsContainer.Add(locElement);
+                localizationEntryFields.Add(locElement);
+            }
+
+            var addLocalisationButton = new Button();
+            addLocalisationButton.text = "Add Localisation";
+            addLocalisationButton.clicked += () =>
+            {
+                var loc = CreateLocalisationEntryElement(new ProjectImportData.LocalizationEntry() {
+                    languageID = importData.baseLanguageName,
+                }, baseLanguage);
+                localizationEntryFields.Add(loc);
+                localisationFieldsContainer.Add(loc);
+                LocalisationsAddedOrRemoved = true;
+
+            };
+            yarnInternalControls.Add(addLocalisationButton);
+
+#if USE_UNITY_LOCALIZATION
+
+            ui.Add(useUnityLocalisationSystemField);
+
+            unityControls.Add(unityLocalisationTableCollectionField);
+
+            SetElementVisible(unityControls, useUnityLocalisationSystemProperty.boolValue);
+            SetElementVisible(yarnInternalControls, !useUnityLocalisationSystemProperty.boolValue);
+
+            useUnityLocalisationSystemField.RegisterCallback<ChangeEvent<bool>>(evt =>
+            {
+                SetElementVisible(unityControls, useUnityLocalisationSystemProperty.boolValue);
+                SetElementVisible(yarnInternalControls, !useUnityLocalisationSystemProperty.boolValue);
+            });
+#endif
+
+            addStringTagsButton.text = "Add Line Tags to Scripts";
+            addStringTagsButton.clicked += () =>
+            {
+                YarnProjectUtility.AddLineTagsToFilesInYarnProject(yarnProjectImporter);
+                UpdateTaggingButtonsEnabled();
+            };
+
+            generateStringsFileButton.text = "Export Strings and Metadata as CSV";
+
+            generateStringsFileButton.clicked += () => ExportStringsData(yarnProjectImporter);
+
+            ui.Add(yarnInternalControls);
+            ui.Add(unityControls);
+
+            ui.Add(addStringTagsButton);
+            ui.Add(generateStringsFileButton);
+
+            ui.Add(new IMGUIContainer(ApplyRevertGUI));
+
+            UpdateTaggingButtonsEnabled();
+
+            return ui;
+
+            void UpdateTaggingButtonsEnabled()
+            {
+                addStringTagsButton.SetEnabled(yarnProjectImporter.CanGenerateStringsTable == false && importData.yarnFiles.Any());
+                generateStringsFileButton.SetEnabled(yarnProjectImporter.CanGenerateStringsTable);
+            }
+        }
+
+        private LocalizationEntryElement CreateLocalisationEntryElement(ProjectImportData.LocalizationEntry localisation, string baseLanguage)
+        {
+            var locElement = new LocalizationEntryElement(localizationUIAsset, localisation, baseLanguage);
+            locElement.onDelete += () =>
+            {
+                locElement.RemoveFromHierarchy();
+                localizationEntryFields.Remove(locElement);
+                LocalisationsAddedOrRemoved = true;
+            };
+            return locElement;
+        }
+
+        
+        private void ExportStringsData(YarnProjectImporter yarnProjectImporter)
+        {
+            var currentPath = AssetDatabase.GetAssetPath(yarnProjectImporter);
+            var currentFileName = Path.GetFileNameWithoutExtension(currentPath);
+            var currentDirectory = Path.GetDirectoryName(currentPath);
+
+            var destinationPath = EditorUtility.SaveFilePanel("Export Strings CSV", currentDirectory, $"{currentFileName}.csv", "csv");
+
+            if (string.IsNullOrEmpty(destinationPath) == false)
+            {
+                // Generate the file on disk
+                YarnProjectUtility.WriteStringsFile(destinationPath, yarnProjectImporter);
+
+                // Also generate the metadata file.
+                var destinationDirectory = Path.GetDirectoryName(destinationPath);
+                var destinationFileName = Path.GetFileNameWithoutExtension(destinationPath);
+
+                var metadataDestinationPath = Path.Combine(destinationDirectory, $"{destinationFileName}-metadata.csv");
+                YarnProjectUtility.WriteMetadataFile(metadataDestinationPath, yarnProjectImporter);
+
+                // destinationPath may have been inside our Assets
+                // directory, so refresh the asset database
+                AssetDatabase.Refresh();
+
+            }
+        }
+
+        private static void SetElementVisible(VisualElement e, bool visible) {
+            if (visible) {
+                e.style.display = DisplayStyle.Flex;
+            } else {
+                e.style.display = DisplayStyle.None;
+
+            }
+        }
+
+        public override bool HasModified()
+        {
+            return base.HasModified() || AnyModifications;
+        }
+
         public override void OnInspectorGUI()
         {
+            DrawDefaultInspector();
+            ApplyRevertGUI();
+#warning Deprecated code
+            return;
             serializedObject.Update();
 
             YarnProjectImporter yarnProjectImporter = serializedObject.targetObject as YarnProjectImporter;
@@ -323,207 +761,70 @@ namespace Yarn.Unity.Editor
 #endif
         }
 
-
-
-        protected override void Apply()
-        {
-            base.Apply();
-
-            // Get all declarations that came from this program
-            var thisProgramDeclarations = new List<Yarn.Compiler.Declaration>();
-
-            for (int i = 0; i < serializedDeclarationsProperty.arraySize; i++)
+        public VisualElement CreateUpgradeUI(YarnProjectImporter importer) {
+            var ui = upgradeYarnProjectAsset.CloneTree();
+            var upgradeButton = ui.Q<Button>();
+            upgradeButton.clicked += () =>
             {
-                var decl = serializedDeclarationsProperty.GetArrayElementAtIndex(i);
-                if (decl.FindPropertyRelative("sourceYarnAsset").objectReferenceValue != null)
-                {
-                    continue;
-                }
+                YarnProjectUtility.UpgradeYarnProject(importer);
+            };
+            var learnMoreLink = ui.Q<Label>("learnMoreLink");
+            learnMoreLink.RegisterCallback<MouseDownEvent>(evt =>
+            {
+                Application.OpenURL(ProjectUpgradeHelpURL);
+            });
 
-                var name = decl.FindPropertyRelative("name").stringValue;
+            ui.Add(new IMGUIContainer(ApplyRevertGUI));
 
-                SerializedProperty typeProperty = decl.FindPropertyRelative("typeName");
+            return ui;
+        }
 
-                Yarn.IType type = YarnProjectImporter.SerializedDeclaration.BuiltInTypesList.FirstOrDefault(t => t.Name == typeProperty.stringValue);
 
-                var description = decl.FindPropertyRelative("description").stringValue;
+    //     protected override void Apply()
+    //     {
+    //         base.Apply();
 
-                System.IConvertible defaultValue;
+    //         // Get all declarations that came from this program
+    //         var thisProgramDeclarations = new List<Yarn.Compiler.Declaration>();
 
-                if (type == Yarn.BuiltinTypes.Number) {
-                    defaultValue = decl.FindPropertyRelative("defaultValueNumber").floatValue;
-                } else if (type == Yarn.BuiltinTypes.String) {
-                    defaultValue = decl.FindPropertyRelative("defaultValueString").stringValue;
-                } else if (type == Yarn.BuiltinTypes.Boolean) {
-                    defaultValue = decl.FindPropertyRelative("defaultValueBool").boolValue;
-                } else {
-                    throw new System.ArgumentOutOfRangeException($"Invalid declaration type {type.Name}");
-                }
+    //         for (int i = 0; i < serializedDeclarationsProperty.arraySize; i++)
+    //         {
+    //             var decl = serializedDeclarationsProperty.GetArrayElementAtIndex(i);
+    //             if (decl.FindPropertyRelative("sourceYarnAsset").objectReferenceValue != null)
+    //             {
+    //                 continue;
+    //             }
+
+    //             var name = decl.FindPropertyRelative("name").stringValue;
+
+    //             SerializedProperty typeProperty = decl.FindPropertyRelative("typeName");
+
+    //             Yarn.IType type = YarnProjectImporter.SerializedDeclaration.BuiltInTypesList.FirstOrDefault(t => t.Name == typeProperty.stringValue);
+
+    //             var description = decl.FindPropertyRelative("description").stringValue;
+
+    //             System.IConvertible defaultValue;
+
+    //             if (type == Yarn.BuiltinTypes.Number) {
+    //                 defaultValue = decl.FindPropertyRelative("defaultValueNumber").floatValue;
+    //             } else if (type == Yarn.BuiltinTypes.String) {
+    //                 defaultValue = decl.FindPropertyRelative("defaultValueString").stringValue;
+    //             } else if (type == Yarn.BuiltinTypes.Boolean) {
+    //                 defaultValue = decl.FindPropertyRelative("defaultValueBool").boolValue;
+    //             } else {
+    //                 throw new System.ArgumentOutOfRangeException($"Invalid declaration type {type.Name}");
+    //             }
                 
-                var declaration = Declaration.CreateVariable(name, type, defaultValue, description);
+    //             var declaration = Declaration.CreateVariable(name, type, defaultValue, description);
 
-                thisProgramDeclarations.Add(declaration);
-            }
+    //             thisProgramDeclarations.Add(declaration);
+    //         }
 
-            var output = Yarn.Compiler.Utility.GenerateYarnFileWithDeclarations(thisProgramDeclarations, "Program");
+    //         var output = Yarn.Compiler.Utility.GenerateYarnFileWithDeclarations(thisProgramDeclarations, "Program");
 
-            var importer = target as YarnProjectImporter;
-            File.WriteAllText(importer.assetPath, output, System.Text.Encoding.UTF8);
-            AssetDatabase.ImportAsset(importer.assetPath);
-        }
+    //         var importer = target as YarnProjectImporter;
+    //         File.WriteAllText(importer.assetPath, output, System.Text.Encoding.UTF8);
+    //         AssetDatabase.ImportAsset(importer.assetPath);
+    //     }
     }
-
-    /// <summary>
-    /// An attribute that causes this property to be drawn as a read-only
-    /// label if a second property is equal to a specific static field on a
-    /// specific class.
-    /// </summary>
-    /// <remarks>
-    /// This attribute is used in order to make the 'stringsFile' field on
-    /// YarnProjectImporter.LanguageToSourceAsset appear as a read-only
-    /// label when its 'languageID' is equal to the default language of the
-    /// YarnProjectImporter currently being inspected.
-    ///
-    /// Yes, this is a really convoluted approach, but this is the best I
-    /// could come up with considering I didn't want to re-implement
-    /// drawing the entire list, and I can't pass contextual information to
-    /// a property.
-    /// </remarks>
-    internal class HideWhenPropertyValueEqualsContextAttribute : PropertyAttribute
-    {
-        /// <summary>
-        /// The class that contains a static field with the name given in
-        /// <see cref="FieldNameInOtherClass"/>.
-        /// </summary>
-        public System.Type OtherClassType;
-
-        /// <summary>
-        /// The name of the static field found in <see
-        /// cref="OtherClassType"/>. This field must be of type <see
-        /// cref="SerializedProperty"/>.
-        /// </summary>
-        /// <remarks>
-        /// You are strongly encouraged to use <code>nameof</code> to refer
-        /// to this member.
-        /// </remarks>
-        public string FieldNameInOtherClass;
-
-        /// <summary>
-        /// The name of the field whose value should be checked against.
-        /// This field must be a sibling of the field this attribute is
-        /// applied to.
-        /// </summary>
-        public string SiblingFieldName;
-
-        /// <summary>
-        /// The label to show for this field in the Inspector when the
-        /// field <see cref="SiblingFieldName"/> has a string value equal
-        /// to the <see cref="SerializedProperty"/> field in <see
-        /// cref="OtherClassType"/>.
-        /// </summary>
-        public string DisplayStringWhenEmpty;
-
-        public HideWhenPropertyValueEqualsContextAttribute(string siblingFieldName, System.Type classType, string fieldNameInOtherClass, string displayStringWhenEmpty)
-        {
-            OtherClassType = classType;
-            FieldNameInOtherClass = fieldNameInOtherClass;
-            SiblingFieldName = siblingFieldName;
-            DisplayStringWhenEmpty = displayStringWhenEmpty;
-        }
-    }
-
-    /// <summary>
-    /// The custom editor for drawing properties that have the
-    /// HideWhenPropertyValueEqualsContextAttribute applied to them.
-    /// </summary>
-    [CustomPropertyDrawer(typeof(HideWhenPropertyValueEqualsContextAttribute))]
-    internal class HideWhenValueEqualsContextAttributeEditor : PropertyDrawer
-    {
-        /// <summary>
-        /// Called by Unity to draw the GUI for properties that this editor
-        /// applies to.
-        /// </summary>
-        /// <param name="position">The rectangle to draw content
-        /// in.</param>
-        /// <param name="property">The property to draw.</param>
-        /// <param name="label">The label to draw for this
-        /// property.</param>
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-        {
-            // Get the HideWhenPropertyValueEqualsContextAttribute that
-            // caused this drawer to be invoked.
-            var attribute = this.attribute as HideWhenPropertyValueEqualsContextAttribute;
-
-            // Get the data out of the attribute.
-            System.Type classType = attribute.OtherClassType;
-            string fieldName = attribute.FieldNameInOtherClass;
-            string displayStringWhenEmpty = attribute.DisplayStringWhenEmpty;
-
-            // Get the static field that the attribute wants to access.
-            System.Reflection.FieldInfo field = classType.GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
-
-            // Get the internal method EditorGUI.DefaultPropertyField,
-            // which we'll call when we need to draw the original property
-            // UI.
-            MethodInfo defaultDraw = typeof(EditorGUI)
-                .GetMethod("DefaultPropertyField", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-
-            // Is the static field a serialized property?
-            if (field.FieldType.IsAssignableFrom(typeof(SerializedProperty)) == false)
-            {
-                // The field we were aimed at is not a serialized property.
-                // Early out.
-                defaultDraw.Invoke(null, new object[3] { position, property, label });
-                return;
-            }
-
-            // Get the context property from the class's static field.
-            SerializedProperty contextProperty = field.GetValue(null) as SerializedProperty;
-
-            // Next, get the property we're comparing to. This is required
-            // to be a sibling property of the one that had this attribute.
-
-            // We'll do this by taking the path to this property, removing
-            // the last element, and appending the target property name.
-            // We'll then use FindProperty to locate it.
-            var targetPropertyPath = string.Join(".", property.propertyPath.Split('.').Reverse().Skip(1).Reverse().Append(attribute.SiblingFieldName));
-
-            var targetProperty = property.serializedObject.FindProperty(targetPropertyPath);
-
-            if (targetProperty == null)
-            {
-                // We couldn't find it. Log a warning, draw the original
-                // UI, and return.
-                Debug.LogWarning($"Property not found at path {targetPropertyPath}");
-                defaultDraw.Invoke(null, new object[3] { position, property, label });
-            }
-
-            // Ensure that they're both strings.
-            if (targetProperty.propertyType != SerializedPropertyType.String || contextProperty.propertyType != SerializedPropertyType.String)
-            {
-                // They're not both strings. Draw as usual.
-                //
-                // (This restriction exists because, weirdly,
-                // SerializedProperty.DataEquals() on two properties that
-                // contained the strings "en-AU" and "en-US" was returning
-                // true. Restricting it to strings and doing a string
-                // comparison fixed this.)
-                defaultDraw.Invoke(null, new object[3] { position, property, label });
-            }
-
-            // Finally, the moment of truth: compare the two strings.
-            if (contextProperty.stringValue.Equals(targetProperty.stringValue, System.StringComparison.InvariantCulture))
-            {
-                // The data matches. We don't want to show this property.
-                // Show the label instead.
-                EditorGUI.LabelField(position, label, new GUIContent(displayStringWhenEmpty));
-            }
-            else
-            {
-                // The data doesn't match. Draw as usual.
-                defaultDraw.Invoke(null, new object[3] { position, property, label });
-            }
-        }
-    }
-
 }

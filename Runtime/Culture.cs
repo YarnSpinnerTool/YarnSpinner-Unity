@@ -28,5 +28,24 @@ namespace Yarn.Unity
         /// language in-game so people can find their native language.
         /// </summary>
         public string NativeName;
+
+        public bool IsNeutralCulture;
+
+        internal System.Globalization.CultureInfo CultureInfo {
+            get {
+                try {
+                    return System.Globalization.CultureInfo.GetCultureInfo(this.Name);
+                } catch (System.Globalization.CultureNotFoundException) {
+                    return null;
+                }
+            }
+        }
+
+        public Culture(System.Globalization.CultureInfo cultureInfo) {
+            this.Name = cultureInfo.Name;
+            this.DisplayName = cultureInfo.DisplayName;
+            this.NativeName = cultureInfo.NativeName;
+            this.IsNeutralCulture = cultureInfo.IsNeutralCulture;
+        }
     }
 }

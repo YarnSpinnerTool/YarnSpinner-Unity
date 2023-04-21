@@ -1,4 +1,6 @@
 using UnityEditor;
+using UnityEditor.UIElements;
+using UnityEngine.UIElements;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
 #else
@@ -10,12 +12,26 @@ namespace Yarn.Unity.Editor
     [CustomEditor(typeof(YarnProject))]
     public class YarnProjectEditor : UnityEditor.Editor
     {
-        public override void OnInspectorGUI()
+        public override VisualElement CreateInspectorGUI()
         {
-            base.OnInspectorGUI();
+            var assetPath = AssetDatabase.GetAssetPath(target);
+            var importer = AssetImporter.GetAtPath(assetPath) as YarnProjectImporter;
+            var importData = importer.ImportData;
 
-            EditorGUILayout.LabelField("wow this is an embedded asset");
+            var ui = new VisualElement();
 
+            if (importData == null) {
+                return new Label("Project failed to import, or needs upgrading.");
+            }
+
+            var importDataSO = new SerializedObject(importData);
+
+            var yarnScriptsProperty = importDataSO.FindProperty(nameof(ProjectImportData.yarnFiles));
+            var yarnScriptsField = new PropertyField(yarnScriptsProperty);
+            yarnScriptsField.Bind(importDataSO);
+            ui.Add(yarnScriptsField);
+
+            return ui;
         }
     }
 

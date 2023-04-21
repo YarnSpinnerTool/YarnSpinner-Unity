@@ -70,14 +70,21 @@ namespace Yarn.Unity.Editor
 
         public bool useAddressableAssets;
 
-        public static string UnityProjectRootPath => Path.GetFullPath("..", Application.dataPath);
+        public static string UnityProjectRootPath => Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
 
 #if USE_UNITY_LOCALIZATION
         public bool UseUnityLocalisationSystem = false;
         public StringTableCollection unityLocalisationStringTableCollection;
 #endif
 
-        public Project GetProject() => Project.LoadFromFile(this.assetPath);
+        public Project GetProject()
+        {
+            try {
+                return Project.LoadFromFile(this.assetPath);
+            } catch (System.Text.Json.JsonException) {
+                return null;
+            }
+        }
 
         public ProjectImportData ImportData => AssetDatabase.LoadAssetAtPath<ProjectImportData>(this.assetPath);
 
@@ -136,91 +143,7 @@ namespace Yarn.Unity.Editor
                 return;
             }
 
-            var projectRelativeSourceFiles = project.SourceFiles.Select(GetRelativePath);
-
-            // If the project doesn't have any source files, then there's
-            // nothing to do.
-            if (projectRelativeSourceFiles.Any() == false) {
-                return;
-            }
-
-            // This project depends upon this script
-            foreach (var scriptPath in projectRelativeSourceFiles)
-            {
-                string guid = AssetDatabase.AssetPathToGUID(scriptPath);
-
-                Debug.Log($"Project {ctx.assetPath} depends on script {scriptPath}");
-
-                ctx.DependsOnSourceAsset(scriptPath);
-
-                importData.yarnFiles.Add(AssetDatabase.LoadAssetAtPath<TextAsset>(scriptPath));
-
-            }
-
-            var library = Actions.GetLibrary();
-
-            // Now to compile the scripts associated with this project.
-            var job = CompilationJob.CreateFromFiles(project.SourceFiles);
-            
-            job.Library = library;
-
-            CompilationResult compilationResult;
-
-            compilationResult = Compiler.Compiler.Compile(job);
-
-            var errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
-
-            if (errors.Count() > 0) 
-            {
-                var errorGroups = errors.GroupBy(e => e.FileName);
-                foreach (var errorGroup in errorGroups)
-                {
-                    var errorMessages = errorGroup.Select(e => e.ToString());
-
-                    var relativePath = GetRelativePath(errorGroup.Key);
-
-                    var asset = AssetDatabase.LoadAssetAtPath<Object>(relativePath);
-
-                    foreach (var error in errorGroup)
-                    {
-                        var relativeErrorFileName = GetRelativePath(error.FileName);
-                        ctx.LogImportError($"Error compiling <a href=\"{relativeErrorFileName}\">{relativeErrorFileName}</a> line {error.Range.Start.Line + 1}: {error.Message}", asset);
-                    }
-
-                    var fileWithErrors = AssetDatabase.LoadAssetAtPath<TextAsset>(relativePath);
-
-                    // TODO: Associate this compile error to the corresponding
-                    // script
-
-                    importData.diagnostics.Add(new ProjectImportData.DiagnosticEntry
-                    {
-                        yarnFile = fileWithErrors,
-                        errorMessages = errorMessages.ToList(),
-                    });
-                }
-                importData.ImportStatus = ProjectImportData.ImportStatusCode.CompilationFailed;
-                return;
-            }
-
-            if (compilationResult.Program == null)
-            {
-                ctx.LogImportError("Internal error: Failed to compile: resulting program was null, but compiler did not report errors.");
-                return;
-            }
-
-            importData.containsImplicitLineIDs = compilationResult.ContainsImplicitStringTags;
-
-            // Store _all_ declarations - both the ones in this
-            // .yarnproject file, and the ones inside the .yarn files.
-
-            // While we're here, filter out any declarations that begin with our
-            // Yarn internal prefix. These are synthesized variables that are
-            // generated as a result of the compilation, and are not declared by
-            // the user.
-            importData.serializedDeclarations = compilationResult.Declarations
-                .Where(decl => !decl.Name.StartsWith("$Yarn.Internal."))
-                .Where(decl => !(decl.Type is FunctionType))
-                .Select(decl => new SerializedDeclaration(decl)).ToList();
+            importData.baseLanguageName = project.BaseLanguage;
 
             foreach (var loc in project.Localisation) {
                 var hasStringsFile = project.TryGetStringsPath(loc.Key, out var stringsFilePath);
@@ -229,7 +152,6 @@ namespace Yarn.Unity.Editor
                 var locInfo = new ProjectImportData.LocalizationEntry
                 {
                     languageID = loc.Key,
-                    isBaseLanguage = loc.Key == project.BaseLanguage,
                     stringsFile = hasStringsFile ? AssetDatabase.LoadAssetAtPath<TextAsset>(stringsFilePath) : null,
                     assetsFolder = hasAssetsFolder ? AssetDatabase.LoadAssetAtPath<DefaultAsset>(assetsFolderPath) : null
                 };
@@ -240,39 +162,124 @@ namespace Yarn.Unity.Editor
                 importData.localizations.Add(new ProjectImportData.LocalizationEntry
                 {
                     languageID = project.BaseLanguage,
-                    isBaseLanguage = true,
                 });
             }
 
-#if USE_UNITY_LOCALIZATION
-            if (UseUnityLocalisationSystem)
+            var projectRelativeSourceFiles = project.SourceFiles.Select(GetRelativePath);
+
+            CompilationResult compilationResult;
+
+            if (projectRelativeSourceFiles.Any())
             {
-                AddStringTableEntries(compilationResult, this.unityLocalisationStringTableCollection, project);
-                projectAsset.localizationType = LocalizationType.Unity;
-            } else {
+
+                // This project depends upon this script
+                foreach (var scriptPath in projectRelativeSourceFiles)
+                {
+                    string guid = AssetDatabase.AssetPathToGUID(scriptPath);
+
+                    Debug.Log($"Project {ctx.assetPath} depends on script {scriptPath}");
+
+                    ctx.DependsOnSourceAsset(scriptPath);
+
+                    importData.yarnFiles.Add(AssetDatabase.LoadAssetAtPath<TextAsset>(scriptPath));
+
+                }
+
+                var library = Actions.GetLibrary();
+
+                // Now to compile the scripts associated with this project.
+                var job = CompilationJob.CreateFromFiles(project.SourceFiles);
+
+                job.Library = library;
+
+                compilationResult = Compiler.Compiler.Compile(job);
+
+                var errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
+
+                if (errors.Count() > 0)
+                {
+                    var errorGroups = errors.GroupBy(e => e.FileName);
+                    foreach (var errorGroup in errorGroups)
+                    {
+                        var errorMessages = errorGroup.Select(e => e.ToString());
+
+                        var relativePath = GetRelativePath(errorGroup.Key);
+
+                        var asset = AssetDatabase.LoadAssetAtPath<Object>(relativePath);
+
+                        foreach (var error in errorGroup)
+                        {
+                            var relativeErrorFileName = GetRelativePath(error.FileName);
+                            ctx.LogImportError($"Error compiling <a href=\"{relativeErrorFileName}\">{relativeErrorFileName}</a> line {error.Range.Start.Line + 1}: {error.Message}", asset);
+                        }
+
+                        var fileWithErrors = AssetDatabase.LoadAssetAtPath<TextAsset>(relativePath);
+
+                        // TODO: Associate this compile error to the
+                        // corresponding script
+
+                        importData.diagnostics.Add(new ProjectImportData.DiagnosticEntry
+                        {
+                            yarnFile = fileWithErrors,
+                            errorMessages = errorMessages.ToList(),
+                        });
+                    }
+                    importData.ImportStatus = ProjectImportData.ImportStatusCode.CompilationFailed;
+                    return;
+                }
+
+                if (compilationResult.Program == null)
+                {
+                    ctx.LogImportError("Internal error: Failed to compile: resulting program was null, but compiler did not report errors.");
+                    return;
+                }
+
+                importData.containsImplicitLineIDs = compilationResult.ContainsImplicitStringTags;
+
+                // Store _all_ declarations - both the ones in this .yarnproject
+                // file, and the ones inside the .yarn files.
+
+                // While we're here, filter out any declarations that begin with
+                // our Yarn internal prefix. These are synthesized variables
+                // that are generated as a result of the compilation, and are
+                // not declared by the user.
+                importData.serializedDeclarations = compilationResult.Declarations
+                    .Where(decl => !decl.Name.StartsWith("$Yarn.Internal."))
+                    .Where(decl => !(decl.Type is FunctionType))
+                    .Select(decl => new SerializedDeclaration(decl)).ToList();
+
+#if USE_UNITY_LOCALIZATION
+                if (UseUnityLocalisationSystem)
+                {
+                    AddStringTableEntries(compilationResult, this.unityLocalisationStringTableCollection, project);
+                    projectAsset.localizationType = LocalizationType.Unity;
+                }
+                else
+                {
+                    CreateYarnInternalLocalizationAssets(ctx, projectAsset, compilationResult, importData);
+                    projectAsset.localizationType = LocalizationType.YarnInternal;
+                }
+#else
                 CreateYarnInternalLocalizationAssets(ctx, projectAsset, compilationResult, importData);
                 projectAsset.localizationType = LocalizationType.YarnInternal;
-            }
-#else
-            CreateYarnInternalLocalizationAssets(ctx, project, compilationResult, importData);
-            project.localizationType = LocalizationType.YarnInternal;
 #endif
 
-            // Store the compiled program
-            byte[] compiledBytes = null;
+                // Store the compiled program
+                byte[] compiledBytes = null;
 
-            using (var memoryStream = new MemoryStream())
-            using (var outputStream = new Google.Protobuf.CodedOutputStream(memoryStream))
-            {
-                // Serialize the compiled program to memory
-                compilationResult.Program.WriteTo(outputStream);
-                outputStream.Flush();
+                using (var memoryStream = new MemoryStream())
+                using (var outputStream = new Google.Protobuf.CodedOutputStream(memoryStream))
+                {
+                    // Serialize the compiled program to memory
+                    compilationResult.Program.WriteTo(outputStream);
+                    outputStream.Flush();
 
-                compiledBytes = memoryStream.ToArray();
+                    compiledBytes = memoryStream.ToArray();
+                }
+
+                projectAsset.compiledYarnProgram = compiledBytes;
             }
-
-            projectAsset.compiledYarnProgram = compiledBytes;
-
+            
             importData.ImportStatus = ProjectImportData.ImportStatusCode.Succeeded;
 
 #if YARNSPINNER_DEBUG
@@ -281,9 +288,13 @@ namespace Yarn.Unity.Editor
 
         }
 
-        private static string GetRelativePath(string path)
+        internal static string GetRelativePath(string path)
         {
-            return Path.GetRelativePath(UnityProjectRootPath, path);
+            if (path.StartsWith(UnityProjectRootPath) == false) {
+                throw new System.ArgumentException($"Path {path} is not a child of the project root path {UnityProjectRootPath}");
+            }
+            // Trim the root path off along with the trailing slash
+            return path.Substring(UnityProjectRootPath.Length + 1);
         }
 
         private void CreateYarnInternalLocalizationAssets(AssetImportContext ctx, YarnProject projectAsset, CompilationResult compilationResult, ProjectImportData importData)
@@ -309,7 +320,7 @@ namespace Yarn.Unity.Editor
                 // Where do we get our strings from? If it's the default
                 // language, we'll pull it from the scripts. If it's from
                 // any other source, we'll pull it from the CSVs.
-                if (localisationInfo.isBaseLanguage)
+                if (localisationInfo.languageID == importData.baseLanguageName)
                 {
                     // No strings file needed - we'll use the program-supplied string table.
                     stringTable = GenerateStringsTable();
@@ -398,7 +409,7 @@ namespace Yarn.Unity.Editor
 
                 ctx.AddObjectToAsset("localization-" + localisationInfo.languageID, newLocalization);
 
-                if (localisationInfo.isBaseLanguage)
+                if (localisationInfo.languageID == importData.baseLanguageName)
                 {
                     // If this is our default language, set it as such
                     projectAsset.baseLocalization = newLocalization;
@@ -422,8 +433,8 @@ namespace Yarn.Unity.Editor
                 var stringTableEntries = GetStringTableEntries(compilationResult);
 
                 var developmentLocalization = ScriptableObject.CreateInstance<Localization>();
-                developmentLocalization.name = $"Default ({importData.BaseLocalizationEntry.languageID})";
-                developmentLocalization.LocaleCode = importData.BaseLocalizationEntry.languageID;
+                developmentLocalization.name = $"Default ({importData.baseLanguageName})";
+                developmentLocalization.LocaleCode = importData.baseLanguageName;
 
 
                 // Add these new lines to the development localisation's asset
@@ -506,6 +517,10 @@ namespace Yarn.Unity.Editor
             get {
                 var importData = AssetDatabase.LoadAssetAtPath<ProjectImportData>(this.assetPath);
 
+                if (importData == null) {
+                    return false;
+                }
+
                 return importData.HasCompileErrors == false && importData.containsImplicitLineIDs == false;
             }
         } 
@@ -521,6 +536,9 @@ namespace Yarn.Unity.Editor
         }
 
         internal IEnumerable<string> GetErrorsForScript(TextAsset sourceScript) {
+            if (ImportData == null) {
+                return Enumerable.Empty<string>();
+            }
             foreach (var errorCollection in ImportData.diagnostics) {
                 if (errorCollection.yarnFile == sourceScript) {
                     return errorCollection.errorMessages;
@@ -660,13 +678,17 @@ namespace Yarn.Unity.Editor
                 fullStringsPath = default;
                 return false;
             }
-            var projectFolder = Path.GetDirectoryName(project.Path);
-            projectFolder = Path.GetFullPath(projectFolder, YarnProjectImporter.UnityProjectRootPath);
-            
+
+            var projectFolderRelative = Path.GetDirectoryName(project.Path);
+            var projectFolderAbsolute = Path.GetFullPath(Path.Combine(YarnProjectImporter.UnityProjectRootPath, projectFolderRelative));
+
             var expandedPath = info.Strings.Replace(YarnProjectImporter.UnityProjectRootVariable, YarnProjectImporter.UnityProjectRootPath);
 
-            fullStringsPath = Path.GetFullPath(expandedPath, projectFolder);
-            fullStringsPath = Path.GetRelativePath(YarnProjectImporter.UnityProjectRootPath, fullStringsPath);
+            if (Path.IsPathRooted(expandedPath) == false) {
+                expandedPath = Path.GetFullPath(Path.Combine(projectFolderAbsolute, expandedPath));
+            }
+            
+            fullStringsPath = YarnProjectImporter.GetRelativePath(expandedPath);
 
             return true;
         }
@@ -680,13 +702,16 @@ namespace Yarn.Unity.Editor
                 fullAssetsPath = default;
                 return false;
             }
-            var projectFolder = Path.GetDirectoryName(project.Path);
-            projectFolder = Path.GetFullPath(projectFolder, YarnProjectImporter.UnityProjectRootPath);
+            var projectFolderRelative = Path.GetDirectoryName(project.Path);
+            var projectFolderAbsolute = Path.GetFullPath(Path.Combine(YarnProjectImporter.UnityProjectRootPath, projectFolderRelative));
 
             var expandedPath = info.Assets.Replace(YarnProjectImporter.UnityProjectRootVariable, YarnProjectImporter.UnityProjectRootPath);
 
-            fullAssetsPath = Path.GetFullPath(expandedPath, projectFolder);
-            fullAssetsPath = Path.GetRelativePath(YarnProjectImporter.UnityProjectRootPath, fullAssetsPath);
+            if (Path.IsPathRooted(expandedPath) == false) {
+                expandedPath = Path.GetFullPath(Path.Combine(projectFolderAbsolute, expandedPath));
+            }
+            
+            fullAssetsPath = YarnProjectImporter.GetRelativePath(expandedPath);
 
             return true;
         }
