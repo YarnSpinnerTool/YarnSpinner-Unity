@@ -89,6 +89,9 @@ namespace Yarn.Unity.Editor
             deleteButton = this.Q<Button>("deleteButton");
             stringsFileNotUsedLabel = this.Q("stringsFileNotUsed");
 
+            assetFolderField.objectType = typeof(DefaultAsset);
+            stringsFileField.objectType = typeof(TextAsset);
+
             IsModified = false;
 
             // Dropdowns don't exist in Unity 2019/20(?), so we need to create
