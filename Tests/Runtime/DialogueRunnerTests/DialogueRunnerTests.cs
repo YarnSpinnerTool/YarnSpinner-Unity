@@ -104,11 +104,11 @@ namespace Yarn.Unity.Tests
         
         private void VerifySaveAndLoadStorageIntegrity(VariableStorageBehaviour storage, Dictionary<string, float> testFloats, Dictionary<string, string> testStrings, Dictionary<string, bool> testBools)
         {
-            var current = storage.GetAllVariables();
+            var currentVariables = storage.GetAllVariables();
 
-            VerifySaveAndLoad(current.FloatVariables, testFloats);
-            VerifySaveAndLoad(current.StringVariables, testStrings);
-            VerifySaveAndLoad(current.BoolVariables, testBools);
+            VerifySaveAndLoad(currentVariables.FloatVariables, testFloats);
+            VerifySaveAndLoad(currentVariables.StringVariables, testStrings);
+            VerifySaveAndLoad(currentVariables.BoolVariables, testBools);
 
             void VerifySaveAndLoad<T>(Dictionary<string, T> current, Dictionary<string, T> original)
             {
