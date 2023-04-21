@@ -31,6 +31,12 @@ namespace Yarn.Unity.Editor
             yarnScriptsField.Bind(importDataSO);
             ui.Add(yarnScriptsField);
 
+            var variablesProperty = importDataSO.FindProperty(nameof(ProjectImportData.serializedDeclarations));
+            var variablesField = new PropertyField(variablesProperty, "Variables");
+            variablesField.Bind(importDataSO);
+
+            ui.Add(variablesField);
+
             return ui;
         }
     }
