@@ -210,6 +210,8 @@ namespace Yarn.Unity.Editor
 
             localisationFieldsContainer = new VisualElement();
 
+            localisationControls.style.marginBottom = 8;
+
             if (importData.diagnostics.Any())
             {
                 var header = new Label();
