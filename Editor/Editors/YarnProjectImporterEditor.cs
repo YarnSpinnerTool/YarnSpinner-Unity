@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEditor;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
@@ -205,7 +205,6 @@ namespace Yarn.Unity.Editor
             var languagePopup = LanguagePopup.Create("Base Language");
             var generateStringsFileButton = new Button();
             var addStringTagsButton = new Button();
-
 
             baseLanguage = importData.baseLanguageName;
 
@@ -640,6 +639,10 @@ namespace Yarn.Unity.Editor
             var upgradeButton = new Button(() =>
             {
                 YarnProjectUtility.UpgradeYarnProject(importer);
+
+                // Reload the entire inspector - we will have changed the
+                // project significantly
+                ActiveEditorTracker.sharedTracker.ForceRebuild();
             });
             upgradeButton.text = "Upgrade Yarn Project";
             box.Add(upgradeButton);
