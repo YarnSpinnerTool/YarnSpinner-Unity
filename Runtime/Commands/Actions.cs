@@ -215,7 +215,7 @@ namespace Yarn.Unity
                 }
             }
 
-            internal DialogueRunner.CommandDispatchResult Invoke(DialogueRunner dispatcher, List<string> parameters, out Coroutine commandCoroutine)
+            internal CommandDispatchResult Invoke(DialogueRunner dispatcher, List<string> parameters, out Coroutine commandCoroutine)
             {
                 object target;
 
@@ -228,10 +228,10 @@ namespace Yarn.Unity
                         // We need at least one parameter, which is the
                         // component to look for
                         commandCoroutine = default;
-                        return new DialogueRunner.CommandDispatchResult
+                        return new CommandDispatchResult
                         {
                             Message = $"{this.Name} needs a target, but none was specified",
-                            Status = DialogueRunner.CommandDispatchResult.StatusType.InvalidParameterCount
+                            Status = CommandDispatchResult.StatusType.InvalidParameterCount
                         };
                     }
 
@@ -248,10 +248,10 @@ namespace Yarn.Unity
                     {
                         // We couldn't find a target with this name.
                         commandCoroutine = default;
-                        return new DialogueRunner.CommandDispatchResult
+                        return new CommandDispatchResult
                         {
                             Message = $"No game object named \"{gameObjectName}\" exists",
-                            Status = DialogueRunner.CommandDispatchResult.StatusType.TargetMissingComponent
+                            Status = CommandDispatchResult.StatusType.TargetMissingComponent
                         };
                     }
 
@@ -262,10 +262,10 @@ namespace Yarn.Unity
                     if (targetComponent == null)
                     {
                         commandCoroutine = default;
-                        return new DialogueRunner.CommandDispatchResult
+                        return new CommandDispatchResult
                         {
                             Message = $"{this.Name} can't be called on {gameObjectName}, because it doesn't have a {this.DeclaringType.Name}",
-                            Status = DialogueRunner.CommandDispatchResult.StatusType.TargetMissingComponent
+                            Status = CommandDispatchResult.StatusType.TargetMissingComponent
                         };
                     }
 
@@ -284,9 +284,9 @@ namespace Yarn.Unity
 
                 if (this.TryParseArgs(parameters.ToArray(), out var finalParameters, out var errorMessage) == false) {
                     commandCoroutine = default;
-                    return new DialogueRunner.CommandDispatchResult
+                    return new CommandDispatchResult
                     {
-                        Status = DialogueRunner.CommandDispatchResult.StatusType.InvalidParameterCount,
+                        Status = CommandDispatchResult.StatusType.InvalidParameterCount,
                         Message = errorMessage,
                 };
                 }
@@ -296,25 +296,25 @@ namespace Yarn.Unity
                 if (returnValue is Coroutine coro)
                 {
                     commandCoroutine = coro;
-                    return new DialogueRunner.CommandDispatchResult
+                    return new CommandDispatchResult
                     {
-                        Status = DialogueRunner.CommandDispatchResult.StatusType.SucceededAsync
+                        Status = CommandDispatchResult.StatusType.SucceededAsync
                     };
                 }
                 else if (returnValue is IEnumerator enumerator)
                 {
                     commandCoroutine = dispatcher.StartCoroutine(enumerator);
-                    return new DialogueRunner.CommandDispatchResult
+                    return new CommandDispatchResult
                     {
-                        Status = DialogueRunner.CommandDispatchResult.StatusType.SucceededAsync
+                        Status = CommandDispatchResult.StatusType.SucceededAsync
                     };
                 }
                 else
                 {
                     commandCoroutine = null;
-                    return new DialogueRunner.CommandDispatchResult
+                    return new CommandDispatchResult
                     {
-                        Status = DialogueRunner.CommandDispatchResult.StatusType.SucceededSync
+                        Status = CommandDispatchResult.StatusType.SucceededSync
                     };
                 }
             }
@@ -459,8 +459,10 @@ namespace Yarn.Unity
 
         public void RemoveCommandHandler(string commandName)
         {
-            #warning Not implemented
-            throw new NotImplementedException();
+            if (_commands.Remove(commandName) == false) {
+                Debug.LogError($"Can't remove command {commandName}, because no command with this name is currently registered.");
+            }
+            
         }
 
         public void RemoveFunction(string name)
@@ -478,7 +480,7 @@ namespace Yarn.Unity
             // no-op
         }
 
-        DialogueRunner.CommandDispatchResult ICommandDispatcher.DispatchCommand(string command, out Coroutine commandCoroutine)
+        CommandDispatchResult ICommandDispatcher.DispatchCommand(string command, out Coroutine commandCoroutine)
         {
             var commandPieces = new List<string>(DialogueRunner.SplitCommandText(command));
 
@@ -487,9 +489,9 @@ namespace Yarn.Unity
                 // No text was found inside the command, so we won't be able to
                 // find it.
                 commandCoroutine = default;
-                return new DialogueRunner.CommandDispatchResult
+                return new CommandDispatchResult
                 {
-                    Status = DialogueRunner.CommandDispatchResult.StatusType.CommandUnknown
+                    Status = CommandDispatchResult.StatusType.CommandUnknown
                 };
             }
 
@@ -503,9 +505,9 @@ namespace Yarn.Unity
                 return registration.Invoke(DialogueRunner, commandPieces, out commandCoroutine);
             } else {
                 commandCoroutine = default;
-                return new DialogueRunner.CommandDispatchResult
+                return new CommandDispatchResult
                 {
-                    Status = DialogueRunner.CommandDispatchResult.StatusType.CommandUnknown
+                    Status = CommandDispatchResult.StatusType.CommandUnknown
                 };
             }
         }
@@ -558,15 +560,28 @@ namespace Yarn.Unity
             {
                 return arg =>
                 {
-                    if (arg.Equals(parameter.Name, StringComparison.InvariantCultureIgnoreCase)) { return true; }
-                    if (bool.TryParse(arg, out bool res)) { return res; }
+                    // If the argument is the name of the parameter, interpret
+                    // the argument as 'true'.
+                    if (arg.Equals(parameter.Name, StringComparison.InvariantCultureIgnoreCase)) 
+                    {
+                        return true;
+                    }
+
+                    // If the argument can be parsed as boolean true or false,
+                    // return that result.
+                    if (bool.TryParse(arg, out bool res))
+                    {
+                        return res;
+                    }
+
+                    // We can't parse the argument.
                     throw new ArgumentException(
                         $"Can't convert the given parameter at position {index + 1} (\"{arg}\") to parameter " +
                         $"{parameter.Name} of type {typeof(bool).FullName}.");
                 };
             }
 
-            // try converting using IConvertible.
+            // Fallback: try converting using IConvertible.
             return arg =>
             {
                 try
@@ -727,9 +742,9 @@ namespace Yarn.Unity
 
             public void AddFunction<TResult, T1, T2, T3, T4, T5, T6>(string name, Func<TResult, T1, T2, T3, T4, T5, T6> implementation) => AddFunction(name, (Delegate)implementation);
 
-            public void RemoveCommandHandler(string commandName) => throw new NotImplementedException("This class does not support removing actions.");
+            public void RemoveCommandHandler(string commandName) => throw new InvalidOperationException("This class does not support removing actions.");
 
-            public void RemoveFunction(string name) => throw new NotImplementedException("This class does not support removing actions.");
+            public void RemoveFunction(string name) => throw new InvalidOperationException("This class does not support removing actions.");
         }
     }
 }

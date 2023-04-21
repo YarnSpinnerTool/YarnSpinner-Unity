@@ -327,8 +327,10 @@ namespace Yarn.Unity.UnityLocalization
             serializedObject.ApplyModifiedProperties();
         }
         public void OnEnable() {
+            #if USE_UNITY_LOCALIZATION
             this.stringsTableProperty = serializedObject.FindProperty(nameof(UnityLocalisedLineProvider.stringsTable));
             this.assetTableProperty = serializedObject.FindProperty(nameof(UnityLocalisedLineProvider.assetTable));
+            #endif
         }
     }
 #endif
