@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEditor;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
@@ -189,6 +189,11 @@ namespace Yarn.Unity.Editor
                 return ui;
             }
 
+            var importDataSO = new SerializedObject(importData);
+            var diagnosticsProperty = importDataSO.FindProperty(nameof(ProjectImportData.diagnostics));
+
+            var errorsContainer = new VisualElement();
+            errorsContainer.name = "errors";
             var yarnInternalControls = new VisualElement();
 
             var unityControls = new VisualElement();
@@ -202,6 +207,42 @@ namespace Yarn.Unity.Editor
 
             localisationFieldsContainer = new VisualElement();
 
+            if (importData.diagnostics.Any())
+            {
+                var header = new Label();
+                header.text = "Errors";
+                header.style.unityFontStyleAndWeight = FontStyle.Bold;
+
+                errorsContainer.Add(header);
+
+                foreach (var error in importData.diagnostics)
+                {
+                    var errorContainer = new VisualElement();
+                    errorContainer.style.marginLeft = 15;
+
+                    var objectField = new ObjectField();
+                    objectField.value = error.yarnFile;
+                    objectField.objectType = typeof(TextAsset);
+
+                    var messagesField = new IMGUIContainer(() =>
+                    {
+                        foreach (var message in error.errorMessages)
+                        {
+                            EditorGUILayout.HelpBox(message, MessageType.Error);
+                        }
+                    });
+                    messagesField.style.marginLeft = 30;
+
+                    errorContainer.Add(objectField);
+                    errorContainer.Add(messagesField);
+
+                    errorsContainer.Add(errorContainer);
+                }
+
+                errorsContainer.style.marginBottom = 15;
+
+                ui.Add(errorsContainer);
+            }
             var languagePopup = LanguagePopup.Create("Base Language");
             var generateStringsFileButton = new Button();
             var addStringTagsButton = new Button();
