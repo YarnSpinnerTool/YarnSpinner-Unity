@@ -1,3 +1,19 @@
-﻿title: Program
----
-===
+{
+  "projectFileVersion": 2,
+  "sourceFiles": [
+    "**/*.yarn"
+  ],
+  "localisation": {
+    "en": {
+      "assets": "../Voice Overs"
+    },
+    "es": {
+      "strings": "Intro Project - es.csv"
+    },
+    "fr": {
+      "strings": null,
+    }
+  },
+  "baseLanguage": "en",
+  "compilerOptions": {}
+}
