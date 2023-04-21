@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEditor;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
@@ -194,6 +194,9 @@ namespace Yarn.Unity.Editor
 
             var errorsContainer = new VisualElement();
             errorsContainer.name = "errors";
+
+            var localisationControls = new VisualElement();
+
             var yarnInternalControls = new VisualElement();
 
             var unityControls = new VisualElement();
@@ -243,13 +246,21 @@ namespace Yarn.Unity.Editor
 
                 ui.Add(errorsContainer);
             }
+
+            var localisationHeader = new Label();
+
+            localisationHeader.text = "Localisation";
+            localisationHeader.style.unityFontStyleAndWeight = FontStyle.Bold;
+            localisationHeader.style.marginTop = 8;
+
+            localisationControls.Add(localisationHeader);
+
             var languagePopup = LanguagePopup.Create("Base Language");
             var generateStringsFileButton = new Button();
             var addStringTagsButton = new Button();
+            var updateExistingStringsFilesButton = new Button();
 
             baseLanguage = importData.baseLanguageName;
-
-            yarnInternalControls.Add(useAddressableAssetsField);
 
             languagePopup.SetValueWithoutNotify(baseLanguage);
             languagePopup.RegisterValueChangedCallback(evt =>
@@ -261,7 +272,9 @@ namespace Yarn.Unity.Editor
                 BaseLanguageNameModified = true;
             });
 
-            yarnInternalControls.Add(languagePopup);
+            localisationControls.Add(languagePopup);
+
+            yarnInternalControls.Add(useAddressableAssetsField);
 
             yarnInternalControls.Add(localisationFieldsContainer);
 
@@ -287,7 +300,7 @@ namespace Yarn.Unity.Editor
 
 #if USE_UNITY_LOCALIZATION
 
-            ui.Add(useUnityLocalisationSystemField);
+            localisationControls.Add(useUnityLocalisationSystemField);
 
             unityControls.Add(unityLocalisationTableCollectionField);
 
@@ -312,11 +325,21 @@ namespace Yarn.Unity.Editor
 
             generateStringsFileButton.clicked += () => ExportStringsData(yarnProjectImporter);
 
-            ui.Add(yarnInternalControls);
-            ui.Add(unityControls);
+            updateExistingStringsFilesButton.text = "Update Existing Strings Files";
+            updateExistingStringsFilesButton.clicked += () =>
+            {
+                YarnProjectUtility.UpdateLocalizationCSVs(yarnProjectImporter);
+            };
+            yarnInternalControls.Add(updateExistingStringsFilesButton);
+
+            localisationControls.Add(yarnInternalControls);
+            localisationControls.Add(unityControls);
+
+            ui.Add(localisationControls);
 
             ui.Add(addStringTagsButton);
             ui.Add(generateStringsFileButton);
+
 
             ui.Add(new IMGUIContainer(ApplyRevertGUI));
 
