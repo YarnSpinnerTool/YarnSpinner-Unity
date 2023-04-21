@@ -617,12 +617,19 @@ namespace Yarn.Unity.Editor
             // Get the current text of the old project
             var existingText = File.ReadAllText(importer.assetPath);
 
-            // Create a unique path to store our variables
-            var newFilePath = Path.GetDirectoryName(importer.assetPath) + "/Variables.yarn";
-            newFilePath = AssetDatabase.GenerateUniqueAssetPath(newFilePath);
+            // Does the existing text contain anything besides the default?
+            var defaultProjectPattern = new System.Text.RegularExpressions.Regex(@"^title:.*?\n---[\n\s]*===[\n\s]*$", System.Text.RegularExpressions.RegexOptions.Multiline);
+            if (defaultProjectPattern.IsMatch(existingText)) {
+                // The project contains no content, so there's no need to copy
+                // it out.
+            } else {
+                // Create a unique path to store our variables
+                var newFilePath = Path.GetDirectoryName(importer.assetPath) + "/Variables.yarn";
+                newFilePath = AssetDatabase.GenerateUniqueAssetPath(newFilePath);
 
-            // Write it out to the new file
-            File.WriteAllText(newFilePath, existingText);
+                // Write it out to the new file
+                File.WriteAllText(newFilePath, existingText);
+            }
 
             // Next, replace the existing project with a new one!
             var newProject = new Yarn.Compiler.Project();
