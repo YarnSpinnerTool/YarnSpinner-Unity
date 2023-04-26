@@ -23,7 +23,7 @@ namespace Yarn.Unity.Editor
     /// cref="YarnScript"/>, which this class wraps around creating the
     /// asset's corresponding meta file.
     /// </summary>
-    [ScriptedImporter(3, new[] { "yarn", "yarnc" }, -1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
+    [ScriptedImporter(4, new[] { "yarn", "yarnc" }, -1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
     [InitializeOnLoad]
     public class YarnImporter : ScriptedImporter
     {
