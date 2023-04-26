@@ -9,9 +9,6 @@
     },
     "es": {
       "strings": "Intro Project - es.csv"
-    },
-    "fr": {
-      "strings": null,
     }
   },
   "baseLanguage": "en",
