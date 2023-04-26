@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -661,6 +662,8 @@ But not all of them are.
 
             //Given
             var outputPath = Path.Combine(YarnTestUtility.TestFilesDirectoryPath, "Project.yarnproject");
+            
+            LogAssert.Expect(LogType.Error, new Regex(".*needs to be upgraded.*"));
 
             // When
             File.WriteAllText(outputPath, OldStyleProjectText);
@@ -679,7 +682,12 @@ But not all of them are.
             var outputPath = Path.Combine(YarnTestUtility.TestFilesDirectoryPath, "Project.yarnproject");
 
             // When
+            
             File.WriteAllText(outputPath, OldStyleProjectText);
+
+            // Expect an import error to be logged
+            LogAssert.Expect(LogType.Error, new Regex(".*needs to be upgraded.*"));
+
             AssetDatabase.Refresh();
             var importer = AssetImporter.GetAtPath(outputPath) as YarnProjectImporter;
             Assert.That(importer.ImportData.ImportStatus, Is.EqualTo(ProjectImportData.ImportStatusCode.NeedsUpgradeFromV1));

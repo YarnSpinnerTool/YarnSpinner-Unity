@@ -135,6 +135,9 @@ namespace Yarn.Unity.Editor
                 if (text.StartsWith("title:")) {
                     // This is an old-style project that needs to be upgraded.
                     importData.ImportStatus = ProjectImportData.ImportStatusCode.NeedsUpgradeFromV1;
+
+                    // Log to notify the user that this needs to be done.
+                    ctx.LogImportError($"Yarn Project {ctx.assetPath} is a version 1 Yarn Project, and needs to be upgraded. Select it in the Inspector, and click Upgrade Yarn project.", this);
                 } else {
                     // We don't know what's going on.
                     importData.ImportStatus = ProjectImportData.ImportStatusCode.Unknown;
