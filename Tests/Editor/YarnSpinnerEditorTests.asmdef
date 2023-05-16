@@ -15,7 +15,8 @@
     "overrideReferences": true,
     "precompiledReferences": [
         "nunit.framework.dll",
-        "YarnSpinner.Compiler.dll"
+        "YarnSpinner.Compiler.dll",
+        "YarnSpinner.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

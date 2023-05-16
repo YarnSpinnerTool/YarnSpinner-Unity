@@ -700,5 +700,48 @@ But not all of them are.
 
             Assert.That(importer.ImportData.serializedDeclarations, Has.Count.EqualTo(3));
         }
+        [Test]
+        public void YarnImporter_ProgramCacheIsInvalidatedAfterReimport() {
+            // Arrange: 
+            // Set up a Yarn project and a Yarn script.
+            var project = SetUpProject(new[] {
+                    string.Join("\n", new[] {
+                    "title: Test",
+                    "---",
+                    "Hello, world!",
+                    "===",
+                    ""
+                })
+            });
+            // Act:
+            // Get the cache's state after the project first gets imported.
+            var before = project.Program;
+            // Retrieve the Yarn script.
+            var searchResults = AssetDatabase.FindAssets(
+                $"t:{nameof(TextAsset)}", // Look for TextAssets...
+                new[] {$"{YarnTestUtility.TestFilesDirectoryPath}"} // Under the test file directory.
+            );
+            // (Sanity check) There should only be one text asset (the script referenced by the Yarn project) here.
+            Assert.AreEqual(1, searchResults.Length);
+            var yarnScriptPath = AssetDatabase.GUIDToAssetPath(searchResults[0]);
+            // Edit the Yarn script with new content.
+            File.WriteAllText(
+                yarnScriptPath, 
+                string.Join("\n", new[] {
+                    "title: Start",
+                    "---",
+                    "The quick brown fox jumps over the lazy dog.",
+                    "===",
+                    ""
+                })
+            );
+            // Refresh the asset database to trigger reimport and thus recompilation.
+            AssetDatabase.Refresh();
+            // Access the cache again. 
+            var after = project.Program;
+            // Assert:
+            // "before" and "after" are different objects because the cache is invalidated.
+            Assert.AreNotEqual(before, after);
+        }
     }
 }
