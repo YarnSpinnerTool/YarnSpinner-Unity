@@ -105,33 +105,11 @@ namespace Yarn.Unity
         [Tooltip("If true, will print Debug.Log messages every time it enters a node, and other frequent events")]
         public bool verboseLogging = true;
 
-        private bool _isDialogueRunning;
-
         /// <summary>
         /// Gets a value that indicates if the dialogue is actively
         /// running.
         /// </summary>
-        public bool IsDialogueRunning
-        {
-            get => _isDialogueRunning;
-            private set
-            {
-                // No change, skip
-                if (_isDialogueRunning == value)
-                    return;
-
-                _isDialogueRunning = value;
-
-                if (value)
-                {
-                    onDialogueStart.Invoke();
-                }
-                else
-                {
-                    onDialogueStop.Invoke();
-                }
-            }
-        }
+        public bool IsDialogueRunning { get; private set; }
 
         /// <summary>
         /// A type of <see cref="UnityEvent"/> that takes a single string
@@ -168,11 +146,6 @@ namespace Yarn.Unity
         /// A Unity event that is called when the dialogue starts running.
         /// </summary>
         public UnityEvent onDialogueStart;
-
-        /// <summary>
-        /// A Unity event that is called when the dialogue stops running.
-        /// </summary>
-        public UnityEvent onDialogueStop;
 
         /// <summary>
         /// A Unity event that is called once the dialogue has completed.
@@ -345,6 +318,8 @@ namespace Yarn.Unity
 
             // Mark that we're in conversation.
             IsDialogueRunning = true;
+
+            onDialogueStart.Invoke();
 
             // Signal that we're starting up.
             foreach (var dialogueView in dialogueViews)
