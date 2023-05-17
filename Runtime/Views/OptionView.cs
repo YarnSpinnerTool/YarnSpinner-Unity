@@ -1,3 +1,4 @@
+#if USE_TMP
 using System;
 using UnityEngine;
 using TMPro;
@@ -72,3 +73,12 @@ namespace Yarn.Unity
         }
     }
 }
+#else
+namespace Yarn.Unity
+{
+    /// <summary>
+    /// Required to draw an inspector saying that TextMeshPro must be added for this component to be supported.
+    /// </summary>
+    public class OptionView : UnityEngine.UI.Selectable { }
+}
+#endif

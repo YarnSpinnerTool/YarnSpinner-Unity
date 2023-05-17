@@ -2,7 +2,9 @@
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+#if USE_TMP
 using TMPro;
+#endif
 
 namespace Yarn.Unity.Editor
 {
@@ -104,7 +106,9 @@ namespace Yarn.Unity.Editor
 
             }
 
+#if USE_TMP
             EditorGUILayout.PropertyField(_useTextMeshProProperty);
+#endif
 
             if (!(_yarnProgramProperty.objectReferenceValue is YarnProject))
             {
@@ -149,11 +153,13 @@ namespace Yarn.Unity.Editor
                                 text = $"'{localisedText}'"
                             };
                             System.Type textType;
+#if USE_TMP
                             if (_useTextMeshProProperty.boolValue)
                             {
                                 textType = typeof(TMPro.TextMeshProUGUI);
                             }
                             else
+#endif
                             {
                                 textType = typeof(UnityEngine.UI.Text);
                             }

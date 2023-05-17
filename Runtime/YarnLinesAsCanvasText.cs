@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+#if USE_TMP
 using TMPro;
+#endif
 
 namespace Yarn.Unity
 {
@@ -18,7 +20,9 @@ namespace Yarn.Unity
 
         [SerializeField] public StringObjectDictionary stringsToViews = new StringObjectDictionary();
 
+#if USE_TMP
         [SerializeField] bool _useTextMeshPro = default;
+#endif
 
         void Start()
         {
@@ -51,6 +55,7 @@ namespace Yarn.Unity
 
                 // var view = line.Value;
 
+                // When reimplementing, handle TMP as an optional dependency with #if USE_TMP (it's become optional due to 2023.2.0a14+ versions merging it with ugui)
                 // if (_useTextMeshPro && view is TextMeshProUGUI tmpText)
                 //     {tmpText.text = localizedString;} else if (view is
                 //     UnityEngine.UI.Text text) {text.text =

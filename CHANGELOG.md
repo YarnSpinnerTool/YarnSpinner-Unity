@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - You can now add a Dialogue System prefab to your scene by opening the GameObject menu and choosing Yarn Spinner -> Dialogue Runner.
 
 ### Changed
+- TextMeshPro dependency is now optional. Example dialogue views will not function properly without TMP. As of 2023.2.0a14 TMP has been merged into UGUI.
 
 ### Removed
 

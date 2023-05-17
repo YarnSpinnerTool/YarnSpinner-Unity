@@ -1,3 +1,4 @@
+#if USE_TMP
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -42,3 +43,12 @@ namespace Yarn.Unity
         }
     }
 }
+#else
+namespace Yarn.Unity
+{
+    /// <summary>
+    /// Required to draw an inspector saying that TextMeshPro must be added for this component to be supported.
+    /// </summary>
+    public class CharacterColorView : Yarn.Unity.DialogueViewBase { }
+}
+#endif
