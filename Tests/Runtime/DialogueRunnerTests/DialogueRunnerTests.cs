@@ -468,5 +468,29 @@ namespace Yarn.Unity.Tests
 
             Assert.AreEqual(expectedComponents, parsedComponents);
         }
+
+        [UnityTest]
+        public IEnumerator DialogueRunner_OnDialogueStartAndStop_CallsEvents() {
+            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+
+            runner.onDialogueStart.AddListener(() =>
+            {
+                Debug.Log("Dialogue start");
+            });
+
+            runner.onDialogueComplete.AddListener(() =>
+            {
+                Debug.Log("Dialogue complete");
+            });
+
+            LogAssert.Expect(LogType.Log, "Dialogue start");
+            LogAssert.Expect(LogType.Log, "Dialogue complete");
+
+            runner.StartDialogue(runner.startNode);
+
+            yield return new WaitForSeconds(0.5f);
+
+            runner.Stop();
+        }
     }
 }
