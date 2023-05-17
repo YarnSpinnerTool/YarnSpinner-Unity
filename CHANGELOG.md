@@ -26,6 +26,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Dialogue Runner will now report an error and stop early if you tell it to start running a node that isn't in the provided Yarn Project.
+
 ### Removed
 
 ## [2.3.0-beta1] 2023-03-06

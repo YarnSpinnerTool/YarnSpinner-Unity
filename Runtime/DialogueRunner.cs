@@ -303,6 +303,11 @@ namespace Yarn.Unity
                 return;
             }
 
+            if (yarnProject.NodeNames.Contains(startNode) == false) {
+                Debug.Log($"Can't start dialogue from node {startNode}: the Yarn Project {yarnProject.name} does not contain a node named \"{startNode}\"", yarnProject);
+                return;
+            }
+
             // Stop any processes that might be running already
             foreach (var dialogueView in dialogueViews)
             {
