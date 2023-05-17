@@ -106,19 +106,11 @@ namespace Yarn.Unity.Editor
                 // script was created after the project was last imported.)
 
                 // Re-import each project.
-                try
+                foreach (var importer in missingProjectImporters)
                 {
-                    AssetDatabase.StartAssetEditing();
-                    foreach (var importer in missingProjectImporters)
-                    {
-                        Debug.Log($"Project {importer.assetPath} needs to be reimported");
-                        EditorUtility.SetDirty(importer);
-                        importer.SaveAndReimport();
-                    }
-                }
-                finally
-                {
-                    AssetDatabase.StopAssetEditing();
+                    Debug.Log($"Project {importer.assetPath} needs to be reimported");
+                    EditorUtility.SetDirty(importer);
+                    importer.SaveAndReimport();
                 }
 
             }
