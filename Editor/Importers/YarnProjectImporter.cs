@@ -294,7 +294,13 @@ namespace Yarn.Unity.Editor
         internal static string GetRelativePath(string path)
         {
             if (path.StartsWith(UnityProjectRootPath) == false) {
-                throw new System.ArgumentException($"Path {path} is not a child of the project root path {UnityProjectRootPath}");
+                // This is not a child of the current project. If it's an
+                // absolute path, then it's enough to go on.
+                if (Path.IsPathRooted(path)) {
+                    return path;
+                } else {
+                    throw new System.ArgumentException($"Path {path} is not a child of the project root path {UnityProjectRootPath}");
+                }
             }
             // Trim the root path off along with the trailing slash
             return path.Substring(UnityProjectRootPath.Length + 1);
