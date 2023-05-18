@@ -1,5 +1,9 @@
-﻿title: Program
----
-/// How many laps Jane has walked
-<<declare $laps = 0>>
-===
+{
+  "projectFileVersion": 2,
+  "sourceFiles": [
+    "**/*.yarn"
+  ],
+  "localisation": {},
+  "baseLanguage": "en",
+  "compilerOptions": {}
+}

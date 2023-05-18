@@ -109,7 +109,7 @@ namespace Yarn.Unity
         /// Gets a value that indicates if the dialogue is actively
         /// running.
         /// </summary>
-        public bool IsDialogueRunning { get; set; }
+        public bool IsDialogueRunning { get; private set; }
 
         /// <summary>
         /// A type of <see cref="UnityEvent"/> that takes a single string
@@ -141,6 +141,11 @@ namespace Yarn.Unity
         /// </remarks>
         /// <seealso cref="Dialogue.NodeCompleteHandler"/>
         public StringUnityEvent onNodeComplete;
+
+        /// <summary>
+        /// A Unity event that is called when the dialogue starts running.
+        /// </summary>
+        public UnityEvent onDialogueStart;
 
         /// <summary>
         /// A Unity event that is called once the dialogue has completed.
@@ -298,6 +303,11 @@ namespace Yarn.Unity
                 return;
             }
 
+            if (yarnProject.NodeNames.Contains(startNode) == false) {
+                Debug.Log($"Can't start dialogue from node {startNode}: the Yarn Project {yarnProject.name} does not contain a node named \"{startNode}\"", yarnProject);
+                return;
+            }
+
             // Stop any processes that might be running already
             foreach (var dialogueView in dialogueViews)
             {
@@ -313,6 +323,8 @@ namespace Yarn.Unity
 
             // Mark that we're in conversation.
             IsDialogueRunning = true;
+
+            onDialogueStart.Invoke();
 
             // Signal that we're starting up.
             foreach (var dialogueView in dialogueViews)
