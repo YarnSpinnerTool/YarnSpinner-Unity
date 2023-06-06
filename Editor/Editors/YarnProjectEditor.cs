@@ -24,16 +24,26 @@ namespace Yarn.Unity.Editor
                 return new Label("Project failed to import, or needs upgrading.");
             }
 
+            Foldout foldout;
+
             var importDataSO = new SerializedObject(importData);
 
             var yarnScriptsProperty = importDataSO.FindProperty(nameof(ProjectImportData.yarnFiles));
             var yarnScriptsField = new PropertyField(yarnScriptsProperty);
             yarnScriptsField.Bind(importDataSO);
             ui.Add(yarnScriptsField);
+            foldout = yarnScriptsField.Q<Foldout>();
+            if (foldout != null) {
+                foldout.value = true;
+            }
 
             var variablesProperty = importDataSO.FindProperty(nameof(ProjectImportData.serializedDeclarations));
             var variablesField = new PropertyField(variablesProperty, "Variables");
             variablesField.Bind(importDataSO);
+            foldout = yarnScriptsField.Q<Foldout>();
+            if (foldout != null) {
+                foldout.value = true;
+            }
 
             ui.Add(variablesField);
 
