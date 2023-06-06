@@ -40,7 +40,7 @@ namespace Yarn.Unity.Editor
             var variablesProperty = importDataSO.FindProperty(nameof(ProjectImportData.serializedDeclarations));
             var variablesField = new PropertyField(variablesProperty, "Variables");
             variablesField.Bind(importDataSO);
-            foldout = variablesProperty.Q<Foldout>();
+            foldout = variablesField.Q<Foldout>();
             if (foldout != null) {
                 foldout.value = true;
             }
