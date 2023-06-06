@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Added the ability to add, modify, and delete source file patterns for Yarn projects in the Inspector.
+
 ### Changed
 
 ### Removed
