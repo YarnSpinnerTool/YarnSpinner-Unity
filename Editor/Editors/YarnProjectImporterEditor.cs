@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEditor;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
@@ -270,7 +270,13 @@ namespace Yarn.Unity.Editor
                 ui.Add(errorsContainer);
             }
 
+            sourceFileEntriesContainer.style.marginLeft = 8;
+
             ui.Add(sourceFilesContainer);
+            var sourceFilesHeader = new Label();
+            sourceFilesHeader.text = "Source Files";
+            sourceFilesHeader.style.unityFontStyleAndWeight = FontStyle.Bold;
+            sourceFilesContainer.Add(sourceFilesHeader);
             sourceFilesContainer.Add(sourceFileEntriesContainer);
 
             foreach (var path in importData.sourceFilePaths) {
@@ -282,6 +288,7 @@ namespace Yarn.Unity.Editor
             var addSourceFileButton = new Button();
             addSourceFileButton.text = "Add";
             sourceFilesContainer.Add(addSourceFileButton);
+            addSourceFileButton.style.marginLeft = 8;
             addSourceFileButton.clicked += () =>
             {
                 var loc = CreateSourceFileEntryElement("**/*.yarn");
