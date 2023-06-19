@@ -56,5 +56,9 @@ namespace Yarn.Unity.Editor
             this.path = data;
             sourceFileField.SetValueWithoutNotify(data);
         }
+        
+        public void ClearModified() {
+            this.IsModified = false;
+        }
     }
 }

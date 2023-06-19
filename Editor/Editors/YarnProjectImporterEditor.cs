@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEditor;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
@@ -168,6 +168,10 @@ namespace Yarn.Unity.Editor
                     // the data.
                     data.Localisation.Remove(data.BaseLanguage);
                 }
+            }
+
+            foreach (var sourceField in this.sourceEntryFields) {
+                sourceField.ClearModified();
             }
 
             BaseLanguageNameModified = false;
