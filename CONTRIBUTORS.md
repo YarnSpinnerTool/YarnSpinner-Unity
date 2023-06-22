@@ -13,4 +13,5 @@ The following people have contributed to the development of Yarn Spinner. If you
 * 2021: @andiCR, Andrés Cartín (andres@treeinteractivecr.com)
 * 2021: Shane Duan <github@xsduan.com>
 * 2022: Bernardo Vecchia Stein <jkhulw@sidhion.com>
+* 2023: ChocolaMint (https://chocola-mint.github.io/)
 * 2023: Mitch Zais <https://github.com/Invertex>

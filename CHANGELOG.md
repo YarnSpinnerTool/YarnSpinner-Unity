@@ -36,6 +36,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Added code to invalidate the Program cache on awake for Yarn Projects properly. This means your Yarn Projects will be correctly compiled and referenced in the editor.
+
+### Removed
+
 - Dialogue Runner will now report an error and stop early if you tell it to start running a node that isn't in the provided Yarn Project.
 - Dialogue Runner's 'On Dialogue Complete' event will now fire when you stop it via by calling the `Stop()` method.
 
