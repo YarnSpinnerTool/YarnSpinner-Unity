@@ -60,7 +60,7 @@ namespace Yarn.Unity.Editor
             var descriptionProp = entry.FindPropertyRelative("description");
 
             nameProp.stringValue = "$variable";
-            typeProp.enumValueIndex = YarnProjectImporter.SerializedDeclaration.BuiltInTypesList.IndexOf(Yarn.BuiltinTypes.String);
+            typeProp.enumValueIndex = YarnProjectImporter.SerializedDeclaration.BuiltInTypesList.IndexOf(Yarn.Types.String);
             defaultValueStringProp.stringValue = string.Empty;
             sourceYarnAssetProp.objectReferenceValue = null;
             descriptionProp.stringValue = string.Empty;

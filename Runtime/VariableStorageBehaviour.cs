@@ -43,6 +43,10 @@ namespace Yarn.Unity
     /// </remarks>
     public abstract class VariableStorageBehaviour : MonoBehaviour, Yarn.IVariableStorage
     {
+        public Program Program { get; set; }
+
+        public ISmartVariableEvaluator SmartVariableEvaluator { get; set; }
+
         /// <inheritdoc/>
         public abstract bool TryGetValue<T>(string variableName, out T result);
 
@@ -83,5 +87,14 @@ namespace Yarn.Unity
         /// Intended to be a point for custom saving, editors, etc.
         /// </summary>
         public abstract (FloatDictionary FloatVariables, StringDictionary StringVariables, BoolDictionary BoolVariables) GetAllVariables();
+
+        public VariableKind GetVariableKind(string name)
+        {
+            if (this.Contains(name)) {
+                return VariableKind.Stored;
+            } else {
+                return Program.GetVariableKind(name);
+            }
+        }
     }
 }

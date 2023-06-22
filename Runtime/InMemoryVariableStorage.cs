@@ -28,6 +28,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Yarn.Unity;
+using System;
 
 namespace Yarn.Unity
 {
@@ -106,7 +107,7 @@ namespace Yarn.Unity
         /// </summary>
         void SetVariable(string name, Yarn.IType type, string value)
         {
-            if (type == Yarn.BuiltinTypes.Boolean)
+            if (type == Yarn.Types.Boolean)
             {
                 bool newBool;
                 if (bool.TryParse(value, out newBool))
@@ -118,7 +119,7 @@ namespace Yarn.Unity
                     throw new System.InvalidCastException($"Couldn't initialize default variable {name} with value {value} as Bool");
                 }
             }
-            else if (type == Yarn.BuiltinTypes.Number)
+            else if (type == Yarn.Types.Number)
             {
                 float newNumber;
                 if (float.TryParse(value, out newNumber))
@@ -130,7 +131,7 @@ namespace Yarn.Unity
                     throw new System.InvalidCastException($"Couldn't initialize default variable {name} with value {value} as Number (Float)");
                 }
             }
-            else if (type == Yarn.BuiltinTypes.String)
+            else if (type == Yarn.Types.String)
             {
                 SetValue(name, value); // no special type conversion required
             }
@@ -181,6 +182,18 @@ namespace Yarn.Unity
             variableTypes[variableName] = typeof(bool);
         }
 
+        private static bool TryGetAsType<T>(Dictionary<string,object>dictionary, string key, out T result) {
+            if (dictionary.TryGetValue(key, out var objectResult) == true 
+                && typeof(T).IsAssignableFrom(objectResult.GetType()))
+            {
+                result = (T)objectResult;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
         /// <summary>
         /// Retrieves a <see cref="Value"/> by name.
         /// </summary>
@@ -192,16 +205,33 @@ namespace Yarn.Unity
         /// representing `null`.</returns>
         /// <exception cref="System.ArgumentException">Thrown when
         /// variableName is not a valid variable name.</exception>
-        public override bool TryGetValue<T>(string variableName, out T result)
-        {
-            ValidateVariableName(variableName);
-
-            // If we don't have a variable with this name, return the null
-            // value
-            if (variables.ContainsKey(variableName) == false)
+        public override bool TryGetValue<T>(string variableName, out T result) {
+            switch (GetVariableKind(variableName))
             {
-                result = default;
-                return false;
+                case VariableKind.Stored:
+                    // This is a stored value. First, attempt to fetch it from the
+                    // variable storage.
+
+                    // Try to get the value from the dictionary, and check to see that it's the 
+                    if (TryGetAsType(variables, variableName, out result)) {
+                        // We successfully fetched it from storage.
+                        return true;
+                    } else {
+                        return this.Program.TryGetInitialValue<T>(variableName, out result);
+                    }
+                case VariableKind.Smart:
+                    // The variable is a smart variable. Find the node that
+                    // implements it, and use that to get the variable's current
+                    // value.
+
+                    // Update the VM's settings, since ours might have changed
+                    // since we created the VM.
+                    return this.SmartVariableEvaluator.TryGetSmartVariable(variableName, out result);
+                case VariableKind.Unknown:
+                default:
+                    // The variable is not known.
+                    result = default;
+                    return false;
             }
 
             var resultObject = variables[variableName];

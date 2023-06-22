@@ -143,11 +143,11 @@ namespace Yarn.Unity.Editor
 
                 var type = YarnProjectImporter.SerializedDeclaration.BuiltInTypesList.FirstOrDefault(t => t.Name == typeProperty.stringValue);
 
-                if (type == BuiltinTypes.Number) {
+                if (type == Types.Number) {
                     defaultValueProperty = property.FindPropertyRelative("defaultValueNumber");
-                } else if (type == BuiltinTypes.String) {
+                } else if (type == Types.String) {
                     defaultValueProperty = property.FindPropertyRelative("defaultValueString");
-                } else if (type == BuiltinTypes.Boolean) {
+                } else if (type == Types.Boolean) {
                     defaultValueProperty = property.FindPropertyRelative("defaultValueBool");
                 } else {
                     defaultValueProperty = null;

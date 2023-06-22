@@ -239,7 +239,14 @@ namespace Yarn.Unity.ActionAnalyser
 
             var registrationStatements = actionGroups.SelectMany(group =>
             {
-                return group.Select((a, i) =>
+                // We should only register commands that are not directly
+                // registered, because otherwise if we register them _here_,
+                // then it will create a duplicate registration later.
+                
+                var registerableCommands = group
+                    .Where(a => !(a.Type == ActionType.Command && a.DeclarationType == DeclarationType.DirectRegistration));
+                return registerableCommands
+                    .Select((a, i) =>
                 {
                     var registrationStatement = a.GetRegistrationSyntax(targetParameterName);
                     if (i == 0)

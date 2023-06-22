@@ -21,15 +21,15 @@ namespace Yarn.Unity.Editor
         public class SerializedDeclaration
         {
             internal static List<Yarn.IType> BuiltInTypesList = new List<Yarn.IType> {
-                Yarn.BuiltinTypes.String,
-                Yarn.BuiltinTypes.Boolean,
-                Yarn.BuiltinTypes.Number,
+                Yarn.Types.String,
+                Yarn.Types.Boolean,
+                Yarn.Types.Number,
             };
 
             public string name = "$variable";
 
             [UnityEngine.Serialization.FormerlySerializedAs("type")]
-            public string typeName = Yarn.BuiltinTypes.String.Name;
+            public string typeName = Yarn.Types.String.Name;
 
             public bool defaultValueBool;
             public float defaultValueNumber;
@@ -52,11 +52,11 @@ namespace Yarn.Unity.Editor
 
                 sourceYarnAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(sourceScriptPath);
 
-                if (this.typeName == BuiltinTypes.String.Name) {
+                if (this.typeName == Types.String.Name) {
                     this.defaultValueString = System.Convert.ToString(decl.DefaultValue);
-                } else if (this.typeName == BuiltinTypes.Boolean.Name) {
+                } else if (this.typeName == Types.Boolean.Name) {
                     this.defaultValueBool = System.Convert.ToBoolean(decl.DefaultValue);
-                } else if (this.typeName == BuiltinTypes.Number.Name) {
+                } else if (this.typeName == Types.Number.Name) {
                     this.defaultValueNumber = System.Convert.ToSingle(decl.DefaultValue);
                 } else {
                     throw new System.InvalidOperationException($"Invalid declaration type {decl.Type.Name}");
