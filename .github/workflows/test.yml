@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      max-parallel: 2 # Reduce risk of contention over license acquisition
+      max-parallel: 1 # Only run one at a time, to prevent license contention
       matrix:
         projectPath:
           - YarnSpinner

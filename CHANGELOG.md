@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Added the ability to add, modify, and delete source file patterns for Yarn projects in the Inspector.
+
 ### Changed
 
 ### Removed
@@ -16,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- The `YarnScriptTemplate.txt` now has a newline at the end of the file.
 - The `.yarnproject` importer has been updated to use new JSON-formatted Yarn Projects.
   - JSON-formatted Yarn Projects replace the previous format, which stored all import data in Unity's `.meta` files.
   - JSON-formatted Yarn Projects allow a single Yarn script to be used in multiple Yarn Projects, and also allow the Yarn Spinner compiler to support upcoming new features.

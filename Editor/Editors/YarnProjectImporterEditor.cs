@@ -51,22 +51,32 @@ namespace Yarn.Unity.Editor
 
         public VisualTreeAsset editorUI;
         public VisualTreeAsset localizationUIAsset;
+        public VisualTreeAsset sourceFileUIAsset;
         public StyleSheet yarnProjectStyleSheet;
 
         private string baseLanguage = null;
         private List<LocalizationEntryElement> localizationEntryFields = new List<LocalizationEntryElement>();
+        private List<SourceFileEntryElement> sourceEntryFields = new List<SourceFileEntryElement>();
+        
         private VisualElement localisationFieldsContainer;
+        private VisualElement sourceFileEntriesContainer;
 
         private bool AnyModifications
         {
             get {
-                return LocalisationsAddedOrRemoved
-                || localizationEntryFields.Any(f => f.IsModified)
-                || BaseLanguageNameModified;
+                return AnyLocalisationModifications
+                || AnySourceFileModifications
+                ;
             }
         }
+
+        private bool AnyLocalisationModifications => LocalisationsAddedOrRemoved || localizationEntryFields.Any(f => f.IsModified) || BaseLanguageNameModified;
+        
+        private bool AnySourceFileModifications => SourceFilesAddedOrRemoved || sourceEntryFields.Any(f => f.IsModified);
+
         private bool LocalisationsAddedOrRemoved = false;
         private bool BaseLanguageNameModified = false;
+        private bool SourceFilesAddedOrRemoved = false;
 
         public override void OnEnable()
         {
@@ -85,7 +95,7 @@ namespace Yarn.Unity.Editor
             base.OnDisable();
 
             if (AnyModifications) {
-                if (EditorUtility.DisplayDialog("Unapplied Localisation Changes", "The currently selected Yarn Project has unapplied localisation changes. Do you want to apply them or revert?", "Apply", "Revert")) {
+                if (EditorUtility.DisplayDialog("Unapplied Changes", "The currently selected Yarn Project has unapplied changes. Do you want to apply them or revert?", "Apply", "Revert")) {
                     this.ApplyAndImport();
                 }
             }
@@ -103,6 +113,8 @@ namespace Yarn.Unity.Editor
             foreach (var removedLocalisation in removedLocalisations) {
                 data.Localisation.Remove(removedLocalisation);
             }
+
+            data.SourceFilePatterns = this.sourceEntryFields.Select(f => f.value);
 
             foreach (var locField in localizationEntryFields) {
 
@@ -158,7 +170,12 @@ namespace Yarn.Unity.Editor
                 }
             }
 
+            foreach (var sourceField in this.sourceEntryFields) {
+                sourceField.ClearModified();
+            }
+
             BaseLanguageNameModified = false;
+            SourceFilesAddedOrRemoved = false;
             LocalisationsAddedOrRemoved = false;
 
             data.SaveToFile(importer.assetPath);
@@ -189,11 +206,14 @@ namespace Yarn.Unity.Editor
                 return ui;
             }
 
+
             var importDataSO = new SerializedObject(importData);
             var diagnosticsProperty = importDataSO.FindProperty(nameof(ProjectImportData.diagnostics));
 
             var errorsContainer = new VisualElement();
             errorsContainer.name = "errors";
+
+            var sourceFilesContainer = new VisualElement();
 
             var localisationControls = new VisualElement();
 
@@ -209,6 +229,7 @@ namespace Yarn.Unity.Editor
 #endif
 
             localisationFieldsContainer = new VisualElement();
+            sourceFileEntriesContainer = new VisualElement();
 
             localisationControls.style.marginBottom = 8;
 
@@ -248,6 +269,33 @@ namespace Yarn.Unity.Editor
 
                 ui.Add(errorsContainer);
             }
+
+            sourceFileEntriesContainer.style.marginLeft = 8;
+
+            ui.Add(sourceFilesContainer);
+            var sourceFilesHeader = new Label();
+            sourceFilesHeader.text = "Source Files";
+            sourceFilesHeader.style.unityFontStyleAndWeight = FontStyle.Bold;
+            sourceFilesContainer.Add(sourceFilesHeader);
+            sourceFilesContainer.Add(sourceFileEntriesContainer);
+
+            foreach (var path in importData.sourceFilePaths) {
+                var locElement = CreateSourceFileEntryElement(path);
+                sourceFileEntriesContainer.Add(locElement);
+                sourceEntryFields.Add(locElement);
+            }
+
+            var addSourceFileButton = new Button();
+            addSourceFileButton.text = "Add";
+            sourceFilesContainer.Add(addSourceFileButton);
+            addSourceFileButton.style.marginLeft = 8;
+            addSourceFileButton.clicked += () =>
+            {
+                var loc = CreateSourceFileEntryElement("**/*.yarn");
+                sourceEntryFields.Add(loc);
+                sourceFileEntriesContainer.Add(loc);
+                SourceFilesAddedOrRemoved = true;
+            };
 
             var localisationHeader = new Label();
 
@@ -366,6 +414,17 @@ namespace Yarn.Unity.Editor
                 LocalisationsAddedOrRemoved = true;
             };
             return locElement;
+        }
+
+        private SourceFileEntryElement CreateSourceFileEntryElement(string path) {
+            var sourceElement = new SourceFileEntryElement(sourceFileUIAsset, path, this.target as YarnProjectImporter);
+            sourceElement.onDelete += () =>
+            {
+                sourceElement.RemoveFromHierarchy();
+                sourceEntryFields.Remove(sourceElement);
+                SourceFilesAddedOrRemoved = true;
+            };
+            return sourceElement;
         }
 
         

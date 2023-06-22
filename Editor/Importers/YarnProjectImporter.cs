@@ -146,6 +146,8 @@ namespace Yarn.Unity.Editor
                 return;
             }
 
+            importData.sourceFilePaths.AddRange(project.SourceFilePatterns);
+
             importData.baseLanguageName = project.BaseLanguage;
 
             foreach (var loc in project.Localisation) {
