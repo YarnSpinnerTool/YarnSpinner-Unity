@@ -15,6 +15,7 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
 {
     const string YarnSpinnerUnityAssemblyName = "YarnSpinner.Unity";
     const string DebugLoggingPreprocessorSymbol = "YARN_SOURCE_GENERATION_DEBUG_LOGGING";
+    const string MinimumUnityVersionPreprocessorSymbol = "UNITY_2021_2_OR_NEWER";
 
     public void Execute(GeneratorExecutionContext context)
     {
@@ -48,6 +49,21 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 output.WriteLine($"Assembly {context.Compilation.AssemblyName} doesn't reference {YarnSpinnerUnityAssemblyName}. Not generating any code for it.");
                 return;
             }
+
+            output.WriteLine("Preprocessor Symbols: ");
+            foreach (var symbol in context.ParseOptions.PreprocessorSymbolNames) {
+                output.WriteLine("- " + symbol);
+            }
+
+            // Don't generate source code if we're not targeting at least Unity
+            // 2021.2. (Unity will not invoke this DLL as a source code
+            // generator until at least this version, but other tools like
+            // OmniSharp might.)
+            if ( !context.ParseOptions.PreprocessorSymbolNames.Contains(MinimumUnityVersionPreprocessorSymbol)) {
+                output.WriteLine($"Not generating code for assembly {context.Compilation.AssemblyName} because this assembly is not being built for Unity 2021.2 or newer");
+                return;
+            }
+
 
             // Don't generate source code for certain Yarn Spinner provided
             // assemblies - these always manually register any actions in them.
