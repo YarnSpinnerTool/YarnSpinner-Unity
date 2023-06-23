@@ -19,7 +19,8 @@ namespace Yarn.Unity.ActionAnalyser
         const string initialisationMethodName = "AddRegisterFunction";
 
         /// <summary>
-        /// The name of a scripting define symbol that, if set, indicates that Yarn actions specific to unit tests should be generated.
+        /// The name of a scripting define symbol that, if set, indicates that
+        /// Yarn actions specific to unit tests should be generated.
         /// </summary>
         public const string GenerateTestActionRegistrationSymbol = "YARN_GENERATE_TEST_ACTION_REGISTRATIONS";
 
@@ -411,7 +412,7 @@ namespace Yarn.Unity.ActionAnalyser
             SemanticModel model = null;
 
             if (compilation != null) {
-                model = compilation.GetSemanticModel(tree);
+                model = compilation.GetSemanticModel(tree, true);
             }
 
             return GetAttributeActions(root, model).Concat(GetRuntimeDefinedActions(root, model));
