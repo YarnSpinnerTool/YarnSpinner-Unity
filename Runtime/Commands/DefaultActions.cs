@@ -18,7 +18,7 @@ namespace Yarn.Unity
             Actions.AddRegistrationMethod(RegisterActions);
         }
 
-        public static void RegisterActions(IActionRegistration target)
+        public static void RegisterActions(IActionRegistration target, RegistrationType registrationType)
         {
             // Register the built-in methods and commands from Yarn Spinner for Unity.
             target.AddCommandHandler<float>("wait", Wait);

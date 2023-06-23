@@ -15,6 +15,7 @@ namespace Yarn.Unity.ActionAnalyser
         const string toolVersion = "1.0.0.0";
         const string registrationMethodName = "RegisterActions";
         const string targetParameterName = "target";
+        const string registrationTypeParameterName = "registrationType";
         const string initialisationMethodName = "AddRegisterFunction";
 
         /// <summary>
@@ -30,7 +31,7 @@ namespace Yarn.Unity.ActionAnalyser
         public IEnumerable<string> SourceFiles => GetSourceFiles(SourcePath);
         public string SourcePath { get; set; }
 
-        public IEnumerable<Action> GetActions()
+        public IEnumerable<Action> GetActions(IEnumerable<string> assemblyPaths = null)
         {
             var trees = SourceFiles
                 .Select(path => CSharpSyntaxTree.ParseText(File.ReadAllText(path), path: path))
@@ -47,16 +48,28 @@ namespace Yarn.Unity.ActionAnalyser
                 MetadataReference.CreateFromFile(
                     typeof(object).Assembly.Location),
                 MetadataReference.CreateFromFile(
+                    GetTypeByName("Yarn.Unity.DialogueRunner").Assembly.Location),
+                MetadataReference.CreateFromFile(
                     GetTypeByName("Yarn.Unity.YarnCommandAttribute").Assembly.Location),
                 MetadataReference.CreateFromFile(
                     GetTypeByName("UnityEngine.MonoBehaviour").Assembly.Location),
                 MetadataReference.CreateFromFile(
                     typeof(System.Collections.IEnumerator).Assembly.Location),
                 MetadataReference.CreateFromFile(
+                    typeof(System.Delegate).Assembly.Location),
+                MetadataReference.CreateFromFile(
+                    typeof(System.Action).Assembly.Location),
+                MetadataReference.CreateFromFile(
+                    typeof(System.Func<>).Assembly.Location),
+                MetadataReference.CreateFromFile(
                     Path.Combine(systemAssemblyPath, "System.dll")),
                 MetadataReference.CreateFromFile(
                     typeof(System.Attribute).Assembly.Location),
             };
+
+            if (assemblyPaths != null) {
+                references.AddRange(assemblyPaths.Select(p => MetadataReference.CreateFromFile(p)));
+            }
 
             var compilation = CSharpCompilation.Create("YarnActionAnalysis")
                 .AddReferences(references)
@@ -237,34 +250,70 @@ namespace Yarn.Unity.ActionAnalyser
         {
             var actionGroups = actions.GroupBy(a => a.SourceFileName);
 
-            var registrationStatements = actionGroups.SelectMany(group =>
+            // Create registrations for all attribute registrations
+            // ([YarnCommand], [YarnFunction]). These registration are always
+            // invoked. Separately, create registrations for all runtime
+            // registrations (AddCommandHandler() invocations). These are only
+            // invoked when the registration methods 'registrationType'
+            // parameter equals Yarn.Unity.RegistrationType, which is true when
+            // Yarn Spinner needs to list all commands and functions from
+            // everywhere.
+            //
+            // We should only register runtime-registered commands when
+            // explicitly requested, because otherwise if we register them here
+            // AND during gameplay, they'll overlap and cause problems
+
+            var attributeRegistrationStatements = actionGroups.SelectMany(group =>
             {
-                // We should only register commands that are not directly
-                // registered, because otherwise if we register them _here_,
-                // then it will create a duplicate registration later.
-                
-                var registerableCommands = group
-                    .Where(a => !(a.Type == ActionType.Command && a.DeclarationType == DeclarationType.DirectRegistration));
-                return registerableCommands
-                    .Select((a, i) =>
-                {
-                    var registrationStatement = a.GetRegistrationSyntax(targetParameterName);
-                    if (i == 0)
-                    {
-                        return registrationStatement.WithLeadingTrivia(SyntaxFactory.TriviaList(
-                            SyntaxFactory.Comment($"// Actions from file:"),
-                            SyntaxFactory.Comment($"// {a.SourceFileName}")
-                        ));
-                    }
-                    else
-                    {
-                        return registrationStatement;
-                    }
-                });
+
+                var attributeRegistrations = group
+                    .Where(a => a.DeclarationType != DeclarationType.DirectRegistration);
+                return GetRegistrationStatements(attributeRegistrations);
             });
 
-            var registrationMethodBody = SyntaxFactory.Block().WithStatements(SyntaxFactory.List(registrationStatements));
+            var runtimeRegistrationStatements = actionGroups.SelectMany(group =>
+            {
+                var runtimeRegistrations = group
+                    .Where(a => a.DeclarationType == DeclarationType.DirectRegistration);
+                return GetRegistrationStatements(runtimeRegistrations);
+            });
 
+            // Create the if statement that, if true, registers
+            // runtime-registered actions
+            var ifRuntimeRegisters = SyntaxFactory.IfStatement
+            (
+                SyntaxFactory.BinaryExpression
+                (
+                    SyntaxKind.EqualsExpression,
+                    SyntaxFactory.IdentifierName("registrationType"),
+                    SyntaxFactory.MemberAccessExpression
+                    (
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        SyntaxFactory.MemberAccessExpression
+                        (
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            SyntaxFactory.MemberAccessExpression
+                            (
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                SyntaxFactory.IdentifierName("Yarn"),
+                                SyntaxFactory.IdentifierName("Unity")
+                            ),
+                            SyntaxFactory.IdentifierName("RegistrationType")
+                        ),
+                        SyntaxFactory.IdentifierName("Compilation")
+                    )
+                ),
+                SyntaxFactory.Block
+                (
+                    SyntaxFactory.List(runtimeRegistrationStatements)
+                )
+            );
+
+            // Create the method body that combines the attribute-registered and
+            // (possibly) runtime-registered action registrations.
+            var registrationMethodBody = SyntaxFactory.Block().WithStatements(SyntaxFactory.List(attributeRegistrationStatements.Append(ifRuntimeRegisters)));
+
+            // Create the list of attributes to attach to this method.
             var attributes = SyntaxFactory.List(new[] { GeneratedCodeAttributeList });
 
             var methodSyntax = SyntaxFactory.MethodDeclaration(
@@ -277,8 +326,11 @@ namespace Yarn.Unity.ActionAnalyser
                 null, // explicit interface identifier
                 SyntaxFactory.Identifier(registrationMethodName), // method name
                 null, // type parameter list
-                SyntaxFactory.ParameterList(SyntaxFactory.SingletonSeparatedList(
-                    SyntaxFactory.Parameter(SyntaxFactory.Identifier(targetParameterName)).WithType(SyntaxFactory.ParseTypeName("global::Yarn.Unity.IActionRegistration"))
+                SyntaxFactory.ParameterList(SyntaxFactory.SeparatedList(
+                    new[] {
+                        SyntaxFactory.Parameter(SyntaxFactory.Identifier(targetParameterName)).WithType(SyntaxFactory.ParseTypeName("global::Yarn.Unity.IActionRegistration")),
+                        SyntaxFactory.Parameter(SyntaxFactory.Identifier(registrationTypeParameterName)).WithType(SyntaxFactory.ParseTypeName("Yarn.Unity.RegistrationType")),
+                    }
                 )), // parameters
                 SyntaxFactory.List<TypeParameterConstraintClauseSyntax>(), // type parameter constraints
                 registrationMethodBody, // body
@@ -287,12 +339,37 @@ namespace Yarn.Unity.ActionAnalyser
                 );
 
             return methodSyntax.NormalizeWhitespace();
+
+            IEnumerable<SyntaxNode> GetRegistrationStatements(IEnumerable<Action> registerableCommands)
+            {
+                return registerableCommands
+                    .Select((a, i) =>
+                    {
+                        var registrationStatement = a.GetRegistrationSyntax(targetParameterName);
+                        if (i == 0)
+                        {
+                            // Add a comment above the first registration that indicates where these actions came from
+                            return registrationStatement.WithLeadingTrivia(
+                                SyntaxFactory.TriviaList(
+                                    SyntaxFactory.Comment($"// Actions from file:"),
+                                    SyntaxFactory.Comment($"// {a.SourceFileName}")
+                            ));
+                        }
+                        else
+                        {
+                            return registrationStatement;
+                        }
+                    }
+                );
+            }
         }
 
         private static AttributeListSyntax GeneratedCodeAttributeList
         {
             get
             {
+                // [System.CodeDom.Compiler.GeneratedCode(<toolName>, <toolVersion>)]
+                
                 var toolNameArgument = SyntaxFactory.AttributeArgument(
                     SyntaxFactory.LiteralExpression(
                         SyntaxKind.StringLiteralExpression,
@@ -342,14 +419,54 @@ namespace Yarn.Unity.ActionAnalyser
 
         private static IEnumerable<Action> GetRuntimeDefinedActions(CompilationUnitSyntax root, SemanticModel model)
         {
-            var methodInvocations = root.DescendantNodes().OfType<InvocationExpressionSyntax>()
+            var classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
+            classes = classes.Where(c =>
+            {
+                var classAttributes = GetAttributes(c, model);
+
+                bool hasGeneratedCodeAttribute = classAttributes.Any(attr =>
+                {
+                    var syntax = attr.Item1;
+                    var data = attr.Item2;
+
+                    // Check to see if this attribute is the [GeneratedCode]
+                    // attribute
+                    INamedTypeSymbol attributeClass = data.AttributeClass;
+                    string attributeClassName = attributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+                    return attributeClassName == "global::System.CodeDom.Compiler.GeneratedCodeAttribute";
+                });
+
+                // Do not visit this class if it is generated code
+                if (hasGeneratedCodeAttribute) {
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+
+            var methodInvocations = classes
+                .SelectMany(classDecl => classDecl.DescendantNodes())
+                .OfType<InvocationExpressionSyntax>()
                 .Select(i =>
                 {
                     // Get the symbol represening the method that's being called
-                    var methodSymbol = model.GetSymbolInfo(i.Expression).Symbol as IMethodSymbol;
+                    var symbolInfo = model.GetSymbolInfo(i.Expression);
+
+                    ISymbol symbol = symbolInfo.Symbol;
+                    
+                    if (symbol == null && symbolInfo.CandidateReason == CandidateReason.OverloadResolutionFailure) {
+                        // We weren't able to determine what specific method
+                        // this was. Pick the first one - we don't actually need
+                        // to know about what specific overload was used, since
+                        // they all have a similar signature.
+                        symbol = symbolInfo.CandidateSymbols.First();
+                    }
+                    var methodSymbol = symbol as IMethodSymbol;
                     return (Syntax: i, Symbol: methodSymbol);
                 })
-                .Where(i => i.Symbol != null).ToList();
+                .Where(i => i.Symbol != null)
+                .ToList();
 
             var dialogueRunnerCalls = methodInvocations
                 .Where(info => info.Symbol.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "global::Yarn.Unity.DialogueRunner").ToList();
@@ -374,7 +491,14 @@ namespace Yarn.Unity.ActionAnalyser
                 }
 
 
-                if (!(model.GetSymbolInfo(targetSyntax.Expression).Symbol is IMethodSymbol targetSymbol))
+                SymbolInfo targetSymbolInfo = model.GetSymbolInfo(targetSyntax.Expression);
+                IMethodSymbol targetSymbol = targetSymbolInfo.Symbol as IMethodSymbol;
+                if (targetSymbol == null && targetSymbolInfo.CandidateReason == CandidateReason.OverloadResolutionFailure) {
+                    // We couldn't figure out exactly which of the targets to
+                    // use. Choose one.
+                    targetSymbol = targetSymbolInfo.CandidateSymbols.FirstOrDefault() as IMethodSymbol;
+                }
+                if (targetSymbol == null)
                 {
                     // TODO: handle case of 'we couldn't figure out target method's
                     // symbol'
@@ -551,6 +675,18 @@ namespace Yarn.Unity.ActionAnalyser
                 case "YarnCommandAttribute": return ActionType.Command;
                 case "YarnFunctionAttribute": return ActionType.Function;
                 default: return ActionType.NotAnAction;
+            }
+        }
+
+        public static IEnumerable<(AttributeSyntax, AttributeData)> GetAttributes(ClassDeclarationSyntax classDecl, SemanticModel model) {
+            var classSymbol = model.GetDeclaredSymbol(classDecl);
+
+            var methodAttributes = classSymbol.GetAttributes();
+
+            foreach (var attribute in methodAttributes)
+            {
+                var syntax = attribute.ApplicationSyntaxReference.GetSyntax() as AttributeSyntax;
+                yield return (syntax, attribute);
             }
         }
 

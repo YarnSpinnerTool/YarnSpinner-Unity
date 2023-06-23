@@ -408,16 +408,35 @@ namespace Yarn.Unity.ActionAnalyser
                     return SyntaxFactory.TypeOfExpression(type);
                 });
 
-                var nameOfMethod = SyntaxFactory.InvocationExpression(
-                    SyntaxFactory.ParseName(nameOfIdentifier), 
-                    SyntaxFactory.ArgumentList(
-                        SyntaxFactory.SeparatedList(
-                            new[] { 
-                                SyntaxFactory.Argument(methodReference) 
-                            }
+                ExpressionSyntax nameOfMethod;
+
+                if (MethodSymbol.DeclaredAccessibility != Accessibility.Public)
+                {
+                    // The method is not public, so we can't use nameof() on it,
+                    // because it would cause a compiler error. Instead, we'll have to
+                    // refer to the method by name.
+                    nameOfMethod = SyntaxFactory.LiteralExpression(
+                        SyntaxKind.StringLiteralExpression,
+                        SyntaxFactory.Literal(MethodName)
+                    );
+                }
+                else
+                {
+                    // The method is public, so we can use nameof() to refer to
+                    // it in a more durable way.
+
+                    nameOfMethod = SyntaxFactory.InvocationExpression(
+                        SyntaxFactory.ParseName(nameOfIdentifier),
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SeparatedList(
+                                new[] {
+                                    SyntaxFactory.Argument(methodReference)
+                                }
+                            )
                         )
-                    )
-                );
+                    );
+                }
+
 
                 var arrayOfTypeParameters = SyntaxFactory.ArrayCreationExpression(
                     SyntaxFactory.ArrayType(

@@ -9,6 +9,18 @@ using UnityEngine;
 namespace Yarn.Unity
 {
     using Converter = System.Func<string, object>;
+    using ActionRegistrationMethod = System.Action<IActionRegistration, RegistrationType>;
+
+    public enum RegistrationType {
+        /// <summary>
+        /// Actions are being registered during a Yarn script compilation.
+        /// </summary>
+        Compilation,
+        /// <summary>
+        /// Actions are being registered for runtime use (i.e. during gameplay.)
+        /// </summary>
+        Runtime
+    }
 
     public interface ICommand {
         string Name { get; }
@@ -382,7 +394,7 @@ namespace Yarn.Unity
  
         public void RegisterActions() {
             foreach (var registrationFunction in ActionRegistrationMethods) {
-                registrationFunction.Invoke(ActionRegistrar);
+                registrationFunction.Invoke(DialogueRunner, RegistrationType.Runtime);
             }
         }
 
@@ -601,10 +613,10 @@ namespace Yarn.Unity
         }
 
 
-        internal static HashSet<System.Action<IActionRegistration>> ActionRegistrationMethods = new HashSet<Action<IActionRegistration>>();
+        internal static HashSet<ActionRegistrationMethod> ActionRegistrationMethods = new HashSet<ActionRegistrationMethod>();
 
 
-        public static void AddRegistrationMethod(Action<IActionRegistration> registerActions)
+        public static void AddRegistrationMethod(ActionRegistrationMethod registerActions)
         {
             ActionRegistrationMethods.Add(registerActions);
         }
@@ -617,7 +629,7 @@ namespace Yarn.Unity
 
             foreach (var registrationMethod in ActionRegistrationMethods)
             {
-                registrationMethod.Invoke(proxy);
+                registrationMethod.Invoke(proxy, RegistrationType.Compilation);
             }
 
             return library;
