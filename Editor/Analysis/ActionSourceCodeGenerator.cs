@@ -74,9 +74,7 @@ namespace Yarn.Unity.Editor
             var analysis = new Yarn.Unity.ActionAnalyser.Analyser("Assets");
             try
             {
-                var assemblyPaths = UnityEditor.Compilation.CompilationPipeline.GetAssemblies(UnityEditor.Compilation.AssembliesType.Player).Select(assembly => assembly.outputPath);
-                
-                var actions = analysis.GetActions(assemblyPaths);
+                var actions = analysis.GetActions();
                 var source = Yarn.Unity.ActionAnalyser.Analyser.GenerateRegistrationFileSource(actions);
 
                 var path = GeneratedSourcePath;
