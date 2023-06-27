@@ -137,5 +137,21 @@ namespace Yarn.Unity
                 }
             }
         }
+
+        /// <inheritdoc />
+        public override void DialogueComplete()
+        {   
+            // do we still have a line lying around?
+            if (canvasGroup.alpha > 0)
+            {
+                StopAllCoroutines();
+                lastSeenLine = null;
+                OnOptionSelected = null;
+                canvasGroup.interactable = false;
+                canvasGroup.blocksRaycasts = false;
+
+                StartCoroutine(Effects.FadeAlpha(canvasGroup, canvasGroup.alpha, 0, fadeTime));
+            }
+        }
     }
 }

@@ -274,5 +274,12 @@ namespace Yarn.Unity
             }
             requestInterrupt?.Invoke();
         }
+
+        /// <inheritdoc />
+        public override void DialogueComplete()
+        {
+            // just in case we are still playing audio we want it to stop
+            audioSource.Stop();
+        }
     }
 }

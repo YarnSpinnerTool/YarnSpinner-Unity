@@ -239,7 +239,11 @@ namespace Yarn.Unity
             canvasGroup.blocksRaycasts = false;
             // turning interaction back on, if it needs it
             canvasGroup.interactable = interactable;
-            onDismissalComplete();
+            
+            if (onDismissalComplete != null)
+            {
+                onDismissalComplete();
+            }
         }
 
         /// <inheritdoc/>
@@ -471,6 +475,17 @@ namespace Yarn.Unity
             // if we'd received a signal from any other part of the game (for
             // example, if a DialogueAdvanceInput had signalled us.)
             UserRequestedViewAdvancement();
+        }
+
+        /// <inheritdoc />
+        public override void DialogueComplete()
+        {
+            // do we still have a line lying around?
+            if (currentLine != null)
+            {
+                currentLine = null;
+                StartCoroutine(DismissLineInternal(null));
+            }
         }
     }
 }
