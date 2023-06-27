@@ -478,6 +478,9 @@ namespace Yarn.Unity
         }
 
         /// <inheritdoc />
+        /// <remarks>
+        /// If a line is still being shown dismisses it.
+        /// </remarks>
         public override void DialogueComplete()
         {
             // do we still have a line lying around?
