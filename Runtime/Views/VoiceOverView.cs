@@ -96,7 +96,6 @@ namespace Yarn.Unity
         /// <seealso cref="DialogueViewBase.RunLine(LocalizedLine, Action)"/>
         public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
-
             // If we have a current playback for some reason, stop it
             // immediately.
             if (playbackCoroutine != null)
@@ -126,7 +125,6 @@ namespace Yarn.Unity
                 yield break;
             }
 
-            
             if (audioSource.isPlaying)
             {
                 // Usually, this shouldn't happen because the DialogueRunner
@@ -224,7 +222,8 @@ namespace Yarn.Unity
             {
                 completionHandler = onDialogueLineFinished;
                 interruptToken.Interrupt();
-            } else
+            }
+            else
             {
                 onDialogueLineFinished();
             }
@@ -272,7 +271,12 @@ namespace Yarn.Unity
             {
                 return;
             }
-            requestInterrupt?.Invoke();
+            // we are playing a line but interruption is already in progress
+            // we don't want to double interrupt as weird things can happen
+            if (interruptToken.CanInterrupt)
+            {
+                requestInterrupt?.Invoke();
+            }
         }
 
         /// <inheritdoc />
