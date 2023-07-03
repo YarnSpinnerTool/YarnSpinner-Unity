@@ -12,12 +12,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Calling `Stop` on the Dialogue Runner will now also dismiss the LineView, OptionListView, and VoiceOverView.
+
 ### Removed
 
 ## [2.3.0-beta2] 2023-05-17
 
 ### Added
 
+- The `YarnScriptTemplate.txt` now has a newline at the end of the file.
 - The `.yarnproject` importer has been updated to use new JSON-formatted Yarn Projects.
   - JSON-formatted Yarn Projects replace the previous format, which stored all import data in Unity's `.meta` files.
   - JSON-formatted Yarn Projects allow a single Yarn script to be used in multiple Yarn Projects, and also allow the Yarn Spinner compiler to support upcoming new features.
@@ -34,6 +37,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added 'On Dialogue Start' event to Dialogue Runner. This event is called when the dialogue starts running. (@nrvllrgrs)
 
 ### Changed
+
+- Added code to invalidate the Program cache on awake for Yarn Projects properly. This means your Yarn Projects will be correctly compiled and referenced in the editor.
+
+### Removed
 
 - Dialogue Runner will now report an error and stop early if you tell it to start running a node that isn't in the provided Yarn Project.
 - Dialogue Runner's 'On Dialogue Complete' event will now fire when you stop it via by calling the `Stop()` method.

@@ -850,7 +850,7 @@ namespace Yarn.Unity
                 case CommandDispatchResult.StatusType.SucceededAsync:
                     // We got a coroutine to wait for. Wait for it, and call
                     // Continue.
-                    StartCoroutine(WaitForYieldInstruction(awaitCoroutine, ContinueDialogue));
+                    StartCoroutine(WaitForYieldInstruction(awaitCoroutine, () => ContinueDialogue(true)));
                     return;
             }
 
@@ -1067,8 +1067,16 @@ namespace Yarn.Unity
             }
         }
 
-        void ContinueDialogue()
+        void ContinueDialogue(bool dontRestart = false)
         {
+            if (dontRestart == true)
+            {
+                if (Dialogue.IsActive == false)
+                {
+                    return;
+                }
+            }
+            
             CurrentLine = null;
             Dialogue.Continue();
         }

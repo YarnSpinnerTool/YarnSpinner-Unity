@@ -304,6 +304,10 @@ namespace Yarn.Unity
         /// on-screen dialogue UI (for example, turning off a letterboxing
         /// effect, or hiding dialogue UI elements.)
         /// </para>
+        /// <para>
+        /// If <see cref="DialogueRunner.Stop()" /> is called, this method is how your custom views are informed of this.
+        /// This allows you to skip over the normal flow of dialogue, so please use this method to clean up your views.
+        /// </para>
         /// <para style="note">The default implementation of this method does
         /// nothing.</para>
         /// </remarks>
