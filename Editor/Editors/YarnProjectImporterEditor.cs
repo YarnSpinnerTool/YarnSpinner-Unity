@@ -362,7 +362,14 @@ namespace Yarn.Unity.Editor
                 SetElementVisible(unityControls, useUnityLocalisationSystemProperty.boolValue);
                 SetElementVisible(yarnInternalControls, !useUnityLocalisationSystemProperty.boolValue);
             });
+
+            
 #endif
+
+            var cantGenerateUnityStringTableMessage = new IMGUIContainer(() =>
+            {
+                EditorGUILayout.HelpBox("All lines must have a line ID tag in order to create a string table. Click 'Add Line Tags to Scripts' to fix this problem.", MessageType.Warning);
+            });
 
             addStringTagsButton.text = "Add Line Tags to Scripts";
             addStringTagsButton.clicked += () =>
@@ -387,6 +394,8 @@ namespace Yarn.Unity.Editor
 
             ui.Add(localisationControls);
 
+            ui.Add(cantGenerateUnityStringTableMessage);
+
             ui.Add(addStringTagsButton);
             ui.Add(generateStringsFileButton);
 
@@ -401,6 +410,15 @@ namespace Yarn.Unity.Editor
             {
                 addStringTagsButton.SetEnabled(yarnProjectImporter.CanGenerateStringsTable == false && importData.yarnFiles.Any());
                 generateStringsFileButton.SetEnabled(yarnProjectImporter.CanGenerateStringsTable);
+
+                bool isUnityLocalisationAvailable;
+#if USE_UNITY_LOCALIZATION
+                isUnityLocalisationAvailable = true;
+#else
+                isUnityLocalisationAvailable = false;
+#endif
+
+                cantGenerateUnityStringTableMessage.style.display = (isUnityLocalisationAvailable && yarnProjectImporter.HasErrors == false && yarnProjectImporter.CanGenerateStringsTable == false) ? DisplayStyle.Flex : DisplayStyle.None;
             }
         }
 

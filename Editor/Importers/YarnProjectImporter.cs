@@ -518,6 +518,24 @@ namespace Yarn.Unity.Editor
 #endif
 
         /// <summary>
+        /// Gets a value indicating whether this Yarn Project contains any
+        /// compile errors.
+        /// </summary>
+        internal bool HasErrors {
+            get {
+                var importData = AssetDatabase.LoadAssetAtPath<ProjectImportData>(this.assetPath);
+
+                if (importData == null) {
+                    // If we have no import data, then a problem has occurred
+                    // when importing this project, so indicate 'true' as
+                    // signal.
+                    return true; 
+                }
+                return importData.HasCompileErrors;
+            }
+        }
+
+        /// <summary>
         /// Gets a value indicating whether this Yarn Project is able to
         /// generate a strings table - that is, it has no compile errors,
         /// it has at least one script, and all scripts are fully tagged.
