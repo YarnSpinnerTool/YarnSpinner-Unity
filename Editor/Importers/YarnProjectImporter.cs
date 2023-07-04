@@ -511,6 +511,11 @@ namespace Yarn.Unity.Editor
                         tags = RemoveLineIDFromMetadata(stringInfo.metadata).ToArray(),
                     });
                 }
+
+                // We've made changes to the table, so flag it and its shared
+                // data as dirty.
+                EditorUtility.SetDirty(table);
+                EditorUtility.SetDirty(table.SharedData);
                 return;
             }
             Debug.LogWarning($"Unable to find a locale in the string table that matches the default locale {project.BaseLanguage}");

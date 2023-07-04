@@ -154,6 +154,7 @@ public class AddAssetsToAssetTableCollectionWizard : EditorWindow {
                 perLocaleCount += 1;
                 totalCount += 1;
             }
+            EditorUtility.SetDirty(assetTableCollection);
             Debug.Log($"Added {perLocaleCount} assets to {locale.LocaleName}");
         }
         Debug.Log($"Added {totalCount} assets to asset table collection");
