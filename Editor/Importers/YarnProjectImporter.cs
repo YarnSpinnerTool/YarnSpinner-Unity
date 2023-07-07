@@ -130,7 +130,7 @@ namespace Yarn.Unity.Editor
             Project project;
             try {
                 project = Yarn.Compiler.Project.LoadFromFile(ctx.assetPath);
-            } catch (System.Text.Json.JsonException) {
+            } catch (System.Exception) {
                 var text = File.ReadAllText(ctx.assetPath);
                 if (text.StartsWith("title:")) {
                     // This is an old-style project that needs to be upgraded.
