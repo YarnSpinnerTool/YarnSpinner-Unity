@@ -8,13 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+### Changed
+
+### Removed
+
+## [2.3.1] 2023-07-07
+
+### Added
+
 - Added the ability to add, modify, and delete source file patterns for Yarn projects in the Inspector.
 
 ### Changed
 
 - Calling `Stop` on the Dialogue Runner will now also dismiss the LineView, OptionListView, and VoiceOverView.
-
-### Removed
 
 ## [2.3.0-beta2] 2023-05-17
 
