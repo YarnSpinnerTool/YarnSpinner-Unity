@@ -138,6 +138,25 @@ namespace Yarn.Unity
                 }
             }
         }
+
+        /// <inheritdoc />
+        /// <remarks>
+        /// If options are still shown dismisses them.
+        /// </remarks>
+        public override void DialogueComplete()
+        {   
+            // do we still have any options being shown?
+            if (canvasGroup.alpha > 0)
+            {
+                StopAllCoroutines();
+                lastSeenLine = null;
+                OnOptionSelected = null;
+                canvasGroup.interactable = false;
+                canvasGroup.blocksRaycasts = false;
+
+                StartCoroutine(Effects.FadeAlpha(canvasGroup, canvasGroup.alpha, 0, fadeTime));
+            }
+        }
     }
 }
 #else

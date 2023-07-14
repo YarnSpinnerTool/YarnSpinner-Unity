@@ -18,6 +18,8 @@ position: 0,0
 ===
 title: VariableTest
 ---
+/// How many laps Jane has walked
+<<declare $laps = 0>>
 Jane: Yes! I've already walked {$laps} laps!
 ===
 title: FunctionTest

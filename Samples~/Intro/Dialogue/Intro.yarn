@@ -46,7 +46,6 @@ Anne: Hi there! #line:tutorial-anne-01 // chirpy
     // dialogue option), this will stay at its default value of 'false',
     // which means the player hasn't learned Anne's name.
     <<set $knows_anne_name to true>>
-
 -> Tom: Where am I? #line:tutorial-tom-05 // a little panicked 
     Anne: You're floating in a featureless void! #line:tutorial-anne-03 // as though this is a perfectly reasonable explanation 
     Tom: I can see that.. #line:tutorial-tom-06 // dubious 

@@ -8,6 +8,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+### Changed
+
+### Removed
+
+## [2.3.1] 2023-07-07
+
+### Added
+
+- Added the ability to add, modify, and delete source file patterns for Yarn projects in the Inspector.
+
+### Changed
+
+- Calling `Stop` on the Dialogue Runner will now also dismiss the LineView, OptionListView, and VoiceOverView.
+
+## [2.3.0-beta2] 2023-05-17
+
+### Added
+
+- The `YarnScriptTemplate.txt` now has a newline at the end of the file.
 - The `.yarnproject` importer has been updated to use new JSON-formatted Yarn Projects.
   - JSON-formatted Yarn Projects replace the previous format, which stored all import data in Unity's `.meta` files.
   - JSON-formatted Yarn Projects allow a single Yarn script to be used in multiple Yarn Projects, and also allow the Yarn Spinner compiler to support upcoming new features.
@@ -18,15 +37,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     - If your project uses any Yarn files that are not in the same folder, or subfolder, of the Yarn Project, **you will need to move the Yarn files** to the folder.
     - Your Yarn scripts, strings files, and localised assets will not be modified, and you won't need to change any objects in your scenes or prefabs. The only thing that will be changed is the Yarn Project file.
 
--
 - The Unity Localization integration is now available when the Localization package is installed.
   - Prior to this change, the `YARN_USE_EXPERIMENTAL_FEATURES` scripting definition symbol needed to be added to the Player settings.
 - You can now add a Dialogue System prefab to your scene by opening the GameObject menu and choosing Yarn Spinner -> Dialogue Runner.
+- Added 'On Dialogue Start' event to Dialogue Runner. This event is called when the dialogue starts running. (@nrvllrgrs)
 
 ### Changed
 - TextMeshPro dependency is now optional. Example dialogue views will not function properly without TMP. As of 2023.2.0a14 TMP has been merged into UGUI.
 
+- Added code to invalidate the Program cache on awake for Yarn Projects properly. This means your Yarn Projects will be correctly compiled and referenced in the editor.
+- Dialogue Runner will now report an error and stop early if you tell it to start running a node that isn't in the provided Yarn Project.
+- Dialogue Runner's 'On Dialogue Complete' event will now fire when you stop it via by calling the `Stop()` method.
+
 ### Removed
+
 
 ## [2.3.0-beta1] 2023-03-06
 

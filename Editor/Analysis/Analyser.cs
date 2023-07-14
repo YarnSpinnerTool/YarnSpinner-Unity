@@ -320,7 +320,7 @@ namespace Yarn.Unity.ActionAnalyser
             }
         }
 
-        public static IEnumerable<Action> GetActions(CSharpCompilation compilation, SyntaxTree tree)
+        public static IEnumerable<Action> GetActions(CSharpCompilation compilation, Microsoft.CodeAnalysis.SyntaxTree tree)
         {
             var root = tree.GetCompilationUnitRoot();
 

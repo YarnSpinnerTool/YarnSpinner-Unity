@@ -78,7 +78,7 @@ namespace Yarn.Unity.Editor
             }
             else
             {
-                EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project, so it can't be compiled or loaded into a Dialogue Runner. Either click Create New Yarn Project, or add a Yarn project to the field below.", MessageType.Info);
+                EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project, so it can't be compiled or loaded into a Dialogue Runner. Either click Create New Yarn Project, or add this folder to an existing Yarn Project's sources list.", MessageType.Info);
                 if (GUILayout.Button("Create New Yarn Project..."))
                 {
                     YarnProjectUtility.CreateYarnProject(target as YarnImporter);

@@ -240,7 +240,11 @@ namespace Yarn.Unity
             canvasGroup.blocksRaycasts = false;
             // turning interaction back on, if it needs it
             canvasGroup.interactable = interactable;
-            onDismissalComplete();
+            
+            if (onDismissalComplete != null)
+            {
+                onDismissalComplete();
+            }
         }
 
         /// <inheritdoc/>
@@ -455,9 +459,12 @@ namespace Yarn.Unity
                 // started it.
                 currentStopToken.Interrupt();
             }
-            // No animation is now running. Signal that we want to
-            // interrupt the line instead.
-            requestInterrupt?.Invoke();
+            else
+            {
+                // No animation is now running. Signal that we want to
+                // interrupt the line instead.
+                requestInterrupt?.Invoke();
+            }
         }
 
         /// <summary>
@@ -469,6 +476,20 @@ namespace Yarn.Unity
             // if we'd received a signal from any other part of the game (for
             // example, if a DialogueAdvanceInput had signalled us.)
             UserRequestedViewAdvancement();
+        }
+
+        /// <inheritdoc />
+        /// <remarks>
+        /// If a line is still being shown dismisses it.
+        /// </remarks>
+        public override void DialogueComplete()
+        {
+            // do we still have a line lying around?
+            if (currentLine != null)
+            {
+                currentLine = null;
+                StartCoroutine(DismissLineInternal(null));
+            }
         }
     }
 }

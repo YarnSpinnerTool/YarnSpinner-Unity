@@ -130,7 +130,7 @@ namespace Yarn.Unity.Editor
             Project project;
             try {
                 project = Yarn.Compiler.Project.LoadFromFile(ctx.assetPath);
-            } catch (System.Text.Json.JsonException) {
+            } catch (System.Exception) {
                 var text = File.ReadAllText(ctx.assetPath);
                 if (text.StartsWith("title:")) {
                     // This is an old-style project that needs to be upgraded.
@@ -145,6 +145,8 @@ namespace Yarn.Unity.Editor
                 // Either way, we can't continue.
                 return;
             }
+
+            importData.sourceFilePaths.AddRange(project.SourceFilePatterns);
 
             importData.baseLanguageName = project.BaseLanguage;
 
@@ -294,7 +296,13 @@ namespace Yarn.Unity.Editor
         internal static string GetRelativePath(string path)
         {
             if (path.StartsWith(UnityProjectRootPath) == false) {
-                throw new System.ArgumentException($"Path {path} is not a child of the project root path {UnityProjectRootPath}");
+                // This is not a child of the current project. If it's an
+                // absolute path, then it's enough to go on.
+                if (Path.IsPathRooted(path)) {
+                    return path;
+                } else {
+                    throw new System.ArgumentException($"Path {path} is not a child of the project root path {UnityProjectRootPath}");
+                }
             }
             // Trim the root path off along with the trailing slash
             return path.Substring(UnityProjectRootPath.Length + 1);
@@ -503,11 +511,34 @@ namespace Yarn.Unity.Editor
                         tags = RemoveLineIDFromMetadata(stringInfo.metadata).ToArray(),
                     });
                 }
+
+                // We've made changes to the table, so flag it and its shared
+                // data as dirty.
+                EditorUtility.SetDirty(table);
+                EditorUtility.SetDirty(table.SharedData);
                 return;
             }
             Debug.LogWarning($"Unable to find a locale in the string table that matches the default locale {project.BaseLanguage}");
         }
 #endif
+
+        /// <summary>
+        /// Gets a value indicating whether this Yarn Project contains any
+        /// compile errors.
+        /// </summary>
+        internal bool HasErrors {
+            get {
+                var importData = AssetDatabase.LoadAssetAtPath<ProjectImportData>(this.assetPath);
+
+                if (importData == null) {
+                    // If we have no import data, then a problem has occurred
+                    // when importing this project, so indicate 'true' as
+                    // signal.
+                    return true; 
+                }
+                return importData.HasCompileErrors;
+            }
+        }
 
         /// <summary>
         /// Gets a value indicating whether this Yarn Project is able to

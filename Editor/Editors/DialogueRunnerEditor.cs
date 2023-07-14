@@ -26,6 +26,7 @@ namespace Yarn.Unity.Editor
         private SerializedProperty verboseLoggingProperty;
         private SerializedProperty onNodeStartProperty;
         private SerializedProperty onNodeCompleteProperty;
+        private SerializedProperty onDialogueStartProperty;
         private SerializedProperty onDialogueCompleteProperty;
         private SerializedProperty onCommandProperty;
 
@@ -41,6 +42,7 @@ namespace Yarn.Unity.Editor
             verboseLoggingProperty = serializedObject.FindProperty(nameof(DialogueRunner.verboseLogging));
             onNodeStartProperty = serializedObject.FindProperty(nameof(DialogueRunner.onNodeStart));
             onNodeCompleteProperty = serializedObject.FindProperty(nameof(DialogueRunner.onNodeComplete));
+            onDialogueStartProperty = serializedObject.FindProperty(nameof(DialogueRunner.onDialogueStart));
             onDialogueCompleteProperty = serializedObject.FindProperty(nameof(DialogueRunner.onDialogueComplete));
             onCommandProperty = serializedObject.FindProperty(nameof(DialogueRunner.onCommand));
         }
@@ -129,6 +131,7 @@ namespace Yarn.Unity.Editor
             {
                 EditorGUILayout.PropertyField(onNodeStartProperty);
                 EditorGUILayout.PropertyField(onNodeCompleteProperty);
+                EditorGUILayout.PropertyField(onDialogueStartProperty);
                 EditorGUILayout.PropertyField(onDialogueCompleteProperty);
                 EditorGUILayout.PropertyField(onCommandProperty);
             }

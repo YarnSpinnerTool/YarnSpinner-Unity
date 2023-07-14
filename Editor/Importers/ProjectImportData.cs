@@ -42,6 +42,8 @@ namespace Yarn.Unity
 
         public List<DiagnosticEntry> diagnostics = new List<DiagnosticEntry>();
 
+        public List<string> sourceFilePaths = new List<string>();
+
         public List<LocalizationEntry> localizations = new List<LocalizationEntry>();
 
         public string baseLanguageName;

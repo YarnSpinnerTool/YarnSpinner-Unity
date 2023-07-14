@@ -25,6 +25,8 @@ public class AddAssetsToAssetTableCollectionWizard : EditorWindow {
     private Dictionary<string, DefaultAsset> localesToFolders = new Dictionary<string, DefaultAsset>();
     private List<Type> allTypes;
 
+    const string description = "This tool searches Asset Folders for assets of the selected type, and then adds them to an Asset Table Collection. Line Providers, like Unity Localised Line Provider, can then fetch these assets at run-time.";
+
     [MenuItem("Window/Yarn Spinner/Add Assets to Table Collection")]
     static void Init()
     {
@@ -50,9 +52,11 @@ public class AddAssetsToAssetTableCollectionWizard : EditorWindow {
         using (new GUILayout.VerticalScope())
         {
 
-            EditorGUILayout.BeginVertical();
+            EditorGUILayout.BeginVertical(EditorStyles.inspectorFullWidthMargins);
+           
+            EditorGUILayout.HelpBox(description, MessageType.Info);
 
-            assetTableCollection = EditorGUILayout.ObjectField("Asset Table Collection", assetTableCollection, typeof(AssetTableCollection), allowSceneObjects: false) as AssetTableCollection;
+            assetTableCollection = EditorGUILayout.ObjectField(new GUIContent("Asset Table Collection", "The asset table collection to add assets to"), assetTableCollection, typeof(AssetTableCollection), allowSceneObjects: false) as AssetTableCollection;
 
             readyToAddAssets &= assetTableCollection != null;
 
@@ -60,7 +64,7 @@ public class AddAssetsToAssetTableCollectionWizard : EditorWindow {
             var selectedIndex = allTypes.IndexOf(assetType);
 
             using (var change = new EditorGUI.ChangeCheckScope()) {
-                var newSelection = EditorGUILayout.Popup(new GUIContent("Asset Type"), selectedIndex, allTypes.Select(t => new GUIContent(
+                var newSelection = EditorGUILayout.Popup(new GUIContent("Asset Type", "The type of assets to find in the Asset Folders"), selectedIndex, allTypes.Select(t => new GUIContent(
                     t.Name,
                     EditorGUIUtility.ObjectContent(null, t).image
                 )).ToArray());
@@ -69,6 +73,12 @@ public class AddAssetsToAssetTableCollectionWizard : EditorWindow {
                     assetType = allTypes[newSelection];
                 }
             }
+
+            var headerStyle = EditorStyles.boldLabel;
+
+            EditorGUILayout.LabelField("Asset Folders", headerStyle);
+
+            EditorGUI.indentLevel += 1;
 
             foreach (var locale in LocalizationEditorSettings.GetLocales())
             {
@@ -84,12 +94,14 @@ public class AddAssetsToAssetTableCollectionWizard : EditorWindow {
                     localesToFolders.TryGetValue(locale.Identifier.Code, out var currentFolder);
 
                     localesToFolders[locale.Identifier.Code] = EditorGUILayout.ObjectField(
-                        locale.LocaleName,
+                        new GUIContent(locale.LocaleName, $"The folder to search for {assetType.Name} assets for the '{locale.LocaleName}' locale"),
                         currentFolder,
                         typeof(DefaultAsset),
                         allowSceneObjects: false) as DefaultAsset;
                 }
             }
+
+            EditorGUI.indentLevel -= 1;
 
             // We can only add assets if at least one folder has been provided.
             readyToAddAssets &= localesToFolders.Where(kv => kv.Value != null).Count() > 0;
@@ -154,6 +166,7 @@ public class AddAssetsToAssetTableCollectionWizard : EditorWindow {
                 perLocaleCount += 1;
                 totalCount += 1;
             }
+            EditorUtility.SetDirty(assetTableCollection);
             Debug.Log($"Added {perLocaleCount} assets to {locale.LocaleName}");
         }
         Debug.Log($"Added {totalCount} assets to asset table collection");

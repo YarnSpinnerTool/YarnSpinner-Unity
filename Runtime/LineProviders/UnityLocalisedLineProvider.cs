@@ -40,7 +40,7 @@ namespace Yarn.Unity.UnityLocalization
             get
             {
                 // If a strings table wasn't set, we'll never have lines
-                if (this.stringsTable == null)
+                if (this.stringsTable.IsEmpty)
                 {
                     return false;
                 }
@@ -54,7 +54,7 @@ namespace Yarn.Unity.UnityLocalization
 
                 // If we have an asset table, then we need to check some things
                 // about it
-                if (this.assetTable != null)
+                if (this.assetTable.IsEmpty == false)
                 {
 
                     // If the table hasn't finished loading yet, then lines
@@ -82,7 +82,7 @@ namespace Yarn.Unity.UnityLocalization
             var text = line.ID;
             if (currentStringsTable != null)
             {
-                text = currentStringsTable[line.ID]?.LocalizedValue ?? line.ID;
+                text = currentStringsTable[line.ID]?.LocalizedValue ?? $"Error: Missing localisation for line {line.ID} in string table {currentStringsTable.LocaleIdentifier}";
             }
 
             // Construct the localized line
@@ -95,7 +95,7 @@ namespace Yarn.Unity.UnityLocalization
 
             // Attempt to fetch metadata tags for this line from the string
             // table
-            var metadata = currentStringsTable[line.ID].GetMetadata<UnityLocalization.LineMetadata>();
+            var metadata = currentStringsTable[line.ID]?.GetMetadata<UnityLocalization.LineMetadata>();
 
             if (metadata != null)
             {
@@ -147,7 +147,7 @@ namespace Yarn.Unity.UnityLocalization
 
         public override void PrepareForLines(IEnumerable<string> lineIDs)
         {
-            if (assetTable != null)
+            if (assetTable.IsEmpty != true)
             {
                 // We have an asset table, so 1. ensure that the locale-specific asset table is loaded, and then 2. ensure that each asset that we care about has been loaded.
 
