@@ -11,7 +11,11 @@ namespace Yarn.Unity.Editor
 	{
         public override void OnInspectorGUI()
         {
-            EditorGUILayout.HelpBox("This component requires TextMeshPro (com.unity.textmeshpro) or UGUI 2.0.0 (com.unity.ugui) be installed in the Package Manager.", MessageType.Warning);
+#if UNITY_2023_2_OR_NEWER
+            EditorGUILayout.HelpBox("This component requires uGUI 2.0.0 or above (com.unity.ugui) be installed in the Package Manager.", MessageType.Warning);
+#else
+			EditorGUILayout.HelpBox("This component requires TextMeshPro (com.unity.textmeshpro) be installed in the Package Manager.", MessageType.Warning);
+#endif
         }
 	}
 
