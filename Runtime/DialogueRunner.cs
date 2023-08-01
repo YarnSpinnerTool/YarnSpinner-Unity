@@ -229,6 +229,8 @@ namespace Yarn.Unity
         /// </summary>
         public void SetProject(YarnProject newProject)
         {
+            yarnProject = newProject;
+
             CommandDispatcher.SetupForProject(newProject);
 
             Dialogue.SetProgram(newProject.Program);
