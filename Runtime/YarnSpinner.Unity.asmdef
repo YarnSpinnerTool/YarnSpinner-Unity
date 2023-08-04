@@ -22,7 +22,12 @@
         "Yarn.System.Reflection.TypeExtensions.dll",
         "Yarn.System.Runtime.CompilerServices.Unsafe.dll",
         "YarnSpinner.Compiler.dll",
-        "YarnSpinner.dll"
+        "YarnSpinner.dll",
+        "Yarn.Microsoft.Extensions.FileSystemGlobbing.dll",
+        "Yarn.Microsoft.Bcl.AsyncInterfaces.dll",
+        "Yarn.System.Text.Json.dll",
+        "Yarn.System.Text.Encodings.Web.dll",
+        "Yarn.System.Threading.Tasks.Extensions.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

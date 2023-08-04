@@ -15,31 +15,27 @@ namespace Yarn.Unity.Editor
     [CustomEditor(typeof(YarnImporter))]
     public class YarnImporterEditor : ScriptedImporterEditor
     {
-        private SerializedProperty isSuccessfullyCompiledProperty;
-        private SerializedProperty parseErrorMessagesProperty;
-        
-        public IEnumerable<string> DestinationProjectError => destinationYarnProjectImporter?.compileErrors ?? new List<string>();
+        public IEnumerable<string> DestinationProjectErrors => destinationYarnProjectImporters.SelectMany(i => i.GetErrorsForScript(assetTarget as TextAsset)) ?? new List<string>();
 
-        private YarnProject destinationYarnProject;
-        private YarnProjectImporter destinationYarnProjectImporter;
+        private IEnumerable<YarnProject> destinationYarnProjects;
+        private IEnumerable<YarnProjectImporter> destinationYarnProjectImporters;
+
+        public bool HasErrors => DestinationProjectErrors.Any();
 
         public override void OnEnable()
         {
             base.OnEnable();
 
-            isSuccessfullyCompiledProperty = serializedObject.FindProperty(nameof(YarnImporter.isSuccessfullyParsed));
-            parseErrorMessagesProperty = serializedObject.FindProperty(nameof(YarnImporter.parseErrorMessages));
-            
-            UpdateDestinationProject();
+            UpdateDestinationProjects();
         }
 
-        private void UpdateDestinationProject()
+        private void UpdateDestinationProjects()
         {
-            destinationYarnProject = (target as YarnImporter).DestinationProject;
+            destinationYarnProjects = (target as YarnImporter).DestinationProjects;
 
-            if (destinationYarnProject != null)
+            if (destinationYarnProjects != null)
             {
-                destinationYarnProjectImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(destinationYarnProject)) as YarnProjectImporter;
+                destinationYarnProjectImporters = destinationYarnProjects.Select(project => AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter);
             }
         }
 
@@ -53,7 +49,7 @@ namespace Yarn.Unity.Editor
             // show an error. If the selected objects have the same
             // destination program, and there's a compile error in it, show
             // that. 
-            if (parseErrorMessagesProperty.arraySize > 0)
+            if (HasErrors)
             {
                 if (serializedObject.isEditingMultipleObjects)
                 {
@@ -61,44 +57,37 @@ namespace Yarn.Unity.Editor
                 }
                 else
                 {
-                    foreach (SerializedProperty errorProperty in parseErrorMessagesProperty) {
-                        EditorGUILayout.HelpBox(errorProperty.stringValue, MessageType.Error);
+                    foreach (string error in DestinationProjectErrors) {
+                        EditorGUILayout.HelpBox(error, MessageType.Error);
                     }
                 }
             }
-            else if (DestinationProjectError.Count() > 0)
-            {
-                var displayMessage = string.Join("\n", DestinationProjectError);
-                EditorGUILayout.HelpBox(displayMessage, MessageType.Error);
-            }
 
-            if (destinationYarnProject == null)
+            if (destinationYarnProjects.Any() != false)
             {
-                EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project, so it can't be compiled or loaded into a Dialogue Runner. Either click Create New Yarn Project, or add a Yarn project to the field below.", MessageType.Info);
+                if (destinationYarnProjects.Count() == 1) {
+                    EditorGUILayout.ObjectField("Project", destinationYarnProjects.First(), typeof(YarnProject), false);
+                } else {
+                    EditorGUILayout.LabelField("Projects", EditorStyles.boldLabel);
+                    EditorGUI.indentLevel += 1;
+                    foreach (var project in destinationYarnProjects) {
+                        EditorGUILayout.ObjectField(project, typeof(YarnProject), false);
+                    }
+                    EditorGUI.indentLevel -= 1;
+                }
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project, so it can't be compiled or loaded into a Dialogue Runner. Either click Create New Yarn Project, or add this folder to an existing Yarn Project's sources list.", MessageType.Info);
                 if (GUILayout.Button("Create New Yarn Project..."))
                 {
                     YarnProjectUtility.CreateYarnProject(target as YarnImporter);
 
-                    UpdateDestinationProject();
+                    UpdateDestinationProjects();
 
                 }
             }
-            
-            using (var change = new EditorGUI.ChangeCheckScope())
-            {
-                var project = EditorGUILayout.ObjectField("Project", destinationYarnProject, typeof(YarnProject), false);
 
-                if (change.changed) {
-                    string programPath = null;
-                    if (project != null) {
-                        programPath = AssetDatabase.GetAssetPath(project);
-                    }
-                    YarnProjectUtility.AssignScriptToProject( (target as YarnImporter).assetPath, programPath);
-                    
-                    UpdateDestinationProject();
-                }
-
-            }
 
             EditorGUILayout.Space();
 

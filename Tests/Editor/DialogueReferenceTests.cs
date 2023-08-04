@@ -18,7 +18,10 @@ namespace Yarn.Unity.Tests
         public YarnProject YarnProject {
             get {
                 string assetPath = AssetDatabase.GUIDToAssetPath(TestYarnProjectGUID);
-                return AssetDatabase.LoadAssetAtPath<YarnProject>(assetPath);
+                Assert.NotNull(assetPath);
+                YarnProject yarnProject = AssetDatabase.LoadAssetAtPath<YarnProject>(assetPath);
+                Assert.NotNull(yarnProject);
+                return yarnProject;
             }
         }
 

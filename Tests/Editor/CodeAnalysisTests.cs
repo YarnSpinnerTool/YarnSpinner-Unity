@@ -13,23 +13,20 @@ namespace Yarn.Unity.Tests
 {
     public class CodeAnalysisTests
     {
-        string outputFilePath => TestFilesDirectoryPath + "YarnActionRegistration.cs";
+        string outputFilePath => YarnTestUtility.TestFilesDirectoryPath + "YarnActionRegistration.cs";
         const string testScriptGUID = "32f15ac5211d54a68825dfb9532e93f4";
 
-        string TestFolderName => TestContext.CurrentContext.Test.FullName;
-        string TestFilesDirectoryPath => $"Assets/{TestFolderName}/";
-
         string TestScriptPathSource => AssetDatabase.GUIDToAssetPath(testScriptGUID);
-        string TestScriptPathInProject => TestFilesDirectoryPath + Path.GetFileName(TestScriptPathSource);
+        string TestScriptPathInProject => YarnTestUtility.TestFilesDirectoryPath + Path.GetFileName(TestScriptPathSource);
 
         string TestNamespace => "Yarn.Unity.Generated." + TestContext.CurrentContext.Test.MethodName;
 
         [SetUp]
         public void SetUp()
         {
-            if (Directory.Exists(TestFilesDirectoryPath) == false)
+            if (Directory.Exists(YarnTestUtility.TestFilesDirectoryPath) == false)
             {
-                AssetDatabase.CreateFolder("Assets", TestFolderName);
+                AssetDatabase.CreateFolder("Assets", YarnTestUtility.TestFolderName);
                 AssetDatabase.CopyAsset(TestScriptPathSource, TestScriptPathInProject);
             }
         }
@@ -37,7 +34,7 @@ namespace Yarn.Unity.Tests
         [UnityTearDown]
         public IEnumerator TearDown()
         {
-            AssetDatabase.DeleteAsset(TestFilesDirectoryPath);
+            AssetDatabase.DeleteAsset(YarnTestUtility.TestFilesDirectoryPath);
             AssetDatabase.Refresh();
             yield return new RecompileScripts(expectScriptCompilation: true, expectScriptCompilationSuccess: true);
         }

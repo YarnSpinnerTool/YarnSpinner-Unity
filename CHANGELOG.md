@@ -8,15 +8,53 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- The Unity Localization integration is now available when the Localization package is installed.
-  - Prior to this change, the `YARN_USE_EXPERIMENTAL_FEATURES` scripting definition symbol needed to be added to the Player settings.
-- You can now add a Dialogue System prefab to your scene by opening the GameObject menu and choosing Yarn Spinner -> Dialogue Runner.
 - Added `YarnEditorUtility.AssetSearchFolders` to allow defining custom Yarn asset folders via script.
   - This can speed up the time to enter PlayMode significantly, because YarnSpinner no longer scans the entire project for Yarn Files.
 
 ### Changed
 
+- Fixed a bug where `YarnNode` attributes would not display correctly in the Inspector when its property path is longer than 1.
+
 ### Removed
+
+## [2.3.1] 2023-07-07
+
+### Added
+
+- Added the ability to add, modify, and delete source file patterns for Yarn projects in the Inspector.
+
+### Changed
+
+- Calling `Stop` on the Dialogue Runner will now also dismiss the LineView, OptionListView, and VoiceOverView.
+
+## [2.3.0-beta2] 2023-05-17
+
+### Added
+
+- The `YarnScriptTemplate.txt` now has a newline at the end of the file.
+- The `.yarnproject` importer has been updated to use new JSON-formatted Yarn Projects.
+  - JSON-formatted Yarn Projects replace the previous format, which stored all import data in Unity's `.meta` files.
+  - JSON-formatted Yarn Projects allow a single Yarn script to be used in multiple Yarn Projects, and also allow the Yarn Spinner compiler to support upcoming new features.
+  - Yarn scripts no longer need to be manually associated with a Yarn Project. If they are in the same folder, or a subfolder, of the Yarn Project, they will be included.
+  - When you update to 2.3.0-beta2, all Yarn scripts and Yarn Projects will be re-imported.
+    - **You will receive import errors on your existing Yarn Projects**, telling you that your Yarn Project needs to be upgraded. To do this, follow the message's instructions: select the project, and click Upgrade Yarn Project in the Inspector.
+    - After upgrading your projects, **you will need to set up your localisations again** by adding them in the Yarn Project's inspector and dragging in your strings file and asset file.
+    - If your project uses any Yarn files that are not in the same folder, or subfolder, of the Yarn Project, **you will need to move the Yarn files** to the folder.
+    - Your Yarn scripts, strings files, and localised assets will not be modified, and you won't need to change any objects in your scenes or prefabs. The only thing that will be changed is the Yarn Project file.
+
+- The Unity Localization integration is now available when the Localization package is installed.
+  - Prior to this change, the `YARN_USE_EXPERIMENTAL_FEATURES` scripting definition symbol needed to be added to the Player settings.
+- You can now add a Dialogue System prefab to your scene by opening the GameObject menu and choosing Yarn Spinner -> Dialogue Runner.
+- Added 'On Dialogue Start' event to Dialogue Runner. This event is called when the dialogue starts running. (@nrvllrgrs)
+
+### Changed
+
+- Added code to invalidate the Program cache on awake for Yarn Projects properly. This means your Yarn Projects will be correctly compiled and referenced in the editor.
+- Dialogue Runner will now report an error and stop early if you tell it to start running a node that isn't in the provided Yarn Project.
+- Dialogue Runner's 'On Dialogue Complete' event will now fire when you stop it via by calling the `Stop()` method.
+
+### Removed
+
 
 ## [2.3.0-beta1] 2023-03-06
 

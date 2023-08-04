@@ -212,6 +212,19 @@ namespace Yarn.Unity
         }
 
 #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
+        internal void OnDisable()
+        {
+            if (Action != null)
+            {
+                // if we have an action and are being turned off then need to disconnect the action
+                // otherwise we have it as a dangling ref and will cause errors
+                Action.performed -= UserPerformedAdvanceAction;
+            }
+        }
+#endif
+
+
+#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
         private void UserPerformedAdvanceAction(InputAction.CallbackContext obj)
         {
             dialogueView.UserRequestedViewAdvancement();

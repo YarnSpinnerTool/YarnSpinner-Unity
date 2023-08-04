@@ -36,7 +36,7 @@ However, if you would like to submit contributions to fix support for unsupporte
 
 ### Branches
 
-All of Yarn Spinner's in-progress work happens on the `develop` branch. When we make a release, we merge from `develop` into `main`. This means that `main` is always in a releasable state.
+All of Yarn Spinner's in-progress work happens on the `main` branch. When we make releases, we create a new tag from `main`. Larger features are developed on their own branch, and then merged to `main` when ready.
 
 ### Code and other contributions
 

@@ -42,81 +42,13 @@ namespace Yarn.Unity.Editor
             destinationPath = AssetDatabase.GenerateUniqueAssetPath(destinationPath);
 
             // Create the program
-            YarnEditorUtility.CreateYarnAsset(destinationPath);
-            
+            var newProject = new Yarn.Compiler.Project();
+            newProject.SaveToFile(destinationPath);
+
             AssetDatabase.ImportAsset(destinationPath);
             AssetDatabase.SaveAssets();
 
-            AssignScriptToProject(path, destinationPath);
-
             return destinationPath;
-        }
-
-        /// <summary>
-        /// Assign a .yarn <see cref="TextAsset"/> file found at <paramref
-        /// name="sourcePath"/> to the <see cref="YarnProjectImporter"/>
-        /// found at <paramref name="projectPath"/>.
-        /// </summary>
-        /// <param name="projectPath">The path to the .yarnproject
-        /// asset.</param>
-        /// <param name="sourcePath">The path to the source .yarn asset
-        /// that should be added to the Yarn Project.</param>
-        internal static void AssignScriptToProject(string sourcePath, string projectPath) {
-            var newSourceScript = AssetDatabase.LoadAssetAtPath<TextAsset>(sourcePath);
-            var programImporter = AssetImporter.GetAtPath(projectPath) as YarnProjectImporter;
-            var scriptImporter = AssetImporter.GetAtPath(sourcePath) as YarnImporter;
-
-            if (newSourceScript == null) {
-                throw new FileNotFoundException($"{nameof(sourcePath)} couldn't be loaded as a {nameof(TextAsset)}.");
-            }
-
-            if (projectPath != null && programImporter == null) {
-                throw new System.ArgumentException($"{nameof(projectPath)} is not a Yarn Project.");
-            }
-
-            if (scriptImporter == null) {
-                throw new System.ArgumentException($"{nameof(projectPath)} is not a Yarn script.");
-            }
-
-            AssignScriptToProject(newSourceScript, scriptImporter, programImporter);
-        }
-
-        /// <summary>
-        /// Assign a .yarn <see cref="TextAsset"/> file <paramref
-        /// name="newSourceScript"/> to the <see
-        /// cref="YarnProjectImporter"/> <paramref
-        /// name="projectImporter"/>.
-        /// </summary>
-        /// <remarks>If <paramref name="projectImporter"/> is <see
-        /// langword="null"/>, this script will be removed from its current
-        /// project (if any) and not added to another.</remarks>
-        /// <param name="newSourceScript">The script that should be
-        /// assigned to the Yarn Project.</param>
-        /// <param name="scriptImporter">The importer for <paramref
-        /// name="newSourceScript"/>.</param>
-        /// <param name="projectImporter">The importer for the project that
-        /// newSourceScript should be made a part of, or null.</param>
-        internal static void AssignScriptToProject(TextAsset newSourceScript, YarnImporter scriptImporter, YarnProjectImporter projectImporter) {
-
-            if (scriptImporter.DestinationProject != null) {
-                var existingProjectImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(scriptImporter.DestinationProject)) as YarnProjectImporter;
-
-                existingProjectImporter.sourceScripts.Remove(newSourceScript);
-
-                EditorUtility.SetDirty(existingProjectImporter);
-                
-                existingProjectImporter.SaveAndReimport();
-            }
-            
-            if (projectImporter != null) {
-                projectImporter.sourceScripts.Add(newSourceScript);
-                EditorUtility.SetDirty(projectImporter);
-
-                // Reimport the program to make it generate its default string
-                // table, if needed
-                projectImporter.SaveAndReimport();
-            }
-
         }
 
         /// <summary>
@@ -147,9 +79,11 @@ namespace Yarn.Unity.Editor
                 return;
             }
 
+            var importData = yarnProjectImporter.ImportData;
+
             var baseLocalizationStrings = yarnProjectImporter.GenerateStringsTable();
 
-            var localizations = yarnProjectImporter.languagesToSourceAssets;
+            var localizations = yarnProjectImporter.ImportData.localizations;
 
             var modifiedFiles = new List<TextAsset>();
 
@@ -159,6 +93,12 @@ namespace Yarn.Unity.Editor
 
                 foreach (var loc in localizations)
                 {
+                    if (loc.languageID == importData.baseLanguageName) {
+                        // This is the base language - no strings file to
+                        // update.
+                        continue;
+                    }
+                    
                     if (loc.stringsFile == null) {
                         Debug.LogWarning($"Can't update localization for {loc.languageID} because it doesn't have a strings file.", yarnProjectImporter);
                         continue;
@@ -227,7 +167,7 @@ namespace Yarn.Unity.Editor
             // Get a map of language IDs to (lineID, asset path) pairs
             var languageToAssets = importer
                 // Get the languages-to-source-assets map
-                .languagesToSourceAssets
+                .ImportData.localizations
                 // Get the asset folder for them
                 .Select(l => new {l.languageID, l.assetsFolder})
                 // Only consider those that have an asset folder
@@ -441,8 +381,10 @@ namespace Yarn.Unity.Editor
                 .Select(path => AssetImporter.GetAtPath(path))
                 // Ensure it's a YarnProjectImporter
                 .OfType<YarnProjectImporter>()
+                // Ensure that its import data is present
+                .Where(i => i.ImportData != null)
                 // Get all of their source scripts, as a single sequence
-                .SelectMany(i => i.sourceScripts)
+                .SelectMany(i => i.ImportData.yarnFiles)
                 // Get the path for each asset
                 .Select(sourceAsset => AssetDatabase.GetAssetPath(sourceAsset))
                 // get each asset importer for that path
@@ -497,7 +439,7 @@ namespace Yarn.Unity.Editor
 
                 AssetDatabase.StartAssetEditing();
 
-                foreach (var script in importer.sourceScripts)
+                foreach (var script in importer.ImportData.yarnFiles)
                 {
                     var assetPath = AssetDatabase.GetAssetPath(script);
                     var contents = File.ReadAllText(assetPath);
@@ -619,7 +561,7 @@ namespace Yarn.Unity.Editor
         }
 
         internal static void ConvertImplicitVariableDeclarationsToExplicit(YarnProjectImporter yarnProjectImporter) {
-            var allFilePaths = yarnProjectImporter.sourceScripts.Select(textAsset => AssetDatabase.GetAssetPath(textAsset));
+            var allFilePaths = yarnProjectImporter.ImportData.yarnFiles.Select(textAsset => AssetDatabase.GetAssetPath(textAsset));
 
             var library = Actions.GetLibrary();
 
@@ -655,6 +597,46 @@ namespace Yarn.Unity.Editor
             File.WriteAllText(yarnProjectImporter.assetPath, output, System.Text.Encoding.UTF8);
             AssetDatabase.ImportAsset(yarnProjectImporter.assetPath);
 
+        }
+
+        /// <summary>
+        /// Upgrades an old-style Yarn Project to JSON.
+        /// </summary>
+        /// <remarks>
+        /// This method copies the text of the project to a new file adjacent to
+        /// the project, and replaces the text of the project with a new empty
+        /// JSON project.
+        /// </remarks>
+        /// <param name="importer">A YarnProjectImporter that represents the
+        /// project that needs to be upgraded.</param>
+        internal static void UpgradeYarnProject(YarnProjectImporter importer)
+        {
+            // We need to copy out the variable declarations from the old Yarn
+            // project before we replace it.
+
+            // Get the current text of the old project
+            var existingText = File.ReadAllText(importer.assetPath);
+
+            // Does the existing text contain anything besides the default?
+            var defaultProjectPattern = new System.Text.RegularExpressions.Regex(@"^title:.*?\n---[\n\s]*===[\n\s]*$", System.Text.RegularExpressions.RegexOptions.Multiline);
+            if (defaultProjectPattern.IsMatch(existingText)) {
+                // The project contains no content, so there's no need to copy
+                // it out.
+            } else {
+                // Create a unique path to store our variables
+                var newFilePath = Path.GetDirectoryName(importer.assetPath) + "/Variables.yarn";
+                newFilePath = AssetDatabase.GenerateUniqueAssetPath(newFilePath);
+
+                // Write it out to the new file
+                File.WriteAllText(newFilePath, existingText);
+            }
+
+            // Next, replace the existing project with a new one!
+            var newProject = new Yarn.Compiler.Project();
+            File.WriteAllText(importer.assetPath, newProject.GetJson());
+
+            // Finally, import the assets we've touched.
+            AssetDatabase.Refresh();
         }
     }
 }

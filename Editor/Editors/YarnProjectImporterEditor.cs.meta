@@ -3,7 +3,11 @@ guid: 2a1a2642bf9259a4b95d13af4498fa9a
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - editorUI: {instanceID: 0}
+  - localizationUIAsset: {fileID: 9197481963319205126, guid: de04e2bdef0b44420ace51d11acb9a26, type: 3}
+  - sourceFileUIAsset: {fileID: 9197481963319205126, guid: 538a1dbae42414629a134a058c8848d9, type: 3}
+  - yarnProjectStyleSheet: {fileID: 7433441132597879392, guid: cb55d9cdb86eb461d9bf7e96af6e9c1e, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

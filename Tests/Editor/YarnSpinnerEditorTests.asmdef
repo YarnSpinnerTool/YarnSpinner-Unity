@@ -14,7 +14,9 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "nunit.framework.dll"
+        "nunit.framework.dll",
+        "YarnSpinner.Compiler.dll",
+        "YarnSpinner.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

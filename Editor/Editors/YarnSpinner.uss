@@ -1,0 +1,20 @@
+.help-box {
+    background-color: var(--unity-colors-helpbox-background);
+    border-color: var(--unity-colors-helpbox-border);
+    border-width: 1px;
+    border-radius: 2px;
+    padding: 8px;
+    margin: 8px;
+}
+
+.help-box Label {
+    white-space: normal;
+    padding-bottom: 8px;
+    
+}
+
+.help-box Label.link {
+    white-space: normal;
+    color: var(--unity-colors-link-text);
+    cursor: link;
+}
