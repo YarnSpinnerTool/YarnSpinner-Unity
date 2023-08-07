@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Fixed a bug where `YarnNode` attributes would not display correctly in the Inspector when its property path is longer than 1.
+- Fixed a bug in the action registration source code generator that caused it to crash on certain files, which resulted in some commands not being registered at runtime.
 
 ### Removed
 
