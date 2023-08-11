@@ -163,32 +163,32 @@ internal class CommandsCollection : IActionRegistration
         AddFunction(name, (Delegate)implementation);
     }
 
-    public void AddFunction<TResult, T1>(string name, Func<TResult, T1> implementation)
+    public void AddFunction<T1, TResult>(string name, Func<T1, TResult> implementation)
     {
         AddFunction(name, (Delegate)implementation);
     }
 
-    public void AddFunction<TResult, T1, T2>(string name, Func<TResult, T1, T2> implementation)
+    public void AddFunction<T1, T2, TResult>(string name, Func<T1, T2, TResult> implementation)
     {
         AddFunction(name, (Delegate)implementation);
     }
 
-    public void AddFunction<TResult, T1, T2, T3>(string name, Func<TResult, T1, T2, T3> implementation)
+    public void AddFunction<T1, T2, T3, TResult>(string name, Func<T1, T2, T3, TResult> implementation)
     {
         AddFunction(name, (Delegate)implementation);
     }
 
-    public void AddFunction<TResult, T1, T2, T3, T4>(string name, Func<TResult, T1, T2, T3, T4> implementation)
+    public void AddFunction<T1, T2, T3, T4, TResult>(string name, Func<T1, T2, T3, T4, TResult> implementation)
     {
         AddFunction(name, (Delegate)implementation);
     }
 
-    public void AddFunction<TResult, T1, T2, T3, T4, T5>(string name, Func<TResult, T1, T2, T3, T4, T5> implementation)
+    public void AddFunction<T1, T2, T3, T4, T5, TResult>(string name, Func<T1, T2, T3, T4, T5, TResult> implementation)
     {
         AddFunction(name, (Delegate)implementation);
     }
 
-    public void AddFunction<TResult, T1, T2, T3, T4, T5, T6>(string name, Func<TResult, T1, T2, T3, T4, T5, T6> implementation)
+    public void AddFunction<T1, T2, T3, T4, T5, T6, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, TResult> implementation)
     {
         AddFunction(name, (Delegate)implementation);
     }
