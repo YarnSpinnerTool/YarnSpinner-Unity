@@ -603,7 +603,6 @@ namespace Yarn.Unity
 
         public static void AddRegistrationMethod(Action<IActionRegistration> registerActions)
         {
-            Debug.Log($"Adding registration method {registerActions.Method.DeclaringType.FullName}.{registerActions.Method.Name}");
             ActionRegistrationMethods.Add(registerActions);
         }
 
