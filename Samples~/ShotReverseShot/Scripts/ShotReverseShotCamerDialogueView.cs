@@ -7,6 +7,9 @@ using Yarn.Unity;
 
 namespace Yarn.Unity.Example
 {
+    // custom dialogue view that enables and disables different cinemachine virtual cameras associated with characters
+    // as each line of dialogue comes in we get the character name from the line and then use the mapping to work out which camera to enable
+    // For options we use the playerName variable to work out which camera to use for options as options rarely have a speaker name with them
     public class ShotReverseShotCamerDialogueView : DialogueViewBase
     {
         [SerializeField] private CharacterCamera[] characters;

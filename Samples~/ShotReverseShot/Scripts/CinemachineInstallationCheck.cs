@@ -5,6 +5,9 @@ using UnityEditor;
 
 namespace Yarn.Unity.Example
 {
+    // This class (and it's related friends below) exist to do a quick check if Cinemachine is installed.
+    // If it is then you won't even notice this gameobject.
+    // If it isn't it will pop up a window that will then tell the package manager to install it.
     [ExecuteAlways]
     public class CinemachineInstallationCheck : MonoBehaviour
     {
