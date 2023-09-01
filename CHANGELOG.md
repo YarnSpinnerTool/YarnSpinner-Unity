@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed a bug in the action registration source code generator that caused it to crash on certain files, which resulted in some commands not being registered at runtime.
 - Replaced the call to `Yarn.Compiler.Utility.AddTagsToLines` with `Yarn.Compiler.Utility.TagLines`
 - Fixed incorrect order of generic parameter names for `AddFunction` methods, usage is unchanged.
+- Fixed incorrect handling of line IDs inside the Unity Localised Line Provider preventing voice assets being loaded.
 
 ### Removed
 

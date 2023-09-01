@@ -103,10 +103,8 @@ namespace Yarn.Unity.UnityLocalization
             }
 
             // Attempt to fetch a loaded asset for this line
-            var lineIDWithoutPrefix = line.ID.Replace("line:", "");
-
             // If we have a loaded asset associated with this line, return it
-            if (loadedAssets.TryGetValue(lineIDWithoutPrefix, out var asset))
+            if (loadedAssets.TryGetValue(line.ID, out var asset))
             {
                 localizedLine.Asset = asset;
             }
@@ -170,18 +168,11 @@ namespace Yarn.Unity.UnityLocalization
 
             void PreloadLinesFromTable(AssetTable table, IEnumerable<string> lineIDs)
             {
-
-                var lineIDsWithoutPrefix = new List<string>();
-                foreach (var l in lineIDs)
-                {
-                    lineIDsWithoutPrefix.Add(l.Replace("line:", ""));
-                }
-
                 // Remove and release the lines that have been previously loaded
                 // but aren't in this set of lines to expect - they're not
                 // needed now
                 var assetKeysToUnload = new HashSet<string>(loadedAssets.Keys);
-                assetKeysToUnload.ExceptWith(lineIDsWithoutPrefix);
+                assetKeysToUnload.ExceptWith(lineIDs);
                 foreach (var assetKeyToUnload in assetKeysToUnload)
                 {
                     var entryToRelease = table.GetEntry(assetKeyToUnload);
@@ -195,7 +186,7 @@ namespace Yarn.Unity.UnityLocalization
                 }
 
                 // Load all assets that we need
-                foreach (var id in lineIDsWithoutPrefix)
+                foreach (var id in lineIDs)
                 {
                     var entry = table.GetEntry(id);
                     if (entry == null)
@@ -207,11 +198,10 @@ namespace Yarn.Unity.UnityLocalization
 
                     var loadOperation = table.GetAssetAsync<Object>(entry.KeyId);
 
-                    if (loadOperation.IsDone == false)
+                    if (loadOperation.IsDone == true)
                     {
                         // If the load operation has already completed, there's
                         // no need to wait - we can use its result now.
-                        Debug.Log($"Asset for {id} was already loaded");
                         loadedAssets[id] = loadOperation.Result;
                     }
                     else
