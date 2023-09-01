@@ -573,27 +573,27 @@ namespace Yarn.Unity
 
         /// <inheritdoc cref="AddFunction{TResult}(string, Func{TResult})" />
         /// <typeparam name="T1">The type of the first parameter to the function.</typeparam>
-        public void AddFunction<TResult, T1>(string name, System.Func<TResult, T1> implementation) => CommandDispatcher.AddFunction(name, implementation);
+        public void AddFunction<T1, TResult>(string name, System.Func<T1, TResult> implementation) => CommandDispatcher.AddFunction(name, implementation);
 
-        /// <inheritdoc cref="AddFunction{TResult,T1}(string, Func{TResult,T1})" />
+        /// <inheritdoc cref="AddFunction{T1,TResult}(string, Func{T1,TResult})" />
         /// <typeparam name="T2">The type of the second parameter to the function.</typeparam>
-        public void AddFunction<TResult, T1, T2>(string name, System.Func<TResult, T1, T2> implementation) => CommandDispatcher.AddFunction(name, implementation);
+        public void AddFunction<T1, T2, TResult>(string name, System.Func<T1, T2, TResult> implementation) => CommandDispatcher.AddFunction(name, implementation);
 
-        /// <inheritdoc cref="AddFunction{TResult,T1,T2}(string, Func{TResult,T1,T2})" />
+        /// <inheritdoc cref="AddFunction{T1,T2,TResult}(string, Func{T1,T2,TResult})" />
         /// <typeparam name="T3">The type of the third parameter to the function.</typeparam>
-        public void AddFunction<TResult, T1, T2, T3>(string name, System.Func<TResult, T1, T2, T3> implementation) => CommandDispatcher.AddFunction(name, implementation);
+        public void AddFunction<T1, T2, T3, TResult>(string name, System.Func<T1, T2, T3, TResult> implementation) => CommandDispatcher.AddFunction(name, implementation);
 
-        /// <inheritdoc cref="AddFunction{TResult,T1,T2,T3}(string, Func{TResult,T1,T2,T3})" />
+        /// <inheritdoc cref="AddFunction{T1,T2,T3,TResult}(string, Func{T1,T2,T3,TResult})" />
         /// <typeparam name="T4">The type of the fourth parameter to the function.</typeparam>
-        public void AddFunction<TResult, T1, T2, T3, T4>(string name, System.Func<TResult, T1, T2, T3, T4> implementation) => CommandDispatcher.AddFunction(name, implementation);
+        public void AddFunction<T1, T2, T3, T4, TResult>(string name, System.Func<T1, T2, T3, T4, TResult> implementation) => CommandDispatcher.AddFunction(name, implementation);
 
-        /// <inheritdoc cref="AddFunction{TResult,T1,T2,T3,T4}(string, Func{TResult,T1,T2,T3,T4})" />
+        /// <inheritdoc cref="AddFunction{T1,T2,T3,T4,TResult}(string, Func{T1,T2,T3,T4,TResult})" />
         /// <typeparam name="T5">The type of the fifth parameter to the function.</typeparam>
-        public void AddFunction<TResult, T1, T2, T3, T4, T5>(string name, System.Func<TResult, T1, T2, T3, T4, T5> implementation) => CommandDispatcher.AddFunction(name, implementation);
+        public void AddFunction<T1, T2, T3, T4, T5, TResult>(string name, System.Func<T1, T2, T3, T4, T5, TResult> implementation) => CommandDispatcher.AddFunction(name, implementation);
 
-        /// <inheritdoc cref="AddFunction{TResult,T1,T2,T3,T4,T5}(string, Func{TResult,T1,T2,T3,T4,T5})" />
+        /// <inheritdoc cref="AddFunction{T1,T2,T3,T4,T5,TResult}(string, Func{T1,T2,T3,T4,T5,TResult})" />
         /// <typeparam name="T6">The type of the sixth parameter to the function.</typeparam>
-        public void AddFunction<TResult, T1, T2, T3, T4, T5, T6>(string name, System.Func<TResult, T1, T2, T3, T4, T5, T6> implementation) => CommandDispatcher.AddFunction(name, implementation);
+        public void AddFunction<T1, T2, T3, T4, T5, T6, TResult>(string name, System.Func<T1, T2, T3, T4, T5, T6, TResult> implementation) => CommandDispatcher.AddFunction(name, implementation);
 
         /// <summary>
         /// Remove a registered function.
