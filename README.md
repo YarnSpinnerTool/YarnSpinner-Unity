@@ -1,6 +1,8 @@
+<img src="https://yarnspinner.dev/img/YarnSpinnerLogo.png" alt="Yarn Spinner logo" width="150px;" align="right">
+
 # Yarn Spinner for Unity
 
-<img src="https://yarnspinner.dev/img/YarnSpinnerLogo.png" alt="Yarn Spinner logo" width="100px;" align="right">
+[![openupm](https://img.shields.io/npm/v/dev.yarnspinner.unity?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/dev.yarnspinner.unity/)
 
 [Yarn Spinner](https://yarnspinner.dev) is the friendly tool for writing dialogue in games. It's easy for writers to use, and has powerful features for programmers.
 
@@ -8,7 +10,7 @@ Yarn Spinner is a dialogue system that lets you write interactive conversations 
 
 When a conversation is running, Yarn Spinner sends your game **lines** of dialogue to show, **options** to let the player choose from, and **commands** to make things happen in your scene. 
 
-Yarn Spinner has been used in a number of critically acclaimed games, including [Night in the Woods](http://nightinthewoods.com), [A Short Hike](https://ashorthike.com), [Lost in Random](https://www.ea.com/en-au/games/lost-in-random), and many more.
+Yarn Spinner has been used in thousands of amazing games, including [Night in the Woods](http://nightinthewoods.com), [A Short Hike](https://ashorthike.com), [Lost in Random](https://www.ea.com/en-au/games/lost-in-random), [Dredge](https://www.dredge.game/), [Frog Detective](https://frogdetective.net/), [Button City](https://www.buttoncitygame.com/), [Escape Academy](https://escapeacademygame.com/en), [Baladins](https://www.baladinsgame.com/), and [Unbeatable](https://www.unbeatablegame.com/).
 
 It's free to download and use for free and commercial games, and is open source under the terms of the MIT License.
 
