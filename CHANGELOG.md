@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Replaced the call to `Yarn.Compiler.Utility.AddTagsToLines` with `Yarn.Compiler.Utility.TagLines`
 - Fixed incorrect order of generic parameter names for `AddFunction` methods, usage is unchanged.
 - Fixed incorrect handling of line IDs inside the Unity Localised Line Provider preventing voice assets being loaded.
+- Fixed a crash where declaration statements without a value (`<<declare $var>>`) would crash the importer, leading to weird bugs.
 
 ### Removed
 
