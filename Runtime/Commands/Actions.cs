@@ -723,7 +723,6 @@ namespace Yarn.Unity
                     throw new ArgumentException($"Cannot register function {name}: a function with this name already exists");
                 }
                 // Register this function in the library
-                Debug.Log($"Registered function {name} to method {implementation.Method.DeclaringType}.{implementation.Method.Name}");
                 library.RegisterFunction(name, implementation);
             }
 
