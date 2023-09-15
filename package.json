@@ -48,6 +48,11 @@
       "displayName": "Addressables",
       "description": "How to use Addressables package to load in audio as a separate external assets via 'address'... requires the Addressables package.",
       "path": "Samples~/Addressables"
+    },
+    {
+      "displayName": "Shot Reverse Shot",
+      "description": "How to use Cinemachine to create a custom dialogue view that can do a shot-reverse-shot conversation camera... requires the Cinemachine package.",
+      "path": "Samples~/ShotReverseShot"
     }
   ]
 }

@@ -446,7 +446,8 @@ namespace Yarn.Unity.Editor
 
                     // Produce a version of this file that contains line
                     // tags added where they're needed.
-                    var taggedVersion = Yarn.Compiler.Utility.AddTagsToLines(contents, allExistingTags);
+                    var tagged = Yarn.Compiler.Utility.TagLines(contents, allExistingTags);
+                    var taggedVersion = tagged.Item1;
                     
                     // if the file has an error it returns null
                     // we want to bail out then otherwise we'd wipe the yarn file
@@ -463,6 +464,8 @@ namespace Yarn.Unity.Editor
 
                         File.WriteAllText(assetPath, taggedVersion, System.Text.Encoding.UTF8);
                         AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.Default);
+
+                        allExistingTags = tagged.Item2 as List<string>;
                     }
                 }
             }

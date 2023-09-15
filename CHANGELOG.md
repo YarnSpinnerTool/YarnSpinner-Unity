@@ -8,9 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- A new sample (Shot Reverse Shot) showing how you can use Cinemachine virtual cameras and custom dialogue views to make a shot reverse shot scene in your game.
+
 ### Changed
 
+- Fixed a bug where `YarnNode` attributes would not display correctly in the Inspector when its property path is longer than 1.
+- Fixed a bug in the action registration source code generator that caused it to crash on certain files, which resulted in some commands not being registered at runtime.
+- Replaced the call to `Yarn.Compiler.Utility.AddTagsToLines` with `Yarn.Compiler.Utility.TagLines`
+- Fixed incorrect order of generic parameter names for `AddFunction` methods, usage is unchanged.
+- Fixed incorrect handling of line IDs inside the Unity Localised Line Provider preventing voice assets being loaded.
+- Fixed a crash where declaration statements without a value (`<<declare $var>>`) would crash the importer, leading to weird bugs.
+- Yarn Functions and Commands can now have up to 10 parameters if you need them.
+
 ### Removed
+
+- The Actions class will no longer log every single time a command is registered.
 
 ## [2.3.1] 2023-07-07
 
