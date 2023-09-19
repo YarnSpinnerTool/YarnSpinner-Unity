@@ -1,4 +1,4 @@
-using UnityEngine;
+#if USE_TMP
 using UnityEditor;
 
 namespace Yarn.Unity.Editor
@@ -97,5 +97,5 @@ namespace Yarn.Unity.Editor
 
         }
     }
-
 }
+#endif

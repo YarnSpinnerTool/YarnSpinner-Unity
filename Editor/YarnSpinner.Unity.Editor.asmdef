@@ -51,6 +51,16 @@
             "name": "com.unity.localization",
             "expression": "1.0.0",
             "define": "USE_UNITY_LOCALIZATION"
+        },
+        {
+            "name": "com.unity.ugui",
+            "expression": "2.0.0",
+            "define": "USE_TMP"
+        },
+        {
+            "name": "com.unity.textmeshpro",
+            "expression": "1.0.0",
+            "define": "USE_TMP"
         }
     ],
     "noEngineReferences": false

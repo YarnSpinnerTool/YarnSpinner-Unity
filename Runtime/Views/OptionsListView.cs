@@ -1,8 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
+#if USE_TMP
+using TMPro;
+#else
+using TextMeshProUGUI = TMPShim;
+#endif
 
 namespace Yarn.Unity
 {

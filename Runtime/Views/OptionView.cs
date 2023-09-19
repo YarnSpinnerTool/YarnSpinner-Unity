@@ -1,7 +1,11 @@
 using System;
 using UnityEngine;
-using TMPro;
 using UnityEngine.EventSystems;
+#if USE_TMP
+using TMPro;
+#else
+using TextMeshProUGUI = TMPShim;
+#endif
 
 namespace Yarn.Unity
 {

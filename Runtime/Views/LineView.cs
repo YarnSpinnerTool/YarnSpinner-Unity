@@ -1,12 +1,15 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using TMPro;
 using UnityEngine.UI;
+#if USE_TMP
+using TMPro;
+#else
+using TextMeshProUGUI = TMPShim;
+#endif
 
 namespace Yarn.Unity
 {
-
     /// <summary>
     /// A Dialogue View that presents lines of dialogue, using Unity UI
     /// elements.
