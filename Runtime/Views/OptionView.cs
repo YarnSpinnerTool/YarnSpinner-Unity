@@ -1,8 +1,11 @@
-#if USE_TMP
 using System;
 using UnityEngine;
-using TMPro;
 using UnityEngine.EventSystems;
+#if USE_TMP
+using TMPro;
+#else
+using TextMeshProUGUI = TMPShim;
+#endif
 
 namespace Yarn.Unity
 {
@@ -80,12 +83,3 @@ namespace Yarn.Unity
         }
     }
 }
-#else
-namespace Yarn.Unity
-{
-    /// <summary>
-    /// Required to draw an inspector saying that TextMeshPro must be added for this component to be supported.
-    /// </summary>
-    public class OptionView : UnityEngine.UI.Selectable { }
-}
-#endif

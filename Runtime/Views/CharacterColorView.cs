@@ -1,7 +1,11 @@
-#if USE_TMP
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+#if USE_TMP
+using TMPro;
+#else
+using TextMeshProUGUI = TMPShim;
+#endif
 
 namespace Yarn.Unity
 {
@@ -18,7 +22,7 @@ namespace Yarn.Unity
 
         [SerializeField] CharacterColorData[] colorData;
 
-        [SerializeField] List<TMPro.TextMeshProUGUI> lineTexts = new List<TMPro.TextMeshProUGUI>();
+        [SerializeField] List<TextMeshProUGUI> lineTexts = new List<TextMeshProUGUI>();
 
         public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
@@ -43,12 +47,3 @@ namespace Yarn.Unity
         }
     }
 }
-#else
-namespace Yarn.Unity
-{
-    /// <summary>
-    /// Required to draw an inspector saying that TextMeshPro must be added for this component to be supported.
-    /// </summary>
-    public class CharacterColorView : Yarn.Unity.DialogueViewBase { }
-}
-#endif

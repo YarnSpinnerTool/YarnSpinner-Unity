@@ -19,10 +19,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed incorrect handling of line IDs inside the Unity Localised Line Provider preventing voice assets being loaded.
 - Fixed a crash where declaration statements without a value (`<<declare $var>>`) would crash the importer, leading to weird bugs.
 - Yarn Functions and Commands can now have up to 10 parameters if you need them.
+- The hard dependancy on Text Mesh Pro is now a soft one, for most projects this change won't be noticed.
 
 ### Removed
 
 - The Actions class will no longer log every single time a command is registered.
+- Removed `YarnLinesAsCanvasText` class and associated elements, this didn't did anything and was using an approach that is no longer advisable.
 
 ## [2.3.1] 2023-07-07
 

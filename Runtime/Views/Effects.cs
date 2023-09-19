@@ -3,6 +3,8 @@ using System.Collections;
 using UnityEngine;
 #if USE_TMP
 using TMPro;
+#else
+using TextMeshProUGUI = TMPShim;
 #endif
 
 namespace Yarn.Unity
@@ -128,7 +130,6 @@ namespace Yarn.Unity
             stopToken?.Complete();
         }
 
-#if USE_TMP
         /// <summary>
         /// A coroutine that gradually reveals the text in a <see
         /// cref="TextMeshProUGUI"/> object over time.
@@ -208,6 +209,5 @@ namespace Yarn.Unity
 
             stopToken?.Complete();
         }
-#endif
     }
 }

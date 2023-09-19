@@ -1,13 +1,15 @@
-#if USE_TMP
 using System;
 using System.Collections;
 using UnityEngine;
-using TMPro;
 using UnityEngine.UI;
+#if USE_TMP
+using TMPro;
+#else
+using TextMeshProUGUI = TMPShim;
+#endif
 
 namespace Yarn.Unity
 {
-
     /// <summary>
     /// A Dialogue View that presents lines of dialogue, using Unity UI
     /// elements.
@@ -493,12 +495,3 @@ namespace Yarn.Unity
         }
     }
 }
-#else
-namespace Yarn.Unity
-{
-    /// <summary>
-    /// Required to draw an inspector saying that TextMeshPro must be added for this component to be supported.
-    /// </summary>
-    public class LineView : DialogueViewBase { }
-}
-#endif
