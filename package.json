@@ -53,6 +53,11 @@
       "displayName": "Shot Reverse Shot",
       "description": "How to use Cinemachine to create a custom dialogue view that can do a shot-reverse-shot conversation camera... requires the Cinemachine package.",
       "path": "Samples~/ShotReverseShot"
+    },
+    {
+      "displayName": "User Input and Yarn",
+      "description": "How to use TMP input fields to get user input into Yarn variables.",
+      "path": "Samples~/HandlingInput"
     }
   ]
 }
