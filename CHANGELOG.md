@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Two new basic save methods on `DialogueRunner` that use the persistent data storage location as their save location
   - these methods `SaveStateToPersistentStorage` and `LoadStateFromPersistentStorage` are intended to replace the older `PlayerPref` based system for basic saves
   - for more complex games we are still assuming you will need to craft your own bespoke save system.
+- A new sample (User Input and Yarn) showing how you can use blocking commands and TMP Input fields to get input into Yarn variables.
 
 ### Changed
 
@@ -30,6 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - The Actions class will no longer log every single time a command is registered.
 - Removed `YarnLinesAsCanvasText` class and associated elements, this didn't did anything and was using an approach that is no longer advisable.
+- The `MainMenu` sample is now gone, this code was not in the package and didn't work so it is unlikely anyone will notice this has been removed.
 
 ## [2.3.1] 2023-07-07
 
