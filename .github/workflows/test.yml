@@ -35,7 +35,7 @@ jobs:
           - 2020.3.45f1
           - 2021.3.9f1
           - 2022.2.1f1
-          - 2023.2.0b5
+          - 2023.1.13f1
         targetPlatform:
           # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
