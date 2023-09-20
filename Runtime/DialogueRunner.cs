@@ -1313,6 +1313,7 @@ namespace Yarn.Unity
         /// cref="VariableStorageBehaviour.SetAllVariables(Dictionary{string,
         /// float}, Dictionary{string, string}, Dictionary{string, bool},
         /// bool)"/>
+        [Obsolete("LoadStateFromPlayerPrefs is deprecated, please use LoadStateFromPersistentStorage instead.")]
         public bool LoadStateFromPlayerPrefs(string SaveKey = "YarnBasicSave")
         {
             if (PlayerPrefs.HasKey(SaveKey))
@@ -1340,6 +1341,38 @@ namespace Yarn.Unity
         }
 
         /// <summary>
+        /// Loads all variables from the requested file in persistent storage into the Dialogue Runner's variable storage.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method loads the file <paramref name="SaveFile"/> from the persistent data storage and attempts to read it as JSON. This is then deserialised and loaded into the <see cref="VariableStorage"/>.
+        /// </para>
+        /// <para>
+        /// The loaded information can be stored via the <see cref="SaveStateToPersistentStorage"/> method.
+        /// </para>
+        /// </remarks>
+        /// <param name="SaveFile">the name the save file should have on disc, including any file extension</param>
+        /// <returns><see langword="true"/> if the variables were successfully loaded from the player preferences; <see langword="false"/> otherwise.</returns>
+        public bool LoadStateFromPersistentStorage(string SaveFile)
+        {
+            var path = System.IO.Path.Combine(Application.persistentDataPath, SaveFile);
+
+            try
+            {
+                var saveData = System.IO.File.ReadAllText(path);
+                var dictionaries = DeserializeAllVariablesFromJSON(saveData);
+                _variableStorage.SetAllVariables(dictionaries.Item1, dictionaries.Item2, dictionaries.Item3);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to load save state at {path}: {e.Message}");
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Saves all variables in the Dialogue Runner's variable storage into
         /// the <see cref="PlayerPrefs"/> object.
         /// </summary>
@@ -1358,11 +1391,43 @@ namespace Yarn.Unity
         /// <param name="SaveKey">The key to use when storing the
         /// variables.</param>
         /// <seealso cref="VariableStorageBehaviour.GetAllVariables"/>
+        [Obsolete("SaveStateToPlayerPrefs is deprecated, please use SaveStateToPersistentStorage instead.")]
         public void SaveStateToPlayerPrefs(string SaveKey = "YarnBasicSave")
         {
             var data = SerializeAllVariablesToJSON();
             PlayerPrefs.SetString(SaveKey, data);
             PlayerPrefs.Save();
+        }
+
+        /// <summary>
+        /// Saves all variables from variable storage into the persistent storage.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method attempts to writes the contents of <see cref="VariableStorage"/> as a JSON file and saves it to the persistent data storage under the file name <paramref name="SaveFile"/>.
+        /// The saved information can be loaded via the <see cref="LoadStateFromPersistentStorage"/> method.
+        /// </para>
+        /// <para>
+        /// If <paramref name="SaveFile"/> already exists it will be overwritten, not appended.
+        /// </para>
+        /// </remarks>
+        /// <param name="SaveFile">the name the save file should have on disc, including any file extension</param>
+        /// <returns><see langword="true"/> if the variables were successfully written into the player preferences; <see langword="false"/> otherwise.</returns>
+        public bool SaveStateToPersistentStorage(string SaveFile)
+        {
+            var data = SerializeAllVariablesToJSON();
+            var path = System.IO.Path.Combine(Application.persistentDataPath, SaveFile);
+
+            try
+            {
+                System.IO.File.WriteAllText(path, data);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to save state to {path}: {e.Message}");
+                return false;
+            }
         }
         
         // takes in a JSON string and converts it into a tuple of dictionaries

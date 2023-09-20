@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - A new sample (Shot Reverse Shot) showing how you can use Cinemachine virtual cameras and custom dialogue views to make a shot reverse shot scene in your game.
+- Two new basic save methods on `DialogueRunner` that use the persistent data storage location as their save location
+  - these methods `SaveStateToPersistentStorage` and `LoadStateFromPersistentStorage` are intended to replace the older `PlayerPref` based system for basic saves
+  - for more complex games we are still assuming you will need to craft your own bespoke save system.
 
 ### Changed
 
@@ -20,6 +23,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed a crash where declaration statements without a value (`<<declare $var>>`) would crash the importer, leading to weird bugs.
 - Yarn Functions and Commands can now have up to 10 parameters if you need them.
 - The hard dependancy on Text Mesh Pro is now a soft one, for most projects this change won't be noticed.
+- Deprecated `SaveStateToPlayerPrefs` and `LoadStateFromPlayerPrefs`
+  - Please use `SaveStateToPersistentStorage` and `LoadStateFromPersistentStorage` instead.
 
 ### Removed
 

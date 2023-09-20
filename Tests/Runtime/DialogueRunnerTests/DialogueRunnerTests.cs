@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -42,7 +43,7 @@ namespace Yarn.Unity.Tests
         }
 
         [UnityTest]
-        public IEnumerator DialogueRunner_WhenStateSaved_CanRestoreState()
+        public IEnumerator DialogueRunner_WhenStateSaved_CanRestoreState_PlayerPrefs()
         {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
             var storage = runner.VariableStorage;
@@ -61,6 +62,44 @@ namespace Yarn.Unity.Tests
             Assert.IsTrue(success);
 
             VerifySaveAndLoadStorageIntegrity(storage, originals.FloatVariables, originals.StringVariables, originals.BoolVariables);
+        }
+        [UnityTest]
+        public IEnumerator DialogueRunner_WhenStateSaved_CanRestoreState()
+        {
+            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            var storage = runner.VariableStorage;
+
+            var testFile = "TemporaryTestingFile.json";
+            runner.StartDialogue("LotsOfVars");
+            yield return null;
+
+            var originals = storage.GetAllVariables();
+
+            runner.SaveStateToPersistentStorage(testFile);
+            yield return null;
+
+            bool success = runner.LoadStateFromPersistentStorage(testFile);
+            Assert.IsTrue(success);
+
+            VerifySaveAndLoadStorageIntegrity(storage, originals.FloatVariables, originals.StringVariables, originals.BoolVariables);
+
+            success = CleanUpSaveFile(testFile);
+            Assert.IsTrue(success);
+        }
+        private bool CleanUpSaveFile(string SaveFile)
+        {
+            var path = System.IO.Path.Combine(Application.persistentDataPath, SaveFile);
+
+            try
+            {
+                System.IO.File.Delete(path);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to delete save file {path}: {e.Message}");
+                return false;
+            }
         }
         [UnityTest]
         public IEnumerator DialogueRunner_WhenRestoringInvalidKey_FailsToLoad()
