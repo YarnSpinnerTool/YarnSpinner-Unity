@@ -25,6 +25,10 @@ namespace Yarn.Unity.UnityLocalization
         [SerializeField] internal LocalizedStringTable stringsTable;
         [SerializeField] internal LocalizedAssetTable assetTable;
 
+        /// Should assets for lines be automatically unloaded or not.
+        /// Most of the time you want to leave this as true.
+        [SerializeField] internal bool AutomaticallyUnloadUnusedLineAssets = true;
+
         // the runtime table we actually get our strings out of
         // this changes at runtime depending on the language
         private StringTable currentStringsTable;
@@ -142,6 +146,21 @@ namespace Yarn.Unity.UnityLocalization
             currentAssetTable = value;
         }
 
+        /// <summary>
+        /// Clears all loaded assets from the cache.
+        /// </summary>
+        /// <remarks>
+        /// If you do this you either know what you are doing or are ok with having weird things happen.
+        /// </remarks>
+        public void ClearLoadedAssets()
+        {
+            loadedAssets.Clear();
+            RunAfterComplete(assetTable.GetTableAsync(), (loadedAssetTable) =>
+            {
+                loadedAssetTable.ReleaseAssets();
+            });
+        }
+
         public override void PrepareForLines(IEnumerable<string> lineIDs)
         {
             if (assetTable.IsEmpty != true)
@@ -167,25 +186,34 @@ namespace Yarn.Unity.UnityLocalization
 
             void PreloadLinesFromTable(AssetTable table, IEnumerable<string> lineIDs)
             {
-                // Remove and release the lines that have been previously loaded
-                // but aren't in this set of lines to expect - they're not
-                // needed now
-                var assetKeysToUnload = new HashSet<string>(loadedAssets.Keys);
-                assetKeysToUnload.ExceptWith(lineIDs);
-                foreach (var assetKeyToUnload in assetKeysToUnload)
+                // first we need to unload any assets that are loaded but unneeded
+                // if you are managing the release of assets yourself this won't happen
+                if (AutomaticallyUnloadUnusedLineAssets)
                 {
-                    var entryToRelease = table.GetEntry(assetKeyToUnload);
-
-                    if (entryToRelease != null)
+                    // Remove and release the lines that have been previously loaded
+                    // but aren't in this set of lines to expect - they're not
+                    // needed now
+                    var assetKeysToUnload = new HashSet<string>(loadedAssets.Keys);
+                    assetKeysToUnload.ExceptWith(lineIDs);
+                    foreach (var assetKeyToUnload in assetKeysToUnload)
                     {
-                        table.ReleaseAsset(entryToRelease);
+                        var entryToRelease = table.GetEntry(assetKeyToUnload);
 
-                        loadedAssets.Remove(assetKeyToUnload);
+                        if (entryToRelease != null)
+                        {
+                            table.ReleaseAsset(entryToRelease);
+
+                            loadedAssets.Remove(assetKeyToUnload);
+                        }
                     }
                 }
 
+                // next we only need to load the assets that aren't already loaded
+                var nonLoadedAssetIDs = new HashSet<string>(lineIDs);
+                nonLoadedAssetIDs.ExceptWith(loadedAssets.Keys);
+
                 // Load all assets that we need
-                foreach (var id in lineIDs)
+                foreach (var id in nonLoadedAssetIDs)
                 {
                     var entry = table.GetEntry(id);
                     if (entry == null)
@@ -296,9 +324,11 @@ namespace Yarn.Unity.UnityLocalization
 
 #if UNITY_EDITOR
     [CustomEditor(typeof(UnityLocalisedLineProvider))]
-    public class UnityLocalisedLineProviderEditor : Editor {
+    public class UnityLocalisedLineProviderEditor : Editor
+    {
         private SerializedProperty stringsTableProperty;
         private SerializedProperty assetTableProperty;
+        private SerializedProperty automaticAssetUnloadingProperty;
 
         public override void OnInspectorGUI()
         {
@@ -306,19 +336,23 @@ namespace Yarn.Unity.UnityLocalization
 
             var stringTableName = stringsTableProperty.FindPropertyRelative("m_TableReference").FindPropertyRelative("m_TableCollectionName").stringValue;
 
-            if (string.IsNullOrEmpty(stringTableName)) {
+            if (string.IsNullOrEmpty(stringTableName))
+            {
                 EditorGUI.indentLevel += 1;
                 EditorGUILayout.HelpBox("Choose a strings table to make this line provider able to deliver line text.", MessageType.Warning);
                 EditorGUI.indentLevel -= 1;
             }
             EditorGUILayout.PropertyField(assetTableProperty);
+            EditorGUILayout.PropertyField(automaticAssetUnloadingProperty, new GUIContent("Manage Assets"));
 
             serializedObject.ApplyModifiedProperties();
         }
-        public void OnEnable() {
+        public void OnEnable()
+        {
             #if USE_UNITY_LOCALIZATION
             this.stringsTableProperty = serializedObject.FindProperty(nameof(UnityLocalisedLineProvider.stringsTable));
             this.assetTableProperty = serializedObject.FindProperty(nameof(UnityLocalisedLineProvider.assetTable));
+            this.automaticAssetUnloadingProperty = serializedObject.FindProperty(nameof(UnityLocalisedLineProvider.AutomaticallyUnloadUnusedLineAssets));
             #endif
         }
     }

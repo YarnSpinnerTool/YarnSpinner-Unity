@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - these methods `SaveStateToPersistentStorage` and `LoadStateFromPersistentStorage` are intended to replace the older `PlayerPref` based system for basic saves
   - for more complex games we are still assuming you will need to craft your own bespoke save system.
 - A new sample (User Input and Yarn) showing how you can use blocking commands and TMP Input fields to get input into Yarn variables.
+- A new method (`ClearLoadedAssets`) to unload all cached assets from the `UnityLocalizedLineProvider`
+  - this is a dangerous method, use wisely.
+- Projects can now provide a list of line IDs within a node using `GetLineIDsForNodes`
+  - this is intended to be used to precache multiple nodes worth of assets but might also be useful for debugging during development.
 
 ### Changed
 
@@ -26,6 +30,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - The hard dependancy on Text Mesh Pro is now a soft one, for most projects this change won't be noticed.
 - Deprecated `SaveStateToPlayerPrefs` and `LoadStateFromPlayerPrefs`
   - Please use `SaveStateToPersistentStorage` and `LoadStateFromPersistentStorage` instead.
+- Dialogue Runner will now better wait for line providers to be ready before requesting lines
+  - This does have the potential issue of long load times for some larger nodes, in those cases we suggest you preload more lines using `GetLineIDsForNodes` on `YarnProject`
+- `UnityLocalizedLineProvider` can now have it's default setting of removing unused assets disabled, this is useful when caching multiple nodes worth of assets
+
 
 ### Removed
 
