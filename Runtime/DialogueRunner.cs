@@ -786,54 +786,76 @@ namespace Yarn.Unity
 
         internal void HandleOptions(OptionSet options)
         {
-            currentOptions = options;
-
-            DialogueOption[] optionSet = new DialogueOption[options.Options.Length];
-            for (int i = 0; i < options.Options.Length; i++)
+            // see comments in HandleLine for why we do this
+            if (lineProvider.LinesAvailable)
             {
-                // Localize the line associated with the option
-                var localisedLine = lineProvider.GetLocalizedLine(options.Options[i].Line);
-                var text = Dialogue.ExpandSubstitutions(localisedLine.RawText, options.Options[i].Line.Substitutions);
+                HandleOptionsInternal();
+            }
+            else
+            {
+                StartCoroutine(WaitUntilLinesAvailable());
+            }
 
-                Dialogue.LanguageCode = lineProvider.LocaleCode;
-
-                try
+            IEnumerator WaitUntilLinesAvailable()
+            {
+                while (!lineProvider.LinesAvailable)
                 {
-                    localisedLine.Text = Dialogue.ParseMarkup(text);
+                    yield return null;
                 }
-                catch (Yarn.Markup.MarkupParseException e)
+                HandleOptionsInternal();
+            }
+
+            void HandleOptionsInternal()
+            {
+                currentOptions = options;
+
+                DialogueOption[] optionSet = new DialogueOption[options.Options.Length];
+                for (int i = 0; i < options.Options.Length; i++)
                 {
-                    // Parsing the markup failed. We'll log a warning, and
-                    // produce a markup result that just contains the raw text.
-                    Debug.LogWarning($"Failed to parse markup in \"{text}\": {e.Message}");
-                    localisedLine.Text = new Yarn.Markup.MarkupParseResult
+                    // Localize the line associated with the option
+                    var localisedLine = lineProvider.GetLocalizedLine(options.Options[i].Line);
+                    var text = Dialogue.ExpandSubstitutions(localisedLine.RawText, options.Options[i].Line.Substitutions);
+
+                    Dialogue.LanguageCode = lineProvider.LocaleCode;
+
+                    try
                     {
-                        Text = text,
-                        Attributes = new List<Yarn.Markup.MarkupAttribute>()
+                        localisedLine.Text = Dialogue.ParseMarkup(text);
+                    }
+                    catch (Yarn.Markup.MarkupParseException e)
+                    {
+                        // Parsing the markup failed. We'll log a warning, and
+                        // produce a markup result that just contains the raw text.
+                        Debug.LogWarning($"Failed to parse markup in \"{text}\": {e.Message}");
+                        localisedLine.Text = new Yarn.Markup.MarkupParseResult
+                        {
+                            Text = text,
+                            Attributes = new List<Yarn.Markup.MarkupAttribute>()
+                        };
+                    }
+
+                    optionSet[i] = new DialogueOption
+                    {
+                        TextID = options.Options[i].Line.ID,
+                        DialogueOptionID = options.Options[i].ID,
+                        Line = localisedLine,
+                        IsAvailable = options.Options[i].IsAvailable,
                     };
                 }
+                
+                // Don't allow selecting options on the same frame that we
+                // provide them
+                IsOptionSelectionAllowed = false;
 
-                optionSet[i] = new DialogueOption
+                foreach (var dialogueView in dialogueViews)
                 {
-                    TextID = options.Options[i].Line.ID,
-                    DialogueOptionID = options.Options[i].ID,
-                    Line = localisedLine,
-                    IsAvailable = options.Options[i].IsAvailable,
-                };
+                    if (dialogueView == null || dialogueView.isActiveAndEnabled == false) continue;
+
+                    dialogueView.RunOptions(optionSet, selectAction);
+                }
+
+                IsOptionSelectionAllowed = true;
             }
-            
-            // Don't allow selecting options on the same frame that we
-            // provide them
-            IsOptionSelectionAllowed = false;
-
-            foreach (var dialogueView in dialogueViews)
-            {
-                if (dialogueView == null || dialogueView.isActiveAndEnabled == false) continue;
-
-                dialogueView.RunOptions(optionSet, selectAction);
-            }
-
-            IsOptionSelectionAllowed = true;
         }
 
         void HandleDialogueComplete()
@@ -902,71 +924,99 @@ namespace Yarn.Unity
         /// <param name="line">The line to send to the dialogue views.</param>
         internal void HandleLine(Line line)
         {
-            // Get the localized line from our line provider
-            CurrentLine = lineProvider.GetLocalizedLine(line);
+            // TODO: make a new "lines for node" method that can be called so that people can manually call the preload
 
-            // Expand substitutions
-            var text = Dialogue.ExpandSubstitutions(CurrentLine.RawText, CurrentLine.Substitutions);
-
-            if (text == null)
+            // it is possible at this point depending on the flow into handling the line that the line provider hasn't finished it's loads
+            // as such we will need to hold here until the line provider has gotten all it's lines loaded
+            // in testing this has been very hard to trigger without having bonkers huge nodes jumping to very asset rich nodes
+            // so if you think you are going to hit this you should preload all the lines ahead of time
+            // but don't worry about it most of the time
+            if (lineProvider.LinesAvailable)
             {
-                Debug.LogWarning($"Dialogue Runner couldn't expand substitutions in Yarn Project [{ yarnProject.name }] node [{ CurrentNodeName }] with line ID [{ CurrentLine.TextID }]. "
-                    + "This usually happens because it couldn't find text in the Localization. The line may not be tagged properly. "
-                    + "Try re-importing this Yarn Program. "
-                    + "For now, Dialogue Runner will swap in CurrentLine.RawText.");
-                text = CurrentLine.RawText;
+                // we just move on normally
+                HandleLineInternal();
+            }
+            else
+            {
+                StartCoroutine(WaitUntilLinesAvailable());
             }
 
-            // Render the markup
-            Dialogue.LanguageCode = lineProvider.LocaleCode;
-
-            try
+            IEnumerator WaitUntilLinesAvailable()
             {
-                CurrentLine.Text = Dialogue.ParseMarkup(text);
-            }
-            catch (Yarn.Markup.MarkupParseException e)
-            {
-                // Parsing the markup failed. We'll log a warning, and
-                // produce a markup result that just contains the raw text.
-                Debug.LogWarning($"Failed to parse markup in \"{text}\": {e.Message}");
-                CurrentLine.Text = new Yarn.Markup.MarkupParseResult
+                while (!lineProvider.LinesAvailable)
                 {
-                    Text = text,
-                    Attributes = new List<Yarn.Markup.MarkupAttribute>()
-                };
+                    yield return null;
+                }
+                HandleLineInternal();
             }
-
-            // Clear the set of active dialogue views, just in case
-            ActiveDialogueViews.Clear();
-
-            // the following is broken up into two stages because otherwise if the 
-            // first view happens to finish first once it calls dialogue complete
-            // it will empty the set of active views resulting in the line being considered
-            // finished by the runner despite there being a bunch of views still waiting
-            // so we do it over two loops.
-            // the first finds every active view and flags it as such
-            // the second then goes through them all and gives them the line
-
-            // Mark this dialogue view as active
-            foreach (var dialogueView in dialogueViews)
+            void HandleLineInternal()
             {
-                if (dialogueView == null || dialogueView.isActiveAndEnabled == false)
+                // Get the localized line from our line provider
+                CurrentLine = lineProvider.GetLocalizedLine(line);
+
+                // Expand substitutions
+                var text = Dialogue.ExpandSubstitutions(CurrentLine.RawText, CurrentLine.Substitutions);
+
+                if (text == null)
                 {
-                    continue;
+                    Debug.LogWarning($"Dialogue Runner couldn't expand substitutions in Yarn Project [{ yarnProject.name }] node [{ CurrentNodeName }] with line ID [{ CurrentLine.TextID }]. "
+                        + "This usually happens because it couldn't find text in the Localization. The line may not be tagged properly. "
+                        + "Try re-importing this Yarn Program. "
+                        + "For now, Dialogue Runner will swap in CurrentLine.RawText.");
+                    text = CurrentLine.RawText;
                 }
 
-                ActiveDialogueViews.Add(dialogueView);
-            }
-            // Send line to all active dialogue views
-            foreach (var dialogueView in dialogueViews)
-            {
-                if (dialogueView == null || dialogueView.isActiveAndEnabled == false)
+                // Render the markup
+                Dialogue.LanguageCode = lineProvider.LocaleCode;
+
+                try
                 {
-                    continue;
+                    CurrentLine.Text = Dialogue.ParseMarkup(text);
+                }
+                catch (Yarn.Markup.MarkupParseException e)
+                {
+                    // Parsing the markup failed. We'll log a warning, and
+                    // produce a markup result that just contains the raw text.
+                    Debug.LogWarning($"Failed to parse markup in \"{text}\": {e.Message}");
+                    CurrentLine.Text = new Yarn.Markup.MarkupParseResult
+                    {
+                        Text = text,
+                        Attributes = new List<Yarn.Markup.MarkupAttribute>()
+                    };
                 }
 
-                dialogueView.RunLine(CurrentLine,
-                    () => DialogueViewCompletedDelivery(dialogueView));
+                // Clear the set of active dialogue views, just in case
+                ActiveDialogueViews.Clear();
+
+                // the following is broken up into two stages because otherwise if the 
+                // first view happens to finish first once it calls dialogue complete
+                // it will empty the set of active views resulting in the line being considered
+                // finished by the runner despite there being a bunch of views still waiting
+                // so we do it over two loops.
+                // the first finds every active view and flags it as such
+                // the second then goes through them all and gives them the line
+
+                // Mark this dialogue view as active
+                foreach (var dialogueView in dialogueViews)
+                {
+                    if (dialogueView == null || dialogueView.isActiveAndEnabled == false)
+                    {
+                        continue;
+                    }
+
+                    ActiveDialogueViews.Add(dialogueView);
+                }
+                // Send line to all active dialogue views
+                foreach (var dialogueView in dialogueViews)
+                {
+                    if (dialogueView == null || dialogueView.isActiveAndEnabled == false)
+                    {
+                        continue;
+                    }
+
+                    dialogueView.RunLine(CurrentLine,
+                        () => DialogueViewCompletedDelivery(dialogueView));
+                }
             }
         }
 

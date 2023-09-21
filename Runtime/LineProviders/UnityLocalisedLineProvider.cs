@@ -56,7 +56,6 @@ namespace Yarn.Unity.UnityLocalization
                 // about it
                 if (this.assetTable.IsEmpty == false)
                 {
-
                     // If the table hasn't finished loading yet, then lines
                     // aren't available yet
                     if (this.currentAssetTable == null)
