@@ -5,11 +5,9 @@ using System.Linq;
 
 namespace Yarn.Unity
 {
-
     [HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
     public class YarnProject : ScriptableObject
     {
-
         [SerializeField]
         [HideInInspector]
         public byte[] compiledYarnProgram;
@@ -176,7 +174,6 @@ namespace Yarn.Unity
 
         public Localization GetLocalization(string localeCode)
         {
-
             // If localeCode is null, we use the base localization.
             if (localeCode == null)
             {
@@ -194,6 +191,30 @@ namespace Yarn.Unity
             // We didn't find a localization. Fall back to the Base
             // localization.
             return baseLocalization;
+        }
+
+        /// <summary>
+        /// Returns a list of all line and option IDs within the requested nodes
+        /// </summary>
+        /// <remarks>
+        /// This is intended to be used either to precache multiple nodes worth of lines or for debugging
+        /// </remarks>
+        /// <param name="nodes">the names of all nodes whos line IDs you covet</param>
+        /// <returns>The ids of all lines and options in the requested <paramref name="nodes"/> </returns>
+        public IEnumerable<string> GetLineIDsForNodes(IEnumerable<string> nodes)
+        {
+            var ids = new List<string>();
+
+            foreach (var node in nodes)
+            {
+                var lines = Program.LineIDsForNode(node);
+                if (lines != null)
+                {
+                    ids.AddRange(lines);
+                }
+            }
+
+            return ids;
         }
 
         /// <summary>

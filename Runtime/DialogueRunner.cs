@@ -1090,8 +1090,6 @@ namespace Yarn.Unity
             onSuccessfulDispatch();
         }
 
-        
-
         private void PrepareForLines(IEnumerable<string> lineIDs)
         {
             lineProvider.PrepareForLines(lineIDs);
