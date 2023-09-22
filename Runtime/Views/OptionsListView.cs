@@ -54,12 +54,6 @@ namespace Yarn.Unity
 
         public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
         {
-            // Hide all existing option views
-            foreach (var optionView in optionViews)
-            {
-                optionView.gameObject.SetActive(false);
-            }
-
             // If we don't already have enough option views, create more
             while (dialogueOptions.Length > optionViews.Count)
             {
@@ -136,7 +130,7 @@ namespace Yarn.Unity
 
                 IEnumerator OptionViewWasSelectedInternal(DialogueOption selectedOption)
                 {
-                    yield return StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeTime));
+                    yield return StartCoroutine(FadeAndDisableOptionViews(canvasGroup, 1, 0, fadeTime));
                     OnOptionSelected(selectedOption.DialogueOptionID);
                 }
             }
@@ -157,7 +151,21 @@ namespace Yarn.Unity
                 canvasGroup.interactable = false;
                 canvasGroup.blocksRaycasts = false;
 
-                StartCoroutine(Effects.FadeAlpha(canvasGroup, canvasGroup.alpha, 0, fadeTime));
+                StartCoroutine(FadeAndDisableOptionViews(canvasGroup, canvasGroup.alpha, 0, fadeTime));
+            }
+        }
+
+        /// <summary>
+        /// Fades canvas and then disables all option views.
+        /// </summary>
+        private IEnumerator FadeAndDisableOptionViews(CanvasGroup canvasGroup, float from, float to, float fadeTime)
+        {
+            yield return Effects.FadeAlpha(canvasGroup, from, to, fadeTime);
+
+            // Hide all existing option views
+            foreach (var optionView in optionViews)
+            {
+                optionView.gameObject.SetActive(false);
             }
         }
     }
