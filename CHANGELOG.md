@@ -33,6 +33,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Dialogue Runner will now better wait for line providers to be ready before requesting lines
   - This does have the potential issue of long load times for some larger nodes, in those cases we suggest you preload more lines using `GetLineIDsForNodes` on `YarnProject`
 - `UnityLocalisedLineProvider` can now have it's default setting of removing unused assets disabled, this is useful when caching multiple nodes worth of assets
+- Add Assets to Asset Table Collection Wizard now correctly prepends `line:` to the key to match the documented behaviour.
 
 ### Removed
 

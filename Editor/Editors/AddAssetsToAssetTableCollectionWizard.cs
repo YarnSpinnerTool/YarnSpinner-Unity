@@ -151,15 +151,17 @@ public class AddAssetsToAssetTableCollectionWizard : EditorWindow {
 
             var allFiles = Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories).Where(path => !path.EndsWith(".meta"));
 
-            foreach (var file in allFiles) {
+            foreach (var file in allFiles)
+            {
                 var asset = AssetDatabase.LoadAssetAtPath(file, assetType);
 
-                if (asset == null) {
+                if (asset == null)
+                {
                     // Not the type of asset we're looking for
                     continue;
                 }
 
-                var keyName = Path.GetFileNameWithoutExtension(file);
+                var keyName = $"line:{Path.GetFileNameWithoutExtension(file)}";
 
                 assetTableCollection.AddAssetToTable(locale.Identifier, keyName, asset);
 
