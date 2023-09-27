@@ -176,7 +176,6 @@ namespace Yarn.Unity.Editor
 
             if (projectRelativeSourceFiles.Any())
             {
-
                 // This project depends upon this script
                 foreach (var scriptPath in projectRelativeSourceFiles)
                 {
@@ -197,10 +196,26 @@ namespace Yarn.Unity.Editor
 
                 job.Library = library;
 
-                compilationResult = Compiler.Compiler.Compile(job);
+                try
+                {
+                    compilationResult = Compiler.Compiler.Compile(job);
+                }
+                catch (System.Exception e)
+                {
+                    var errorMessage = $"Encountered an unhandled exception during compilation: {e.Message}";
+                    ctx.LogImportError(errorMessage, null);
+
+                    importData.diagnostics.Add(new ProjectImportData.DiagnosticEntry
+                    {
+                        yarnFile = null,
+                        errorMessages = new List<string> { errorMessage },
+                    });
+                    importData.ImportStatus = ProjectImportData.ImportStatusCode.CompilationFailed;
+                    return;
+                }
 
                 var errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
-
+  
                 if (errors.Count() > 0)
                 {
                     var errorGroups = errors.GroupBy(e => e.FileName);
@@ -290,7 +305,6 @@ namespace Yarn.Unity.Editor
 #if YARNSPINNER_DEBUG
             UnityEngine.Profiling.Profiler.enabled = false;
 #endif
-
         }
 
         internal static string GetRelativePath(string path)
