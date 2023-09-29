@@ -39,6 +39,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed an issue with `AudioLineProvider` that would prevent audio assets being loaded 
 - Fixed an issue with the Project editor that prevented audio assets loading when using Addressables.
 - The Yarn Project inspector window will now log errors when your inspector width is considered too small
+  - We are pretty sure this is a bug in the UI code on Unity's end.
   - in our testing it happens at widths less than 319 pixels, because sure why not.
   - it also doesn't seem to happen in every version of Unity, so that's fun.
 
