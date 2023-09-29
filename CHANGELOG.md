@@ -120,6 +120,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - This solves an uncommon but *very* hard to debug error!
 - `YarnProjectImporterEditor.CreateUpgradeUI` is now private.
 - The Yarn Project editor 'upgrade' help link now correctly links to the upgrade page on the docs.
+- When using Unity Localization, line metadata is now stored on the shared entry for a line ID, rather than only on the base language's entry. (This caused an issue where, if the game was not running in the base language, line metadata would not be available.)
 
 ### Removed
 

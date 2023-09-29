@@ -3,6 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity;
 
+#if USE_UNITY_LOCALIZATION
+using UnityEngine.Localization.Tables;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement;
+using UnityEngine.Localization.Metadata;
+
+#endif
 
 #nullable enable
 
@@ -185,7 +195,44 @@ namespace Yarn.Unity.UnityLocalization
                 TextID = line.ID,
                 RawText = $"{line.ID}: Unable to create a localised line, because the Unity Localization package is not installed in this project.",
                 Substitutions = line.Substitutions,
-            });
+            };
+        }
+#endif
+    }
+
+#if USE_UNITY_LOCALIZATION
+    public class LineMetadata : IMetadata {
+        public string nodeName;
+        public string[] tags;
+    }
+#endif  
+
+#if UNITY_EDITOR
+    [CustomEditor(typeof(UnityLocalisedLineProvider))]
+    public class UnityLocalisedLineProviderEditor : Editor {
+        private SerializedProperty stringsTableProperty;
+        private SerializedProperty assetTableProperty;
+
+        public override void OnInspectorGUI()
+        {
+            EditorGUILayout.PropertyField(stringsTableProperty);
+
+            var stringTableName = stringsTableProperty.FindPropertyRelative("m_TableReference").FindPropertyRelative("m_TableCollectionName").stringValue;
+
+            if (string.IsNullOrEmpty(stringTableName)) {
+                EditorGUI.indentLevel += 1;
+                EditorGUILayout.HelpBox("Choose a strings table to make this line provider able to deliver line text.", MessageType.Warning);
+                EditorGUI.indentLevel -= 1;
+            }
+            EditorGUILayout.PropertyField(assetTableProperty);
+
+            serializedObject.ApplyModifiedProperties();
+        }
+        public void OnEnable() {
+            #if USE_UNITY_LOCALIZATION
+            this.stringsTableProperty = serializedObject.FindProperty(nameof(UnityLocalisedLineProvider.stringsTable));
+            this.assetTableProperty = serializedObject.FindProperty(nameof(UnityLocalisedLineProvider.assetTable));
+            #endif
         }
     }
 #endif
