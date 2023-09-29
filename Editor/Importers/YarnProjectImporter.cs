@@ -17,7 +17,7 @@ using UnityEngine.Localization.Tables;
 
 namespace Yarn.Unity.Editor
 {
-    [ScriptedImporter(4, new[] { "yarnproject" }, 1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
+    [ScriptedImporter(5, new[] { "yarnproject" }, 1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
     [InitializeOnLoad]
     public class YarnProjectImporter : ScriptedImporter
     {
@@ -511,20 +511,29 @@ namespace Yarn.Unity.Editor
                     var lineID = entry.Key;
                     var stringInfo = entry.Value;
 
-                    var lineEntry = table.AddEntry(lineID, stringInfo.text);
+                    var existingEntry = table.GetEntry(lineID);
 
-                    var existingMetadata = lineEntry.GetMetadata<UnityLocalization.LineMetadata>();
+                    if (existingEntry != null)
+                    {
+                        var existingSharedMetadata = existingEntry.SharedEntry.Metadata.GetMetadata<UnityLocalization.LineMetadata>();
 
-                    if (existingMetadata != null) {
-                        lineEntry.RemoveMetadata(existingMetadata);
+                        if (existingSharedMetadata != null)
+                        {
+                            existingEntry.SharedEntry.Metadata.RemoveMetadata(existingSharedMetadata);
+                            table.MetadataEntries.Remove(existingSharedMetadata);
+                        }
                     }
 
-                    lineEntry.AddMetadata(new UnityLocalization.LineMetadata
+                    var lineEntry = table.AddEntry(lineID, stringInfo.text);
+
+                    lineEntry.SharedEntry.Metadata.AddMetadata(new UnityLocalization.LineMetadata
                     {
                         nodeName = stringInfo.nodeName,
                         tags = RemoveLineIDFromMetadata(stringInfo.metadata).ToArray(),
                     });
                 }
+
+                
 
                 // We've made changes to the table, so flag it and its shared
                 // data as dirty.
