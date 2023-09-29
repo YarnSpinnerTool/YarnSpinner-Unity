@@ -35,6 +35,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `UnityLocalisedLineProvider` can now have it's default setting of removing unused assets disabled, this is useful when caching multiple nodes worth of assets
 - Add Assets to Asset Table Collection Wizard now correctly prepends `line:` to the key to match the documented behaviour.
 - `OptionsListView` now deactivates child options when they are not needed instead of just making them transparent.
+- When using Unity Localization, line metadata is now stored on the shared entry for a line ID, rather than only on the base language's entry. (This caused an issue where, if the game was not running in the base language, line metadata would not be available.)
 - Fixed an issue with `AudioLineProvider` that would prevent audio assets being loaded 
 - Fixed an issue with the Project editor that prevented audio assets loading when using Addressables.
 

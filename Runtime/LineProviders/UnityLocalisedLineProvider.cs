@@ -10,6 +10,8 @@ using UnityEngine.Localization.Settings;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement;
+using UnityEngine.Localization.Metadata;
+
 #endif
 
 #if UNITY_EDITOR
@@ -98,7 +100,7 @@ namespace Yarn.Unity.UnityLocalization
 
             // Attempt to fetch metadata tags for this line from the string
             // table
-            var metadata = currentStringsTable[line.ID]?.GetMetadata<UnityLocalization.LineMetadata>();
+            var metadata = currentStringsTable[line.ID]?.SharedEntry.Metadata.GetMetadata<UnityLocalization.LineMetadata>();
 
             if (metadata != null)
             {
@@ -316,7 +318,7 @@ namespace Yarn.Unity.UnityLocalization
     }
 
 #if USE_UNITY_LOCALIZATION
-    public class LineMetadata : UnityEngine.Localization.Metadata.IMetadata {
+    public class LineMetadata : IMetadata {
         public string nodeName;
         public string[] tags;
     }
