@@ -35,12 +35,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `UnityLocalisedLineProvider` can now have it's default setting of removing unused assets disabled, this is useful when caching multiple nodes worth of assets
 - Add Assets to Asset Table Collection Wizard now correctly prepends `line:` to the key to match the documented behaviour.
 - `OptionsListView` now deactivates child options when they are not needed instead of just making them transparent.
+- Fixed an issue with `AudioLineProvider` that would prevent audio assets being loaded 
+- Fixed an issue with the Project editor that prevented audio assets loading when using Addressables.
 
 ### Removed
 
 - The Actions class will no longer log every single time a command is registered.
 - Removed `YarnLinesAsCanvasText` class and associated elements, this didn't did anything and was using an approach that is no longer advisable.
 - The `MainMenu` sample is now gone, this code was not in the package and didn't work so it is unlikely anyone will notice this has been removed.
+- Deprecated code inside `YarnProjectImporterEditor`
 
 ## [2.3.1] 2023-07-07
 
