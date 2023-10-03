@@ -94,9 +94,15 @@ namespace Yarn.Unity.Editor
         {
             base.OnDisable();
 
-            if (AnyModifications) {
-                if (EditorUtility.DisplayDialog("Unapplied Changes", "The currently selected Yarn Project has unapplied changes. Do you want to apply them or revert?", "Apply", "Revert")) {
+            if (AnyModifications)
+            {
+                if (EditorUtility.DisplayDialog("Unapplied Changes", "The currently selected Yarn Project has unapplied changes. Do you want to apply them or revert?", "Apply", "Revert"))
+                {
+#if UNITY_2022_2_OR_NEWER
+                    this.SaveChanges();
+#else
                     this.ApplyAndImport();
+#endif
                 }
             }
         }
