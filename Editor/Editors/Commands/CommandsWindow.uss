@@ -3,10 +3,6 @@
     white-space: normal;
 }
 
-.commandListItem {
-    background-color: unset;
-}
-
 .command {
     padding-left: 20px;
 }
