@@ -38,6 +38,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - When using Unity Localization, line metadata is now stored on the shared entry for a line ID, rather than only on the base language's entry. (This caused an issue where, if the game was not running in the base language, line metadata would not be available.)
 - Fixed an issue with `AudioLineProvider` that would prevent audio assets being loaded 
 - Fixed an issue with the Project editor that prevented audio assets loading when using Addressables.
+- The Yarn Project inspector window will now log errors when your inspector width is considered too small
+  - We are pretty sure this is a bug in the UI code on Unity's end.
+  - in our testing it happens at widths less than 319 pixels, because sure why not.
+  - it also doesn't seem to happen in every version of Unity, so that's fun.
 
 ### Removed
 

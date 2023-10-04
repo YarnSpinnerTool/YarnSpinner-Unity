@@ -109,7 +109,6 @@ namespace Yarn.Unity.Editor
 #if YARNSPINNER_DEBUG
             UnityEngine.Profiling.Profiler.enabled = true;
 #endif
-            Debug.Log("Import project " + ctx.assetPath);
 
             var projectAsset = ScriptableObject.CreateInstance<YarnProject>();
 
@@ -180,8 +179,6 @@ namespace Yarn.Unity.Editor
                 foreach (var scriptPath in projectRelativeSourceFiles)
                 {
                     string guid = AssetDatabase.AssetPathToGUID(scriptPath);
-
-                    Debug.Log($"Project {ctx.assetPath} depends on script {scriptPath}");
 
                     ctx.DependsOnSourceAsset(scriptPath);
 

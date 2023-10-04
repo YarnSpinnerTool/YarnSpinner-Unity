@@ -70,7 +70,6 @@ namespace Yarn.Unity.Editor
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
-            Debug.Log("Import script " + ctx.assetPath);
             var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
 
