@@ -1,0 +1,119 @@
+name: Run Tests on Broad Version Range 🌶
+
+env:
+  ACTIONS_RUNNER_DEBUG: true
+  ACTIONS_STEP_DEBUG: true
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  buildAndTestForSomePlatforms:
+    concurrency:
+      group: ${{ github.workflow }}
+      cancel-in-progress: true # Cancel other jobs if another one arrives
+    name: Test on ${{ matrix.unityVersion }} for ${{ matrix.targetPlatform }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 1 # Only run one at a time, to prevent license contention
+      matrix:
+        projectPath:
+          - YarnSpinner
+        unityVersion:
+          # - 2019.4.40f1
+          # - 2020.3.45f1
+          # - 2021.3.9f1
+          # - 2022.2.1f1
+          
+          - 2019.4.0f1
+          - 2019.4.40f1
+          - 2020.1.0f1
+          - 2020.1.17f1
+          - 2020.2.0f1
+          - 2020.2.7f1
+          - 2020.3.0f1
+          - 2020.3.48f1
+          - 2021.1.0f1
+          - 2021.1.28f1
+          - 2021.2.0f1
+          - 2021.2.19f1
+          - 2021.3.0f1
+          - 2021.3.30f1
+          - 2022.1.0f1
+          - 2022.1.24f1
+          - 2022.2.0f1
+          - 2022.2.21f1
+          - 2022.3.0f1
+          - 2022.3.10f1
+
+          # - 2023.1.13f1
+        targetPlatform:
+          # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
+          - StandaloneWindows64 # Build a Windows 64-bit standalone.
+          # - StandaloneLinux64 # Build a Linux 64-bit standalone.
+          # - iOS # Build an iOS player.
+          # - Android # Build an Android player.
+          # - WebGL # WebGL.
+    steps:
+      - name: Create empty Unity project
+        run: |
+          mkdir -p ${{ matrix.projectPath }}/Assets
+          mkdir -p ${{ matrix.projectPath }}/ProjectSettings 
+          mkdir -p ${{ matrix.projectPath }}/Packages
+      
+      # Add the Unity Input System package, and configure the new project to use
+      # both the Input System and the legacy Input Manager.
+      - name: Add Input System package
+        run: |
+          cat <<EOF > ${{ matrix.projectPath }}/ProjectSettings/ProjectSettings.asset
+          %YAML 1.1
+          %TAG !u! tag:unity3d.com,2011:
+          --- !u!129 &1
+          PlayerSettings:
+            activeInputHandler: 2
+          EOF
+
+          cat <<EOF > ${{ matrix.projectPath }}/Packages/manifest.json
+          {
+            "dependencies": {
+              "com.unity.inputsystem": "1.0.2"
+            }
+          }
+          EOF
+      
+      - name: Check out to Packages/YarnSpinner
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          path: ${{ matrix.projectPath }}/Packages/YarnSpinner
+          
+      - name: Fetch from Cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ matrix.projectPath }}/Library
+          key: Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-${{ matrix.unityVersion }}-${{ hashFiles(matrix.projectPath) }}
+          restore-keys: |
+            Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-${{ matrix.unityVersion }}-
+            
+      - name: Run tests
+        uses: game-ci/unity-test-runner@v2.1.1
+        id: testRunner
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        with:
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: 'Test Results ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}'
+          # customParameters: -quit
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: Test results (edit + play, ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}
+          # path: ${{ steps.testRunner.outputs.artifactsPath }}
+          path: artifacts
