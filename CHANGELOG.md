@@ -47,8 +47,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - The Actions class will no longer log every single time a command is registered.
 - Removed `YarnLinesAsCanvasText` class and associated elements, this didn't did anything and was using an approach that is no longer advisable.
-- The `MainMenu` sample is now gone, this code was not in the package and didn't work so it is unlikely anyone will notice this has been removed.
-- Deprecated code inside `YarnProjectImporterEditor`
+  - The `MainMenu` sample is now gone, this code was not in the package and didn't work so it is unlikely anyone will notice this has been removed.
+- Removed the deprecated code inside `YarnProjectImporterEditor`
 
 ## [2.3.1] 2023-07-07
 
