@@ -43,6 +43,11 @@ namespace Yarn.Unity.Editor
 
             // Create the program
             var newProject = new Yarn.Compiler.Project();
+
+            // Follow Unity's behaviour - exclude any content in a folder whose
+            // name ends with a tilde
+            newProject.ExcludeFilePatterns = new[] { "**/*~/*" };
+
             newProject.SaveToFile(destinationPath);
 
             AssetDatabase.ImportAsset(destinationPath);
