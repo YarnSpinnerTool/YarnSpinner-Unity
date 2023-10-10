@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - this is a dangerous method, use wisely.
 - Projects can now provide a list of line IDs within a node using `GetLineIDsForNodes`
   - this is intended to be used to precache multiple nodes worth of assets but might also be useful for debugging during development.
+- Newly created `.yarnproject` files now ignore any `.yarn` files that are in a folder whose name ends in '~', which follows Unity's behaviour.
+  - You can customise this behaviour by opening the `.yarnproject` file in a text editor and modifying the `excludeFiles` property.
 
 ### Changed
 
