@@ -10,3 +10,14 @@ tags:
 <<set $floatVar = 1.420>>
 
 ===
+
+title: DefaultValueTests
+---
+<<declare $defaultString = "hello">>
+<<declare $defaultBool = true>>
+<<declare $defaultFloat = 999>>
+===
+
+title: EmptyNode
+---
+===

@@ -139,6 +139,28 @@ namespace Yarn.Unity.Tests
             File.Delete(testFilePath);
         }
 
+        // need another test here where we test the default variable loading
+        // because we don't currently actually test that...
+        [UnityTest]
+        public IEnumerator TestLoadingDefaultValues()
+        {
+            // intentionally not running the node that declares the vars we intend on testing
+            Runner.StartDialogue("EmptyNode");
+            yield return null;
+
+            var hasVar = VarStorage.TryGetValue<string>("$defaultString", out var defaultString);
+            Assert.IsTrue(hasVar);
+            Assert.AreEqual("hello", defaultString);
+
+            hasVar = VarStorage.TryGetValue<bool>("$defaultBool", out var defaultBool);
+            Assert.IsTrue(hasVar);
+            Assert.AreEqual(true, defaultBool);
+
+            hasVar = VarStorage.TryGetValue<float>("$defaultFloat", out var defaultFloat);
+            Assert.IsTrue(hasVar);
+            Assert.AreEqual(999, defaultFloat);
+        }
+
         [Test]
         public void VariableStorage_OnUsingValueWithInvalidName_ThrowsError() {
             VarStorage.SetValue("$valid", 1);

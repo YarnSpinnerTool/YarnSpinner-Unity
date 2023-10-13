@@ -235,9 +235,11 @@ namespace Yarn.Unity
 
             Dialogue.SetProgram(newProject.Program);
 
-            if (lineProvider != null) {
+            if (lineProvider != null)
+            {
                 lineProvider.YarnProject = newProject;
             }
+            SetInitialVariables();
         }
 
         /// <summary>

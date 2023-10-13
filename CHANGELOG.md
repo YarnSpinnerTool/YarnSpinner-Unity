@@ -44,6 +44,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - We are pretty sure this is a bug in the UI code on Unity's end.
   - in our testing it happens at widths less than 319 pixels, because sure why not.
   - it also doesn't seem to happen in every version of Unity, so that's fun.
+- Setting a project on the dialogue runner will now also load the initial variables from this project, fixing this regression.
 
 ### Removed
 
