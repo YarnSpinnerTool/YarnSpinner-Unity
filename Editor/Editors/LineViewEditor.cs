@@ -22,9 +22,10 @@ namespace Yarn.Unity.Editor
         private SerializedProperty autoAdvanceDialogueProperty;
         private SerializedProperty holdDelayProperty;
 
+        private SerializedProperty paletteProperty;
+
         public void OnEnable()
         {
-
             canvasGroupProperty = serializedObject.FindProperty(nameof(LineView.canvasGroup));
             useFadeEffectProperty = serializedObject.FindProperty(nameof(LineView.useFadeEffect));
             fadeInTimeProperty = serializedObject.FindProperty(nameof(LineView.fadeInTime));
@@ -38,6 +39,7 @@ namespace Yarn.Unity.Editor
             continueButtonProperty = serializedObject.FindProperty(nameof(LineView.continueButton));
             autoAdvanceDialogueProperty = serializedObject.FindProperty(nameof(LineView.autoAdvance));
             holdDelayProperty = serializedObject.FindProperty(nameof(LineView.holdTime));
+            paletteProperty = serializedObject.FindProperty(nameof(LineView.palette));
         }
 
         public override void OnInspectorGUI()
@@ -92,6 +94,8 @@ namespace Yarn.Unity.Editor
             }
 
             EditorGUILayout.PropertyField(continueButtonProperty);
+
+            EditorGUILayout.PropertyField(paletteProperty);
 
             serializedObject.ApplyModifiedProperties();
 

@@ -193,6 +193,9 @@ namespace Yarn.Unity
         /// </remarks>
         [SerializeField]
         internal bool autoAdvance = false;
+
+        [SerializeField]
+        internal MarkupPalette palette;
         
         /// <summary>
         /// The current <see cref="LocalizedLine"/> that this line view is
@@ -322,13 +325,14 @@ namespace Yarn.Unity
                     continueButton.SetActive(false);
                 }
 
+                Markup.MarkupParseResult text;
                 if (characterNameText != null)
                 {
                     // If we have a character name text view, show the character
                     // name in it, and show the rest of the text in our main
                     // text view.
                     characterNameText.text = dialogueLine.CharacterName;
-                    lineText.text = dialogueLine.TextWithoutCharacterName.Text;
+                    text = dialogueLine.TextWithoutCharacterName;
                 }
                 else
                 {
@@ -337,14 +341,34 @@ namespace Yarn.Unity
                     if (showCharacterNameInLineView)
                     {
                         // Yep! Show the entire text.
-                        lineText.text = dialogueLine.Text.Text;
+                        text = dialogueLine.Text;
                     }
                     else
                     {
                         // Nope! Show just the text without the character name.
-                        lineText.text = dialogueLine.TextWithoutCharacterName.Text;
+                        text = dialogueLine.TextWithoutCharacterName;
                     }
                 }
+
+                string lineOfText = text.Text;
+                // if we have a palette file need to add those colours into the text
+                if (palette != null)
+                {
+                    text.Attributes.Sort((a, b) => (b.Position.CompareTo(a.Position)));
+                    foreach (var attribute in text.Attributes)
+                    {
+                        // we have a colour that matches the current marker
+                        Color markerColour;
+                        if (palette.ColorForMarker(attribute.Name, out markerColour))
+                        {
+                            // we use the range on the marker to insert the TMP <color> tags
+                            // not the best approach but will work ok for this use case
+                            lineOfText = lineOfText.Insert(attribute.Position + attribute.Length, "</color>");
+                            lineOfText = lineOfText.Insert(attribute.Position, $"<color=#{ColorUtility.ToHtmlStringRGB(markerColour)}>");
+                        }
+                    }
+                }
+                lineText.text = lineOfText;
 
                 if (useTypewriterEffect)
                 {
@@ -365,7 +389,8 @@ namespace Yarn.Unity
                 if (useFadeEffect)
                 {
                     yield return StartCoroutine(Effects.FadeAlpha(canvasGroup, 0, 1, fadeInTime, currentStopToken));
-                    if (currentStopToken.WasInterrupted) {
+                    if (currentStopToken.WasInterrupted)
+                    {
                         // The fade effect was interrupted. Stop this entire
                         // coroutine.
                         yield break;
@@ -388,7 +413,8 @@ namespace Yarn.Unity
                             currentStopToken
                         )
                     );
-                    if (currentStopToken.WasInterrupted) {
+                    if (currentStopToken.WasInterrupted)
+                    {
                         // The typewriter effect was interrupted. Stop this
                         // entire coroutine.
                         yield break;
