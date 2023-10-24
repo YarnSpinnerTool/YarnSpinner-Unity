@@ -15,6 +15,7 @@ namespace Yarn.Unity
         [SerializeField] bool showCharacterName = false;
 
         public Action<DialogueOption> OnOptionSelected;
+        public MarkupPalette palette;
 
         DialogueOption _option;
 
@@ -32,14 +33,25 @@ namespace Yarn.Unity
 
                 // When we're given an Option, use its text and update our
                 // interactibility.
+                Markup.MarkupParseResult line;
                 if (showCharacterName)
                 {
-                    text.text = value.Line.Text.Text;
+                    line = value.Line.Text;
                 }
                 else
                 {
-                    text.text = value.Line.TextWithoutCharacterName.Text;
+                    line = value.Line.TextWithoutCharacterName;
                 }
+
+                if (palette != null)
+                {
+                    text.text = LineView.PaletteMarkedUpText(line, palette);
+                }
+                else
+                {
+                    text.text = line.Text;
+                }
+
                 interactable = value.IsAvailable;
             }
         }

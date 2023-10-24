@@ -350,25 +350,15 @@ namespace Yarn.Unity
                     }
                 }
 
-                string lineOfText = text.Text;
                 // if we have a palette file need to add those colours into the text
                 if (palette != null)
                 {
-                    text.Attributes.Sort((a, b) => (b.Position.CompareTo(a.Position)));
-                    foreach (var attribute in text.Attributes)
-                    {
-                        // we have a colour that matches the current marker
-                        Color markerColour;
-                        if (palette.ColorForMarker(attribute.Name, out markerColour))
-                        {
-                            // we use the range on the marker to insert the TMP <color> tags
-                            // not the best approach but will work ok for this use case
-                            lineOfText = lineOfText.Insert(attribute.Position + attribute.Length, "</color>");
-                            lineOfText = lineOfText.Insert(attribute.Position, $"<color=#{ColorUtility.ToHtmlStringRGB(markerColour)}>");
-                        }
-                    }
+                    lineText.text = LineView.PaletteMarkedUpText(text, palette);
                 }
-                lineText.text = lineOfText;
+                else
+                {
+                    lineText.text = text.Text;
+                }
 
                 if (useTypewriterEffect)
                 {
@@ -518,6 +508,35 @@ namespace Yarn.Unity
                 currentLine = null;
                 StartCoroutine(DismissLineInternal(null));
             }
+        }
+
+        /// <summary>
+        /// Applies the <paramref name="palette"/> to the line based on it's markup.
+        /// </summary>
+        /// <remarks>
+        /// This is static so that other dialogue views can reuse this code.
+        /// While this is simplistic it is useful enough that multiple pieces might well want it.
+        /// </remarks>
+        /// <param name="line">The parsed marked up line with it's attributes.</param>
+        /// <param name="palette">The palette mapping attributes to colours.</param>
+        /// <returns>A TMP formatted string with the palette markup values injected within.</returns>
+        public static string PaletteMarkedUpText(Markup.MarkupParseResult line, MarkupPalette palette)
+        {
+            string lineOfText = line.Text;
+            line.Attributes.Sort((a, b) => (b.Position.CompareTo(a.Position)));
+            foreach (var attribute in line.Attributes)
+            {
+                // we have a colour that matches the current marker
+                Color markerColour;
+                if (palette.ColorForMarker(attribute.Name, out markerColour))
+                {
+                    // we use the range on the marker to insert the TMP <color> tags
+                    // not the best approach but will work ok for this use case
+                    lineOfText = lineOfText.Insert(attribute.Position + attribute.Length, "</color>");
+                    lineOfText = lineOfText.Insert(attribute.Position, $"<color=#{ColorUtility.ToHtmlStringRGB(markerColour)}>");
+                }
+            }
+            return lineOfText;
         }
     }
 }

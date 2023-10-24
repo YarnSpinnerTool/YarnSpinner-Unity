@@ -18,6 +18,8 @@ namespace Yarn.Unity
 
         [SerializeField] TextMeshProUGUI lastLineText;
 
+        [SerializeField] MarkupPalette palette;
+
         [SerializeField] float fadeTime = 0.1f;
 
         [SerializeField] bool showUnavailableOptions = false;
@@ -77,6 +79,7 @@ namespace Yarn.Unity
 
                 optionView.gameObject.SetActive(true);
 
+                optionView.palette = this.palette;
                 optionView.Option = option;
 
                 // The first available option is selected by default
@@ -91,10 +94,13 @@ namespace Yarn.Unity
             // Update the last line, if one is configured
             if (lastLineText != null)
             {
-                if (lastSeenLine != null) {
+                if (lastSeenLine != null)
+                {
                     lastLineText.gameObject.SetActive(true);
                     lastLineText.text = lastSeenLine.Text.Text;
-                } else {
+                }
+                else
+                {
                     lastLineText.gameObject.SetActive(false);
                 }
             }
