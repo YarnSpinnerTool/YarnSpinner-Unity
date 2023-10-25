@@ -141,9 +141,11 @@ namespace Yarn.Unity.Tests
 
         // need another test here where we test the default variable loading
         // because we don't currently actually test that...
-        [Test]
-        public void TestLoadingDefaultValues()
+        [UnityTest]
+        public IEnumerator TestLoadingDefaultValues()
         {
+            yield return new WaitForSeconds(5f);
+
             var hasVar = VarStorage.TryGetValue<string>("$defaultString", out var defaultString);
             Assert.IsTrue(hasVar);
             Assert.AreEqual("hello", defaultString);
