@@ -144,9 +144,7 @@ namespace Yarn.Unity.Tests
         [UnityTest]
         public IEnumerator TestLoadingDefaultValues()
         {
-            // intentionally not running the node that declares the vars we intend on testing
-            Runner.StartDialogue("EmptyNode");
-            yield return null;
+            yield return new WaitForSeconds(5f);
 
             var hasVar = VarStorage.TryGetValue<string>("$defaultString", out var defaultString);
             Assert.IsTrue(hasVar);
