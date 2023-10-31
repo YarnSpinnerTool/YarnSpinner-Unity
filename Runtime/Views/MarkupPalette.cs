@@ -10,7 +10,8 @@ namespace Yarn.Unity
     /// <remarks>
     /// This is intended to be used with the LineView, and also be a sample of using the markup system.
     /// </remarks>
-    [CreateAssetMenu] public class MarkupPalette : ScriptableObject
+    [CreateAssetMenu(fileName = "NewPalette", menuName = "Yarn Spinner/Markup Palette", order = 201)]
+    public class MarkupPalette : ScriptableObject
     {
         [System.Serializable]
         public struct ColorMarker
