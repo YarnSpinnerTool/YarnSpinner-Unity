@@ -594,7 +594,7 @@ MonoBehaviour:
   continueButton: {fileID: 3604244442191887152}
   holdTime: 1
   autoAdvance: 0
-  palette: {fileID: 11400000, guid: 2515faf2158774ece8aa2c3a2195fac4, type: 2}
+  palette: {fileID: 0}
 --- !u!225 &3604244442327615253
 CanvasGroup:
   m_ObjectHideFlags: 0
