@@ -103,6 +103,15 @@ namespace Yarn.Unity
         internal TextMeshProUGUI characterNameText = null;
 
         /// <summary>
+        /// The gameobject that holds the <see cref="characterNameText"/> textfield.
+        /// </summary>
+        /// <remarks>
+        /// This is needed in situations where the character name is contained within an entirely different game object.
+        /// Most of the time this will just be the same gameobject as <see cref="characterNameText"/>.
+        /// </remarks>
+        [SerializeField] internal GameObject characterNameContainer = null;
+
+        /// <summary>
         /// Controls whether the text of <see cref="lineText"/> should be
         /// gradually revealed over time.
         /// </summary>
@@ -325,14 +334,21 @@ namespace Yarn.Unity
                     continueButton.SetActive(false);
                 }
 
-                Markup.MarkupParseResult text;
-                if (characterNameText != null)
+                Markup.MarkupParseResult text = dialogueLine.TextWithoutCharacterName;
+                if (characterNameContainer != null && characterNameText != null)
                 {
-                    // If we have a character name text view, show the character
-                    // name in it, and show the rest of the text in our main
-                    // text view.
-                    characterNameText.text = dialogueLine.CharacterName;
-                    text = dialogueLine.TextWithoutCharacterName;
+                    // we are set up to show a character name, but there isn't one
+                    // so just hide the container
+                    if (string.IsNullOrWhiteSpace(dialogueLine.CharacterName))
+                    {
+                        characterNameContainer.SetActive(false);
+                    }
+                    else
+                    {
+                        // we have a character name text view, show the character name
+                        characterNameText.text = dialogueLine.CharacterName;
+                        characterNameContainer.SetActive(true);
+                    }
                 }
                 else
                 {
@@ -342,11 +358,6 @@ namespace Yarn.Unity
                     {
                         // Yep! Show the entire text.
                         text = dialogueLine.Text;
-                    }
-                    else
-                    {
-                        // Nope! Show just the text without the character name.
-                        text = dialogueLine.TextWithoutCharacterName;
                     }
                 }
 

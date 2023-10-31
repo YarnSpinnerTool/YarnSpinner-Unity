@@ -29,6 +29,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6323935187928403879}
   m_RootOrder: 0
@@ -126,6 +127,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6323935187869300298}
   - {fileID: 6323935188436132820}
@@ -151,8 +153,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canvasGroup: {fileID: 6323935187928403896}
   optionViewPrefab: {fileID: 5665317717604146022, guid: 3ff4e0d87ab7d4789a1565ac303e8261, type: 3}
-  lastLineText: {fileID: 6323935188436132823}
+  palette: {fileID: 0}
   fadeTime: 0.1
+  showUnavailableOptions: 0
+  lastLineText: {fileID: 6323935188436132823}
+  lastLineContainer: {fileID: 6323935188436132821}
 --- !u!114 &6323935187928403897
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -233,6 +238,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6323935187928403879}
   m_RootOrder: 1

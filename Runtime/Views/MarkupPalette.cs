@@ -25,7 +25,7 @@ namespace Yarn.Unity
         public List<ColorMarker> ColourMarkers = new List<ColorMarker>();
 
         /// <summary>
-        /// Sets the colour for a particular marker inside this palette.
+        /// Determines the colour for a particular marker inside this palette.
         /// </summary>
         /// <param name="Marker">The marker of which you are covetous of it's colour.</param>
         /// <param name="colour">The colour of the marker, or black if it doesn't exist.</param>
