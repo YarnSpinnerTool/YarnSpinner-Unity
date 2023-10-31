@@ -63,6 +63,11 @@
       "displayName": "User Input and Yarn",
       "description": "How to use TMP input fields to get user input into Yarn variables.",
       "path": "Samples~/HandlingInput"
+    },
+    {
+      "displayName": "Markup Palettes",
+      "description": "Demonstrates how to use the Markup Palettes",
+      "path": "Samples~/MarkupPalette"
     }
   ]
 }

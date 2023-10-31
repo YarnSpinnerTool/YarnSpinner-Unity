@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `MarkupPalette` scriptable object and support for the palette inside of `LineView` and `OptionsListView` and associated `OptionView`.
   - This is useful both as a standalone way to easily annotate your dialogue but also as an example of the markup system.
 - A new sample (Sliced Views) showing off the new alternative default prefabs.
+- A new sample (Markup Palette) that demonstrates the new `MarkupPalette` system.
 
 ### Changed
 
