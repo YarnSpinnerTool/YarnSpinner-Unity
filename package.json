@@ -30,6 +30,11 @@
       "path": "Samples~/Space"
     },
     {
+      "displayName": "Sliced Views",
+      "description": "A basic scene that demonstrates the althernative 9-sliced prefabs for the built in views",
+      "path": "Samples~/rounded-views"
+    },
+    {
       "displayName": "Visual Novel",
       "description": "A template for creating a visual novel with extensive use of Yarn Commands.",
       "path": "Samples~/VisualNovel"
