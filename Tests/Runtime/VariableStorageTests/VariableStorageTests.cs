@@ -141,32 +141,9 @@ namespace Yarn.Unity.Tests
 
         // need another test here where we test the default variable loading
         // because we don't currently actually test that...
-        [UnityTest]
-        public IEnumerator TestLoadingDefaultValues()
+        [Test]
+        public void TestLoadingDefaultValues()
         {
-            yield return new WaitForSeconds(5f);
-
-            Debug.Log(VarStorage.GetDebugList());
-
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
-            var project = runner.yarnProject;
-            if (project != null)
-            {
-                var values = project.InitialValues;
-                Assert.IsNotNull(values);
-
-                var stringBuilder = new System.Text.StringBuilder();
-                foreach (var pair in values)
-                {
-                    stringBuilder.AppendLine($"{pair.Key}: {pair.Value}");
-                }
-                stringBuilder.Insert(0, "Initial Values\n");
-                Debug.Log(stringBuilder.ToString());
-            }
-
-            // ok so this is temporary
-            runner.SetInitialVariables();
-
             var hasVar = VarStorage.TryGetValue<string>("$defaultString", out var defaultString);
             Assert.IsTrue(hasVar);
             Assert.AreEqual("hello", defaultString);
