@@ -149,8 +149,10 @@ namespace Yarn.Unity
         /// <exception cref="System.ArgumentException">Thrown when
         /// <paramref name="variableName"/> is not a valid variable
         /// name.</exception> 
-        private void ValidateVariableName(string variableName) {
-            if (variableName.StartsWith("$") == false) {
+        private void ValidateVariableName(string variableName)
+        {
+            if (variableName.StartsWith("$") == false)
+            {
                 throw new System.ArgumentException($"{variableName} is not a valid variable name: Variable names must start with a '$'. (Did you mean to use '${variableName}'?)");
             }
         }
@@ -213,8 +215,6 @@ namespace Yarn.Unity
             {
                 throw new System.InvalidCastException($"Variable {variableName} exists, but is the wrong type (expected {typeof(T)}, got {resultObject.GetType()}");
             }
-
-
         }
 
         /// <summary>

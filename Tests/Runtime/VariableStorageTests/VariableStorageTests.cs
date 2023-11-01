@@ -146,6 +146,25 @@ namespace Yarn.Unity.Tests
         {
             yield return new WaitForSeconds(5f);
 
+            Debug.Log(VarStorage.GetDebugList());
+
+            Assert.IsTrue(VarStorage.Contains("$defaultString"));
+            Assert.IsTrue(VarStorage.Contains("$defaultBool"));
+            Assert.IsTrue(VarStorage.Contains("$defaultFloat"));
+
+            var project = GameObject.FindObjectOfType<DialogueRunner>().yarnProject;
+            Assert.IsNotNull(project);
+            var values = project.InitialValues;
+            Assert.IsNotNull(values);
+
+            var stringBuilder = new System.Text.StringBuilder();
+            foreach (var pair in values)
+            {
+                stringBuilder.AppendLine($"{pair.Key}: {pair.Value}");
+            }
+            stringBuilder.Insert(0, "Initial Values\n");
+            Debug.Log(stringBuilder.ToString());
+
             var hasVar = VarStorage.TryGetValue<string>("$defaultString", out var defaultString);
             Assert.IsTrue(hasVar);
             Assert.AreEqual("hello", defaultString);
