@@ -79,9 +79,12 @@ namespace Yarn.Unity.Editor
 
         public Project GetProject()
         {
-            try {
+            try
+            {
                 return Project.LoadFromFile(this.assetPath);
-            } catch (System.Text.Json.JsonException) {
+            }
+            catch (System.Exception)
+            {
                 return null;
             }
         }
