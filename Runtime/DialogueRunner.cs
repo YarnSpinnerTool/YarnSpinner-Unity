@@ -249,6 +249,7 @@ namespace Yarn.Unity
         /// </summary>
         public void SetInitialVariables(bool overrideExistingValues = false)
         {
+            Debug.Log("Dialogue runner is loading initial values");
             if (yarnProject == null)
             {
                 Debug.LogError("Unable to set default values, there is no project set");
