@@ -64,7 +64,7 @@ MonoBehaviour:
   lineText: {fileID: 4935123090305946392}
   showCharacterNameInLineView: 1
   characterNameText: {fileID: 4935123091767085942}
-  characterNameContainer: {fileID: 4935123090305946390}
+  characterNameContainer: {fileID: 4935123091767085940}
   useTypewriterEffect: 1
   onCharacterTyped:
     m_PersistentCalls:
