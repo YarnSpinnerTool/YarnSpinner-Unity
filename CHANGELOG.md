@@ -23,6 +23,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - This is useful both as a standalone way to easily annotate your dialogue but also as an example of the markup system.
 - A new sample (Sliced Views) showing off the new alternative default prefabs.
 - A new sample (Markup Palette) that demonstrates the new `MarkupPalette` system.
+- A `PausableTypewriter` effect that works identical to the existing typewriter but supports arbitrary pauses.
+- LineView now can now identify markup based pauses and insert pauses into the typewriter effect
+  - To use this you can use the `pause` markup inside your lines
+    - `Alice: wow this line now has a halt[pause=500 /] inside of it`
+    - this line will stop the typewriter for 500ms after the `halt` is shown
+    - after the 500ms the rest of the line will typewriter out
+  - It does this via the `GetPauseDurationsInsideLine` method
+  - Two new Unity events have also been added to be informed when pauses happen:
+    - `onPauseStarted`
+    - `onPauseEnded`
 
 ### Changed
 
@@ -52,6 +62,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `LineView` now supports showing the character names as a standalone element.
   - existing behaviour is still the same with the default prefabs
 - `OptionsListView` now supports showing the character names as a standalone element.
+- `LineView` now uses the `PausableTypewriter` by default
+  - If you don't use pauses you won't need to change anything
+- `Effects.Typewriter` now is a wrapper into the `PausableTypewriter` effect
+  - If you don't use pauses nothing will change
 
 ### Removed
 
