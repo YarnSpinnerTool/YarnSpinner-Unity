@@ -31,7 +31,7 @@
     },
     {
       "displayName": "Sliced Views",
-      "description": "A basic scene that demonstrates the althernative 9-sliced prefabs for the built in views",
+      "description": "A basic scene that demonstrates the alternative 9-sliced prefabs for the built in views",
       "path": "Samples~/rounded-views"
     },
     {
@@ -68,6 +68,11 @@
       "displayName": "Markup Palettes",
       "description": "Demonstrates how to use the Markup Palettes",
       "path": "Samples~/MarkupPalette"
+    },
+    {
+      "displayName": "Minimal Dialogue Runner",
+      "description": "An advanced sample covering the necessary elements to create yourself if you want to take full control over Yarn Spinner.",
+      "path": "Samples~/Minimal Viable Dialogue System"
     }
   ]
 }
