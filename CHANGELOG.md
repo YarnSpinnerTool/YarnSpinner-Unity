@@ -33,6 +33,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Two new Unity events have also been added to be informed when pauses happen:
     - `onPauseStarted`
     - `onPauseEnded`
+  - A new sample (Pausing the Typewriter) showing how you can use the `[pause/]` marker to temporarily pause in the middle of a line.
 
 ### Changed
 

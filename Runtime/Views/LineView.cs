@@ -610,7 +610,7 @@ namespace Yarn.Unity
                 if (attribute.Properties.TryGetValue(label, out Yarn.Markup.MarkupValue value))
                 {
                     // depending on the property value we need to take a different path
-                    // this is because they have made it an integer or a flat which are roughly the same
+                    // this is because they have made it an integer or a float which are roughly the same
                     // note to self: integer and float really ought to be convertible...
                     // but they also might have done something weird and we need to handle that
                     switch (value.Type)

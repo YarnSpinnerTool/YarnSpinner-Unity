@@ -70,6 +70,11 @@
       "path": "Samples~/MarkupPalette"
     },
     {
+      "displayName": "Pausing the Typewriter",
+      "description": "Demonstrates how to use the pausing markup to pause in the middle of line",
+      "path": "Samples~/PausingTypewriter"
+    },
+    {
       "displayName": "Minimal Dialogue Runner",
       "description": "An advanced sample covering the necessary elements to create yourself if you want to take full control over Yarn Spinner.",
       "path": "Samples~/Minimal Viable Dialogue System"
