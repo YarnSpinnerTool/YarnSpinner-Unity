@@ -74,6 +74,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Removed `YarnLinesAsCanvasText` class and associated elements, this didn't did anything and was using an approach that is no longer advisable.
   - The `MainMenu` sample is now gone, this code was not in the package and didn't work so it is unlikely anyone will notice this has been removed.
 - Removed the deprecated code inside `YarnProjectImporterEditor`
+- Addressable sample has been removed for now as it isn't well suited as an example of using Yarn Spinner and Addressables
 
 ## [2.3.1] 2023-07-07
 
