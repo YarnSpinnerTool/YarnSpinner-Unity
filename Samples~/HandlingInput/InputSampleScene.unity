@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641275, b: 0.5748172, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028353, g: 0.22571383, b: 0.30692253, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -942,7 +942,7 @@ PrefabInstance:
     - target: {fileID: 3579681405068720530, guid: 7f29e5f7ffdea4a6793cefb278b61f0c, type: 3}
       propertyPath: yarnProject
       value: 
-      objectReference: {fileID: 7545569452688597077, guid: 15548d26090e94efbb7e3cf2b9d63395, type: 3}
+      objectReference: {fileID: 7545569452688597077, guid: 30ee7ea719ff444e7aaf35505742982b, type: 3}
     - target: {fileID: 3579681405068720530, guid: 7f29e5f7ffdea4a6793cefb278b61f0c, type: 3}
       propertyPath: verboseLogging
       value: 0
@@ -1280,7 +1280,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2027833623}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 409903e2d3e8d430eb00fc98945b717a, type: 3}
+  m_Script: {fileID: 11500000, guid: 0b9845ea16f174f14a52d53fa447840c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   fadeDuration: 1
