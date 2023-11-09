@@ -117,7 +117,6 @@ namespace Yarn.Unity.Editor
 
             projectAsset.name = Path.GetFileNameWithoutExtension(ctx.assetPath);
 
-
             // Start by creating the asset - no matter what, we need to
             // produce an asset, even if it doesn't contain valid Yarn
             // bytecode, so that other assets don't lose their references.
@@ -130,17 +129,23 @@ namespace Yarn.Unity.Editor
 
             // Attempt to load the JSON project file.
             Project project;
-            try {
+            try
+            {
                 project = Yarn.Compiler.Project.LoadFromFile(ctx.assetPath);
-            } catch (System.Exception) {
+            }
+            catch (System.Exception)
+            {
                 var text = File.ReadAllText(ctx.assetPath);
-                if (text.StartsWith("title:")) {
+                if (text.StartsWith("title:"))
+                {
                     // This is an old-style project that needs to be upgraded.
                     importData.ImportStatus = ProjectImportData.ImportStatusCode.NeedsUpgradeFromV1;
 
                     // Log to notify the user that this needs to be done.
                     ctx.LogImportError($"Yarn Project {ctx.assetPath} is a version 1 Yarn Project, and needs to be upgraded. Select it in the Inspector, and click Upgrade Yarn project.", this);
-                } else {
+                }
+                else
+                {
                     // We don't know what's going on.
                     importData.ImportStatus = ProjectImportData.ImportStatusCode.Unknown;
                 }
@@ -152,7 +157,8 @@ namespace Yarn.Unity.Editor
 
             importData.baseLanguageName = project.BaseLanguage;
 
-            foreach (var loc in project.Localisation) {
+            foreach (var loc in project.Localisation)
+            {
                 var hasStringsFile = project.TryGetStringsPath(loc.Key, out var stringsFilePath);
                 var hasAssetsFolder = project.TryGetAssetsPath(loc.Key, out var assetsFolderPath);
 
@@ -165,7 +171,8 @@ namespace Yarn.Unity.Editor
                 importData.localizations.Add(locInfo);
             }
 
-            if (project.Localisation.ContainsKey(project.BaseLanguage) == false) {
+            if (project.Localisation.ContainsKey(project.BaseLanguage) == false)
+            {
                 importData.localizations.Add(new ProjectImportData.LocalizationEntry
                 {
                     languageID = project.BaseLanguage,
@@ -221,7 +228,24 @@ namespace Yarn.Unity.Editor
                     var errorGroups = errors.GroupBy(e => e.FileName);
                     foreach (var errorGroup in errorGroups)
                     {
-                        var errorMessages = errorGroup.Select(e => e.ToString());
+                        if (errorGroup.Key == null)
+                        {
+                            // ok so we have no file for some reason
+                            // so these are errors currently not tied to a file
+                            // so we instead need to just log the errors and move on
+                            foreach (var error in errorGroup)
+                            {
+                                ctx.LogImportError($"Error compiling project: {error.Message}");
+                            }
+
+                            importData.diagnostics.Add(new ProjectImportData.DiagnosticEntry
+                            {
+                                yarnFile = null,
+                                errorMessages = errorGroup.Select(e => e.Message).ToList(),
+                            });
+
+                            continue;
+                        }
 
                         var relativePath = GetRelativePath(errorGroup.Key);
 
@@ -238,6 +262,7 @@ namespace Yarn.Unity.Editor
                         // TODO: Associate this compile error to the
                         // corresponding script
 
+                        var errorMessages = errorGroup.Select(e => e.ToString());
                         importData.diagnostics.Add(new ProjectImportData.DiagnosticEntry
                         {
                             yarnFile = fileWithErrors,
@@ -309,12 +334,16 @@ namespace Yarn.Unity.Editor
 
         internal static string GetRelativePath(string path)
         {
-            if (path.StartsWith(UnityProjectRootPath) == false) {
+            if (path.StartsWith(UnityProjectRootPath) == false)
+            {
                 // This is not a child of the current project. If it's an
                 // absolute path, then it's enough to go on.
-                if (Path.IsPathRooted(path)) {
+                if (Path.IsPathRooted(path))
+                {
                     return path;
-                } else {
+                }
+                else
+                {
                     throw new System.ArgumentException($"Path {path} is not a child of the project root path {UnityProjectRootPath}");
                 }
             }

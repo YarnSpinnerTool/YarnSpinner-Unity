@@ -609,12 +609,14 @@ namespace Yarn.Unity
             ActionRegistrationMethods.Add(registerActions);
         }
 
-        public static Yarn.Library GetLibrary() {
+        public static Yarn.Library GetLibrary()
+        {
             var library = new Yarn.Library();
 
             var proxy = new LibraryRegistrationProxy(library);
 
-            foreach (var registrationMethod in ActionRegistrationMethods) {
+            foreach (var registrationMethod in ActionRegistrationMethods)
+            {
                 registrationMethod.Invoke(proxy);
             }
 
