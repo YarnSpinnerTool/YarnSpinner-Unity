@@ -67,6 +67,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - If you don't use pauses you won't need to change anything
 - `Effects.Typewriter` now is a wrapper into the `PausableTypewriter` effect
   - If you don't use pauses nothing will change
+- Yarn Projects that have no import data will no longer suggest to upgrade the project file
+  - this solves an uncommon but *very* hard to debug error
+- `YarnProjectImporterEditor.CreateUpgradeUI` is now private
+- Yarn Project editor upgrade help link now correctly links to the upgrade page on the docs
 
 ### Removed
 
