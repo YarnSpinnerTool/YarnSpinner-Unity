@@ -42,11 +42,7 @@ namespace Yarn.Unity.Editor
             destinationPath = AssetDatabase.GenerateUniqueAssetPath(destinationPath);
 
             // Create the program
-            var newProject = new Yarn.Compiler.Project();
-
-            // Follow Unity's behaviour - exclude any content in a folder whose
-            // name ends with a tilde
-            newProject.ExcludeFilePatterns = new[] { "**/*~/*" };
+            var newProject = YarnProjectUtility.CreateDefaultYarnProject();
 
             newProject.SaveToFile(destinationPath);
 
@@ -54,6 +50,25 @@ namespace Yarn.Unity.Editor
             AssetDatabase.SaveAssets();
 
             return destinationPath;
+        }
+
+        /// <summary>
+        /// Creates a Unity tweaked default Yarn Project.
+        /// </summary>
+        /// <remarks>
+        /// This is just a default Yarn Project with the exclusion file pattern set up to ignore ~ folders.
+        /// </remarks>
+        /// <returns>A Unity default Yarn Project</returns>
+        internal static Yarn.Compiler.Project CreateDefaultYarnProject()
+        {
+            // Create the program
+            var newProject = new Yarn.Compiler.Project();
+
+            // Follow Unity's behaviour - exclude any content in a folder whose
+            // name ends with a tilde
+            newProject.ExcludeFilePatterns = new[] { "**/*~/*" };
+
+            return newProject;
         }
 
         /// <summary>
@@ -640,7 +655,7 @@ namespace Yarn.Unity.Editor
             }
 
             // Next, replace the existing project with a new one!
-            var newProject = new Yarn.Compiler.Project();
+            var newProject = YarnProjectUtility.CreateDefaultYarnProject();
             File.WriteAllText(importer.assetPath, newProject.GetJson());
 
             // Finally, import the assets we've touched.

@@ -584,7 +584,7 @@ But not all of them are.
             string yarnProjectPath = $"{YarnTestUtility.TestFilesDirectoryPath}/Project.yarnproject";
             string yarnScriptPath = $"{YarnTestUtility.TestFilesDirectoryPath}/Script.yarn";
 
-            var projectText = new Yarn.Compiler.Project().GetJson();
+            var projectText = YarnProjectUtility.CreateDefaultYarnProject().GetJson();
             var scriptText = "title: Start\n---\n===\n";
 
             File.WriteAllText(yarnProjectPath, projectText);
