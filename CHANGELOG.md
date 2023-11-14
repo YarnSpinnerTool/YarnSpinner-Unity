@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### In-Line Pause Support
 
-- LineView now can now identify markup based pauses and insert pauses into the typewriter effect
+- The built-in Line View now can now identify markup based pauses and insert pauses into the typewriter effect.
   - To use this you can use the `pause` markup inside your lines:
     ```
     Alice: wow this line now has a halt [pause=500 /] inside of it
@@ -19,7 +19,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Two new Unity events have also been added to be informed when pauses happen:
     - `onPauseStarted`
     - `onPauseEnded`
-  - Added a new sample (Pausing the Typewriter) showing how you can use the `[pause/]` marker to temporarily pause in the middle of a line.
 - Added a new `PausableTypewriter` effect that works identically to the existing `Typewriter` effect, but supports arbitrary pauses. This effect can be used in your own custom line views to add support for the `[pause/]` markup.
 - To learn more about how the pause system works, take a look at the `PausableTypewriter.GetPauseDurationsInsideLine` method!
 
@@ -27,16 +26,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Several new sample projects have been added:
   - **Shot Reverse Shot** shows how you can use Cinemachine virtual cameras and custom dialogue views to make a shot-reverse-shot scene in your game.
-  - **Sliced Views** shows off the new alternative default line view prefabs.
+  - **Sliced Views** shows off a new alternative default line and option view prefab.
   - **Markup Palette** demonstrates the new `MarkupPalette` system.
   - **User Input and Yarn** shows how you can use blocking commands and TMP Input fields to get input into Yarn variables.
+  - **Pausing the Typewriter** howing how you can use the `[pause/]` marker to temporarily pause in the middle of a line.
 
 #### New Saving System
 
 - Added two new basic save methods on `DialogueRunner` that use the persistent data storage location as their save location:
-  - SaveStateToPersistentStorage saves all variables known to the Dialogue Runner to a named file in the [Application.persistentDataPath](https://docs.unity3d.com/ScriptReference/Application-persistentDataPath.html) folder.
-  - These methods, `SaveStateToPersistentStorage` and `LoadStateFromPersistentStorage` are intended to replace the older `PlayerPref` based system for basic saves.
-  - Note: For more complex games, we are still assuming you will need to craft your own bespoke save system.
+  - `SaveStateToPersistentStorage` saves all variables known to the Dialogue Runner to a named file in the [Application.persistentDataPath](https://docs.unity3d.com/ScriptReference/Application-persistentDataPath.html) folder.
+      - These methods, `SaveStateToPersistentStorage` and `LoadStateFromPersistentStorage` are intended to replace the older `PlayerPref` based system for basic saves.
+      - Note: For more complex games, we are still assuming you will need to craft your own bespoke save system.
 
 #### Other Features
 
@@ -55,10 +55,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed a bug where `YarnNode` attributes would not display correctly in the Inspector when its property path is longer than 1.
 - Fixed a bug in the action registration source code generator that caused it to crash on certain files, which resulted in some commands not being registered at runtime.
 - Replaced the call to `Yarn.Compiler.Utility.AddTagsToLines` with `Yarn.Compiler.Utility.TagLines`.
-- Fixed incorrect order of generic parameter names for `AddFunction` methods, usage is unchanged.
+- Fixed incorrect order of generic parameter names for `AddFunction` methods; usage is unchanged.
 - Fixed incorrect handling of line IDs inside the Unity Localised Line Provider preventing voice assets being loaded.
-- Fixed a crash where declaration statements without a value (`<<declare $var>>`) would crash the importer, leading to weird bugs.
-- Yarn Functions and Commands can now have up to 10 parameters if you need them.
+- Fixed a crash where declaration statements without a value (`<<declare $var>>`) would crash the importer, leading to _weird_ bugs.
+- Yarn Functions and Commands can now have up to 10 parameters.
 - The hard dependency on Text Mesh Pro is now a soft one.
   - This change will only affect projects that do not have TextMeshPro installed in their project. For most projects, this change won't be noticed.
 - Dialogue Runner will now better wait for line providers to be ready before requesting lines
