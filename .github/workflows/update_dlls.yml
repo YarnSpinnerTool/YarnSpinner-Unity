@@ -86,7 +86,8 @@ jobs:
     # https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/15#issuecomment-1036162152.
     - name: Rename vendored DLLs
       run: |
-        assemblyalias --target-directory "YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/" --prefix "Yarn." --assemblies-to-alias "System*;Antlr*;Csv*;Google*;Microsoft.Bcl*;Microsoft.Extensions*"
+        assemblyalias --target-directory "YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/" --prefix "Yarn." --assemblies-to-alias "Antlr*;Csv*;Google*;"
+        assemblyalias --target-directory "YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/" --internalize --prefix "Yarn." --assemblies-to-alias "System*;Microsoft.Bcl*;Microsoft.Extensions*"
     
     # Copy all of the dependency DLLs into the YarnSpinner-Unity repo, except
     # for Microsoft.CSharp.dll (which is provided by Unity, so including it
