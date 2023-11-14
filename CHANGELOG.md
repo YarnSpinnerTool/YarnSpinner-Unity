@@ -8,72 +8,88 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- A new sample (Shot Reverse Shot) showing how you can use Cinemachine virtual cameras and custom dialogue views to make a shot reverse shot scene in your game.
-- Two new basic save methods on `DialogueRunner` that use the persistent data storage location as their save location
-  - these methods `SaveStateToPersistentStorage` and `LoadStateFromPersistentStorage` are intended to replace the older `PlayerPref` based system for basic saves
-  - for more complex games we are still assuming you will need to craft your own bespoke save system.
-- A new sample (User Input and Yarn) showing how you can use blocking commands and TMP Input fields to get input into Yarn variables.
-- A new method (`ClearLoadedAssets`) to unload all cached assets from the `UnityLocalisedLineProvider`
-  - this is a dangerous method, use wisely.
-- Projects can now provide a list of line IDs within a node using `GetLineIDsForNodes`
-  - this is intended to be used to precache multiple nodes worth of assets but might also be useful for debugging during development.
-- Newly created `.yarnproject` files now ignore any `.yarn` files that are in a folder whose name ends in '~', which follows Unity's behaviour.
-  - You can customise this behaviour by opening the `.yarnproject` file in a text editor and modifying the `excludeFiles` property.
-- `MarkupPalette` scriptable object and support for the palette inside of `LineView` and `OptionsListView` and associated `OptionView`.
-  - This is useful both as a standalone way to easily annotate your dialogue but also as an example of the markup system.
-- A new sample (Sliced Views) showing off the new alternative default prefabs.
-- A new sample (Markup Palette) that demonstrates the new `MarkupPalette` system.
-- A `PausableTypewriter` effect that works identical to the existing typewriter but supports arbitrary pauses.
+#### In-Line Pause Support
+
 - LineView now can now identify markup based pauses and insert pauses into the typewriter effect
-  - To use this you can use the `pause` markup inside your lines
-    - `Alice: wow this line now has a halt[pause=500 /] inside of it`
-    - this line will stop the typewriter for 500ms after the `halt` is shown
-    - after the 500ms the rest of the line will typewriter out
-  - It does this via the `GetPauseDurationsInsideLine` method
+  - To use this you can use the `pause` markup inside your lines:
+    ```
+    Alice: wow this line now has a halt [pause=500 /] inside of it
+    ```
+    - This line will stop the typewriter for 500ms after the `halt` is shown. After the 500ms delay, the rest of the line will appear.
   - Two new Unity events have also been added to be informed when pauses happen:
     - `onPauseStarted`
     - `onPauseEnded`
-  - A new sample (Pausing the Typewriter) showing how you can use the `[pause/]` marker to temporarily pause in the middle of a line.
+  - Added a new sample (Pausing the Typewriter) showing how you can use the `[pause/]` marker to temporarily pause in the middle of a line.
+- Added a new `PausableTypewriter` effect that works identically to the existing `Typewriter` effect, but supports arbitrary pauses. This effect can be used in your own custom line views to add support for the `[pause/]` markup.
+- To learn more about how the pause system works, take a look at the `PausableTypewriter.GetPauseDurationsInsideLine` method!
+
+#### New Samples
+
+- Several new sample projects have been added:
+  - **Shot Reverse Shot** shows how you can use Cinemachine virtual cameras and custom dialogue views to make a shot-reverse-shot scene in your game.
+  - **Sliced Views** shows off the new alternative default line view prefabs.
+  - **Markup Palette** demonstrates the new `MarkupPalette` system.
+  - **User Input and Yarn** shows how you can use blocking commands and TMP Input fields to get input into Yarn variables.
+
+#### New Saving System
+
+- Added two new basic save methods on `DialogueRunner` that use the persistent data storage location as their save location:
+  - SaveStateToPersistentStorage saves all variables known to the Dialogue Runner to a named file in the [Application.persistentDataPath](https://docs.unity3d.com/ScriptReference/Application-persistentDataPath.html) folder.
+  - These methods, `SaveStateToPersistentStorage` and `LoadStateFromPersistentStorage` are intended to replace the older `PlayerPref` based system for basic saves.
+  - Note: For more complex games, we are still assuming you will need to craft your own bespoke save system.
+
+#### Other Features
+
+- A new method (`ClearLoadedAssets`), which unloads all cached assets from the `UnityLocalisedLineProvider`, has been added.
+  - This method will forcibly unload all assets. Only call this method if you're very familiar with the Addressable Assets system and are comfortable with Yarn Spinner's internals!
+- Projects can now provide a list of line IDs within a node, using `GetLineIDsForNodes`.
+  - This is intended to be used to precache multiple nodes worth of assets, but might also be useful for debugging during development.
+- Newly created `.yarnproject` files now ignore any `.yarn` files that are in a folder whose name ends in '~', which follows Unity's behaviour.
+  - You can customise this behaviour by opening the `.yarnproject` file in a text editor and modifying the `excludeFiles` property.
+- Added `MarkupPalette` scriptable object and support for the palette inside of `LineView` and `OptionsListView` and associated `OptionView`.
+  - This is useful both as a standalone way to easily annotate your dialogue, but also as an example of the markup system.
+
 
 ### Changed
 
 - Fixed a bug where `YarnNode` attributes would not display correctly in the Inspector when its property path is longer than 1.
 - Fixed a bug in the action registration source code generator that caused it to crash on certain files, which resulted in some commands not being registered at runtime.
-- Replaced the call to `Yarn.Compiler.Utility.AddTagsToLines` with `Yarn.Compiler.Utility.TagLines`
+- Replaced the call to `Yarn.Compiler.Utility.AddTagsToLines` with `Yarn.Compiler.Utility.TagLines`.
 - Fixed incorrect order of generic parameter names for `AddFunction` methods, usage is unchanged.
 - Fixed incorrect handling of line IDs inside the Unity Localised Line Provider preventing voice assets being loaded.
 - Fixed a crash where declaration statements without a value (`<<declare $var>>`) would crash the importer, leading to weird bugs.
 - Yarn Functions and Commands can now have up to 10 parameters if you need them.
-- The hard dependancy on Text Mesh Pro is now a soft one, for most projects this change won't be noticed.
-- Deprecated `SaveStateToPlayerPrefs` and `LoadStateFromPlayerPrefs`
-  - Please use `SaveStateToPersistentStorage` and `LoadStateFromPersistentStorage` instead.
+- The hard dependency on Text Mesh Pro is now a soft one.
+  - This change will only affect projects that do not have TextMeshPro installed in their project. For most projects, this change won't be noticed.
 - Dialogue Runner will now better wait for line providers to be ready before requesting lines
   - This does have the potential issue of long load times for some larger nodes, in those cases we suggest you preload more lines using `GetLineIDsForNodes` on `YarnProject`
 - `UnityLocalisedLineProvider` can now have it's default setting of removing unused assets disabled, this is useful when caching multiple nodes worth of assets
-- Add Assets to Asset Table Collection Wizard now correctly prepends `line:` to the key to match the documented behaviour.
+- The Add Assets to Asset Table Collection Wizard now correctly prepends `line:` to the key to match the documented behaviour.
 - `OptionsListView` now deactivates child options when they are not needed instead of just making them transparent.
 - When using Unity Localization, line metadata is now stored on the shared entry for a line ID, rather than only on the base language's entry. (This caused an issue where, if the game was not running in the base language, line metadata would not be available.)
 - Fixed an issue with `AudioLineProvider` that would prevent audio assets being loaded 
 - Fixed an issue with the Project editor that prevented audio assets loading when using Addressables.
-- The Yarn Project inspector window will now log errors when your inspector width is considered too small
+- The Yarn Project inspector window will now log errors when your inspector width is considered too small.
   - We are pretty sure this is a bug in the UI code on Unity's end.
-  - in our testing it happens at widths less than 319 pixels, because sure why not.
-  - it also doesn't seem to happen in every version of Unity, so that's fun.
+  - In our testing it happens at widths less than 319 pixels, because, sure, why not!
+  - It also doesn't seem to happen in every version of Unity, so that's fun.
 - Setting a project on the dialogue runner will now also load the initial variables from this project, fixing this regression.
 - `LineView` now supports showing the character names as a standalone element.
-  - existing behaviour is still the same with the default prefabs
+  - The existing behaviour is still the same with the default prefabs
 - `OptionsListView` now supports showing the character names as a standalone element.
-- `LineView` now uses the `PausableTypewriter` by default
-  - If you don't use pauses you won't need to change anything
+- `LineView` now uses the `PausableTypewriter` by default.
+  - If you don't use pauses, you won't need to change anything.
 - `Effects.Typewriter` now is a wrapper into the `PausableTypewriter` effect
   - If you don't use pauses nothing will change
-- Yarn Projects that have no import data will no longer suggest to upgrade the project file
-  - this solves an uncommon but *very* hard to debug error
-- `YarnProjectImporterEditor.CreateUpgradeUI` is now private
-- Yarn Project editor upgrade help link now correctly links to the upgrade page on the docs
+- Yarn Projects that have no import data will no longer suggest to upgrade the project file.
+  - This solves an uncommon but *very* hard to debug error!
+- `YarnProjectImporterEditor.CreateUpgradeUI` is now private.
+- The Yarn Project editor 'upgrade' help link now correctly links to the upgrade page on the docs.
 
 ### Removed
 
+- Deprecated `SaveStateToPlayerPrefs` and `LoadStateFromPlayerPrefs`.
+  - Please use `SaveStateToPersistentStorage` and `LoadStateFromPersistentStorage` instead.
 - The Actions class will no longer log every single time a command is registered.
 - Removed `YarnLinesAsCanvasText` class and associated elements, this didn't did anything and was using an approach that is no longer advisable.
   - The `MainMenu` sample is now gone, this code was not in the package and didn't work so it is unlikely anyone will notice this has been removed.
