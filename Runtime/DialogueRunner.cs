@@ -1391,21 +1391,28 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Loads all variables from the requested file in persistent storage into the Dialogue Runner's variable storage.
+        /// Loads all variables from the requested file in persistent storage
+        /// into the Dialogue Runner's variable storage.
         /// </summary>
         /// <remarks>
         /// <para>
-        /// This method loads the file <paramref name="SaveFile"/> from the persistent data storage and attempts to read it as JSON. This is then deserialised and loaded into the <see cref="VariableStorage"/>.
+        /// This method loads the file <paramref name="saveFileName"/> from the
+        /// persistent data storage and attempts to read it as JSON. This is
+        /// then deserialised and loaded into the <see cref="VariableStorage"/>.
         /// </para>
         /// <para>
-        /// The loaded information can be stored via the <see cref="SaveStateToPersistentStorage"/> method.
+        /// The loaded information can be stored via the <see
+        /// cref="SaveStateToPersistentStorage"/> method.
         /// </para>
         /// </remarks>
-        /// <param name="SaveFile">the name the save file should have on disc, including any file extension</param>
-        /// <returns><see langword="true"/> if the variables were successfully loaded from the player preferences; <see langword="false"/> otherwise.</returns>
-        public bool LoadStateFromPersistentStorage(string SaveFile)
+        /// <param name="saveFileName">the name the save file should have on
+        /// disc, including any file extension</param>
+        /// <returns><see langword="true"/> if the variables were successfully
+        /// loaded from the player preferences; <see langword="false"/>
+        /// otherwise.</returns>
+        public bool LoadStateFromPersistentStorage(string saveFileName)
         {
-            var path = System.IO.Path.Combine(Application.persistentDataPath, SaveFile);
+            var path = System.IO.Path.Combine(Application.persistentDataPath, saveFileName);
 
             try
             {
@@ -1450,23 +1457,31 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Saves all variables from variable storage into the persistent storage.
+        /// Saves all variables from variable storage into the persistent
+        /// storage.
         /// </summary>
         /// <remarks>
         /// <para>
-        /// This method attempts to writes the contents of <see cref="VariableStorage"/> as a JSON file and saves it to the persistent data storage under the file name <paramref name="SaveFile"/>.
-        /// The saved information can be loaded via the <see cref="LoadStateFromPersistentStorage"/> method.
+        /// This method attempts to writes the contents of <see
+        /// cref="VariableStorage"/> as a JSON file and saves it to the
+        /// persistent data storage under the file name <paramref
+        /// name="saveFileName"/>. The saved information can be loaded via the
+        /// <see cref="LoadStateFromPersistentStorage"/> method.
         /// </para>
         /// <para>
-        /// If <paramref name="SaveFile"/> already exists it will be overwritten, not appended.
+        /// If <paramref name="saveFileName"/> already exists, it will be
+        /// overwritten, not appended.
         /// </para>
         /// </remarks>
-        /// <param name="SaveFile">the name the save file should have on disc, including any file extension</param>
-        /// <returns><see langword="true"/> if the variables were successfully written into the player preferences; <see langword="false"/> otherwise.</returns>
-        public bool SaveStateToPersistentStorage(string SaveFile)
+        /// <param name="saveFileName">the name the save file should have on
+        /// disc, including any file extension</param>
+        /// <returns><see langword="true"/> if the variables were successfully
+        /// written into the player preferences; <see langword="false"/>
+        /// otherwise.</returns>
+        public bool SaveStateToPersistentStorage(string saveFileName)
         {
             var data = SerializeAllVariablesToJSON();
-            var path = System.IO.Path.Combine(Application.persistentDataPath, SaveFile);
+            var path = System.IO.Path.Combine(Application.persistentDataPath, saveFileName);
 
             try
             {
