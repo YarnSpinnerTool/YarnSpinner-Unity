@@ -85,7 +85,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - This change will only affect projects that do not have TextMeshPro installed in their project. For most projects, this change won't be noticed.
 - Dialogue Runner will now better wait for line providers to be ready before requesting lines.
   - This does have the potential issue of long load times for some larger nodes, in those cases we suggest you preload more lines using `GetLineIDsForNodes` on `YarnProject`
-- `UnityLocalisedLineProvider` can now have it's default setting of removing unused assets disabled, this is useful when caching multiple nodes worth of assets
+- `UnityLocalisedLineProvider` can now have its default setting of removing unused assets disabled, this is useful when caching multiple nodes worth of assets
 - The "Add Assets to Asset Table Collection" wizard now correctly prepends `line:` to the key, to match the documented behaviour.
 - `OptionsListView` now deactivates child options when they are not needed instead of just making them transparent.
 - When using Unity Localization, line metadata is now stored on the shared entry for a line ID, rather than only on the base language's entry. (This caused an issue where, if the game was not running in the base language, line metadata would not be available.)
@@ -113,7 +113,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Deprecated `SaveStateToPlayerPrefs` and `LoadStateFromPlayerPrefs`.
   - Please use `SaveStateToPersistentStorage` and `LoadStateFromPersistentStorage` instead.
 - The Actions class will no longer log every single time a command is registered.
-- Removed `YarnLinesAsCanvasText` class and associated elements, this didn't did anything and was using an approach that is no longer advisable.
+- Removed `YarnLinesAsCanvasText` class and associated elements, this didn't do anything and was using an approach that is no longer advisable.
   - The `MainMenu` sample is now gone, this code was not in the package and didn't work, so it is unlikely anyone will notice this has been removed.
 - Removed the deprecated code inside `YarnProjectImporterEditor`.
 - The Addressable sample has been removed for now as it isn't well suited as an example of using Yarn Spinner and Addressables. It will return in a future release of Yarn Spinner.
