@@ -31,12 +31,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **User Input and Yarn** shows how you can use blocking commands and TMP Input fields to get input into Yarn variables.
   - **Pausing the Typewriter** howing how you can use the `[pause/]` marker to temporarily pause in the middle of a line.
 
-#### New Saving System
+#### New Saving Features
 
 - Added two new basic save methods on `DialogueRunner` that use the persistent data storage location as their save location:
   - `SaveStateToPersistentStorage` saves all variables known to the Dialogue Runner to a named file in the [Application.persistentDataPath](https://docs.unity3d.com/ScriptReference/Application-persistentDataPath.html) folder.
       - These methods, `SaveStateToPersistentStorage` and `LoadStateFromPersistentStorage` are intended to replace the older `PlayerPref` based system for basic saves.
       - Note: For more complex games, we are still assuming you will need to craft your own bespoke save system.
+
+#### Markup Palette System
+
+- The Line View and Options List View prefabs now support _markup palettes_, which allow you to customise the colours of your lines and options using Yarn Spinner's markup.
+- Markup Palettes let you associate a marker with a colour. When you use that marker in your dialogue, the text will be rendered using that colour.
+- For example, consider the following line:
+  ```
+  I'm [excited]thrilled to be here[/excited]!
+  ```
+  If you create a Markup Palette that links the word `excited` to the colour red, the words "thrilled to be here" will be red.
+  
+- The built-in Line View and Options List View prefabs have support for Markup Palettes, as well as any custom Dialogue Views you build that use the `LineView` and `OptionsListView` classes.
 
 #### Other Features
 
@@ -55,16 +67,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed a bug where `YarnNode` attributes would not display correctly in the Inspector when its property path is longer than 1.
 - Fixed a bug in the action registration source code generator that caused it to crash on certain files, which resulted in some commands not being registered at runtime.
 - Replaced the call to `Yarn.Compiler.Utility.AddTagsToLines` with `Yarn.Compiler.Utility.TagLines`.
-- Fixed incorrect order of generic parameter names for `AddFunction` methods; usage is unchanged.
+- Fixed incorrect order of generic parameter names for `AddFunction` methods. The usage of these functions is unchanged.
 - Fixed incorrect handling of line IDs inside the Unity Localised Line Provider preventing voice assets being loaded.
 - Fixed a crash where declaration statements without a value (`<<declare $var>>`) would crash the importer, leading to _weird_ bugs.
-- Yarn Functions and Commands can now have up to 10 parameters.
+- Yarn Functions and Commands can now have up to 10 parameters if you need them. (Previously, the limit was 6.)
 - The hard dependency on Text Mesh Pro is now a soft one.
   - This change will only affect projects that do not have TextMeshPro installed in their project. For most projects, this change won't be noticed.
-- Dialogue Runner will now better wait for line providers to be ready before requesting lines
+- Dialogue Runner will now better wait for line providers to be ready before requesting lines.
   - This does have the potential issue of long load times for some larger nodes, in those cases we suggest you preload more lines using `GetLineIDsForNodes` on `YarnProject`
 - `UnityLocalisedLineProvider` can now have it's default setting of removing unused assets disabled, this is useful when caching multiple nodes worth of assets
-- The Add Assets to Asset Table Collection Wizard now correctly prepends `line:` to the key to match the documented behaviour.
+- The "Add Assets to Asset Table Collection" wizard now correctly prepends `line:` to the key, to match the documented behaviour.
 - `OptionsListView` now deactivates child options when they are not needed instead of just making them transparent.
 - When using Unity Localization, line metadata is now stored on the shared entry for a line ID, rather than only on the base language's entry. (This caused an issue where, if the game was not running in the base language, line metadata would not be available.)
 - Fixed an issue with `AudioLineProvider` that would prevent audio assets being loaded 
@@ -92,9 +104,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Please use `SaveStateToPersistentStorage` and `LoadStateFromPersistentStorage` instead.
 - The Actions class will no longer log every single time a command is registered.
 - Removed `YarnLinesAsCanvasText` class and associated elements, this didn't did anything and was using an approach that is no longer advisable.
-  - The `MainMenu` sample is now gone, this code was not in the package and didn't work so it is unlikely anyone will notice this has been removed.
-- Removed the deprecated code inside `YarnProjectImporterEditor`
-- Addressable sample has been removed for now as it isn't well suited as an example of using Yarn Spinner and Addressables
+  - The `MainMenu` sample is now gone, this code was not in the package and didn't work, so it is unlikely anyone will notice this has been removed.
+- Removed the deprecated code inside `YarnProjectImporterEditor`.
+- The Addressable sample has been removed for now as it isn't well suited as an example of using Yarn Spinner and Addressables. It will return in a future release of Yarn Spinner.
 
 ## [2.3.1] 2023-07-07
 
