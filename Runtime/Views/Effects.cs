@@ -245,28 +245,29 @@ namespace Yarn.Unity
                     yield break;
                 }
 
-                // ok so the change needs to be that if at any point we hit the pause position
-                // we instead stop worrying about letters
-                // and instead we do a normal wait for the necessary duration
-                if (pausePositions != null && pausePositions.Count != 0)
-                {
-                    if (text.maxVisibleCharacters == pausePositions.Peek().Item1)
-                    {
-                        var pause = pausePositions.Pop();
-                        onPauseStarted?.Invoke();
-                        yield return Effects.InterruptableWait(pause.Item2, stopToken);
-                        onPauseEnded?.Invoke();
-
-                        // need to reset the accumulator
-                        accumulator = Time.deltaTime;
-                    }
-                }
-
                 // We need to show as many letters as we have accumulated
                 // time for.
                 while (accumulator >= secondsPerLetter)
                 {
                     text.maxVisibleCharacters += 1;
+
+                    // ok so the change needs to be that if at any point we hit the pause position
+                    // we instead stop worrying about letters
+                    // and instead we do a normal wait for the necessary duration
+                    if (pausePositions != null && pausePositions.Count != 0)
+                    {
+                        if (text.maxVisibleCharacters == pausePositions.Peek().Item1)
+                        {
+                            var pause = pausePositions.Pop();
+                            onPauseStarted?.Invoke();
+                            yield return Effects.InterruptableWait(pause.Item2, stopToken);
+                            onPauseEnded?.Invoke();
+
+                            // need to reset the accumulator
+                            accumulator = Time.deltaTime;
+                        }
+                    }
+
                     onCharacterTyped?.Invoke();
                     accumulator -= secondsPerLetter;
                 }
