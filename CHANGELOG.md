@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+### Changed
+
+### Removed
+
+## [2.4.0] 2023-11-15
+
+### Added
+
 #### In-Line Pause Support
 
 - The built-in Line View now can now identify markup based pauses and insert pauses into the typewriter effect.
