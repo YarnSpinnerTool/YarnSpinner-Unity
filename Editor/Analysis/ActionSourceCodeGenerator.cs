@@ -1,8 +1,3 @@
-#if UNITY_2021_2_OR_NEWER
-    // Source generators are only available on Unity 2021.2 and later.
-    #define SOURCE_GENERATOR_AVAILABLE
-#endif
-
 using UnityEngine;
 using Yarn.Unity;
 using UnityEditor;
@@ -64,23 +59,6 @@ namespace Yarn.Unity.Editor
 
             }
         }
-
-#if !SOURCE_GENERATOR_AVAILABLE
-#pragma warning disable IDE0051 // private member is unused
-
-        // On versions of Unity where source generators are not available, we
-        // provide a menu item that manually generates the appropriate code that
-        // registers actions when the domain reloads.
-        //
-        // We don't need to do this when source generators ARE available, so we
-        // don't offer this item in this case.
-        [MenuItem("Window/Yarn Spinner/Update Yarn Commands")]
-        private static void OnUpdateYarnCommands()
-        {
-            GenerateYarnActionSourceCode();
-        }
-#pragma warning restore IDE0051
-#endif
 
         /// <summary>
         /// Generates and imports a C# source code file in the project

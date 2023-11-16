@@ -24,7 +24,7 @@ namespace Yarn.Unity
         void OnEnable()
         {
 #if UNITY_2023_2_OR_NEWER
-        Debug.LogWarning("Yarn Spinner requires requires uGUI 2.0.0 or above (com.unity.ugui) be installed in the Package Manager.");
+            Debug.LogWarning("Yarn Spinner requires requires uGUI 2.0.0 or above (com.unity.ugui) be installed in the Package Manager.");
 #else
             Debug.LogWarning("Yarn Spinner requires TextMeshPro (com.unity.textmeshpro) be installed in the Package Manager.");
 #endif

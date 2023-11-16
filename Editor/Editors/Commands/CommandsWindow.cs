@@ -280,16 +280,12 @@ namespace Yarn.Unity.Editor
         private List<IListItem> listItems;
         private List<IListItem> filteredListItems;
 
-#if UNITY_2021_2_OR_NEWER
-    // TODO: The commands list works in Unity 2021, but doesn't appear to
-    // populate when I tested in Unity 2019. Disabling it here for now.
-    [MenuItem("Window/Yarn Spinner/Commands...")]
-    static void Summon()
-    {
-        var window = GetWindow<CommandsWindow>("Yarn Commands");
-        window.Show();
-    }
-#endif
+        [MenuItem("Window/Yarn Spinner/Commands...")]
+        static void Summon()
+        {
+            var window = GetWindow<CommandsWindow>("Yarn Commands");
+            window.Show();
+        }
 
         void CreateGUI()
         {

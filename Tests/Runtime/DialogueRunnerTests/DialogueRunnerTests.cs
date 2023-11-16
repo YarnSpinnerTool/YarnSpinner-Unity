@@ -20,13 +20,11 @@ namespace Yarn.Unity.Tests
 
         public void Setup()
         {
-            RuntimeTestUtility.GenerateRegistrationSource(TestResourcesFolderGUID);
             RuntimeTestUtility.AddSceneToBuild(DialogueRunnerTestSceneGUID);
         }
 
         public void Cleanup()
         {
-            RuntimeTestUtility.CleanupGeneratedSource();
             RuntimeTestUtility.RemoveSceneFromBuild(DialogueRunnerTestSceneGUID);
         }
 

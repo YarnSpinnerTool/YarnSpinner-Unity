@@ -223,11 +223,7 @@ namespace Yarn.Unity.Editor
             // so we'll do a little version testing here
             string methodName;
 
-#if UNITY_2020_2_OR_NEWER
             methodName = "PlayPreviewClip";
-#else
-        methodName = "PlayClip";
-#endif
 
             System.Reflection.MethodInfo method = audioUtilClass.GetMethod(
                 methodName,
@@ -249,13 +245,7 @@ namespace Yarn.Unity.Editor
 
             // The name of the method we want to invoke changed in 2020.2,
             // so we'll do a little version testing here
-            string methodName;
-
-#if UNITY_2020_2_OR_NEWER
-            methodName = "StopAllPreviewClips";
-#else
-        methodName = "StopAllClips";
-#endif
+            string methodName = "StopAllPreviewClips";
 
             System.Reflection.MethodInfo method = audioUtilClass.GetMethod(
                 methodName,
@@ -275,9 +265,6 @@ namespace Yarn.Unity.Editor
             System.Reflection.Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;
             System.Type audioUtilClass = unityEditorAssembly.GetType("UnityEditor.AudioUtil");
 
-            // The name of the method we want to invoke AND its parameters
-            // changed in 2020.2, so we'll do a little version testing here
-#if UNITY_2020_2_OR_NEWER
             System.Reflection.MethodInfo method = audioUtilClass.GetMethod(
                 "IsPreviewClipPlaying",
                 System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public
@@ -286,19 +273,6 @@ namespace Yarn.Unity.Editor
                 null,
                 null
             );
-#else
-        System.Reflection.MethodInfo method = audioUtilClass.GetMethod(
-            "IsClipPlaying",
-            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public,
-            null,
-            new System.Type[] { typeof(AudioClip) },
-            null
-        );
-        return (bool)method.Invoke(
-            null,
-            new object[] { clip }
-        );
-#endif
         }
     }
 }

@@ -351,11 +351,11 @@ namespace Yarn.Unity.UnityLocalization
         }
         public void OnEnable()
         {
-            #if USE_UNITY_LOCALIZATION
+#if USE_UNITY_LOCALIZATION
             this.stringsTableProperty = serializedObject.FindProperty(nameof(UnityLocalisedLineProvider.stringsTable));
             this.assetTableProperty = serializedObject.FindProperty(nameof(UnityLocalisedLineProvider.assetTable));
             this.automaticAssetUnloadingProperty = serializedObject.FindProperty(nameof(UnityLocalisedLineProvider.AutomaticallyUnloadUnusedLineAssets));
-            #endif
+#endif
         }
     }
 #endif

@@ -1,13 +1,6 @@
 using UnityEditor;
-#if UNITY_2020_2_OR_NEWER
-#else
-using UnityEditor.Experimental.AssetImporters;
-#endif
 using UnityEngine;
 using System.Linq;
-
-#if USE_UNITY_LOCALIZATION
-#endif
 
 namespace Yarn.Unity.Editor
 {
