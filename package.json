@@ -32,7 +32,7 @@
     {
       "displayName": "Sliced Views",
       "description": "A basic scene that demonstrates the alternative 9-sliced prefabs for the built in views",
-      "path": "Samples~/rounded-views"
+      "path": "Samples~/RoundedViews"
     },
     {
       "displayName": "Visual Novel",
