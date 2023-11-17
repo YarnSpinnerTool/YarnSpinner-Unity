@@ -8,7 +8,6 @@ using System.Linq;
 
 namespace Yarn.Unity
 {
-
     public class Localization : ScriptableObject
     {
         /// <summary>

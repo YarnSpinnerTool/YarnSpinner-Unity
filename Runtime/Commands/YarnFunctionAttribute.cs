@@ -28,14 +28,8 @@ namespace Yarn.Unity
     /// will be done for you automatically when your code compiles.
     /// </para>
     /// </remarks>
-    public class YarnFunctionAttribute : YarnActionAttribute {
-        [Obsolete("Use " + nameof(Name) + " instead.")]
-        public string FunctionName
-        {
-            get => Name;
-            set => Name = value;
-        }
-
+    public class YarnFunctionAttribute : YarnActionAttribute
+    {
         public YarnFunctionAttribute(string name = null) => Name = name;
     }
 }

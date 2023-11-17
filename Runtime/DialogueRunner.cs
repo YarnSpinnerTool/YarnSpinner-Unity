@@ -372,25 +372,6 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Starts running the dialogue again.
-        /// </summary>
-        /// <remarks>
-        /// If <paramref name="nodeName"/> is null, the node specified by
-        /// <see cref="startNode"/> is attempted, followed the currently
-        /// running node. If none of these options are available, an <see
-        /// cref="ArgumentNullException"/> is thrown.
-        /// </remarks>
-        /// <exception cref="ArgumentNullException">Thrown when a node to
-        /// restart the dialogue from cannot be found.</exception>
-        [Obsolete("Use " + nameof(StartDialogue) + "(nodeName) instead.")]
-        public void ResetDialogue(string nodeName = null)
-        {
-            nodeName = nodeName ?? startNode ?? CurrentNodeName ?? throw new ArgumentNullException($"Cannot reset dialogue: couldn't figure out a node to restart the dialogue from.");
-
-            StartDialogue(nodeName);
-        }
-
-        /// <summary>
         /// Unloads all nodes from the <see cref="Dialogue"/>.
         /// </summary>
         public void Clear()

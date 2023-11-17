@@ -20,10 +20,10 @@ public class QuitGameCommand : MonoBehaviour
     {
         // In the editor, leave Play Mode. In a regular build, quit the
         // app.
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         EditorApplication.isPlaying = false;
-        #else
+#else
         Application.Quit();
-        #endif        
+#endif        
     }
 }

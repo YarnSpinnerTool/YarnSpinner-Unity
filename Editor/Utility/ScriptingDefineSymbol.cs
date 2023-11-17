@@ -54,34 +54,19 @@ namespace Yarn.Unity.Editor
         {
             get
             {
-#if UNITY_2021_2_OR_NEWER
                 var currentGroup = UnityEditor.Build.NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
                 return PlayerSettings
                     .GetScriptingDefineSymbols(currentGroup)
                     .Split(new[] {';'}, System.StringSplitOptions.RemoveEmptyEntries)
                     .Contains(SymbolName);
-#else
-                var currentGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
-                return PlayerSettings
-                    .GetScriptingDefineSymbolsForGroup(currentGroup)
-                    .Split(new[] {';'}, System.StringSplitOptions.RemoveEmptyEntries)
-                    .Contains(SymbolName);
-#endif
             }
 
             set
             {
-#if UNITY_2021_2_OR_NEWER
                 var currentGroup = UnityEditor.Build.NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
                 var currentDefines = PlayerSettings
                     .GetScriptingDefineSymbols(currentGroup)
                     .Split(new[] {';'}, System.StringSplitOptions.RemoveEmptyEntries);
-#else
-                var currentGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
-                var currentDefines = PlayerSettings
-                    .GetScriptingDefineSymbolsForGroup(currentGroup)
-                    .Split(new[] {';'}, System.StringSplitOptions.RemoveEmptyEntries);
-#endif
 
                 var currentDefinesList = new List<string>(currentDefines);
 
@@ -110,11 +95,7 @@ namespace Yarn.Unity.Editor
                 UnityEngine.Debug.Log($"SetScriptingDefineSymbolsForGroup '{newDefinesList}'");
 #endif
 
-#if UNITY_2021_2_OR_NEWER
                 PlayerSettings.SetScriptingDefineSymbols(currentGroup, newDefinesList);
-#else
-                PlayerSettings.SetScriptingDefineSymbolsForGroup(currentGroup, newDefinesList);
-#endif
             }
         }
     }
