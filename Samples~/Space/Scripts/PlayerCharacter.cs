@@ -94,7 +94,7 @@ namespace Yarn.Unity.Example
 #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
             movement += Keyboard.current.rightArrowKey.isPressed ? 1f : 0f;
             movement += Keyboard.current.leftArrowKey.isPressed ? -1f : 0f;
-#elif ENABLE_LEGACY_INPUT_MANAGER || UNITY_2018
+#elif ENABLE_LEGACY_INPUT_MANAGER
             movement += Input.GetAxis("Horizontal");
 #endif
 

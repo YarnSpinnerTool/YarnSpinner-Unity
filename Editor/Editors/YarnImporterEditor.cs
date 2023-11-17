@@ -1,10 +1,6 @@
 using UnityEngine;
 using UnityEditor;
-#if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
-#else
-using UnityEditor.Experimental.AssetImporters;
-#endif
 using System.Linq;
 using System.IO;
 using System.Collections.Generic;
@@ -91,33 +87,8 @@ namespace Yarn.Unity.Editor
 
             EditorGUILayout.Space();
 
-            var hadChanges = serializedObject.ApplyModifiedProperties();
-
-#if UNITY_2018
-        // Unity 2018's ApplyRevertGUI is buggy, and doesn't automatically
-        // detect changes to the importer's serializedObject. This means
-        // that we'd need to track the state of the importer, and don't
-        // have a way to present a Revert button. 
-        //
-        // Rather than offer a broken experience, on Unity 2018 we
-        // immediately reimport the changes. This is slow (we're
-        // serializing and writing the asset to disk on every property
-        // change!) but ensures that the writes are done.
-        if (hadChanges)
-        {
-            // Manually perform the same tasks as the 'Apply' button would
-            ApplyAndImport();
-        }
-#endif
-
-#if UNITY_2019_1_OR_NEWER
-            // On Unity 2019 and newer, we can use an ApplyRevertGUI that
-            // works identically to the built-in importer inspectors.
+            _ = serializedObject.ApplyModifiedProperties();
             ApplyRevertGUI();
-#endif
         }
-
-
-
     }
 }

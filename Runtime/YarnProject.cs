@@ -220,15 +220,6 @@ namespace Yarn.Unity
         /// <summary>
         /// Gets the Yarn Program stored in this project.
         /// </summary>
-        [System.Obsolete("Use the Program property instead, which caches its return value.")]
-        public Program GetProgram()
-        {
-            return Program.Parser.ParseFrom(compiledYarnProgram);
-        }
-
-        /// <summary>
-        /// Gets the Yarn Program stored in this project.
-        /// </summary>
         /// <remarks>
         /// The first time this is called, the program stored in <see
         /// cref="compiledYarnProgram"/> is deserialized and cached. Future

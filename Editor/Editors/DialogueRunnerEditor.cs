@@ -123,9 +123,7 @@ namespace Yarn.Unity.Editor
 
             EditorGUILayout.Space();
 
-#if UNITY_2019_1_OR_NEWER
             ShowCallbacks = EditorGUILayout.BeginFoldoutHeaderGroup(ShowCallbacks, "Events");
-#endif
 
             if (ShowCallbacks)
             {
@@ -136,9 +134,7 @@ namespace Yarn.Unity.Editor
                 EditorGUILayout.PropertyField(onCommandProperty);
             }
 
-#if UNITY_2019_1_OR_NEWER
             EditorGUILayout.EndFoldoutHeaderGroup();
-#endif
 
             serializedObject.ApplyModifiedProperties();
 

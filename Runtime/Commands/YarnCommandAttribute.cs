@@ -118,12 +118,6 @@ namespace Yarn.Unity
     /// </remarks>
     public class YarnCommandAttribute : YarnActionAttribute
     {
-        [Obsolete("Use " + nameof(Name) + " instead.")]
-        public string CommandString {
-            get => Name;
-            set => Name = value;
-        }
-
         /// <summary>
         /// Override the state injector for this command only.
         /// </summary>

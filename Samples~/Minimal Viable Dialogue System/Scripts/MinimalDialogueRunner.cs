@@ -27,7 +27,7 @@ public class MinimalDialogueRunner : MonoBehaviour
     void Awake()
     {
         dialogue = CreateDialogueInstance();
-        dialogue.SetProgram(project.GetProgram());
+        dialogue.SetProgram(project.Program);
 
         if (LineProvider == null)
         {

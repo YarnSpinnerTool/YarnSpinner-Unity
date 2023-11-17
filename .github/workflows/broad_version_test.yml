@@ -21,33 +21,16 @@ jobs:
         projectPath:
           - YarnSpinner
         unityVersion:
-          # - 2019.4.40f1
-          # - 2020.3.45f1
-          # - 2021.3.9f1
-          # - 2022.2.1f1
-          
-          - 2019.4.0f1
-          - 2019.4.40f1
-          - 2020.1.0f1
-          - 2020.1.17f1
-          - 2020.2.0f1
-          - 2020.2.7f1
-          - 2020.3.0f1
-          - 2020.3.48f1
-          - 2021.1.0f1
-          - 2021.1.28f1
-          - 2021.2.0f1
-          - 2021.2.19f1
           - 2021.3.0f1
-          - 2021.3.30f1
+          - 2021.3.32f1
           - 2022.1.0f1
           - 2022.1.24f1
           - 2022.2.0f1
           - 2022.2.21f1
           - 2022.3.0f1
-          - 2022.3.10f1
-
-          # - 2023.1.13f1
+          - 2022.3.13f1
+          - 2023.1.0f1
+          - 2023.1.20f1
         targetPlatform:
           # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
@@ -97,7 +80,7 @@ jobs:
             Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-${{ matrix.unityVersion }}-
             
       - name: Run tests
-        uses: game-ci/unity-test-runner@v2.1.1
+        uses: game-ci/unity-test-runner@v4
         id: testRunner
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
