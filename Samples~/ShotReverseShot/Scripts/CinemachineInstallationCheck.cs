@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using UnityEngine;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
@@ -76,3 +78,5 @@ namespace Yarn.Unity.Example
         }
     }
 }
+
+#endif
