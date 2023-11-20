@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Bumped minimum Unity version to 2021.3
 - Fixed disconnected sliced view sample
 - Fixed Minimal Dialogue Runner sample using obsolete methods
+- Fixed a bug where TMPShim wasn't being detected
 
 ### Removed
 
