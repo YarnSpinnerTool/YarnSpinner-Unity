@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed a bug where the Rounded Views sample wouldn't import correctly.
 - Fixed Minimal Dialogue Runner sample that was using obsolete methods.
 - Fixed a bug where TMPShim wasn't being detected.
+- Standard library functions (like `random`, `dice`, `round_places`, etc) have been moved to the core Yarn Spinner library.
 
 ### Removed
 
