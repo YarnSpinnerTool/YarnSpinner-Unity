@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed Minimal Dialogue Runner sample that was using obsolete methods.
 - Fixed a bug where TMPShim wasn't being detected.
 - Standard library functions (like `random`, `dice`, `round_places`, etc) have been moved to the core Yarn Spinner library.
+- Fixed a bug where the audio assets in the samples weren't being linked correctly resulting in playback errors.
 
 ### Removed
 
