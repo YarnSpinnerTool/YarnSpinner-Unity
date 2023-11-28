@@ -37,7 +37,7 @@ Jane: Here's a function from code that's in another assembly: {testExternalAssem
 ===
 title: BuiltinsTest
 ---
-Jane: round(3.522) = {round(3.522)}; round_places(3.522, 2) = {round_places(3.522, 2)}; floor(3.522) = {floor(3.522)}; floor(-3.522) = {floor(-3.522)}; ceil(3.522) = {ceil(3.522)}; ceil(-3.522) = {ceil(-3.522)}; inc(3.522) = {inc(3.522)}; inc(4) = {inc(4)}; dec(3.522) = {dec(3.522)}; dec(3) = {dec(3)}; decimal(3.522) = {decimal(3.522)}; int(3.522) = {int(3.522)}; int(-3.522) = {int(-3.522)};
+Jane: round(3.522) = {round(3.522)}; round_places(3.522, 2) = {round_places(3.522, 2)}; floor(3.522) = {floor(3.522)}; floor(-3.522) = {floor(-3.522)}; ceil(3.522) = {ceil(3.522)}; ceil(-3.522) = {ceil(-3.522)}; inc(3.522) = {inc(3.522)}; inc(4) = {inc(4)}; dec(3.522) = {dec(3.522)}; dec(3) = {dec(3)}; round_places(decimal(3.522),3) = {round_places(decimal(3.522),3)}; int(3.522) = {int(3.522)}; int(-3.522) = {int(-3.522)};
 // actual function unit testing should go in the YarnSpinner core
 ===
 title: LotsOfVars
