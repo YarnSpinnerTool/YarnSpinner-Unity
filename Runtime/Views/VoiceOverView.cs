@@ -14,9 +14,7 @@ namespace Yarn.Unity
     /// game, your <see cref="DialogueRunner"/> must be configured to use an
     /// <see cref="AudioLineProvider"/>, and your Yarn projects must be
     /// configured to use voice-over audio assets. For more information, see
-    /// <see
-    /// href="/using-yarnspinner-with-unity/assets-and-localization/README.md">Localization
-    /// and Assets</see>.
+    /// [Localization and Assets](/docs/using-yarnspinner-with-unity/assets-and-localization/README.md).
     /// </remarks>
     /// <seealso cref="DialogueViewBase"/>
     public class VoiceOverView : DialogueViewBase
