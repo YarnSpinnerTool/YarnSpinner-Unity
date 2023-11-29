@@ -215,7 +215,7 @@ namespace Yarn.Unity
                 }
             }
 
-            internal CommandDispatchResult Invoke(DialogueRunner dispatcher, List<string> parameters, out Coroutine commandCoroutine)
+            internal CommandDispatchResult Invoke(MonoBehaviour dispatcher, List<string> parameters, out Coroutine commandCoroutine)
             {
                 object target;
 
@@ -366,14 +366,14 @@ namespace Yarn.Unity
         private Dictionary<string, CommandRegistration> _commands = new Dictionary<string, CommandRegistration>();
 
         public Library Library { get; }
-        public DialogueRunner DialogueRunner { get; }
+        public IActionRegistration ActionRegistrar { get; }
 
         public IEnumerable<ICommand> Commands => _commands.Values;
 
-        public Actions(DialogueRunner dialogueRunner, Library library)
+        public Actions(IActionRegistration actionRegistrar, Library library)
         {
             Library = library;
-            DialogueRunner = dialogueRunner;
+            ActionRegistrar = actionRegistrar;
         }
 
         private static string GetFullMethodName(MethodInfo method) {
@@ -382,7 +382,7 @@ namespace Yarn.Unity
  
         public void RegisterActions() {
             foreach (var registrationFunction in ActionRegistrationMethods) {
-                registrationFunction.Invoke(DialogueRunner);
+                registrationFunction.Invoke(ActionRegistrar);
             }
         }
 
@@ -483,7 +483,7 @@ namespace Yarn.Unity
             // no-op
         }
 
-        CommandDispatchResult ICommandDispatcher.DispatchCommand(string command, out Coroutine commandCoroutine)
+        CommandDispatchResult ICommandDispatcher.DispatchCommand(string command, MonoBehaviour coroutineHost, out Coroutine commandCoroutine)
         {
             var commandPieces = new List<string>(DialogueRunner.SplitCommandText(command));
 
@@ -505,7 +505,7 @@ namespace Yarn.Unity
                 // command.
                 commandPieces.RemoveAt(0);
 
-                return registration.Invoke(DialogueRunner, commandPieces, out commandCoroutine);
+                return registration.Invoke(coroutineHost, commandPieces, out commandCoroutine);
             } else {
                 commandCoroutine = default;
                 return new CommandDispatchResult

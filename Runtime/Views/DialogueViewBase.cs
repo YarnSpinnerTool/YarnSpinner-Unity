@@ -1,5 +1,17 @@
 using System;
+using System.Threading;
 using UnityEngine;
+
+#if USE_UNITASK
+using Cysharp.Threading.Tasks;
+using YarnTask = Cysharp.Threading.Tasks.UniTask;
+using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
+using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
+#else
+using YarnTask = System.Threading.Tasks.Task;
+using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
+using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
+#endif
 
 namespace Yarn.Unity
 {
@@ -37,7 +49,7 @@ namespace Yarn.Unity
     /// </remarks>
     /// <seealso cref="LineProviderBehaviour"/>
     /// <seealso cref="DialogueRunner.dialogueViews"/>
-    public abstract class DialogueViewBase : MonoBehaviour
+    public abstract class DialogueViewBase : AsyncDialogueViewBase
     {
         /// <summary>
         /// Represents the method that should be called when this view wants the
@@ -362,6 +374,82 @@ namespace Yarn.Unity
         public virtual void UserRequestedViewAdvancement()
         {
             // default implementation does nothing
+        }
+
+        // This method implements the v3 async pattern for dialogue views on top
+        // of the v2 API.
+        public override async YarnTask RunLineAsync(LocalizedLine line, CancellationToken token)
+        {
+            // phaseComplete is a flag that represents whether the current
+            // 'phase' of a v2-style dialogue view (Run, Interrupt, Dismiss) is
+            // complete or not.
+            bool phaseComplete = false;
+            void PhaseComplete() => phaseComplete = true;
+
+            // Run the line, and make phaseComplete become true when it's done.
+            this.RunLine(line, PhaseComplete);
+
+            // Wait for one of the following things to happen:
+            // 1. RunLine completes successfully and calls PhaseComplete.
+            // 2. The line is cancelled.
+            while (phaseComplete == false && token.IsCancellationRequested == false) {
+                await YarnTask.Yield();
+            }
+
+            // If the line was cancelled, tell the view that the line was
+            // 'interrupted' and should finish presenting quickly. Wait for the
+            // phase to complete.
+            if (token.IsCancellationRequested) {
+                phaseComplete = false;
+                this.InterruptLine(line, PhaseComplete);
+                while (phaseComplete == false) {
+                    await YarnTask.Yield();
+                }
+            }
+
+            // Finally, signal that the line should be dismissed, and wait for
+            // the dismissal to complete.
+            phaseComplete = false;
+            this.DismissLine(PhaseComplete);
+
+            while (phaseComplete == false) {
+                await YarnTask.Yield();
+            }
+        }
+
+        // This method implements the v3 async pattern for dialogue views on top
+        // of the v2 API.
+        public override async YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        {
+            int selectedOptionID = -1;
+            
+            // Run the options, and wait for either a selection to be made, or
+            // for this view to be cancelled.
+            this.RunOptions(dialogueOptions, (selectedID) =>
+            {
+                selectedOptionID = selectedID;
+            });
+
+            while (selectedOptionID == -1 && cancellationToken.IsCancellationRequested == false) {
+                await YarnTask.Yield();
+            }
+
+            if (cancellationToken.IsCancellationRequested) {
+                // We were cancelled. Return null.
+                return null;
+            }
+
+            // Find the option that has the same ID as the one that was
+            // selected, and return that.
+            for (int i = 0; i < dialogueOptions.Length; i++) {
+                if (dialogueOptions[i].DialogueOptionID == selectedOptionID) {
+                    return dialogueOptions[i];
+                }
+            }
+
+            // If we got here, we weren't cancelled, but we also didn't select
+            // an option that was valid. Throw an error.
+            throw new InvalidOperationException($"Option view selected an invalid option ID ({selectedOptionID})");
         }
     }
 }

@@ -855,7 +855,7 @@ namespace Yarn.Unity
 
         internal void HandleCommand(Command command)
         {
-            var dispatchResult = CommandDispatcher.DispatchCommand(command.Text, out Coroutine awaitCoroutine);
+            var dispatchResult = CommandDispatcher.DispatchCommand(command.Text, this, out Coroutine awaitCoroutine);
 
             switch (dispatchResult.Status)
             {
