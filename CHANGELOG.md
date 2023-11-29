@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed a bug where TMPShim wasn't being detected.
 - Standard library functions (like `random`, `dice`, `round_places`, etc) have been moved to the core Yarn Spinner library.
 - Fixed a bug where the audio assets in the samples weren't being linked correctly resulting in playback errors.
+- Intro Sample: Moved the Character Color view to a new stand-alone object (it's easier to explain how to do this in a tutorial!)
 
 ### Removed
 
