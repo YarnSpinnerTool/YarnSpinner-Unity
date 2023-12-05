@@ -1,47 +1,48 @@
 // This file contains helpers that make it easier for the Yarn Spinner code to
 // not have to think about which async API it's using.
 
-using UnityEngine;
-using System.Collections;
-using System.Threading;
-
-using UnityEngine.ResourceManagement.AsyncOperations;
-
-using System.Runtime.CompilerServices;
-
 #nullable enable
 
+namespace Yarn.Unity
+{
+    using UnityEngine;
+    using System.Collections;
+    using System.Threading;
+    
+    using UnityEngine.ResourceManagement.AsyncOperations;
+    using System.Runtime.CompilerServices;
+
 #if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object>;
+    using Cysharp.Threading.Tasks;
+    using YarnTask = Cysharp.Threading.Tasks.UniTask;
+    using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
 #else
-using YarnTask = System.Threading.Tasks.Task;
-using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object>;
+    using YarnTask = System.Threading.Tasks.Task;
+    using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
 #endif
 
-public static partial class YarnAsync
-{
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public async static YarnTask WaitUntilCanceled(System.Threading.CancellationToken token)
+    public static partial class YarnAsync
     {
-        while (token.IsCancellationRequested == false)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public async static YarnTask WaitUntilCanceled(System.Threading.CancellationToken token)
         {
-            await YarnTask.Yield();
+            while (token.IsCancellationRequested == false)
+            {
+                await YarnTask.Yield();
+            }
         }
-    }
 
 #if !USE_UNITASK
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static YarnTask Forget(this YarnTask task)
-    {
-        return task;
-    }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static YarnTask Forget(this YarnTask task)
+        {
+            return task;
+        }
 #endif
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public async static YarnTask WaitForCoroutine(this MonoBehaviour mb, Coroutine coro, CancellationToken cancellationToken = default)
-    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public async static YarnTask WaitForCoroutine(this MonoBehaviour mb, Coroutine coro, CancellationToken cancellationToken = default)
+        {
 #if USE_UNITASK
         IEnumerator Wait()
         {
@@ -51,41 +52,50 @@ public static partial class YarnAsync
             .ToUniTask(cancellationToken: cancellationToken)
             .SuppressCancellationThrow();
 #else
-        bool complete = false;
-        IEnumerator WaitForCompletion()
-        {
-            yield return coro;
-            complete = true;
-        }
-
-        var waitingCoroutine = mb.StartCoroutine(WaitForCompletion());
-
-        while (!complete)
-        {
-            if (cancellationToken.IsCancellationRequested)
+            bool complete = false;
+            IEnumerator WaitForCompletion()
             {
-                // Our task was cancelled. Stop the coroutine and return immediately.
-                mb.StopCoroutine(waitingCoroutine);
-                return;
+                yield return coro;
+                complete = true;
             }
-            await YarnTask.Yield();
-        }
-#endif
-    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static async YarnObjectTask WaitForAsyncOperation<T>(AsyncOperationHandle<T> operationHandle) where T : UnityEngine.Object
-    {
+            var waitingCoroutine = mb.StartCoroutine(WaitForCompletion());
+
+            while (!complete)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    // Our task was cancelled. Stop the coroutine and return
+                    // immediately.
+                    mb.StopCoroutine(waitingCoroutine);
+                    return;
+                }
+                await YarnTask.Yield();
+            }
+#endif
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static async YarnObjectTask WaitForAsyncOperation<T>(AsyncOperationHandle<T> operationHandle, CancellationToken cancellationToken) where T : UnityEngine.Object
+        {
 #if USE_UNITASK
+        // TODO: use cancellationToken
         return await operationHandle;
 #else
 
-        while (operationHandle.IsDone == false)
-        {
-            await YarnTask.Yield();
-        }
+            while (operationHandle.IsDone == false)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return null;
+                }
 
-        return operationHandle.Result;
+                await YarnTask.Yield();
+            }
+
+            return operationHandle.Result;
 #endif
+        }
     }
+
 }

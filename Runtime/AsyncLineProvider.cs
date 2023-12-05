@@ -1,131 +1,141 @@
 // #define USE_UNITASK
 
-using UnityEngine;
+namespace Yarn.Unity
+{
 
-using System.Collections;
-using System.Threading;
+
+    using UnityEngine;
+
+    using System.Collections;
+    using System.Threading;
 #if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnIntTask = Cysharp.Threading.Tasks.UniTask<int>;
-using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
+    using Cysharp.Threading.Tasks;
+    using YarnTask = Cysharp.Threading.Tasks.UniTask;
+    using YarnIntTask = Cysharp.Threading.Tasks.UniTask<int>;
+    using YarnLineTask = Cysharp.Threading.Tasks.UniTask<LocalizedLine>;
 #else
-using YarnTask = System.Threading.Tasks.Task;
-using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
+    using YarnTask = System.Threading.Tasks.Task;
+    using YarnLineTask = System.Threading.Tasks.Task<LocalizedLine>;
 #endif
 
 
-using Yarn;
-using Yarn.Unity;
+    using Yarn;
+    using Yarn.Unity;
 
 #if USE_ADDRESSABLES
-using UnityEngine.AddressableAssets;
+    using UnityEngine.AddressableAssets;
 #endif
-using System.Collections.Generic;
+    using System.Collections.Generic;
 
 #nullable enable
 
-internal interface ILineProvider
-{
-    public YarnProject? YarnProject { get; set; }
-    public string LocaleCode { get; set; }
-    public YarnLineTask GetLocalizedLineAsync(Line line);
-    public YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs);
-}
+    internal interface ILineProvider
+    {
+        public YarnProject? YarnProject { get; set; }
+        public string LocaleCode { get; set; }
+        public YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken);
+        public YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken);
+    }
 
 #if USE_ADDRESSABLES
-public class AsyncLineProvider : MonoBehaviour, ILineProvider
-{
-    public YarnProject? YarnProject { get; set; }
-
-    public string LocaleCode { 
-        get => _localeCode; 
-        set => _localeCode = value; 
-    }
-
-    [SerializeField] private string _localeCode = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
-    private Dictionary<string, Object> cachedAssets = new Dictionary<string, Object>();
-
-    public async YarnLineTask GetLocalizedLineAsync(Line line)
+    public class AsyncLineProvider : MonoBehaviour, ILineProvider
     {
-        Localization loc = CurrentLocalization;
-        string text = loc.GetLocalizedString(line.ID);
+        public YarnProject? YarnProject { get; set; }
 
-        cachedAssets.TryGetValue(line.ID, out Object? asset);
-
-        if (asset == null)
+        public string LocaleCode
         {
-            // We didn't find an asset for this line. Try to get one now.
+            get => _localeCode;
+            set => _localeCode = value;
+        }
 
-            if (loc.UsesAddressableAssets)
+        [SerializeField] private string _localeCode = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+        private Dictionary<string, Object> cachedAssets = new Dictionary<string, Object>();
+
+        private YarnTask? prepareForLinesTask;
+        private CancellationTokenSource? prepareForLinesCancellation;
+
+        public async YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken)
+        {
+            Localization loc = CurrentLocalization;
+            string text = loc.GetLocalizedString(line.ID);
+
+            cachedAssets.TryGetValue(line.ID, out Object? asset);
+
+            if (asset == null)
             {
-                string assetAddress = Localization.GetAddressForLine(line.ID, LocaleCode);
+                // We didn't find an asset for this line. Try to get one now.
 
-                asset = await YarnAsync.WaitForAsyncOperation(
-                    Addressables.LoadAssetAsync<AudioClip>(assetAddress)
-                );
+                if (loc.UsesAddressableAssets)
+                {
+                    string assetAddress = Localization.GetAddressForLine(line.ID, LocaleCode);
 
-                if (asset != null) { cachedAssets.Add(line.ID, asset); }
+                    asset = await YarnAsync.WaitForAsyncOperation(
+                        Addressables.LoadAssetAsync<AudioClip>(assetAddress),
+                        cancellationToken
+                    );
+
+                    if (asset != null) { cachedAssets.Add(line.ID, asset); }
+                }
+                else
+                {
+                    asset = loc.GetLocalizedObject<Object>(line.ID);
+                }
             }
-            else
+
+            return new LocalizedLine
             {
-                asset = loc.GetLocalizedObject<Object>(line.ID);
+                RawText = text,
+                TextID = line.ID,
+                Asset = asset,
+            };
+        }
+
+        public async YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken)
+        {
+            if (CurrentLocalization.UsesAddressableAssets)
+            {
+                foreach (var entry in cachedAssets)
+                {
+                    Addressables.Release(entry.Value);
+                }
+                cachedAssets.Clear();
+                var allTasks = new List<YarnTask>();
+                foreach (var id in lineIDs)
+                {
+                    allTasks.Add(LoadAssetIntoCache(id, cancellationToken));
+                }
+                prepareForLinesTask = YarnTask.WhenAll(allTasks);
+                await prepareForLinesTask;
             }
         }
 
-        return new LocalizedLine
+        public async YarnTask LoadAssetIntoCache(string id, CancellationToken token)
         {
-            RawText = text,
-            TextID = line.ID,
-            Asset = asset,
-        };
-    }
-
-    public async YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs)
-    {
-        if (CurrentLocalization.UsesAddressableAssets)
-        {
-            foreach (var entry in cachedAssets)
+            var address = Localization.GetAddressForLine(id, LocaleCode);
+            var load = Addressables.LoadAssetAsync<Object>(address);
+            var asset = await YarnAsync.WaitForAsyncOperation(load, token);
+            if (asset != null)
             {
-                Addressables.Release(entry.Value);
-            }
-            cachedAssets.Clear();
-            var allTasks = new List<YarnTask>();
-            foreach (var id in lineIDs)
-            {
-                allTasks.Add(LoadAssetIntoCache(id));
-            }
-            await YarnTask.WhenAll(allTasks);
-        }
-    }
-
-    public async YarnTask LoadAssetIntoCache(string id)
-    {
-        var address = Localization.GetAddressForLine(id, LocaleCode);
-        var load = Addressables.LoadAssetAsync<Object>(address);
-        var asset = await YarnAsync.WaitForAsyncOperation(load);
-        if (asset != null)
-        {
-            cachedAssets.Add(address, asset);
-        }
-    }
-
-    private Localization CurrentLocalization
-    {
-        get
-        {
-            if (YarnProject != null)
-            {
-                return YarnProject.GetLocalization(LocaleCode);
-            }
-            else
-            {
-                throw new System.InvalidOperationException($"Can't get a localised line because {nameof(YarnProject)} is not set!");
+                cachedAssets.Add(address, asset);
             }
         }
-    }
 
-}
+        private Localization CurrentLocalization
+        {
+            get
+            {
+                if (YarnProject != null)
+                {
+                    return YarnProject.GetLocalization(LocaleCode);
+                }
+                else
+                {
+                    throw new System.InvalidOperationException($"Can't get a localised line because {nameof(YarnProject)} is not set!");
+                }
+            }
+        }
+
+    }
 #else
 public class AsyncLineProvider : MonoBehaviour, ILineProvider
 {
@@ -174,3 +184,5 @@ public class AsyncLineProvider : MonoBehaviour, ILineProvider
     }
 }
 #endif
+
+}
