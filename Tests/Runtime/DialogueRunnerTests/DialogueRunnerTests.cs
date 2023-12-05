@@ -341,7 +341,7 @@ namespace Yarn.Unity.Tests
             var dispatcher = runner.CommandDispatcher;
 
             LogAssert.Expect(LogType.Log, expectedLogResult);
-            var result = dispatcher.DispatchCommand(test, out var commandCoroutine);
+            var result = dispatcher.DispatchCommand(test, runner, out var commandCoroutine);
             
             Assert.AreEqual(CommandDispatchResult.StatusType.SucceededSync, result.Status);
             Assert.IsNull(commandCoroutine);
@@ -354,7 +354,7 @@ namespace Yarn.Unity.Tests
 
             var framesToWait = 5;
 
-            var result = dispatcher.DispatchCommand($"testCommandCoroutine DialogueRunner {framesToWait}", out var commandCoroutine);
+            var result = dispatcher.DispatchCommand($"testCommandCoroutine DialogueRunner {framesToWait}", runner, out var commandCoroutine);
 
             Assert.AreEqual(CommandDispatchResult.StatusType.SucceededAsync, result.Status);
             Assert.IsNotNull(commandCoroutine);
@@ -377,7 +377,7 @@ namespace Yarn.Unity.Tests
             var dispatcher = runner.CommandDispatcher;
             var regex = new Regex(error);
 
-            var result = dispatcher.DispatchCommand(command, out _);
+            var result = dispatcher.DispatchCommand(command, runner, out _);
 
             Assert.AreEqual(CommandDispatchResult.StatusType.InvalidParameterCount, result.Status);
             Assert.That(regex.IsMatch(result.Message));
@@ -389,7 +389,7 @@ namespace Yarn.Unity.Tests
             var dispatcher = runner.CommandDispatcher;
             var regex = new Regex(error);
 
-            var result = dispatcher.DispatchCommand(command, out _);
+            var result = dispatcher.DispatchCommand(command, runner, out _);
             Assert.AreEqual(CommandDispatchResult.StatusType.InvalidParameterCount, result.Status);
             Assert.That(regex.IsMatch(result.Message));
         }
@@ -405,8 +405,8 @@ namespace Yarn.Unity.Tests
             LogAssert.Expect(LogType.Log, "success 1");
             LogAssert.Expect(LogType.Log, "success 2");
 
-            var result1 = dispatcher.DispatchCommand("test1", out _);
-            var result2 = dispatcher.DispatchCommand("test2 2", out _);
+            var result1 = dispatcher.DispatchCommand("test1", runner, out _);
+            var result2 = dispatcher.DispatchCommand("test2 2", runner, out _);
 
             Assert.IsNull(result1.Message);
             Assert.IsNull(result2.Message);
@@ -434,7 +434,7 @@ namespace Yarn.Unity.Tests
 
             LogAssert.Expect(LogType.Log, $"success {Time.frameCount + framesToWait}");
 
-            dispatcher.DispatchCommand("test", out var coroutine);
+            dispatcher.DispatchCommand("test", runner, out var coroutine);
 
             Assert.IsNotNull(coroutine);
 
