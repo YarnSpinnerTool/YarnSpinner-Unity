@@ -13,3 +13,10 @@ This sample highlights:
 
 To get started play the scene and the dialogue will start itself.
 The dialogue will auto-advance, click on options to select dialogue branches.
+
+Credits:
+
+Tom: Jon Pimentel
+Anne: Lola Lynn Rensink
+
+Spanish Translation: Alejandra de la Torre

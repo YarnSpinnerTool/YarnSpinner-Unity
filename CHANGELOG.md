@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Updated voiceover and translation credits for the Intro sample scene.
+
 ### Changed
 
 - Update the minimum Unity version to 2021.3.
