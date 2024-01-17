@@ -1,12 +1,10 @@
 namespace Yarn.Unity.Editor
 {
-    using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
+#if UNITY_EDITOR
     using UnityEditor;
     using UnityEngine;
-    using UnityEngine.UIElements;
-    using UnityEditor.UIElements;
+#endif
 
     /// <summary>
     /// Basic data class of unity settings that impact Yarn Spinner.
@@ -18,35 +16,92 @@ namespace Yarn.Unity.Editor
     {
         public static string YarnSpinnerProjectSettingsPath => Path.Combine("ProjectSettings", "Packages", "dev.yarnspinner", "YarnSpinnerProjectSettings.json");
 
-        [SerializeField] internal bool autoRefreshLocalisedAssets = true;
+        public bool autoRefreshLocalisedAssets = true;
+        public bool automaticallyLinkAttributedYarnCommandsAndFunctions = true;
 
-        internal static YarnSpinnerProjectSettings GetOrCreateSettings()
+        // need to make it os the output can be passed in also so it can log
+        internal static YarnSpinnerProjectSettings GetOrCreateSettings(string path = null, Yarn.Unity.ILogger iLogger = null)
         {
+            var settingsPath = YarnSpinnerProjectSettingsPath;
+            if (path != null)
+            {
+                settingsPath = Path.Combine(path, YarnSpinnerProjectSettingsPath);
+            }
+            var logger = ValidLogger(iLogger);
+
             YarnSpinnerProjectSettings settings = new YarnSpinnerProjectSettings();
-            if (File.Exists(YarnSpinnerProjectSettingsPath))
+            if (File.Exists(settingsPath))
             {
                 try
                 {
-                    var settingsData = File.ReadAllText(YarnSpinnerProjectSettingsPath);
-                    EditorJsonUtility.FromJsonOverwrite(settingsData, settings);
+                    var settingsData = File.ReadAllText(settingsPath);
+                    settings = YarnSpinnerProjectSettings.FromJson(settingsData, logger);
 
                     return settings;
                 }
                 catch (System.Exception e)
                 {
-                    Debug.LogWarning($"Failed to load Yarn Spinner project settings at {YarnSpinnerProjectSettingsPath}: {e.Message}");
+                    logger.WriteLine($"Failed to load Yarn Spinner project settings at {settingsPath}: {e.Message}");
                 }
+            }
+            else
+            {
+                logger.WriteLine($"No settings file exists at {settingsPath}, will fallback to default settings");
             }
 
             settings.autoRefreshLocalisedAssets = true;
-            settings.WriteSettings();
+            settings.automaticallyLinkAttributedYarnCommandsAndFunctions = true;
+            settings.WriteSettings(path, logger);
 
             return settings;
         }
 
-        internal void WriteSettings()
+        private static YarnSpinnerProjectSettings FromJson(string jsonString, Yarn.Unity.ILogger iLogger = null)
         {
-            var jsonValue = EditorJsonUtility.ToJson(this);
+            var logger = ValidLogger(iLogger);
+            
+            YarnSpinnerProjectSettings settings = new YarnSpinnerProjectSettings();
+            var jsonDict = Json.Deserialize(jsonString) as System.Collections.Generic.Dictionary<string, object>;
+            if (jsonDict == null)
+            {
+                logger.WriteLine($"Failed to parse Yarn Spinner project settings JSON");
+                return settings;
+            }
+
+            bool automaticallyLinkAttributedYarnCommandsAndFunctions = true;
+            bool autoRefreshLocalisedAssets = true;
+            try
+            {
+                automaticallyLinkAttributedYarnCommandsAndFunctions = (bool)jsonDict["automaticallyLinkAttributedYarnCommandsAndFunctions"];
+                autoRefreshLocalisedAssets = (bool)jsonDict["autoRefreshLocalisedAssets"];
+            }
+            catch (System.Exception e)
+            {
+                logger.WriteLine($"Failed to parse Yarn Spinner project settings: {e.Message}");
+            }
+
+            settings.automaticallyLinkAttributedYarnCommandsAndFunctions = automaticallyLinkAttributedYarnCommandsAndFunctions;
+            settings.autoRefreshLocalisedAssets = autoRefreshLocalisedAssets;
+
+            return settings;
+        }
+
+        internal void WriteSettings(string path = null, Yarn.Unity.ILogger iLogger = null)
+        {
+            var logger = ValidLogger(iLogger);
+
+            var settingsPath = YarnSpinnerProjectSettingsPath;
+            if (path != null)
+            {
+                settingsPath = Path.Combine(path, settingsPath);
+            }
+
+            // var jsonValue = EditorJsonUtility.ToJson(this);
+            var dictForm = new System.Collections.Generic.Dictionary<string, bool>();
+            dictForm["automaticallyLinkAttributedYarnCommandsAndFunctions"] = this.automaticallyLinkAttributedYarnCommandsAndFunctions;
+            dictForm["autoRefreshLocalisedAssets"] = this.autoRefreshLocalisedAssets;
+
+            var jsonValue = Json.Serialize(dictForm);
 
             var folder = Path.GetDirectoryName(YarnSpinnerProjectSettingsPath);
             if (!Directory.Exists(folder))
@@ -60,49 +115,24 @@ namespace Yarn.Unity.Editor
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"Failed to save Yarn Spinner project settings to {YarnSpinnerProjectSettingsPath}: {e.Message}");
+                logger.WriteLine($"Failed to save Yarn Spinner project settings to {YarnSpinnerProjectSettingsPath}: {e.Message}");
             }
         }
-    }
 
-    class YarnSpinnerProjectSettingsProvider : SettingsProvider
-    {
-        private YarnSpinnerProjectSettings baseSettings;
-
-        public YarnSpinnerProjectSettingsProvider(string path, SettingsScope scope = SettingsScope.Project) : base(path, scope) { }
-
-        public override void OnActivate(string searchContext, VisualElement rootElement)
+        // if the provided logger is valid just return it
+        // otherwise return the default logger
+        private static Yarn.Unity.ILogger ValidLogger(Yarn.Unity.ILogger iLogger)
         {
-            // This function is called when the user clicks on the MyCustom element in the Settings window.
-            baseSettings = YarnSpinnerProjectSettings.GetOrCreateSettings();
-        }
-
-        public override void OnGUI(string searchContext)
-        {
-            // Use IMGUI to display UI:
-            EditorGUILayout.LabelField("Automatically update localised assets with Yarn Projects");
-
-            using (var changeCheck = new EditorGUI.ChangeCheckScope())
+            var logger = iLogger;
+            if (logger == null)
             {
-                var result = EditorGUILayout.Toggle(baseSettings.autoRefreshLocalisedAssets);
-
-                if (changeCheck.changed)
-                {
-                    baseSettings.autoRefreshLocalisedAssets = result;
-                    baseSettings.WriteSettings();
-                }
+#if UNITY_EDITOR
+                logger = new UnityLogger();
+#else
+                logger = new NullLogger();
+#endif
             }
-        }
-
-        // Register the SettingsProvider
-        [SettingsProvider]
-        public static SettingsProvider CreateYarnSpinnerProjectSettingsProvider()
-        {
-            var provider = new YarnSpinnerProjectSettingsProvider("Project/Yarn Spinner", SettingsScope.Project);
-
-            var keywords = new List<string>() { "yarn", "spinner", "localisation" };
-            provider.keywords = keywords;
-            return provider;
+            return logger;
         }
     }
 }

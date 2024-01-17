@@ -19,11 +19,56 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
     public void Execute(GeneratorExecutionContext context)
     {
         var output = GetOutput(context);
+        output.WriteLine(DateTime.Now);
+
+        // we need to know if the settings are configured to not perform codegen to link attributed methods
+        // this is kinda annoying because the path root of the project settings and the root path of this process are *very* different
+        // so what we do is we use the included Compilation Assembly additional file that Unity gives us.
+        // This file if opened has the path of the Unity project, which we can then use to get the settings
+        // if any stage of this fails then we bail out and assume that codegen is desired
+        if (context.AdditionalFiles.Any())
+        {
+            var relevants = context.AdditionalFiles.Where(i => i.Path.Contains($"{context.Compilation.AssemblyName}.AdditionalFile.txt"));
+            if (relevants.Any())
+            {
+                var arsgacsaf = relevants.First();
+                if (File.Exists(arsgacsaf.Path))
+                {
+                    try
+                    {
+                        var projectPath = File.ReadAllText(arsgacsaf.Path);
+                        var fullPath = Path.Combine(projectPath, Yarn.Unity.Editor.YarnSpinnerProjectSettings.YarnSpinnerProjectSettingsPath);
+                        output.WriteLine($"Attempting to read settings file at {fullPath}");
+
+                        if (!Yarn.Unity.Editor.YarnSpinnerProjectSettings.GetOrCreateSettings(projectPath, output).automaticallyLinkAttributedYarnCommandsAndFunctions)
+                        {
+                            output.WriteLine("Skipping codegen due to settings.");
+                            output.Dispose();
+                            return;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        output.WriteLine($"Unable to determine Yarn settings, settings values will be ignored and codegen will occur: {e.Message}");
+                    }
+                }
+                else
+                {
+                    output.WriteLine($"The project settings path metadata file does not exist at: {arsgacsaf.Path}. Settings values will be ignored and codegen will occur");
+                }
+            }
+            else
+            {
+                output.WriteLine("Unable to determine Yarn settings path, no file containing the project path metadata was included. Settings values will be ignored and codegen will occur.");
+            }
+        }
+        else
+        {
+            output.WriteLine("Unable to determine Yarn settings path as no additional files were included. Settings values will be ignored and codegen will occur.");
+        }
         
         try
         {
-            output.WriteLine(DateTime.Now);
-
             output.WriteLine("Source code generation for assembly " + context.Compilation.AssemblyName);
 
             if (context.AdditionalFiles.Any()) {
@@ -322,18 +367,21 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
         context.RegisterForSyntaxNotifications(() => new ClassDeclarationSyntaxReceiver());
     }
 
-    public ILogger GetOutput(GeneratorExecutionContext context)
+    public Yarn.Unity.ILogger GetOutput(GeneratorExecutionContext context)
     {
         if (GetShouldLogToFile(context))
         {
             var tempPath = System.IO.Path.GetTempPath();
+
             var path = System.IO.Path.Combine(tempPath, $"{nameof(ActionRegistrationSourceGenerator)}-{context.Compilation.AssemblyName}.txt");
 
             var outFile = System.IO.File.Open(path, System.IO.FileMode.Create);
 
-            return new FileLogger(new System.IO.StreamWriter(outFile));
-        } else {
-            return new NullLogger();
+            return new Yarn.Unity.FileLogger(new System.IO.StreamWriter(outFile));
+        }
+        else
+        {
+            return new Yarn.Unity.NullLogger();
         }
     }
 
@@ -363,54 +411,5 @@ internal class ClassDeclarationSyntaxReceiver : ISyntaxReceiver
         {
             Classes.Add(cds);
         }
-    }
-}
-
-public interface ILogger : IDisposable
-{
-    void Write(object obj);
-    void WriteLine(object obj);
-}
-
-public class FileLogger : ILogger
-{
-    System.IO.TextWriter writer;
-
-    public FileLogger(TextWriter writer)
-    {
-        this.writer = writer;
-    }
-
-    public void Dispose()
-    {
-        writer.Dispose();
-    }
-
-    public void Write(object text)
-    {
-        writer.Write(text);
-    }
-
-    public void WriteLine(object text)
-    {
-        writer.WriteLine(text);
-    }
-}
-
-public class NullLogger : ILogger
-{
-    public void Dispose()
-    {
-
-    }
-
-    public void Write(object text)
-    {
-
-    }
-
-    public void WriteLine(object text)
-    {
-
     }
 }
