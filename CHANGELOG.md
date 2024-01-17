@@ -8,6 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- A Unity Project scoped settings that allows you to override some of the default behaviours of Yarn Spinner
+  - settings are saved to a file in `ProjectSettings\Packages\dev.yarnspinner\YarnSpinnerProjectSettings.json`
+  - these can be changed via `Edit -> Project Settings -> Yarn Spinner`
+  - currently supports two convenience features of Yarn Spinner:
+    - automatically associating assets with localisations
+    - automatically linking YarnCommand and YarnFunction attributed methods to the dialogue runner
+  - enabling/disabling C# linking will force an entire C# reimport
+  - enabling/disabling asset linking will force a reimport of all `yarnprojects`
+
 ### Changed
 
 - Update the minimum Unity version to 2021.3.
