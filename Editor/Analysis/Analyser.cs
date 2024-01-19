@@ -392,7 +392,6 @@ namespace Yarn.Unity.ActionAnalyser
 
         private static IEnumerable<Action> GetAttributeActions(CompilationUnitSyntax root, SemanticModel model)
         {
-
             var methodInfos = root
                 .DescendantNodes()
                 .OfType<MethodDeclarationSyntax>()
@@ -403,8 +402,7 @@ namespace Yarn.Unity.ActionAnalyser
                 {
                     return (MethodDeclaration: decl, Symbol: model.GetDeclaredSymbol(decl));
                 })
-                .Where(pair => pair.Symbol != null)
-                .Where(pair => pair.Symbol.DeclaredAccessibility == Accessibility.Public);
+                .Where(pair => pair.Symbol != null);
 
             var actionMethods = methodsAndSymbols
                 .Select(pair =>
@@ -448,6 +446,7 @@ namespace Yarn.Unity.ActionAnalyser
                     Name = actionName,
                     Type = methodInfo.ActionType,
                     MethodName = $"{containerName}.{methodInfo.MethodDeclaration.Identifier}",
+                    MethodIdentifierName = methodInfo.MethodDeclaration.Identifier.ToString(),
                     MethodSymbol = methodInfo.Symbol,
                     IsStatic = methodInfo.Symbol.IsStatic,
                     Declaration = methodInfo.MethodDeclaration,
@@ -492,8 +491,6 @@ namespace Yarn.Unity.ActionAnalyser
             // default value; other parts of the action detection process will throw
             // errors.
             return default;
-
-
         }
 
         private static IEnumerable<Parameter> GetParameters(IMethodSymbol symbol)

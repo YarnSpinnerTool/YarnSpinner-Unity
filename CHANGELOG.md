@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     - automatically linking YarnCommand and YarnFunction attributed methods to the dialogue runner
   - enabling/disabling C# linking will force an entire C# reimport
   - enabling/disabling asset linking will force a reimport of all `yarnprojects`
+- `Yarn.Unity.ActionAnalyser.Action` now has a `MethodIdentifierName` property, which is the short form of the method name.
 
 ### Changed
 
@@ -27,6 +28,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Standard library functions (like `random`, `dice`, `round_places`, etc) have been moved to the core Yarn Spinner library.
 - Fixed a bug where the audio assets in the samples weren't being linked correctly resulting in playback errors.
 - Intro Sample: Moved the Character Color view to a new stand-alone object (it's easier to explain how to do this in a tutorial!)
+- `Analyser` no longer ignores non-public 
+  - this is now handled at the codegen side so we can better log it
+- `ActionsGenerator` will now generate C# warnings for non-private methods that are attributed as `YarnFunction` or `YarnCommand`.
+- `ActionsGenerator` still logs to a temporary location, but now into a `dev.yarnspinner.logs` folder inside the temporary location.
 
 ### Removed
 

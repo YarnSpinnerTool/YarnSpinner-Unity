@@ -124,7 +124,8 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 actions.AddRange(Analyser.GetActions(compilation, tree).Where(a => a.DeclarationType == DeclarationType.Attribute));
             }
 
-            if (actions.Any() == false) {
+            if (actions.Any() == false)
+            {
                 output.WriteLine($"Didn't find any Yarn Actions in {context.Compilation.AssemblyName}. Not generating any source code for it.");
                 return;
             }
@@ -136,8 +137,33 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                     output.WriteLine($"Action is null??");
                     continue;
                 }
+
+                // if an action isn't public we will log a warning
+                // and then later we will also skip it
+                if (action.MethodSymbol.DeclaredAccessibility != Accessibility.Public)
+                {
+                    var descriptor = new DiagnosticDescriptor(
+                        "YS1001",
+                        $"Yarn {action.Type} methods must be public",
+                        "YarnCommand and YarnFunction methods must be public. \"{0}\" is {1}.",
+                        "Yarn Spinner",
+                        DiagnosticSeverity.Warning,
+                        true,
+                        "[YarnCommand] and [YarnFunction] attributed methods must be public so that the codegen can reference them.",
+                        "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/creating-commands-functions");
+                    context.ReportDiagnostic(Microsoft.CodeAnalysis.Diagnostic.Create(
+                        descriptor,
+                        action.Declaration?.GetLocation(),
+                        action.MethodIdentifierName, action.MethodSymbol.DeclaredAccessibility
+                    ));
+                    output.WriteLine($"Action {action.Name} will be skipped due to it's declared accessibility {action.MethodSymbol.DeclaredAccessibility}");
+                    continue;
+                }
                 output.WriteLine($"Action {action.Name}: {action.SourceFileName}:{action.Declaration?.GetLocation()?.GetLineSpan().StartLinePosition.Line} ({action.Type})");
             }
+
+            // removing any actions that aren't public from the list before we do codegen
+            actions = actions.Where(a => a.MethodSymbol.DeclaredAccessibility == Accessibility.Public).ToList();
 
             output.Write($"Generating source code... ");
 
@@ -371,10 +397,23 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
     {
         if (GetShouldLogToFile(context))
         {
-            var tempPath = System.IO.Path.GetTempPath();
+            var tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "dev.yarnspinner.logs");
+
+            // we need to make the logs folder, but this can potentially fail
+            // if it does fail then we will just chuck the logs inside the tmp folder
+            try
+            {
+                if (!Directory.Exists(tempPath))
+                {
+                    Directory.CreateDirectory(tempPath);
+                }
+            }
+            catch
+            {
+                tempPath = System.IO.Path.GetTempPath();
+            }
 
             var path = System.IO.Path.Combine(tempPath, $"{nameof(ActionRegistrationSourceGenerator)}-{context.Compilation.AssemblyName}.txt");
-
             var outFile = System.IO.File.Open(path, System.IO.FileMode.Create);
 
             return new Yarn.Unity.FileLogger(new System.IO.StreamWriter(outFile));
