@@ -540,6 +540,7 @@ namespace Yarn.Unity
             if (currentLine != null)
             {
                 currentLine = null;
+                StopAllCoroutines();
                 StartCoroutine(DismissLineInternal(null));
             }
         }

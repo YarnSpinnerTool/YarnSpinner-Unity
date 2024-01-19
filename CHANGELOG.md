@@ -32,6 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - this is now handled at the codegen side so we can better log it
 - `ActionsGenerator` will now generate C# warnings for non-private methods that are attributed as `YarnFunction` or `YarnCommand`.
 - `ActionsGenerator` still logs to a temporary location, but now into a `dev.yarnspinner.logs` folder inside the temporary location.
+- Auto-advancing `LineView`s will no longer attempt to advance dialogue that has been stopped.
 
 ### Removed
 
