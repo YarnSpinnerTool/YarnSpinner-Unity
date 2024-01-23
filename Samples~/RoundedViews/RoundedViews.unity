@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4465788, g: 0.49641287, b: 0.5748173, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028305, g: 0.22571313, b: 0.3069213, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -610,15 +610,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   yarnProject: {fileID: 7545569452688597077, guid: 541c33f5dcd3d402a93eebfd5d27318a, type: 3}
-  _variableStorage: {fileID: 3831113770283321495}
+  variableStorage: {fileID: 0}
+  lineProvider: {fileID: 0}
   dialogueViews:
   - {fileID: 7778558435607149780}
   - {fileID: 3292657647505705248}
+  autoStart: 1
   startNode: Start
-  startAutomatically: 1
   runSelectedOptionAsLine: 0
-  lineProvider: {fileID: 0}
-  verboseLogging: 1
   onNodeStart:
     m_PersistentCalls:
       m_Calls: []

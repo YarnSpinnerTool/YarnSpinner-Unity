@@ -106,22 +106,7 @@ namespace Yarn.Unity.Tests
         }
 
         string testFilePath { get { return System.IO.Path.Combine(Application.persistentDataPath, "YarnVariableStorageTest.json"); }}
-        [UnityTest]
-        public IEnumerator TestSavingAndLoadingFile_PlayerPrefs()
-        {
-            // run all lines
-            Runner.StartDialogue(Runner.startNode);
-            yield return null;
-
-            // save all variable values to a file, clear, then load from a file
-            Runner.SaveStateToPlayerPrefs();
-            TestClearVarStorage();
-            Runner.LoadStateFromPlayerPrefs();
-            TestVariableValuesFromYarnScript();
-
-            // cleanup
-            PlayerPrefs.DeleteKey("YarnBasicSave");
-        }
+        
         [UnityTest]
         public IEnumerator TestSavingAndLoadingFile()
         {

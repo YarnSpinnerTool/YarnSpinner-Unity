@@ -5,4 +5,5 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyFileVersion("2.4.0.0")]
 [assembly: AssemblyInformationalVersion("2.4.0")]
 
+[assembly: InternalsVisibleTo("YarnSpinner.Unity.Editor")]
 [assembly: InternalsVisibleTo("YarnSpinner.Editor.Tests")]

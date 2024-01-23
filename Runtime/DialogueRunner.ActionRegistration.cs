@@ -7,7 +7,7 @@ using Yarn.Unity;
 namespace Yarn.Unity
 {
 
-    public partial class AsyncDialogueRunner : IActionRegistration
+    public partial class DialogueRunner : IActionRegistration
     {
 
         private ICommandDispatcher commandDispatcher;
@@ -18,7 +18,7 @@ namespace Yarn.Unity
             {
                 if (commandDispatcher == null)
                 {
-                    var actions = new Actions(this, dialogue.Library);
+                    var actions = new Actions(this, Dialogue.Library);
                     commandDispatcher = actions;
                     actions.RegisterActions();
                 }

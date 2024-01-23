@@ -4,6 +4,7 @@ using UnityEngine;
 using Yarn.Unity;
 using UnityEngine.Events;
 using System.Linq;
+using System.Threading;
 
 // This class is an example of how you can make your own dialogue runners for when you need total control over the dialogue.
 // This runner is about as basic as it can be and does no checking or timing and will just move through dialogue when told.
@@ -32,7 +33,7 @@ public class MinimalDialogueRunner : MonoBehaviour
         if (LineProvider == null)
         {
             // we don't have a line provider, create one and use that
-            LineProvider = gameObject.AddComponent<TextLineProvider>();
+            LineProvider = gameObject.AddComponent<BuiltinLocalisedLineProvider>();
         }
         LineProvider.YarnProject = project;
     }
@@ -99,7 +100,7 @@ public class MinimalDialogueRunner : MonoBehaviour
         DialogueOption[] optionSet = new DialogueOption[options.Options.Length];
         for (int i = 0; i < options.Options.Length; i++)
         {
-            var line = LineProvider.GetLocalizedLine(options.Options[i].Line);
+            var line = LineProvider.GetLocalizedLineAsync(options.Options[i].Line, System.Threading.CancellationToken.None).GetAwaiter().GetResult();
             var text = Yarn.Dialogue.ExpandSubstitutions(line.RawText, options.Options[i].Line.Substitutions);
             dialogue.LanguageCode = LineProvider.LocaleCode;
             line.Text = dialogue.ParseMarkup(text);
@@ -155,7 +156,7 @@ public class MinimalDialogueRunner : MonoBehaviour
     public UnityEvent<Yarn.Unity.LocalizedLine> LineNeedsPresentation;
     private void HandleLine(Yarn.Line line)
     {
-        var finalLine = LineProvider.GetLocalizedLine(line);
+        var finalLine = LineProvider.GetLocalizedLineAsync(line, System.Threading.CancellationToken.None).GetAwaiter().GetResult();
         var text = Yarn.Dialogue.ExpandSubstitutions(finalLine.RawText, line.Substitutions);
         dialogue.LanguageCode = LineProvider.LocaleCode;
         finalLine.Text = dialogue.ParseMarkup(text);
@@ -185,7 +186,7 @@ public class MinimalDialogueRunner : MonoBehaviour
 
     private void PrepareForLines(IEnumerable<string> lineIDs)
     {
-        LineProvider.PrepareForLines(lineIDs);
+        LineProvider.PrepareForLinesAsync(lineIDs, CancellationToken.None).GetAwaiter().GetResult();
     }
 
     // call this method to advance the dialogue

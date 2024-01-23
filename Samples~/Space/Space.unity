@@ -1120,6 +1120,25 @@ MonoBehaviour:
   dialogueView: {fileID: 0}
   continueActionType: 1
   continueActionKeyCode: 32
+  continueActionReference: {fileID: 0}
+  continueAction:
+    m_Name: Skip
+    m_Type: 1
+    m_ExpectedControlType: 
+    m_Id: 
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: 
+      m_Path: Submit
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Skip
+      m_Flags: 0
+    m_Flags: 0
+  enableActionOnStart: 1
 --- !u!1 &1045999317
 GameObject:
   m_ObjectHideFlags: 0
@@ -1216,8 +1235,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b6798449caec4a32a5ad27badb06624, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textLanguageCode: en-US
-  audioLanguage: en-US
+  _textLocaleCode: en
+  _assetLocaleCode: en
 --- !u!850595691 &1274772176
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -1656,9 +1675,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb87ae987c60e9d4f8346202d271648d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  endLineWhenVoiceoverComplete: 0
   fadeOutTimeOnLineFinish: 0.05
   waitTimeBeforeLineStart: 0
-  waitTimeAfterLineComplete: 0
+  waitTimeAfterLineComplete: 1
   audioSource: {fileID: 0}
 --- !u!4 &1959458982
 Transform:
@@ -2343,16 +2363,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   yarnProject: {fileID: 7545569452688597077, guid: c39db14a6cc1d44c0ae07dde1eaf16aa, type: 3}
-  _variableStorage: {fileID: 3831113771427077447}
+  variableStorage: {fileID: 0}
+  lineProvider: {fileID: 1137691053}
   dialogueViews:
   - {fileID: 7778558434905401604}
   - {fileID: 3292657646813961456}
   - {fileID: 1959458981}
+  autoStart: 1
   startNode: Start
-  startAutomatically: 0
   runSelectedOptionAsLine: 0
-  lineProvider: {fileID: 1137691053}
-  verboseLogging: 1
   onNodeStart:
     m_PersistentCalls:
       m_Calls:

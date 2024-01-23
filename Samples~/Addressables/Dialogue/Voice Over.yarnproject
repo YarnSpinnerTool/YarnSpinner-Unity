@@ -3,11 +3,17 @@
   "sourceFiles": [
     "**/*.yarn"
   ],
+  "excludeFiles": [],
   "localisation": {
     "de": {
+      "assets": "../Audio/de",
       "strings": "VoiceOverExampleDialogue (de).csv"
+    },
+    "en": {
+      "assets": "../Audio/en",
+      "strings": "VoiceOverExampleDialogue (en).csv"
     }
   },
-  "baseLanguage": "en",
+  "baseLanguage": "de",
   "compilerOptions": {}
 }

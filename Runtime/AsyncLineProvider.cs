@@ -2,8 +2,6 @@
 
 namespace Yarn.Unity
 {
-
-
     using UnityEngine;
 
     using System.Collections;
@@ -29,12 +27,15 @@ namespace Yarn.Unity
 
 #nullable enable
 
-    internal interface ILineProvider
+    public interface ILineProvider
     {
         public YarnProject? YarnProject { get; set; }
-        public string LocaleCode { get; set; }
+        public string LocaleCode { get; }
         public YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken);
         public YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken);
+
+        [System.Obsolete("Await the result of PrepareForLinesAsync instead of polling this property.")]
+        public bool LinesAvailable { get; }
     }
 
 #if USE_ADDRESSABLES
@@ -44,16 +45,19 @@ namespace Yarn.Unity
 
         public string LocaleCode
         {
-            get => _localeCode;
-            set => _localeCode = value;
+            get => _textLocaleCode;
+            set => _textLocaleCode = value;
         }
 
-        [SerializeField] private string _localeCode = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+        [SerializeField,Language] private string _textLocaleCode = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+        [SerializeField,Language] private string _assetLocaleCode = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+
         private Dictionary<string, Object> cachedAssets = new Dictionary<string, Object>();
 
         private YarnTask? prepareForLinesTask;
-        private CancellationTokenSource? prepareForLinesCancellation;
 
+        public bool LinesAvailable => prepareForLinesTask?.IsCompletedSuccessfully ?? false;
+        
         public async YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken)
         {
             Localization loc = CurrentLocalization;

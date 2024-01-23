@@ -19,6 +19,7 @@ namespace Yarn.Unity
 #else
     using YarnTask = System.Threading.Tasks.Task;
     using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
+    using System.Threading.Tasks;
 #endif
 
     public static partial class YarnAsync
@@ -75,8 +76,17 @@ namespace Yarn.Unity
 #endif
         }
 
+        // Type aliases don't currently support generics, so in order to support returning
+        // a task-like object that yields type T, we need to use gross ifdefs
+        // when specifying the return type.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static async YarnObjectTask WaitForAsyncOperation<T>(AsyncOperationHandle<T> operationHandle, CancellationToken cancellationToken) where T : UnityEngine.Object
+        public static async 
+        #if USE_UNITASK
+            UniTask<T?>
+        #else
+            Task<T?>
+        #endif
+        WaitForAsyncOperation<T>(AsyncOperationHandle<T> operationHandle, CancellationToken cancellationToken) where T : UnityEngine.Object
         {
 #if USE_UNITASK
         // TODO: use cancellationToken
@@ -94,6 +104,27 @@ namespace Yarn.Unity
             }
 
             return operationHandle.Result;
+#endif
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static async YarnTask WaitForAsyncOperation(AsyncOperationHandle operationHandle, CancellationToken cancellationToken)
+        {
+#if USE_UNITASK
+        // TODO: use cancellationToken
+        return await operationHandle;
+#else
+            while (operationHandle.IsDone == false)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                await YarnTask.Yield();
+            }
+
+            return;
 #endif
         }
     }

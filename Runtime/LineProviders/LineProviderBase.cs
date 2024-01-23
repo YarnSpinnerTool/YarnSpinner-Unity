@@ -1,6 +1,32 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+using System.Threading;
+using Yarn.Unity;
+using Yarn;
+
+#if USE_UNITASK
+    using Cysharp.Threading.Tasks;
+    using YarnTask = Cysharp.Threading.Tasks.UniTask;
+    using YarnIntTask = Cysharp.Threading.Tasks.UniTask<int>;
+    using YarnLineTask = Cysharp.Threading.Tasks.UniTask<LocalizedLine>;
+#else
+using YarnTask = System.Threading.Tasks.Task;
+    using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
+#endif
+
+#nullable enable
+
+internal interface ILineProvider
+{
+    public YarnProject? YarnProject { get; set; }
+    public string LocaleCode { get; }
+    public YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken);
+    public YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken);
+}
+
+
 namespace Yarn.Unity
 {
     /// <summary>
@@ -18,14 +44,14 @@ namespace Yarn.Unity
     /// <para>
     /// Subclasses of this abstract class may return subclasses of <see
     /// cref="LocalizedLine"/>. For example, <see
-    /// cref="AudioLineProvider"/> returns an <see
+    /// cref="BuiltinLocalisedLineProvider"/> returns an <see
     /// cref="AudioLocalizedLine"/>, which includes <see
     /// cref="AudioClip"/>; views that make use of audio can then access
     /// this additional data.
     /// </para>
     /// </remarks>
     /// <seealso cref="DialogueViewBase"/>
-    public abstract class LineProviderBehaviour : MonoBehaviour
+    public abstract class LineProviderBehaviour : MonoBehaviour, ILineProvider
     {
         /// <summary>
         /// Prepares and returns a <see cref="LocalizedLine"/> from the
@@ -39,7 +65,7 @@ namespace Yarn.Unity
         /// <see cref="LocalizedLine"/> from.</param>
         /// <returns>A localized line, ready to be presented to the
         /// player.</returns>
-        public abstract LocalizedLine GetLocalizedLine(Yarn.Line line);
+        public abstract YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken);
 
         /// <summary>
         /// The YarnProject that contains the localized data for lines.
@@ -47,7 +73,7 @@ namespace Yarn.Unity
         /// <remarks>This property is set at run-time by the object that
         /// will be requesting content (typically a <see
         /// cref="DialogueRunner"/>).
-        public YarnProject YarnProject { get; set; }
+        public YarnProject? YarnProject { get; set; }
 
         /// <summary>
         /// Signals to the line provider that lines with the provided line
@@ -73,21 +99,12 @@ namespace Yarn.Unity
         /// </remarks>
         /// <param name="lineIDs">A collection of line IDs that the line
         /// provider should prepare for.</param>
-        public virtual void PrepareForLines(IEnumerable<string> lineIDs)
+        public virtual YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken)
         {
             // No-op by default.
+            return YarnTask.CompletedTask;
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this line provider is ready to
-        /// provide <see cref="LocalizedLine"/> objects. The default
-        /// implementation returns <see langword="true"/>.
-        /// </summary>
-        /// <remarks>
-        /// Subclasses should return <see langword="false"/> when the
-        /// required resources needed to deliver lines are not yet ready,
-        /// and <see langword="true"/> when they are.
-        /// </remarks>
         public virtual bool LinesAvailable => true;
 
         /// <summary>
@@ -99,7 +116,7 @@ namespace Yarn.Unity
         /// <c>[plural]</c> marker, which behaves differently depending on the
         /// user's locale.)
         /// </remarks>
-        public abstract string LocaleCode { get; }
+        public abstract string LocaleCode { get; set; }
 
         /// <summary>
         /// Called by Unity when the <see cref="LineProviderBehaviour"/>
@@ -111,90 +128,6 @@ namespace Yarn.Unity
         /// </remarks>
         public virtual void Start()
         {
-        }
-    }
-
-    /// <summary>
-    /// Represents a line, ready to be presented to the user in the
-    /// localisation they have specified.
-    /// </summary>
-    public class LocalizedLine
-    {
-        /// <summary>
-        /// DialogueLine's ID
-        /// </summary>
-        public string TextID;
-
-        /// <summary>
-        /// DialogueLine's inline expression's substitution
-        /// </summary>
-        public string[] Substitutions;
-
-        /// <summary>
-        /// DialogueLine's text
-        /// </summary>
-        public string RawText;
-
-        /// <summary>
-        /// Any metadata associated with this line.
-        /// </summary>
-        public string[] Metadata;
-
-        /// <summary>
-        /// The name of the character, if present.
-        /// </summary>
-        /// <remarks>
-        /// This value will be <see langword="null"/> if the line does not
-        /// have a character name.
-        /// </remarks>
-        public string CharacterName
-        {
-            get
-            {
-                if (Text.TryGetAttributeWithName("character", out var characterNameAttribute))
-                {
-                    if (characterNameAttribute.Properties.TryGetValue("name", out var value))
-                    {
-                        return value.StringValue;
-                    }
-                }
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// The asset associated with this line, if any.
-        /// </summary>
-        public Object Asset;
-
-        /// <summary>
-        /// The underlying <see cref="Yarn.Markup.MarkupParseResult"/> for
-        /// this line.
-        /// </summary>
-        public Markup.MarkupParseResult Text { get; set; }
-
-        /// <summary>
-        /// The underlying <see cref="Yarn.Markup.MarkupParseResult"/> for
-        /// this line, with any `character` attribute removed.
-        /// </summary>
-        /// <remarks>
-        /// If the line has no `character` attribute, this method returns
-        /// the same value as <see cref="Text"/>.
-        /// </remarks>
-        public Markup.MarkupParseResult TextWithoutCharacterName
-        {
-            get
-            {
-                // If a 'character' attribute is present, remove its text
-                if (Text.TryGetAttributeWithName("character", out var characterNameAttribute))
-                {
-                    return Text.DeleteRange(characterNameAttribute);
-                }
-                else
-                {
-                    return Text;
-                }
-            }
         }
     }
 

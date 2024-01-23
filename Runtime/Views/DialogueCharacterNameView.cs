@@ -26,7 +26,7 @@ namespace Yarn.Unity
         /// The name is given as the parameter.
         /// </summary>
         /// <seealso cref="onNameNotPresent"/>
-        public DialogueRunner.StringUnityEvent onNameUpdate;
+        public UnityEventString onNameUpdate;
 
         /// <summary>
         /// Invoked when the dialogue is started.

@@ -10,30 +10,37 @@ namespace Yarn.Unity
     /// </summary>
     /// <remarks>
     /// This class plays audio clip assets that are provided by an <see
-    /// cref="AudioLineProvider"/>. To use a <see cref="VoiceOverView"/> in your
+    /// cref="BuiltinLocalisedLineProvider"/>. To use a <see cref="VoiceOverView"/> in your
     /// game, your <see cref="DialogueRunner"/> must be configured to use an
-    /// <see cref="AudioLineProvider"/>, and your Yarn projects must be
+    /// <see cref="BuiltinLocalisedLineProvider"/>, and your Yarn projects must be
     /// configured to use voice-over audio assets. For more information, see
     /// [Localization and Assets](/docs/using-yarnspinner-with-unity/assets-and-localization/README.md).
     /// </remarks>
     /// <seealso cref="DialogueViewBase"/>
     public class VoiceOverView : DialogueViewBase
     {
+        [Group("Line Management")]
+        public bool endLineWhenVoiceoverComplete = true;
+        public override bool EndLineWhenViewFinishes => this.endLineWhenVoiceoverComplete;
+
         /// <summary>
         /// The fade out time when <see cref="UserRequestedViewAdvancement"/> is
         /// called.
         /// </summary>
+        [Group("Timing")]
         public float fadeOutTimeOnLineFinish = 0.05f;
 
         /// <summary>
         /// The amount of time to wait before starting playback of the line.
         /// </summary>
+        [Group("Timing")]
         public float waitTimeBeforeLineStart = 0f;
 
         /// <summary>
         /// The amount of time after playback has completed before this view
         /// reports that it's finished delivering the line.
         /// </summary>
+        [Group("Timing")]
         public float waitTimeAfterLineComplete = 0f;
 
         /// <summary>

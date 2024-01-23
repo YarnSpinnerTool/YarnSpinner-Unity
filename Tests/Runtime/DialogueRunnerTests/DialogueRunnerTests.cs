@@ -41,27 +41,6 @@ namespace Yarn.Unity.Tests
         }
 
         [UnityTest]
-        public IEnumerator DialogueRunner_WhenStateSaved_CanRestoreState_PlayerPrefs()
-        {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
-            var storage = runner.VariableStorage;
-
-            var testKey = "TemporaryTestingKey";
-            runner.StartDialogue("LotsOfVars");
-            yield return null;
-
-            var originals = storage.GetAllVariables();
-
-            runner.SaveStateToPlayerPrefs(testKey);
-            yield return null;
-
-            bool success = runner.LoadStateFromPlayerPrefs(testKey);
-            PlayerPrefs.DeleteKey(testKey);
-            Assert.IsTrue(success);
-
-            VerifySaveAndLoadStorageIntegrity(storage, originals.FloatVariables, originals.StringVariables, originals.BoolVariables);
-        }
-        [UnityTest]
         public IEnumerator DialogueRunner_WhenStateSaved_CanRestoreState()
         {
             var runner = GameObject.FindObjectOfType<DialogueRunner>();
@@ -110,7 +89,7 @@ namespace Yarn.Unity.Tests
 
             var originals = storage.GetAllVariables();
 
-            bool success = runner.LoadStateFromPlayerPrefs("invalid key");
+            bool success = runner.LoadStateFromPersistentStorage("invalid key");
 
             // because the load should have failed this should still be fine
             VerifySaveAndLoadStorageIntegrity(storage, originals.FloatVariables, originals.StringVariables, originals.BoolVariables);
@@ -131,7 +110,7 @@ namespace Yarn.Unity.Tests
             
             var originals = storage.GetAllVariables();
 
-            bool success = runner.LoadStateFromPlayerPrefs(testKey);
+            bool success = runner.LoadStateFromPersistentStorage(testKey);
 
             // because the load should have failed this should still be fine
             VerifySaveAndLoadStorageIntegrity(storage, originals.FloatVariables, originals.StringVariables, originals.BoolVariables);
@@ -304,9 +283,9 @@ namespace Yarn.Unity.Tests
             DialogueRunnerMockUI dialogueUI = GameObject.FindObjectOfType<DialogueRunnerMockUI>();
 
             // Insert a null element into the dialogue views array
-            var viewArrayWithNullElement = runner.dialogueViews.ToList();
+            var viewArrayWithNullElement = runner.DialogueViews.ToList();
             viewArrayWithNullElement.Add(null);
-            runner.dialogueViews = viewArrayWithNullElement.ToArray();
+            runner.DialogueViews = viewArrayWithNullElement.ToArray();
 
             runner.StartDialogue(runner.startNode);
             yield return null;

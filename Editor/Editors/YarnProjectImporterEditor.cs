@@ -390,14 +390,36 @@ namespace Yarn.Unity.Editor
 
             unityControls.Add(unityLocalisationTableCollectionField);
 
-            SetElementVisible(unityControls, useUnityLocalisationSystemProperty.boolValue);
-            SetElementVisible(yarnInternalControls, !useUnityLocalisationSystemProperty.boolValue);
+            var emptyTableCollectionWarning = new IMGUIContainer(() =>
+            {
+                EditorGUILayout.HelpBox("A string table collection is required.", MessageType.Warning);
+            });
+
+            unityControls.Add(emptyTableCollectionWarning);
+
+            void UpdateLocalizationVisibility() {
+                SetElementVisible(unityControls, useUnityLocalisationSystemProperty.boolValue);
+                SetElementVisible(yarnInternalControls, !useUnityLocalisationSystemProperty.boolValue);
+            }
+
+            void UpdateUnityTableCollectionEmptyWarningVisibility(){
+                SetElementVisible(emptyTableCollectionWarning, unityLocalisationTableCollectionProperty.objectReferenceValue == null);
+            }
+
+            UpdateLocalizationVisibility();
+            UpdateUnityTableCollectionEmptyWarningVisibility();
 
             useUnityLocalisationSystemField.RegisterCallback<ChangeEvent<bool>>(evt =>
             {
-                SetElementVisible(unityControls, useUnityLocalisationSystemProperty.boolValue);
-                SetElementVisible(yarnInternalControls, !useUnityLocalisationSystemProperty.boolValue);
+                UpdateLocalizationVisibility();
             });
+
+            unityLocalisationTableCollectionField.RegisterValueChangeCallback(evt =>
+            {
+                UpdateUnityTableCollectionEmptyWarningVisibility();
+            });
+
+            
 #endif
 
             var cantGenerateUnityStringTableMessage = new IMGUIContainer(() =>
