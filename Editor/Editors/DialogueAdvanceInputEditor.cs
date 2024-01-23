@@ -24,6 +24,8 @@ namespace Yarn.Unity.Editor
         private SerializedProperty dialogueViewProperty;
         private SerializedProperty continueActionTypeProperty;
         private SerializedProperty continueActionKeyCodeProperty;
+        private SerializedProperty continueActionButtonNameProperty;
+        private SerializedProperty continueActionOnButtonReleaseProperty;
         private SerializedProperty continueActionReferenceProperty;
         private SerializedProperty continueActionProperty;
         private SerializedProperty enableActionOnStartProperty;
@@ -33,6 +35,8 @@ namespace Yarn.Unity.Editor
             dialogueViewProperty = serializedObject.FindProperty(nameof(DialogueAdvanceInput.dialogueView));
             continueActionTypeProperty = serializedObject.FindProperty(nameof(DialogueAdvanceInput.continueActionType));
             continueActionKeyCodeProperty = serializedObject.FindProperty(nameof(DialogueAdvanceInput.continueActionKeyCode));
+            continueActionButtonNameProperty = serializedObject.FindProperty(nameof(DialogueAdvanceInput.continueActionButtonName));
+            continueActionOnButtonReleaseProperty = serializedObject.FindProperty(nameof(DialogueAdvanceInput.continueActionOnButtonRelease));
 
 #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
             continueActionReferenceProperty = serializedObject.FindProperty(nameof(DialogueAdvanceInput.continueActionReference));
@@ -55,6 +59,10 @@ namespace Yarn.Unity.Editor
 
                 case (int)DialogueAdvanceInput.ContinueActionType.KeyCode:
                     DrawInputActionTypeKeycode();
+                    break;
+                
+                case (int)DialogueAdvanceInput.ContinueActionType.VirtualButton:
+                    DrawInputActionTypeButton();
                     break;
 
                 case (int)DialogueAdvanceInput.ContinueActionType.InputSystemAction:
@@ -100,11 +108,23 @@ namespace Yarn.Unity.Editor
             EditorGUI.indentLevel += 1;
 #if ENABLE_LEGACY_INPUT_MANAGER
             EditorGUILayout.PropertyField(continueActionKeyCodeProperty);
+            EditorGUILayout.PropertyField(continueActionOnButtonReleaseProperty);
 #else
             EditorGUILayout.HelpBox(LegacyInputSystemNotAvailableWarning, MessageType.Warning);
 #endif
             EditorGUI.indentLevel -= 1;
+        }
 
+        private void DrawInputActionTypeButton()
+        {
+            EditorGUI.indentLevel += 1;
+#if ENABLE_LEGACY_INPUT_MANAGER
+            EditorGUILayout.PropertyField(continueActionButtonNameProperty);
+            EditorGUILayout.PropertyField(continueActionOnButtonReleaseProperty);
+#else
+            EditorGUILayout.HelpBox(LegacyInputSystemNotAvailableWarning, MessageType.Warning);
+#endif
+            EditorGUI.indentLevel -= 1;
         }
 
         private void DrawInputActionTypeNone()

@@ -25,6 +25,21 @@ namespace Yarn.Unity
     public class DialogueAdvanceInput : MonoBehaviour
     {
         /// <summary>
+        /// The button/keycode action type, should the button be fired on release or press?
+        /// </summary>
+        public enum ContinueButtonActionType
+        {
+            /// <summary>
+            /// Action will fire on key release
+            /// </summary>
+            Up,
+            /// <summary>
+            /// Action will fire on key pressed
+            /// </summary>
+            Down,
+        }
+
+        /// <summary>
         /// The type of input that this component is listening for in order to signal that its dialogue view should advance.
         /// </summary>
         public enum ContinueActionType
@@ -44,6 +59,15 @@ namespace Yarn.Unity
             /// Input Manager is enabled.</para>
             /// </remarks>
             KeyCode,
+
+            /// <summary>
+            /// The component is listening for a virtual button to be pressed.
+            /// </summary>
+            /// <remarks>
+            /// <para style="info">This input will only be used if the legacy
+            /// Input Manager is enabled.</para>
+            /// </remarks>
+            VirtualButton,
 
             /// <summary>
             /// The component is listening for the action configured in <see
@@ -96,6 +120,33 @@ namespace Yarn.Unity
         /// </remarks>
         [SerializeField]
         public KeyCode continueActionKeyCode = KeyCode.Space;
+
+        /// <summary>
+        /// The virtual button that this component is listening for.
+        /// </summary>
+        /// <remarks>
+        /// <para style="info">
+        /// This value is only used when <see cref="continueActionType"/> is
+        /// <see cref="ContinueActionType.VirtualButton"/>.
+        /// </para>
+        /// </remarks>
+        [SerializeField]
+        public string continueActionButtonName = "Jump";
+
+        /// <summary>
+        /// Should the continue action respond to key being pressed down or released.
+        /// </summary>
+        /// <remarks>
+        /// <para style="info">
+        /// Defaults to firing the advancement on key released.
+        /// </para>
+        /// <para style="info">
+        /// This value is only used when <see cref="continueActionType"/> is
+        /// <see cref="ContinueActionType.KeyCode"/> or <see cref="ContinueActionType.VirtualButton"/>.
+        /// </para>
+        /// </remarks>
+        [SerializeField]
+        public ContinueButtonActionType continueActionOnButtonRelease = ContinueButtonActionType.Up; // defaults to on release
 
 #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
         /// <summary>
@@ -234,17 +285,33 @@ namespace Yarn.Unity
 #if ENABLE_LEGACY_INPUT_MANAGER
         internal void Update()
         {
-            // We need to be configured to use a keycode to interrupt/continue
-            // lines.
-            if (continueActionType != ContinueActionType.KeyCode)
+            var advance = false;
+
+            if (continueActionType == ContinueActionType.KeyCode)
             {
-                return;
+                if (this.continueActionOnButtonRelease == ContinueButtonActionType.Up)
+                {
+                    advance = Input.GetKeyUp(continueActionKeyCode);
+                }
+                else
+                {
+                    advance = Input.GetKeyDown(continueActionKeyCode);
+                }
+            }
+            else if (continueActionType == ContinueActionType.VirtualButton)
+            {
+                if (this.continueActionOnButtonRelease == ContinueButtonActionType.Up)
+                {
+                    advance = Input.GetButtonUp(continueActionButtonName);
+                }
+                else
+                {
+                    advance = Input.GetButtonDown(continueActionButtonName);
+                }
             }
 
-            // Has the keycode been pressed this frame?
-            if (Input.GetKeyUp(continueActionKeyCode))
+            if (advance)
             {
-                // Indicate that we want to skip/continue.
                 dialogueView.UserRequestedViewAdvancement();
             }
         }
