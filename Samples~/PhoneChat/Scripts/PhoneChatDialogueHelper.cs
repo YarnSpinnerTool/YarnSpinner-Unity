@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;

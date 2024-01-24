@@ -1,4 +1,8 @@
-﻿using System.Reflection;
+﻿/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 [assembly: AssemblyVersion("2.4.0.0")]

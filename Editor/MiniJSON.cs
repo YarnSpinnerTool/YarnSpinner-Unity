@@ -1,4 +1,8 @@
 /*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
+/*
  * Copyright (c) 2013 Calvin Rien
  *
  * Based on the JSON parser by Patrick van Bergen
