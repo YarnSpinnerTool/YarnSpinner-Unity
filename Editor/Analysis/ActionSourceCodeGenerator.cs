@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 #if UNITY_2021_2_OR_NEWER
     // Source generators are only available on Unity 2021.2 and later.
     #define SOURCE_GENERATOR_AVAILABLE

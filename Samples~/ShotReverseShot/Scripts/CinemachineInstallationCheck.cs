@@ -1,3 +1,9 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
+#if UNITY_EDITOR
+
 using UnityEngine;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
@@ -76,3 +82,4 @@ namespace Yarn.Unity.Example
         }
     }
 }
+#endif

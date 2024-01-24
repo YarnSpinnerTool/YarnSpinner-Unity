@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
+using System.Collections.Generic;
 using UnityEditor;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
