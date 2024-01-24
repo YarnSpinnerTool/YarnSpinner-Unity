@@ -14,6 +14,10 @@ using UnityEngine.Localization.Metadata;
 
 #endif
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 #nullable enable
 
 #if USE_UNITASK
@@ -28,6 +32,7 @@ using UnityEngine.Localization.Metadata;
     using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object>;
     using System.Threading;
     using System.Threading.Tasks;
+using Yarn.Unity.UnityLocalization;
 #endif
 
 namespace Yarn.Unity.UnityLocalization
@@ -236,4 +241,4 @@ namespace Yarn.Unity.UnityLocalization
         }
     }
 #endif
-}
+

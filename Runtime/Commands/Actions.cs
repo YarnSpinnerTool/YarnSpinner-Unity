@@ -394,7 +394,7 @@ namespace Yarn.Unity
  
         public void RegisterActions() {
             foreach (var registrationFunction in ActionRegistrationMethods) {
-                registrationFunction.Invoke(DialogueRunner, RegistrationType.Runtime);
+                registrationFunction.Invoke(ActionRegistrar, RegistrationType.Runtime);
             }
         }
 

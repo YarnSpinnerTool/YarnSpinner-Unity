@@ -11,6 +11,8 @@ using UnityEditor.Localization;
 using UnityEngine.Localization.Tables;
 #endif
 
+#nullable enable
+
 namespace Yarn.Unity.Editor
 {
     [ScriptedImporter(5, new[] { "yarnproject" }, 1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
@@ -35,7 +37,7 @@ namespace Yarn.Unity.Editor
             public float defaultValueNumber;
             public string defaultValueString;
 
-            public string description;
+            public string? description;
 
             public bool isImplicit;
 
@@ -73,7 +75,7 @@ namespace Yarn.Unity.Editor
         public StringTableCollection unityLocalisationStringTableCollection;
 #endif
 
-        public Project GetProject()
+        public Project? GetProject()
         {
             try
             {
@@ -306,7 +308,7 @@ namespace Yarn.Unity.Editor
 #endif
 
                 // Store the compiled program
-                byte[] compiledBytes = null;
+                byte[] compiledBytes;
 
                 using (var memoryStream = new MemoryStream())
                 using (var outputStream = new Google.Protobuf.CodedOutputStream(memoryStream))
@@ -637,11 +639,11 @@ namespace Yarn.Unity.Editor
         /// cref="StringTableEntry"/> for each of the lines in the Yarn
         /// Project, or <see langword="null"/> if the Yarn Project contains
         /// errors.</returns>
-        internal IEnumerable<StringTableEntry> GenerateStringsTable()
+        internal IEnumerable<StringTableEntry>? GenerateStringsTable()
         {
             CompilationResult? compilationResult = CompileStringsOnly();
 
-            if (!compilationResult.HasValue)
+            if (compilationResult == null)
             {
                 // We only get no value if we have no scripts to work with.
                 // In this case, return an empty collection - there's no
@@ -649,7 +651,7 @@ namespace Yarn.Unity.Editor
                 return new List<StringTableEntry>();
             }
 
-            var errors = compilationResult.Value.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
+            var errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
 
             if (errors.Count() > 0)
             {
@@ -657,14 +659,14 @@ namespace Yarn.Unity.Editor
                 return null;
             }
 
-            return GetStringTableEntries(compilationResult.Value);
+            return GetStringTableEntries(compilationResult);
         }
 
-        internal IEnumerable<LineMetadataTableEntry> GenerateLineMetadataEntries()
+        internal IEnumerable<LineMetadataTableEntry>? GenerateLineMetadataEntries()
         {
             CompilationResult? compilationResult = CompileStringsOnly();
 
-            if (!compilationResult.HasValue)
+            if (compilationResult == null)
             {
                 // We only get no value if we have no scripts to work with.
                 // In this case, return an empty collection - there's no
@@ -672,7 +674,7 @@ namespace Yarn.Unity.Editor
                 return new List<LineMetadataTableEntry>();
             }
 
-            var errors = compilationResult.Value.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
+            var errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
 
             if (errors.Count() > 0)
             {
@@ -680,7 +682,7 @@ namespace Yarn.Unity.Editor
                 return null;
             }
 
-            return LineMetadataTableEntriesFromCompilationResult(compilationResult.Value);
+            return LineMetadataTableEntriesFromCompilationResult(compilationResult);
         }
 
         private IEnumerable<StringTableEntry> GetStringTableEntries(CompilationResult result)
@@ -751,7 +753,7 @@ namespace Yarn.Unity.Editor
 
     public static class ProjectExtensions {
 
-        public static bool TryGetStringsPath(this Yarn.Compiler.Project project, string languageCode, out string fullStringsPath) {
+        public static bool TryGetStringsPath(this Yarn.Compiler.Project project, string languageCode, out string? fullStringsPath) {
             if (project.Localisation.TryGetValue(languageCode, out var info) == false) {
                 fullStringsPath = default;
                 return false;
@@ -775,7 +777,7 @@ namespace Yarn.Unity.Editor
             return true;
         }
 
-        public static bool TryGetAssetsPath(this Yarn.Compiler.Project project, string languageCode, out string fullAssetsPath) {
+        public static bool TryGetAssetsPath(this Yarn.Compiler.Project project, string languageCode, out string? fullAssetsPath) {
             if (project.Localisation.TryGetValue(languageCode, out var info) == false) {
                 fullAssetsPath = default;
                 return false;
