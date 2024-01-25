@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 #if USE_TMP
@@ -386,7 +387,7 @@ namespace Yarn.Unity
                 }
                 else
                 {
-                    lineText.text = text.Text;
+                    lineText.text = LineView.AddLineBreaks(text);
                 }
 
                 if (useTypewriterEffect)
@@ -554,8 +555,9 @@ namespace Yarn.Unity
         /// </remarks>
         /// <param name="line">The parsed marked up line with it's attributes.</param>
         /// <param name="palette">The palette mapping attributes to colours.</param>
+        /// <param name="applyLineBreaks">If the [br /] marker is found in the line should this be replaced with a line break?</param>
         /// <returns>A TMP formatted string with the palette markup values injected within.</returns>
-        public static string PaletteMarkedUpText(Markup.MarkupParseResult line, MarkupPalette palette)
+        public static string PaletteMarkedUpText(Markup.MarkupParseResult line, MarkupPalette palette, bool applyLineBreaks = true)
         {
             string lineOfText = line.Text;
             line.Attributes.Sort((a, b) => (b.Position.CompareTo(a.Position)));
@@ -570,6 +572,23 @@ namespace Yarn.Unity
                     lineOfText = lineOfText.Insert(attribute.Position + attribute.Length, "</color>");
                     lineOfText = lineOfText.Insert(attribute.Position, $"<color=#{ColorUtility.ToHtmlStringRGB(markerColour)}>");
                 }
+
+                if (applyLineBreaks && attribute.Name == "br")
+                {
+                    lineOfText = lineOfText.Insert(attribute.Position, "<br>");
+                }
+            }
+            return lineOfText;
+        }
+
+        public static string AddLineBreaks(Markup.MarkupParseResult line)
+        {
+            string lineOfText = line.Text;
+            line.Attributes.Sort((a, b) => (b.Position.CompareTo(a.Position)));
+            foreach (var attribute in line.Attributes.Where(a => a.Name == "br"))
+            {
+                // we then replace the marker with the tmp <br>
+                lineOfText = lineOfText.Insert(attribute.Position, "<br>");
             }
             return lineOfText;
         }

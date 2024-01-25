@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - enabling/disabling C# linking will force an entire C# reimport
   - enabling/disabling asset linking will force a reimport of all `yarnprojects`
 - `Yarn.Unity.ActionAnalyser.Action` now has a `MethodIdentifierName` property, which is the short form of the method name.
+- `LineView` now will add in line breaks when it encounters a self closing `[br /]` marker.
 
 ### Changed
 
