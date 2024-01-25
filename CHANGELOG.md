@@ -19,6 +19,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Yarn.Unity.ActionAnalyser.Action` now has a `MethodIdentifierName` property, which is the short form of the method name.
 - `DialogueAdvanceInput` now supports Virtual Button names in addition to KeyCodes and Input Actions.
   - This can be configured to work on button or key release or press. By default, the component works on release.
+- `LineView` now will add in line breaks when it encounters a self closing `[br /]` marker.
+- Yarn attributed Functions and Commands can now use constant values in addition to literals for their name.
 
 ### Changed
 
@@ -35,6 +37,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `ActionsGenerator` will now generate C# warnings for non-private methods that are attributed as `YarnFunction` or `YarnCommand`.
 - `ActionsGenerator` still logs to a temporary location, but now into a `dev.yarnspinner.logs` folder inside the temporary location.
 - Auto-advancing `LineView`s will no longer attempt to advance dialogue that has been stopped.
+- Actions Registration now dumps generated code into the same temporary folder the logs live in
+- `ActionsGenerator` will now generate C# warnings for incorrectly named methods that are attributed as `YarnFunction` or `YarnCommand`.
 
 ### Removed
 
