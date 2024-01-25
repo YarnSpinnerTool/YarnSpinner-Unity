@@ -1,4 +1,8 @@
-﻿#if !USE_TMP
+﻿/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
+#if !USE_TMP
 using UnityEditor;
 
 namespace Yarn.Unity.Editor

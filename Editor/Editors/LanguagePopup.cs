@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 using System.Linq;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;

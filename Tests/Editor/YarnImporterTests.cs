@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 // #define KEEP_FILES_ON_TEARDOWN
 
 using System;
