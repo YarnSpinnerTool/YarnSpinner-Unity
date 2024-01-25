@@ -121,7 +121,7 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
             var actions = new List<YarnAction>();
             foreach (var tree in compilation.SyntaxTrees)
             {
-                actions.AddRange(Analyser.GetActions(compilation, tree).Where(a => a.DeclarationType == DeclarationType.Attribute));
+                actions.AddRange(Analyser.GetActions(compilation, tree, output).Where(a => a.DeclarationType == DeclarationType.Attribute));
             }
 
             if (actions.Any() == false)
@@ -130,6 +130,8 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 return;
             }
 
+            HashSet<string> removals = new HashSet<string>();
+            // validating and logging all the actions
             foreach (var action in actions)
             {
                 if (action == null)
@@ -157,15 +159,40 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                         action.MethodIdentifierName, action.MethodSymbol.DeclaredAccessibility
                     ));
                     output.WriteLine($"Action {action.Name} will be skipped due to it's declared accessibility {action.MethodSymbol.DeclaredAccessibility}");
+                    removals.Add(action.Name);
                     continue;
                 }
+
+                // this is not a full validation of the naming rules of commands
+                // but is good enough to catch the most common situations, whitespace and periods
+                if (action.Name.Contains(".") || action.Name.Any(x => Char.IsWhiteSpace(x)))
+                {
+                    var descriptor = new DiagnosticDescriptor(
+                        "YS1002",
+                        $"Yarn {action.Type} methods must have a valid name",
+                        "YarnCommand and YarnFunction methods follow existing ID rules for Yarn. \"{0}\" is invalid.",
+                        "Yarn Spinner",
+                        DiagnosticSeverity.Warning,
+                        true,
+                        "[YarnCommand] and [YarnFunction] attributed methods must follow Yarn ID rules so that Yarn scripts can reference them.",
+                        "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/creating-commands-functions");
+                    context.ReportDiagnostic(Microsoft.CodeAnalysis.Diagnostic.Create(
+                        descriptor,
+                        action.Declaration?.GetLocation(),
+                        action.Name
+                    ));
+                    output.WriteLine($"Action {action.MethodIdentifierName} will be skipped due to it's name {action.Name}");
+                    removals.Add(action.Name);
+                    continue;
+                }
+
                 output.WriteLine($"Action {action.Name}: {action.SourceFileName}:{action.Declaration?.GetLocation()?.GetLineSpan().StartLinePosition.Line} ({action.Type})");
             }
 
-            // removing any actions that aren't public from the list before we do codegen
-            actions = actions.Where(a => a.MethodSymbol.DeclaredAccessibility == Accessibility.Public).ToList();
+            // removing any actions that failed validation
+            actions.Where(x => !removals.Contains(x.Name)).ToList();
 
-            output.Write($"Generating source code... ");
+            output.Write($"Generating source code...");
 
             var source = Analyser.GenerateRegistrationFileSource(actions);
 
@@ -393,25 +420,31 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
         context.RegisterForSyntaxNotifications(() => new ClassDeclarationSyntaxReceiver());
     }
 
+    static string TemporaryPath()
+    {
+        var tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "dev.yarnspinner.logs");
+
+        // we need to make the logs folder, but this can potentially fail
+        // if it does fail then we will just chuck the logs inside the tmp folder
+        try
+        {
+            if (!Directory.Exists(tempPath))
+            {
+                Directory.CreateDirectory(tempPath);
+            }
+        }
+        catch
+        {
+            tempPath = System.IO.Path.GetTempPath();
+        }
+        return tempPath;
+    }
+
     public Yarn.Unity.ILogger GetOutput(GeneratorExecutionContext context)
     {
         if (GetShouldLogToFile(context))
         {
-            var tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "dev.yarnspinner.logs");
-
-            // we need to make the logs folder, but this can potentially fail
-            // if it does fail then we will just chuck the logs inside the tmp folder
-            try
-            {
-                if (!Directory.Exists(tempPath))
-                {
-                    Directory.CreateDirectory(tempPath);
-                }
-            }
-            catch
-            {
-                tempPath = System.IO.Path.GetTempPath();
-            }
+            var tempPath = ActionRegistrationSourceGenerator.TemporaryPath();
 
             var path = System.IO.Path.Combine(tempPath, $"{nameof(ActionRegistrationSourceGenerator)}-{context.Compilation.AssemblyName}.txt");
             var outFile = System.IO.File.Open(path, System.IO.FileMode.Create);
@@ -431,8 +464,9 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
 
     public void DumpGeneratedFile(GeneratorExecutionContext context, string text)
     {
-        if (GetShouldLogToFile(context)) {
-            var tempPath = System.IO.Path.GetTempPath();
+        if (GetShouldLogToFile(context))
+        {
+            var tempPath = ActionRegistrationSourceGenerator.TemporaryPath();
             var path = System.IO.Path.Combine(tempPath, $"{nameof(ActionRegistrationSourceGenerator)}-{context.Compilation.AssemblyName}.cs");
             System.IO.File.WriteAllText(path, text);
         }

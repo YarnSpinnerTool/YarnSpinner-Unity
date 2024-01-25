@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - enabling/disabling asset linking will force a reimport of all `yarnprojects`
 - `Yarn.Unity.ActionAnalyser.Action` now has a `MethodIdentifierName` property, which is the short form of the method name.
 - `LineView` now will add in line breaks when it encounters a self closing `[br /]` marker.
+- Yarn attributed Functions and Commands can now use constant values in addition to literals for their name.
 
 ### Changed
 
@@ -29,7 +30,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Standard library functions (like `random`, `dice`, `round_places`, etc) have been moved to the core Yarn Spinner library.
 - Fixed a bug where the audio assets in the samples weren't being linked correctly resulting in playback errors.
 - Intro Sample: Moved the Character Color view to a new stand-alone object (it's easier to explain how to do this in a tutorial!)
-- `Analyser` no longer ignores non-public 
+- `Analyser` no longer ignores non-public Yarn attributed methods
   - this is now handled at the codegen side so we can better log it
 - `ActionsGenerator` will now generate C# warnings for non-private methods that are attributed as `YarnFunction` or `YarnCommand`.
 - `ActionsGenerator` still logs to a temporary location, but now into a `dev.yarnspinner.logs` folder inside the temporary location.
@@ -37,6 +38,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `DialogueAdvanceInput` now supports Virtual Button names in addition to KeyCodes and Input Actions
   - this can be configured to work on button or keycode release or press.
   - defaults to on release.
+- Actions Registration now dumps generated code into the same temporary folder the logs live in
+- `ActionsGenerator` will now generate C# warnings for incorrectly named methods that are attributed as `YarnFunction` or `YarnCommand`.
 
 ### Removed
 

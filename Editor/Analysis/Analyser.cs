@@ -320,17 +320,24 @@ namespace Yarn.Unity.ActionAnalyser
             }
         }
 
-        public static IEnumerable<Action> GetActions(CSharpCompilation compilation, Microsoft.CodeAnalysis.SyntaxTree tree)
+        public static IEnumerable<Action> GetActions(CSharpCompilation compilation, Microsoft.CodeAnalysis.SyntaxTree tree, Yarn.Unity.ILogger yLogger = null)
         {
+            var logger = yLogger;
+            if (logger == null)
+            {
+                logger = new NullLogger();
+            }
+
             var root = tree.GetCompilationUnitRoot();
 
             SemanticModel model = null;
 
-            if (compilation != null) {
+            if (compilation != null)
+            {
                 model = compilation.GetSemanticModel(tree);
             }
 
-            return GetAttributeActions(root, model).Concat(GetRuntimeDefinedActions(root, model));
+            return GetAttributeActions(root, model, logger).Concat(GetRuntimeDefinedActions(root, model));
         }
 
         private static IEnumerable<Action> GetRuntimeDefinedActions(CompilationUnitSyntax root, SemanticModel model)
@@ -390,7 +397,7 @@ namespace Yarn.Unity.ActionAnalyser
             }
         }
 
-        private static IEnumerable<Action> GetAttributeActions(CompilationUnitSyntax root, SemanticModel model)
+        private static IEnumerable<Action> GetAttributeActions(CompilationUnitSyntax root, SemanticModel model, Yarn.Unity.ILogger logger)
         {
             var methodInfos = root
                 .DescendantNodes()
@@ -417,21 +424,29 @@ namespace Yarn.Unity.ActionAnalyser
             {
                 var attr = methodInfo.ActionAttribute;
 
-                string actionName;
+                // working on an assumption that most people just use the method name
+                string actionName = methodInfo.MethodDeclaration.Identifier.ToString();
 
-                // If the attribute has an argument list, and the first argument
-                // is a string, then use that string's value as the action name.
-                if (attr.ArgumentList != null
-                    && attr.ArgumentList.Arguments.First().Expression is LiteralExpressionSyntax commandName
-                    && commandName.Kind() == SyntaxKind.StringLiteralExpression
-                    && commandName.Token.Value is string name)
+                // handling the situation where they have provided arguments
+                // if we have an argument list
+                if (attr.ArgumentList != null)
                 {
-                    actionName = name;
-                }
-                else
-                {
-                    // Otherwise, use the method's name.
-                    actionName = methodInfo.MethodDeclaration.Identifier.ToString();
+                    // we resolve the value of first item in that list
+                    // and if it's a string we use that as the action name
+                    var constantValue = model.GetConstantValue(attr.ArgumentList.Arguments.First().Expression);
+                    if (constantValue.HasValue)
+                    {
+                        if (constantValue.Value is string)
+                        {
+                            logger.WriteLine($"resolved constant expression value for the action name: {constantValue.Value.ToString()}");
+                            actionName = constantValue.Value as string;
+                        }
+                        else
+                        {
+                            // Otherwise just logging the incorrect type and moving on with our life
+                            logger.WriteLine($"resolved constant expression value for the action name, but it is not a string, skipping: {constantValue.Value.ToString()}");
+                        }
+                    }
                 }
 
                 var position = methodInfo.MethodDeclaration.GetLocation();
