@@ -448,8 +448,9 @@
             Extracts a line ID from a collection of <see
             cref="T:Yarn.Compiler.YarnSpinnerParser.HashtagContext"/>s, if one exists.
             </summary>
-            <param name="hashtagContexts">The hashtag parsing
-            contexts.</param>
+            <param name="type">The type of content identifier tag to
+            retrieve.</param>
+            <param name="hashtagContexts">The hashtag parsing contexts.</param>
             <returns>The line ID if one is present in the hashtag contexts,
             otherwise <c>null</c>.</returns>
         </member>
@@ -462,6 +463,7 @@
             The line ID is extracted from the <c>#line:</c> hashtag found on the
             line. If it isn't present, then this method throws an exception.
             </remarks>
+            <param name="type">The type of content identifier to retrieve.</param>
             <param name="line">The line statement to extract the line ID
             from.</param>
             <returns>The line ID found in this line.</returns>
@@ -4155,6 +4157,10 @@
             <summary>
             The original text of the string.
             </summary>
+            <remarks>
+            This field is <see langword="null"/> if <see cref="F:Yarn.Compiler.StringInfo.shadowLineID"/>
+            is not null.
+            </remarks>
         </member>
         <member name="F:Yarn.Compiler.StringInfo.nodeName">
             <summary>
