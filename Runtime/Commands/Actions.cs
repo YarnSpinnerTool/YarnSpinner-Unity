@@ -408,6 +408,9 @@ namespace Yarn.Unity
                 Debug.LogError($"Failed to register command {commandName}: a command by this name has already been registered.");
                 return;
             } else {
+#if YARN_SOURCE_GENERATION_DEBUG_LOGGING
+                Debug.Log($"Registering command {commandName}");
+#endif
                 _commands.Add(commandName, new CommandRegistration(commandName, handler));
             }
         }
@@ -419,6 +422,10 @@ namespace Yarn.Unity
                 Debug.LogError($"Cannot add function {name}: one already exists");
                 return;
             }
+#if YARN_SOURCE_GENERATION_DEBUG_LOGGING
+                Debug.Log($"Registering command {name} from method {implementation.Method.DeclaringType.FullName}.{implementation.Method.Name}");
+#endif
+
             Library.RegisterFunction(name, implementation);
         }
 
