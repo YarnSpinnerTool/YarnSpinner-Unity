@@ -96,7 +96,7 @@ namespace Yarn.Unity
         }
 
         [Space]
-        [SerializeField] List<AsyncDialogueViewBase> dialogueViews = new List<AsyncDialogueViewBase>();
+        [SerializeField] List<AsyncDialogueViewBase?> dialogueViews = new List<AsyncDialogueViewBase?>();
 
         /// <summary>
         /// Gets a value that indicates if the dialogue is actively
@@ -181,7 +181,7 @@ namespace Yarn.Unity
         [Group("Events", foldOut: true)]
         public UnityEventString onCommand;
 
-        public IEnumerable<AsyncDialogueViewBase> DialogueViews {
+        public IEnumerable<AsyncDialogueViewBase?> DialogueViews {
             get => dialogueViews;
             set => dialogueViews = value.ToList();
         } 
@@ -392,6 +392,11 @@ namespace Yarn.Unity
 
             foreach (var view in this.dialogueViews)
             {
+                if (view == null) {
+                    // The view doesn't exist. Skip it.
+                    continue;
+                }
+
                 // Legacy support: if this view is an v2-style DialogueViewBase,
                 // then set its requestInterrupt delegate to be one that cancels the
                 // current line.
@@ -466,6 +471,10 @@ namespace Yarn.Unity
             var pendingTasks = new HashSet<YarnOptionTask>();
             foreach (var view in this.dialogueViews)
             {
+                if (view == null) {
+                    continue;
+                }
+
                 YarnOptionTask task = view.RunOptionsAsync(localisedOptions, optionCancellationSource.Token);
                 pendingTasks.Add(task);
             }
