@@ -184,6 +184,10 @@ namespace Yarn.Unity
         /// <exception cref="System.ArgumentException">Thrown when
         /// variableName is not a valid variable name.</exception>
         public override bool TryGetValue<T>(string variableName, out T result) {
+
+            // Ensure that the variable name is valid.
+            ValidateVariableName(variableName);
+                    
             switch (GetVariableKind(variableName))
             {
                 case VariableKind.Stored:
