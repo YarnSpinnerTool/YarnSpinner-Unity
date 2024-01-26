@@ -9,6 +9,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Updated voiceover and translation credits for the Intro sample scene.
+- Added a Unity Project scoped settings that allows you to override some of the default behaviours of Yarn Spinner.
+  - Yarn Spinner settings are saved to the path `ProjectSettings\Packages\dev.yarnspinner\YarnSpinnerProjectSettings.json`.
+  - The settings be changed in the Project Settings window, by choosing `Edit -> Project Settings -> Yarn Spinner`.
+  - The setting currently supports two convenience features of Yarn Spinner:
+    - Automatically associating assets with localisations
+    - Automatically linking `YarnCommand` and `YarnFunction` attributed methods to the Dialogue Runner.
+  - Enabling or disabling `YarnCommand` and `YarnFunction` linking will cause your project to recompile.
+  - Enabling or disabling asset linking will cause a reimport of all `yarnproject` assets.
+- `Yarn.Unity.ActionAnalyser.Action` now has a `MethodIdentifierName` property, which is the short form of the method name.
+- `DialogueAdvanceInput` now supports Virtual Button names in addition to KeyCodes and Input Actions.
+  - This can be configured to work on button or key release or press. By default, the component works on release.
+- `LineView` now will add in line breaks when it encounters a self closing `[br /]` marker.
+- Yarn attributed Functions and Commands can now use constant values in addition to literals for their name.
 
 ### Changed
 
@@ -18,6 +31,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed Minimal Dialogue Runner sample that was using obsolete methods.
 - Fixed a bug where TMPShim wasn't being detected.
 - Standard library functions (like `random`, `dice`, `round_places`, etc) have been moved to the core Yarn Spinner library.
+- Fixed a bug where the audio assets in the samples weren't being linked correctly resulting in playback errors.
+- Intro Sample: Moved the Character Color view to a new stand-alone object (it's easier to explain how to do this in a tutorial!)
+- `Analyser` no longer ignores non-public methods.
+  - This is now handled during codegen side so we can better log it.
+- `ActionsGenerator` will now generate C# warnings for non-private methods that are attributed as `YarnFunction` or `YarnCommand`.
+- `ActionsGenerator` still logs to a temporary location, but now into a `dev.yarnspinner.logs` folder inside the temporary location.
+- Auto-advancing `LineView`s will no longer attempt to advance dialogue that has been stopped.
+- Actions Registration now dumps generated code into the same temporary folder the logs live in
+- `ActionsGenerator` will now generate C# warnings for incorrectly named methods that are attributed as `YarnFunction` or `YarnCommand`.
 
 ### Removed
 

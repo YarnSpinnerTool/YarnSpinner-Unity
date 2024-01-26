@@ -49,7 +49,7 @@ namespace Yarn.Unity
 
                 if (palette != null)
                 {
-                    text.text = LineView.PaletteMarkedUpText(line, palette);
+                    text.text = LineView.PaletteMarkedUpText(line, palette, false);
                 }
                 else
                 {

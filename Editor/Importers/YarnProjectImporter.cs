@@ -19,7 +19,7 @@ using UnityEngine.Localization.Tables;
 
 namespace Yarn.Unity.Editor
 {
-    [ScriptedImporter(5, new[] { "yarnproject" }, 1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
+    [ScriptedImporter(5, new[] { "yarnproject" }, 1000), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
     [InitializeOnLoad]
     public class YarnProjectImporter : ScriptedImporter
     {
@@ -332,6 +332,53 @@ namespace Yarn.Unity.Editor
 #if YARNSPINNER_DEBUG
             UnityEngine.Profiling.Profiler.enabled = false;
 #endif
+        }
+
+        /// <summary>
+        /// Checks if the modifications on the Asset Database will necessitate a reimport of the project to stay in sync with the localisation assets.
+        /// </summary>
+        /// <remarks>
+        /// Because assets can be added and removed after associating a folder of assets with a locale modifications won't be detected until runtime when they cause an error.
+        /// This is bad for many reasons, so this method will check any modified assets and see if they correspond to this Yarn Project.
+        /// If they do it will reimport the project to reassociate them.
+        /// </remarks>
+        /// <param name="modifiedAssetPaths">The list of asset paths that have been modified, that is to say assets that have been added, removed, or moved.</param>
+        public void CheckUpdatedAssetsRequireReimport(List<string> modifiedAssetPaths)
+        {
+            bool needsReimport = false;
+
+            var comparison = System.StringComparison.CurrentCulture;
+            if (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)
+            {
+                comparison = System.StringComparison.OrdinalIgnoreCase;
+            }
+
+            var localeAssetFolderPaths = ImportData.localizations.Where(l => l.assetsFolder != null).Select(l => AssetDatabase.GetAssetPath(l.assetsFolder));
+            foreach (var path in localeAssetFolderPaths)
+            {
+                // we need to ensure we have the trailing seperator otherwise it is to be considered a file
+                // and files can never be the parent of another file
+                var assetPath = path;
+                if (!path.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                {
+                    assetPath += Path.DirectorySeparatorChar.ToString();
+                }
+
+                foreach (var modified in modifiedAssetPaths)
+                {
+                    if (modified.StartsWith(assetPath, comparison))
+                    {
+                        needsReimport = true;
+                        goto SHORTCUT;
+                    }
+                }
+            }
+
+            SHORTCUT:
+            if (needsReimport)
+            {
+                AssetDatabase.ImportAsset(this.assetPath);
+            }
         }
 
         internal static string GetRelativePath(string path)

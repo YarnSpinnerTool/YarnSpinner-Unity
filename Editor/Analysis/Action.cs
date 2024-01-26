@@ -168,6 +168,11 @@ namespace Yarn.Unity.ActionAnalyser
         public string MethodName { get; internal set; }
 
         /// <summary>
+        /// Gets the short form of the method, essentially the easy to read form of <see cref="MethodName"/>.
+        /// </summary>
+        public string MethodIdentifierName { get; internal set; }
+
+        /// <summary>
         /// Whether this action is a static method, or an instance method.
         /// </summary>
         public bool IsStatic { get; internal set; }

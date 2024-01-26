@@ -123,26 +123,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!114 &33153664
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4935123090840333073}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d9c74c52320c546b6a28bcb92f9d6e21, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  colorData:
-  - characterName: Tom
-    displayColor: {r: 0.9921569, g: 0.7960785, b: 0.43137258, a: 1}
-  - characterName: Anne
-    displayColor: {r: 0.4313725, g: 0.99215686, b: 0.9865518, a: 1}
-  lineTexts:
-  - {fileID: 4935123091905265835}
 --- !u!1 &78317530
 GameObject:
   m_ObjectHideFlags: 0
@@ -5331,6 +5311,7 @@ RectTransform:
   m_Children:
   - {fileID: 4935123090840333072}
   - {fileID: 6323935187362328828}
+  - {fileID: 555294863}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -5339,6 +5320,63 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &555294862
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 555294863}
+  - component: {fileID: 555294864}
+  m_Layer: 5
+  m_Name: Character Color View
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &555294863
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 555294862}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 424243564}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &555294864
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 555294862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9c74c52320c546b6a28bcb92f9d6e21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultColor: {r: 1, g: 1, b: 1, a: 1}
+  colorData:
+  - characterName: Tom
+    displayColor: {r: 0.9921569, g: 0.7960785, b: 0.43137258, a: 1}
+  - characterName: Anne
+    displayColor: {r: 0.4313725, g: 0.99215686, b: 0.9865518, a: 1}
+  lineTexts:
+  - {fileID: 4935123091905265835}
 --- !u!1 &757243266
 GameObject:
   m_ObjectHideFlags: 0
@@ -15734,7 +15772,6 @@ GameObject:
   - component: {fileID: 4935123090840333078}
   - component: {fileID: 4935123090840333079}
   - component: {fileID: 4935123090840333076}
-  - component: {fileID: 33153664}
   m_Layer: 5
   m_Name: Line View
   m_TagString: Untagged
