@@ -2,31 +2,14 @@ using System;
 using System.Collections;
 using System.Reflection;
 using UnityEngine;
-using Yarn.Unity;
+
+#nullable enable
 
 namespace Yarn.Unity
 {
 
     public partial class DialogueRunner : IActionRegistration
     {
-
-        private ICommandDispatcher commandDispatcher;
-
-        internal ICommandDispatcher CommandDispatcher
-        {
-            get
-            {
-                if (commandDispatcher == null)
-                {
-                    var actions = new Actions(this, Dialogue.Library);
-                    commandDispatcher = actions;
-                    actions.RegisterActions();
-                }
-                return commandDispatcher;
-            }
-        }
-
-
         /// <summary>
         /// Adds a command handler. Dialogue will pause execution after the
         /// command is called.

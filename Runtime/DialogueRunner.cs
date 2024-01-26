@@ -189,6 +189,14 @@ namespace Yarn.Unity
         private CancellationTokenSource? dialogueCancellationSource;
         private CancellationTokenSource? currentLineCancellationSource;
 
+        internal ICommandDispatcher CommandDispatcher { get; private set; }
+        
+        public void Awake() {
+            var actions = new Actions(this, Dialogue.Library);
+            CommandDispatcher = actions;
+            actions.RegisterActions();
+        }
+        
         public void Start()
         {
             if (autoStart)
