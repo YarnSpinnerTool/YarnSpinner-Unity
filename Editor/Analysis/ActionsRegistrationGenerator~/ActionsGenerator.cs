@@ -14,12 +14,57 @@ using Yarn.Unity.ActionAnalyser;
 using YarnAction = Yarn.Unity.ActionAnalyser.Action;
 using System.IO;
 
+#nullable enable
+
 [Generator]
 public class ActionRegistrationSourceGenerator : ISourceGenerator
 {
     const string YarnSpinnerUnityAssemblyName = "YarnSpinner.Unity";
     const string DebugLoggingPreprocessorSymbol = "YARN_SOURCE_GENERATION_DEBUG_LOGGING";
     const string MinimumUnityVersionPreprocessorSymbol = "UNITY_2021_2_OR_NEWER";
+
+    public static string? GetProjectRoot(GeneratorExecutionContext context)
+    {
+        // Try and find any additional files passed to the context
+        if (!context.AdditionalFiles.Any())
+        {
+            return null;
+        }
+
+        // One of those files is (AssemblyName).AdditionalFile.txt, and it
+        // contains the path to the project
+        var relevantFiles = context.AdditionalFiles.Where(i => i.Path.Contains($"{context.Compilation.AssemblyName}.AdditionalFile.txt"));
+        if (!relevantFiles.Any())
+        {
+            return null;
+        }
+
+        var assemblyRelevantFile = relevantFiles.First();
+
+        // The file needs to exist on disk
+        if (!File.Exists(assemblyRelevantFile.Path))
+        {
+            return null;
+        }
+
+        try
+        {
+            // Attempt to read it - it should contain the path to the project directory
+            var projectPath = File.ReadAllText(assemblyRelevantFile.Path);
+            if (Directory.Exists(projectPath))
+            {
+                // If this directory exists, we're done
+                return projectPath;
+            } else {
+                return null;
+            }
+        }
+        catch (IOException)
+        {
+            // We encountered a problem while testing
+            return null;
+        }
+    }
 
     public void Execute(GeneratorExecutionContext context)
     {
@@ -122,6 +167,10 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 "YarnSpinner.Editor",
             };
 
+            if (context.Compilation.AssemblyName == null) {
+                output.WriteLine("Not generating registration code, because the provided AssemblyName is null");
+                return;
+            }
             foreach (var prefix in prefixesToIgnore)
             {
                 if (context.Compilation.AssemblyName.StartsWith(prefix))
@@ -440,9 +489,15 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
         context.RegisterForSyntaxNotifications(() => new ClassDeclarationSyntaxReceiver());
     }
 
-    static string TemporaryPath()
+    static string GetTemporaryPath(GeneratorExecutionContext context)
     {
-        var tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "dev.yarnspinner.logs");
+        string tempPath;
+        var rootPath = GetProjectRoot(context);
+        if (rootPath != null) {
+            tempPath = Path.Combine(rootPath, "Logs", "Packages", "dev.yarnspinner.unity");
+        } else {
+            tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "dev.yarnspinner.logs");
+        }
 
         // we need to make the logs folder, but this can potentially fail
         // if it does fail then we will just chuck the logs inside the tmp folder
@@ -464,7 +519,7 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
     {
         if (GetShouldLogToFile(context))
         {
-            var tempPath = ActionRegistrationSourceGenerator.TemporaryPath();
+            var tempPath = ActionRegistrationSourceGenerator.GetTemporaryPath(context);
 
             var path = System.IO.Path.Combine(tempPath, $"{nameof(ActionRegistrationSourceGenerator)}-{context.Compilation.AssemblyName}.txt");
             var outFile = System.IO.File.Open(path, System.IO.FileMode.Create);
@@ -486,7 +541,7 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
     {
         if (GetShouldLogToFile(context))
         {
-            var tempPath = ActionRegistrationSourceGenerator.TemporaryPath();
+            var tempPath = ActionRegistrationSourceGenerator.GetTemporaryPath(context);
             var path = System.IO.Path.Combine(tempPath, $"{nameof(ActionRegistrationSourceGenerator)}-{context.Compilation.AssemblyName}.cs");
             System.IO.File.WriteAllText(path, text);
         }
