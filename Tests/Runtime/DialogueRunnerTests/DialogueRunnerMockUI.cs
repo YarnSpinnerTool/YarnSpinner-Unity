@@ -5,67 +5,49 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 using System;
 using System.Collections;
 using System.Collections.Generic;
+
+#nullable enable
+
+#if USE_UNITASK
+using Cysharp.Threading.Tasks;
+using YarnTask = Cysharp.Threading.Tasks.UniTask;
+using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
+using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
+#else
+using YarnTask = System.Threading.Tasks.Task;
+using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
+using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine?>;
+#endif
+
 using UnityEngine;
-using Yarn.Unity;
+using System.Threading;
 
 namespace Yarn.Unity.Tests
 {
-    public class DialogueRunnerMockUI : Yarn.Unity.DialogueViewBase
+    public class DialogueRunnerMockUI : Yarn.Unity.AsyncDialogueViewBase
     {
         private static DialogueRunnerMockUI instance;
-        public static DialogueRunnerMockUI GetInstance(string name)
+        private bool readyToAdvance;
+
+        public static DialogueRunnerMockUI? GetInstance(string name)
         {
             return name == "custom" ? instance : null;
         }
 
         // The text of the most recently received line that we've been
         // given
-        public string CurrentLine { get; private set; } = default;
+        private string? CurrentLine { get; set; } = default;
 
         // The text of the most recently received options that we've ben
         // given
-        public List<string> CurrentOptions { get; private set; } = new List<string>();
+        private List<string> CurrentOptions { get; set; } = new List<string>();
 
         private void Awake()
         {
             instance = this;
         }
 
-        // runs the line complete callback
-        // without this
-        public void Advance()
-        {
-            lineDelivered();
-        }
-
-        private Action lineDelivered;
-        public override void RunLine(LocalizedLine dialogueLine, Action onLineDeliveryComplete)
-        {
-            // Store the localised text in our CurrentLine property and
-            // capture the completion handler so it can be called at
-            // the correct moment later by the test system
-            CurrentLine = dialogueLine.Text.Text;
-            lineDelivered = onLineDeliveryComplete;
-        }
-
-        public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
-        {
-            CurrentOptions.Clear();
-            foreach (var option in dialogueOptions)
-            {
-                CurrentOptions.Add(option.Line.Text.Text);
-            }
-        }
-
-        public override void DismissLine(Action onDismissalComplete)
-        {
-            onDismissalComplete();
-        }
-
-        public override void InterruptLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
-        {
-            onDialogueLineFinished();
-        }
+        private Action<int>? PerformSelectOption = null;
 
         // A Yarn command that receives integer parameters
         [YarnCommand("testCommandInteger")]
@@ -144,6 +126,56 @@ namespace Yarn.Unity.Tests
         public static string TestFunctionVariable(string text)
         {
             return $"{text} no you're not! {text}";
+        }
+
+        public override async YarnTask RunLineAsync(LocalizedLine line, CancellationToken token)
+        {
+            // Store the localised text in our CurrentLine property
+            CurrentLine = line.Text.Text;
+
+            while (!readyToAdvance) {
+                await YarnTask.Yield();
+            }
+            readyToAdvance = false;
+        }
+
+        public override async YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        {
+            CurrentOptions.Clear();
+            foreach (var option in dialogueOptions)
+            {
+                CurrentOptions.Add(option.Line.Text.Text);
+            }
+
+            int selectedOption = -1;
+            PerformSelectOption = (option) =>
+            {
+                selectedOption = option;
+            };
+            while (selectedOption == -1) {
+                await YarnTask.Yield();
+            }
+            return dialogueOptions[selectedOption];
+
+        }
+
+        public void ExpectLine(string text)
+        {
+            CurrentLine.Should().BeEqualTo(text);
+            readyToAdvance = true;
+        }
+
+        public void SelectOption(int index) {
+            PerformSelectOption.Should().NotBeNull();
+            PerformSelectOption!(index);
+        }
+
+        internal void ExpectOptions(params string[] options)
+        {
+            CurrentOptions.Should().HaveCount(options.Length);
+            for (int i = 0; i < options.Length; i++) {
+                CurrentOptions[i].Should().BeEqualTo(options[i]);
+            }
         }
     }
 

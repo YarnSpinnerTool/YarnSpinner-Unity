@@ -5,7 +5,8 @@
         "YarnSpinner.Unity",
         "YarnSpinner.Unity.Editor",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "YarnSpinnerTests.Shared"
     ],
     "includePlatforms": [
         "Editor"

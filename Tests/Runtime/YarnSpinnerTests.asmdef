@@ -1,11 +1,13 @@
 {
     "name": "YarnSpinnerTests",
+    "rootNamespace": "",
     "references": [
         "YarnSpinner.Unity",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Unity.TextMeshPro",
-        "YarnSpinner.Unity.Editor"
+        "YarnSpinner.Unity.Editor",
+        "YarnSpinnerTests.Shared"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -13,8 +15,7 @@
     "overrideReferences": true,
     "precompiledReferences": [
         "nunit.framework.dll",
-        "YarnSpinner.dll",
-        "nunit.framework.dll"
+        "YarnSpinner.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

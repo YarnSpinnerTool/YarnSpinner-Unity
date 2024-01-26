@@ -5,13 +5,15 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
-using Yarn.Unity;
+
+#nullable enable
 
 namespace Yarn.Unity.Tests
 {
@@ -32,6 +34,13 @@ namespace Yarn.Unity.Tests
             RuntimeTestUtility.RemoveSceneFromBuild(DialogueRunnerTestSceneGUID);
         }
 
+        [AllowNull]
+        private DialogueRunner runner;
+        [AllowNull]
+        private DialogueRunnerMockUI dialogueUI;
+        [AllowNull]
+        private YarnProject yarnProject;
+
         [UnitySetUp]
         public IEnumerator LoadScene() {
             SceneManager.LoadScene("DialogueRunnerTest");
@@ -42,12 +51,20 @@ namespace Yarn.Unity.Tests
             };
 
             yield return new WaitUntil(() => loaded);
+
+            runner = GameObject.FindObjectOfType<DialogueRunner>();
+            dialogueUI = GameObject.FindObjectOfType<DialogueRunnerMockUI>();
+
+            runner.Should().NotBeNull();
+            dialogueUI.Should().NotBeNull();
+
+            yarnProject = runner.yarnProject;
+            yarnProject.Should().NotBeNull();
         }
 
         [UnityTest]
         public IEnumerator DialogueRunner_WhenStateSaved_CanRestoreState()
         {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
             var storage = runner.VariableStorage;
 
             var testFile = "TemporaryTestingFile.json";
@@ -85,7 +102,6 @@ namespace Yarn.Unity.Tests
         [UnityTest]
         public IEnumerator DialogueRunner_WhenRestoringInvalidKey_FailsToLoad()
         {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
             var storage = runner.VariableStorage;
 
             runner.StartDialogue("LotsOfVars");
@@ -93,6 +109,7 @@ namespace Yarn.Unity.Tests
 
             var originals = storage.GetAllVariables();
 
+            LogAssert.Expect(LogType.Error, new Regex("Failed to load save state"));
             bool success = runner.LoadStateFromPersistentStorage("invalid key");
 
             // because the load should have failed this should still be fine
@@ -101,9 +118,8 @@ namespace Yarn.Unity.Tests
             Assert.IsFalse(success);
         }
         [UnityTest]
-        public IEnumerator SaveAndLoad_BadSave()
+        public IEnumerator SaveAndLoad_WhenLoadingInvalidSave_FailsToLoad()
         {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
             var storage = runner.VariableStorage;
 
             runner.StartDialogue("LotsOfVars");
@@ -114,12 +130,14 @@ namespace Yarn.Unity.Tests
             
             var originals = storage.GetAllVariables();
 
+            LogAssert.Expect(LogType.Error, new Regex("Failed to load save state"));
             bool success = runner.LoadStateFromPersistentStorage(testKey);
+            
+            success.Should().BeFalse();
 
             // because the load should have failed this should still be fine
             VerifySaveAndLoadStorageIntegrity(storage, originals.FloatVariables, originals.StringVariables, originals.BoolVariables);
 
-            Assert.IsFalse(success);
         }
         
         private void VerifySaveAndLoadStorageIntegrity(VariableStorageBehaviour storage, Dictionary<string, float> testFloats, Dictionary<string, string> testStrings, Dictionary<string, bool> testBools)
@@ -134,8 +152,9 @@ namespace Yarn.Unity.Tests
             {
                 foreach (var pair in current)
                 {
-                    T originalValue;
-                    Assert.IsTrue(original.TryGetValue(pair.Key, out originalValue), "new key is not inside the original set of variables");
+                    var exists = original.TryGetValue(pair.Key, out T originalValue);
+
+                    Assert.IsTrue(exists, "new key is not inside the original set of variables");
                     Assert.AreEqual(originalValue, pair.Value, "values under the same key are different");
                 }
             }
@@ -144,8 +163,6 @@ namespace Yarn.Unity.Tests
         [UnityTest]
         public IEnumerator DialogueRunner_CanAccessNodeHeaders()
         {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
-
             // these are all set inside of TestHeadersAreAccessible.yarn
             // which is part of the test scene project
             var allHeaders = new Dictionary<string, Dictionary<string, List<string>>>();
@@ -193,7 +210,7 @@ namespace Yarn.Unity.Tests
 
             foreach (var headerTestData in allHeaders)
             {
-                var yarnHeaders = runner.yarnProject.GetHeaders(headerTestData.Key);
+                var yarnHeaders = yarnProject.GetHeaders(headerTestData.Key);
 
                 // its possible we got no headers or more/less headers
                 // so we need to check we found all the ones we expected to see
@@ -213,8 +230,8 @@ namespace Yarn.Unity.Tests
         [UnityTest]
         public IEnumerator DialogueRunner_CanAccessInitialValues()
         {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
-
+            
+            
             // these are derived from the declares and sets inside of DialogueRunnerTest.yarn
             var testDefaults = new Dictionary<string, System.IConvertible>();
             testDefaults.Add("$laps", 0);
@@ -223,14 +240,14 @@ namespace Yarn.Unity.Tests
             testDefaults.Add("$bool", true);
             testDefaults.Add("$true", false);
 
-            CollectionAssert.AreEquivalent(runner.yarnProject.InitialValues, testDefaults);
+            CollectionAssert.AreEquivalent(yarnProject.InitialValues, testDefaults);
 
             yield return null;
         }
         [UnityTest]
         public IEnumerator DialogueRunner_CanAccessNodeNames()
         {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            
 
             // these are derived from the nodes inside of:
             //   - DialogueTest.yarn
@@ -255,7 +272,9 @@ namespace Yarn.Unity.Tests
                 "DuplicateHeaders",
             };
 
-            CollectionAssert.AreEquivalent(runner.yarnProject.NodeNames, testNodes);
+            yarnProject.Should().NotBeNull();
+
+            yarnProject!.NodeNames.Should().Contain(testNodes);
 
             yield return null;
         }
@@ -263,28 +282,29 @@ namespace Yarn.Unity.Tests
         [UnityTest]
         public IEnumerator HandleLine_OnValidYarnFile_SendCorrectLinesToUI()
         {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
-            DialogueRunnerMockUI dialogueUI = GameObject.FindObjectOfType<DialogueRunnerMockUI>();
+            
+
 
             runner.StartDialogue(runner.startNode);
             yield return null;
 
-            Assert.AreEqual("Spieler: Kannst du mich hören? 2", dialogueUI.CurrentLine);
-            dialogueUI.Advance();
+            dialogueUI.ExpectLine("Spieler: Kannst du mich hören? 2");
+            yield return null;
 
-            Assert.AreEqual("NPC: Klar und deutlich.", dialogueUI.CurrentLine);
-            dialogueUI.Advance();
+            dialogueUI.ExpectLine("NPC: Klar und deutlich.");
+            yield return null;
 
-            Assert.AreEqual(2, dialogueUI.CurrentOptions.Count);
-            Assert.AreEqual("Mir reicht es.", dialogueUI.CurrentOptions[0]);
-            Assert.AreEqual("Nochmal!", dialogueUI.CurrentOptions[1]);
+            dialogueUI.ExpectOptions(
+                "Mir reicht es.",
+                "Nochmal!"
+            );
         }
 
         [UnityTest]
         public IEnumerator HandleLine_OnViewsArrayContainingNullElement_SendCorrectLinesToUI()
         {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
-            DialogueRunnerMockUI dialogueUI = GameObject.FindObjectOfType<DialogueRunnerMockUI>();
+            
+
 
             // Insert a null element into the dialogue views array
             var viewArrayWithNullElement = runner.DialogueViews.ToList();
@@ -294,15 +314,16 @@ namespace Yarn.Unity.Tests
             runner.StartDialogue(runner.startNode);
             yield return null;
 
-            Assert.AreEqual("Spieler: Kannst du mich hören? 2", dialogueUI.CurrentLine);
-            dialogueUI.Advance();
+            dialogueUI.ExpectLine("Spieler: Kannst du mich hören? 2");
+            yield return null;
 
-            Assert.AreEqual("NPC: Klar und deutlich.", dialogueUI.CurrentLine);
-            dialogueUI.Advance();
+            dialogueUI.ExpectLine("NPC: Klar und deutlich.");
+            yield return null;
 
-            Assert.AreEqual(2, dialogueUI.CurrentOptions.Count);
-            Assert.AreEqual("Mir reicht es.", dialogueUI.CurrentOptions[0]);
-            Assert.AreEqual("Nochmal!", dialogueUI.CurrentOptions[1]);
+            dialogueUI.ExpectOptions(
+                "Mir reicht es.",
+                "Nochmal!"
+            );
         }
 
 
@@ -320,7 +341,7 @@ namespace Yarn.Unity.Tests
         [TestCase("testStaticCommand", "success")]
         [TestCase("testExternalAssemblyCommand", "success")]
         public void HandleCommand_DispatchesCommands(string test, string expectedLogResult) {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            
             var dispatcher = runner.CommandDispatcher;
 
             LogAssert.Expect(LogType.Log, expectedLogResult);
@@ -332,7 +353,7 @@ namespace Yarn.Unity.Tests
 
         [UnityTest]
         public IEnumerator HandleCommand_DispatchedCommands_StartCoroutines() {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            
             var dispatcher = runner.CommandDispatcher;
 
             var framesToWait = 5;
@@ -356,7 +377,7 @@ namespace Yarn.Unity.Tests
         [TestCase("testCommandOptionalParams DialogueRunner", "requires between 1 and 2 parameters, but 0 were provided")]
         [TestCase("testCommandOptionalParams DialogueRunner 1 2 3", "requires between 1 and 2 parameters, but 3 were provided")]
         public void HandleCommand_FailsWhenParameterCountNotCorrect(string command, string error) {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            
             var dispatcher = runner.CommandDispatcher;
             var regex = new Regex(error);
 
@@ -368,7 +389,7 @@ namespace Yarn.Unity.Tests
 
         [TestCase("testCommandInteger DialogueRunner 1 not_an_integer", "Can't convert the given parameter")]
         public void HandleCommand_FailsWhenParameterTypesNotValid(string command, string error) {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            
             var dispatcher = runner.CommandDispatcher;
             var regex = new Regex(error);
 
@@ -379,7 +400,7 @@ namespace Yarn.Unity.Tests
 
         [Test]
         public void AddCommandHandler_RegistersCommands() {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            
             var dispatcher = runner.CommandDispatcher;
 
             runner.AddCommandHandler("test1", () => { Debug.Log("success 1"); } );
@@ -399,7 +420,7 @@ namespace Yarn.Unity.Tests
 
         [UnityTest]
         public IEnumerator AddCommandHandler_RegistersCoroutineCommands() {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            
             var dispatcher = runner.CommandDispatcher;
 
              IEnumerator TestCommandCoroutine(int frameDelay) {
@@ -430,48 +451,53 @@ namespace Yarn.Unity.Tests
 
         [UnityTest]
         public IEnumerator VariableStorage_OnExternalChanges_ReturnsExpectedValue() {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
-            DialogueRunnerMockUI dialogueUI = GameObject.FindObjectOfType<DialogueRunnerMockUI>();
+            
+
             var variableStorage = GameObject.FindObjectOfType<VariableStorageBehaviour>();
 
             runner.StartDialogue("VariableTest");
             yield return null;
 
-            Assert.AreEqual("Jane: Yes! I've already walked 0 laps!", dialogueUI.CurrentLine);
+            dialogueUI.ExpectLine("Jane: Yes! I've already walked 0 laps!");
+            yield return null;
 
             variableStorage.SetValue("$laps", 1);
             runner.Stop();
             runner.StartDialogue("VariableTest");
             yield return null;
 
-            Assert.AreEqual("Jane: Yes! I've already walked 1 laps!", dialogueUI.CurrentLine);
-
+            dialogueUI.ExpectLine("Jane: Yes! I've already walked 1 laps!");
+            yield return null;
+            
             variableStorage.SetValue("$laps", 5);
             runner.Stop();
             runner.StartDialogue("FunctionTest");
             yield return null;
 
-            Assert.AreEqual("Jane: Yes! I've already walked 25 laps!", dialogueUI.CurrentLine);
+            dialogueUI.ExpectLine("Jane: Yes! I've already walked 25 laps!");
+            yield return null;
 
             runner.Stop();
             runner.StartDialogue("FunctionTest2");
             yield return null;
 
-            Assert.AreEqual("Jane: Yes! I've already walked arg! i am a pirate no you're not! arg! i am a pirate laps!", dialogueUI.CurrentLine);
-
+            dialogueUI.ExpectLine("Jane: Yes! I've already walked arg! i am a pirate no you're not! arg! i am a pirate laps!");
+            yield return null;
+            
             runner.Stop();
             runner.StartDialogue("ExternalFunctionTest");
             yield return null;
 
-            Assert.AreEqual("Jane: Here's a function from code that's in another assembly: 42", dialogueUI.CurrentLine);
-
+            dialogueUI.ExpectLine("Jane: Here's a function from code that's in another assembly: 42");
+            yield return null;
+            
             runner.Stop();
             runner.StartDialogue("BuiltinsTest");
             yield return null;
 
-            Assert.AreEqual("Jane: round(3.522) = 4; round_places(3.522, 2) = 3.52; floor(3.522) = 3; floor(-3.522) = -4; ceil(3.522) = 4; ceil(-3.522) = -3; inc(3.522) = 4; inc(4) = 5; dec(3.522) = 3; dec(3) = 2; round_places(decimal(3.522),3) = 0.522; int(3.522) = 3; int(-3.522) = -3;", dialogueUI.CurrentLine);
-
-            // dialogueUI.ReadyForNextLine();
+            dialogueUI.ExpectLine("Jane: round(3.522) = 4; round_places(3.522, 2) = 3.52; floor(3.522) = 3; floor(-3.522) = -4; ceil(3.522) = 4; ceil(-3.522) = -3; inc(3.522) = 4; inc(4) = 5; dec(3.522) = 3; dec(3) = 2; round_places(decimal(3.522),3) = 0.522; int(3.522) = 3; int(-3.522) = -3;");
+            yield return null;
+            
         }   
 
         [TestCase(@"one two three four", new[] {"one", "two", "three", "four"})]
@@ -491,7 +517,7 @@ namespace Yarn.Unity.Tests
 
         [UnityTest]
         public IEnumerator DialogueRunner_OnDialogueStartAndStop_CallsEvents() {
-            var runner = GameObject.FindObjectOfType<DialogueRunner>();
+            
 
             runner.onDialogueStart.AddListener(() =>
             {
