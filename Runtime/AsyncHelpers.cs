@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 // This file contains helpers that make it easier for the Yarn Spinner code to
 // not have to think about which async API it's using.
 

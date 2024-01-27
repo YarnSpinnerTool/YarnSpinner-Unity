@@ -1,3 +1,6 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
 
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
