@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 #nullable enable
 
@@ -25,6 +26,13 @@ namespace Yarn.Unity.Tests
 
     public static class AssertionExtensions
     {
+
+        private static void NullCheck<T>([NotNull] T assertion, string? message) {
+            if (assertion == null) {
+                throw new AssertionException("Value is null", message);
+            }
+        }
+
         public static ShouldAssertion<T> Should<T>(this T subject)
         {
             return new ShouldAssertion<T>(subject);
@@ -212,6 +220,42 @@ namespace Yarn.Unity.Tests
             var enumerable = value.Subject;
             if (enumerable.Count() != count) {
                 throw new AssertionException($"Expected collection to have count {count}", message);
+            }
+        }
+
+        public static void BeGreaterThan<T>(this ShouldAssertion<T> value, T other, string? message = null) where T : IComparable<T> {
+
+            NullCheck(value.Subject, message);
+
+            if (Comparer<T>.Default.Compare(value.Subject, other) != 1) {
+                throw new AssertionException($"Expected {value.Subject} to be greater than {other}", message);
+            }
+        }
+        
+        public static void BeLessThan<T>(this ShouldAssertion<T> value, T other, string? message = null) where T : IComparable<T> {
+
+            NullCheck(value.Subject, message);
+
+            if (Comparer<T>.Default.Compare(value.Subject, other) != -1) {
+                throw new AssertionException($"Expected {value.Subject} to be greater than {other}", message);
+            }
+        }
+
+        public static void BeGreaterThanOrEqualTo<T>(this ShouldAssertion<T> value, T other, string? message = null) where T : IComparable<T> {
+
+            NullCheck(value.Subject, message);
+
+            if (Comparer<T>.Default.Compare(value.Subject, other) == -1) {
+                throw new AssertionException($"Expected {value.Subject} to be greater than or equal to {other}", message);
+            }
+        }
+
+        public static void BeLessThanOrEqualTo<T>(this ShouldAssertion<T> value, T other, string? message = null) where T : IComparable<T> {
+
+            NullCheck(value.Subject, message);
+
+            if (Comparer<T>.Default.Compare(value.Subject, other) == 1) {
+                throw new AssertionException($"Expected {value.Subject} to be less than or equal to {other}", message);
             }
         }
     }
