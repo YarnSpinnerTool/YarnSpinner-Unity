@@ -5,12 +5,13 @@
 
 namespace Yarn.Unity
 {
-    using UnityEngine;
+    using System;
     using System.Collections;
     using System.Threading;
-    
-    using UnityEngine.ResourceManagement.AsyncOperations;
     using System.Runtime.CompilerServices;
+    
+    using UnityEngine;
+    using UnityEngine.ResourceManagement.AsyncOperations;
 
 #if USE_UNITASK
     using Cysharp.Threading.Tasks;
@@ -125,6 +126,29 @@ namespace Yarn.Unity
             }
 
             return;
+#endif
+        }
+
+        public static IEnumerator ToCoroutine(Func<YarnTask> factory) {
+#if USE_UNITASK
+            return UniTask.ToCoroutine(task);
+#else
+            var task = factory();
+            while (task.IsCompleted == false) {
+                yield return null;
+            }
+            #endif
+        }
+
+        internal static async YarnTask WaitForSeconds(float timeInSeconds)
+        {
+#if USE_UNITASK
+            throw new NotImplementedException();
+#else
+            var now = Time.time;
+            while (Time.time < now + timeInSeconds) {
+                await YarnTask.Yield();
+            }
 #endif
         }
     }
