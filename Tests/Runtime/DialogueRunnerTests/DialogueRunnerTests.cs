@@ -1,17 +1,19 @@
-﻿/*
+/*
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text.RegularExpressions;
-using NUnit.Framework;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.TestTools;
+namespace Yarn.Unity.Tests
+{
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+    using NUnit.Framework;
+    using UnityEngine;
+    using UnityEngine.SceneManagement;
+    using UnityEngine.TestTools;
 
 #nullable enable
 
@@ -19,7 +21,7 @@ namespace Yarn.Unity.Tests
 {
 
     [TestFixture]
-    public class DialogueRunnerTests: IPrebuildSetup, IPostBuildCleanup
+    public class DialogueRunnerTests : IPrebuildSetup, IPostBuildCleanup
     {
         const string DialogueRunnerTestSceneGUID = "a04d7174042154a47a29ac4f924e0474";
         const string TestResourcesFolderGUID = "be395506411a5a74eb2458a5cf1de710";
@@ -42,7 +44,8 @@ namespace Yarn.Unity.Tests
         private YarnProject yarnProject;
 
         [UnitySetUp]
-        public IEnumerator LoadScene() {
+        public IEnumerator LoadScene()
+        {
             SceneManager.LoadScene("DialogueRunnerTest");
             bool loaded = false;
             SceneManager.sceneLoaded += (index, mode) =>
@@ -126,20 +129,20 @@ namespace Yarn.Unity.Tests
             yield return null;
 
             var testKey = "TemporaryTestingKey";
-            PlayerPrefs.SetString(testKey,"{}");
-            
+            PlayerPrefs.SetString(testKey, "{}");
+
             var originals = storage.GetAllVariables();
 
             LogAssert.Expect(LogType.Error, new Regex("Failed to load save state"));
             bool success = runner.LoadStateFromPersistentStorage(testKey);
-            
+
             success.Should().BeFalse();
 
             // because the load should have failed this should still be fine
             VerifySaveAndLoadStorageIntegrity(storage, originals.FloatVariables, originals.StringVariables, originals.BoolVariables);
 
         }
-        
+
         private void VerifySaveAndLoadStorageIntegrity(VariableStorageBehaviour storage, Dictionary<string, float> testFloats, Dictionary<string, string> testStrings, Dictionary<string, bool> testBools)
         {
             var currentVariables = storage.GetAllVariables();
@@ -159,7 +162,7 @@ namespace Yarn.Unity.Tests
                 }
             }
         }
-        
+
         [UnityTest]
         public IEnumerator DialogueRunner_CanAccessNodeHeaders()
         {
@@ -168,44 +171,44 @@ namespace Yarn.Unity.Tests
             var allHeaders = new Dictionary<string, Dictionary<string, List<string>>>();
             var headers = new Dictionary<string, List<string>>();
 
-            headers.Add("title", new List<string>(){"EmptyTags"});
-            headers.Add("tags", new List<string>() {string.Empty});
+            headers.Add("title", new List<string>() { "EmptyTags" });
+            headers.Add("tags", new List<string>() { string.Empty });
             allHeaders.Add("EmptyTags", headers);
             headers = new Dictionary<string, List<string>>();
 
-            headers.Add("title", new List<string>() {"ArbitraryHeaderWithValue"});
-            headers.Add("arbitraryheader", new List<string>() {"some-arbitrary-text"});
+            headers.Add("title", new List<string>() { "ArbitraryHeaderWithValue" });
+            headers.Add("arbitraryheader", new List<string>() { "some-arbitrary-text" });
             allHeaders.Add("ArbitraryHeaderWithValue", headers);
             headers = new Dictionary<string, List<string>>();
 
-            headers.Add("title", new List<string>(){"Tags"});
-            headers.Add("tags",new List<string>(){"one two three"});
+            headers.Add("title", new List<string>() { "Tags" });
+            headers.Add("tags", new List<string>() { "one two three" });
             allHeaders.Add("Tags", headers);
             headers = new Dictionary<string, List<string>>();
 
-            headers.Add("title", new List<string>(){"SingleTagOnly"});
-            allHeaders.Add("SingleTagOnly",headers);
+            headers.Add("title", new List<string>() { "SingleTagOnly" });
+            allHeaders.Add("SingleTagOnly", headers);
             headers = new Dictionary<string, List<string>>();
 
-            headers.Add("title", new List<string>() {"Comments"});
-            headers.Add("tags", new List<string>() {"one two three"});
+            headers.Add("title", new List<string>() { "Comments" });
+            headers.Add("tags", new List<string>() { "one two three" });
             allHeaders.Add("Comments", headers);
             headers = new Dictionary<string, List<string>>();
 
-            headers.Add("contains", new List<string>() {"lots"});
-            headers.Add("title", new List<string>() {"LotsOfHeaders"});
-            headers.Add("this", new List<string>() {"node"});
-            headers.Add("of", new List<string>() {string.Empty});
-            headers.Add("blank", new List<string>() {string.Empty});
-            headers.Add("others", new List<string>() {"are"});
-            headers.Add("headers", new List<string>() {""});
-            headers.Add("some", new List<string>() {"are"});
-            headers.Add("not", new List<string>() {""});
+            headers.Add("contains", new List<string>() { "lots" });
+            headers.Add("title", new List<string>() { "LotsOfHeaders" });
+            headers.Add("this", new List<string>() { "node" });
+            headers.Add("of", new List<string>() { string.Empty });
+            headers.Add("blank", new List<string>() { string.Empty });
+            headers.Add("others", new List<string>() { "are" });
+            headers.Add("headers", new List<string>() { "" });
+            headers.Add("some", new List<string>() { "are" });
+            headers.Add("not", new List<string>() { "" });
             allHeaders.Add("LotsOfHeaders", headers);
             headers = new Dictionary<string, List<string>>();
 
-            headers.Add("title", new List<string>() {"DuplicateHeaders"});
-            headers.Add("repeat", new List<string>() {"tag1", "tag2", "tag3"});
+            headers.Add("title", new List<string>() { "DuplicateHeaders" });
+            headers.Add("repeat", new List<string>() { "tag1", "tag2", "tag3" });
             allHeaders.Add("DuplicateHeaders", headers);
 
             foreach (var headerTestData in allHeaders)
@@ -230,8 +233,8 @@ namespace Yarn.Unity.Tests
         [UnityTest]
         public IEnumerator DialogueRunner_CanAccessInitialValues()
         {
-            
-            
+
+
             // these are derived from the declares and sets inside of DialogueRunnerTest.yarn
             var testDefaults = new Dictionary<string, System.IConvertible>();
             testDefaults.Add("$laps", 0);
@@ -247,7 +250,7 @@ namespace Yarn.Unity.Tests
         [UnityTest]
         public IEnumerator DialogueRunner_CanAccessNodeNames()
         {
-            
+
 
             // these are derived from the nodes inside of:
             //   - DialogueTest.yarn
@@ -282,7 +285,7 @@ namespace Yarn.Unity.Tests
         [UnityTest]
         public IEnumerator HandleLine_OnValidYarnFile_SendCorrectLinesToUI()
         {
-            
+
 
 
             runner.StartDialogue(runner.startNode);
@@ -303,7 +306,7 @@ namespace Yarn.Unity.Tests
         [UnityTest]
         public IEnumerator HandleLine_OnViewsArrayContainingNullElement_SendCorrectLinesToUI()
         {
-            
+
 
 
             // Insert a null element into the dialogue views array
@@ -340,20 +343,22 @@ namespace Yarn.Unity.Tests
         [TestCase("testCommandDefaultName DialogueRunner", "success")]
         [TestCase("testStaticCommand", "success")]
         [TestCase("testExternalAssemblyCommand", "success")]
-        public void HandleCommand_DispatchesCommands(string test, string expectedLogResult) {
-            
+        public void HandleCommand_DispatchesCommands(string test, string expectedLogResult)
+        {
+
             var dispatcher = runner.CommandDispatcher;
 
             LogAssert.Expect(LogType.Log, expectedLogResult);
             var result = dispatcher.DispatchCommand(test, runner, out var commandCoroutine);
-            
+
             Assert.AreEqual(CommandDispatchResult.StatusType.SucceededSync, result.Status);
             Assert.IsNull(commandCoroutine);
         }
 
         [UnityTest]
-        public IEnumerator HandleCommand_DispatchedCommands_StartCoroutines() {
-            
+        public IEnumerator HandleCommand_DispatchedCommands_StartCoroutines()
+        {
+
             var dispatcher = runner.CommandDispatcher;
 
             var framesToWait = 5;
@@ -368,7 +373,8 @@ namespace Yarn.Unity.Tests
             LogAssert.Expect(LogType.Log, $"success {Time.frameCount + framesToWait}");
 
             // After framesToWait frames, we should have seen the log
-            while (framesToWait > 0) {
+            while (framesToWait > 0)
+            {
                 framesToWait -= 1;
                 yield return null;
             }
@@ -376,8 +382,9 @@ namespace Yarn.Unity.Tests
 
         [TestCase("testCommandOptionalParams DialogueRunner", "requires between 1 and 2 parameters, but 0 were provided")]
         [TestCase("testCommandOptionalParams DialogueRunner 1 2 3", "requires between 1 and 2 parameters, but 3 were provided")]
-        public void HandleCommand_FailsWhenParameterCountNotCorrect(string command, string error) {
-            
+        public void HandleCommand_FailsWhenParameterCountNotCorrect(string command, string error)
+        {
+
             var dispatcher = runner.CommandDispatcher;
             var regex = new Regex(error);
 
@@ -388,8 +395,9 @@ namespace Yarn.Unity.Tests
         }
 
         [TestCase("testCommandInteger DialogueRunner 1 not_an_integer", "Can't convert the given parameter")]
-        public void HandleCommand_FailsWhenParameterTypesNotValid(string command, string error) {
-            
+        public void HandleCommand_FailsWhenParameterTypesNotValid(string command, string error)
+        {
+
             var dispatcher = runner.CommandDispatcher;
             var regex = new Regex(error);
 
@@ -399,12 +407,13 @@ namespace Yarn.Unity.Tests
         }
 
         [Test]
-        public void AddCommandHandler_RegistersCommands() {
-            
+        public void AddCommandHandler_RegistersCommands()
+        {
+
             var dispatcher = runner.CommandDispatcher;
 
-            runner.AddCommandHandler("test1", () => { Debug.Log("success 1"); } );
-            runner.AddCommandHandler("test2", (int val) => { Debug.Log($"success {val}"); } );
+            runner.AddCommandHandler("test1", () => { Debug.Log("success 1"); });
+            runner.AddCommandHandler("test2", (int val) => { Debug.Log($"success {val}"); });
 
             LogAssert.Expect(LogType.Log, "success 1");
             LogAssert.Expect(LogType.Log, "success 2");
@@ -419,13 +428,16 @@ namespace Yarn.Unity.Tests
         }
 
         [UnityTest]
-        public IEnumerator AddCommandHandler_RegistersCoroutineCommands() {
-            
+        public IEnumerator AddCommandHandler_RegistersCoroutineCommands()
+        {
+
             var dispatcher = runner.CommandDispatcher;
 
-             IEnumerator TestCommandCoroutine(int frameDelay) {
+            IEnumerator TestCommandCoroutine(int frameDelay)
+            {
                 // Wait the specified number of frames
-                while (frameDelay > 0) {
+                while (frameDelay > 0)
+                {
                     frameDelay -= 1;
                     yield return null;
                 }
@@ -443,15 +455,17 @@ namespace Yarn.Unity.Tests
             Assert.IsNotNull(coroutine);
 
             // After framesToWait frames, we should have seen the log
-            while (framesToWait > 0) {
+            while (framesToWait > 0)
+            {
                 framesToWait -= 1;
                 yield return null;
             }
         }
 
         [UnityTest]
-        public IEnumerator VariableStorage_OnExternalChanges_ReturnsExpectedValue() {
-            
+        public IEnumerator VariableStorage_OnExternalChanges_ReturnsExpectedValue()
+        {
+
 
             var variableStorage = GameObject.FindObjectOfType<VariableStorageBehaviour>();
 
@@ -468,7 +482,7 @@ namespace Yarn.Unity.Tests
 
             dialogueUI.ExpectLine("Jane: Yes! I've already walked 1 laps!");
             yield return null;
-            
+
             variableStorage.SetValue("$laps", 5);
             runner.Stop();
             runner.StartDialogue("FunctionTest");
@@ -483,32 +497,32 @@ namespace Yarn.Unity.Tests
 
             dialogueUI.ExpectLine("Jane: Yes! I've already walked arg! i am a pirate no you're not! arg! i am a pirate laps!");
             yield return null;
-            
+
             runner.Stop();
             runner.StartDialogue("ExternalFunctionTest");
             yield return null;
 
             dialogueUI.ExpectLine("Jane: Here's a function from code that's in another assembly: 42");
             yield return null;
-            
+
             runner.Stop();
             runner.StartDialogue("BuiltinsTest");
             yield return null;
 
             dialogueUI.ExpectLine("Jane: round(3.522) = 4; round_places(3.522, 2) = 3.52; floor(3.522) = 3; floor(-3.522) = -4; ceil(3.522) = 4; ceil(-3.522) = -3; inc(3.522) = 4; inc(4) = 5; dec(3.522) = 3; dec(3) = 2; round_places(decimal(3.522),3) = 0.522; int(3.522) = 3; int(-3.522) = -3;");
             yield return null;
-            
-        }   
 
-        [TestCase(@"one two three four", new[] {"one", "two", "three", "four"})]
-        [TestCase(@"one ""two three"" four", new[] {"one", "two three", "four"})]
-        [TestCase(@"one ""two three four", new[] {"one", "two three four"})]
-        [TestCase(@"one ""two \""three"" four", new[] {"one", "two \"three", "four"})]
-        [TestCase(@"one \two three four", new[] {"one", "\\two", "three", "four"})]
-        [TestCase(@"one ""two \\ three"" four", new[] {"one", "two \\ three", "four"})]
-        [TestCase(@"one ""two \1 three"" four", new[] {"one", "two \\1 three", "four"})]
-        [TestCase(@"one      two", new[] {"one", "two"})]
-        public void SplitCommandText_SplitsTextCorrectly(string input, IEnumerable<string> expectedComponents) 
+        }
+
+        [TestCase(@"one two three four", new[] { "one", "two", "three", "four" })]
+        [TestCase(@"one ""two three"" four", new[] { "one", "two three", "four" })]
+        [TestCase(@"one ""two three four", new[] { "one", "two three four" })]
+        [TestCase(@"one ""two \""three"" four", new[] { "one", "two \"three", "four" })]
+        [TestCase(@"one \two three four", new[] { "one", "\\two", "three", "four" })]
+        [TestCase(@"one ""two \\ three"" four", new[] { "one", "two \\ three", "four" })]
+        [TestCase(@"one ""two \1 three"" four", new[] { "one", "two \\1 three", "four" })]
+        [TestCase(@"one      two", new[] { "one", "two" })]
+        public void SplitCommandText_SplitsTextCorrectly(string input, IEnumerable<string> expectedComponents)
         {
             IEnumerable<string> parsedComponents = DialogueRunner.SplitCommandText(input);
 
@@ -516,8 +530,9 @@ namespace Yarn.Unity.Tests
         }
 
         [UnityTest]
-        public IEnumerator DialogueRunner_OnDialogueStartAndStop_CallsEvents() {
-            
+        public IEnumerator DialogueRunner_OnDialogueStartAndStop_CallsEvents()
+        {
+
 
             runner.onDialogueStart.AddListener(() =>
             {
