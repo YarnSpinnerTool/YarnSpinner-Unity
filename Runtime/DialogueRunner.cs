@@ -96,6 +96,14 @@ namespace Yarn.Unity
         /// </summary>
         public bool runSelectedOptionAsLine;
 
+        /// <summary>
+        /// By default, DialogueRunner will print a warning if no DialogueViews
+        /// are assigned to <see cref="dialogueViews"/>. However, if you
+        /// assign the views at runtime, this warning isn't useful. Set this to
+        /// true to silence the warning.
+        /// </summary>
+        public bool silenceDialogueViewWarning;
+
         public LineProviderBehaviour lineProvider;
 
         /// <summary>
@@ -653,7 +661,7 @@ namespace Yarn.Unity
         void Awake()
         {
             
-            if (dialogueViews.Length == 0)
+            if (dialogueViews.Length == 0 && !silenceDialogueViewWarning)
             {
                 Debug.LogWarning($"Dialogue Runner doesn't have any dialogue views set up. No lines or options will be visible.");
             }

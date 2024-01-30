@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Yarn.Unity.ActionAnalyser.Action` now has a `MethodIdentifierName` property, which is the short form of the method name.
 - `LineView` now will add in line breaks when it encounters a self closing `[br /]` marker.
 - Yarn attributed Functions and Commands can now use constant values in addition to literals for their name.
+- `DialogueRunner` now has a `silenceDialogueViewWarning` property. When set to true, the dialogue runner will no longer print a warning if the `dialogueViews` array is empty. 
 
 ### Changed
 
