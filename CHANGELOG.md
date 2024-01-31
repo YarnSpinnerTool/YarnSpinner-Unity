@@ -40,6 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - defaults to on release.
 - Actions Registration now dumps generated code into the same temporary folder the logs live in
 - `ActionsGenerator` will now generate C# warnings for incorrectly named methods that are attributed as `YarnFunction` or `YarnCommand`.
+- Fixed a bug where `AudioLineProvider` didn't allow runtime changing of the text locale.
 
 ### Removed
 
