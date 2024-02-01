@@ -598,5 +598,126 @@ namespace Yarn.Unity.ActionAnalyser
 
             return null;
         }
+
+        // these are basically just ripped straight from the LSP
+        // should maybe look at making these more accessible, for now the code dupe is fine IMO
+        public static string GetActionTrivia(MethodDeclarationSyntax method, Yarn.Unity.ILogger logger)
+        {
+            // The main string to use as the function's documentation.
+            if (method.HasLeadingTrivia)
+            {
+                var trivias = method.GetLeadingTrivia();
+                var structuredTrivia = trivias.LastOrDefault(t => t.HasStructure);
+                if (structuredTrivia.Kind() != SyntaxKind.None)
+                {
+                    // The method contains structured trivia. Extract the
+                    // documentation for it.
+                    logger.WriteLine("trivia is structured");
+                    return GetDocumentationFromStructuredTrivia(structuredTrivia);
+                }
+                else
+                {
+                    // There isn't any structured trivia, but perhaps there's a
+                    // comment above the method, which we can use as our
+                    // documentation.
+                    logger.WriteLine("trivia is unstructured");
+                    return GetDocumentationFromUnstructuredTrivia(trivias);
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+        private static string GetDocumentationFromUnstructuredTrivia(SyntaxTriviaList trivias)
+        {
+            string documentation;
+            bool emptyLineFlag = false;
+            var documentationParts = Enumerable.Empty<string>();
+
+            // loop in reverse order until hit something that doesn't look like it's related
+            foreach (var trivia in trivias.Reverse())
+            {
+                var doneWithTrivia = false;
+                switch (trivia.Kind())
+                {
+                    case SyntaxKind.EndOfLineTrivia:
+                        // if we hit two lines in a row without a comment/attribute inbetween, we're done collecting trivia
+                        if (emptyLineFlag == true) { doneWithTrivia = true; }
+                        emptyLineFlag = true;
+                        break;
+                    case SyntaxKind.WhitespaceTrivia:
+                        break;
+                    case SyntaxKind.Attribute:
+                        emptyLineFlag = false;
+                        break;
+                    case SyntaxKind.SingleLineCommentTrivia:
+                    case SyntaxKind.MultiLineCommentTrivia:
+                        documentationParts = documentationParts.Prepend(trivia.ToString().Trim('/', ' '));
+                        emptyLineFlag = false;
+                        break;
+                    default:
+                        doneWithTrivia = true;
+                        break;
+                }
+
+                if (doneWithTrivia)
+                {
+                    break;
+                }
+            }
+
+            documentation = string.Join(" ", documentationParts);
+            return documentation;
+        }
+        private static string GetDocumentationFromStructuredTrivia(SyntaxTrivia structuredTrivia)
+        {
+            string documentation;
+            var triviaStructure = structuredTrivia.GetStructure();
+            if (triviaStructure == null)
+            {
+                return null;
+            }
+
+            string ExtractStructuredTrivia(string tagName)
+            {
+                // Find the tag that matches the requested name.
+                var triviaMatch = triviaStructure
+                    .ChildNodes()
+                    .OfType<XmlElementSyntax>()
+                    .FirstOrDefault(x =>
+                        x.StartTag.Name.ToString() == tagName
+                    );
+
+                if (triviaMatch != null
+                    && triviaMatch.Kind() != SyntaxKind.None
+                    && triviaMatch.Content.Any())
+                {
+                    // Get all content from this element that isn't a newline, and
+                    // join it up into a single string.
+                    var v = triviaMatch
+                        .Content[0]
+                        .ChildTokens()
+                        .Where(ct => ct.Kind() != SyntaxKind.XmlTextLiteralNewLineToken)
+                        .Select(ct => ct.ValueText.Trim());
+
+                    return string.Join(" ", v).Trim();
+                }
+
+                return null;
+            }
+
+            var summary = ExtractStructuredTrivia("summary");
+            var remarks = ExtractStructuredTrivia("remarks");
+
+            documentation = summary ?? triviaStructure.ToString();
+
+            if (remarks != null)
+            {
+                documentation += "\n\n" + remarks;
+            }
+
+            return documentation;
+        }
     }
 }

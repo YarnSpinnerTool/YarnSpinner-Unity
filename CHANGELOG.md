@@ -11,10 +11,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - A Unity Project scoped settings that allows you to override some of the default behaviours of Yarn Spinner
   - settings are saved to a file in `ProjectSettings\Packages\dev.yarnspinner\YarnSpinnerProjectSettings.json`
   - these can be changed via `Edit -> Project Settings -> Yarn Spinner`
-  - currently supports two convenience features of Yarn Spinner:
+  - currently supports three convenience features of Yarn Spinner:
     - automatically associating assets with localisations
     - automatically linking YarnCommand and YarnFunction attributed methods to the dialogue runner
-  - enabling/disabling C# linking will force an entire C# reimport
+    - generating a `ysls` file for all of your Yarn attributed methods
+      - this is save to `ProjectSettings\Packages\dev.yarnspinner\generated.ysls.json`
+      - this is an experimental feature to support better editor integration down the line
+      - as such this defaults to *not* being generated
+  - enabling/disabling C# linking or ysls generation will force an entire C# reimport
   - enabling/disabling asset linking will force a reimport of all `yarnprojects`
 - `Yarn.Unity.ActionAnalyser.Action` now has a `MethodIdentifierName` property, which is the short form of the method name.
 - `LineView` now will add in line breaks when it encounters a self closing `[br /]` marker.

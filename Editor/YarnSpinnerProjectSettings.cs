@@ -15,9 +15,11 @@ namespace Yarn.Unity.Editor
     class YarnSpinnerProjectSettings
     {
         public static string YarnSpinnerProjectSettingsPath => Path.Combine("ProjectSettings", "Packages", "dev.yarnspinner", "YarnSpinnerProjectSettings.json");
+        public static string YarnSpinnerGeneratedYSLSPath => Path.Combine("ProjectSettings", "Packages", "dev.yarnspinner", "generated.ysls.json");
 
         public bool autoRefreshLocalisedAssets = true;
         public bool automaticallyLinkAttributedYarnCommandsAndFunctions = true;
+        public bool generateYSLSFile = false;
 
         // need to make it os the output can be passed in also so it can log
         internal static YarnSpinnerProjectSettings GetOrCreateSettings(string path = null, Yarn.Unity.ILogger iLogger = null)
@@ -51,6 +53,7 @@ namespace Yarn.Unity.Editor
 
             settings.autoRefreshLocalisedAssets = true;
             settings.automaticallyLinkAttributedYarnCommandsAndFunctions = true;
+            settings.generateYSLSFile = false;
             settings.WriteSettings(path, logger);
 
             return settings;
@@ -70,10 +73,12 @@ namespace Yarn.Unity.Editor
 
             bool automaticallyLinkAttributedYarnCommandsAndFunctions = true;
             bool autoRefreshLocalisedAssets = true;
+            bool generateYSLSFile = false;
             try
             {
                 automaticallyLinkAttributedYarnCommandsAndFunctions = (bool)jsonDict["automaticallyLinkAttributedYarnCommandsAndFunctions"];
                 autoRefreshLocalisedAssets = (bool)jsonDict["autoRefreshLocalisedAssets"];
+                generateYSLSFile = (bool)jsonDict["generateYSLSFile"];
             }
             catch (System.Exception e)
             {
@@ -82,6 +87,7 @@ namespace Yarn.Unity.Editor
 
             settings.automaticallyLinkAttributedYarnCommandsAndFunctions = automaticallyLinkAttributedYarnCommandsAndFunctions;
             settings.autoRefreshLocalisedAssets = autoRefreshLocalisedAssets;
+            settings.generateYSLSFile = generateYSLSFile;
 
             return settings;
         }
@@ -100,6 +106,7 @@ namespace Yarn.Unity.Editor
             var dictForm = new System.Collections.Generic.Dictionary<string, bool>();
             dictForm["automaticallyLinkAttributedYarnCommandsAndFunctions"] = this.automaticallyLinkAttributedYarnCommandsAndFunctions;
             dictForm["autoRefreshLocalisedAssets"] = this.autoRefreshLocalisedAssets;
+            dictForm["generateYSLSFile"] = this.generateYSLSFile;
 
             var jsonValue = Json.Serialize(dictForm);
 
