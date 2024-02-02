@@ -81,8 +81,9 @@ namespace Yarn.Unity
             {
                 if (metadataEntry.StartsWith("shadow:") != false)
                 {
-                    // This is a shadow line.
-                    return metadataEntry.Substring("shadow:".Length);
+                    // This is a shadow line. Return the line ID that it's
+                    // shadowing.
+                    return "line:" + metadataEntry.Substring("shadow:".Length);
                 }
             }
 

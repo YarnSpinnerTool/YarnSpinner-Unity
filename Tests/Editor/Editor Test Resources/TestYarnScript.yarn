@@ -19,6 +19,6 @@ position: 0,0
 ===
 title: ShadowTest
 ---
-Dies ist ein Test der Schattenlinien. #line:shadowsource
-Dies ist ein Test der Schattenlinien. #shadow:shadowsource
+Dies ist ein Test der Schattenlinien. #line:shadowsource #meta1
+Dies ist ein Test der Schattenlinien. #shadow:shadowsource #meta2
 ===

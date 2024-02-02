@@ -749,5 +749,27 @@ But not all of them are.
             // "before" and "after" are different objects because the cache is invalidated.
             Assert.AreNotEqual(before, after);
         }
+
+        [Test]
+        public void YarnImporter_OnImportScriptWithShadowLines_CreatesShadowTable() {
+            var project = SetUpProject(YarnTestUtility.TestYarnScriptSource);
+
+            var metadata = project.lineMetadata;
+            var lineIDs = metadata.GetLineIDs();
+
+            // At least one shadow line entry should exist in the metadata
+            var shadowLineID = lineIDs.Should().Contain((id) => project.lineMetadata.GetShadowLineSource(id) != null).Subject;
+
+            // The entry should map to the line "shadowsource"
+            var sourceLineID = project.lineMetadata.GetShadowLineSource(shadowLineID);
+            sourceLineID.Should().BeEqualTo("line:shadowsource");
+
+            // The entry should have its own metadata, distinct from the source
+            project.lineMetadata.GetMetadata(sourceLineID).Should().Contain("meta1");
+            project.lineMetadata.GetMetadata(shadowLineID).Should().Contain("meta2");
+            
+            project.lineMetadata.GetMetadata(shadowLineID).Should().NotContain("meta1");
+            project.lineMetadata.GetMetadata(sourceLineID).Should().NotContain("meta2");
+        }
     }
 }
