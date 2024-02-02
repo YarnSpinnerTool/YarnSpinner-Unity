@@ -332,6 +332,16 @@
             property.
             </remarks>
         </member>
+        <member name="P:Yarn.Compiler.CompilationResult.ContainsErrors">
+            <summary>
+            Gets a value indicating whether this compilation result contains any
+            error diagnostics. 
+            </summary>
+            <remarks>
+            If this value is true, then the value contained in <see
+            cref="P:Yarn.Compiler.CompilationResult.Program"/> will not contain a valid output.
+            </remarks>
+        </member>
         <member name="P:Yarn.Compiler.CompilationResult.DebugInfo">
             <summary>
             Gets the collection of <see cref="P:Yarn.Compiler.CompilationResult.DebugInfo"/> objects for each node

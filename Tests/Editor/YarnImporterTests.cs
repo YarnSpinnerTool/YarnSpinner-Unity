@@ -192,7 +192,7 @@ But not all of them are.
 
             // Assert:
             // Metadata entries should be identical to what we expect.
-            CollectionAssert.AreEquivalent(simpleResult, simpleExpected);
+            CollectionAssert.AreEquivalent(simpleExpected, simpleResult);
         }
 
         [Test]
@@ -245,10 +245,12 @@ But not all of them are.
             // The project has a base localization, and no other
             // localizations. The base localization contains the expected
             // line IDs.
-            Assert.IsNotNull(project.baseLocalization);
-            Assert.AreEqual(1, project.localizations.Count());
-            Assert.AreSame(project.baseLocalization, project.localizations[0]);
-            CollectionAssert.AreEquivalent(project.baseLocalization.GetLineIDs(), YarnTestUtility.ExpectedStrings.Select(l => l.ID));
+
+            project.baseLocalization.Should().NotBeNull();
+            project.localizations.Should().HaveCount(1);
+            project.baseLocalization.Should().BeSameObjectAs(project.localizations[0]);
+
+            project.baseLocalization.GetLineIDs().Should().ContainExactly(YarnTestUtility.ExpectedStrings.Select(l => l.ID));
         }
 
         [Test]

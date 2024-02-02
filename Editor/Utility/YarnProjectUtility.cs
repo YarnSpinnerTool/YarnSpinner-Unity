@@ -105,7 +105,11 @@ namespace Yarn.Unity.Editor
 
             var importData = yarnProjectImporter.ImportData;
 
-            var baseLocalizationStrings = yarnProjectImporter.GenerateStringsTable();
+            var job = yarnProjectImporter.GetCompilationJob();
+            job.CompilationType = Compiler.CompilationJob.Type.StringsOnly;
+            var result = Compiler.Compiler.Compile(job);
+
+            var baseLocalizationStrings = yarnProjectImporter.GenerateStringsTable(result);
 
             var localizations = yarnProjectImporter.ImportData.localizations;
 
@@ -186,7 +190,11 @@ namespace Yarn.Unity.Editor
         internal static void UpdateAssetAddresses(YarnProjectImporter importer)
         {
 #if USE_ADDRESSABLES
-            var lineIDs = importer.GenerateStringsTable().Select(s => s.ID);
+            var job = importer.GetCompilationJob();
+            job.CompilationType = Compiler.CompilationJob.Type.StringsOnly;
+            var result = Compiler.Compiler.Compile(job);
+
+            var lineIDs = importer.GenerateStringsTable(result).Select(s => s.ID);
 
             // Get a map of language IDs to (lineID, asset path) pairs
             var languageToAssets = importer
@@ -538,7 +546,17 @@ namespace Yarn.Unity.Editor
         {
             // Perform a strings-only compilation to get a full strings
             // table, and generate the CSV. 
-            var stringTable = yarnProjectImporter.GenerateStringsTable();
+            var job = yarnProjectImporter.GetCompilationJob();
+            job.CompilationType = Compiler.CompilationJob.Type.StringsOnly;
+            var result = Compiler.Compiler.Compile(job);
+
+            if (result.ContainsErrors)
+            {
+                // The project contains errors. Bail out.
+                return false;
+            }
+
+            var stringTable = yarnProjectImporter.GenerateStringsTable(result);
 
             // If there was an error, bail out here
             if (stringTable == null)

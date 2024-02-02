@@ -38,6 +38,9 @@ namespace Yarn.Unity.Tests
         // given
         private string? CurrentLine { get; set; } = default;
 
+        // The asset of the most recently received line that we've been given
+        private UnityEngine.Object? CurrentAsset { get; set; } = default;
+
         // The text of the most recently received options that we've ben
         // given
         private List<string> CurrentOptions { get; set; } = new List<string>();
@@ -132,6 +135,7 @@ namespace Yarn.Unity.Tests
         {
             // Store the localised text in our CurrentLine property
             CurrentLine = line.Text.Text;
+            CurrentAsset = line.Asset;
 
             while (!readyToAdvance) {
                 await YarnTask.Yield();
@@ -159,9 +163,10 @@ namespace Yarn.Unity.Tests
 
         }
 
-        public void ExpectLine(string text)
+        public void ExpectLine(string text, UnityEngine.Object? asset = null)
         {
             CurrentLine.Should().BeEqualTo(text);
+            CurrentAsset.Should().BeEqualTo(asset);
             readyToAdvance = true;
         }
 

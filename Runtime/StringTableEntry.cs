@@ -4,7 +4,8 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 using System.Collections.Generic;
 using CsvHelper;
-using CsvHelper.Configuration;
+
+#nullable enable
 
 namespace Yarn.Unity
 {
@@ -25,7 +26,7 @@ namespace Yarn.Unity
         /// The text of this line, in the language specified by <see
         /// cref="Language"/>.
         /// </summary>
-        public string Text;
+        public string? Text;
 
         /// <summary>
         /// The name of the Yarn script in which this line was originally
@@ -94,7 +95,7 @@ namespace Yarn.Unity
             Language = s.Language;
         }
 
-        private static CsvHelper.Configuration.Configuration CsvConfiguration;
+        private static CsvHelper.Configuration.Configuration? CsvConfiguration;
 
         private static CsvHelper.Configuration.Configuration GetConfiguration()
         {
@@ -255,7 +256,7 @@ namespace Yarn.Unity
             return
                 Language.GetHashCode() ^
                 ID.GetHashCode() ^
-                Text.GetHashCode() ^
+                (Text?.GetHashCode() ?? 1) ^
                 File.GetHashCode() ^
                 Node.GetHashCode() ^
                 LineNumber.GetHashCode() ^

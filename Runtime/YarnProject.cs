@@ -25,7 +25,7 @@ namespace Yarn.Unity
         public List<Localization> localizations = new List<Localization>();
 
         [SerializeField]
-        [HideInInspector]
+        // [HideInInspector]
         public LineMetadata lineMetadata;
 
         [SerializeField]
@@ -57,7 +57,20 @@ namespace Yarn.Unity
                 return Program.Nodes.Keys.ToArray();
             }
         }
-        
+
+        [System.Serializable]
+        public struct ShadowTableEntry {
+            public string sourceLineID;
+            public string[] shadowMetadata;
+        }
+
+        [System.Serializable]
+        public class ShadowTableDictionary : SerializedDictionary<string, ShadowTableEntry> { }
+
+        [SerializeField]
+        private ShadowTableDictionary shadowTable = new ShadowTableDictionary();
+        public ShadowTableDictionary ShadowTable => shadowTable;
+
         /// <summary>
         /// The cached result of reading the default values from the <see
         /// cref="Program"/>.

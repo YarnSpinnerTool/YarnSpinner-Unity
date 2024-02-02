@@ -1,5 +1,6 @@
 language,id,text,file,node,lineNumber,lock,comment
-de,line:0e3dc4b,Spieler: Kannst du mich hören?,Packages/dev.yarnspinner.unity/Tests/Editor/TestYarnScript.yarn,Start,7,318f89c8,
-de,line:0967160,NPC: Klar und deutlich.,Packages/dev.yarnspinner.unity/Tests/Editor/TestYarnScript.yarn,Start,8,5b494822,
-de,line:04e806e,Mir reicht es.,Packages/dev.yarnspinner.unity/Tests/Editor/TestYarnScript.yarn,Start,9,1a2e5a09,
-de,line:0901fb2,Nochmal!,Packages/dev.yarnspinner.unity/Tests/Editor/TestYarnScript.yarn,Start,11,bb5a3bc4,
+de,line:0e3dc4b,Spieler: Kannst du mich hören?,Packages/dev.yarnspinner.unity/Tests/Editor/Editor Test Resources/TestYarnScript.yarn,Start,7,318f89c8,
+de,line:0967160,NPC: Klar und deutlich.,Packages/dev.yarnspinner.unity/Tests/Editor/Editor Test Resources/TestYarnScript.yarn,Start,8,5b494822,Line metadata: linemetadata lastline
+de,line:04e806e,Mir reicht es.,Packages/dev.yarnspinner.unity/Tests/Editor/Editor Test Resources/TestYarnScript.yarn,Start,9,1a2e5a09,Line metadata: linemetadata linemetadata2
+de,line:0901fb2,Nochmal!,Packages/dev.yarnspinner.unity/Tests/Editor/Editor Test Resources/TestYarnScript.yarn,Start,11,bb5a3bc4,
+de,line:shadowsource,Dies ist ein Test der Schattenlinien.,Packages/dev.yarnspinner.unity/Tests/Editor/Editor Test Resources/TestYarnScript.yarn,ShadowTest,22,ee749230,

@@ -7,12 +7,11 @@ using UnityEditor;
 using UnityEditor.AssetImporters;
 using System.IO;
 using System.Linq;
-using System.Globalization;
 using System.Collections.Generic;
-using Yarn;
-using Yarn.Compiler;
 using System.Security.Cryptography;
 using System.Text;
+
+#nullable enable
 
 namespace Yarn.Unity.Editor
 {

@@ -1,4 +1,4 @@
-/*
+﻿/*
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
@@ -15,10 +15,14 @@ namespace Yarn.Unity.Tests
     using UnityEngine.SceneManagement;
     using UnityEngine.TestTools;
 
-#nullable enable
+#if USE_UNITASK
+    using Cysharp.Threading.Tasks;
+    using YarnTask = Cysharp.Threading.Tasks.UniTask;
+#else
+    using YarnTask = System.Threading.Tasks.Task;
+#endif
 
-namespace Yarn.Unity.Tests
-{
+#nullable enable
 
     [TestFixture]
     public class DialogueRunnerTests : IPrebuildSetup, IPostBuildCleanup
@@ -277,7 +281,7 @@ namespace Yarn.Unity.Tests
 
             yarnProject.Should().NotBeNull();
 
-            yarnProject!.NodeNames.Should().Contain(testNodes);
+            yarnProject!.NodeNames.Should().ContainAllOf(testNodes);
 
             yield return null;
         }
@@ -553,5 +557,17 @@ namespace Yarn.Unity.Tests
 
             runner.Stop();
         }
+
+        [UnityTest]
+        public IEnumerator DialogueRunner_LinesWithAssets_HaveAssets() => YarnAsync.ToCoroutine(async () =>
+        {
+            throw new NotImplementedException();
+        });
+
+        [UnityTest]
+        public IEnumerator DialogueRunner_RunningShadowLines_ReusesAssets() => YarnAsync.ToCoroutine(async () =>
+        {
+            throw new NotImplementedException();
+        });
     }
 }

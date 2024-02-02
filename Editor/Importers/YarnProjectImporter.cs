@@ -426,7 +426,7 @@ namespace Yarn.Unity.Editor
                 if (localisationInfo.languageID == importData.baseLanguageName)
                 {
                     // No strings file needed - we'll use the program-supplied string table.
-                    stringTable = GenerateStringsTable();
+                    stringTable = GenerateStringsTable(compilationResult);
 
                     // We don't need to add a default localization.
                     shouldAddDefaultLocalization = false;
@@ -660,14 +660,25 @@ namespace Yarn.Unity.Editor
             }
         } 
 
-        private CompilationResult? CompileStringsOnly()
+        internal CompilationJob GetCompilationJob() {
+            var project = GetProject();
+
+            if (project == null) {
+                return default;
+            }
+
+            return CompilationJob.CreateFromFiles(project.SourceFiles);
+        }
+
+        
+        private IDictionary<string, StringInfo>? CompileStringsOnly()
         {
-            var paths = GetProject().SourceFiles;
+            var paths = GetProject()?.SourceFiles;
             
             var job = CompilationJob.CreateFromFiles(paths);
             job.CompilationType = CompilationJob.Type.StringsOnly;
 
-            return Compiler.Compiler.Compile(job);
+            return Compiler.Compiler.Compile(job)?.StringTable;
         }
 
         internal IEnumerable<string> GetErrorsForScript(TextAsset sourceScript) {
@@ -682,6 +693,14 @@ namespace Yarn.Unity.Editor
             return Enumerable.Empty<string>();
         }
 
+        internal IEnumerable<StringTableEntry>? GenerateStringsTable() {
+            var job = GetCompilationJob();
+            job.CompilationType = CompilationJob.Type.StringsOnly;
+            var result = Compiler.Compiler.Compile(job);
+            return GenerateStringsTable(result);
+            
+        }
+
         /// <summary>
         /// Generates a collection of <see cref="StringTableEntry"/>
         /// objects, one for each line in this Yarn Project's scripts.
@@ -690,10 +709,8 @@ namespace Yarn.Unity.Editor
         /// cref="StringTableEntry"/> for each of the lines in the Yarn
         /// Project, or <see langword="null"/> if the Yarn Project contains
         /// errors.</returns>
-        internal IEnumerable<StringTableEntry>? GenerateStringsTable()
+        internal IEnumerable<StringTableEntry>? GenerateStringsTable(CompilationResult compilationResult)
         {
-            CompilationResult? compilationResult = CompileStringsOnly();
-
             if (compilationResult == null)
             {
                 // We only get no value if we have no scripts to work with.
@@ -715,15 +732,17 @@ namespace Yarn.Unity.Editor
 
         internal IEnumerable<LineMetadataTableEntry>? GenerateLineMetadataEntries()
         {
-            CompilationResult? compilationResult = CompileStringsOnly();
+            CompilationJob compilationJob = GetCompilationJob();
 
-            if (compilationResult == null)
-            {
-                // We only get no value if we have no scripts to work with.
-                // In this case, return an empty collection - there's no
-                // error, but there's no content either.
+            if (compilationJob.Files.Any() == false) {
+                // We have no scripts to work with. In this case, return an
+                // empty collection - there's no error, but there's no content
+                // either.
                 return new List<LineMetadataTableEntry>();
             }
+            compilationJob.CompilationType = CompilationJob.Type.StringsOnly;
+
+            CompilationResult compilationResult = Compiler.Compiler.Compile(compilationJob);
 
             var errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
 
@@ -738,16 +757,18 @@ namespace Yarn.Unity.Editor
 
         private IEnumerable<StringTableEntry> GetStringTableEntries(CompilationResult result)
         {
-            
-            return result.StringTable.Select(x => new StringTableEntry
+
+            var linesWithContent = result.StringTable.Where(s => s.Value.text != null);
+
+            return linesWithContent.Select(x => new StringTableEntry
             {
                 ID = x.Key,
-                Language = GetProject().BaseLanguage,
+                Language = GetProject()?.BaseLanguage ?? "<unknown language>",
                 Text = x.Value.text,
                 File = x.Value.fileName,
                 Node = x.Value.nodeName,
                 LineNumber = x.Value.lineNumber.ToString(),
-                Lock = YarnImporter.GetHashString(x.Value.text, 8),
+                Lock = YarnImporter.GetHashString(x.Value.text!, 8),
                 Comment = GenerateCommentWithLineMetadata(x.Value.metadata),
             });
         }

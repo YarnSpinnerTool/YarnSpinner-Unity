@@ -3,7 +3,12 @@
   "sourceFiles": [
     "./TestYarnScript.yarn"
   ],
-  "localisation": {},
-  "baseLanguage": "en",
+  "excludeFiles": [],
+  "localisation": {
+    "de": {
+      "assets": "Voiceover/de"
+    }
+  },
+  "baseLanguage": "de",
   "compilerOptions": {}
 }
