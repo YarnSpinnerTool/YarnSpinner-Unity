@@ -67,10 +67,6 @@ namespace Yarn.Unity
         [System.Serializable]
         public class ShadowTableDictionary : SerializedDictionary<string, ShadowTableEntry> { }
 
-        [SerializeField]
-        private ShadowTableDictionary shadowTable = new ShadowTableDictionary();
-        public ShadowTableDictionary ShadowTable => shadowTable;
-
         /// <summary>
         /// The cached result of reading the default values from the <see
         /// cref="Program"/>.

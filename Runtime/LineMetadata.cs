@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     [Serializable]
@@ -57,13 +59,34 @@ namespace Yarn.Unity
         /// </summary>
         /// <param name="lineID">The line ID.</param>
         /// <returns>An array of each piece of metadata if defined, otherwise returns null.</returns>
-        public string[] GetMetadata(string lineID)
+        public string[]? GetMetadata(string lineID)
         {
             if (_lineMetadata.TryGetValue(lineID, out var result))
             {
                 return result.Split(' ');
             }
 
+            return null;
+        }
+
+        public string? GetShadowLineSource(string lineID) {
+            if (_lineMetadata.TryGetValue(lineID, out var metadataString) == false) {
+                // The line has no metadata, so it is not a shadow line.
+                return null;
+            }
+
+            var metadata = metadataString.Split(' ');
+
+            foreach (var metadataEntry in metadata)
+            {
+                if (metadataEntry.StartsWith("shadow:") != false)
+                {
+                    // This is a shadow line.
+                    return metadataEntry.Substring("shadow:".Length);
+                }
+            }
+
+            // The line had metadata, but it wasn't a shadow line.
             return null;
         }
     }
