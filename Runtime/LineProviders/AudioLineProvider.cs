@@ -83,9 +83,9 @@ namespace Yarn.Unity
         }
 
 #if USE_ADDRESSABLES
-        private class AddressablesAudioLineProvider: IAudioLineProvider
+        private class AddressablesAudioLineProvider: IAssetLineProvider
         {
-            AudioLineProvider audioLineProvider { get; set; }
+            public AudioLineProvider audioLineProvider { get; set; }
 
             // Lines are available if there are no outstanding load operations
             public bool LinesAvailable => pendingLoadOperations.Count == 0;
@@ -104,7 +104,7 @@ namespace Yarn.Unity
 
                 // If the audio language is different to the text language,
                 // pull the text data from a different localization
-                if (audioLanguage != textLanguageCode)
+                if (audioLineProvider.audioLanguageCode != audioLineProvider.textLanguageCode)
                 {
                     textLocalization = audioLineProvider.YarnProject.GetLocalization(audioLineProvider.textLanguageCode);
                 }
@@ -146,7 +146,7 @@ namespace Yarn.Unity
                     TextID = line.ID,
                     RawText = text,
                     Substitutions = line.Substitutions,
-                    Metadata = YarnProject.lineMetadata.GetMetadata(line.ID),
+                    Metadata = audioLineProvider.YarnProject.lineMetadata.GetMetadata(line.ID),
                     Asset = audioClip,
                 };
             }
@@ -227,7 +227,7 @@ namespace Yarn.Unity
                         completedLoadOperations.Add(stringID, operation);
                         break;
                     case AsyncOperationStatus.Failed:
-                        Debug.LogError($"Failed to load asset for line {stringID} in localization \"{YarnProject.GetLocalization(audioLanguage).LocaleCode}\"");
+                        Debug.LogError($"Failed to load asset for line {stringID} in localization \"{audioLineProvider.YarnProject.GetLocalization(audioLineProvider.audioLanguageCode).LocaleCode}\"");
                         break;
                     default:
                         // We shouldn't be here?
