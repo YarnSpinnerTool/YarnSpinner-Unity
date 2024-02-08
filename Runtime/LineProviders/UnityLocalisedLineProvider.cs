@@ -11,7 +11,6 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement;
 using UnityEngine.Localization.Metadata;
-
 #endif
 
 #if UNITY_EDITOR
@@ -318,7 +317,8 @@ namespace Yarn.Unity.UnityLocalization
     }
 
 #if USE_UNITY_LOCALIZATION
-    public class LineMetadata : IMetadata {
+    public class LineMetadata : IMetadata
+    {
         public string nodeName;
         public string[] tags;
     }

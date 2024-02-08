@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     - automatically associating assets with localisations
     - automatically linking YarnCommand and YarnFunction attributed methods to the dialogue runner
     - generating a `ysls` file for all of your Yarn attributed methods
-      - this is save to `ProjectSettings\Packages\dev.yarnspinner\generated.ysls.json`
+      - this is saved to `ProjectSettings\Packages\dev.yarnspinner\generated.ysls.json`
       - this is an experimental feature to support better editor integration down the line
       - as such this defaults to *not* being generated
   - enabling/disabling C# linking or ysls generation will force an entire C# reimport
@@ -45,6 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Actions Registration now dumps generated code into the same temporary folder the logs live in
 - `ActionsGenerator` will now generate C# warnings for incorrectly named methods that are attributed as `YarnFunction` or `YarnCommand`.
 - Fixed a bug where `AudioLineProvider` didn't allow runtime changing of the text locale.
+- Fixed a bug where the Unity Localisation strings tables would have duplicate lines after tagging all lines in a project.
 
 ### Removed
 
