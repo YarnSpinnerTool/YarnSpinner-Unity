@@ -110,6 +110,7 @@ namespace Yarn.Unity.Tests
             // setting the path to use *only* the files for this project
             var a = importer.GetProject();
             a.SourceFilePatterns = newPaths.Select(p => $"./{Path.GetFileName(p)}");
+            a.BaseLanguage = "en";
             a.SaveToFile($"{AssetPath}/{projectName}.yarnproject");
             
             // making it use the tables we made
