@@ -119,10 +119,6 @@ namespace Yarn.Unity.Tests
             // flagging it as needing save and reimport
             EditorUtility.SetDirty(importer);
             importer.SaveAndReimport();
-
-            // now open and read out the contents of the json
-            var json = File.ReadAllText($"{AssetPath}/{projectName}.yarnproject");
-            Debug.LogWarning(json);
         }
 
         public void Cleanup()
@@ -156,6 +152,12 @@ namespace Yarn.Unity.Tests
         {
             var table = ValidateSetup();
 
+            // temp logging
+            var json = File.ReadAllText($"{AssetPath}/ProjectA.yarnproject");
+            Debug.LogWarning(json);
+            json = File.ReadAllText($"{AssetPath}/ProjectB.yarnproject");
+            Debug.LogWarning(json);
+
             // and it needs to have the same number of lines as our projects have
             Assert.AreEqual(table.Count(), lines.Count());
 
@@ -174,6 +176,12 @@ namespace Yarn.Unity.Tests
             var projectA = AssetImporter.GetAtPath($"{AssetPath}/ProjectA.yarnproject") as YarnProjectImporter;
             // now we tag the yarn
             YarnProjectUtility.AddLineTagsToFilesInYarnProject(projectA);
+
+            // temp logging
+            var json = File.ReadAllText($"{AssetPath}/ProjectA.yarnproject");
+            Debug.LogWarning(json);
+            json = File.ReadAllText($"{AssetPath}/ProjectB.yarnproject");
+            Debug.LogWarning(json);
 
             // and now we make sure it correctly added and removed the lines
 
