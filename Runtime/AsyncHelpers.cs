@@ -108,6 +108,10 @@ namespace Yarn.Unity
                 await YarnTask.Yield();
             }
 
+            if (operationHandle.Status == AsyncOperationStatus.Failed) {
+                throw operationHandle.OperationException;
+            }
+
             return operationHandle.Result;
 #endif
         }
@@ -133,15 +137,24 @@ namespace Yarn.Unity
 #endif
         }
 
-        public static IEnumerator ToCoroutine(Func<YarnTask> factory) {
+        public static IEnumerator ToCoroutine(Func<YarnTask> factory)
+        {
 #if USE_UNITASK
             return UniTask.ToCoroutine(task);
 #else
             var task = factory();
-            while (task.IsCompleted == false) {
+            // Yield until the task is complete, successfully or otherwise
+            while (task.IsCompleted == false)
+            {
                 yield return null;
             }
-            #endif
+
+            if (task.Exception != null)
+            {
+                // The task ended because it threw an exception. Rethrow it.
+                throw task.Exception;
+            }
+#endif
         }
 
         internal static async YarnTask WaitForSeconds(float timeInSeconds)
