@@ -560,8 +560,12 @@ namespace Yarn.Unity.Editor
 
             var defaultCulture = new System.Globalization.CultureInfo(project.BaseLanguage);
 
+            Debug.LogWarning($"Looking for \"{project.BaseLanguage}\"");
+            Debug.LogWarning($"Will be checking {unityLocalisationStringTableCollection.StringTables.Count()} tables");
+
             foreach (var table in unityLocalisationStringTableCollection.StringTables)
             {
+                Debug.LogWarning($"Table is \"{table.LocaleIdentifier.CultureInfo}\"");
                 if (table.LocaleIdentifier.CultureInfo != defaultCulture)
                 {
                     var neutralTable = table.LocaleIdentifier.CultureInfo.IsNeutralCulture 
