@@ -119,6 +119,10 @@ namespace Yarn.Unity.Tests
             // flagging it as needing save and reimport
             EditorUtility.SetDirty(importer);
             importer.SaveAndReimport();
+
+            // now open and read out the contents of the json
+            var json = File.ReadAllText($"{AssetPath}/{projectName}.yarnproject");
+            Debug.LogWarning(json);
         }
 
         public void Cleanup()
