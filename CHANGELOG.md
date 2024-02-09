@@ -12,23 +12,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added a Unity Project scoped settings that allows you to override some of the default behaviours of Yarn Spinner.
   - Yarn Spinner settings are saved to the path `ProjectSettings\Packages\dev.yarnspinner\YarnSpinnerProjectSettings.json`.
   - The settings be changed in the Project Settings window, by choosing `Edit -> Project Settings -> Yarn Spinner`.
-  - The setting currently supports two convenience features of Yarn Spinner:
+  - The setting currently supports three convenience features of Yarn Spinner:
     - Automatically associating assets with localisations
     - Automatically linking `YarnCommand` and `YarnFunction` attributed methods to the Dialogue Runner.
-  - Enabling or disabling `YarnCommand` and `YarnFunction` linking will cause your project to recompile.
+    - Generating a `.ysls.json` file that stores information about your Yarn attributed methods.
+      - This file is saved to `ProjectSettings\Packages\dev.yarnspinner\generated.ysls.json`.
+      - This is an experimental feature to support better editor integration down the line. As such, this feature defaults to 'off'. 
+  - Enabling or disabling `YarnCommand` and `YarnFunction` linking, or `.ysls` generation, will cause your project to recompile.
   - Enabling or disabling asset linking will cause a reimport of all `yarnproject` assets.
-- A Unity Project scoped settings that allows you to override some of the default behaviours of Yarn Spinner
-  - settings are saved to a file in `ProjectSettings\Packages\dev.yarnspinner\YarnSpinnerProjectSettings.json`
-  - these can be changed via `Edit -> Project Settings -> Yarn Spinner`
-  - currently supports three convenience features of Yarn Spinner:
-    - automatically associating assets with localisations
-    - automatically linking YarnCommand and YarnFunction attributed methods to the dialogue runner
-    - generating a `ysls` file for all of your Yarn attributed methods
-      - this is saved to `ProjectSettings\Packages\dev.yarnspinner\generated.ysls.json`
-      - this is an experimental feature to support better editor integration down the line
-      - as such this defaults to *not* being generated
-  - enabling/disabling C# linking or ysls generation will force an entire C# reimport
-  - enabling/disabling asset linking will force a reimport of all `yarnprojects`
 - `Yarn.Unity.ActionAnalyser.Action` now has a `MethodIdentifierName` property, which is the short form of the method name.
 - `DialogueAdvanceInput` now supports Virtual Button names in addition to KeyCodes and Input Actions.
   - This can be configured to work on button or key release or press. By default, the component works on release.
