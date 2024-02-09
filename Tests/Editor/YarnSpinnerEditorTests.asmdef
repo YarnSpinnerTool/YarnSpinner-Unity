@@ -6,7 +6,7 @@
         "YarnSpinner.Unity.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "YarnSpinnerTests.Shared"
+        "YarnSpinnerTests.Shared",
         "Unity.Localization",
         "Unity.Localization.Editor",
         "Unity.Localization.Settings"
