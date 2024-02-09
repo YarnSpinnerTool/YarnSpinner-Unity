@@ -389,14 +389,16 @@ namespace Yarn.Unity.Editor
             return true;
         }
 
-        internal static void AddLineTagsToFilesInYarnProject(YarnProjectImporter importer)
+        private static (List<string>, List<string>) ExtantLineTags(YarnProjectImporter importer)
         {
             // First, gather all existing line tags across ALL yarn
             // projects, so that we don't accidentally overwrite an
-            // existing one. Do this by finding all yarn scripts in all
-            // yarn projects, and get the string tags inside them.
-
-            var allYarnFiles =
+            // existing one. Do this by finding all yarn projects, 
+            // and get the string tags inside them.
+            // By doing it in this way we get the same implicit tags
+            // from the project as the importer would normally do,
+            // letting us then do a direct comparision for them.
+            var allYarnProjects =
                 // get all yarn projects across the entire project
                 AssetDatabase.FindAssets($"t:{nameof(YarnProject)}")
                 // Get the path for each asset's GUID
@@ -407,19 +409,10 @@ namespace Yarn.Unity.Editor
                 .OfType<YarnProjectImporter>()
                 // Ensure that its import data is present
                 .Where(i => i.ImportData != null)
-                // Get all of their source scripts, as a single sequence
-                .SelectMany(i => i.ImportData.yarnFiles)
-                // Get the path for each asset
-                .Select(sourceAsset => AssetDatabase.GetAssetPath(sourceAsset))
-                // get each asset importer for that path
-                .Select(path => AssetImporter.GetAtPath(path))
-                // ensure that it's a YarnImporter
-                .OfType<YarnImporter>()
-                // get the path for each importer's asset (the compiler
-                // will use this)
-                .Select(i => AssetDatabase.GetAssetPath(i))
-                // remove any nulls, in case any are found
-                .Where(path => path != null);
+                // get the project out, and also flag if it is the project for THIS importer
+                .Select(i => (i.GetProject(), i == importer))
+                // remove any nulls just in case any are found
+                .Where(p => p.Item1 != null);
 
 #if YARNSPINNER_DEBUG
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -427,40 +420,61 @@ namespace Yarn.Unity.Editor
 
             var library = Actions.GetLibrary();
 
+            var allExistingTags = new List<string>();
+            var projectImplicitTags = new List<string>();
+
             // Compile all of these, and get whatever existing string tags
             // they had. Do each in isolation so that we can continue even
-            // if a file contains a parse error.
-            var allExistingTags = allYarnFiles.SelectMany(path =>
+            // if a project contains a parse error.
+            foreach (var tuple in allYarnProjects)
             {
-                // Compile this script in strings-only mode to get
-                // string entries
-                var compilationJob = Yarn.Compiler.CompilationJob.CreateFromFiles(path);
+                var project = tuple.Item1;
+                var compilationJob = Yarn.Compiler.CompilationJob.CreateFromFiles(project.SourceFiles);
                 compilationJob.CompilationType = Yarn.Compiler.CompilationJob.Type.StringsOnly;
                 compilationJob.Library = library;
 
                 var result = Yarn.Compiler.Compiler.Compile(compilationJob);
-
-                bool containsErrors = result.Diagnostics
-                    .Any(d => d.Severity == Compiler.Diagnostic.DiagnosticSeverity.Error);
-
-                if (containsErrors) {
-                    Debug.LogWarning($"Can't check for existing line tags in {path} because it contains errors.");
-                    return new string[] { };
+                bool containsErrors = result.Diagnostics.Any(d => d.Severity == Compiler.Diagnostic.DiagnosticSeverity.Error);
+                if (containsErrors)
+                {
+                    Debug.LogWarning($"{project} has errors so cannot be scanned for tagging.");
+                    continue;
                 }
+                allExistingTags.AddRange(result.StringTable.Where(i => i.Value.isImplicitTag == false).Select(i => i.Key));
                 
-                return result.StringTable.Where(i => i.Value.isImplicitTag == false).Select(i => i.Key);
-            }).ToList(); // immediately execute this query so we can determine timing information
+                // we add the implicit lines IDs only for this project
+                if (tuple.Item2)
+                {
+                    projectImplicitTags.AddRange(result.StringTable.Where(i => i.Value.isImplicitTag == true).Select(i => i.Key));
+                }
+            }
 
 #if YARNSPINNER_DEBUG
             stopwatch.Stop();
-            Debug.Log($"Checked {allYarnFiles.Count()} yarn files for line tags in {stopwatch.ElapsedMilliseconds}ms");
+            Debug.Log($"Checked {allYarnProjects.Count()} yarn files for line tags in {stopwatch.ElapsedMilliseconds}ms");
+#endif
+            return (allExistingTags, projectImplicitTags);
+        }
+
+        internal static void AddLineTagsToFilesInYarnProject(YarnProjectImporter importer)
+        {
+            var extantTags = YarnProjectUtility.ExtantLineTags(importer);
+            var allExistingTags = extantTags.Item1;
+
+#if USE_UNITY_LOCALIZATION
+            // if we are using Unity localisation we need to first remove the implicit tags for this project from the strings table
+            if (importer.UseUnityLocalisationSystem && importer.unityLocalisationStringTableCollection != null)
+            {
+                foreach (var implicitTag in extantTags.Item2)
+                {
+                    importer.unityLocalisationStringTableCollection.RemoveEntry(implicitTag);
+                }
+            }
 #endif
 
             var modifiedFiles = new List<string>();
-
             try
             {
-
                 AssetDatabase.StartAssetEditing();
 
                 foreach (var script in importer.ImportData.yarnFiles)

@@ -34,30 +34,33 @@ namespace Yarn.Unity.Editor
                 using (new EditorGUI.IndentLevelScope())
                 {
                     EditorGUILayout.BeginHorizontal();
-
                     EditorGUILayout.LabelField("Update Localised Assets", GUILayout.Width(290), GUILayout.ExpandWidth(false));
                     var localisedAssetUpdate = EditorGUILayout.Toggle(unsavedSettings.autoRefreshLocalisedAssets, GUILayout.ExpandWidth(false));
-
                     EditorGUILayout.EndHorizontal();
 
                     EditorGUILayout.BeginHorizontal();
-
                     EditorGUILayout.LabelField("Generate linkings for Functions and Commands", GUILayout.Width(290), GUILayout.ExpandWidth(false));
                     var linkingAttributedFuncs = EditorGUILayout.Toggle(unsavedSettings.automaticallyLinkAttributedYarnCommandsAndFunctions, GUILayout.ExpandWidth(false));
+                    EditorGUILayout.EndHorizontal();
 
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField("Generate YSLS file for attributed methods", GUILayout.Width(290), GUILayout.ExpandWidth(false));
+                    var generateYSLS = EditorGUILayout.Toggle(unsavedSettings.generateYSLSFile, GUILayout.ExpandWidth(false));
                     EditorGUILayout.EndHorizontal();
 
                     if (changeCheck.changed)
                     {   
                         unsavedSettings.autoRefreshLocalisedAssets = localisedAssetUpdate;
                         unsavedSettings.automaticallyLinkAttributedYarnCommandsAndFunctions = linkingAttributedFuncs;
+                        unsavedSettings.generateYSLSFile = generateYSLS;
                     }
 
                     bool disabledReimportButton = true;
                     if
                     (
                         unsavedSettings.automaticallyLinkAttributedYarnCommandsAndFunctions != baseSettings.automaticallyLinkAttributedYarnCommandsAndFunctions ||
-                        unsavedSettings.autoRefreshLocalisedAssets != baseSettings.autoRefreshLocalisedAssets
+                        unsavedSettings.autoRefreshLocalisedAssets != baseSettings.autoRefreshLocalisedAssets ||
+                        unsavedSettings.generateYSLSFile != baseSettings.generateYSLSFile
                     )
                     {
                         disabledReimportButton = false;
@@ -83,10 +86,15 @@ namespace Yarn.Unity.Editor
                             {
                                 needsCSharpRecompilation = true;
                             }
+                            if (baseSettings.generateYSLSFile != unsavedSettings.generateYSLSFile)
+                            {
+                                needsCSharpRecompilation = true;
+                            }
 
                             // saving the changed settings out to disk
                             baseSettings.autoRefreshLocalisedAssets = unsavedSettings.autoRefreshLocalisedAssets;
                             baseSettings.automaticallyLinkAttributedYarnCommandsAndFunctions = unsavedSettings.automaticallyLinkAttributedYarnCommandsAndFunctions;
+                            baseSettings.generateYSLSFile = unsavedSettings.generateYSLSFile;
                             baseSettings.WriteSettings();
 
                             // now we can reimport

@@ -17,38 +17,44 @@ namespace Yarn.Unity
     public class AudioLineProvider : LineProviderBehaviour
     {
 #region AudioLineProviderInternalObjects
-        private interface IAudioLineProvider
+        private interface IAssetLineProvider
         {
             LocalizedLine GetLocalizedLine(Yarn.Line line);
             void PrepareForLines(IEnumerable<string> lineIDs);
             bool LinesAvailable { get; }
-            YarnProject YarnProject { set; }
-            string textLanguageCode { set; get; }
-            string audioLanguage { set; get; }
+            AudioLineProvider audioLineProvider { get; set; }
         }
 
-        private class DirectReferenceAudioLineProvider: IAudioLineProvider
+        private class NullProvider: IAssetLineProvider
         {
-            public string textLanguageCode { get; set; }
+            public LocalizedLine GetLocalizedLine(Yarn.Line line)
+            {
+                Debug.LogWarning($"asked for line {line.ID} but this provider has no project.");
+                return null;
+            }
+            public void PrepareForLines(IEnumerable<string> lineIDs) { }
+            public bool LinesAvailable { get { return false; } }
+            public AudioLineProvider audioLineProvider { get; set; }
+        }
 
-            public string audioLanguage { set; get; }
-
-            public YarnProject YarnProject { get; set; }
+        private class DirectReferenceAudioLineProvider: IAssetLineProvider
+        {
+            public AudioLineProvider audioLineProvider { get; set; }
 
             // Lines are always available because they loaded with the scene
             public bool LinesAvailable => true;
 
             public LocalizedLine GetLocalizedLine(Line line)
             {
-                Localization audioLocalization = YarnProject.GetLocalization(audioLanguage);
+                Localization audioLocalization = audioLineProvider.YarnProject.GetLocalization(audioLineProvider.audioLanguageCode);
 
                 Localization textLocalization;
 
                 // If the audio language is different to the text language,
                 // pull the text data from a different localization
-                if (audioLanguage != textLanguageCode)
+                if (audioLineProvider.audioLanguageCode != audioLineProvider.textLanguageCode)
                 {
-                    textLocalization = YarnProject.GetLocalization(textLanguageCode);
+                    textLocalization = audioLineProvider.YarnProject.GetLocalization(audioLineProvider.textLanguageCode);
                 }
                 else
                 {
@@ -69,7 +75,7 @@ namespace Yarn.Unity
                     TextID = line.ID,
                     RawText = text,
                     Substitutions = line.Substitutions,
-                    Metadata = YarnProject.lineMetadata.GetMetadata(line.ID),
+                    Metadata = audioLineProvider.YarnProject.lineMetadata.GetMetadata(line.ID),
                     Asset = audioClip,
                 };
             }
@@ -81,13 +87,9 @@ namespace Yarn.Unity
         }
 
 #if USE_ADDRESSABLES
-        private class AddressablesAudioLineProvider: IAudioLineProvider
+        private class AddressablesAudioLineProvider: IAssetLineProvider
         {
-            public string textLanguageCode { get; set; }
-
-            public string audioLanguage { set; get; }
-
-            public YarnProject YarnProject { get; set; }
+            public AudioLineProvider audioLineProvider { get; set; }
 
             // Lines are available if there are no outstanding load operations
             public bool LinesAvailable => pendingLoadOperations.Count == 0;
@@ -100,15 +102,15 @@ namespace Yarn.Unity
 
             public LocalizedLine GetLocalizedLine(Line line)
             {
-                Localization audioLocalization = YarnProject.GetLocalization(audioLanguage);
+                Localization audioLocalization = audioLineProvider.YarnProject.GetLocalization(audioLineProvider.audioLanguageCode);
 
                 Localization textLocalization;
 
                 // If the audio language is different to the text language,
                 // pull the text data from a different localization
-                if (audioLanguage != textLanguageCode)
+                if (audioLineProvider.audioLanguageCode != audioLineProvider.textLanguageCode)
                 {
-                    textLocalization = YarnProject.GetLocalization(textLanguageCode);
+                    textLocalization = audioLineProvider.YarnProject.GetLocalization(audioLineProvider.textLanguageCode);
                 }
                 else
                 {
@@ -148,18 +150,18 @@ namespace Yarn.Unity
                     TextID = line.ID,
                     RawText = text,
                     Substitutions = line.Substitutions,
-                    Metadata = YarnProject.lineMetadata.GetMetadata(line.ID),
+                    Metadata = audioLineProvider.YarnProject.lineMetadata.GetMetadata(line.ID),
                     Asset = audioClip,
                 };
             }
 
             public void PrepareForLines(IEnumerable<string> lineIDs)
             {
-                var audioAddressableLocalization = YarnProject.GetLocalization(audioLanguage);
+                var audioAddressableLocalization = audioLineProvider.YarnProject.GetLocalization(audioLineProvider.audioLanguageCode);
 
                 if (audioAddressableLocalization.UsesAddressableAssets == false)
                 {
-                    Debug.LogError($"The Yarn project {YarnProject.name} isn't using addressable assets, but the {nameof(AudioLineProvider)} is attempting to do so. Double check your project settings.");
+                    Debug.LogError($"The Yarn project {audioLineProvider.YarnProject.name} isn't using addressable assets, but the {nameof(AudioLineProvider)} is attempting to do so. Double check your project settings.");
                     return;
                 }
 
@@ -229,7 +231,7 @@ namespace Yarn.Unity
                         completedLoadOperations.Add(stringID, operation);
                         break;
                     case AsyncOperationStatus.Failed:
-                        Debug.LogError($"Failed to load asset for line {stringID} in localization \"{YarnProject.GetLocalization(audioLanguage).LocaleCode}\"");
+                        Debug.LogError($"Failed to load asset for line {stringID} in localization \"{audioLineProvider.YarnProject.GetLocalization(audioLineProvider.audioLanguageCode).LocaleCode}\"");
                         break;
                     default:
                         // We shouldn't be here?
@@ -250,42 +252,62 @@ namespace Yarn.Unity
         /// <summary>Specifies the language code to use for audio content
         /// for this <see cref="AudioLineProvider"/>.
         [Language]
-        public string audioLanguage = System.Globalization.CultureInfo.CurrentCulture.Name;
+        public string audioLanguageCode = System.Globalization.CultureInfo.CurrentCulture.Name;
 
         public override string LocaleCode => textLanguageCode;
 
-        private IAudioLineProvider _provider;
-        private IAudioLineProvider provider
+        private IAssetLineProvider _provider;
+        private IAssetLineProvider provider
         {
             get
             {
-                if (_provider == null)
+                IAssetLineProvider configureProvider()
                 {
+                    IAssetLineProvider p;
                     if (this.YarnProject != null)
                     {
-                        if (YarnProject.GetLocalization(audioLanguage).UsesAddressableAssets)
+                        if (YarnProject.GetLocalization(audioLanguageCode).UsesAddressableAssets)
                         {
 #if USE_ADDRESSABLES
-                            _provider = new AddressablesAudioLineProvider();
+                            p = new AddressablesAudioLineProvider();
 #else
                             Debug.LogError($"The Yarn project {YarnProject.name} is configured to use Addressable assets, but the package is not installed. Double check your package settings. Falling back to providing non-Addressable audio loading");
-                            _provider = new DirectReferenceAudioLineProvider();
+                            p = new DirectReferenceAudioLineProvider();
 #endif
                         }
                         else
                         {
-                            _provider = new DirectReferenceAudioLineProvider();
+                            p = new DirectReferenceAudioLineProvider();
                         }
                     }
                     else
                     {
-                        Debug.LogError($"The {nameof(AudioLineProvider)} is attempting to configure itself but the project isn't defined. Falling back to providing non-Addressable audio loading");
-                        _provider = new DirectReferenceAudioLineProvider();
+                        Debug.LogError($"The {nameof(AudioLineProvider)} is attempting to configure itself but the project isn't defined.");
+                        p = new NullProvider();
                     }
-                    _provider.YarnProject = this.YarnProject;
-                    _provider.textLanguageCode = this.textLanguageCode;
-                    _provider.audioLanguage = this.audioLanguage;
+                    p.audioLineProvider = this;
+                    return p;
                 }
+
+                // do we have an already set up provider?
+                // first time this runs it will always be null so we need to set one up
+                if (_provider == null)
+                {
+                    _provider = configureProvider();
+                }
+                // we have been configured but it is the null one
+                // this only happens when a yarn project hasn't been provided so there isn't really any solution
+                // except to try to configure it again and hope
+                else if (_provider is NullProvider)
+                {
+                    // do we have a project yet?
+                    // if so we reconfigure and try again
+                    if (this.YarnProject != null)
+                    {
+                        _provider = configureProvider();
+                    }
+                }
+
                 return _provider;
             }
         }

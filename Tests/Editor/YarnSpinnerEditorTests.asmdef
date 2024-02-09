@@ -5,7 +5,10 @@
         "YarnSpinner.Unity",
         "YarnSpinner.Unity.Editor",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "Unity.Localization",
+        "Unity.Localization.Editor",
+        "Unity.Localization.Settings"
     ],
     "includePlatforms": [
         "Editor"
@@ -27,6 +30,11 @@
             "name": "com.unity.addressables",
             "expression": "1.0.0",
             "define": "USE_ADDRESSABLES"
+        },
+        {
+            "name": "com.unity.localization",
+            "expression": "1.0.0",
+            "define": "USE_UNITY_LOCALIZATION"
         }
     ],
     "noEngineReferences": false

@@ -11,10 +11,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added a Unity Project scoped settings that allows you to override some of the default behaviours of Yarn Spinner.
   - Yarn Spinner settings are saved to the path `ProjectSettings\Packages\dev.yarnspinner\YarnSpinnerProjectSettings.json`.
   - The settings be changed in the Project Settings window, by choosing `Edit -> Project Settings -> Yarn Spinner`.
-  - The setting currently supports two convenience features of Yarn Spinner:
+  - The setting currently supports three convenience features of Yarn Spinner:
     - Automatically associating assets with localisations
     - Automatically linking `YarnCommand` and `YarnFunction` attributed methods to the Dialogue Runner.
-  - Enabling or disabling `YarnCommand` and `YarnFunction` linking will cause your project to recompile.
+    - Generating a `.ysls.json` file that stores information about your Yarn attributed methods.
+      - This file is saved to `ProjectSettings\Packages\dev.yarnspinner\generated.ysls.json`.
+      - This is an experimental feature to support better editor integration down the line. As such, this feature defaults to 'off'. 
+  - Enabling or disabling `YarnCommand` and `YarnFunction` linking, or `.ysls` generation, will cause your project to recompile.
   - Enabling or disabling asset linking will cause a reimport of all `yarnproject` assets.
 - `Yarn.Unity.ActionAnalyser.Action` now has a `MethodIdentifierName` property, which is the short form of the method name.
 - `DialogueAdvanceInput` now supports Virtual Button names in addition to KeyCodes and Input Actions.
@@ -39,6 +42,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Auto-advancing `LineView`s will no longer attempt to advance dialogue that has been stopped.
 - Actions Registration now dumps generated code into the same temporary folder the logs live in
 - `ActionsGenerator` will now generate C# warnings for incorrectly named methods that are attributed as `YarnFunction` or `YarnCommand`.
+- Fixed a bug where `AudioLineProvider` didn't allow runtime changing of the text locale.
+- Fixed a bug where the Unity Localisation strings tables would have duplicate lines after tagging all lines in a project.
 
 ### Removed
 
