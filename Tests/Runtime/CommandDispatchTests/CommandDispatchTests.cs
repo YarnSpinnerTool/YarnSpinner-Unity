@@ -36,17 +36,6 @@ namespace Yarn.Unity.Tests
                 UnityEditor.AssetDatabase.CopyAsset(TestScriptPathSource, TestScriptPathInProject);
             }
 
-#if UNITY_EDITOR && !UNITY_2021_2_OR_NEWER
-            // On Unity 2021.1 and earlier, we need to manually generate the
-            // registration code. On later versions, the source code generator
-            // will handle it for us.
-
-            var analysis = new Yarn.Unity.ActionAnalyser.Analyser(TestScriptPathInProject);
-            var actions = analysis.GetActions();
-            var source = Yarn.Unity.ActionAnalyser.Analyser.GenerateRegistrationFileSource(actions, "Yarn.Unity.Tests.Generated");
-            
-            System.IO.File.WriteAllText(outputFilePath, source);
-#endif
             UnityEditor.AssetDatabase.Refresh();
         }
 
