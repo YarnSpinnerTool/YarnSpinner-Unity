@@ -65,7 +65,7 @@ namespace Yarn.Unity.Tests
             runner.Should().NotBeNull();
             dialogueUI.Should().NotBeNull();
 
-            yarnProject = runner.yarnProject;
+            yarnProject = runner.yarnProject!;
             yarnProject.Should().NotBeNull();
         }
 
@@ -557,17 +557,5 @@ namespace Yarn.Unity.Tests
 
             runner.Stop();
         }
-
-        [UnityTest]
-        public IEnumerator DialogueRunner_LinesWithAssets_HaveAssets() => YarnAsync.ToCoroutine(async () =>
-        {
-            throw new NotImplementedException();
-        });
-
-        [UnityTest]
-        public IEnumerator DialogueRunner_RunningShadowLines_ReusesAssets() => YarnAsync.ToCoroutine(async () =>
-        {
-            throw new NotImplementedException();
-        });
     }
 }

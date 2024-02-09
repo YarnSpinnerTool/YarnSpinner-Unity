@@ -16,7 +16,7 @@ using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
 #else
 using YarnTask = System.Threading.Tasks.Task;
 using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
-using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine?>;
+using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
 #endif
 
 using UnityEngine;

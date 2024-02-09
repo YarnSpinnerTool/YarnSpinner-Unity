@@ -186,7 +186,20 @@ But not all of them are.
             // Simplify the results so that we can compare these metadata
             // table entries based only on specific fields.
             System.Func<LineMetadataTableEntry, (string id, string node, string lineNo, string metadata)> simplifier =
-                e => (id: e.ID, node: e.Node, lineNo: e.LineNumber, metadata: string.Join(" ", e.Metadata));
+                e =>
+                {
+                    // Shadow line IDs may vary, so treat all shadow line IDs
+                    // (which begin with "sh_") as the same by stripping them of
+                    // everything but their prefix
+
+                    string id;
+                    if (e.ID.StartsWith("line:sh_")) {
+                        id = e.ID.Substring(0, "line:sh_".Length);
+                    } else {
+                        id = e.ID;
+                    }
+                    return (id, node: e.Node, lineNo: e.LineNumber, metadata: string.Join(" ", e.Metadata));
+                };
             var simpleExpected = YarnTestUtility.ExpectedMetadata.Select(simplifier);
             var simpleResult = metadataEntries.Select(simplifier);
 

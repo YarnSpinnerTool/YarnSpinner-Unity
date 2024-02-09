@@ -3,7 +3,12 @@
   "sourceFiles": [
     "**/*.yarn"
   ],
-  "localisation": {},
+  "excludeFiles": [],
+  "localisation": {
+    "en": {
+      "assets": "Voiceover_en"
+    }
+  },
   "baseLanguage": "en",
   "compilerOptions": {}
 }

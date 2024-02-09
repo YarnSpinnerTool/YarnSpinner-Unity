@@ -16,8 +16,8 @@ namespace Yarn.Unity.Tests
     public partial class ObjectAssertions<TSubject>
     {
 
-        public TSubject? Subject { get; internal set; }
-
+        [AllowNull]
+        public TSubject Subject { get; internal set; }
 
         protected static void NullCheck([NotNull] object? assertion, string? message)
         {
@@ -27,7 +27,7 @@ namespace Yarn.Unity.Tests
             }
         }
 
-        public  void BeNull(string? message = null)
+        public void BeNull(string? message = null)
         {
             if (Subject != null)
             {
@@ -35,7 +35,7 @@ namespace Yarn.Unity.Tests
             }
         }
 
-        public  void NotBeNull(string? message = null)
+        public void NotBeNull(string? message = null)
         {
             if (Subject == null)
             {
@@ -43,9 +43,14 @@ namespace Yarn.Unity.Tests
             }
         }
 
-        public  void BeEqualTo(TSubject? other, string? message = null)
+        public void BeEqualTo(TSubject? other, string? message = null)
         {
             var comparer = EqualityComparer<TSubject>.Default;
+
+            if (Subject == null && other == null) {
+                // They're both null, so they're equal
+                return;
+            }
 
             NullCheck(Subject, message);
             NullCheck(other, message);
@@ -60,16 +65,20 @@ namespace Yarn.Unity.Tests
         {
             var comparer = EqualityComparer<TSubject>.Default;
 
-            NullCheck(Subject, message);
-            NullCheck(other, message);
+            if (Subject == null && other != null
+            || Subject != null && other == null
+            ) {
+                // One of them is not null, so they're not equal
+                return;
+            }
 
-            if (comparer.Equals(Subject, other) == true)
+            if ((Subject == null && other == null) || comparer.Equals(Subject, other!) == true)
             {
                 throw new AssertionException($"Expected subject to not be equal to {other}, but it was {Subject}", message);
             }
         }
 
-        public void BeSameObjectAs(TSubject other, string? message = null) 
+        public ObjectAssertions<TSubject> BeSameObjectAs(TSubject other, string? message = null)
         {
             NullCheck(Subject, message);
             NullCheck(other, message);
@@ -78,9 +87,10 @@ namespace Yarn.Unity.Tests
             {
                 throw new AssertionException($"Expected subject to be the same object as {other}, but it was {Subject}", message);
             }
+            return this;
         }
 
-        public void NotBeSameObjectAs(TSubject other, string? message = null)
+        public ObjectAssertions<TSubject> NotBeSameObjectAs(TSubject other, string? message = null)
         {
             NullCheck(Subject, message);
             NullCheck(other, message);
@@ -89,10 +99,36 @@ namespace Yarn.Unity.Tests
             {
                 throw new AssertionException($"Expected subject to not be the same object as {other}, but it was {Subject}", message);
             }
+            return this;
+        }
+
+        public ObjectAssertions<TSubject> BeOfType<T>(string? message = null)
+        {
+            NullCheck(Subject, message);
+
+            if (typeof(T).IsAssignableFrom(Subject.GetType()) == false)
+            {
+                throw new AssertionException($"Expected subject to be {typeof(T)}, but it was {Subject.GetType()}", message);
+            }
+
+            return this;
+        }
+
+        public ObjectAssertions<TSubject> BeOfExactType<T>(string? message = null)
+        {
+            NullCheck(Subject, message);
+
+            if (typeof(T) != Subject.GetType())
+            {
+                throw new AssertionException($"Expected subject to be exactly {typeof(T)}, but it was {Subject.GetType()}", message);
+            }
+
+            return this;
         }
     }
 
-    public partial class BooleanAssertions : ObjectAssertions<bool> {
+    public partial class BooleanAssertions : ObjectAssertions<bool>
+    {
 
         public void BeTrue(string? message = null)
         {
@@ -112,7 +148,8 @@ namespace Yarn.Unity.Tests
 
     }
 
-    public class ComparableAssertions<TSubject> : ObjectAssertions<TSubject> where TSubject : IComparable<TSubject> {
+    public class ComparableAssertions<TSubject> : ObjectAssertions<TSubject> where TSubject : IComparable<TSubject>
+    {
 
         public void BeGreaterThan(TSubject other, string? message = null)
         {
@@ -134,7 +171,7 @@ namespace Yarn.Unity.Tests
             }
         }
 
-        public void BeGreaterThanOrEqualTo(TSubject other, string? message = null) 
+        public void BeGreaterThanOrEqualTo(TSubject other, string? message = null)
         {
             NullCheck(Subject, message);
 
@@ -144,7 +181,7 @@ namespace Yarn.Unity.Tests
             }
         }
 
-        public void BeLessThanOrEqualTo(TSubject other, string? message = null) 
+        public void BeLessThanOrEqualTo(TSubject other, string? message = null)
         {
 
             NullCheck(Subject, message);
@@ -156,14 +193,16 @@ namespace Yarn.Unity.Tests
         }
     }
 
-    public class NumericAssertions<TItem> : ComparableAssertions<TItem> where TItem : IComparable<TItem> {
+    public class NumericAssertions<TItem> : ComparableAssertions<TItem> where TItem : IComparable<TItem>
+    {
 
     }
 
-    public class EnumerableAssertions<TItem> : ObjectAssertions<IEnumerable<TItem>> {
+    public class EnumerableAssertions<TItem> : ObjectAssertions<IEnumerable<TItem>>
+    {
 
 
-        public void BeEmpty(string? message = null)
+        public EnumerableAssertions<TItem> BeEmpty(string? message = null)
         {
             NullCheck(Subject, message);
 
@@ -171,8 +210,9 @@ namespace Yarn.Unity.Tests
             {
                 throw new AssertionException($"Expected collection to be empty, but it had {Subject.Count()} items", message);
             }
+            return this;
         }
-        public void NotBeEmpty(string? message = null)
+        public EnumerableAssertions<TItem> NotBeEmpty(string? message = null)
         {
             NullCheck(Subject, message);
 
@@ -180,6 +220,7 @@ namespace Yarn.Unity.Tests
             {
                 throw new AssertionException($"Expected collection to not be empty", message);
             }
+            return this;
         }
 
 
@@ -205,9 +246,9 @@ namespace Yarn.Unity.Tests
             Contain((TItem item) => comparer.Equals(item, match), message);
         }
 
-        
 
-        public void ContainExactly(IEnumerable<TItem> expectation, string? message = null) 
+
+        public void ContainExactly(IEnumerable<TItem> expectation, string? message = null)
         {
             NullCheck(Subject, message);
             NullCheck(expectation, message);
@@ -229,7 +270,7 @@ namespace Yarn.Unity.Tests
         }
 
 
-        public void ContainAllOf(IEnumerable<TItem> expectation, string? message = null) 
+        public void ContainAllOf(IEnumerable<TItem> expectation, string? message = null)
         {
 
             NullCheck(Subject, message);
@@ -249,7 +290,7 @@ namespace Yarn.Unity.Tests
             NotContain((item) => comparer.Equals(item, match), message);
         }
 
-        public void NotContainAnyOf(IEnumerable<TItem> expectation, string? message = null) 
+        public void NotContainAnyOf(IEnumerable<TItem> expectation, string? message = null)
         {
             NullCheck(Subject, message);
 
@@ -284,22 +325,50 @@ namespace Yarn.Unity.Tests
 
         public void HaveCount(int count, string? message = null)
         {
+            NullCheck(Subject, message);
             if (Subject.Count() != count)
             {
                 throw new AssertionException($"Expected collection to have count {count}", message);
             }
         }
 
+        public ObjectAssertions<TItem> ContainSingle(Func<TItem, bool> test, string? message = null)
+        {
+            NullCheck(Subject, message);
+
+            int count = 0;
+            TItem? result = default;
+
+            foreach (var item in Subject)
+            {
+                if (test(item))
+                {
+                    count += 1;
+                    result = item;
+                }
+            }
+
+            if (count != 1)
+            {
+                throw new AssertionException($"Expected collection to match a single item, but {count} did", message);
+            }
+
+            return new ObjectAssertions<TItem> { Subject = result! };
+        }
+
     }
 
-    public class DictionaryAssertions<TKey, TValue> : EnumerableAssertions<KeyValuePair<TKey,TValue>> {
-        public ObjectAssertions<KeyValuePair<TKey, TValue>> ContainKey(TKey match, string? message = null) 
+    public class DictionaryAssertions<TKey, TValue> : EnumerableAssertions<KeyValuePair<TKey, TValue>>
+    {
+        public ObjectAssertions<KeyValuePair<TKey, TValue>> ContainKey(TKey match, string? message = null)
         {
             NullCheck(Subject, message);
 
             var comparer = EqualityComparer<TKey>.Default;
-            foreach (var kv in Subject) {
-                if (comparer.Equals(kv.Key, match)) {
+            foreach (var kv in Subject)
+            {
+                if (comparer.Equals(kv.Key, match))
+                {
                     return new ObjectAssertions<KeyValuePair<TKey, TValue>> { Subject = kv };
                 }
             }
@@ -312,8 +381,10 @@ namespace Yarn.Unity.Tests
             NullCheck(Subject, message);
 
             var comparer = EqualityComparer<TValue>.Default;
-            foreach (var kv in Subject) {
-                if (comparer.Equals(kv.Value, match)) {
+            foreach (var kv in Subject)
+            {
+                if (comparer.Equals(kv.Value, match))
+                {
                     return new ObjectAssertions<KeyValuePair<TKey, TValue>> { Subject = kv };
                 }
             }
@@ -321,22 +392,26 @@ namespace Yarn.Unity.Tests
             throw new AssertionException($"Expected collection to contain a key matching {match}", message);
         }
 
-        public ObjectAssertions<TKey> ContainKey(Func<TKey,bool> match, string? message = null) 
+        public ObjectAssertions<TKey> ContainKey(Func<TKey, bool> match, string? message = null)
         {
             NullCheck(Subject, message);
-            foreach (var kv in Subject) {
-                if (match(kv.Key)) {
+            foreach (var kv in Subject)
+            {
+                if (match(kv.Key))
+                {
                     return new ObjectAssertions<TKey> { Subject = kv.Key };
                 }
             }
             throw new AssertionException("Expected collection to contain a matching key", message);
         }
 
-        public ObjectAssertions<TValue> ContainValue(Func<TValue,bool> match, string? message = null)
+        public ObjectAssertions<TValue> ContainValue(Func<TValue, bool> match, string? message = null)
         {
             NullCheck(Subject, message);
-            foreach (var kv in Subject) {
-                if (match(kv.Value)) {
+            foreach (var kv in Subject)
+            {
+                if (match(kv.Value))
+                {
                     return new ObjectAssertions<TValue> { Subject = kv.Value };
                 }
             }
@@ -344,11 +419,15 @@ namespace Yarn.Unity.Tests
         }
     }
 
+    public class StringAssertions : ObjectAssertions<string>
+    {
+    }
+
     public static class AssertionExtensions
     {
 
 
-        public static ObjectAssertions<object> Should(this object subject)
+        public static ObjectAssertions<object> Should(this object? subject)
         {
             return new ObjectAssertions<object>
             {
@@ -363,7 +442,7 @@ namespace Yarn.Unity.Tests
         {
             return new EnumerableAssertions<TItem> { Subject = subject };
         }
-        public static DictionaryAssertions<TKey, TValue> Should<TKey, TValue>(this IDictionary<TKey,TValue> subject)
+        public static DictionaryAssertions<TKey, TValue> Should<TKey, TValue>(this IDictionary<TKey, TValue> subject)
         {
             return new DictionaryAssertions<TKey, TValue> { Subject = subject };
         }
@@ -379,5 +458,11 @@ namespace Yarn.Unity.Tests
         {
             return new NumericAssertions<double> { Subject = subject };
         }
+        public static StringAssertions Should(this string? subject)
+        {
+            return new StringAssertions { Subject = subject };
+        }
     }
+
+
 }

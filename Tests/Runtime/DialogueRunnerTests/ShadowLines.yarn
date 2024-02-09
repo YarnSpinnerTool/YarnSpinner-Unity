@@ -1,0 +1,12 @@
+﻿title: ShadowLines_Lounge
+---
+Ava: Hello, barkeep!  #line:shadowtest_1 #meta1
+Guy: Hi there, how can I help? #line:shadowtest_2
+Ava: I should go. #line:shadowtest_3 #meta2
+===
+title: ShadowLines_Kitchen
+---
+Ava: Greetings, chef! #line:shadowtest_4
+Guy: What are you doing back here? #line:shadowtest_5
+Ava: I should go. #shadow:shadowtest_3 #meta3
+===
