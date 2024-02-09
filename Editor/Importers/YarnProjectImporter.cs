@@ -611,8 +611,6 @@ namespace Yarn.Unity.Editor
                     });
                 }
 
-                
-
                 // We've made changes to the table, so flag it and its shared
                 // data as dirty.
                 EditorUtility.SetDirty(table);

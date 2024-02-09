@@ -88,6 +88,10 @@ namespace Yarn.Unity.Tests
 
         internal static void SetupYarnProject(string[] yarnScriptText, Yarn.Compiler.Project projectData, out YarnProject yarnProject)
         {
+            SetupYarnProject(yarnScriptText, projectData, TestFilesDirectoryPath, "Project", true, out yarnProject);
+        }
+        internal static List<string> SetupYarnProject(string[] yarnScriptText, Yarn.Compiler.Project projectData, string testFolderPath, string projectName, bool validateCreation, out YarnProject yarnProject)
+        {
             // Disable errors causing failures, in case the yarn script
             // text contains deliberately invalid code
             var wasIgnoringFailingMessages = LogAssert.ignoreFailingMessages;
@@ -103,10 +107,10 @@ namespace Yarn.Unity.Tests
 
             foreach (var scriptText in yarnScriptText)
             {
-                string yarnScriptName = $"YarnScript{fileCount}";
+                string yarnScriptName = $"YarnScript-{projectName}-{fileCount}";
                 fileCount += 1;
 
-                string yarnScriptPath = $"{TestFilesDirectoryPath}/{yarnScriptName}.yarn";
+                string yarnScriptPath = $"{testFolderPath}/{yarnScriptName}.yarn";
                 pathsToAdd.Add(yarnScriptPath);
 
                 string textToWrite;
@@ -128,7 +132,7 @@ namespace Yarn.Unity.Tests
 
             // Now create and import the project
 
-            string yarnProjectPath = $"{TestFilesDirectoryPath}/Project.yarnproject";
+            string yarnProjectPath = $"{testFolderPath}/{projectName}.yarnproject";
             
             var project = YarnEditorUtility.CreateYarnProject(yarnProjectPath, projectData) as YarnProject;
             var yarnProjectImporter = AssetImporter.GetAtPath(yarnProjectPath) as YarnProjectImporter;
@@ -137,24 +141,31 @@ namespace Yarn.Unity.Tests
             {
                 var textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
 
-                // We should have a text asset, imported by a YarnImporter
-                Assert.IsNotNull(textAsset);
-                AssetImporter actual = AssetImporter.GetAtPath(path);
-                Assert.IsInstanceOf<YarnImporter>(actual);
+                if (validateCreation)
+                {
+                    // We should have a text asset, imported by a YarnImporter
+                    Assert.IsNotNull(textAsset);
+                    AssetImporter actual = AssetImporter.GetAtPath(path);
+                    Assert.IsInstanceOf<YarnImporter>(actual);
 
-                var scriptImporter = AssetImporter.GetAtPath(path) as YarnImporter;
-                
-                // The created script should have the newly-created project in its destinations list
-                Assert.True(scriptImporter.DestinationProjects.Contains(project));
+                    var scriptImporter = AssetImporter.GetAtPath(path) as YarnImporter;
+                    
+                    // The created script should have the newly-created project in its destinations list
+                    Assert.True(scriptImporter.DestinationProjects.Contains(project));
+                }
             }
 
-            // As a final check, make sure the project is referencing the
-            // right number of scripts
-            Assert.AreEqual(yarnScriptText.Length, yarnProjectImporter.ImportData.yarnFiles.Count);
+            if (validateCreation)
+            {
+                // As a final check, make sure the project is referencing the
+                // right number of scripts
+                Assert.AreEqual(yarnScriptText.Length, yarnProjectImporter.ImportData.yarnFiles.Count);
+            }
 
             LogAssert.ignoreFailingMessages = wasIgnoringFailingMessages;
 
             yarnProject = project;
+            return pathsToAdd;
         }
     }
 }

@@ -17,6 +17,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     - Automatically linking `YarnCommand` and `YarnFunction` attributed methods to the Dialogue Runner.
   - Enabling or disabling `YarnCommand` and `YarnFunction` linking will cause your project to recompile.
   - Enabling or disabling asset linking will cause a reimport of all `yarnproject` assets.
+- A Unity Project scoped settings that allows you to override some of the default behaviours of Yarn Spinner
+  - settings are saved to a file in `ProjectSettings\Packages\dev.yarnspinner\YarnSpinnerProjectSettings.json`
+  - these can be changed via `Edit -> Project Settings -> Yarn Spinner`
+  - currently supports three convenience features of Yarn Spinner:
+    - automatically associating assets with localisations
+    - automatically linking YarnCommand and YarnFunction attributed methods to the dialogue runner
+    - generating a `ysls` file for all of your Yarn attributed methods
+      - this is saved to `ProjectSettings\Packages\dev.yarnspinner\generated.ysls.json`
+      - this is an experimental feature to support better editor integration down the line
+      - as such this defaults to *not* being generated
+  - enabling/disabling C# linking or ysls generation will force an entire C# reimport
+  - enabling/disabling asset linking will force a reimport of all `yarnprojects`
 - `Yarn.Unity.ActionAnalyser.Action` now has a `MethodIdentifierName` property, which is the short form of the method name.
 - `DialogueAdvanceInput` now supports Virtual Button names in addition to KeyCodes and Input Actions.
   - This can be configured to work on button or key release or press. By default, the component works on release.
@@ -44,6 +56,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - The `LineProviderBase.GetLocalizedLineAsync` method now receives a parameter of type `IMarkupParser`, which it should use to parse any markup before returning its finalised localised line.
   - Previously, markup parsing was done in the `DialogueRunner` class, which meant that preparing a ready-to-use `LocalizedLine` object could only be done inside Yarn Spinner's internal systems. With this change, `LocalizedLine` preparation can now be done independently of other Yarn Spinner systems.
   - Line Providers now return `LocalizedLine.InvalidLine` if they are unable to produce a valid line, rather than null.
+- Fixed a bug where `AudioLineProvider` didn't allow runtime changing of the text locale.
+- Fixed a bug where the Unity Localisation strings tables would have duplicate lines after tagging all lines in a project.
 
 ### Removed
 
