@@ -4,6 +4,7 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 namespace Yarn.Unity.Editor
 {
+    using System.Collections.Generic;
     using System.IO;
 #if UNITY_EDITOR
     using UnityEditor;
@@ -75,19 +76,17 @@ namespace Yarn.Unity.Editor
                 return settings;
             }
 
-            bool automaticallyLinkAttributedYarnCommandsAndFunctions = true;
-            bool autoRefreshLocalisedAssets = true;
-            bool generateYSLSFile = false;
-            try
-            {
-                automaticallyLinkAttributedYarnCommandsAndFunctions = (bool)jsonDict["automaticallyLinkAttributedYarnCommandsAndFunctions"];
-                autoRefreshLocalisedAssets = (bool)jsonDict["autoRefreshLocalisedAssets"];
-                generateYSLSFile = (bool)jsonDict["generateYSLSFile"];
+            T GetValueOrDefault<T>(string key, T defaultValue) {
+                if (jsonDict.TryGetValue(key, out object result)) {
+                    return (T)result;
+                } else {
+                    return defaultValue;
+                }
             }
-            catch (System.Exception e)
-            {
-                logger.WriteLine($"Failed to parse Yarn Spinner project settings: {e.Message}");
-            }
+
+            bool automaticallyLinkAttributedYarnCommandsAndFunctions = GetValueOrDefault("automaticallyLinkAttributedYarnCommandsAndFunctions", true);
+            bool autoRefreshLocalisedAssets = GetValueOrDefault("autoRefreshLocalisedAssets", true);
+            bool generateYSLSFile = GetValueOrDefault("generateYSLSFile", false);
 
             settings.automaticallyLinkAttributedYarnCommandsAndFunctions = automaticallyLinkAttributedYarnCommandsAndFunctions;
             settings.autoRefreshLocalisedAssets = autoRefreshLocalisedAssets;
