@@ -91,7 +91,7 @@ namespace Yarn.Unity
         #else
             Task<T?>
         #endif
-        WaitForAsyncOperation<T>(AsyncOperationHandle<T> operationHandle, CancellationToken cancellationToken) where T : UnityEngine.Object
+        WaitForAsyncOperation<T>(AsyncOperationHandle<T> operationHandle, CancellationToken cancellationToken)
         {
 #if USE_UNITASK
         // TODO: use cancellationToken
@@ -102,7 +102,7 @@ namespace Yarn.Unity
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    return null;
+                    return default;
                 }
 
                 await YarnTask.Yield();
