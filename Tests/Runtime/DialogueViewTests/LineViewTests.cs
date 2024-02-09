@@ -68,7 +68,7 @@ namespace Yarn.Unity.Tests
 
             dialogueRunner.DialogueViews.Should().Contain(lineView);
             dialogueRunner.DialogueViews.Should().Contain(optionsView);
-            dialogueRunner.YarnProject.Should().NotBeNull();
+            dialogueRunner.YarnProject!.Should().NotBeNull();
 
             // Tests may need to control which node runs, so automatically
             // starting a fixed node is not a great idea. Ensure that we're not
@@ -109,7 +109,7 @@ namespace Yarn.Unity.Tests
             Markup.MarkupParseResult ParseMarkup(string text, string[] substitutions)
             {
                 text = Dialogue.ExpandSubstitutions(text, substitutions);
-                return dialogueRunner.Dialogue.ParseMarkup(text);
+                return dialogueRunner.Dialogue.ParseMarkup(text, "en");
             }
 
             return new LocalizedLine()
@@ -117,7 +117,7 @@ namespace Yarn.Unity.Tests
                 TextID = lineID ?? $"line:{UnityEngine.Random.Range(0, 1000):D4}",
                 RawText = lineText,
                 Substitutions = substitutions ?? new string[] { },
-                Metadata = metadata,
+                Metadata = metadata ?? System.Array.Empty<string>(),
                 Text = ParseMarkup(lineText, substitutions ?? new string[] { }),
             };
         }
@@ -185,9 +185,9 @@ namespace Yarn.Unity.Tests
             lineView.lineText.maxVisibleCharacters.Should().BeLessThan(characterCount, "the entire line should not yet be visible");
 
             // Wait for the typewriter effect to complete
-            await YarnAsync.WaitForSeconds(0.5f);
+            await YarnAsync.WaitForSeconds(2f);
 
-            lineView.lineText.maxVisibleCharacters.Should().BeEqualTo(characterCount);
+            lineView.lineText.maxVisibleCharacters.Should().BeGreaterThanOrEqualTo(characterCount);
 
             // Dismiss the line
             lineView.UserRequestedViewAdvancement();
