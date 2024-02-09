@@ -23,7 +23,7 @@ using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
 #else
 using YarnTask = System.Threading.Tasks.Task;
 using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
-using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine?>;
+using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
 #endif
 
 namespace System.Diagnostics.CodeAnalysis
@@ -344,9 +344,9 @@ namespace Yarn.Unity
 
         private async YarnTask OnLineReceivedAsync(Line line)
         {
-            var localisedLine = await GetLocalizedLine(line, dialogueCancellationSource?.Token ?? CancellationToken.None);
-
-            if (localisedLine == null)
+            var localisedLine = await LineProvider.GetLocalizedLineAsync(line, this.Dialogue, dialogueCancellationSource?.Token ?? CancellationToken.None);
+            
+            if (localisedLine == LocalizedLine.InvalidLine)
             {
                 Debug.LogError($"Failed to get a localised line for {line.ID}!");
             }
@@ -354,7 +354,6 @@ namespace Yarn.Unity
             {
                 await RunLocalisedLine(localisedLine);
             }
-
 
             if (dialogueCancellationSource?.IsCancellationRequested == false)
             {
@@ -458,11 +457,17 @@ namespace Yarn.Unity
             for (int i = 0; i < options.Options.Length; i++)
             {
                 var opt = options.Options[i];
+                LocalizedLine localizedLine = await LineProvider.GetLocalizedLineAsync(opt.Line, this.Dialogue, optionCancellationSource.Token);
+
+                if (localizedLine == LocalizedLine.InvalidLine) {
+                    Debug.LogError($"Failed to get a localised line for line {opt.Line.ID} (option {i + 1})!");
+                }
+
                 localisedOptions[i] = new DialogueOption
                 {
                     DialogueOptionID = opt.ID,
                     IsAvailable = opt.IsAvailable,
-                    Line = await GetLocalizedLine(opt.Line, optionCancellationSource.Token),
+                    Line = localizedLine,
                     TextID = opt.Line.ID,
                 };
             }
@@ -541,21 +546,6 @@ namespace Yarn.Unity
                 // Proceed to the next piece of dialogue content.
                 Dialogue.Continue();
             }
-        }
-
-        private async YarnLineTask GetLocalizedLine(Line line, CancellationToken cancellationToken)
-        {
-            var localisedLine = await LineProvider.GetLocalizedLineAsync(line, cancellationToken);
-
-            if (localisedLine == null) {
-                return null;
-            }
-
-            var text = Dialogue.ExpandSubstitutions(localisedLine.RawText, line.Substitutions);
-            Dialogue.LanguageCode = LineProvider.LocaleCode;
-            localisedLine.Text = this.Dialogue.ParseMarkup(text);
-
-            return localisedLine;
         }
 
         public void StartDialogue(string nodeName)

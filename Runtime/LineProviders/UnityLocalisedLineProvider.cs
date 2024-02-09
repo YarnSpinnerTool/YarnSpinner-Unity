@@ -92,7 +92,7 @@ namespace Yarn.Unity.UnityLocalization
             }
         }
 
-        public override async YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken)
+        public override async YarnLineTask GetLocalizedLineAsync(Line line, IMarkupParser markupParser, CancellationToken cancellationToken)
         {
             if (stringsTable.IsEmpty)
             {
@@ -114,9 +114,12 @@ namespace Yarn.Unity.UnityLocalization
             var text = line.ID;
             text = currentStringTable[line.ID]?.LocalizedValue ?? $"!! Error: Missing localisation for line {line.ID} in string table {currentStringTable.LocaleIdentifier}";
 
+            var markup = markupParser.ParseMarkup(Dialogue.ExpandSubstitutions(text, line.Substitutions), currentStringTable.LocaleIdentifier.Code);
+
             // Construct the localized line
             LocalizedLine localizedLine = new LocalizedLine()
             {
+                Text = markup,
                 TextID = line.ID,
                 Substitutions = line.Substitutions,
                 RawText = text,
@@ -211,8 +214,8 @@ namespace Yarn.Unity.UnityLocalization
 
 #if USE_UNITY_LOCALIZATION
     public class LineMetadata : IMetadata {
-        public string nodeName;
-        public string[] tags;
+        public string nodeName = "";
+        public string[] tags = System.Array.Empty<string>();
     }
 #endif  
 

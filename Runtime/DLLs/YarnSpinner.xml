@@ -19,14 +19,24 @@
              <item>Use <see cref="M:Yarn.Dialogue.ExpandSubstitutions(System.String,System.Collections.Generic.IList{System.String})"/> to replace all
              substitutions in the user-facing text.</item>
             
-             <item>Use <see cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/> to parse all markup in the
+             <item>Use <see cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/> to parse all markup in the
              line.</item>
              </list>
             
-             <para>You do not create instances of this struct yourself. They are
-             created by the <see cref="T:Yarn.Dialogue"/> during program execution.</para>
+             <para>You typically do not create instances of this struct yourself.
+             They are created by the <see cref="T:Yarn.Dialogue"/> during program
+             execution.</para>
              </remarks>
              <seealso cref="P:Yarn.Dialogue.LineHandler"/>
+        </member>
+        <member name="M:Yarn.Line.#ctor(System.String,System.String[])">
+            <summary>
+            Initialises a new instance of the <see cref="T:Yarn.Line"/> struct.
+            </summary>
+            <param name="stringID">The unique line ID for this content.</param>
+            <param name="substitutions">The list of values that should be
+            substituted into the final line.
+            </param>
         </member>
         <member name="F:Yarn.Line.ID">
             <summary>
@@ -35,8 +45,8 @@
         </member>
         <member name="F:Yarn.Line.Substitutions">
             <summary>
-            The values that should be inserted into the user-facing text
-            before delivery.
+            The values that should be inserted into the user-facing text before
+            delivery.
             </summary>
         </member>
         <member name="T:Yarn.OptionSet">
@@ -45,7 +55,7 @@
             cref="T:Yarn.Dialogue"/> to the game.
             </summary>
             <remarks>
-            You do not create instances of this struct yourself. They are
+            You typically do not create instances of this struct yourself. They are
             created by the <see cref="T:Yarn.Dialogue"/> during program execution.
             </remarks>
             <seealso cref="P:Yarn.Dialogue.OptionsHandler"/>
@@ -139,6 +149,20 @@
             sent to a log.
             </remarks>
             <param name="message">The text that should be logged.</param>
+        </member>
+        <member name="T:Yarn.IMarkupParser">
+            <summary>
+            Contains methods for parsing raw text into a <see
+            cref="T:Yarn.Markup.MarkupParseResult"/>.
+            </summary>
+        </member>
+        <member name="M:Yarn.IMarkupParser.ParseMarkup(System.String,System.String)">
+            <summary>
+            Parses a string into markup, given a locale.
+            </summary>
+            <param name="rawText">The text to parse.</param>
+            <param name="localeCode">The locale to use when parsing the text.</param>
+            <returns></returns>
         </member>
         <member name="T:Yarn.VariableKind">
             <summary>
@@ -398,22 +422,6 @@
             Gets or sets the <see cref="T:Yarn.LineHandler"/> that is called when
             a line is ready to be shown to the user.
             </summary>
-        </member>
-        <member name="P:Yarn.Dialogue.LanguageCode">
-            <summary>
-            Gets or sets the <see cref="T:Yarn.Dialogue"/>'s locale, as an IETF BCP 47
-            code.
-            </summary>
-            <remarks>
-            <para>
-            This code is used to determine how the <c>plural</c> and <c>ordinal</c>
-            markers determine the plural class of numbers.
-            </para>
-            <para>
-            For example, the code "en-US" represents the English language as
-            used in the United States.
-            </para>
-            </remarks>
         </member>
         <member name="P:Yarn.Dialogue.OptionsHandler">
             <summary>
@@ -685,7 +693,7 @@
             </summary>
             <param name="context">The Context that performs the analysis</param>
         </member>
-        <member name="M:Yarn.Dialogue.ParseMarkup(System.String)">
+        <member name="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)">
             <summary>
             Parses a line of text, and produces a <see
             cref="T:Yarn.Markup.MarkupParseResult"/> containing the results.
@@ -695,7 +703,7 @@
             cref="F:Yarn.Markup.MarkupParseResult.Text"/> will have any <c>select</c>,
             <c>plural</c> or <c>ordinal</c> markers replaced with the appropriate
             text, following this <see cref="T:Yarn.Dialogue"/>'s <see
-            cref="P:Yarn.Dialogue.LanguageCode"/>.
+            cref="!:LanguageCode"/>.
             </remarks>
             <param name="line">The line of text to parse.</param>
             <returns>The results of parsing the markup.</returns>
@@ -723,7 +731,7 @@
             <c>\</c>.
             </summary>
         </member>
-        <member name="M:Yarn.Dialogue.Yarn#Markup#IAttributeMarkerProcessor#ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker)">
+        <member name="M:Yarn.Dialogue.Yarn#Markup#IAttributeMarkerProcessor#ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker,System.String)">
             <summary>Returns the text that should be used to replace the
             contents of <paramref name="marker"/>.</summary>
             <param name="marker">The marker to generate replacement text
@@ -2262,7 +2270,7 @@
             marker.</summary>
             <seealso cref="M:Yarn.Markup.LineParser.RegisterMarkerProcessor(System.String,Yarn.Markup.IAttributeMarkerProcessor)"/>
         </member>
-        <member name="M:Yarn.Markup.IAttributeMarkerProcessor.ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker)">
+        <member name="M:Yarn.Markup.IAttributeMarkerProcessor.ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker,System.String)">
             <summary>
             Produces the replacement text that should be inserted into a parse
             result for a given attribute.
@@ -2274,6 +2282,7 @@
             </remarks>
             <param name="marker">The marker that should have text
             inserted.</param>
+            <param name="localeCode">The locale to use when preparing replacement text.</param>
             <returns>The replacement text to insert.</returns>
         </member>
         <member name="T:Yarn.Markup.LineParser">
@@ -2373,19 +2382,20 @@
             <param name="markerProcessor">The object that should be invoked
             when markers with this name are encountered.</param>
         </member>
-        <member name="M:Yarn.Markup.LineParser.ParseMarkup(System.String)">
+        <member name="M:Yarn.Markup.LineParser.ParseMarkup(System.String,System.String)">
             <summary>Parses a line of text, and produces a
             <see cref="T:Yarn.Markup.MarkupParseResult"/> containing the processed
             text.</summary>
             <param name="input">The text to parse.</param>
             <returns>The resulting markup information.</returns>
         </member>
-        <member name="M:Yarn.Markup.LineParser.ProcessReplacementMarker(Yarn.Markup.MarkupAttributeMarker)">
+        <member name="M:Yarn.Markup.LineParser.ProcessReplacementMarker(Yarn.Markup.MarkupAttributeMarker,System.String)">
             <summary>
             Parses a marker and generates replacement text to insert into
             the plain text.
             </summary>
             <param name="marker">The marker to parse.</param>
+            <param name="localeCode">The locale code to use when processing the marker.</param>
             <returns>The replacement text to insert.</returns>
         </member>
         <member name="M:Yarn.Markup.LineParser.ParseRawTextUpToAttributeClose(System.String)">
@@ -2556,7 +2566,7 @@
             You do not create instances of this struct yourself. It is created
             by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
             </remarks>
-            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/>
+            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/>
         </member>
         <member name="F:Yarn.Markup.MarkupParseResult.Text">
             <summary>
@@ -2681,7 +2691,7 @@
             You do not create instances of this struct yourself. It is created
             by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
             </remarks>
-            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/>
+            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/>
         </member>
         <member name="M:Yarn.Markup.MarkupAttribute.#ctor(System.Int32,System.Int32,System.Int32,System.String,System.Collections.Generic.IEnumerable{Yarn.Markup.MarkupProperty})">
             <summary>
@@ -2749,7 +2759,7 @@
             You do not create instances of this struct yourself. It is created
             by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
             </remarks>
-            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/>
+            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/>
         </member>
         <member name="M:Yarn.Markup.MarkupProperty.#ctor(System.String,Yarn.Markup.MarkupValue)">
             <summary>
@@ -2777,7 +2787,7 @@
             You do not create instances of this struct yourself. It is created
             by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
             </remarks>
-            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/>
+            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/>
         </member>
         <member name="P:Yarn.Markup.MarkupValue.IntegerValue">
             <summary>Gets the integer value of this property.</summary>
@@ -2815,6 +2825,9 @@
         <member name="M:Yarn.Markup.MarkupValue.ToString">
             <inheritdoc/>
         </member>
+        <member name="M:Yarn.Markup.MarkupValue.ToString(System.IFormatProvider)">
+            <inheritdoc/>
+        </member>
         <member name="T:Yarn.Markup.MarkupAttributeMarker">
             <summary>
             Represents a marker (e.g. <c>[a]</c>) in line of marked up text.
@@ -2823,7 +2836,7 @@
             You do not create instances of this struct yourself. It is created
             by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
             </remarks>
-            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/>
+            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/>
         </member>
         <member name="M:Yarn.Markup.MarkupAttributeMarker.#ctor(System.String,System.Int32,System.Int32,System.Collections.Generic.List{Yarn.Markup.MarkupProperty},Yarn.Markup.TagType)">
             <summary>
@@ -2900,7 +2913,7 @@
             <summary>A markup text processor that implements the <c>[nomarkup]</c>
             attribute's behaviour.</summary>
         </member>
-        <member name="M:Yarn.Markup.NoMarkupTextProcessor.ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker)">
+        <member name="M:Yarn.Markup.NoMarkupTextProcessor.ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker,System.String)">
             <inheritdoc/>
         </member>
         <member name="T:Yarn.Markup.TagType">

@@ -104,11 +104,8 @@ public class MinimalDialogueRunner : MonoBehaviour
         DialogueOption[] optionSet = new DialogueOption[options.Options.Length];
         for (int i = 0; i < options.Options.Length; i++)
         {
-            var line = LineProvider.GetLocalizedLineAsync(options.Options[i].Line, System.Threading.CancellationToken.None).GetAwaiter().GetResult();
-            var text = Yarn.Dialogue.ExpandSubstitutions(line.RawText, options.Options[i].Line.Substitutions);
-            dialogue.LanguageCode = LineProvider.LocaleCode;
-            line.Text = dialogue.ParseMarkup(text);
-
+            var line = LineProvider.GetLocalizedLineAsync(options.Options[i].Line, dialogue, System.Threading.CancellationToken.None).GetAwaiter().GetResult();
+            
             optionSet[i] = new DialogueOption
             {
                 TextID = options.Options[i].Line.ID,
@@ -160,10 +157,7 @@ public class MinimalDialogueRunner : MonoBehaviour
     public UnityEvent<Yarn.Unity.LocalizedLine> LineNeedsPresentation;
     private void HandleLine(Yarn.Line line)
     {
-        var finalLine = LineProvider.GetLocalizedLineAsync(line, System.Threading.CancellationToken.None).GetAwaiter().GetResult();
-        var text = Yarn.Dialogue.ExpandSubstitutions(finalLine.RawText, line.Substitutions);
-        dialogue.LanguageCode = LineProvider.LocaleCode;
-        finalLine.Text = dialogue.ParseMarkup(text);
+        var finalLine = LineProvider.GetLocalizedLineAsync(line, dialogue, System.Threading.CancellationToken.None).GetAwaiter().GetResult();
         
         LineNeedsPresentation?.Invoke(finalLine);
     }

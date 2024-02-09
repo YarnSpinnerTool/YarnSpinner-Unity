@@ -2,6 +2,8 @@ using UnityEngine;
 
 namespace Yarn.Unity
 {
+    #nullable enable
+
     /// <summary>
     /// Represents a line, ready to be presented to the user in the
     /// localisation they have specified.
@@ -11,22 +13,22 @@ namespace Yarn.Unity
         /// <summary>
         /// DialogueLine's ID
         /// </summary>
-        public string TextID;
+        public string TextID = "<unknown>";
 
         /// <summary>
         /// DialogueLine's inline expression's substitution
         /// </summary>
-        public string[] Substitutions;
+        public string[] Substitutions = System.Array.Empty<string>();
 
         /// <summary>
         /// DialogueLine's text
         /// </summary>
-        public string RawText;
+        public string? RawText;
 
         /// <summary>
         /// Any metadata associated with this line.
         /// </summary>
-        public string[] Metadata;
+        public string[] Metadata = System.Array.Empty<string>();
 
         /// <summary>
         /// The name of the character, if present.
@@ -35,7 +37,7 @@ namespace Yarn.Unity
         /// This value will be <see langword="null"/> if the line does not
         /// have a character name.
         /// </remarks>
-        public string CharacterName
+        public string? CharacterName
         {
             get
             {
@@ -53,7 +55,7 @@ namespace Yarn.Unity
         /// <summary>
         /// The asset associated with this line, if any.
         /// </summary>
-        public Object Asset;
+        public Object? Asset;
 
         /// <summary>
         /// The underlying <see cref="Yarn.Markup.MarkupParseResult"/> for
@@ -84,6 +86,20 @@ namespace Yarn.Unity
                 }
             }
         }
+
+        /// <summary>
+        /// A <see cref="LocalizedLine"/> object that represents content not
+        /// being found.
+        /// </summary>
+        public static readonly LocalizedLine InvalidLine = new LocalizedLine
+        {
+            Asset = null,
+            Metadata = System.Array.Empty<string>(),
+            RawText = "!! ERROR: Missing line!",
+            Substitutions = System.Array.Empty<string>(),
+            TextID = "<missing>",
+            Text = new Markup.MarkupParseResult { Text = "!! ERROR: Missing line!", Attributes = new System.Collections.Generic.List<Markup.MarkupAttribute>() }
+        };
     }
 
 }

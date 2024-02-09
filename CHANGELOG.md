@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - This can be configured to work on button or key release or press. By default, the component works on release.
 - `LineView` now will add in line breaks when it encounters a self closing `[br /]` marker.
 - Yarn attributed Functions and Commands can now use constant values in addition to literals for their name.
+- Added shadow line support to BuiltInLineProvider.
 
 ### Changed
 
@@ -40,6 +41,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Auto-advancing `LineView`s will no longer attempt to advance dialogue that has been stopped.
 - Actions Registration now dumps generated code into the same temporary folder the logs live in
 - `ActionsGenerator` will now generate C# warnings for incorrectly named methods that are attributed as `YarnFunction` or `YarnCommand`.
+- The `LineProviderBase.GetLocalizedLineAsync` method now receives a parameter of type `IMarkupParser`, which it should use to parse any markup before returning its finalised localised line.
+  - Previously, markup parsing was done in the `DialogueRunner` class, which meant that preparing a ready-to-use `LocalizedLine` object could only be done inside Yarn Spinner's internal systems. With this change, `LocalizedLine` preparation can now be done independently of other Yarn Spinner systems.
+  - Line Providers now return `LocalizedLine.InvalidLine` if they are unable to produce a valid line, rather than null.
 
 ### Removed
 

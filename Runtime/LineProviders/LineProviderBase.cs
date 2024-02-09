@@ -69,7 +69,7 @@ namespace Yarn.Unity
         /// <see cref="LocalizedLine"/> from.</param>
         /// <returns>A localized line, ready to be presented to the
         /// player.</returns>
-        public abstract YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken);
+        public abstract YarnLineTask GetLocalizedLineAsync(Line line, IMarkupParser markupParser, CancellationToken cancellationToken);
 
         /// <summary>
         /// The YarnProject that contains the localized data for lines.

@@ -4,11 +4,15 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
 using System.Linq;
 #endif
+
+#nullable enable
 
 namespace Yarn.Unity
 {
@@ -73,7 +77,7 @@ namespace Yarn.Unity
         private bool _usesAddressableAssets;
 
         #region Localized Strings
-        public string GetLocalizedString(string key)
+        public string? GetLocalizedString(string key)
         {
             string result;
             if (_runtimeStringTable.TryGetValue(key, out result))
@@ -158,7 +162,9 @@ namespace Yarn.Unity
         {
             foreach (var entry in stringTableEntries)
             {
-                AddLocalizedString(entry.ID, entry.Text);
+                if (entry.Text != null) {
+                    AddLocalizedString(entry.ID, entry.Text);
+                }
             }
         }
 
@@ -166,7 +172,7 @@ namespace Yarn.Unity
 
         #region Localised Objects
 
-        public T GetLocalizedObject<T>(string key) where T : UnityEngine.Object
+        public T? GetLocalizedObject<T>(string key) where T : UnityEngine.Object
         {
             if (_usesAddressableAssets) {
                 Debug.LogWarning($"Localization {name} uses addressable assets. Use the Addressable Assets API to load the asset.");
@@ -250,7 +256,7 @@ namespace Yarn.Unity
         {
             var lineTagContents = linetag.Replace("line:", "");
 
-            string[] result = null;
+            string[] result = Array.Empty<String>();
             string[] searchPatterns = new string[] {
                 $"t:AudioClip {lineTagContents} ({language})",
                 $"t:AudioClip {lineTagContents}  {language}",

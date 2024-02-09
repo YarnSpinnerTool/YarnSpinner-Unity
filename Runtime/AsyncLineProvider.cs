@@ -4,6 +4,8 @@ namespace Yarn.Unity
 {
     using UnityEngine;
 
+    #nullable enable
+
     using System.Collections;
     using System.Threading;
 #if USE_UNITASK
@@ -24,6 +26,7 @@ namespace Yarn.Unity
     using UnityEngine.AddressableAssets;
 #endif
     using System.Collections.Generic;
+    using Yarn.Markup;
 
 #nullable enable
 
@@ -31,7 +34,7 @@ namespace Yarn.Unity
     {
         public YarnProject? YarnProject { get; set; }
         public string LocaleCode { get; }
-        public YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken);
+        public YarnLineTask GetLocalizedLineAsync(Line line, IMarkupParser markupParser, CancellationToken cancellationToken);
         public YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken);
 
         [System.Obsolete("Await the result of PrepareForLinesAsync instead of polling this property.")]
@@ -58,10 +61,15 @@ namespace Yarn.Unity
 
         public bool LinesAvailable => prepareForLinesTask?.IsCompletedSuccessfully ?? false;
         
-        public async YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken)
+        public async YarnLineTask GetLocalizedLineAsync(Line line, IMarkupParser markupParser, CancellationToken cancellationToken)
         {
             Localization loc = CurrentLocalization;
-            string text = loc.GetLocalizedString(line.ID);
+            string? text = loc.GetLocalizedString(line.ID);
+
+            if (text == null) {
+                // No line available.
+                return LocalizedLine.InvalidLine;
+            }
 
             cachedAssets.TryGetValue(line.ID, out Object? asset);
 
@@ -86,9 +94,13 @@ namespace Yarn.Unity
                 }
             }
 
+            var parsedText = Dialogue.ExpandSubstitutions(text, line.Substitutions);
+            MarkupParseResult parseResult = markupParser.ParseMarkup(parsedText, LocaleCode);
+
             return new LocalizedLine
             {
                 RawText = text,
+                Text = parseResult,
                 TextID = line.ID,
                 Asset = asset,
             };

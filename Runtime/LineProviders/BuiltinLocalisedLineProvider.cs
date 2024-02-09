@@ -1,3 +1,9 @@
+#nullable enable
+
+using System.Threading;
+using System.Collections.Generic;
+using UnityEngine;
+
 namespace Yarn.Unity
 {
     using UnityEngine;
@@ -8,22 +14,22 @@ namespace Yarn.Unity
     using YarnTask = Cysharp.Threading.Tasks.UniTask;
     using YarnIntTask = Cysharp.Threading.Tasks.UniTask<int>;
     using YarnLineTask = Cysharp.Threading.Tasks.UniTask<LocalizedLine>;
+    using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
 #else
     using YarnTask = System.Threading.Tasks.Task;
     using YarnLineTask = System.Threading.Tasks.Task<LocalizedLine>;
+    using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
 #endif
 
     using Yarn;
-
-#if USE_ADDRESSABLES
-    using UnityEngine.AddressableAssets;
-    using UnityEngine.ResourceManagement.AsyncOperations;
-#endif
     using System.Collections.Generic;
 
-#nullable enable
-
 #if USE_ADDRESSABLES
+    using AddressablesHelper = Yarn.Unity.UnityAddressablesHelper;
+#else
+    using AddressablesHelper = Yarn.Unity.NullAddressablesHelper;
+#endif
+
     public class BuiltinLocalisedLineProvider : LineProviderBehaviour, ILineProvider
     {
         public override string LocaleCode
@@ -35,82 +41,81 @@ namespace Yarn.Unity
         [SerializeField, Language] private string _textLocaleCode = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
         [SerializeField, Language] private string _assetLocaleCode = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
 
-        private Dictionary<string, AsyncOperationHandle<Object>> assetHandles = new Dictionary<string, AsyncOperationHandle<Object>>();
+        public string AssetLocaleCode
+        {
+            get => _assetLocaleCode;
+            set => _assetLocaleCode = value;
+        }
 
         private YarnTask? prepareForLinesTask;
 
         public override bool LinesAvailable => prepareForLinesTask?.IsCompletedSuccessfully ?? false;
 
-        public override async YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken)
+        IAddressablesHelper addressablesHelper = new AddressablesHelper();
+
+        public override async YarnLineTask GetLocalizedLineAsync(Line line, IMarkupParser markupParser, CancellationToken cancellationToken)
         {
             Localization loc = CurrentLocalization;
-            string text = loc.GetLocalizedString(line.ID);
 
-            if (!loc.UsesAddressableAssets) {
-                // This localisation doesn't use addressable assets. Fetch the
-                // asset directly.
-                return new LocalizedLine()
-                {
-                    RawText = text,
-                    TextID = line.ID,
-                    Asset = loc.GetLocalizedObject<Object>(line.ID)
-                };
-            }
+            string sourceLineID = line.ID;
 
-            assetHandles.TryGetValue(line.ID, out AsyncOperationHandle<Object> handle);
+            string[] metadata = System.Array.Empty<string>();
 
-            if (handle.IsValid() == false)
+            // Check to see if this line shadows another. If it does, we'll use
+            // that line's text and asset.
+            if (YarnProject != null)
             {
-                // We don't have a loading handle for this asset. Start loading it now.
-            
-                string assetAddress = Localization.GetAddressForLine(line.ID, _assetLocaleCode);
+                metadata = YarnProject.lineMetadata.GetMetadata(line.ID) ?? System.Array.Empty<string>();
 
-                handle = Addressables.LoadAssetAsync<Object>(assetAddress);
-                assetHandles.Add(line.ID, handle);
-                
+                var shadowLineSource = YarnProject.lineMetadata.GetShadowLineSource(line.ID);
+
+                if (shadowLineSource != null)
+                {
+                    sourceLineID = shadowLineSource;
+                }
             }
 
-            if (handle.IsDone == false) {
-                // Wait for the handle to finish loading.
-                await YarnAsync.WaitForAsyncOperation(handle, cancellationToken);
+            string? text = loc.GetLocalizedString(sourceLineID);
+
+            if (text == null)
+            {
+                // No line available.
+                return LocalizedLine.InvalidLine;
             }
 
-            // Get the asset itself.
-            var asset = handle.Result;
+            var parseResult = markupParser.ParseMarkup(Dialogue.ExpandSubstitutions(text, line.Substitutions), this.LocaleCode);
+
+            Object? asset;
+
+            if (loc.UsesAddressableAssets)
+            {
+                // Fetch the asset from the addressables helper. (If the
+                // Addressables package is not available, this object will log
+                // an error and return null.)
+                asset = await addressablesHelper.GetObject(sourceLineID, AssetLocaleCode, cancellationToken);
+            }
+            else
+            {
+                // This localisation doesn't use addressable assets. Fetch the
+                // asset directly from the Localization object.
+                asset = loc.GetLocalizedObject<Object>(sourceLineID);
+            }
 
             return new LocalizedLine
             {
+                Text = parseResult,
                 RawText = text,
                 TextID = line.ID,
                 Asset = asset,
+                Metadata = metadata,
             };
         }
 
         public async override YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken)
         {
-            if (CurrentLocalization.UsesAddressableAssets)
-            {
-                // Release all existing asset handles.
-                foreach (var entry in assetHandles)
-                {
-                    Addressables.Release(entry.Value);
-                }
-                assetHandles.Clear();
-                var allTasks = new List<YarnTask>();
-                foreach (var id in lineIDs)
-                {
-                    // Requesting the new lines, and cache the load operation
-                    // handles for them.
-                    var address = Localization.GetAddressForLine(id, _assetLocaleCode);
-                    var load = Addressables.LoadAssetAsync<Object>(address);
-                    assetHandles.Add(id, load);
-                    allTasks.Add(YarnAsync.WaitForAsyncOperation(load, cancellationToken));
-                }
+            prepareForLinesTask = addressablesHelper.PrepareForLinesAsync(lineIDs, this.AssetLocaleCode, cancellationToken);
 
-                // Wait for all of the lines to become ready.
-                prepareForLinesTask = YarnTask.WhenAll(allTasks);
-                await prepareForLinesTask;
-            }
+            await prepareForLinesTask;
         }
 
         private Localization CurrentLocalization
@@ -126,67 +131,120 @@ namespace Yarn.Unity
                     throw new System.InvalidOperationException($"Can't get a localised line because {nameof(YarnProject)} is not set!");
                 }
             }
+        }
+    }
+}
+
+namespace Yarn.Unity
+{
+#if USE_UNITASK
+    using Cysharp.Threading.Tasks;
+    using YarnTask = Cysharp.Threading.Tasks.UniTask;
+    using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
+#else
+    using YarnTask = System.Threading.Tasks.Task;
+    using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
+#endif
+
+
+#if USE_ADDRESSABLES
+    using UnityEngine.AddressableAssets;
+    using UnityEngine.ResourceManagement.AsyncOperations;
+    using UnityEditor;
+
+    internal class UnityAddressablesHelper : IAddressablesHelper
+    {
+        private Dictionary<string, AsyncOperationHandle<UnityEngine.Object>> assetHandles = new Dictionary<string, AsyncOperationHandle<UnityEngine.Object>>();
+
+        public async YarnObjectTask GetObject(string assetID, string localeID, CancellationToken cancellationToken)
+        {
+            assetHandles.TryGetValue(assetID, out AsyncOperationHandle<Object> handle);
+
+            if (handle.IsValid() == false)
+            {
+                // We don't have a loading handle for this asset. Start
+                // loading it now.
+
+                string assetAddress = Localization.GetAddressForLine(assetID, localeID);
+
+                handle = Addressables.LoadAssetAsync<Object>(assetAddress);
+
+                assetHandles.Add(localeID, handle);
+            }
+
+            if (handle.IsDone == false)
+            {
+                // The asset isn't already in memory. Wait for the handle to
+                // finish loading.
+                await YarnAsync.WaitForAsyncOperation(handle, cancellationToken);
+            }
+
+            // Get the asset itself.
+            var asset = handle.Result;
+            return asset;
+        }
+
+        private static async YarnTask FetchLine(string lineID, string localeID, Dictionary<string, AsyncOperationHandle<Object>> operationCache, CancellationToken cancellationToken) {
+
+            // Find the location of the line's asset, and if a location exists,
+            // start loading it. Cache the load operation so we can test for it
+            // later. If a location is not available, do nothing.
+
+            var address = Localization.GetAddressForLine(lineID, localeID);
+            var location = await YarnAsync.WaitForAsyncOperation(Addressables.LoadResourceLocationsAsync(address), cancellationToken);
+
+            if (location == null || location.Count == 0) {
+                // No location available for this asset. Don't attempt to load it.
+                return;
+            }
+            var assetLoadOperation = Addressables.LoadAssetAsync<UnityEngine.Object>(address);
+
+            operationCache.Add(lineID, assetLoadOperation);
+
+            await YarnAsync.WaitForAsyncOperation(assetLoadOperation, cancellationToken);
+        }
+
+        public async YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, string localeID, CancellationToken cancellationToken)
+        {
+
+            // Release all existing asset handles.
+            foreach (var entry in assetHandles)
+            {
+                Addressables.Release(entry.Value);
+            }
+
+            assetHandles.Clear();
+            var allTasks = new List<YarnTask>();
+
+            foreach (var id in lineIDs)
+            {
+                allTasks.Add(FetchLine(id, localeID, assetHandles, cancellationToken));
+            }
+
+            // Wait for all of the lines to become ready.
+            await YarnTask.WhenAll(allTasks);
         }
     }
 #else
-    // This version of the class is used when the Addressables package is not
-    // installed.
-    public class BuiltinLocalisedLineProvider : LineProviderBehaviour, ILineProvider
+    internal class NullAddressablesHelper : IAddressablesHelper
     {
-        public override string LocaleCode
+        public YarnObjectTask GetObject(string assetID, string localeID, CancellationToken cancellationToken)
         {
-            get => _localeCode;
-            set => _localeCode = value;
+            Debug.LogWarning($"Can't fetch assets for line {assetID}: the localisation object uses Addressable Assets, but the Addressables package isn't installed.");
+            return YarnTask.FromResult<Object?>(null);
         }
 
-        [SerializeField] private string _localeCode = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
-
-        public override YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken)
+        public YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, string localeID, CancellationToken cancellationToken)
         {
-            var loc = CurrentLocalization;
-
-            var text = loc.GetLocalizedString(line.ID);
-            Object? asset;
-
-            if (loc.UsesAddressableAssets)
-            {
-                // This localisation uses addressable assets, but the Addressables
-                // package isn't available.
-                Debug.LogWarning($"Can't fetch assets for line {line.ID}: the localisation object uses Addressable Assets, but the Addressables package isn't installed.");
-                asset = null;
-            } else {
-                asset = loc.GetLocalizedObject<Object>(line.ID);
-            }
-
-            return YarnTask.FromResult(new LocalizedLine
-            {
-                RawText = text,
-                Asset = asset,
-            });
-        }
-
-        public override YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken)
-        {
+            // No-op, because addressables support is not available.
             return YarnTask.CompletedTask;
         }
-
-        private Localization CurrentLocalization
-        {
-            get
-            {
-                if (YarnProject != null)
-                {
-                    return YarnProject.GetLocalization(LocaleCode);
-                }
-                else
-                {
-                    throw new System.InvalidOperationException($"Can't get a localised line because {nameof(YarnProject)} is not set!");
-                }
-            }
-        }
-
-        public override bool LinesAvailable => true;
     }
 #endif
 
+    internal interface IAddressablesHelper
+    {
+        public YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, string localeID, CancellationToken cancellationToken);
+        public YarnObjectTask GetObject(string assetID, string localeID, CancellationToken cancellationToken);
+    }
 }
