@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Fixed a test that failed when run on a computer with german culture
 - Update the minimum Unity version to 2021.3.
 - Fixed a bug where line pauses could sometimes not happen when the user's framerate is low.
 - Fixed a bug where the Rounded Views sample wouldn't import correctly.
