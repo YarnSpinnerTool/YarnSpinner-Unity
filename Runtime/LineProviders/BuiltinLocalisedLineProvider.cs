@@ -113,9 +113,22 @@ namespace Yarn.Unity
 
         public async override YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken)
         {
-            prepareForLinesTask = addressablesHelper.PrepareForLinesAsync(lineIDs, this.AssetLocaleCode, cancellationToken);
+            Localization loc = CurrentLocalization;
 
-            await prepareForLinesTask;
+            if (loc.UsesAddressableAssets)
+            {
+                // The localization uses addressable assets. Ensure that these
+                // assets are pre-loaded.
+                prepareForLinesTask = addressablesHelper.PrepareForLinesAsync(lineIDs, this.AssetLocaleCode, cancellationToken);
+
+                await prepareForLinesTask;
+            }
+            else
+            {
+                // The localization uses direct references. No need to pre-load
+                // the assets - they were loaded with the scene.
+                return;
+            }
         }
 
         private Localization CurrentLocalization
