@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+### Changed
+
+### Removed
+
+## [2.4.2] 2024-02-24
+
+### Added
+
 - Added a Unity Project scoped settings that allows you to override some of the default behaviours of Yarn Spinner.
   - Yarn Spinner settings are saved to the path `ProjectSettings\Packages\dev.yarnspinner\YarnSpinnerProjectSettings.json`.
   - The settings be changed in the Project Settings window, by choosing `Edit -> Project Settings -> Yarn Spinner`.
@@ -52,6 +60,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Obsolete property `YarnFunctionAttribute.FunctionName`
   - Obsolete property `YarnCommandAttribute.CommandString`
   - Obsolete method `YarnProject.GetProgram`
+
+## [2.4.1] 2024-01-30
+
+- Version 2.4.1 is the first release of the paid version of Yarn Spinner on the [Unity Asset Store](https://assetstore.unity.com/packages/tools/behavior-ai/yarn-spinner-for-unity-267061) and on [itch.io](https://yarnspinner.itch.io). It's identical to v2.4.0.
+- Yarn Spinner is and will remain free and open source - we also make it available for purchase as an excellent way to support the team.
+- While you're reading, why not consider our [paid add-ons](https://yarnspinner.itch.io), which add some fantastic and easy-to-customise dialogue views?
 
 ## [2.4.0] 2023-11-15
 
