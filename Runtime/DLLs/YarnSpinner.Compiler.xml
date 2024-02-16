@@ -4078,6 +4078,12 @@
             location.
             </summary>
         </member>
+        <member name="P:Yarn.Compiler.Project.ExtensionData">
+            <summary>
+            Contains any data parsed from the source file that was not matched
+            to a property on this type.
+            </summary>
+        </member>
         <member name="P:Yarn.Compiler.Project.SearchDirectoryPath">
             <summary>
             Gets the path of the directory from which to start searching for

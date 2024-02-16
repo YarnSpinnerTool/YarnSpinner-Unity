@@ -5,10 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
-
+  
 ### Added
 
 - Updated voiceover and translation credits for the Intro sample scene.
+- Added shadow line support to BuiltInLineProvider.
+
+### Changed
+
+### Removed
+
+- Remove certain items that were previously marked as obsolete:
+  - Obsolete method `DialogueRunner.ResetDialogue`
+  - Obsolete property `YarnFunctionAttribute.FunctionName`
+  - Obsolete property `YarnCommandAttribute.CommandString`
+  - Obsolete method `YarnProject.GetProgram`
+
+## [2.4.2] 2024-02-24
+
+### Added
+
 - Added a Unity Project scoped settings that allows you to override some of the default behaviours of Yarn Spinner.
   - Yarn Spinner settings are saved to the path `ProjectSettings\Packages\dev.yarnspinner\YarnSpinnerProjectSettings.json`.
   - The settings be changed in the Project Settings window, by choosing `Edit -> Project Settings -> Yarn Spinner`.
@@ -25,7 +41,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - This can be configured to work on button or key release or press. By default, the component works on release.
 - `LineView` now will add in line breaks when it encounters a self closing `[br /]` marker.
 - Yarn attributed Functions and Commands can now use constant values in addition to literals for their name.
-- Added shadow line support to BuiltInLineProvider.
 
 ### Changed
 
@@ -44,9 +59,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Auto-advancing `LineView`s will no longer attempt to advance dialogue that has been stopped.
 - Actions Registration now dumps generated code into the same temporary folder the logs live in
 - `ActionsGenerator` will now generate C# warnings for incorrectly named methods that are attributed as `YarnFunction` or `YarnCommand`.
-- The `LineProviderBase.GetLocalizedLineAsync` method now receives a parameter of type `IMarkupParser`, which it should use to parse any markup before returning its finalised localised line.
-  - Previously, markup parsing was done in the `DialogueRunner` class, which meant that preparing a ready-to-use `LocalizedLine` object could only be done inside Yarn Spinner's internal systems. With this change, `LocalizedLine` preparation can now be done independently of other Yarn Spinner systems.
-  - Line Providers now return `LocalizedLine.InvalidLine` if they are unable to produce a valid line, rather than null.
 - Fixed a bug where `AudioLineProvider` didn't allow runtime changing of the text locale.
 - Fixed a bug where the Unity Localisation strings tables would have duplicate lines after tagging all lines in a project.
 
@@ -57,6 +69,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Obsolete property `YarnFunctionAttribute.FunctionName`
   - Obsolete property `YarnCommandAttribute.CommandString`
   - Obsolete method `YarnProject.GetProgram`
+
+## [2.4.1] 2024-01-30
+
+- Version 2.4.1 is the first release of the paid version of Yarn Spinner on the [Unity Asset Store](https://assetstore.unity.com/packages/tools/behavior-ai/yarn-spinner-for-unity-267061) and on [itch.io](https://yarnspinner.itch.io). It's identical to v2.4.0.
+- Yarn Spinner is and will remain free and open source - we also make it available for purchase as an excellent way to support the team.
+- While you're reading, why not consider our [paid add-ons](https://yarnspinner.itch.io), which add some fantastic and easy-to-customise dialogue views?
 
 ## [2.4.0] 2023-11-15
 
@@ -151,7 +169,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - This solves an uncommon but *very* hard to debug error!
 - `YarnProjectImporterEditor.CreateUpgradeUI` is now private.
 - The Yarn Project editor 'upgrade' help link now correctly links to the upgrade page on the docs.
-- When using Unity Localization, line metadata is now stored on the shared entry for a line ID, rather than only on the base language's entry. (This caused an issue where, if the game was not running in the base language, line metadata would not be available.)
 
 ### Removed
 
