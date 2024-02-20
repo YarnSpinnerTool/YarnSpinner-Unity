@@ -155,6 +155,8 @@ namespace Yarn.Unity.Editor
                 return;
             }
 
+            project.AllowLanguagePreviewFeatures = true;
+
             importData.sourceFilePaths.AddRange(project.SourceFilePatterns);
 
             importData.baseLanguageName = project.BaseLanguage;
@@ -202,6 +204,7 @@ namespace Yarn.Unity.Editor
 
                 // Now to compile the scripts associated with this project.
                 var job = CompilationJob.CreateFromFiles(project.SourceFiles);
+                job.AllowPreviewFeatures = true;
 
                 job.Library = library;
 
