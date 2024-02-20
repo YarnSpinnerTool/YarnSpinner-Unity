@@ -24,6 +24,7 @@ using UnityEngine.Localization.Tables;
 
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
+using System;
 
 namespace Yarn.Unity.Editor
 {
@@ -61,6 +62,13 @@ namespace Yarn.Unity.Editor
         
         private VisualElement localisationFieldsContainer;
         private VisualElement sourceFileEntriesContainer;
+        private VisualElement variableStorageSettingsContainer;
+
+        private SerializedProperty generateVariablesSourceFileProperty;
+        private SerializedProperty variablesClassNameProperty;
+        private SerializedProperty variablesClassNamespaceProperty;
+        private SerializedProperty variablesClassParentProperty;
+
 
         private bool AnyModifications
         {
@@ -78,6 +86,7 @@ namespace Yarn.Unity.Editor
         private bool LocalisationsAddedOrRemoved = false;
         private bool BaseLanguageNameModified = false;
         private bool SourceFilesAddedOrRemoved = false;
+        private bool VariableFileSettingsModified = false;
 
         public override void OnEnable()
         {
@@ -89,6 +98,11 @@ namespace Yarn.Unity.Editor
             useUnityLocalisationSystemProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.UseUnityLocalisationSystem));
             unityLocalisationTableCollectionProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.unityLocalisationStringTableCollection));
 #endif
+
+            generateVariablesSourceFileProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.generateVariablesSourceFile));
+            variablesClassNameProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.variablesClassName));
+            variablesClassNamespaceProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.variablesClassNamespace));
+            variablesClassParentProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.variablesClassParent));
         }
 
         public override void OnDisable()
@@ -251,6 +265,7 @@ namespace Yarn.Unity.Editor
 
             localisationFieldsContainer = new VisualElement();
             sourceFileEntriesContainer = new VisualElement();
+            variableStorageSettingsContainer = new VisualElement();
 
             localisationControls.style.marginBottom = 8;
 
@@ -458,6 +473,55 @@ namespace Yarn.Unity.Editor
 
             ui.Add(addStringTagsButton);
             ui.Add(generateStringsFileButton);
+
+            var generateVariablesSourceFileField = new PropertyField(generateVariablesSourceFileProperty);
+            var variablesClassNameField = new PropertyField(variablesClassNameProperty);
+            var variablesClassNamespaceField = new PropertyField(variablesClassNamespaceProperty);
+            
+            generateVariablesSourceFileField.Bind(serializedObject);
+            variablesClassNameField.Bind(serializedObject);
+            variablesClassNamespaceField.Bind(serializedObject);
+
+            
+            // Find all loaded assemblies that are not YarnSpinner.dll. Find all
+            // types that implement IVariableStorage, are not abstract, and are
+            // not generated code. Get the full names of the result.
+            var variableStorageClasses = AppDomain.CurrentDomain
+                .GetAssemblies()
+                .Where(a => a != typeof(Yarn.Dialogue).Assembly)
+                .SelectMany(a => a.GetTypes())
+                .Where(t => t.GetInterfaces().Any(i => i == typeof(IVariableStorage)))
+                .Where(t => t.IsAbstract == false)
+                .Where(t => !t.CustomAttributes.Any(a => a.AttributeType == typeof(System.CodeDom.Compiler.GeneratedCodeAttribute)))
+                .Select(t => t.FullName)
+                .ToList();
+
+            var variablesClassParentDropdownField = new DropdownField(
+                "Variables Parent Class", 
+                variableStorageClasses, 
+                variablesClassParentProperty.stringValue
+                );
+                
+            variablesClassParentDropdownField.RegisterValueChangedCallback(v =>
+            {
+                variablesClassParentProperty.stringValue = v.newValue;
+                serializedObject.ApplyModifiedProperties();
+            });
+
+            void UpdateVariableSettingsVisibility() {
+                foreach (var field in new VisualElement[] { variablesClassNameField, variablesClassNamespaceField, variablesClassParentDropdownField }) {
+                    SetElementVisible(field, generateVariablesSourceFileProperty.boolValue);
+                }
+            }
+            UpdateVariableSettingsVisibility();
+            generateVariablesSourceFileField.RegisterValueChangeCallback(e => UpdateVariableSettingsVisibility());
+
+            variableStorageSettingsContainer.Add(generateVariablesSourceFileField);
+            variableStorageSettingsContainer.Add(variablesClassNameField);
+            variableStorageSettingsContainer.Add(variablesClassNamespaceField);
+            variableStorageSettingsContainer.Add(variablesClassParentDropdownField);
+
+            ui.Add(variableStorageSettingsContainer);
 
 
             ui.Add(new IMGUIContainer(ApplyRevertGUI));

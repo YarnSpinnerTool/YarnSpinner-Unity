@@ -9,6 +9,7 @@ using UnityEngine;
 using System.Linq;
 using Yarn.Compiler;
 using System.IO;
+using System.Text;
 
 #if USE_UNITY_LOCALIZATION
 using UnityEditor.Localization;
@@ -69,6 +70,11 @@ namespace Yarn.Unity.Editor
                 }
             }
         }
+
+        public bool generateVariablesSourceFile = false;
+        public string variablesClassName = "YarnVariables";
+        public string? variablesClassNamespace = null;
+        public string variablesClassParent = typeof(InMemoryVariableStorage).FullName;
 
         public bool useAddressableAssets;
 
@@ -328,13 +334,170 @@ namespace Yarn.Unity.Editor
                 }
 
                 projectAsset.compiledYarnProgram = compiledBytes;
+
+                if (generateVariablesSourceFile)
+                {
+
+                    var fileName = variablesClassName + ".cs";
+
+                    var generatedSourcePath = Path.Combine(Path.GetDirectoryName(ctx.assetPath), fileName);
+                    bool generated = GenerateVariableSource(generatedSourcePath, project, compilationResult);
+                    if (generated)
+                    {
+                        AssetDatabase.ImportAsset(generatedSourcePath);
+                    }
+                }
             }
-            
+
+
+
             importData.ImportStatus = ProjectImportData.ImportStatusCode.Succeeded;
 
 #if YARNSPINNER_DEBUG
             UnityEngine.Profiling.Profiler.enabled = false;
 #endif
+        }
+
+        private bool GenerateVariableSource(string outputPath, Project project, CompilationResult compilationResult)
+        {
+            string? existingContent = null;
+
+            if (File.Exists(outputPath)) {
+                // If the file already exists on disk, read it all in now. We'll
+                // compare it to what we generated and, if the contents match
+                // exactly, we don't need to re-import the resulting C# script.
+                existingContent = File.ReadAllText(outputPath);
+            }
+
+            if (string.IsNullOrEmpty(variablesClassName))
+            {
+                Debug.LogError("Can't generate variable interface, because the specified class name is empty.");
+                return false;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            int indentLevel = 0;
+            const int indentSize = 4;
+
+            void WriteLine(string line = "", int offset = 0)
+            {
+                if (line.Length > 0)
+                {
+                    sb.Append(new string(' ', (indentLevel + offset) * indentSize));
+                }
+                sb.AppendLine(line);
+            }
+            void WriteComment(string comment = "") => WriteLine("// " + comment);
+
+            if (string.IsNullOrEmpty(variablesClassNamespace) == false)
+            {
+                WriteLine($"namespace {variablesClassNamespace} {{");
+                WriteLine();
+                indentLevel += 1;
+            }
+
+            var toolName = "YarnSpinner";
+            var toolVersion = this.GetType().Assembly.GetName().Version.ToString();
+            WriteLine($"[System.CodeDom.Compiler.GeneratedCode(\"{toolName}\", \"{toolVersion}\")]");
+
+            WriteLine($"public partial class {variablesClassName} : {variablesClassParent} {{");
+
+            indentLevel += 1;
+
+            const string variableUnknownError = "Failed to get a value of type {0} for variable {1}.";
+
+            var declarationsToGenerate = compilationResult.Declarations
+                .Where(d => d.IsVariable == true);
+
+            if (declarationsToGenerate.Count() == 0)
+            {
+                WriteComment("This yarn project does not declare any variables.");
+            }
+
+            foreach (var decl in declarationsToGenerate)
+            {
+                string? cSharpTypeName = null;
+
+                if (decl.Type == Yarn.Types.String)
+                {
+                    cSharpTypeName = "string";
+                }
+                else if (decl.Type == Yarn.Types.Number)
+                {
+                    cSharpTypeName = "float";
+                }
+                else if (decl.Type == Yarn.Types.Boolean)
+                {
+                    cSharpTypeName = "bool";
+                }
+                else
+                {
+                    WriteLine($"#warning Can't generate a property for variable {decl.Name}, because its type ({decl.Type}) can't be handled.");
+                    WriteLine();
+                    continue;
+                }
+
+                WriteComment($"Accessor for {decl.Type} {decl.Name}");
+
+                // Remove '$'
+                string cSharpVariableName = decl.Name.TrimStart('$');
+                // Capitalise first letter
+                cSharpVariableName = cSharpVariableName.Substring(0, 1).ToUpperInvariant() + cSharpVariableName.Substring(1);
+
+                if (decl.Description != null)
+                {
+                    WriteLine("/// <summary>");
+                    WriteLine($"/// {decl.Description}");
+                    WriteLine("/// </summary>");
+                }
+
+                WriteLine($"public {cSharpTypeName} {cSharpVariableName} {{");
+
+                WriteLine($"get {{", 1);
+                WriteLine($"if (base.TryGetValue<{cSharpTypeName}>(\"{decl.Name}\", out {cSharpTypeName} result)) {{", 2);
+                WriteLine($"return result;", 3);
+                WriteLine($"}} else {{", 2);
+                WriteLine(string.Format($"UnityEngine.Debug.Log(\"{variableUnknownError}\");", cSharpTypeName, decl.Name), 3);
+                WriteLine($"return default({cSharpTypeName});", 3);
+                WriteLine($"}}", 2);
+
+                WriteLine($"}}", 1);
+
+                if (decl.IsInlineExpansion == false)
+                {
+                    // Only generate a setter if it's a variable that can be modified
+                    WriteLine($"set {{", 1);
+                    WriteLine($"base.SetValue(\"{decl.Name})\", value);", 2);
+                    WriteLine($"}}", 1);
+                }
+
+                WriteLine($"}}");
+
+                WriteLine();
+            }
+
+            indentLevel -= 1;
+
+            WriteLine($"}}");
+
+            if (string.IsNullOrEmpty(variablesClassNamespace) == false)
+            {
+                indentLevel -= 1;
+                WriteLine($"}}");
+            }
+
+            if (existingContent != null && existingContent.Equals(sb.ToString(), System.StringComparison.Ordinal))
+            {
+                // What we generated is identical to what's already on disk.
+                // Don't write it.
+                return false;
+            }
+
+            Debug.Log($"Writing to {outputPath}");
+            File.WriteAllText(outputPath, sb.ToString());
+
+            return true;
+
         }
 
         /// <summary>
