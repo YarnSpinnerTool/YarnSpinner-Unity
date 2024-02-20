@@ -23,9 +23,9 @@ namespace Yarn.Unity.Tests
 
 #if USE_UNITY_LOCALIZATION
     [TestFixture]
-    public class UnityLocalisationTests : IPrebuildSetup, IPostBuildCleanup
+    public class UnityLocalisationImportTests : IPrebuildSetup, IPostBuildCleanup
     {
-        static string TestFolderName = typeof(UnityLocalisationTests).Name;
+        static string TestFolderName = typeof(UnityLocalisationImportTests).Name;
         static string AssetPath = $"Assets/{TestFolderName}/";
 
         string[] aLines =
