@@ -10,6 +10,8 @@ using System.Linq;
 using Yarn.Compiler;
 using System.IO;
 using System.Text;
+using Yarn.Utility;
+
 
 #if USE_UNITY_LOCALIZATION
 using UnityEditor.Localization;
@@ -57,9 +59,36 @@ namespace Yarn.Unity.Editor
             }
         }
 
+        /// <summary>
+        /// Whether to generate a C# file that contains properties for each variable.
+        /// </summary>
+        /// <seealso cref="variablesClassName"/>
+        /// <seealso cref="variablesClassNamespace"/>
+        /// <seealso cref="variablesClassParent"/>
         public bool generateVariablesSourceFile = false;
+
+        /// <summary>
+        /// The name of the generated variables storage class.
+        /// </summary>
+        /// <seealso cref="generateVariablesSourceFile"/>
+        /// <seealso cref="variablesClassNamespace"/>
+        /// <seealso cref="variablesClassParent"/>
         public string variablesClassName = "YarnVariables";
+
+        /// <summary>
+        /// The namespace of the generated variables storage class.
+        /// </summary>
+        /// <seealso cref="generateVariablesSourceFile"/>
+        /// <seealso cref="variablesClassName"/>
+        /// <seealso cref="variablesClassParent"/>
         public string? variablesClassNamespace = null;
+
+        /// <summary>
+        /// The parent class of the generated variables storage class.
+        /// </summary>
+        /// <seealso cref="generateVariablesSourceFile"/>
+        /// <seealso cref="variablesClassName"/>
+        /// <seealso cref="variablesClassNamespace"/>
         public string variablesClassParent = typeof(InMemoryVariableStorage).FullName;
 
         public bool useAddressableAssets;
@@ -383,15 +412,86 @@ namespace Yarn.Unity.Editor
                 indentLevel += 1;
             }
 
-            var toolName = "YarnSpinner";
-            var toolVersion = this.GetType().Assembly.GetName().Version.ToString();
-            WriteLine($"[System.CodeDom.Compiler.GeneratedCode(\"{toolName}\", \"{toolVersion}\")]");
+            WriteLine("using Yarn.Unity;");
+            WriteLine();
 
-            WriteLine($"public partial class {variablesClassName} : {variablesClassParent} {{");
+            void WriteGeneratedCodeAttribute()
+            {
+                var toolName = "YarnSpinner";
+                var toolVersion = this.GetType().Assembly.GetName().Version.ToString();
+                WriteLine($"[System.CodeDom.Compiler.GeneratedCode(\"{toolName}\", \"{toolVersion}\")]");
+            }
+
+            // For each user-defined enum, create a C# enum type
+            foreach (var type in compilationResult.UserDefinedTypes.OfType<Yarn.EnumType>())
+            {
+                WriteGeneratedCodeAttribute();
+
+                if (type.RawType == Types.String) {
+                    // String-backed enums are represented as CRC32 hashes of
+                    // the raw value, which we store as uints
+                    WriteLine($"public enum {type.Name} : uint {{");
+                } else {
+                    WriteLine($"public enum {type.Name} {{");
+                }
+
+                indentLevel += 1;
+
+                foreach (var enumCase in type.EnumCases)
+                {
+                    if (type.RawType == Types.Number)
+                    {
+                        WriteLine($"{enumCase.Key} = {enumCase.Value.Value},");
+                    }
+                    else if (type.RawType == Types.String)
+                    {
+                        var stringValue = (string)enumCase.Value.Value;
+                        WriteComment($"\"{stringValue}\"");
+                        WriteLine($"{enumCase.Key} = {CRC32.GetChecksum(stringValue)},");
+                    }
+                    else
+                    {
+                        WriteComment($"Error: enum case {type.Name}.{enumCase.Key} has an invalid raw type {type.RawType.Name}");
+                    }
+                }
+
+                indentLevel -= 1;
+
+                WriteLine($"}}");
+                WriteLine();
+            }
+
+            WriteGeneratedCodeAttribute();
+            WriteLine($"public partial class {variablesClassName} : {variablesClassParent}, Yarn.Unity.IGeneratedVariableStorage {{");
 
             indentLevel += 1;
 
-            const string variableUnknownError = "Failed to get a value of type {0} for variable {1}.";
+            WriteLine("public string GetStringValueForEnumCase<T>(T enumCase) where T : System.Enum {");
+            indentLevel += 1;
+            foreach (var type in compilationResult.UserDefinedTypes.OfType<Yarn.EnumType>().Where(e => e.RawType == Types.String)) {
+                WriteLine($"if (typeof(T) == typeof({type.Name})) {{");
+                indentLevel += 1;
+                WriteLine("switch (enumCase) {");
+                indentLevel += 1;
+                foreach (var enumCase in type.EnumCases)
+                {
+                    WriteLine($"case {type.Name}.{enumCase.Key}:");
+                    indentLevel += 1;
+                    WriteLine($"return \"{(string)enumCase.Value.Value}\";");
+                    indentLevel -= 1;
+                }
+                WriteLine("default:");
+                indentLevel += 1;
+                WriteLine("throw new System.ArgumentException($\"{enumCase} is not a valid enum case.\");");
+                indentLevel -= 1;
+                indentLevel -= 1;
+                WriteLine("}");
+                indentLevel -= 1;
+                WriteLine($"}}");
+            }
+            WriteLine("throw new System.ArgumentException($\"{typeof(T)} is not a valid enum type.\");");
+            indentLevel -= 1;
+            WriteLine("}");
 
             var declarationsToGenerate = compilationResult.Declarations
                 .Where(d => d.IsVariable == true);
@@ -417,12 +517,16 @@ namespace Yarn.Unity.Editor
                 {
                     cSharpTypeName = "bool";
                 }
+                else if (decl.Type is EnumType enumType1)
+                {
+                    cSharpTypeName = enumType1.Name;
+                }
                 else
                 {
                     WriteLine($"#warning Can't generate a property for variable {decl.Name}, because its type ({decl.Type}) can't be handled.");
                     WriteLine();
-                    continue;
                 }
+                
 
                 WriteComment($"Accessor for {decl.Type} {decl.Name}");
 
@@ -440,24 +544,32 @@ namespace Yarn.Unity.Editor
 
                 WriteLine($"public {cSharpTypeName} {cSharpVariableName} {{");
 
-                WriteLine($"get {{", 1);
-                WriteLine($"if (base.TryGetValue<{cSharpTypeName}>(\"{decl.Name}\", out {cSharpTypeName} result)) {{", 2);
-                WriteLine($"return result;", 3);
-                WriteLine($"}} else {{", 2);
-                WriteLine(string.Format($"UnityEngine.Debug.Log(\"{variableUnknownError}\");", cSharpTypeName, decl.Name), 3);
-                WriteLine($"return default({cSharpTypeName});", 3);
-                WriteLine($"}}", 2);
+                indentLevel += 1;
 
-                WriteLine($"}}", 1);
+                if (decl.Type is EnumType enumType)
+                {
+                    WriteLine($"get => this.GetEnumValueOrDefault<{cSharpTypeName}>(\"{decl.Name}\");");
+                } else {
+                    WriteLine($"get => this.GetValueOrDefault<{cSharpTypeName}>(\"{decl.Name}\");");
+                }
 
                 if (decl.IsInlineExpansion == false)
                 {
                     // Only generate a setter if it's a variable that can be modified
-                    WriteLine($"set {{", 1);
-                    WriteLine($"base.SetValue(\"{decl.Name})\", value);", 2);
-                    WriteLine($"}}", 1);
+                    if (decl.Type is EnumType e) {
+                        if (e.RawType == Types.Number) {
+                            WriteLine($"set => this.SetNumberEnum<{cSharpTypeName}>(\"{decl.Name}\", value);");
+                        } else if (e.RawType == Types.String) {
+                            WriteLine($"set => this.SetStringEnum<{cSharpTypeName}>(\"{decl.Name}\", value);");
+                        } else {
+                            WriteLine($"#warning Can't generate a setter for {decl.Name}: enum's raw type, {e.RawType}, is unsupported");
+                        }
+                    } else {
+                        WriteLine($"set => this.SetValue<{cSharpTypeName}>(\"{decl.Name}\", value);");
+                    }
                 }
-
+                indentLevel -= 1;
+                
                 WriteLine($"}}");
 
                 WriteLine();

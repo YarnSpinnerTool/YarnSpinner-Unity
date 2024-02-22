@@ -353,6 +353,12 @@
             Gets the debugging information for this compiled project.
             </summary>
         </member>
+        <member name="P:Yarn.Compiler.CompilationResult.UserDefinedTypes">
+            <summary>
+            Gets a collection of any types that were defined by the user in the
+            input (for example, user-defined enum types.)
+            </summary>
+        </member>
         <member name="F:Yarn.Compiler.ContentIdentifierType.Line">
             <summary>
             The content identifier is a <c>#line:</c> tag.
@@ -614,44 +620,6 @@
             The name of the variable that tracks whether once statement
             primary clause has been seen before or not.
             </summary>
-        </member>
-        <member name="T:Yarn.Compiler.CRC32">
-            <summary>
-            Provides a method for generating CRC32 hashes of strings.
-            </summary>
-        </member>
-        <member name="M:Yarn.Compiler.CRC32.GetChecksum(System.Byte[])">
-            <summary>
-            Computes a CRC32 checksum from the given bytes.
-            </summary>
-            <param name="bytes">The bytes to generate a checksum
-            for.</param>
-            <returns>A CRC32 checksum derived from <paramref
-            name="bytes"/>.</returns>
-        </member>
-        <member name="M:Yarn.Compiler.CRC32.GetChecksum(System.String)">
-            <summary>
-            Computes a CRC32 checksum from the given string.
-            </summary>
-            <remarks>
-            This method converts the string to a UTF-8 encoding, and then
-            computes a CRC32 checksum from those bytes.
-            </remarks>
-            <param name="s">The string to generate a checksum for.</param>
-            <returns>A CRC32 checksum derived from <paramref
-            name="s"/>.</returns>
-        </member>
-        <member name="M:Yarn.Compiler.CRC32.GetChecksumString(System.String)">
-            <summary>
-            Gets the CRC-32 hash of <paramref name="s"/> as a string
-            containing 8 lowercase hexadecimal characters.
-            </summary>
-            <remarks>
-            This method converts the string to a UTF-8 encoding, and then
-            computes a CRC32 checksum from those bytes.
-            </remarks>
-            <param name="s">The string to get the checksum of.</param>
-            <returns>The string containing the checksum.</returns>
         </member>
         <member name="T:Yarn.Compiler.NodeDebugInfo">
             <summary>

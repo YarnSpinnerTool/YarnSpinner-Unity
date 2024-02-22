@@ -4,6 +4,44 @@
         <name>YarnSpinner</name>
     </assembly>
     <members>
+        <member name="T:Yarn.Utility.CRC32">
+            <summary>
+            Provides a method for generating CRC32 hashes of strings.
+            </summary>
+        </member>
+        <member name="M:Yarn.Utility.CRC32.GetChecksum(System.Byte[])">
+            <summary>
+            Computes a CRC32 checksum from the given bytes.
+            </summary>
+            <param name="bytes">The bytes to generate a checksum
+            for.</param>
+            <returns>A CRC32 checksum derived from <paramref
+            name="bytes"/>.</returns>
+        </member>
+        <member name="M:Yarn.Utility.CRC32.GetChecksum(System.String)">
+            <summary>
+            Computes a CRC32 checksum from the given string.
+            </summary>
+            <remarks>
+            This method converts the string to a UTF-8 encoding, and then
+            computes a CRC32 checksum from those bytes.
+            </remarks>
+            <param name="s">The string to generate a checksum for.</param>
+            <returns>A CRC32 checksum derived from <paramref
+            name="s"/>.</returns>
+        </member>
+        <member name="M:Yarn.Utility.CRC32.GetChecksumString(System.String)">
+            <summary>
+            Gets the CRC-32 hash of <paramref name="s"/> as a string
+            containing 8 lowercase hexadecimal characters.
+            </summary>
+            <remarks>
+            This method converts the string to a UTF-8 encoding, and then
+            computes a CRC32 checksum from those bytes.
+            </remarks>
+            <param name="s">The string to get the checksum of.</param>
+            <returns>The string containing the checksum.</returns>
+        </member>
         <member name="T:Yarn.Line">
              <summary>
              A line of dialogue, sent from the <see cref="T:Yarn.Dialogue"/> to the game.
@@ -1562,6 +1600,16 @@
         <member name="P:Yarn.EnumType.Description">
             <inheritdoc/>
         </member>
+        <member name="P:Yarn.EnumType.RawType">
+            <summary>
+            Gets the type of this enum's members.
+            </summary>
+        </member>
+        <member name="P:Yarn.EnumType.EnumCases">
+            <summary>
+            Gets the collection of enum cases in this enum.
+            </summary>
+        </member>
         <member name="M:Yarn.EnumType.AddMember(System.String,Yarn.ConstantTypeProperty)">
             <summary>
             Adds a new case to this enumeration type.
@@ -1571,7 +1619,7 @@
         </member>
         <member name="T:Yarn.FunctionType">
             <summary>
-            A type that represents functions.
+            A type that represents a function.
             </summary>
             <remarks>
             Functions have parameters and a return type, and can be called from
@@ -1718,9 +1766,19 @@
             cases.
             </remarks>
         </member>
+        <member name="P:Yarn.ConstantTypeProperty.Type">
+            <summary>
+            Gets the type of this property.
+            </summary>
+        </member>
         <member name="P:Yarn.ConstantTypeProperty.Value">
             <summary>
             Gets the value that is stored in this property.
+            </summary>
+        </member>
+        <member name="P:Yarn.ConstantTypeProperty.Description">
+            <summary>
+            Gets a string describing this property.
             </summary>
         </member>
         <member name="T:Yarn.TypeBase">
@@ -1728,9 +1786,37 @@
             Provides the base class for all concrete types.
             </summary>
         </member>
+        <member name="P:Yarn.TypeBase.Name">
+            <summary>
+            Gets the name of this type.
+            </summary>
+        </member>
+        <member name="P:Yarn.TypeBase.Parent">
+            <summary>
+            Gets the parent of this type.
+            </summary>
+        </member>
+        <member name="P:Yarn.TypeBase.Description">
+            <summary>
+            Gets a string describing this type.
+            </summary>
+        </member>
+        <member name="M:Yarn.TypeBase.ToString">
+            <inheritdoc />
+        </member>
         <member name="P:Yarn.TypeBase.Methods">
             <summary>
             Gets the collection of methods that are defined on this type.
+            </summary>
+        </member>
+        <member name="P:Yarn.TypeBase.TypeMembers">
+            <summary>
+            Gets a dictionary containing the members of this type.
+            </summary>
+        </member>
+        <member name="P:Yarn.TypeBase.ConvertibleToTypes">
+            <summary>
+            Gets the collection of types that this type may be converted to.
             </summary>
         </member>
         <member name="P:Yarn.TypeBase.TypeDepth">
@@ -1749,6 +1835,23 @@
             Registers that this type is convertible to <paramref name="otherType"/>.
             </summary>
             <param name="otherType"></param>
+        </member>
+        <member name="M:Yarn.TypeBase.IsConvertibleTo(Yarn.TypeBase)">
+            <summary>
+            Checks if this type is convertible to the type represented by
+            <paramref name="otherType"/>.
+            </summary>
+            <remarks>
+            A type is convertible to another type if: 
+            <list type="number">
+            <item>there is an explicit conversion available, or</item>
+            <item>it is a descendant of that type, or</item>
+            <item>
+            the two types are identical.</item></list>
+            </remarks>
+            <param name="otherType">The type to check.</param>
+            <returns><see langword="true"/> if this type is convertible to
+            <paramref name="otherType"/>.</returns>
         </member>
         <member name="T:Yarn.Types">
             <summary>
