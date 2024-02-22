@@ -44,6 +44,7 @@ jobs:
     steps:
       - name: Create empty Unity project
         run: |
+          shell: bash
           mkdir -p ${{ matrix.projectPath }}/Assets
           mkdir -p ${{ matrix.projectPath }}/ProjectSettings 
           mkdir -p ${{ matrix.projectPath }}/Packages
@@ -51,6 +52,7 @@ jobs:
       # Add the Unity Input System package, and configure the new project to use
       # both the Input System and the legacy Input Manager.
       - name: Add Input System package
+        shell: bash
         run: |
           cat <<EOF > ${{ matrix.projectPath }}/ProjectSettings/ProjectSettings.asset
           %YAML 1.1
