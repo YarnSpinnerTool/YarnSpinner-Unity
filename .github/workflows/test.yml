@@ -43,8 +43,8 @@ jobs:
           # - WebGL # WebGL.
     steps:
       - name: Create empty Unity project
+        shell: bash
         run: |
-          shell: bash
           mkdir -p ${{ matrix.projectPath }}/Assets
           mkdir -p ${{ matrix.projectPath }}/ProjectSettings 
           mkdir -p ${{ matrix.projectPath }}/Packages
