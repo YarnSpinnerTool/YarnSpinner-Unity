@@ -29,10 +29,6 @@ namespace Yarn.Unity
     ///     System.Object value = variable.Value;
     /// }
     /// </code>
-    ///
-    /// <para>Note that as of v2.0, this class no longer uses Yarn.Value, to
-    /// enforce static typing of declared variables within the Yarn
-    /// Program.</para>
     /// </remarks>
     [HelpURL("https://yarnspinner.dev/docs/unity/components/variable-storage/")]
     public class InMemoryVariableStorage : VariableStorageBehaviour, IEnumerable<KeyValuePair<string, object>>
@@ -161,6 +157,7 @@ namespace Yarn.Unity
         }
 
         private static bool TryGetAsType<T>(Dictionary<string,object>dictionary, string key, out T result) {
+
             if (dictionary.TryGetValue(key, out var objectResult) == true 
                 && typeof(T).IsAssignableFrom(objectResult.GetType()))
             {
