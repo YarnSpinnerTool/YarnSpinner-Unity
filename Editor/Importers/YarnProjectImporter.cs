@@ -38,10 +38,6 @@ namespace Yarn.Unity.Editor
             [UnityEngine.Serialization.FormerlySerializedAs("type")]
             public string typeName = Yarn.Types.String.Name;
 
-            public bool defaultValueBool;
-            public float defaultValueNumber;
-            public string defaultValueString;
-
             public string? description;
 
             public bool isImplicit;
@@ -58,16 +54,6 @@ namespace Yarn.Unity.Editor
                 string sourceScriptPath = GetRelativePath(decl.SourceFileName);
 
                 sourceYarnAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(sourceScriptPath);
-
-                if (this.typeName == Types.String.Name) {
-                    this.defaultValueString = System.Convert.ToString(decl.DefaultValue);
-                } else if (this.typeName == Types.Boolean.Name) {
-                    this.defaultValueBool = System.Convert.ToBoolean(decl.DefaultValue);
-                } else if (this.typeName == Types.Number.Name) {
-                    this.defaultValueNumber = System.Convert.ToSingle(decl.DefaultValue);
-                } else {
-                    throw new System.InvalidOperationException($"Invalid declaration type {decl.Type.Name}");
-                }
             }
         }
 
