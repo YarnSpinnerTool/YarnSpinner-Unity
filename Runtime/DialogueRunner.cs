@@ -409,19 +409,23 @@ namespace Yarn.Unity
 
                 async YarnTask RunLineAndInvokeCompletion(AsyncDialogueViewBase view, LocalizedLine line, CancellationToken token) {
 
-                    // Run the line and wait for it to finish
-                    await view.RunLineAsync(localisedLine, token);
-
+                    try
+                    {
+                        // Run the line and wait for it to finish
+                        await view.RunLineAsync(localisedLine, token);
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogException(e, view);
+                    }
                     if (view.EndLineWhenViewFinishes) {
                         // When this view finishes, we end the entire line.
                         currentLineCancellationSource.Cancel();
                     }
-
-
-
                 }
 
                 YarnTask task = RunLineAndInvokeCompletion(view, localisedLine, currentLineCancellationSource.Token);
+                
                 pendingTasks.Add(task);
             }
 
@@ -486,26 +490,50 @@ namespace Yarn.Unity
 
             DialogueOption? selectedOption = null;
 
-            // Wait for our option views. If any of them return a non-null value,
-            // use it (and cancel the rest.)
+            // Wait for our option views. If any of them return a non-null
+            // value, use it (and cancel the rest.) If any throw an exception,
+            // log it and stop waiting for it.
             while (pendingTasks.Count > 0)
             {
-                var completedTask = await YarnTask.WhenAny(pendingTasks);
-                if (completedTask.Result == null)
+                try
                 {
-                    // An option task completed and returned null. Remove that task
-                    // from the set of tasks we're waiting for, and wait for the
-                    // rest.
-                    pendingTasks.Remove(completedTask);
+                    var completedTask = await YarnTask.WhenAny(pendingTasks);
+                    if (completedTask.Result == null)
+                    {
+                        // An option task completed and returned null. Remove that task
+                        // from the set of tasks we're waiting for, and wait for the
+                        // rest.
+                        pendingTasks.Remove(completedTask);
+                    }
+                    else
+                    {
+                        // The option task completed with an option. Cancel all other
+                        // option handlers and stop waiting for them - their input is no
+                        // longer required.
+                        selectedOption = completedTask.Result;
+                        optionCancellationSource.Cancel();
+                        break;
+                    }
                 }
-                else
+                catch (Exception exception)
                 {
-                    // The option task completed with an option. Cancel all other
-                    // option handlers and stop waiting for them - their input is no
-                    // longer required.
-                    selectedOption = completedTask.Result;
-                    optionCancellationSource.Cancel();
-                    break;
+                    // One or more tasks have faulted. Log the exceptions, and
+                    // remove the faulted tasks.
+                    if (exception is AggregateException aggregateException)
+                    {
+                        // Log each inner exception individually.
+                        foreach (var innerException in aggregateException.InnerExceptions)
+                        {
+                            Debug.LogException(innerException, this);
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogException(exception, this);
+                    }
+
+                    // Filter out any faulted tasks.
+                    pendingTasks = pendingTasks.Where(t => t.IsFaulted == false).ToHashSet();
                 }
             }
 
