@@ -221,6 +221,7 @@ namespace Yarn.Unity.Editor
                 catch (System.Exception e)
                 {
                     var errorMessage = $"Encountered an unhandled exception during compilation: {e.Message}";
+                    Debug.LogException(e);
                     ctx.LogImportError(errorMessage, null);
 
                     importData.diagnostics.Add(new ProjectImportData.DiagnosticEntry
