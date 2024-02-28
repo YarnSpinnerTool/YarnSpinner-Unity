@@ -11,6 +11,8 @@ using Yarn.Compiler;
 using System.IO;
 using System.Text;
 using Yarn.Utility;
+using System.Threading.Tasks;
+
 
 
 #if USE_UNITY_LOCALIZATION
@@ -423,15 +425,35 @@ namespace Yarn.Unity.Editor
             }
 
             // For each user-defined enum, create a C# enum type
-            foreach (var type in compilationResult.UserDefinedTypes.OfType<Yarn.EnumType>())
+            IEnumerable<EnumType> enumTypes = compilationResult.UserDefinedTypes.OfType<Yarn.EnumType>();
+
+            foreach (var type in enumTypes)
             {
+                WriteLine($"/// <summary>");
+                if (string.IsNullOrEmpty(type.Description) == false)
+                {
+                    WriteLine($"/// {type.Description}");
+                }
+                else
+                {
+                    WriteLine($"/// {type.Name}");
+                }
+                WriteLine($"/// </summary>");
+
+                WriteLine($"/// <remarks>");
+                WriteLine($"/// Automatically generated from Yarn project at {this.assetPath}.");
+                WriteLine($"/// </remarks>");
+
                 WriteGeneratedCodeAttribute();
 
-                if (type.RawType == Types.String) {
+                if (type.RawType == Types.String)
+                {
                     // String-backed enums are represented as CRC32 hashes of
                     // the raw value, which we store as uints
                     WriteLine($"public enum {type.Name} : uint {{");
-                } else {
+                }
+                else
+                {
                     WriteLine($"public enum {type.Name} {{");
                 }
 
@@ -439,12 +461,28 @@ namespace Yarn.Unity.Editor
 
                 foreach (var enumCase in type.EnumCases)
                 {
+                    WriteLine();
+
+                    WriteLine($"/// <summary>");
+                    if (string.IsNullOrEmpty(enumCase.Value.Description) == false)
+                    {
+                        WriteLine($"/// {enumCase.Value.Description}");
+                    }
+                    else
+                    {
+                        WriteLine($"/// {enumCase.Value}");
+                    }
+                    WriteLine($"/// </summary>");
+
                     if (type.RawType == Types.Number)
                     {
                         WriteLine($"{enumCase.Key} = {enumCase.Value.Value},");
                     }
                     else if (type.RawType == Types.String)
                     {
+                        WriteLine($"/// <remarks>");
+                        WriteLine($"/// Backing value: \"{enumCase.Value.Value}\"");
+                        WriteLine($"/// </remarks>");
                         var stringValue = (string)enumCase.Value.Value;
                         WriteComment($"\"{stringValue}\"");
                         WriteLine($"{enumCase.Key} = {CRC32.GetChecksum(stringValue)},");
@@ -461,37 +499,54 @@ namespace Yarn.Unity.Editor
                 WriteLine();
             }
 
+            if (enumTypes.Any())
+            {
+                // Generate an extension class that extends the above enums with
+                // methods that accesses their backing value
+                WriteGeneratedCodeAttribute();
+                WriteLine($"internal static class {variablesClassName}TypeExtensions {{");
+                indentLevel += 1;
+                foreach (var enumType in enumTypes)
+                {
+                    var backingType = enumType.RawType == Types.Number ? "int" : "string";
+                    WriteLine($"internal static {backingType} GetBackingValue(this {enumType.Name} enumValue) {{");
+                    indentLevel += 1;
+                    WriteLine($"switch (enumValue) {{");
+                    indentLevel += 1;
+
+                    foreach (var @case in enumType.EnumCases)
+                    {
+                        WriteLine($"case {enumType.Name}.{@case.Key}:", 1);
+                        if (enumType.RawType == Types.Number)
+                        {
+
+                            WriteLine($"return {@case.Value.Value};", 2);
+                        }
+                        else if (enumType.RawType == Types.String)
+                        {
+                            WriteLine($"return \"{@case.Value.Value}\";", 2);
+                        }
+                        else
+                        {
+                            throw new System.ArgumentException($"Invalid Yarn enum raw type {enumType.RawType}");
+                        }
+                    }
+                    WriteLine("default:", 1);
+                    WriteLine("throw new System.ArgumentException($\"{enumValue} is not a valid enum case.\");");
+
+                    indentLevel -= 1;
+                    WriteLine("}");
+                    indentLevel -= 1;
+                    WriteLine("}");
+                }
+                indentLevel -= 1;
+                WriteLine("}");
+            }
+
             WriteGeneratedCodeAttribute();
             WriteLine($"public partial class {variablesClassName} : {variablesClassParent}, Yarn.Unity.IGeneratedVariableStorage {{");
 
             indentLevel += 1;
-
-            WriteLine("public string GetStringValueForEnumCase<T>(T enumCase) where T : System.Enum {");
-            indentLevel += 1;
-            foreach (var type in compilationResult.UserDefinedTypes.OfType<Yarn.EnumType>().Where(e => e.RawType == Types.String)) {
-                WriteLine($"if (typeof(T) == typeof({type.Name})) {{");
-                indentLevel += 1;
-                WriteLine("switch (enumCase) {");
-                indentLevel += 1;
-                foreach (var enumCase in type.EnumCases)
-                {
-                    WriteLine($"case {type.Name}.{enumCase.Key}:");
-                    indentLevel += 1;
-                    WriteLine($"return \"{(string)enumCase.Value.Value}\";");
-                    indentLevel -= 1;
-                }
-                WriteLine("default:");
-                indentLevel += 1;
-                WriteLine("throw new System.ArgumentException($\"{enumCase} is not a valid enum case.\");");
-                indentLevel -= 1;
-                indentLevel -= 1;
-                WriteLine("}");
-                indentLevel -= 1;
-                WriteLine($"}}");
-            }
-            WriteLine("throw new System.ArgumentException($\"{typeof(T)} is not a valid enum type.\");");
-            indentLevel -= 1;
-            WriteLine("}");
 
             var declarationsToGenerate = compilationResult.Declarations
                 .Where(d => d.IsVariable == true);
@@ -549,22 +604,21 @@ namespace Yarn.Unity.Editor
                 if (decl.Type is EnumType enumType)
                 {
                     WriteLine($"get => this.GetEnumValueOrDefault<{cSharpTypeName}>(\"{decl.Name}\");");
-                } else {
+                }
+                else
+                {
                     WriteLine($"get => this.GetValueOrDefault<{cSharpTypeName}>(\"{decl.Name}\");");
                 }
 
                 if (decl.IsInlineExpansion == false)
                 {
                     // Only generate a setter if it's a variable that can be modified
-                    if (decl.Type is EnumType e) {
-                        if (e.RawType == Types.Number) {
-                            WriteLine($"set => this.SetNumberEnum<{cSharpTypeName}>(\"{decl.Name}\", value);");
-                        } else if (e.RawType == Types.String) {
-                            WriteLine($"set => this.SetStringEnum<{cSharpTypeName}>(\"{decl.Name}\", value);");
-                        } else {
-                            WriteLine($"#warning Can't generate a setter for {decl.Name}: enum's raw type, {e.RawType}, is unsupported");
-                        }
-                    } else {
+                    if (decl.Type is EnumType e)
+                    {
+                        WriteLine($"set => this.SetValue(\"{decl.Name}\", value.GetBackingValue());");
+                    }
+                    else
+                    {
                         WriteLine($"set => this.SetValue<{cSharpTypeName}>(\"{decl.Name}\", value);");
                     }
                 }
