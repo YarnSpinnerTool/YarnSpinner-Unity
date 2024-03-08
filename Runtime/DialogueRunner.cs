@@ -263,6 +263,43 @@ namespace Yarn.Unity
         private void OnDialogueCompleted()
         {
             onDialogueComplete?.Invoke();
+            OnDialogueCompleteAsync().Forget();
+        }
+        private async YarnTask OnDialogueCompleteAsync()
+        {
+            // cleaning up the old cancellation token
+            currentLineCancellationSource?.Dispose();
+            currentLineCancellationSource = null;
+
+            var pendingTasks = new HashSet<YarnTask>();
+            foreach (var view in this.dialogueViews)
+            {
+                if (view == null)
+                {
+                    // The view doesn't exist. Skip it.
+                    continue;
+                }
+
+                // Tell all of our views that the dialogue has finished
+                async YarnTask RunCompletion()
+                {
+                    try
+                    {
+                        await view.DialogueCompleteAsync();
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogException(e, view);
+                    }
+                }
+
+                YarnTask task = RunCompletion();
+                
+                pendingTasks.Add(task);
+            }
+
+            // Wait for all views to finish doing their clean up
+            await YarnTask.WhenAll(pendingTasks);
         }
 
         private void OnNodeCompleted(string completedNodeName)

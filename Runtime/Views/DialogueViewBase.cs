@@ -380,6 +380,11 @@ namespace Yarn.Unity
             // default implementation does nothing
         }
 
+        public override YarnTask DialogueCompleteAsync()
+        {
+            return YarnTask.CompletedTask;
+        }
+
         // This method implements the v3 async pattern for dialogue views on top
         // of the v2 API.
         public override async YarnTask RunLineAsync(LocalizedLine line, CancellationToken token)
