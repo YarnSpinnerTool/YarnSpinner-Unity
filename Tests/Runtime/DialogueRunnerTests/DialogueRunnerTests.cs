@@ -490,7 +490,10 @@ namespace Yarn.Unity.Tests
             runner.StartDialogue("BuiltinsTest");
             yield return null;
 
-            Assert.AreEqual("Jane: round(3.522) = 4; round_places(3.522, 2) = 3.52; floor(3.522) = 3; floor(-3.522) = -4; ceil(3.522) = 4; ceil(-3.522) = -3; inc(3.522) = 4; inc(4) = 5; dec(3.522) = 3; dec(3) = 2; round_places(decimal(3.522),3) = 0.522; int(3.522) = 3; int(-3.522) = -3;", dialogueUI.CurrentLine);
+            // we need to format the expected values with the current culture, because "3.52" is formatted as "3,52" in some cultures.
+            var round_places = $"{3.52:0.00}";
+            var round_places_decimal = $"{0.522:0.000}";
+            Assert.AreEqual($"Jane: round(3.522) = 4; round_places(3.522, 2) = {round_places}; floor(3.522) = 3; floor(-3.522) = -4; ceil(3.522) = 4; ceil(-3.522) = -3; inc(3.522) = 4; inc(4) = 5; dec(3.522) = 3; dec(3) = 2; round_places(decimal(3.522),3) = {round_places_decimal}; int(3.522) = 3; int(-3.522) = -3;", dialogueUI.CurrentLine);
 
             // dialogueUI.ReadyForNextLine();
         }   
