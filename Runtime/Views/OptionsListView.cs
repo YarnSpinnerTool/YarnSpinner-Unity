@@ -6,6 +6,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Yarn.Markup;
+
 #if USE_TMP
 using TMPro;
 #else
@@ -26,6 +28,8 @@ namespace Yarn.Unity
 
         [SerializeField] bool showUnavailableOptions = false;
 
+        [SerializeField] private bool addNumbersToOptions;
+        
         [Header("Last Line Components")]
         [SerializeField] TextMeshProUGUI lastLineText;
         [SerializeField] GameObject lastLineContainer;
@@ -74,6 +78,7 @@ namespace Yarn.Unity
             // Set up all of the option views
             int optionViewsCreated = 0;
 
+            int optionDisplayNumber = 1;
             for (int i = 0; i < dialogueOptions.Length; i++)
             {
                 var optionView = optionViews[i];
@@ -88,12 +93,27 @@ namespace Yarn.Unity
                 optionView.gameObject.SetActive(true);
 
                 optionView.palette = this.palette;
+
+                if (addNumbersToOptions)
+                {
+                    option.Line.Text = new MarkupParseResult
+                    {
+                        Attributes = option.Line.Text.Attributes,
+                        Text = $"{optionDisplayNumber}.\t{option.Line.Text.Text}"
+                    };
+                }
+
                 optionView.Option = option;
 
                 // The first available option is selected by default
                 if (optionViewsCreated == 0)
                 {
                     optionView.Select();
+                }
+
+                if (option.IsAvailable == true)
+                {
+                    optionDisplayNumber++;
                 }
 
                 optionViewsCreated += 1;
@@ -187,7 +207,7 @@ namespace Yarn.Unity
         /// If options are still shown dismisses them.
         /// </remarks>
         public override void DialogueComplete()
-        {   
+        {
             // do we still have any options being shown?
             if (canvasGroup.alpha > 0)
             {
@@ -230,12 +250,46 @@ namespace Yarn.Unity
             {
                 UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(layout.GetComponent<RectTransform>());
             }
-            
+
             // Perform the second pass of re-layout. This will update the outer vertical group's positioning of the individual elements.
             foreach (var layout in layouts)
             {
                 UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(layout.GetComponent<RectTransform>());
             }
+        }
+
+        /// <summary>
+        /// Call, when the option should be selected without the button being clicked.
+        /// This could be when the player can use the 1-9 keys on the keyboard to select an option.
+        /// </summary>
+        /// <param name="number">First option has number 1 and so on.</param>
+        public void SelectOption(int number)
+        {
+            if (optionViews.Count < number)
+                return;
+
+            int optionDisplayNumber = 0;
+            foreach (var option in optionViews)
+            {
+                if (!option.isActiveAndEnabled)
+                    continue;
+
+                optionDisplayNumber++;
+
+                if (optionDisplayNumber == number)
+                    option.InvokeOptionSelected();
+            }
+        }
+
+        /// <summary>
+        /// Call, when the last option should be selected without the button being clicked.
+        /// An example would be a "Cancel" key (on keyboard or controller), that will always select the last option.
+        /// </summary>
+        public void SelectLastOption()
+        {
+            var optionView = optionViews.FindLast(o => o.isActiveAndEnabled);
+            if (optionView != null)
+                optionView.InvokeOptionSelected();
         }
     }
 }
