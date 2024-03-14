@@ -40,6 +40,7 @@ jobs:
           mkdir -p ${{ matrix.projectPath }}/Assets
           mkdir -p ${{ matrix.projectPath }}/ProjectSettings 
           mkdir -p ${{ matrix.projectPath }}/Packages
+          mkdir -p ${{ matrix.projectPath }}/TestOutput
       
       # Add the Unity Input System package, and configure the new project to use
       # both the Input System and the legacy Input Manager.
@@ -67,4 +68,22 @@ jobs:
         with:
           fetch-depth: 0
           path: ${{ matrix.projectPath }}/Packages/YarnSpinner
-          
+
+      - name: Run tests
+        run: |
+            docker run \
+                --rm \
+                -v ${{ matrix.projectPath }}:/project \
+                -v ${{ matrix.projectPath }}/TestOutput:/output \
+                --hostname YS-Linux-Build \
+                yarnspinner/unity-${{ matrix.unityVersion }} \
+                unity-editor -runTests -batchmode -projectPath /project/ -testResults /output/TestResults-EditMode.xml -testPlatform EditMode -logFile -
+    
+      - name: Upload test results
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+            name: Test results (edit + play, ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}
+            # path: ${{ steps.testRunner.outputs.artifactsPath }}
+            path: ${{ matrix.projectPath }}/TestOutput
+    
