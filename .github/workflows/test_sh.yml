@@ -29,8 +29,8 @@ jobs:
         #   - 2023.1.1f1
         targetPlatform:
           # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
-          - StandaloneWindows64 # Build a Windows 64-bit standalone.
-          # - StandaloneLinux64 # Build a Linux 64-bit standalone.
+          # - StandaloneWindows64 # Build a Windows 64-bit standalone.
+          - StandaloneLinux64 # Build a Linux 64-bit standalone.
           # - iOS # Build an iOS player.
           # - Android # Build an Android player.
           # - WebGL # WebGL.
@@ -77,7 +77,7 @@ jobs:
                 -v ./output:/output \
                 --hostname YS-Linux-Build \
                 yarnspinner/unity-${{ matrix.unityVersion }} \
-                /bin/bash -c 'unity-editor -runTests -batchmode -projectPath /project/ -testResults /output/TestResults-EditMode.xml -testPlatform EditMode -logFile - && chmod -R 777 /project/* /output/*'
+                /bin/bash -c 'unity-editor -runTests -batchmode -projectPath /project/ -testResults /output/TestResults-EditMode.xml -testPlatform EditMode -logFile - && chmod -R 777 /project/ /output/'
     
       - name: Upload test results
         uses: actions/upload-artifact@v2
