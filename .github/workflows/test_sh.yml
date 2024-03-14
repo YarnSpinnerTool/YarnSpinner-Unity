@@ -24,7 +24,7 @@ jobs:
         projectPath:
           - YarnSpinner
         unityVersion:
-          - 2021.3.1f1
+          - 2021.3.35f1
         #   - 2022.2.1f1
         #   - 2023.1.1f1
         targetPlatform:
