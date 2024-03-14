@@ -76,6 +76,7 @@ jobs:
                 -v ./${{ matrix.projectPath }}:/project \
                 -v ./output:/output \
                 --hostname YS-Linux-Build \
+                --user $(id -u):$(id -g) \
                 yarnspinner/unity-${{ matrix.unityVersion }} \
                 unity-editor -runTests -batchmode -projectPath /project/ -testResults /output/TestResults-EditMode.xml -testPlatform EditMode -logFile -
     
