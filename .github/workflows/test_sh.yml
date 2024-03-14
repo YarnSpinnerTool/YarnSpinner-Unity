@@ -73,8 +73,8 @@ jobs:
         run: |
             docker run \
                 --rm \
-                -v ${{ matrix.projectPath }}:/project \
-                -v output:/output \
+                -v ./${{ matrix.projectPath }}:/project \
+                -v ./output:/output \
                 --hostname YS-Linux-Build \
                 yarnspinner/unity-${{ matrix.unityVersion }} \
                 unity-editor -runTests -batchmode -projectPath /project/ -testResults /output/TestResults-EditMode.xml -testPlatform EditMode -logFile -
@@ -85,5 +85,5 @@ jobs:
         with:
             name: Test results (edit + play, ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}
             # path: ${{ steps.testRunner.outputs.artifactsPath }}
-            path: output
+            path: ./output
     
