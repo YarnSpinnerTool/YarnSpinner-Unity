@@ -25,8 +25,8 @@ jobs:
           - YarnSpinner
         unityVersion:
           - 2021.3.35f1
-          # - 2022.3.21f1
-          # - 2023.2.12f1
+          - 2022.3.21f1
+          - 2023.2.12f1
         targetPlatform:
           # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           # - StandaloneWindows64 # Build a Windows 64-bit standalone.
