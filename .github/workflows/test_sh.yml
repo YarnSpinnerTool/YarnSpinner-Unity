@@ -69,13 +69,23 @@ jobs:
           fetch-depth: 0
           path: ${{ matrix.projectPath }}/Packages/YarnSpinner
 
-      - name: Run tests
+      - name: Run edit mode tests
         run: |
           docker run \
             --rm \
             -v ./${{ matrix.projectPath }}:/project \
             -v ./output:/output \
             -e TEST_MODE=EditMode \
+            --hostname YS-Linux-Build \
+            yarnspinner/unity-${{ matrix.unityVersion }}
+                
+      - name: Run play mode tests
+        run: |
+          docker run \
+            --rm \
+            -v ./${{ matrix.projectPath }}:/project \
+            -v ./output:/output \
+            -e TEST_MODE=PlayMode \
             --hostname YS-Linux-Build \
             yarnspinner/unity-${{ matrix.unityVersion }}
                 
