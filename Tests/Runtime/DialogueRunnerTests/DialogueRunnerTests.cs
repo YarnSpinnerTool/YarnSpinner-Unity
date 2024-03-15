@@ -248,6 +248,15 @@ namespace Yarn.Unity.Tests
 
             yield return null;
         }
+
+
+        [Test]
+        public void TestFailing()
+        {
+            Assert.Fail("This Play-Mode test failed.");
+        }
+
+
         [UnityTest]
         public IEnumerator DialogueRunner_CanAccessNodeNames()
         {
