@@ -163,13 +163,6 @@ namespace Yarn.Unity.Tests
             }
         }
 
-        
-        [Test]
-        public void TestFailing()
-        {
-            Assert.Fail("This Edit-Mode test failed.");
-        }
-
         [Test]
         public void UnityLocalisation_FormerImplictLinesAreRemovedFromStringTables()
         {
