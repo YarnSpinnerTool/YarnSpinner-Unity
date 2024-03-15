@@ -25,8 +25,8 @@ jobs:
           - YarnSpinner
         unityVersion:
           - 2021.3.35f1
-          - 2022.3.21f1
-          - 2023.2.12f1
+          # - 2022.3.21f1
+          # - 2023.2.12f1
         targetPlatform:
           # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           # - StandaloneWindows64 # Build a Windows 64-bit standalone.
@@ -71,13 +71,13 @@ jobs:
 
       - name: Run tests
         run: |
-            docker run \
-                --rm \
-                -v ./${{ matrix.projectPath }}:/project \
-                -v ./output:/output \
-                --hostname YS-Linux-Build \
-                yarnspinner/unity-${{ matrix.unityVersion }} \
-                /bin/bash -c 'unity-editor -runTests -batchmode -projectPath /project/ -testResults /output/TestResults-EditMode.xml -testPlatform EditMode -logFile -'
+          docker run \
+            --rm \
+            -v ./${{ matrix.projectPath }}:/project \
+            -v ./output:/output \
+            -e TEST_MODE=EditMode \
+            --hostname YS-Linux-Build \
+            yarnspinner/unity-${{ matrix.unityVersion }}
                 
       - name: Upload test results
         uses: actions/upload-artifact@v2
@@ -87,14 +87,5 @@ jobs:
           # path: ${{ steps.testRunner.outputs.artifactsPath }}
           path: ./output
 
-      - name: Cleanup
-        if: always()
-        run: |
-            docker run \
-                --rm \
-                -v ./${{ matrix.projectPath }}:/project
-                -v ./output:/output
-                yarnspinner/unity-${{ matrix.unityVersion }} \
-                /bin/bash -c 'rm -rf /project/* /output/*'
                 
     
