@@ -80,6 +80,7 @@ jobs:
             yarnspinner/unity-${{ matrix.unityVersion }}
                 
       - name: Run play mode tests
+        if: always()
         run: |
           docker run \
             --rm \
