@@ -97,9 +97,11 @@ namespace Yarn.Unity.Editor
                 var project = Project.LoadFromFile(this.assetPath);
                 var scriptFile = yarnImporter.assetPath;
 
+                var scriptFileWithEnvironmentSeparators = string.Join(System.IO.Path.DirectorySeparatorChar, scriptFile.Split('/'));
+
                 var projectRelativeSourceFiles = project.SourceFiles.Select(GetRelativePath);
 
-                return projectRelativeSourceFiles.Contains(scriptFile);
+                return projectRelativeSourceFiles.Contains(scriptFileWithEnvironmentSeparators);
             }
             catch
             {
