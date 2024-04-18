@@ -120,24 +120,7 @@ namespace Yarn.Unity.UnityLocalization
             return localizedLine;
         }
 
-        public override void Start()
-        {
-            // doing an initial load of the strings
-            if (stringsTable != null)
-            {
-                // Adding an event handler to TableChanged will trigger an
-                // initial async load of the string table, which will call the
-                // handler on completion. So, we don't set currentStringsTable
-                // here, but instead we only ever do it in OnStringTableChanged.
-                stringsTable.TableChanged += OnStringTableChanged;
-            }
-
-            if (assetTable != null)
-            {
-                // Same logic for asset table as for strings table, above.
-                assetTable.TableChanged += OnAssetTableChanged;
-            }
-        }
+        public override void Start() => SetTable(stringsTable, assetTable);
 
         // We've been notified that a new strings table has been loaded.
         private void OnStringTableChanged(StringTable newTable)
@@ -149,6 +132,42 @@ namespace Yarn.Unity.UnityLocalization
         private void OnAssetTableChanged(AssetTable value)
         {
             currentAssetTable = value;
+        }
+
+        /// <summary>
+        /// Updates referenced LocalizedStringTable.
+        /// </summary>
+        public void SetTable(LocalizedStringTable stringsTable) => SetTable(stringsTable, assetTable);
+        
+        /// <summary>
+        /// Updates referenced LocalizedAssetTable.
+        /// </summary>
+        public void SetTable(LocalizedAssetTable assetTable) => SetTable(stringsTable, assetTable);
+
+        /// <summary>
+        /// Updates both referenced LocalizedStringTable and LocalizedAssetTable.
+        /// </summary>
+        public void SetTable(LocalizedStringTable stringsTable, LocalizedAssetTable assetTable)
+        {
+            // doing an initial load of the strings
+            if (stringsTable != null && this.stringsTable != stringsTable)
+            {
+                this.stringsTable = stringsTable;
+
+                // Adding an event handler to TableChanged will trigger an
+                // initial async load of the string table, which will call the
+                // handler on completion. So, we don't set currentStringsTable
+                // here, but instead we only ever do it in OnStringTableChanged.
+                stringsTable.TableChanged += OnStringTableChanged;
+            }
+
+            if (assetTable != null && this.assetTable != assetTable)
+            {
+                this.assetTable = assetTable;
+
+                // Same logic for asset table as for strings table, above.
+                assetTable.TableChanged += OnAssetTableChanged;
+            }
         }
 
         /// <summary>
