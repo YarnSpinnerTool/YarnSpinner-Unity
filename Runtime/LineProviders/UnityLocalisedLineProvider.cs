@@ -150,7 +150,7 @@ namespace Yarn.Unity.UnityLocalization
         public void SetTable(LocalizedStringTable stringsTable, LocalizedAssetTable assetTable)
         {
             // doing an initial load of the strings
-            if (stringsTable != null)
+            if (stringsTable != null && this.stringsTable != stringsTable)
             {
                 this.stringsTable = stringsTable;
 
@@ -161,7 +161,7 @@ namespace Yarn.Unity.UnityLocalization
                 stringsTable.TableChanged += OnStringTableChanged;
             }
 
-            if (assetTable != null)
+            if (assetTable != null && this.assetTable != assetTable)
             {
                 this.assetTable = assetTable;
 
