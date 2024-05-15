@@ -181,7 +181,7 @@ namespace Yarn.Unity.UnityLocalization
 #else
     public class UnityLocalisedLineProvider : LineProviderBehaviour
     {
-        public override string LocaleCode => "error";
+        public override string LocaleCode { get => "error"; set { } }
 
 
         private readonly string NotInstalledError = $"{nameof(UnityLocalisedLineProvider)} requires that the Unity Localization package is installed in the project. To fix this, install Unity Localization.";
@@ -197,7 +197,7 @@ namespace Yarn.Unity.UnityLocalization
             Debug.LogError(NotInstalledError);
         }
 
-        public override YarnLineTask GetLocalizedLineAsync(Yarn.Line line, CancellationToken cancellationToken)
+        public override YarnLineTask GetLocalizedLineAsync(Yarn.Line line, IMarkupParser markupParser, CancellationToken cancellationToken)
         {
             Debug.LogError($"{nameof(UnityLocalisedLineProvider)}: Can't create a localised line for ID {line.ID} because the Unity Localization package is not installed in this project. To fix this, install Unity Localization.");
 

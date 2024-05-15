@@ -165,21 +165,25 @@ public class AsyncLineProvider : MonoBehaviour, ILineProvider
 
     [SerializeField] private string _localeCode = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
 
-    public YarnLineTask GetLocalizedLineAsync(Line line)
+    public YarnLineTask GetLocalizedLineAsync(Line line, IMarkupParser parser, CancellationToken cancellationToken)
     {
         var loc = CurrentLocalization;
 
         var text = loc.GetLocalizedString(line.ID);
         var asset = loc.GetLocalizedObject<Object>(line.ID);
+        var markup = parser.ParseMarkup(text ?? "", loc.LocaleCode);
 
-        return UniTask.FromResult(new LocalizedLine
+        return YarnTask.FromResult(new LocalizedLine
         {
+            Text = markup,
+            Substitutions = line.Substitutions,
+            TextID = line.ID,
             RawText = text,
             Asset = asset,
         });
     }
 
-    public YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs)
+    public YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken)
     {
         return YarnTask.CompletedTask;
     }
@@ -198,7 +202,9 @@ public class AsyncLineProvider : MonoBehaviour, ILineProvider
             }
         }
     }
-}
+
+        public bool LinesAvailable => true;
+    }
 #endif
 
 }
