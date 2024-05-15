@@ -1,4 +1,4 @@
-﻿/*
+/*
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
@@ -160,7 +160,11 @@ namespace Yarn.Unity.Tests
                 await YarnTask.Yield();
             }
             return dialogueOptions[selectedOption];
+        }
 
+        public override YarnTask DialogueCompleteAsync()
+        {
+            return YarnTask.CompletedTask;
         }
 
         public void ExpectLine(string text, UnityEngine.Object? asset = null)
