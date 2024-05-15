@@ -208,15 +208,8 @@ namespace Yarn.Unity.UnityLocalization
                 Substitutions = line.Substitutions,
             });
         }
+    }
 #endif
-    }
-
-#if USE_UNITY_LOCALIZATION
-    public class LineMetadata : IMetadata {
-        public string nodeName = "";
-        public string[] tags = System.Array.Empty<string>();
-    }
-#endif  
 
 #if UNITY_EDITOR
     [CustomEditor(typeof(UnityLocalisedLineProvider))]
@@ -247,4 +240,5 @@ namespace Yarn.Unity.UnityLocalization
         }
     }
 #endif
+}
 
