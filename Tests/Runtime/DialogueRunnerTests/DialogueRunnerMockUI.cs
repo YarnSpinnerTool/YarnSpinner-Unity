@@ -1,4 +1,4 @@
-/*
+﻿/*
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
@@ -156,7 +156,8 @@ namespace Yarn.Unity.Tests
             {
                 selectedOption = option;
             };
-            while (selectedOption == -1) {
+            while (selectedOption == -1)
+            {
                 await YarnTask.Yield();
             }
             return dialogueOptions[selectedOption];
@@ -167,7 +168,7 @@ namespace Yarn.Unity.Tests
             return YarnTask.CompletedTask;
         }
 
-        public void ExpectLine(string text, UnityEngine.Object? asset = null)
+        public void AssertCurrentLineIs(string text, UnityEngine.Object? asset = null)
         {
             CurrentLine.Should().BeEqualTo(text);
             CurrentAsset.Should().BeEqualTo(asset);
@@ -179,7 +180,7 @@ namespace Yarn.Unity.Tests
             PerformSelectOption!(index);
         }
 
-        internal void ExpectOptions(params string[] options)
+        internal void AssertCurrentOptionsAre(params string[] options)
         {
             CurrentOptions.Should().HaveCount(options.Length);
             for (int i = 0; i < options.Length; i++) {

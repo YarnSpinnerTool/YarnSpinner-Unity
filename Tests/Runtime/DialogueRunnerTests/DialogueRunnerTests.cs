@@ -295,13 +295,13 @@ namespace Yarn.Unity.Tests
             runner.StartDialogue(runner.startNode);
             yield return null;
 
-            dialogueUI.ExpectLine("Spieler: Kannst du mich hören? 2");
+            dialogueUI.AssertCurrentLineIs("Spieler: Kannst du mich hören? 2");
             yield return null;
 
-            dialogueUI.ExpectLine("NPC: Klar und deutlich.");
+            dialogueUI.AssertCurrentLineIs("NPC: Klar und deutlich.");
             yield return null;
 
-            dialogueUI.ExpectOptions(
+            dialogueUI.AssertCurrentOptionsAre(
                 "Mir reicht es.",
                 "Nochmal!"
             );
@@ -321,13 +321,13 @@ namespace Yarn.Unity.Tests
             runner.StartDialogue(runner.startNode);
             yield return null;
 
-            dialogueUI.ExpectLine("Spieler: Kannst du mich hören? 2");
+            dialogueUI.AssertCurrentLineIs("Spieler: Kannst du mich hören? 2");
             yield return null;
 
-            dialogueUI.ExpectLine("NPC: Klar und deutlich.");
+            dialogueUI.AssertCurrentLineIs("NPC: Klar und deutlich.");
             yield return null;
 
-            dialogueUI.ExpectOptions(
+            dialogueUI.AssertCurrentOptionsAre(
                 "Mir reicht es.",
                 "Nochmal!"
             );
@@ -476,7 +476,7 @@ namespace Yarn.Unity.Tests
             runner.StartDialogue("VariableTest");
             yield return null;
 
-            dialogueUI.ExpectLine("Jane: Yes! I've already walked 0 laps!");
+            dialogueUI.AssertCurrentLineIs("Jane: Yes! I've already walked 0 laps!");
             yield return null;
 
             variableStorage.SetValue("$laps", 1);
@@ -484,7 +484,7 @@ namespace Yarn.Unity.Tests
             runner.StartDialogue("VariableTest");
             yield return null;
 
-            dialogueUI.ExpectLine("Jane: Yes! I've already walked 1 laps!");
+            dialogueUI.AssertCurrentLineIs("Jane: Yes! I've already walked 1 laps!");
             yield return null;
 
             variableStorage.SetValue("$laps", 5);
@@ -492,28 +492,28 @@ namespace Yarn.Unity.Tests
             runner.StartDialogue("FunctionTest");
             yield return null;
 
-            dialogueUI.ExpectLine("Jane: Yes! I've already walked 25 laps!");
+            dialogueUI.AssertCurrentLineIs("Jane: Yes! I've already walked 25 laps!");
             yield return null;
 
             runner.Stop();
             runner.StartDialogue("FunctionTest2");
             yield return null;
 
-            dialogueUI.ExpectLine("Jane: Yes! I've already walked arg! i am a pirate no you're not! arg! i am a pirate laps!");
+            dialogueUI.AssertCurrentLineIs("Jane: Yes! I've already walked arg! i am a pirate no you're not! arg! i am a pirate laps!");
             yield return null;
 
             runner.Stop();
             runner.StartDialogue("ExternalFunctionTest");
             yield return null;
 
-            dialogueUI.ExpectLine("Jane: Here's a function from code that's in another assembly: 42");
+            dialogueUI.AssertCurrentLineIs("Jane: Here's a function from code that's in another assembly: 42");
             yield return null;
 
             runner.Stop();
             runner.StartDialogue("BuiltinsTest");
             yield return null;
 
-            dialogueUI.ExpectLine("Jane: round(3.522) = 4; round_places(3.522, 2) = 3.52; floor(3.522) = 3; floor(-3.522) = -4; ceil(3.522) = 4; ceil(-3.522) = -3; inc(3.522) = 4; inc(4) = 5; dec(3.522) = 3; dec(3) = 2; round_places(decimal(3.522),3) = 0.522; int(3.522) = 3; int(-3.522) = -3;");
+            dialogueUI.AssertCurrentLineIs("Jane: round(3.522) = 4; round_places(3.522, 2) = 3.52; floor(3.522) = 3; floor(-3.522) = -4; ceil(3.522) = 4; ceil(-3.522) = -3; inc(3.522) = 4; inc(4) = 5; dec(3.522) = 3; dec(3) = 2; round_places(decimal(3.522),3) = 0.522; int(3.522) = 3; int(-3.522) = -3;");
             yield return null;
 
         }
