@@ -195,6 +195,10 @@ namespace Yarn.Unity
             var actions = new Actions(this, Dialogue.Library);
             CommandDispatcher = actions;
             actions.RegisterActions();
+
+            if (this.VariableStorage != null && this.YarnProject != null) {
+                this.VariableStorage.Program = this.YarnProject.Program;
+            }
         }
         
         public void Start()
