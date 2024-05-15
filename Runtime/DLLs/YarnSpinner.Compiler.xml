@@ -92,6 +92,12 @@
             <param name="type">The type to apply to the Declaration.</param>
             <inheritdoc cref="M:Yarn.Compiler.DeclarationBuilder.WithName(System.String)" path="/returns"/>
         </member>
+        <member name="T:Yarn.Compiler.EnumTypeBuilder">
+            <summary>
+            Provides methods for constructing <see cref="T:Yarn.EnumType"/>
+            objects.
+            </summary>
+        </member>
         <member name="T:Yarn.Compiler.FunctionTypeBuilder">
             <summary>
             Provides methods for constructing <see cref="T:Yarn.FunctionType"/>
@@ -207,6 +213,12 @@
         <member name="P:Yarn.Compiler.CompilationJob.AllowPreviewFeatures">
             <summary>
             Whether language preview features are permitted.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.CompilationJob.TypeDeclarations">
+            <summary>
+            The collection of type declarations that should be imported and made
+            available to the compiler, prior to compilation.
             </summary>
         </member>
         <member name="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.Library)">
@@ -357,6 +369,34 @@
             <summary>
             Gets a collection of any types that were defined by the user in the
             input (for example, user-defined enum types.)
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.SpecialHeaderNames">
+            <summary>
+            Contains header names and strings used by the compiler.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.SpecialHeaderNames.TitleHeader">
+            <summary>
+            The name of the header that indicates a node's title.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.SpecialHeaderNames.WhenHeader">
+            <summary>
+            The name of a header that indicates a node's condition when part of
+            a node group.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.SpecialHeaderNames.NodeGroupHeader">
+            <summary>
+            The name of the header that indicates which node group a node
+            belongs to.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.SpecialHeaderNames.TrackingVariableNameHeader">
+            <summary>
+            The name of the header that indicates the name of the tracking
+            variable for this node.
             </summary>
         </member>
         <member name="F:Yarn.Compiler.ContentIdentifierType.Line">
@@ -547,6 +587,33 @@
             Gets the title of this node, as specified in its '<c>title</c>'
             header. If it is not present, returns <see langword="null"/>.
             </summary>
+        </member>
+        <member name="P:Yarn.Compiler.YarnSpinnerParser.NodeContext.NodeGroup">
+            <summary>
+            Gets the name of the node group that this node is part of, if
+            any.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.YarnSpinnerParser.NodeContext.GetHeader(System.String)">
+            <summary>
+            Gets the first header in this node named <paramref name="key"/>.
+            </summary>
+            <param name="key">The key of the header to find.</param>
+            <returns>A header whose <see cref="F:Yarn.Compiler.YarnSpinnerParser.HeaderContext.header_key"/>
+            is <paramref name="key"/>. </returns>
+            <remarks>
+            This method returns only the first header with the specified
+            key. To fetch all headers with this key, use <see
+            cref="M:Yarn.Compiler.YarnSpinnerParser.NodeContext.GetHeaders(System.String)"/>.
+            </remarks>
+        </member>
+        <member name="M:Yarn.Compiler.YarnSpinnerParser.NodeContext.GetHeaders(System.String)">
+            <summary>
+            Gets all headers in this node named <paramref name="key"/>.
+            </summary>
+            <param name="key">The key of the header to find.</param>
+            <returns>A collection of headers whose <see cref="F:Yarn.Compiler.YarnSpinnerParser.HeaderContext.header_key"/>
+            is <paramref name="key"/>. </returns>
         </member>
         <member name="P:Yarn.Compiler.YarnSpinnerParser.Line_statementContext.LineID">
             <summary>
@@ -4707,6 +4774,16 @@
             <param name="result"></param>
             <returns></returns>
         </member>
+        <member name="M:Yarn.Compiler.Utility.GetYarnValue(System.IConvertible)">
+            <summary>
+            Returns an <see cref="T:Yarn.IYarnValue"/> representation of the provided
+            value.
+            </summary>
+            <param name="clrValue">The value to get a Yarn representation
+            of.</param>
+            <returns>An <see cref="T:Yarn.IYarnValue"/> representation of <paramref
+            name="clrValue"/>.</returns>
+        </member>
         <member name="F:Yarn.Compiler.GraphingNode.node">
             <summary>
             The name of the node.
@@ -4773,6 +4850,9 @@
             <remarks>
             If this block begins at a labelled instruction, the name will be <c>[NodeName].[LabelName]</c>. Otherwise, it will be <c>[NodeName].[FirstInstructionIndex]</c>.
             </remarks>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.ToString">
+            <inheritdoc/>
         </member>
         <member name="P:Yarn.Compiler.BasicBlock.Ancestors">
             <summary>

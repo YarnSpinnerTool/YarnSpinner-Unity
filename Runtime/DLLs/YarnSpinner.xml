@@ -1930,6 +1930,19 @@
             is the same or a subtype of <paramref name="parentType"/>; <see
             langword="false"/> otherwise.</returns>
         </member>
+        <member name="T:Yarn.IYarnValue">
+            <summary>
+            Represents a read-only value in the Yarn Spinner virtual machine.
+            </summary>
+        </member>
+        <member name="M:Yarn.IYarnValue.ConvertTo``1">
+            <summary>
+            Converts this <see cref="T:Yarn.IYarnValue"/> to type <typeparamref
+            name="T"/>.
+            </summary>
+            <typeparam name="T">The type to convert to.</typeparam>
+            <returns>A value of type T.</returns>
+        </member>
         <member name="T:Yarn.Value">
             <summary>
             A value from inside Yarn.
