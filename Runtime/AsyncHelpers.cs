@@ -13,9 +13,11 @@ namespace Yarn.Unity
     using System.Collections;
     using System.Threading;
     using System.Runtime.CompilerServices;
-    
+
     using UnityEngine;
+#if USE_ADDRESSABLES
     using UnityEngine.ResourceManagement.AsyncOperations;
+#endif
 
 #if USE_UNITASK
     using Cysharp.Threading.Tasks;
@@ -87,6 +89,7 @@ namespace Yarn.Unity
 #endif
         }
 
+#if USE_ADDRESSABLES
         // Type aliases don't currently support generics, so in order to support returning
         // a task-like object that yields type T, we need to use gross ifdefs
         // when specifying the return type.
@@ -142,6 +145,8 @@ namespace Yarn.Unity
             return;
 #endif
         }
+
+#endif
 
         public static IEnumerator ToCoroutine(Func<YarnTask> factory)
         {
