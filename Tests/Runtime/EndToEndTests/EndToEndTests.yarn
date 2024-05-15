@@ -1,0 +1,151 @@
+﻿title: SpeakToGuard
+when: $guard_friendly == true
+---
+// The guard likes us
+Guard: Halt, traveller!
+Player: Why, hello there!
+Guard: Ah, my friend! You may pass.
+===
+
+title: SpeakToGuard
+when: $guard_friendly == false
+---
+// The guard doesn't like us
+Guard: Halt, scum!
+Guard: None shall pass this point!
+===
+
+title: SpeakToGuard
+when: $guard_friendly == true
+when: $helped_king == true
+---
+// The guard likes us, AND we helped the King
+// (both conditions must be true)
+Guard: Greetings, traveller!
+Guard: A friend of the king is always welcome!
+Guard: You may pass!
+===
+
+title: LinesAndOptions
+position: -108,-255
+---
+Line 1
+Line 2
+-> Option 1
+    Option 1 Selected
+-> Option 2
+    Option 2 Selected
+Line 3
+===
+title: LineGroups
+position: 283,-244
+---
+
+=> Guard: Halt!
+=> Guard: Stop right there!
+=> Guard: No entry!
+=> Guard: Stop right there, you criminal scum! <<if $is_criminal>>
+=> Guard: Halt, you brigand! <<if $is_criminal>>
+=> Guard: Thief! Stop right there! <<if $is_criminal>>
+=> Guard: I've got to stay alert! <<once>>
+=> Guard: I hear the king has a new advisor. <<once if $helped_king>>
+
+===
+
+title: SmartVariables
+position: -298,-106
+---
+// Declare a new variable, $player_can_afford_pie, which
+// is a boolean value that is 'true' when the player has
+// more than 10 money
+
+<<declare $player_can_afford_pie = $player_money > 10>>
+
+<<if $player_can_afford_pie>>
+    Player: One pie, please.
+    PieMaker: Certainly!
+<<else>>
+    Player: Can I have a pie?
+    PieMaker: You can't afford it!
+<<endif>>
+===
+title: Detours
+position: -313,298
+---
+Guard: Have I told you my backstory?
+-> Yes.
+-> No?
+    <<detour Guard_Backstory>>
+Guard: Anyway, move along.
+===
+title: Guard_Backstory
+position: -63,286
+---
+Guard: It all started when I was a new recruit.
+Guard: Why, I was but a young whippersnapper.
+Guard: My backstory is so long.
+// ... excessively long backstory goes here ...
+Guard: Want to hear more?
+-> Yes.
+-> No, thanks.
+    // Return early
+    <<return>>
+Guard: Great! After I graduated...
+// ... more backstory ...
+Guard: (I'm going to stop now.)
+
+// The node will automatically return when it reaches the end
+===
+title: Once
+position: 264,-25
+---
+<<once>>
+  Guard: Who are you?
+  Guard: I've never seen you before.
+  Player: I'm new!
+<<else>>
+	Guard: Ah, it's you.
+<<endonce>>
+===
+title: Config
+position: 239,232
+---
+
+<<declare $is_criminal = false>>
+<<declare $helped_king = false>>
+<<declare $guard_friendly = false>>
+<<declare $player_money = 0>>
+
+-> Configure Variables
+    -> Set Criminal Status
+        -> Set Criminal = True
+            <<set $is_criminal = true>>
+        -> Set Criminal = False
+            <<set $is_criminal = false>>
+    -> Set Guard Friendly Status
+        -> Set Friendly = True
+            <<set $guard_friendly = true>>
+        -> Set Friendly = False
+            <<set $guard_friendly = false>>
+    -> Set Helped King Status
+        -> Set Helped = True
+            <<set $helped_king = true>>
+        -> Set Helped = False
+            <<set $helped_king = false>>
+    -> Set Player Money
+        -> Set Player Money = 0
+            <<set $player_money = 0>>
+        -> Set Player Money += 15
+            <<set $player_money += 15>>
+        -> Set Player Money -= 15
+            <<set $player_money -= 15>>
+-> Configure Saliency
+    -> First
+        <<set_saliency first>>
+    -> Best
+        <<set_saliency best>>
+    -> Best Least Recent
+        <<set_saliency best-least-recent>>
+    -> Random Best Least Recent
+        <<set_saliency random-best-least-recent>>
+===
