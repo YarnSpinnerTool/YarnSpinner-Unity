@@ -525,6 +525,7 @@ namespace Yarn.Unity.ActionAnalyser
                     Type = ActionType.Command,
                     MethodName = targetSymbol.Name,
                     MethodSymbol = targetSymbol,
+                    MethodDeclarationSyntax = declaringSyntax,
                     Declaration = null,
                     SourceFileName = root.SyntaxTree.FilePath,
                     DeclarationType = DeclarationType.DirectRegistration,
@@ -573,7 +574,7 @@ namespace Yarn.Unity.ActionAnalyser
                     {
                         if (constantValue.Value is string)
                         {
-                            logger.WriteLine($"resolved constant expression value for the action name: {constantValue.Value.ToString()}");
+                        logger.WriteLine($"resolved constant expression value for the action name: {constantValue.Value.ToString()}");
                             actionName = constantValue.Value as string;
                         }
                         else
@@ -598,6 +599,7 @@ namespace Yarn.Unity.ActionAnalyser
                     MethodName = $"{containerName}.{methodInfo.MethodDeclaration.Identifier}",
                     MethodIdentifierName = methodInfo.MethodDeclaration.Identifier.ToString(),
                     MethodSymbol = methodInfo.Symbol,
+                    MethodDeclarationSyntax = methodInfo.MethodDeclaration,
                     IsStatic = methodInfo.Symbol.IsStatic,
                     Declaration = methodInfo.MethodDeclaration,
                     Parameters = new List<Parameter>(GetParameters(methodInfo.Symbol)),

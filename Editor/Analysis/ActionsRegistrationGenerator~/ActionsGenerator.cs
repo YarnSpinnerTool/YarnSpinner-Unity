@@ -16,6 +16,14 @@ using System.IO;
 
 #nullable enable
 
+static class ErrorCodes {
+    public const string YS1001ActionMethodsMustBePublic = "YS1001";
+    public const string YS1002ActionMethodsMustHaveAValidName = "YS1002";
+
+    public const string YS1003ActionMethodsMustHaveAValidReturnType = "YS1003";
+    public const string YS1003ActionMethodsMustHaveValidParameters = "YS1004";
+}
+
 [Generator]
 public class ActionRegistrationSourceGenerator : ISourceGenerator
 {
@@ -68,16 +76,22 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
 
     public void Execute(GeneratorExecutionContext context)
     {
-        var output = GetOutput(context);
+        using var output = GetOutput(context);
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+
         output.WriteLine(DateTime.Now);
 
-        // we need to know if the settings are configured to not perform codegen to link attributed methods
-        // this is kinda annoying because the path root of the project settings and the root path of this process are *very* different
-        // so what we do is we use the included Compilation Assembly additional file that Unity gives us.
-        // This file if opened has the path of the Unity project, which we can then use to get the settings
-        // if any stage of this fails then we bail out and assume that codegen is desired
-        string projectPath = null;
-        Yarn.Unity.Editor.YarnSpinnerProjectSettings settings = null;
+        // We need to know if the settings are configured to not perform codegen
+        // to link attributed methods. This is kinda annoying because the path
+        // root of the project settings and the root path of this process are
+        // *very* different. So, what we do is we use the included Compilation
+        // Assembly additional file that Unity gives us. This file, if opened,
+        // has the path of the Unity project, which we can then use to get the
+        // settings. If any stage of this fails, then we bail out and assume
+        // that codegen is desired.
+        string? projectPath = null;
+        Yarn.Unity.Editor.YarnSpinnerProjectSettings? settings = null;
         if (context.AdditionalFiles.Any())
         {
             var relevants = context.AdditionalFiles.Where(i => i.Path.Contains($"{context.Compilation.AssemblyName}.AdditionalFile.txt"));
@@ -96,7 +110,6 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                         if (!settings.automaticallyLinkAttributedYarnCommandsAndFunctions)
                         {
                             output.WriteLine("Skipping codegen due to settings.");
-                            output.Dispose();
                             return;
                         }
                     }
@@ -119,27 +132,31 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
         {
             output.WriteLine("Unable to determine Yarn settings path as no additional files were included. Settings values will be ignored and codegen will occur.");
         }
-        
+
         try
         {
             output.WriteLine("Source code generation for assembly " + context.Compilation.AssemblyName);
 
-            if (context.AdditionalFiles.Any()) {
+            if (context.AdditionalFiles.Any())
+            {
                 output.WriteLine($"Additional files:");
-                foreach (var item in context.AdditionalFiles) {
+                foreach (var item in context.AdditionalFiles)
+                {
                     output.WriteLine("  " + item.Path);
                 }
             }
 
             output.WriteLine("Referenced assemblies for this compilation:");
-            foreach (var referencedAssembly in context.Compilation.ReferencedAssemblyNames) {
+            foreach (var referencedAssembly in context.Compilation.ReferencedAssemblyNames)
+            {
                 output.WriteLine(" - " + referencedAssembly.Name);
             }
 
             bool compilationReferencesYarnSpinner = context.Compilation.ReferencedAssemblyNames
                 .Any(name => name.Name == YarnSpinnerUnityAssemblyName);
 
-            if (compilationReferencesYarnSpinner == false) {
+            if (compilationReferencesYarnSpinner == false)
+            {
                 // This compilation doesn't reference YarnSpinner.Unity. Any
                 // code that we generate that references symbols in that
                 // assembly won't work.
@@ -148,7 +165,8 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
             }
 
             output.WriteLine("Preprocessor Symbols: ");
-            foreach (var symbol in context.ParseOptions.PreprocessorSymbolNames) {
+            foreach (var symbol in context.ParseOptions.PreprocessorSymbolNames)
+            {
                 output.WriteLine("- " + symbol);
             }
 
@@ -156,7 +174,8 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
             // 2021.2. (Unity will not invoke this DLL as a source code
             // generator until at least this version, but other tools like
             // OmniSharp might.)
-            if ( !context.ParseOptions.PreprocessorSymbolNames.Contains(MinimumUnityVersionPreprocessorSymbol)) {
+            if (!context.ParseOptions.PreprocessorSymbolNames.Contains(MinimumUnityVersionPreprocessorSymbol))
+            {
                 output.WriteLine($"Not generating code for assembly {context.Compilation.AssemblyName} because this assembly is not being built for Unity 2021.2 or newer");
                 return;
             }
@@ -170,7 +189,8 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 "YarnSpinner.Editor",
             };
 
-            if (context.Compilation.AssemblyName == null) {
+            if (context.Compilation.AssemblyName == null)
+            {
                 output.WriteLine("Not generating registration code, because the provided AssemblyName is null");
                 return;
             }
@@ -202,6 +222,15 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 return;
             }
 
+            List<ITypeSymbol> knownValidReturnTypes = new List<ITypeSymbol?> {
+                    compilation.GetTypeByMetadataName("UnityEngine.Coroutine"),
+                    compilation.GetTypeByMetadataName("System.Collections.IEnumerator"),
+                    compilation.GetSpecialType(SpecialType.System_Void),
+                }
+                .NonNull(throwIfAnyNull: true)
+                .ToList();
+
+
             HashSet<string> removals = new HashSet<string>();
             // validating and logging all the actions
             foreach (var action in actions)
@@ -212,12 +241,48 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                     continue;
                 }
 
+                output.WriteLine($"{action.Name} ({action.MethodName}) has return type {action.MethodSymbol.ReturnType}");
+
+
+                bool isReturnTypeOnAllowList = knownValidReturnTypes.Contains(action.MethodSymbol.ReturnType);
+                output.WriteLine($"{action.Name} ({action.MethodName}) has is allowlisted: {isReturnTypeOnAllowList}");
+
+                // TODO: Allow async actions (i.e. action methods that return an
+                // awaitable type) once support for them is added to the actions
+                // system
+
+                // bool isReturnTypeAwaitable = action.MethodSymbol.ReturnType.IsAwaitableNonDynamic(action.SemanticModel, action.MethodDeclarationSyntax.SpanStart);
+                // output.WriteLine($"{action.Name} ({action.MethodName}) has is awaitable: {isReturnTypeAwaitable}");
+
+                bool isReturnTypeValid = isReturnTypeOnAllowList;
+
+                if (!isReturnTypeValid)
+                {
+                    var descriptor = new DiagnosticDescriptor(
+                        ErrorCodes.YS1003ActionMethodsMustHaveAValidReturnType,
+                        $"Yarn {action.Type} methods must return a valid type",
+                        $"YarnCommand and YarnFunction methods must return a valid type ({string.Join(", ", knownValidReturnTypes.Select(t => t.ToDisplayString()))}). \"{{0}}\" is {{1}}.",
+                        "Yarn Spinner",
+                        DiagnosticSeverity.Warning,
+                        true,
+                        "[YarnCommand] and [YarnFunction] attributed methods must be public so that the codegen can reference them.",
+                        "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/creating-commands-functions");
+                    context.ReportDiagnostic(Microsoft.CodeAnalysis.Diagnostic.Create(
+                        descriptor,
+                        action.Declaration?.GetLocation(),
+                        action.MethodIdentifierName, action.MethodSymbol.ReturnType.ToDisplayString()
+                    ));
+                    output.WriteLine($"Action {action.Name} will be skipped due to its return type not being valid ({action.MethodSymbol.ReturnType})");
+                    removals.Add(action.Name);
+                    continue;
+                }
+
                 // if an action isn't public we will log a warning
                 // and then later we will also skip it
                 if (action.MethodSymbol.DeclaredAccessibility != Accessibility.Public)
                 {
                     var descriptor = new DiagnosticDescriptor(
-                        "YS1001",
+                        ErrorCodes.YS1001ActionMethodsMustBePublic,
                         $"Yarn {action.Type} methods must be public",
                         "YarnCommand and YarnFunction methods must be public. \"{0}\" is {1}.",
                         "Yarn Spinner",
@@ -240,7 +305,7 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 if (action.Name.Contains(".") || action.Name.Any(x => Char.IsWhiteSpace(x)))
                 {
                     var descriptor = new DiagnosticDescriptor(
-                        "YS1002",
+                        ErrorCodes.YS1002ActionMethodsMustHaveAValidName,
                         $"Yarn {action.Type} methods must have a valid name",
                         "YarnCommand and YarnFunction methods follow existing ID rules for Yarn. \"{0}\" is invalid.",
                         "Yarn Spinner",
@@ -286,8 +351,8 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 {
                     output.Write($"Generating ysls...");
                     // generating the ysls
-                    YSLSGenerator generator = new YSLSGenerator();
-                    generator.logger = output;
+                    YSLSGenerator generator = new YSLSGenerator(output);
+
                     foreach (var action in actions)
                     {
                         generator.AddAction(action);
@@ -325,16 +390,14 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 output.WriteLine($"skipping ysls generation due to settings not being found");
             }
 
+            stopwatch.Stop();
+            output.WriteLine($"Source code generation completed in {stopwatch.Elapsed.TotalMilliseconds}ms");
             return;
 
         }
         catch (Exception e)
         {
             output.WriteLine($"{e}");
-        }
-        finally
-        {
-            output.Dispose();
         }
     }
 
@@ -611,6 +674,9 @@ internal class ClassDeclarationSyntaxReceiver : ISyntaxReceiver
 
 internal class YSLSGenerator
 {
+    public YSLSGenerator(Yarn.Unity.ILogger logger) {
+        this.logger = logger;
+    }
     struct YarnActionParameter
     {
         internal string Name;
@@ -812,5 +878,90 @@ internal class YSLSGenerator
                 break;
         }
         return type;
+    }
+}
+
+static class EnumerableExtensions {
+    public static IEnumerable<T> NonNull<T>(this IEnumerable<T?> collection, bool throwIfAnyNull = false) where T:class {
+        foreach (var item in collection) {
+            if (item != null) {
+                yield return item;
+            } else {
+                if (throwIfAnyNull) {
+                    throw new NullReferenceException("Collection contains a null item");
+                } 
+            }
+        }
+    }
+}
+
+
+static class SymbolExtensions {
+
+    /// <summary>
+    /// If the <paramref name="symbol"/> is a method symbol, returns <see langword="true"/> if the method's return type is "awaitable", but not if it's <see langword="dynamic"/>.
+    /// If the <paramref name="symbol"/> is a type symbol, returns <see langword="true"/> if that type is "awaitable".
+    /// An "awaitable" is any type that exposes a GetAwaiter method which returns a valid "awaiter". This GetAwaiter method may be an instance method or an extension method.
+    /// </summary>
+    public static bool IsAwaitableNonDynamic(this ISymbol symbol, SemanticModel semanticModel, int position)
+    {
+        IMethodSymbol? methodSymbol = symbol as IMethodSymbol;
+        ITypeSymbol? typeSymbol = null;
+
+        if (methodSymbol == null)
+        {
+            typeSymbol = symbol as ITypeSymbol;
+            if (typeSymbol == null)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (methodSymbol.ReturnType == null)
+            {
+                return false;
+            }
+        }
+
+        // otherwise: needs valid GetAwaiter
+        var potentialGetAwaiters = semanticModel.LookupSymbols(position,
+                                                               container: typeSymbol ?? methodSymbol?.ReturnType.OriginalDefinition,
+                                                               name: WellKnownMemberNames.GetAwaiter,
+                                                               includeReducedExtensionMethods: true);
+        var getAwaiters = potentialGetAwaiters.OfType<IMethodSymbol>().Where(x => !x.Parameters.Any());
+        return getAwaiters.Any(VerifyGetAwaiter);
+    }
+
+    private static bool VerifyGetAwaiter(IMethodSymbol getAwaiter)
+    {
+        var returnType = getAwaiter.ReturnType;
+        if (returnType == null)
+        {
+            return false;
+        }
+
+        // bool IsCompleted { get }
+        if (!returnType.GetMembers().OfType<IPropertySymbol>().Any(p => p.Name == WellKnownMemberNames.IsCompleted && p.Type.SpecialType == SpecialType.System_Boolean && p.GetMethod != null))
+        {
+            return false;
+        }
+
+        var methods = returnType.GetMembers().OfType<IMethodSymbol>();
+
+        // NOTE: (vladres) The current version of C# Spec, §7.7.7.3 'Runtime evaluation of await expressions', requires that
+        // NOTE: the interface method INotifyCompletion.OnCompleted or ICriticalNotifyCompletion.UnsafeOnCompleted is invoked
+        // NOTE: (rather than any OnCompleted method conforming to a certain pattern).
+        // NOTE: Should this code be updated to match the spec?
+
+        // void OnCompleted(Action) 
+        // Actions are delegates, so we'll just check for delegates.
+        if (!methods.Any(x => x.Name == WellKnownMemberNames.OnCompleted && x.ReturnsVoid && x.Parameters.Length == 1 && x.Parameters.First().Type.TypeKind == TypeKind.Delegate))
+        {
+            return false;
+        }
+
+        // void GetResult() || T GetResult()
+        return methods.Any(m => m.Name == WellKnownMemberNames.GetResult && !m.Parameters.Any());
     }
 }

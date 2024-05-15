@@ -9,6 +9,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+#nullable enable
+
 namespace Yarn.Unity.ActionAnalyser
 {
 
@@ -182,6 +184,11 @@ namespace Yarn.Unity.ActionAnalyser
         /// </summary>
         public string SourceFileName { get; internal set; }
 
+        /// <summary>
+        /// The syntax node for the method declaration associated with this action.
+        /// </summary>
+        public SyntaxNode? MethodDeclarationSyntax { get; internal set; }
+
         // The names of the methods that register commands and functions
         private const string AddCommandHandlerMethodName = "AddCommandHandler";
         private const string AddFunctionMethodName = "AddFunction";
@@ -191,7 +198,7 @@ namespace Yarn.Unity.ActionAnalyser
         /// </summary>
         public List<Parameter> Parameters = new List<Parameter>();
 
-        public bool Validate(out Diagnostic failureReason)
+        public bool Validate(out Diagnostic? failureReason)
         {
             var methodDeclaration = Declaration as MethodDeclarationSyntax;
 
@@ -236,7 +243,7 @@ namespace Yarn.Unity.ActionAnalyser
             }
         }
 
-        private bool ValidateFunction(out Diagnostic failureReason)
+        private bool ValidateFunction(out Diagnostic? failureReason)
         {
             var methodDeclaration = Declaration as MethodDeclarationSyntax;
 
