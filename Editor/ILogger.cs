@@ -27,6 +27,7 @@ namespace Yarn.Unity
 
         public void Dispose()
         {
+            writer.Flush();
             writer.Dispose();
         }
 
