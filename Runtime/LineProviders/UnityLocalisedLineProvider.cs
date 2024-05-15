@@ -206,7 +206,7 @@ namespace Yarn.Unity.UnityLocalization
                 TextID = line.ID,
                 RawText = $"{line.ID}: Unable to create a localised line, because the Unity Localization package is not installed in this project.",
                 Substitutions = line.Substitutions,
-            };
+            });
         }
 #endif
     }
