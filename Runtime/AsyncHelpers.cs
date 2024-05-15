@@ -47,6 +47,12 @@ namespace Yarn.Unity
 #endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public async static YarnTask WaitForCoroutine(this MonoBehaviour mb, IEnumerator coro, CancellationToken cancellationToken = default)
+        {
+            await mb.WaitForCoroutine(mb.StartCoroutine(coro), cancellationToken);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async static YarnTask WaitForCoroutine(this MonoBehaviour mb, Coroutine coro, CancellationToken cancellationToken = default)
         {
 #if USE_UNITASK
