@@ -23,19 +23,20 @@ using UnityEditor;
 
 #nullable enable
 
+using System.Threading;
+using Yarn.Unity.UnityLocalization;
+
 #if USE_UNITASK
     using Cysharp.Threading.Tasks;
     using YarnTask = Cysharp.Threading.Tasks.UniTask;
     using YarnIntTask = Cysharp.Threading.Tasks.UniTask<int>;
-    using YarnLineTask = Cysharp.Threading.Tasks.UniTask<LocalizedLine>;
+    using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
     using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object>;
 #else
     using YarnTask = System.Threading.Tasks.Task;
     using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
     using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object>;
-    using System.Threading;
     using System.Threading.Tasks;
-using Yarn.Unity.UnityLocalization;
 #endif
 
 namespace Yarn.Unity.UnityLocalization
@@ -46,7 +47,8 @@ namespace Yarn.Unity.UnityLocalization
     using UnityEngine.Localization;
     using UnityEngine.Localization.Settings;
     using UnityEngine.Localization.Metadata;
-    
+    using System.Threading;
+
     public class LineMetadata : IMetadata
     {
         public string nodeName = "";

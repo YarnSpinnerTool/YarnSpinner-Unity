@@ -7,7 +7,8 @@
         "UnityEditor.TestRunner",
         "Unity.TextMeshPro",
         "YarnSpinner.Unity.Editor",
-        "YarnSpinnerTests.Shared"
+        "YarnSpinnerTests.Shared",
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -26,6 +27,11 @@
             "name": "com.unity.addressables",
             "expression": "1.0.0",
             "define": "USE_ADDRESSABLES"
+        },
+        {
+            "name": "com.cysharp.unitask",
+            "expression": "1.0.0",
+            "define": "USE_UNITASK"
         }
     ],
     "noEngineReferences": false

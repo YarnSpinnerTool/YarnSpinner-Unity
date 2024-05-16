@@ -57,9 +57,9 @@ namespace Yarn.Unity
 
         private Dictionary<string, Object> cachedAssets = new Dictionary<string, Object>();
 
-        private YarnTask? prepareForLinesTask;
+        private YarnTask prepareForLinesTask = YarnTask.Never(CancellationToken.None);
 
-        public bool LinesAvailable => prepareForLinesTask?.IsCompletedSuccessfully ?? false;
+        public bool LinesAvailable => prepareForLinesTask.Status == UniTaskStatus.Succeeded;
         
         public async YarnLineTask GetLocalizedLineAsync(Line line, IMarkupParser markupParser, CancellationToken cancellationToken)
         {

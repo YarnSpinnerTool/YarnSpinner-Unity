@@ -15,6 +15,7 @@ namespace Yarn.Unity.Tests
 #if USE_UNITASK
     using Cysharp.Threading.Tasks;
     using YarnTask = Cysharp.Threading.Tasks.UniTask;
+    using System;
 #else
     using YarnTask = System.Threading.Tasks.Task;
 #endif
@@ -94,9 +95,9 @@ namespace Yarn.Unity.Tests
 
             var runTask = lineView.RunLineAsync(line, tokenSource.Token);
 
-            await YarnAsync.WaitForSeconds(0.5f);
+            await YarnTask.Delay(TimeSpan.FromSeconds(0.5f));
 
-            runTask.IsCompleted.Should().BeFalse("we're still running the line");
+            runTask.IsCompleted().Should().BeFalse("we're still running the line");
 
             lineView.lineText.text.Should().BeEqualTo("Well, this is great.");
             lineView.characterNameText.text.Should().BeEqualTo("Mae");
@@ -138,15 +139,14 @@ namespace Yarn.Unity.Tests
             lineView.requestInterrupt = () => cancellationSource.Cancel();
 
             YarnTask runTask = lineView.RunLineAsync(line, cancellationSource.Token);
-
-            runTask.IsCompleted.Should().BeFalse();
+            
+            runTask.IsCompleted().Should().BeFalse();
             lineView.lineText.text.Should().BeEqualTo("Line 1");
 
             lineView.UserRequestedViewAdvancement();
 
             await runTask;
 
-            runTask.IsCompleted.Should().BeTrue();
             lineView.canvasGroup.alpha.Should().BeEqualTo(0, "The line view should now be dismissed");
         });
 
@@ -170,39 +170,39 @@ namespace Yarn.Unity.Tests
             characterCount.Should().BeGreaterThan(0);
             lineView.lineText.maxVisibleCharacters.Should().BeEqualTo(0, "The typewriter effect has not yet begun");
 
-            await YarnAsync.WaitForSeconds(0.05f);
+            await YarnTask.Delay(TimeSpan.FromSeconds(0.05f));
 
             lineView.canvasGroup.alpha.Should().BeGreaterThan(0);
             lineView.canvasGroup.alpha.Should().BeLessThan(1);
             lineView.lineText.maxVisibleCharacters.Should().BeEqualTo(0, "The typewriter effect has not yet begun");
 
             // Wait for the fade to finish
-            await YarnAsync.WaitForSeconds(lineView.fadeInTime);
-
+            await YarnTask.Delay(TimeSpan.FromSeconds(lineView.fadeInTime));
+            
             lineView.canvasGroup.alpha.Should().BeEqualTo(1);
 
             lineView.lineText.maxVisibleCharacters.Should().BeGreaterThanOrEqualTo(0, "the typewriter effect has begun");
             lineView.lineText.maxVisibleCharacters.Should().BeLessThan(characterCount, "the entire line should not yet be visible");
 
             // Wait for the typewriter effect to complete
-            await YarnAsync.WaitForSeconds(2f);
+            await YarnTask.Delay(TimeSpan.FromSeconds(2f));
 
             lineView.lineText.maxVisibleCharacters.Should().BeGreaterThanOrEqualTo(characterCount);
 
             // Dismiss the line
             lineView.UserRequestedViewAdvancement();
 
-            await YarnAsync.WaitForSeconds(0.01f);
+            await YarnTask.Delay(TimeSpan.FromSeconds(0.01f));
 
             lineView.canvasGroup.alpha.Should().BeLessThan(1);
             lineView.canvasGroup.alpha.Should().BeGreaterThan(0);
-            runTask.IsCompleted.Should().BeFalse();
+            runTask.IsCompleted().Should().BeFalse();
 
             // Wait for the fade out to complete
-            await YarnAsync.WaitForSeconds(lineView.fadeOutTime);
+            await YarnTask.Delay(TimeSpan.FromSeconds(lineView.fadeOutTime));
 
             lineView.canvasGroup.alpha.Should().BeEqualTo(0);
-            runTask.IsCompleted.Should().BeTrue();
+            runTask.IsCompleted().Should().BeTrue();
         });
     }
 }

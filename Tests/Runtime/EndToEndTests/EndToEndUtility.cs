@@ -143,27 +143,16 @@ namespace Yarn.Unity.Tests
 
         public static async YarnTask WaitForTaskAsync(YarnTask task, string? failureMessage = null, int timeoutMilliseconds = 2000)
         {
-
-            var delay = YarnTask.Delay(timeoutMilliseconds);
-            try
-            {
-                var taskRaceResult = await YarnTask.WhenAny(task, delay);
-                if (taskRaceResult == delay)
-                {
-                    if (failureMessage == null)
-                    {
-                        throw new TimeoutException(failureMessage);
-                    }
-                    else
-                    {
-                        throw new TimeoutException(failureMessage);
-                    }
-
+            try {
+                await task.Wait(TimeSpan.FromMilliseconds(timeoutMilliseconds));
+            } catch (TimeoutException timeout) {
+                if (failureMessage == null) {
+                    throw;
+                } else {
+                    throw new TimeoutException(failureMessage, timeout);
                 }
-            }
-            catch (Exception)
-            {
-                // Rethrow exceptions to our main context
+            } catch (Exception) {
+                // Rethrow non-timeout exceptions to our main context
                 throw;
             }
         }

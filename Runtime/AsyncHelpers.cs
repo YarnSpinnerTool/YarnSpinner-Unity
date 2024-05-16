@@ -51,20 +51,26 @@ namespace Yarn.Unity
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async static YarnTask WaitForCoroutine(this MonoBehaviour mb, IEnumerator coro, CancellationToken cancellationToken = default)
         {
-            await mb.WaitForCoroutine(mb.StartCoroutine(coro), cancellationToken);
+#if USE_UNITASK
+            // If we have UniTask, we can convert it to a task directly and
+            // attach a cancellation token
+            await coro.ToUniTask(cancellationToken: cancellationToken);
+#else
+            // Otherwise, we'll need to just start the coroutine directly and
+            // wait for it to run to completion
+            await mb.WaitForCoroutine(mb.StartCoroutine(coro));
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async static YarnTask WaitForCoroutine(this MonoBehaviour mb, Coroutine coro, CancellationToken cancellationToken = default)
+        public async static YarnTask WaitForCoroutine(this MonoBehaviour mb, Coroutine coro)
         {
 #if USE_UNITASK
-        IEnumerator Wait()
-        {
-            yield return coro;
-        }
-        await Wait()
-            .ToUniTask(cancellationToken: cancellationToken)
-            .SuppressCancellationThrow();
+            IEnumerator Wait()
+            {
+                yield return coro;
+            }
+            await Wait().ToUniTask(mb);
 #else
             bool complete = false;
             IEnumerator WaitForCompletion()
@@ -129,8 +135,7 @@ namespace Yarn.Unity
         public static async YarnTask WaitForAsyncOperation(AsyncOperationHandle operationHandle, CancellationToken cancellationToken)
         {
 #if USE_UNITASK
-        // TODO: use cancellationToken
-        return await operationHandle;
+        await operationHandle.ToUniTask(cancellationToken: cancellationToken);
 #else
             while (operationHandle.IsDone == false)
             {
@@ -151,7 +156,7 @@ namespace Yarn.Unity
         public static IEnumerator ToCoroutine(Func<YarnTask> factory)
         {
 #if USE_UNITASK
-            return UniTask.ToCoroutine(task);
+            return UniTask.ToCoroutine(factory);
 #else
             var task = factory();
             // Yield until the task is complete, successfully or otherwise
@@ -168,17 +173,57 @@ namespace Yarn.Unity
 #endif
         }
 
-        internal static async YarnTask WaitForSeconds(float timeInSeconds)
-        {
-#if USE_UNITASK
-            throw new NotImplementedException();
-#else
-            var now = Time.time;
-            while (Time.time < now + timeInSeconds) {
-                await YarnTask.Yield();
-            }
-#endif
+        #if USE_UNITASK
+        internal static bool IsCompleted(this UniTask task) {
+            return task.Status != UniTaskStatus.Pending;
         }
+        internal static bool IsCompleted<T>(this UniTask<T> task) {
+            return task.Status != UniTaskStatus.Pending;
+        }
+        #endif
+        
+        internal static bool IsCompleted(this System.Threading.Tasks.Task task) {
+            return task.IsCompleted;
+        }
+        internal static bool IsCompleted<T>(this System.Threading.Tasks.Task task) {
+            return task.IsCompleted;
+        }
+
+#if USE_UNITASK
+        internal static async YarnTask Wait(this UniTask task, TimeSpan timeout)
+        {
+            var delay = UniTask.Delay(timeout);
+
+            var winner = await UniTask.WhenAny(task, delay);
+
+            if (winner == 0)
+            {
+                return;
+            }
+            else
+            {
+                throw new TimeoutException();
+            }
+
+        }
+#else
+        internal static async YarnTask Wait(this System.Threading.Tasks.Task task, TimeSpan timeout)
+        {
+            var delay = System.Threading.Tasks.Task.Delay(timeout);
+
+            var winner = await System.Threading.Tasks.Task.WhenAny(task, delay);
+
+            if (winner == task)
+            {
+                return;
+            }
+            else
+            {
+                throw new TimeoutException();
+            }
+        }
+#endif
+
     }
 
 }

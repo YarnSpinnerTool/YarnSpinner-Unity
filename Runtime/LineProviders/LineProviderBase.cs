@@ -14,7 +14,7 @@ using Yarn;
     using Cysharp.Threading.Tasks;
     using YarnTask = Cysharp.Threading.Tasks.UniTask;
     using YarnIntTask = Cysharp.Threading.Tasks.UniTask<int>;
-    using YarnLineTask = Cysharp.Threading.Tasks.UniTask<LocalizedLine>;
+    using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
 #else
 using YarnTask = System.Threading.Tasks.Task;
     using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;

@@ -47,9 +47,9 @@ namespace Yarn.Unity
             set => _assetLocaleCode = value;
         }
 
-        private YarnTask? prepareForLinesTask;
+        private YarnTask prepareForLinesTask = YarnTask.Never(CancellationToken.None);
 
-        public override bool LinesAvailable => prepareForLinesTask?.IsCompletedSuccessfully ?? false;
+        public override bool LinesAvailable => prepareForLinesTask.Status == UniTaskStatus.Succeeded;
 
         IAddressablesHelper addressablesHelper = new AddressablesHelper();
 

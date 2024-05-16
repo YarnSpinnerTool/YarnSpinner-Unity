@@ -20,10 +20,12 @@ using Cysharp.Threading.Tasks;
 using YarnTask = Cysharp.Threading.Tasks.UniTask;
 using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
 using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
+using YarnOptionCompletionSource = Cysharp.Threading.Tasks.UniTaskCompletionSource<Yarn.Unity.DialogueOption?>;
 #else
 using YarnTask = System.Threading.Tasks.Task;
 using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
 using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
+using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption?>;
 #endif
 
 namespace System.Diagnostics.CodeAnalysis
@@ -337,7 +339,7 @@ namespace Yarn.Unity
                 case CommandDispatchResult.StatusType.SucceededAsync:
                     Debug.Log($"Command returned a coroutine. Waiting for it...");
                     var cancellationToken = dialogueCancellationSource?.Token ?? CancellationToken.None;
-                    await this.WaitForCoroutine(commandCoroutine, cancellationToken);
+                    await this.WaitForCoroutine(commandCoroutine);
                     Debug.Log($"Done waiting for <<{command.Text}>>");
                     break;
 
@@ -517,65 +519,48 @@ namespace Yarn.Unity
                 };
             }
 
+            var dialogueSelectionTCS = new YarnOptionCompletionSource();
+            int pendingOptionViews = 0;
+            int viewsNotReturningOption = 0;
 
-            var pendingTasks = new HashSet<YarnOptionTask>();
+            async YarnTask WaitForOptionsView(AsyncDialogueViewBase? view) {
+                if (view == null) {
+                    return;
+                }
+                pendingOptionViews += 1;
+
+                var result = await view.RunOptionsAsync(localisedOptions, optionCancellationSource.Token);
+                if (result != null) {
+                    // We no longer need the other views, so tell them to stop
+                    // by cancelling the option selection.
+                    optionCancellationSource.Cancel();
+                    dialogueSelectionTCS.TrySetResult(result);
+                } else {
+                    // Our view did not return an option. 
+                    viewsNotReturningOption += 1;
+                    if (viewsNotReturningOption >= pendingOptionViews) {
+                        // No view returned an option, so it's unanimous. Set the result to 'null'.
+                        dialogueSelectionTCS.TrySetResult(null);
+                    }
+                }
+            }
+            
+            var pendingTasks = new List<YarnTask>();
             foreach (var view in this.dialogueViews)
             {
-                if (view == null) {
-                    continue;
-                }
-
-                YarnOptionTask task = view.RunOptionsAsync(localisedOptions, optionCancellationSource.Token);
-                pendingTasks.Add(task);
+                pendingTasks.Add(WaitForOptionsView(view));
             }
 
-            DialogueOption? selectedOption = null;
+            DialogueOption? selectedOption;
 
-            // Wait for our option views. If any of them return a non-null
-            // value, use it (and cancel the rest.) If any throw an exception,
-            // log it and stop waiting for it.
-            while (pendingTasks.Count > 0)
-            {
-                try
-                {
-                    var completedTask = await YarnTask.WhenAny(pendingTasks);
-                    if (completedTask.Result == null)
-                    {
-                        // An option task completed and returned null. Remove that task
-                        // from the set of tasks we're waiting for, and wait for the
-                        // rest.
-                        pendingTasks.Remove(completedTask);
-                    }
-                    else
-                    {
-                        // The option task completed with an option. Cancel all other
-                        // option handlers and stop waiting for them - their input is no
-                        // longer required.
-                        selectedOption = completedTask.Result;
-                        optionCancellationSource.Cancel();
-                        break;
-                    }
-                }
-                catch (Exception exception)
-                {
-                    // One or more tasks have faulted. Log the exceptions, and
-                    // remove the faulted tasks.
-                    if (exception is AggregateException aggregateException)
-                    {
-                        // Log each inner exception individually.
-                        foreach (var innerException in aggregateException.InnerExceptions)
-                        {
-                            Debug.LogException(innerException, this);
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogException(exception, this);
-                    }
-
-                    // Filter out any faulted tasks.
-                    pendingTasks = pendingTasks.Where(t => t.IsFaulted == false).ToHashSet();
-                }
+            try {
+                selectedOption = await dialogueSelectionTCS.Task;
+            } catch (Exception e) {
+                // If a view threw an exception while getting the option,
+                // propagate it
+                Debug.LogException(e);
+                return;
+                // throw;
             }
 
             optionCancellationSource.Dispose();
