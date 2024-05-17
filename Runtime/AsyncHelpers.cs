@@ -190,6 +190,18 @@ namespace Yarn.Unity
         }
 
 #if USE_UNITASK
+        internal static YarnTask AsYarnTask(this System.Threading.Tasks.Task task)
+        {
+            return task.AsUniTask();
+        }
+#else
+        internal static YarnTask AsYarnTask(this System.Threading.Tasks.Task task) {
+            return task;
+        }
+#endif
+
+
+#if USE_UNITASK
         internal static async YarnTask Wait(this UniTask task, TimeSpan timeout)
         {
             var delay = UniTask.Delay(timeout);

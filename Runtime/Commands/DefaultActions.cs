@@ -7,6 +7,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+internal class DemoAction {
+    public static async System.Threading.Tasks.Task DemoCommandAsync() {
+        await System.Threading.Tasks.Task.Delay(1000);
+    }
+}
+
 namespace Yarn.Unity
 {
     internal class DefaultActions : MonoBehaviour

@@ -4,6 +4,18 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 using System;
 
+#nullable enable
+
+#if USE_UNITASK
+    using Cysharp.Threading.Tasks;
+    using YarnTask = Cysharp.Threading.Tasks.UniTask;
+    using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
+#else
+    using YarnTask = System.Threading.Tasks.Task;
+    using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
+    using System.Threading.Tasks;
+#endif
+
 namespace Yarn.Unity
 {
     /// <summary>
@@ -17,9 +29,7 @@ namespace Yarn.Unity
         internal enum StatusType
         {
 
-            SucceededAsync,
-
-            SucceededSync,
+            Succeeded,
 
             NoTargetFound,
 
@@ -31,24 +41,25 @@ namespace Yarn.Unity
             /// The command could not be found.
             /// </summary>
             CommandUnknown,
-
-            /// <summary>
-            /// The command was located and successfully called.
-            /// </summary>
-            [Obsolete("Use a more specific enum case", true)]
-            Success,
-
-            /// <summary>
-            /// The command was located, but failed to be called.
-            /// </summary>
-            [Obsolete("Use a more specific enum case", true)]
-            Failed,
         };
 
         internal StatusType Status;
 
-        internal string Message;
+        internal string? Message;
 
-        internal bool IsSuccess => this.Status == StatusType.SucceededAsync || this.Status == StatusType.SucceededSync;
+        internal YarnTask Task;
+
+        public CommandDispatchResult(StatusType status)
+        {
+            Status = status;
+            Task = YarnTask.CompletedTask;;
+            Message = null;
+        }
+        public CommandDispatchResult(StatusType status, YarnTask task)
+        {
+            Status = status;
+            Task = task;
+            Message = null;
+        }
     }
 }

@@ -353,10 +353,10 @@ namespace Yarn.Unity.Tests
             var dispatcher = runner.CommandDispatcher;
 
             LogAssert.Expect(LogType.Log, expectedLogResult);
-            var result = dispatcher.DispatchCommand(test, runner, out var commandCoroutine);
+            var result = dispatcher.DispatchCommand(test, runner);
 
-            Assert.AreEqual(CommandDispatchResult.StatusType.SucceededSync, result.Status);
-            Assert.IsNull(commandCoroutine);
+            Assert.AreEqual(CommandDispatchResult.StatusType.Succeeded, result.Status);
+            Assert.IsTrue(result.Task.IsCompleted());
         }
 
         [UnityTest]
@@ -367,10 +367,10 @@ namespace Yarn.Unity.Tests
 
             var framesToWait = 5;
 
-            var result = dispatcher.DispatchCommand($"testCommandCoroutine DialogueRunner {framesToWait}", runner, out var commandCoroutine);
+            var result = dispatcher.DispatchCommand($"testCommandCoroutine DialogueRunner {framesToWait}", runner);
 
-            Assert.AreEqual(CommandDispatchResult.StatusType.SucceededAsync, result.Status);
-            Assert.IsNotNull(commandCoroutine);
+            Assert.AreEqual(CommandDispatchResult.StatusType.Succeeded, result.Status);
+            Assert.IsFalse(result.Task.IsCompleted());
 
             // commandCoroutine will already be running on runner, so now we wait for it
 
@@ -392,7 +392,7 @@ namespace Yarn.Unity.Tests
             var dispatcher = runner.CommandDispatcher;
             var regex = new Regex(error);
 
-            var result = dispatcher.DispatchCommand(command, runner, out _);
+            var result = dispatcher.DispatchCommand(command, runner);
 
             Assert.AreEqual(CommandDispatchResult.StatusType.InvalidParameterCount, result.Status);
             Assert.That(regex.IsMatch(result.Message));
@@ -405,7 +405,7 @@ namespace Yarn.Unity.Tests
             var dispatcher = runner.CommandDispatcher;
             var regex = new Regex(error);
 
-            var result = dispatcher.DispatchCommand(command, runner, out _);
+            var result = dispatcher.DispatchCommand(command, runner);
             Assert.AreEqual(CommandDispatchResult.StatusType.InvalidParameterCount, result.Status);
             Assert.That(regex.IsMatch(result.Message));
         }
@@ -422,13 +422,13 @@ namespace Yarn.Unity.Tests
             LogAssert.Expect(LogType.Log, "success 1");
             LogAssert.Expect(LogType.Log, "success 2");
 
-            var result1 = dispatcher.DispatchCommand("test1", runner, out _);
-            var result2 = dispatcher.DispatchCommand("test2 2", runner, out _);
+            var result1 = dispatcher.DispatchCommand("test1", runner);
+            var result2 = dispatcher.DispatchCommand("test2 2", runner);
 
             Assert.IsNull(result1.Message);
             Assert.IsNull(result2.Message);
-            Assert.AreEqual(result1.Status, CommandDispatchResult.StatusType.SucceededSync, "test1 should succeed synchronously");
-            Assert.AreEqual(result1.Status, CommandDispatchResult.StatusType.SucceededSync, "test2 should succeed synchronously");
+            Assert.AreEqual(result1.Status, CommandDispatchResult.StatusType.Succeeded, "test1 should succeed synchronously");
+            Assert.AreEqual(result1.Status, CommandDispatchResult.StatusType.Succeeded, "test2 should succeed synchronously");
         }
 
         [UnityTest]
@@ -454,9 +454,10 @@ namespace Yarn.Unity.Tests
 
             LogAssert.Expect(LogType.Log, $"success {Time.frameCount + framesToWait}");
 
-            dispatcher.DispatchCommand("test", runner, out var coroutine);
+            var result = dispatcher.DispatchCommand("test", runner);
+            Assert.AreEqual(CommandDispatchResult.StatusType.Succeeded, result.Status);
 
-            Assert.IsNotNull(coroutine);
+            Assert.IsFalse(result.Task.IsCompleted());
 
             // After framesToWait frames, we should have seen the log
             while (framesToWait > 0)

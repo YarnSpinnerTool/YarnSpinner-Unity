@@ -326,23 +326,20 @@ namespace Yarn.Unity
         private async YarnTask OnCommandReceivedAsync(Command command)
         {
             Debug.Log($"Running command <<{command.Text}>>");
-            var dispatchResult = this.CommandDispatcher.DispatchCommand(command.Text, this, out var commandCoroutine);
+            CommandDispatchResult dispatchResult = this.CommandDispatcher.DispatchCommand(command.Text, this);
 
             var parts = SplitCommandText(command.Text);
             string commandName = parts.ElementAtOrDefault(0);
 
             switch (dispatchResult.Status)
             {
-                case CommandDispatchResult.StatusType.SucceededSync:
-                    // The command succeeded synchronously. Nothing to do.
+                case CommandDispatchResult.StatusType.Succeeded:
+                    // The command succeeded. Wait for it to complete. (In the
+                    // case of commands that complete synchronously, this task
+                    // will be Task.Completed, so this 'await' will return
+                    // immediately.)
+                    await dispatchResult.Task;
                     break;
-                case CommandDispatchResult.StatusType.SucceededAsync:
-                    Debug.Log($"Command returned a coroutine. Waiting for it...");
-                    var cancellationToken = dialogueCancellationSource?.Token ?? CancellationToken.None;
-                    await this.WaitForCoroutine(commandCoroutine);
-                    Debug.Log($"Done waiting for <<{command.Text}>>");
-                    break;
-
                 case CommandDispatchResult.StatusType.NoTargetFound:
                     Debug.LogError($"Can't call command {commandName}: failed to find a game object named {parts.ElementAtOrDefault(1)}", this);
                     break;

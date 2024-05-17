@@ -7,8 +7,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using System.Threading.Tasks;
 using UnityEngine;
 
+
+#if USE_UNITASK
+    using Cysharp.Threading.Tasks;
+    using YarnTask = Cysharp.Threading.Tasks.UniTask;
+    using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
+#else
+    using YarnTask = System.Threading.Tasks.Task;
+    using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
+    using System.Threading.Tasks;
+#endif
 
 namespace Yarn.Unity
 {
@@ -231,7 +242,7 @@ namespace Yarn.Unity
                 }
             }
 
-            internal CommandDispatchResult Invoke(MonoBehaviour dispatcher, List<string> parameters, out Coroutine commandCoroutine)
+            internal CommandDispatchResult Invoke(MonoBehaviour dispatcher, List<string> parameters)
             {
                 object target;
 
@@ -243,11 +254,9 @@ namespace Yarn.Unity
                     {
                         // We need at least one parameter, which is the
                         // component to look for
-                        commandCoroutine = default;
-                        return new CommandDispatchResult
+                        return new CommandDispatchResult(CommandDispatchResult.StatusType.InvalidParameterCount, YarnTask.CompletedTask)
                         {
                             Message = $"{this.Name} needs a target, but none was specified",
-                            Status = CommandDispatchResult.StatusType.InvalidParameterCount
                         };
                     }
 
@@ -263,11 +272,9 @@ namespace Yarn.Unity
                     if (gameObject == null)
                     {
                         // We couldn't find a target with this name.
-                        commandCoroutine = default;
-                        return new CommandDispatchResult
+                        return new CommandDispatchResult(CommandDispatchResult.StatusType.TargetMissingComponent)
                         {
                             Message = $"No game object named \"{gameObjectName}\" exists",
-                            Status = CommandDispatchResult.StatusType.TargetMissingComponent
                         };
                     }
 
@@ -277,11 +284,9 @@ namespace Yarn.Unity
 
                     if (targetComponent == null)
                     {
-                        commandCoroutine = default;
-                        return new CommandDispatchResult
+                        return new CommandDispatchResult(CommandDispatchResult.StatusType.TargetMissingComponent)
                         {
                             Message = $"{this.Name} can't be called on {gameObjectName}, because it doesn't have a {this.DeclaringType.Name}",
-                            Status = CommandDispatchResult.StatusType.TargetMissingComponent
                         };
                     }
 
@@ -298,40 +303,54 @@ namespace Yarn.Unity
                     throw new InvalidOperationException($"Internal error: {nameof(CommandRegistration)} \"{this.Name}\" has no {nameof(Target)}, but method is not static and ${DynamicallyFindsTarget} is false");
                 }
 
-                if (this.TryParseArgs(parameters.ToArray(), out var finalParameters, out var errorMessage) == false) {
-                    commandCoroutine = default;
-                    return new CommandDispatchResult
+                if (this.TryParseArgs(parameters.ToArray(), out var finalParameters, out var errorMessage) == false)
+                {
+                    return new CommandDispatchResult(CommandDispatchResult.StatusType.InvalidParameterCount)
                     {
-                        Status = CommandDispatchResult.StatusType.InvalidParameterCount,
                         Message = errorMessage,
-                };
+                    };
                 }
 
                 var returnValue = this.Method.Invoke(target, finalParameters);
 
                 if (returnValue is Coroutine coro)
                 {
-                    commandCoroutine = coro;
-                    return new CommandDispatchResult
-                    {
-                        Status = CommandDispatchResult.StatusType.SucceededAsync
-                    };
+                    // The method returned a Coroutine object.
+                    return new CommandDispatchResult(
+                        CommandDispatchResult.StatusType.Succeeded, 
+                        dispatcher.WaitForCoroutine(coro)
+                    );
                 }
                 else if (returnValue is IEnumerator enumerator)
                 {
-                    commandCoroutine = dispatcher.StartCoroutine(enumerator);
-                    return new CommandDispatchResult
-                    {
-                        Status = CommandDispatchResult.StatusType.SucceededAsync
-                    };
+                    // The method returned an IEnumerator.
+                    return new CommandDispatchResult(
+                        CommandDispatchResult.StatusType.Succeeded, 
+                        dispatcher.WaitForCoroutine(enumerator)
+                    );
                 }
+                else if (returnValue is System.Threading.Tasks.Task task) {
+                    // The method returned a task. Convert it to a YarnTask.
+                    return new CommandDispatchResult(
+                        CommandDispatchResult.StatusType.Succeeded, 
+                        task.AsYarnTask()
+                    );
+                }
+                #if USE_UNITASK
+                else if (returnValue is Cysharp.Threading.Tasks.UniTask unitask) {
+                    // The method returned a UniTask. No need to convert it to
+                    // YarnTask, because if UniTask is installed, YarnTask means
+                    // UniTask.
+                    return new CommandDispatchResult(
+                        CommandDispatchResult.StatusType.Succeeded, 
+                        unitask
+                    );
+                }
+                #endif
                 else
                 {
-                    commandCoroutine = null;
-                    return new CommandDispatchResult
-                    {
-                        Status = CommandDispatchResult.StatusType.SucceededSync
-                    };
+                    // The method returned no value.
+                    return new CommandDispatchResult(CommandDispatchResult.StatusType.Succeeded);
                 }
             }
 
@@ -506,7 +525,7 @@ namespace Yarn.Unity
             // no-op
         }
 
-        CommandDispatchResult ICommandDispatcher.DispatchCommand(string command, MonoBehaviour coroutineHost, out Coroutine commandCoroutine)
+        CommandDispatchResult ICommandDispatcher.DispatchCommand(string command, MonoBehaviour coroutineHost)
         {
             var commandPieces = new List<string>(DialogueRunner.SplitCommandText(command));
 
@@ -514,11 +533,7 @@ namespace Yarn.Unity
             {
                 // No text was found inside the command, so we won't be able to
                 // find it.
-                commandCoroutine = default;
-                return new CommandDispatchResult
-                {
-                    Status = CommandDispatchResult.StatusType.CommandUnknown
-                };
+                return new CommandDispatchResult(CommandDispatchResult.StatusType.CommandUnknown, YarnTask.CompletedTask);
             }
 
             if (_commands.TryGetValue(commandPieces[0], out var registration))
@@ -528,13 +543,9 @@ namespace Yarn.Unity
                 // command.
                 commandPieces.RemoveAt(0);
 
-                return registration.Invoke(coroutineHost, commandPieces, out commandCoroutine);
+                return registration.Invoke(coroutineHost, commandPieces);
             } else {
-                commandCoroutine = default;
-                return new CommandDispatchResult
-                {
-                    Status = CommandDispatchResult.StatusType.CommandUnknown
-                };
+                return new CommandDispatchResult(CommandDispatchResult.StatusType.CommandUnknown);
             }
         }
 
@@ -646,49 +657,49 @@ namespace Yarn.Unity
             return library;
         }
 
-        public void AddCommandHandler(string commandName, Func<IEnumerator> handler)
+        public void AddCommandHandler(string commandName, Func<object> handler)
         {
             this.AddCommandHandler(commandName, (Delegate)handler);
         }
 
         // GYB4 START
-        public void AddCommandHandler<T1>(string commandName, Func<T1, IEnumerator> handler)
+        public void AddCommandHandler<T1>(string commandName, Func<T1, object> handler)
         {
             this.AddCommandHandler(commandName, (Delegate)handler);
         }
-        public void AddCommandHandler<T1, T2>(string commandName, Func<T1, T2, IEnumerator> handler)
+        public void AddCommandHandler<T1, T2>(string commandName, Func<T1, T2, object> handler)
         {
             this.AddCommandHandler(commandName, (Delegate)handler);
         }
-        public void AddCommandHandler<T1, T2, T3>(string commandName, Func<T1, T2, T3, IEnumerator> handler)
+        public void AddCommandHandler<T1, T2, T3>(string commandName, Func<T1, T2, T3, object> handler)
         {
             this.AddCommandHandler(commandName, (Delegate)handler);
         }
-        public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Func<T1, T2, T3, T4, IEnumerator> handler)
+        public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Func<T1, T2, T3, T4, object> handler)
         {
             this.AddCommandHandler(commandName, (Delegate)handler);
         }
-        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Func<T1, T2, T3, T4, T5, IEnumerator> handler)
+        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Func<T1, T2, T3, T4, T5, object> handler)
         {
             this.AddCommandHandler(commandName, (Delegate)handler);
         }
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Func<T1, T2, T3, T4, T5, T6, IEnumerator> handler)
+        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Func<T1, T2, T3, T4, T5, T6, object> handler)
         {
             this.AddCommandHandler(commandName, (Delegate)handler);
         }
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, IEnumerator> handler)
+        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, object> handler)
         {
             this.AddCommandHandler(commandName, (Delegate)handler);
         }
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, IEnumerator> handler)
+        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, object> handler)
         {
             this.AddCommandHandler(commandName, (Delegate)handler);
         }
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, IEnumerator> handler)
+        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, object> handler)
         {
             this.AddCommandHandler(commandName, (Delegate)handler);
         }
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, IEnumerator> handler)
+        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, object> handler)
         {
             this.AddCommandHandler(commandName, (Delegate)handler);
         }
@@ -713,36 +724,21 @@ namespace Yarn.Unity
                 return;
             }
 
-            public void AddCommandHandler(string commandName, Func<Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-
             public void AddCommandHandler(string commandName, MethodInfo methodInfo) => AddCommandHandler(commandName, (Delegate)null);
 
             // GYB5 START
-            public void AddCommandHandler<T1>(string commandName, Func<T1, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2>(string commandName, Func<T1, T2, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3>(string commandName, Func<T1, T2, T3, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Func<T1, T2, T3, T4, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Func<T1, T2, T3, T4, T5, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Func<T1, T2, T3, T4, T5, T6, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            // GYB5 END
+            public void AddCommandHandler(string commandName, Func<object> handler) => AddCommandHandler(commandName, (Delegate)handler);
 
-            public void AddCommandHandler(string commandName, Func<IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-
-            // GYB6 START
-            public void AddCommandHandler<T1>(string commandName, Func<T1, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2>(string commandName, Func<T1, T2, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3>(string commandName, Func<T1, T2, T3, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Func<T1, T2, T3, T4, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Func<T1, T2, T3, T4, T5, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Func<T1, T2, T3, T4, T5, T6, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
+            public void AddCommandHandler<T1>(string commandName, Func<T1, object> handler) => AddCommandHandler(commandName, (Delegate)handler);
+            public void AddCommandHandler<T1, T2>(string commandName, Func<T1, T2, object> handler) => AddCommandHandler(commandName, (Delegate)handler);
+            public void AddCommandHandler<T1, T2, T3>(string commandName, Func<T1, T2, T3, object> handler) => AddCommandHandler(commandName, (Delegate)handler);
+            public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Func<T1, T2, T3, T4, object> handler) => AddCommandHandler(commandName, (Delegate)handler);
+            public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Func<T1, T2, T3, T4, T5, object> handler) => AddCommandHandler(commandName, (Delegate)handler);
+            public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Func<T1, T2, T3, T4, T5, T6, object> handler) => AddCommandHandler(commandName, (Delegate)handler);
+            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, object> handler) => AddCommandHandler(commandName, (Delegate)handler);
+            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, object> handler) => AddCommandHandler(commandName, (Delegate)handler);
+            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, object> handler) => AddCommandHandler(commandName, (Delegate)handler);
+            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, object> handler) => AddCommandHandler(commandName, (Delegate)handler);
             // GYB6 END
 
             public void AddCommandHandler(string commandName, Action handler) => AddCommandHandler(commandName, (Delegate)handler);

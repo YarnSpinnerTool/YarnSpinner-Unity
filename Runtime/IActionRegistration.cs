@@ -43,55 +43,29 @@ namespace Yarn.Unity
         void AddCommandHandler(string commandName, MethodInfo methodInfo);
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler(string commandName, System.Func<Coroutine> handler);
-
-        // GYB9 START
-        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1>(string commandName, System.Func<T1, Coroutine> handler);
-        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2>(string commandName, System.Func<T1, T2, Coroutine> handler);
-        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2, T3>(string commandName, System.Func<T1, T2, T3, Coroutine> handler);
-        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2, T3, T4>(string commandName, System.Func<T1, T2, T3, T4, Coroutine> handler);
-        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, System.Func<T1, T2, T3, T4, T5, Coroutine> handler);
-        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, Coroutine> handler);
-        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, Coroutine> handler);
-        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, Coroutine> handler);
-        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, Coroutine> handler);
-        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, Coroutine> handler);
-        // GYB9 END
-
-        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler(string commandName, System.Func<IEnumerator> handler);
+        void AddCommandHandler(string commandName, System.Func<object> handler);
 
         // GYB10 START
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1>(string commandName, System.Func<T1, IEnumerator> handler);
+        void AddCommandHandler<T1>(string commandName, System.Func<T1, object> handler);
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2>(string commandName, System.Func<T1, T2, IEnumerator> handler);
+        void AddCommandHandler<T1, T2>(string commandName, System.Func<T1, T2, object> handler);
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2, T3>(string commandName, System.Func<T1, T2, T3, IEnumerator> handler);
+        void AddCommandHandler<T1, T2, T3>(string commandName, System.Func<T1, T2, T3, object> handler);
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2, T3, T4>(string commandName, System.Func<T1, T2, T3, T4, IEnumerator> handler);
+        void AddCommandHandler<T1, T2, T3, T4>(string commandName, System.Func<T1, T2, T3, T4, object> handler);
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, System.Func<T1, T2, T3, T4, T5, IEnumerator> handler);
+        void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, System.Func<T1, T2, T3, T4, T5, object> handler);
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, IEnumerator> handler);
+        void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, object> handler);
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, IEnumerator> handler);
+        void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, object> handler);
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, IEnumerator> handler);
+        void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, object> handler);
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, IEnumerator> handler);
+        void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, object> handler);
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, IEnumerator> handler);
+        void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, object> handler);
         // GYB10 END
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
