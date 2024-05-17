@@ -16,13 +16,7 @@ using System.IO;
 
 #nullable enable
 
-static class ErrorCodes {
-    public const string YS1001ActionMethodsMustBePublic = "YS1001";
-    public const string YS1002ActionMethodsMustHaveAValidName = "YS1002";
 
-    public const string YS1003ActionMethodsMustHaveAValidReturnType = "YS1003";
-    public const string YS1003ActionMethodsMustHaveValidParameters = "YS1004";
-}
 
 [Generator]
 public class ActionRegistrationSourceGenerator : ISourceGenerator
@@ -222,18 +216,7 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 return;
             }
 
-            List<ITypeSymbol> knownValidReturnTypes = new List<ITypeSymbol?> {
-                    compilation.GetTypeByMetadataName("UnityEngine.Coroutine"),
-                    compilation.GetTypeByMetadataName("System.Collections.IEnumerator"),
-                    compilation.GetSpecialType(SpecialType.System_Void),
-                    compilation.GetSpecialType(SpecialType.System_Int32),
-                    compilation.GetSpecialType(SpecialType.System_Single),
-                    compilation.GetSpecialType(SpecialType.System_Boolean),
-                    compilation.GetSpecialType(SpecialType.System_String),
-                }
-                .NonNull(throwIfAnyNull: true)
-                .ToList();
-
+            
 
             HashSet<string> removals = new HashSet<string>();
             // validating and logging all the actions
@@ -245,87 +228,19 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                     continue;
                 }
 
-                output.WriteLine($"{action.Name} ({action.MethodName}) has return type {action.MethodSymbol.ReturnType}");
+                var diagnostics = action.Validate(compilation);
+                foreach (var diagnostic in diagnostics) {
+                    context.ReportDiagnostic(diagnostic);
+                    output.WriteLine($"Skipping '{action.Name}' ({action.MethodName}): {diagnostic}");
+                }
 
-
-                bool isReturnTypeOnAllowList = knownValidReturnTypes.Contains(action.MethodSymbol.ReturnType);
-                output.WriteLine($"{action.Name} ({action.MethodName}) has is allowlisted: {isReturnTypeOnAllowList}");
+                if (diagnostics.Count > 0) {
+                    continue;
+                }
 
                 // TODO: Allow async actions (i.e. action methods that return an
                 // awaitable type) once support for them is added to the actions
                 // system
-
-                // bool isReturnTypeAwaitable = action.MethodSymbol.ReturnType.IsAwaitableNonDynamic(action.SemanticModel, action.MethodDeclarationSyntax.SpanStart);
-                // output.WriteLine($"{action.Name} ({action.MethodName}) has is awaitable: {isReturnTypeAwaitable}");
-
-                bool isReturnTypeValid = isReturnTypeOnAllowList;
-
-                if (!isReturnTypeValid)
-                {
-                    var descriptor = new DiagnosticDescriptor(
-                        ErrorCodes.YS1003ActionMethodsMustHaveAValidReturnType,
-                        $"Yarn {action.Type} methods must return a valid type",
-                        $"YarnCommand and YarnFunction methods must return a valid type ({string.Join(", ", knownValidReturnTypes.Select(t => t.ToDisplayString()))}). \"{{0}}\" is {{1}}.",
-                        "Yarn Spinner",
-                        DiagnosticSeverity.Warning,
-                        true,
-                        "[YarnCommand] and [YarnFunction] attributed methods must be public so that the codegen can reference them.",
-                        "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/creating-commands-functions");
-                    context.ReportDiagnostic(Microsoft.CodeAnalysis.Diagnostic.Create(
-                        descriptor,
-                        action.Declaration?.GetLocation(),
-                        action.MethodIdentifierName, action.MethodSymbol.ReturnType.ToDisplayString()
-                    ));
-                    output.WriteLine($"Action {action.Name} will be skipped due to its return type not being valid ({action.MethodSymbol.ReturnType})");
-                    removals.Add(action.Name);
-                    continue;
-                }
-
-                // if an action isn't public we will log a warning
-                // and then later we will also skip it
-                if (action.MethodSymbol.DeclaredAccessibility != Accessibility.Public)
-                {
-                    var descriptor = new DiagnosticDescriptor(
-                        ErrorCodes.YS1001ActionMethodsMustBePublic,
-                        $"Yarn {action.Type} methods must be public",
-                        "YarnCommand and YarnFunction methods must be public. \"{0}\" is {1}.",
-                        "Yarn Spinner",
-                        DiagnosticSeverity.Warning,
-                        true,
-                        "[YarnCommand] and [YarnFunction] attributed methods must be public so that the codegen can reference them.",
-                        "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/creating-commands-functions");
-                    context.ReportDiagnostic(Microsoft.CodeAnalysis.Diagnostic.Create(
-                        descriptor,
-                        action.Declaration?.GetLocation(),
-                        action.MethodIdentifierName, action.MethodSymbol.DeclaredAccessibility
-                    ));
-                    output.WriteLine($"Action {action.Name} will be skipped due to it's declared accessibility {action.MethodSymbol.DeclaredAccessibility}");
-                    removals.Add(action.Name);
-                    continue;
-                }
-
-                // this is not a full validation of the naming rules of commands
-                // but is good enough to catch the most common situations, whitespace and periods
-                if (action.Name.Contains(".") || action.Name.Any(x => Char.IsWhiteSpace(x)))
-                {
-                    var descriptor = new DiagnosticDescriptor(
-                        ErrorCodes.YS1002ActionMethodsMustHaveAValidName,
-                        $"Yarn {action.Type} methods must have a valid name",
-                        "YarnCommand and YarnFunction methods follow existing ID rules for Yarn. \"{0}\" is invalid.",
-                        "Yarn Spinner",
-                        DiagnosticSeverity.Warning,
-                        true,
-                        "[YarnCommand] and [YarnFunction] attributed methods must follow Yarn ID rules so that Yarn scripts can reference them.",
-                        "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/creating-commands-functions");
-                    context.ReportDiagnostic(Microsoft.CodeAnalysis.Diagnostic.Create(
-                        descriptor,
-                        action.Declaration?.GetLocation(),
-                        action.Name
-                    ));
-                    output.WriteLine($"Action {action.MethodIdentifierName} will be skipped due to it's name {action.Name}");
-                    removals.Add(action.Name);
-                    continue;
-                }
 
                 output.WriteLine($"Action {action.Name}: {action.SourceFileName}:{action.Declaration?.GetLocation()?.GetLineSpan().StartLinePosition.Line} ({action.Type})");
             }
@@ -882,90 +797,5 @@ internal class YSLSGenerator
                 break;
         }
         return type;
-    }
-}
-
-static class EnumerableExtensions {
-    public static IEnumerable<T> NonNull<T>(this IEnumerable<T?> collection, bool throwIfAnyNull = false) where T:class {
-        foreach (var item in collection) {
-            if (item != null) {
-                yield return item;
-            } else {
-                if (throwIfAnyNull) {
-                    throw new NullReferenceException("Collection contains a null item");
-                } 
-            }
-        }
-    }
-}
-
-
-static class SymbolExtensions {
-
-    /// <summary>
-    /// If the <paramref name="symbol"/> is a method symbol, returns <see langword="true"/> if the method's return type is "awaitable", but not if it's <see langword="dynamic"/>.
-    /// If the <paramref name="symbol"/> is a type symbol, returns <see langword="true"/> if that type is "awaitable".
-    /// An "awaitable" is any type that exposes a GetAwaiter method which returns a valid "awaiter". This GetAwaiter method may be an instance method or an extension method.
-    /// </summary>
-    public static bool IsAwaitableNonDynamic(this ISymbol symbol, SemanticModel semanticModel, int position)
-    {
-        IMethodSymbol? methodSymbol = symbol as IMethodSymbol;
-        ITypeSymbol? typeSymbol = null;
-
-        if (methodSymbol == null)
-        {
-            typeSymbol = symbol as ITypeSymbol;
-            if (typeSymbol == null)
-            {
-                return false;
-            }
-        }
-        else
-        {
-            if (methodSymbol.ReturnType == null)
-            {
-                return false;
-            }
-        }
-
-        // otherwise: needs valid GetAwaiter
-        var potentialGetAwaiters = semanticModel.LookupSymbols(position,
-                                                               container: typeSymbol ?? methodSymbol?.ReturnType.OriginalDefinition,
-                                                               name: WellKnownMemberNames.GetAwaiter,
-                                                               includeReducedExtensionMethods: true);
-        var getAwaiters = potentialGetAwaiters.OfType<IMethodSymbol>().Where(x => !x.Parameters.Any());
-        return getAwaiters.Any(VerifyGetAwaiter);
-    }
-
-    private static bool VerifyGetAwaiter(IMethodSymbol getAwaiter)
-    {
-        var returnType = getAwaiter.ReturnType;
-        if (returnType == null)
-        {
-            return false;
-        }
-
-        // bool IsCompleted { get }
-        if (!returnType.GetMembers().OfType<IPropertySymbol>().Any(p => p.Name == WellKnownMemberNames.IsCompleted && p.Type.SpecialType == SpecialType.System_Boolean && p.GetMethod != null))
-        {
-            return false;
-        }
-
-        var methods = returnType.GetMembers().OfType<IMethodSymbol>();
-
-        // NOTE: (vladres) The current version of C# Spec, §7.7.7.3 'Runtime evaluation of await expressions', requires that
-        // NOTE: the interface method INotifyCompletion.OnCompleted or ICriticalNotifyCompletion.UnsafeOnCompleted is invoked
-        // NOTE: (rather than any OnCompleted method conforming to a certain pattern).
-        // NOTE: Should this code be updated to match the spec?
-
-        // void OnCompleted(Action) 
-        // Actions are delegates, so we'll just check for delegates.
-        if (!methods.Any(x => x.Name == WellKnownMemberNames.OnCompleted && x.ReturnsVoid && x.Parameters.Length == 1 && x.Parameters.First().Type.TypeKind == TypeKind.Delegate))
-        {
-            return false;
-        }
-
-        // void GetResult() || T GetResult()
-        return methods.Any(m => m.Name == WellKnownMemberNames.GetResult && !m.Parameters.Any());
     }
 }
