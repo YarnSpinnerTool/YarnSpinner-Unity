@@ -226,6 +226,10 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                     compilation.GetTypeByMetadataName("UnityEngine.Coroutine"),
                     compilation.GetTypeByMetadataName("System.Collections.IEnumerator"),
                     compilation.GetSpecialType(SpecialType.System_Void),
+                    compilation.GetSpecialType(SpecialType.System_Int32),
+                    compilation.GetSpecialType(SpecialType.System_Single),
+                    compilation.GetSpecialType(SpecialType.System_Boolean),
+                    compilation.GetSpecialType(SpecialType.System_String),
                 }
                 .NonNull(throwIfAnyNull: true)
                 .ToList();
