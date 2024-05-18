@@ -54,9 +54,10 @@ namespace Yarn.Unity.Tests
         }
 
         [YarnCommand("move_to")]
-        public static IEnumerator MoveToMarker(string moverName, string markerName, float speed = 20f, float distance = 2f)
+        public static async YarnTask MoveToMarker(string moverName, 
+            string markerName, float speed = 20f, float distance = 2f)
         {
-            yield return YarnAsync.ToCoroutine(() => MoveToMarkerAsync(moverName, markerName, speed, distance));
+            await MoveToMarkerAsync(moverName, markerName, speed, distance);
         }
 
         public static async YarnTask RunDialogueAsync(string nodeName)
