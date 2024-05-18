@@ -31,7 +31,7 @@ namespace Yarn.Unity
         public static void RegisterActions(IActionRegistration target, RegistrationType registrationType)
         {
             // Register the built-in methods and commands from Yarn Spinner for Unity.
-            target.AddCommandHandler<float>("wait", Wait);
+            target.AddCommandHandler<float, IEnumerator>("wait", Wait);
         }
 
         #region Commands
