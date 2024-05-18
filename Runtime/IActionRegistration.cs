@@ -138,6 +138,50 @@ namespace Yarn.Unity
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this IActionRegistration registration, string commandName, System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         // GYB11 END
+       
+        public static void AddCommandHandler<T1>(this IActionRegistration registration, string commandName, System.Func<T1, IEnumerator> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2>(this IActionRegistration registration, string commandName, System.Func<T1, T2, IEnumerator> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2, T3>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, IEnumerator> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2, T3, T4>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, IEnumerator> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2, T3, T4, T5>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, IEnumerator> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, IEnumerator> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, IEnumerator> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, IEnumerator> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, IEnumerator> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, IEnumerator> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        // GYB11 END
+
+
+        public static void AddCommandHandler<T1>(this IActionRegistration registration, string commandName, System.Func<T1, Coroutine> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2>(this IActionRegistration registration, string commandName, System.Func<T1, T2, Coroutine> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2, T3>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, Coroutine> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2, T3, T4>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, Coroutine> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2, T3, T4, T5>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, Coroutine> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, Coroutine> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, Coroutine> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, Coroutine> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, Coroutine> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, Coroutine> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        // GYB11 END
+
 
         public static void AddFunction<TResult>(this IActionRegistration registration, string name, System.Func<TResult> implementation) => registration.AddFunction(name, (Delegate)implementation);
 
