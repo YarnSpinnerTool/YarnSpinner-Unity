@@ -197,7 +197,8 @@ namespace Yarn.Unity
             return asset;
         }
 
-        private static async YarnTask FetchLine(string lineID, string localeID, Dictionary<string, AsyncOperationHandle<Object>> operationCache, CancellationToken cancellationToken) {
+        private static async YarnTask FetchLine(string lineID, string localeID, Dictionary<string, AsyncOperationHandle<Object>> operationCache, CancellationToken cancellationToken)
+        {
 
             // Find the location of the line's asset, and if a location exists,
             // start loading it. Cache the load operation so we can test for it
@@ -206,7 +207,8 @@ namespace Yarn.Unity
             var address = Localization.GetAddressForLine(lineID, localeID);
             var location = await YarnAsync.WaitForAsyncOperation(Addressables.LoadResourceLocationsAsync(address), cancellationToken);
 
-            if (location == null || location.Count == 0) {
+            if (location == null || location.Count == 0)
+            {
                 // No location available for this asset. Don't attempt to load it.
                 return;
             }
@@ -238,7 +240,8 @@ namespace Yarn.Unity
             await YarnTask.WhenAll(allTasks);
         }
     }
-#else
+#endif
+
     internal class NullAddressablesHelper : IAddressablesHelper
     {
         public YarnObjectTask GetObject(string assetID, string localeID, CancellationToken cancellationToken)
@@ -253,7 +256,6 @@ namespace Yarn.Unity
             return YarnTask.CompletedTask;
         }
     }
-#endif
 
     internal interface IAddressablesHelper
     {

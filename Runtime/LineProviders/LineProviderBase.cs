@@ -22,11 +22,11 @@ using YarnTask = System.Threading.Tasks.Task;
 
 #nullable enable
 
-internal interface ILineProvider
+public interface ILineProvider
 {
     public YarnProject? YarnProject { get; set; }
     public string LocaleCode { get; }
-    public YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken);
+    public YarnLineTask GetLocalizedLineAsync(Line line, IMarkupParser markupParser, CancellationToken cancellationToken);
     public YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken);
 }
 
