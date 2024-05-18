@@ -456,51 +456,6 @@ namespace Yarn.Unity
                 _commands.Add(commandName, new CommandRegistration(commandName, methodInfo));
             }
         }
-
-        public void AddCommandHandler(string commandName, Func<Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-
-        public void AddCommandHandler(string commandName, Action handler) => AddCommandHandler(commandName, (Delegate)handler);
-
-        // GYB2 START
-        public void AddCommandHandler<TResult>(string commandName, Func<TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, TResult>(string commandName, Func<T1, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, TResult>(string commandName, Func<T1, T2, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, TResult>(string commandName, Func<T1, T2, T3, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, TResult>(string commandName, Func<T1, T2, T3, T4, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, TResult>(string commandName, Func<T1, T2, T3, T4, T5, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, TResult>(string commandName, Func<T1, T2, T3, T4, T5, T6, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, TResult>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-
-        public void AddCommandHandler<T1>(string commandName, Action<T1> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2>(string commandName, Action<T1, T2> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3>(string commandName, Action<T1, T2, T3> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Action<T1, T2, T3, T4> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Action<T1, T2, T3, T4, T5> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Action<T1, T2, T3, T4, T5, T6> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(string commandName, Action<T1, T2, T3, T4, T5, T6, T7> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(string commandName, Action<T1, T2, T3, T4, T5, T6, T7, T8> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(string commandName, Action<T1, T2, T3, T4, T5, T6, T7, T8, T9> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string commandName, Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        // GYB2 END
-
-        public void AddFunction<TResult>(string name, Func<TResult> implementation) => AddFunction(name, (Delegate)implementation);
-
-        // GYB3 START
-        public void AddFunction<T1, TResult>(string name, Func<T1, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, TResult>(string name, Func<T1, T2, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, T3, TResult>(string name, Func<T1, T2, T3, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, T3, T4, TResult>(string name, Func<T1, T2, T3, T4, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, T3, T4, T5, TResult>(string name, Func<T1, T2, T3, T4, T5, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, T3, T4, T5, T6, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, T3, T4, T5, T6, T7, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        // GYB3 END
-
         public void RemoveCommandHandler(string commandName)
         {
             if (_commands.Remove(commandName) == false) {
@@ -682,36 +637,6 @@ namespace Yarn.Unity
 
             public void AddCommandHandler(string commandName, MethodInfo methodInfo) => AddCommandHandler(commandName, (Delegate)null);
 
-            // GYB5 START
-            public void AddCommandHandler<TResult>(string commandName, Func<TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-
-            public void AddCommandHandler<T1, TResult>(string commandName, Func<T1, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, TResult>(string commandName, Func<T1, T2, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, TResult>(string commandName, Func<T1, T2, T3, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, TResult>(string commandName, Func<T1, T2, T3, T4, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, TResult>(string commandName, Func<T1, T2, T3, T4, T5, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, TResult>(string commandName, Func<T1, T2, T3, T4, T5, T6, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, TResult>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            // GYB6 END
-
-            public void AddCommandHandler(string commandName, Action handler) => AddCommandHandler(commandName, (Delegate)handler);
-
-            // GYB7 START
-            public void AddCommandHandler<T1>(string commandName, Action<T1> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2>(string commandName, Action<T1, T2> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3>(string commandName, Action<T1, T2, T3> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Action<T1, T2, T3, T4> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Action<T1, T2, T3, T4, T5> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Action<T1, T2, T3, T4, T5, T6> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(string commandName, Action<T1, T2, T3, T4, T5, T6, T7> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(string commandName, Action<T1, T2, T3, T4, T5, T6, T7, T8> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(string commandName, Action<T1, T2, T3, T4, T5, T6, T7, T8, T9> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string commandName, Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            // GYB7 END
-
             public void AddFunction(string name, Delegate implementation) {
                 // Check to see if the function already exists in our Library,
                 // and error out if it does
@@ -721,21 +646,6 @@ namespace Yarn.Unity
                 // Register this function in the library
                 library.RegisterFunction(name, implementation);
             }
-
-            public void AddFunction<TResult>(string name, Func<TResult> implementation) => AddFunction(name, (Delegate)implementation);
-
-            // GYB8 START
-            public void AddFunction<T1, TResult>(string name, Func<T1, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, TResult>(string name, Func<T1, T2, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, T3, TResult>(string name, Func<T1, T2, T3, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, T3, T4, TResult>(string name, Func<T1, T2, T3, T4, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, T3, T4, T5, TResult>(string name, Func<T1, T2, T3, T4, T5, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, T3, T4, T5, T6, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, T3, T4, T5, T6, T7, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            // GYB8 END
 
             public void RemoveCommandHandler(string commandName) => throw new InvalidOperationException("This class does not support removing actions.");
 
