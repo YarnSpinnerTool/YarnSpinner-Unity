@@ -191,7 +191,7 @@ namespace Yarn.Unity.UnityLocalization
         public override YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken)
         {
             Debug.LogError(NotInstalledError);
-            return Task.CompletedTask;
+            return YarnTask.CompletedTask;
         }
 
         public override void Start()
