@@ -549,7 +549,8 @@ namespace Yarn.Unity.Editor
             indentLevel += 1;
 
             var declarationsToGenerate = compilationResult.Declarations
-                .Where(d => d.IsVariable == true);
+                .Where(d => d.IsVariable == true)
+                .Where(d => d.Name.StartsWith("$Yarn.Internal") == false);
 
             if (declarationsToGenerate.Count() == 0)
             {
