@@ -47,7 +47,7 @@ namespace Yarn.Unity
             set => _assetLocaleCode = value;
         }
 
-        private YarnTask prepareForLinesTask = YarnTask.Never(CancellationToken.None);
+        private YarnTask prepareForLinesTask = YarnAsync.Never(CancellationToken.None);
 
         public override bool LinesAvailable => prepareForLinesTask.IsCompletedSuccessfully();
 

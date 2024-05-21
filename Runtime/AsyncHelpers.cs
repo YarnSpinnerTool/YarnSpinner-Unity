@@ -242,6 +242,14 @@ namespace Yarn.Unity
         }
 #endif
 
+        internal static YarnTask Never(CancellationToken cancellationToken) {
+            #if USE_UNITASK
+            return UniTask.Never(cancellationToken);
+            #else
+            return Task.Delay(Timeout.Infinite, cancellationToken);
+            #endif
+        }
+
     }
 
 }
