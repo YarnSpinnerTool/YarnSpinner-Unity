@@ -173,6 +173,12 @@ namespace Yarn.Unity
         internal static bool IsCompleted<T>(this UniTask<T> task) {
             return task.Status != UniTaskStatus.Pending;
         }
+        internal static bool IsCompletedSuccessfully(this UniTask task) {
+            return task.Status != UniTaskStatus.Succeeded;
+        }
+        internal static bool IsCompletedSuccessfully<T>(this UniTask<T> task) {
+            return task.Status != UniTaskStatus.Succeeded;
+        }
         #endif
         
         internal static bool IsCompleted(this System.Threading.Tasks.Task task) {
@@ -180,6 +186,13 @@ namespace Yarn.Unity
         }
         internal static bool IsCompleted<T>(this System.Threading.Tasks.Task task) {
             return task.IsCompleted;
+        }
+
+        internal static bool IsCompletedSuccessfully(this System.Threading.Tasks.Task task) {
+            return task.IsCompletedSuccessfully;
+        }
+        internal static bool IsCompletedSuccessfully<T>(this System.Threading.Tasks.Task task) {
+            return task.IsCompletedSuccessfully;
         }
 
 #if USE_UNITASK

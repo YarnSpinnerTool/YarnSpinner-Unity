@@ -49,7 +49,7 @@ namespace Yarn.Unity
 
         private YarnTask prepareForLinesTask = YarnTask.Never(CancellationToken.None);
 
-        public override bool LinesAvailable => prepareForLinesTask.Status == UniTaskStatus.Succeeded;
+        public override bool LinesAvailable => prepareForLinesTask.IsCompletedSuccessfully();
 
         IAddressablesHelper addressablesHelper = new AddressablesHelper();
 
