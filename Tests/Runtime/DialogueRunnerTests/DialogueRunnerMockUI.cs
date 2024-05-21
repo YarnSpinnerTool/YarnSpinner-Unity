@@ -163,7 +163,12 @@ namespace Yarn.Unity.Tests
             return dialogueOptions[selectedOption];
         }
 
-        public override YarnTask DialogueCompleteAsync()
+        public override YarnTask OnDialogueStartedAsync()
+        {
+            return YarnTask.CompletedTask;
+        }
+
+        public override YarnTask OnDialogueCompleteAsync()
         {
             return YarnTask.CompletedTask;
         }

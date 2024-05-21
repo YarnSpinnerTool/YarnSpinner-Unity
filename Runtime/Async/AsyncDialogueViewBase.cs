@@ -25,7 +25,8 @@ namespace Yarn.Unity
     {
         public abstract YarnTask RunLineAsync(LocalizedLine line, CancellationToken token);
         public abstract YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken);
-        public abstract YarnTask DialogueCompleteAsync();
+        public abstract YarnTask OnDialogueStartedAsync();
+        public abstract YarnTask OnDialogueCompleteAsync();
 
         public virtual bool EndLineWhenViewFinishes => false;
     }

@@ -291,7 +291,7 @@ namespace Yarn.Unity
                 {
                     try
                     {
-                        await view.DialogueCompleteAsync();
+                        await view.OnDialogueCompleteAsync();
                     }
                     catch (System.Exception e)
                     {
@@ -615,7 +615,22 @@ namespace Yarn.Unity
 
             onDialogueStart?.Invoke();
 
-            Dialogue.Continue();
+            StartDialogueAsync().Forget();
+
+            async YarnTask StartDialogueAsync()
+            {
+                var tasks = new List<YarnTask>();
+                foreach (var view in DialogueViews)
+                {
+                    if (view == null)
+                    {
+                        continue;
+                    }
+                    tasks.Add(view.OnDialogueStartedAsync());
+                }
+                await YarnTask.WhenAll(tasks);
+                Dialogue.Continue();
+            }
         }
 
         public void CancelCurrentLine()

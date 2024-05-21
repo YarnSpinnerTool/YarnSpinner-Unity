@@ -380,7 +380,12 @@ namespace Yarn.Unity
             // default implementation does nothing
         }
 
-        public override YarnTask DialogueCompleteAsync()
+        public override YarnTask OnDialogueStartedAsync()
+        {
+            return YarnTask.CompletedTask;
+        }
+
+        public override YarnTask OnDialogueCompleteAsync()
         {
             return YarnTask.CompletedTask;
         }
