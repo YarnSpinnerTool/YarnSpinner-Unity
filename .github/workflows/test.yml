@@ -23,7 +23,7 @@ jobs:
       group: ${{ github.workflow }}-${{ matrix.unityVersion }}
       cancel-in-progress: true # Cancel other jobs if another one arrives
     name: Test on ${{ matrix.unityVersion }} for ${{ matrix.targetPlatform }}
-    runs-on: self-hosted linux
+    runs-on: self-hosted Linux
     strategy:
       fail-fast: false
       # max-parallel: 1 # Only run one at a time, to prevent license contention
