@@ -11,11 +11,11 @@ namespace Yarn.Unity.Tests
     using UnityEngine;
     using UnityEngine.TestTools;
     using UnityEngine.SceneManagement;
+    using System;
 
 #if USE_UNITASK
     using Cysharp.Threading.Tasks;
     using YarnTask = Cysharp.Threading.Tasks.UniTask;
-    using System;
 #else
     using YarnTask = System.Threading.Tasks.Task;
 #endif

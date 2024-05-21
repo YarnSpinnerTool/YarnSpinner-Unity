@@ -145,7 +145,7 @@ namespace Yarn.Unity.Tests
         public static async YarnTask WaitForTaskAsync(YarnTask task, string? failureMessage = null, int timeoutMilliseconds = 2000)
         {
             try {
-                await task.Wait(TimeSpan.FromMilliseconds(timeoutMilliseconds));
+                await YarnAsync.Wait(task, TimeSpan.FromMilliseconds(timeoutMilliseconds));
             } catch (TimeoutException timeout) {
                 if (failureMessage == null) {
                     throw;

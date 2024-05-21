@@ -385,21 +385,13 @@ namespace Yarn.Unity.ActionAnalyser
                 return SyntaxFactory.ParseTypeName(t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
             });
 
-            // If this is a function, or a command whose method returns a value, we also need to include the return type in
+            // If this is a function, we also need to include the return type in
             // this list.
             if (Type == ActionType.Function)
             {
                 var returnType = (MethodSymbol as IMethodSymbol)?.ReturnType ?? throw new InvalidOperationException($"Action {Name} has type {ActionType.Function}, but its return type is null.");
 
                 typeArguments = typeArguments.Append(SyntaxFactory.ParseTypeName(returnType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
-            }
-            if (Type == ActionType.Command) {
-                var returnType = (MethodSymbol as IMethodSymbol)?.ReturnType;
-
-                // If the command has a return type, and it's not void, add it to the list of type parameters
-                if (returnType != null && returnType.SpecialType != SpecialType.System_Void) {
-                    typeArguments = typeArguments.Append(SyntaxFactory.ParseTypeName(returnType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
-                }
             }
 
             if (typeArguments.Any() && MethodSymbol?.IsStatic == true)
