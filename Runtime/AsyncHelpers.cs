@@ -83,13 +83,6 @@ namespace Yarn.Unity
 
             while (!complete)
             {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    // Our task was cancelled. Stop the coroutine and return
-                    // immediately.
-                    mb.StopCoroutine(waitingCoroutine);
-                    return;
-                }
                 await YarnTask.Yield();
             }
 #endif
