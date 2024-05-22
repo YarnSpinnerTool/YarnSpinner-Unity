@@ -26,6 +26,12 @@ namespace Yarn.Unity
     internal struct CommandDispatchResult
     {
 
+        internal enum ParameterParseStatusType {
+            Succeeded,
+            InvalidParameterType,
+            InvalidParameterCount,
+        }
+
         internal enum StatusType
         {
 
@@ -36,6 +42,8 @@ namespace Yarn.Unity
             TargetMissingComponent,
 
             InvalidParameterCount,
+
+            InvalidParameter,
 
             /// <summary>
             /// The command could not be found.

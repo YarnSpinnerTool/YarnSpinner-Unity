@@ -131,6 +131,16 @@ namespace Yarn.Unity.Tests
             return $"{text} no you're not! {text}";
         }
 
+        [YarnCommand("testInstanceVariadic")]
+        public void VariadicInstanceFunction(int required, params bool[] bools) {
+            Debug.Log($"Variadic instance function: {required}, ({string.Join(", ", bools)})");
+        }
+        [YarnCommand("testStaticVariadic")]
+        public static void VariadicStaticFunction(int required, params bool[] bools) {
+            Debug.Log($"Variadic static function: {required}, ({string.Join(", ", bools)})");
+        }
+
+
         public override async YarnTask RunLineAsync(LocalizedLine line, CancellationToken token)
         {
             // Store the localised text in our CurrentLine property

@@ -64,5 +64,15 @@ namespace Yarn.Unity
             Debug.Log($"Demo function {nameof(DemoFunction2)}");
             return 1;
         }
+
+        [YarnCommand("instance_variadic")]
+        public void VariadicInstanceFunction(int required, params bool[] bools) {
+            Debug.Log($"Variadic instance function: {required}, ({string.Join(", ", bools)})");
+        }
+
+        [YarnCommand("static_variadic")]
+        public void VariadicStaticFunction(int required, params bool[] bools) {
+            Debug.Log($"Variadic static function: {required}, ({string.Join(", ", bools)})");
+        }
     }
 }

@@ -23,8 +23,9 @@ using UnityEngine;
 
 namespace Yarn.Unity
 {
-    using Converter = System.Func<string, object?>;
+    using Converter = System.Func<string, int, object?>;
     using ActionRegistrationMethod = System.Action<IActionRegistration, RegistrationType>;
+
 
     public enum RegistrationType {
         /// <summary>
@@ -176,7 +177,7 @@ namespace Yarn.Unity
             /// <summary>
             /// Attempt to parse the arguments with cached converters.
             /// </summary>
-            public bool TryParseArgs(string[] args, out object?[]? result, out string? message)
+            public CommandDispatchResult.ParameterParseStatusType TryParseArgs(string[] args, out object?[]? result, out string? message)
             {
                 var parameters = Method.GetParameters();
 
@@ -195,49 +196,123 @@ namespace Yarn.Unity
                     }
                     message = $"{this.Name} requires {requirementDescription}, but {argumentCount} {DiagnosticUtility.EnglishPluraliseWasVerb(argumentCount)} provided.";
                     result = default;
-                    return false;
+                    return CommandDispatchResult.ParameterParseStatusType.InvalidParameterCount;
                 }
 
                 var finalArgs = new object?[parameters.Length];
 
+                var argsQueue = new Queue(args);
+
                 for (int i = 0; i < argumentCount; i++)
                 {
+                    var parameterIsParamsArray = parameters[i].GetCustomAttribute<ParamArrayAttribute>() != null;
+
                     string arg = args[i];
-                    if (Converters[i] == null) {
-                        finalArgs[i] = arg;
-                    } else {
-                        try {
-                            finalArgs[i] = Converters[i].Invoke(arg);
-                        } catch (Exception e) {
-                            message = $"Can't convert parameter {i} to {parameters[i].ParameterType.Name}: {e.Message}";
-                            result = default;
-                            return false;
+                    Converter converter = Converters[i];
+                    
+                    if (parameterIsParamsArray) {
+                        // Consume all remaining arguments, passing them through
+                        // the final converter, and produce an array from the
+                        // results. This array will be the final parameter to
+                        // the method.
+                        var parameterArrayElementType = parameters[i].ParameterType.GetElementType();
+                        var paramIndex = i;
+                        // var paramsArray = new List<object?>();
+                        var paramsArray = Array.CreateInstance(parameterArrayElementType, argumentCount - i);
+                        while (i < argumentCount) {
+                            arg = args[i];
+                            if (converter == null) {
+                                paramsArray.SetValue(arg, i);
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    paramsArray.SetValue(converter.Invoke(arg, i), i-paramIndex);
+                                }
+                                catch (Exception e)
+                                {
+                                    message = $"Can't convert parameter {i} to {parameterArrayElementType.Name}: {e.Message}";
+                                    result = default;
+                                    return CommandDispatchResult.ParameterParseStatusType.InvalidParameterType;
+                                }
+                            }
+                            i += 1;
+                        }
+                        finalArgs[paramIndex] = paramsArray;
+                    }
+                    else
+                    {
+                        // Consume a single argument
+                        if (converter == null)
+                        {
+                            finalArgs[i] = arg;
+                        }
+                        else
+                        {
+                            try
+                            {
+                                finalArgs[i] = converter.Invoke(arg, i);
+                            }
+                            catch (Exception e)
+                            {
+                                message = $"Can't convert parameter {i} to {parameters[i].ParameterType.Name}: {e.Message}";
+                                result = default;
+                                return CommandDispatchResult.ParameterParseStatusType.InvalidParameterType;
+                            }
                         }
                     }
                 }
                 for (int i = argumentCount; i < finalArgs.Length; i++)
                 {
-                    finalArgs[i] = System.Type.Missing;
+                    var parameter = parameters[i];
+                    if (parameter.IsOptional)
+                    {
+                        // If this parameter is optional, provide the Missing type.
+                        finalArgs[i] = System.Type.Missing;
+                    }
+                    else if (parameter.GetCustomAttribute<ParamArrayAttribute>() != null)
+                    {
+                        // If the parameter is a params array, provide an empty array of the appropriate type.
+                        finalArgs[i] = Array.CreateInstance(parameter.ParameterType.GetElementType(),0);
+                    } else {
+                        throw new InvalidOperationException($"Can't provide a default value for parameter {parameter.Name}");
+                    }
                 }
                 result = finalArgs;
                 message = default;
-                return true;
+                return CommandDispatchResult.ParameterParseStatusType.Succeeded;
             }
 
             private (int Min, int Max) ParameterCount {
                 get {
                     var parameters = Method.GetParameters();
                     int optional = 0;
+                    bool lastCommandIsParams = false;
                     foreach (var parameter in parameters)
                     {
                         if (parameter.IsOptional)
                         {
                             optional += 1;
                         }
+                        if (parameter.ParameterType.IsArray && parameter.GetCustomAttribute<ParamArrayAttribute>()!= null) {
+                            // If the parameter is a params array, then:
+                            // 1. It's 'optional' in that you can pass in no
+                            //    values (so, for our purposes, the minimum
+                            //    number of parameters you need to pass is not
+                            //    changed)
+                            // 2. The maximum number of parameters you can pass
+                            //    is now effectively unbounded.
+                            lastCommandIsParams = true;
+                            optional += 1;
+                        }
                     }
 
                     int min = parameters.Length - optional;
                     int max = parameters.Length;
+                    if (lastCommandIsParams) {
+                        max = int.MaxValue;
+                    }
                     return (min, max);
                 }
             }
@@ -303,9 +378,19 @@ namespace Yarn.Unity
                     throw new InvalidOperationException($"Internal error: {nameof(CommandRegistration)} \"{this.Name}\" has no {nameof(Target)}, but method is not static and ${DynamicallyFindsTarget} is false");
                 }
 
-                if (this.TryParseArgs(parameters.ToArray(), out var finalParameters, out var errorMessage) == false)
+                var parseArgsStatus = this.TryParseArgs(parameters.ToArray(), out var finalParameters, out var errorMessage);
+
+                if (parseArgsStatus != CommandDispatchResult.ParameterParseStatusType.Succeeded)
                 {
-                    return new CommandDispatchResult(CommandDispatchResult.StatusType.InvalidParameterCount)
+                    var status = parseArgsStatus switch
+                    {
+                        CommandDispatchResult.ParameterParseStatusType.Succeeded => CommandDispatchResult.StatusType.Succeeded,
+                        CommandDispatchResult.ParameterParseStatusType.InvalidParameterType => CommandDispatchResult.StatusType.InvalidParameter,
+                        CommandDispatchResult.ParameterParseStatusType.InvalidParameterCount => CommandDispatchResult.StatusType.InvalidParameterCount,
+                        _ => throw new InvalidOperationException("Internal error: invalid parameter parse result " + parseArgsStatus),
+                    };
+
+                    return new CommandDispatchResult(status)
                     {
                         Message = errorMessage,
                     };
@@ -507,7 +592,7 @@ namespace Yarn.Unity
         {
             ParameterInfo[] parameterInfos = method.GetParameters();
 
-            Converter[] result = (Func<string, object>[])Array.CreateInstance(typeof(Func<string, object>), parameterInfos.Length);
+            Converter[] result = new Converter[parameterInfos.Length];
 
             int i = 0;
 
@@ -519,23 +604,43 @@ namespace Yarn.Unity
             return result;
         }
 
-        private static Converter CreateConverter(ParameterInfo parameter, int index)
+        private static System.Func<string, int, object?> CreateConverter(ParameterInfo parameter, int index)
         {
             var targetType = parameter.ParameterType;
+            string name = parameter.Name;
+            var parameterIsParamsArray = parameter.GetCustomAttribute<ParamArrayAttribute>() != null;
+
+            if (targetType.IsArray && parameterIsParamsArray) {
+                // This parameter is a params array. Make a converter for that
+                // array's element type; at dispatch time, we'll repeatedly call
+                // it with the arguments found in the command.
+
+                var paramsArrayType = targetType.GetElementType();
+                var elementConverter = CreateConverterFunction(paramsArrayType, name);
+                return elementConverter;
+                
+            } else {
+                // This parameter is for a single value. Make a converter that receives a single string, 
+                return CreateConverterFunction(targetType, name);
+            }
+        }
+
+        private static Converter CreateConverterFunction(Type targetType, string parameterName)
+        {
 
             // well, I mean...
-            if (targetType == typeof(string)) { return arg => arg; }
+            if (targetType == typeof(string)) { return (arg, i) => arg; }
 
             // find the GameObject.
             if (typeof(GameObject).IsAssignableFrom(targetType))
             {
-                return GameObject.Find;
+                return (arg, i) => GameObject.Find(arg);
             }
 
             // find components of the GameObject with the component, if available
             if (typeof(Component).IsAssignableFrom(targetType))
             {
-                return arg =>
+                return (arg, i) =>
                 {
                     GameObject gameObject = GameObject.Find(arg);
                     if (gameObject == null)
@@ -549,11 +654,11 @@ namespace Yarn.Unity
             // bools can take "true" or "false", or the parameter name.
             if (typeof(bool).IsAssignableFrom(targetType))
             {
-                return arg =>
+                return (arg, i) =>
                 {
                     // If the argument is the name of the parameter, interpret
                     // the argument as 'true'.
-                    if (arg.Equals(parameter.Name, StringComparison.InvariantCultureIgnoreCase)) 
+                    if (arg.Equals(parameterName, StringComparison.InvariantCultureIgnoreCase)) 
                     {
                         return true;
                     }
@@ -567,13 +672,13 @@ namespace Yarn.Unity
 
                     // We can't parse the argument.
                     throw new ArgumentException(
-                        $"Can't convert the given parameter at position {index + 1} (\"{arg}\") to parameter " +
-                        $"{parameter.Name} of type {typeof(bool).FullName}.");
+                        $"Can't convert the given parameter at position {i + 1} (\"{arg}\") to parameter " +
+                        $"{parameterName} of type {typeof(bool).FullName}.");
                 };
             }
 
             // Fallback: try converting using IConvertible.
-            return arg =>
+            return (arg, i) =>
             {
                 try
                 {
@@ -582,8 +687,8 @@ namespace Yarn.Unity
                 catch (Exception e)
                 {
                     throw new ArgumentException(
-                        $"Can't convert the given parameter at position {index + 1} (\"{arg}\") to parameter " +
-                        $"{parameter.Name} of type {targetType.FullName}: {e}", e);
+                        $"Can't convert the given parameter at position {i + 1} (\"{arg}\") to parameter " +
+                        $"{parameterName} of type {targetType.FullName}: {e}", e);
                 }
             };
         }

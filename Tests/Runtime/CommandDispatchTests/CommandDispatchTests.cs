@@ -61,6 +61,8 @@ namespace Yarn.Unity.Tests
                 "static_demo_action",
                 "static_demo_action_with_params",
                 "static_demo_action_with_optional_params",
+                "static_variadic",
+                "instance_variadic",
             };
 
             var expectedFunctionNames = new[] {

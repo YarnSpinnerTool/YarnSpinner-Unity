@@ -410,6 +410,23 @@ namespace Yarn.Unity.Tests
             Assert.That(regex.IsMatch(result.Message));
         }
 
+        [TestCase("testInstanceVariadic DialogueRunner 1", "Variadic instance function: 1, ()")]
+        [TestCase("testInstanceVariadic DialogueRunner 1 true", "Variadic instance function: 1, (True)")]
+        [TestCase("testInstanceVariadic DialogueRunner 1 true false", "Variadic instance function: 1, (True, False)")]
+        [TestCase("testStaticVariadic 1", "Variadic static function: 1, ()")]
+        [TestCase("testStaticVariadic 1 true", "Variadic static function: 1, (True)")]
+        [TestCase("testStaticVariadic 1 true false", "Variadic static function: 1, (True, False)")]
+        public void HandleCommand_DispatchesCommandsWithVariadicParameters(string command, string expectedLog)
+        {
+            var dispatcher = runner.CommandDispatcher;
+
+            LogAssert.Expect(LogType.Log, expectedLog);
+            
+            var result = dispatcher.DispatchCommand(command, runner);
+            
+            Assert.AreEqual(CommandDispatchResult.StatusType.Succeeded, result.Status);
+        }
+
         [Test]
         public void AddCommandHandler_RegistersCommands()
         {
