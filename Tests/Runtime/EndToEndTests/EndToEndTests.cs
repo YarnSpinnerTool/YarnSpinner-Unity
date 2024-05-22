@@ -4,7 +4,6 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 namespace Yarn.Unity.Tests
 {
-    using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
@@ -19,11 +18,11 @@ namespace Yarn.Unity.Tests
     using Cysharp.Threading.Tasks;
     using YarnTask = Cysharp.Threading.Tasks.UniTask;
 #else
-    using YarnTask = System.Threading.Tasks.Task;
 #endif
 
     using static EndToEndUtility;
-    
+    using static RunnerExecution;
+
 #nullable enable
 
     public class CoroutineHost : MonoBehaviour { }
@@ -82,43 +81,41 @@ namespace Yarn.Unity.Tests
         {
             await MoveToMarkerAsync("Character1", "Character2");
 
-            YarnTask dialogue;
+            await using (var dialogue = StartDialogue("SpeakToGuard"))
+            {
+                await WaitForLineAsync("Halt, scum!");
+                await WaitForLineAsync("None shall pass this point!");
+            }
 
-            dialogue = RunDialogueAsync("SpeakToGuard");
-            await WaitForLineAsync("Halt, scum!");
-            await WaitForLineAsync("None shall pass this point!");
-            await WaitForTaskAsync(dialogue, "Expected dialogue to be finished");
-
-            var variableStorage = GameObject.FindObjectOfType<VariableStorageBehaviour>();
+            var variableStorage = GameObject.FindAnyObjectByType<VariableStorageBehaviour>();
             variableStorage.SetValue("$guard_friendly", true);
 
-            dialogue = RunDialogueAsync("SpeakToGuard");
-            await WaitForLineAsync("Halt, traveller!");
-            await WaitForLineAsync("Why, hello there!");
-            await WaitForLineAsync("Ah, my friend! You may pass.");
-            await WaitForTaskAsync(dialogue, "Expected dialogue to be finished");
+            await using (var dialogue = StartDialogue("SpeakToGuard"))
+            {
+                await WaitForLineAsync("Halt, traveller!");
+                await WaitForLineAsync("Why, hello there!");
+                await WaitForLineAsync("Ah, my friend! You may pass.");
+            }
         });
 
         [UnityTest]
         public IEnumerator EndToEndTest_CanAwaitContent() => YarnAsync.ToCoroutine(async () =>
         {
-            YarnTask dialogue;
+            await using var dialogue = StartDialogue("LinesAndOptions");
 
-            dialogue = RunDialogueAsync("LinesAndOptions");
             await WaitForLineAsync("Line 1");
             await WaitForLineAsync("Line 2");
             await WaitForOptionAndSelectAsync("Option 1");
             await WaitForLineAsync("Option 1 Selected");
             await WaitForLineAsync("Line 3");
-
-            await WaitForTaskAsync(dialogue, "Expected dialogue to be finished");
         });
 
         [UnityTest]
         public IEnumerator LineGroups_DeliverContent() => YarnAsync.ToCoroutine(async () =>
         {
+
             
-        });       
+        });
 
     }
 }
