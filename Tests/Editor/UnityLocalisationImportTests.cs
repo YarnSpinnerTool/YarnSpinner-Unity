@@ -185,9 +185,9 @@ namespace Yarn.Unity.Tests
         }
     }
 #else
-    public class UnityLocalisationTests
+    [Ignore("Unity Localisation is not installed.")]
+    public class UnityLocalisationImportTests
     {
-        [Test]
         public void UnityLocalisation_UnityLocalisationPackageInstalled()
         {
             Assert.Fail("Unity Localisation package is not installed, tests cannot continue");
