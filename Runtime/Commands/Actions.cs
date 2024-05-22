@@ -632,12 +632,13 @@ namespace Yarn.Unity
             public void AddCommandHandler(string commandName, Delegate handler)
             {
                 // No action; this class does not handle commands, only functions.
-                throw new InvalidOperationException($"{nameof(LibraryRegistrationProxy)} does not support commands.");
+                return;
             }
 
             public void AddCommandHandler(string commandName, MethodInfo methodInfo)
             {
-                throw new InvalidOperationException($"{nameof(LibraryRegistrationProxy)} does not support commands.");
+                // No action; this class does not handle commands, only functions.
+                return;
             }
 
             public void AddFunction(string name, Delegate implementation) {
