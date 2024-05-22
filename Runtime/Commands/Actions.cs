@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 
+#nullable enable
 
 #if USE_UNITASK
     using Cysharp.Threading.Tasks;
@@ -18,12 +19,11 @@ using UnityEngine;
 #else
     using YarnTask = System.Threading.Tasks.Task;
     using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
-    using System.Threading.Tasks;
 #endif
 
 namespace Yarn.Unity
 {
-    using Converter = System.Func<string, object>;
+    using Converter = System.Func<string, object?>;
     using ActionRegistrationMethod = System.Action<IActionRegistration, RegistrationType>;
 
     public enum RegistrationType {
@@ -108,7 +108,7 @@ namespace Yarn.Unity
 
             public string Name { get; set; }
             public MethodInfo Method { get; set; }
-            private object Target { get; set; }
+            private object? Target { get; set; }
 
             public Type DeclaringType => Method.DeclaringType;
             public Type ReturnType => Method.ReturnType;
@@ -176,7 +176,7 @@ namespace Yarn.Unity
             /// <summary>
             /// Attempt to parse the arguments with cached converters.
             /// </summary>
-            public bool TryParseArgs(string[] args, out object[] result, out string message)
+            public bool TryParseArgs(string[] args, out object?[]? result, out string? message)
             {
                 var parameters = Method.GetParameters();
 
@@ -198,7 +198,7 @@ namespace Yarn.Unity
                     return false;
                 }
 
-                var finalArgs = new object[parameters.Length];
+                var finalArgs = new object?[parameters.Length];
 
                 for (int i = 0; i < argumentCount; i++)
                 {
@@ -244,7 +244,7 @@ namespace Yarn.Unity
 
             internal CommandDispatchResult Invoke(MonoBehaviour dispatcher, List<string> parameters)
             {
-                object target;
+                object? target;
 
                 if (DynamicallyFindsTarget)
                 {
@@ -632,10 +632,13 @@ namespace Yarn.Unity
             public void AddCommandHandler(string commandName, Delegate handler)
             {
                 // No action; this class does not handle commands, only functions.
-                return;
+                throw new InvalidOperationException($"{nameof(LibraryRegistrationProxy)} does not support commands.");
             }
 
-            public void AddCommandHandler(string commandName, MethodInfo methodInfo) => AddCommandHandler(commandName, (Delegate)null);
+            public void AddCommandHandler(string commandName, MethodInfo methodInfo)
+            {
+                throw new InvalidOperationException($"{nameof(LibraryRegistrationProxy)} does not support commands.");
+            }
 
             public void AddFunction(string name, Delegate implementation) {
                 // Check to see if the function already exists in our Library,
