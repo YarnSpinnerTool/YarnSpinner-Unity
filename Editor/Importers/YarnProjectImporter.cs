@@ -178,6 +178,8 @@ namespace Yarn.Unity.Editor
                 return;
             }
 
+            Debug.Log($"Beginning compilation of project; project JSON data:\n{project.GetJson()}\n\nProject files:\n{string.Join("\n", project.SourceFiles.Select(f => $"- {f}"))}");
+
             project.AllowLanguagePreviewFeatures = true;
 
             importData.sourceFilePaths.AddRange(project.SourceFilePatterns);
