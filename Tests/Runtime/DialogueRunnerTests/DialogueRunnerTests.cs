@@ -406,7 +406,7 @@ namespace Yarn.Unity.Tests
             var regex = new Regex(error);
 
             var result = dispatcher.DispatchCommand(command, runner);
-            Assert.AreEqual(CommandDispatchResult.StatusType.InvalidParameterCount, result.Status);
+            Assert.AreEqual(CommandDispatchResult.StatusType.InvalidParameter, result.Status);
             Assert.That(regex.IsMatch(result.Message));
         }
 
