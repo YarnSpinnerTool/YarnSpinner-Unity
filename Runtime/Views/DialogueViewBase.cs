@@ -382,11 +382,15 @@ namespace Yarn.Unity
 
         public override YarnTask OnDialogueStartedAsync()
         {
+            // Invoke the synchronous version of 'dialogue started'
+            this.DialogueStarted();
             return YarnTask.CompletedTask;
         }
 
         public override YarnTask OnDialogueCompleteAsync()
         {
+            // Invoke the synchronous version of 'dialogue started'
+            this.DialogueComplete();
             return YarnTask.CompletedTask;
         }
 
