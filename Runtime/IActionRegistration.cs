@@ -139,7 +139,7 @@ namespace Yarn.Unity
        #if USE_UNITASK
        
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
-        public static void AddCommandHandler<(this IActionRegistration registration, string commandName, System.Func<Cysharp.Threading.Tasks.UniTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        public static void AddCommandHandler(this IActionRegistration registration, string commandName, System.Func<Cysharp.Threading.Tasks.UniTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
         public static void AddCommandHandler<T1>(this IActionRegistration registration, string commandName, System.Func<T1, Cysharp.Threading.Tasks.UniTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
