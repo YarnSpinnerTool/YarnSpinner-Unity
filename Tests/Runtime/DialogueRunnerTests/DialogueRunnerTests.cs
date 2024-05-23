@@ -426,6 +426,18 @@ namespace Yarn.Unity.Tests
             
             Assert.AreEqual(CommandDispatchResult.StatusType.Succeeded, result.Status);
         }
+        [TestCase("testInstanceVariadic DialogueRunner 1 one")]
+        [TestCase("testInstanceVariadic DialogueRunner 1 true too")]
+        [TestCase("testStaticVariadic 1 one")]
+        [TestCase("testStaticVariadic 1 true too")]
+        public void HandleCommand_InvalidVariadicParameters_ShouldFail(string command)
+        {
+            var dispatcher = runner.CommandDispatcher;
+
+            var result = dispatcher.DispatchCommand(command, runner);
+            
+            Assert.AreEqual(CommandDispatchResult.StatusType.InvalidParameter, result.Status);
+        }
 
         [Test]
         public void AddCommandHandler_RegistersCommands()
