@@ -84,6 +84,7 @@ namespace Yarn.Unity
                 }
                 return variableStorage;
             }
+            set => variableStorage = value;
         }
 
         [SerializeReference] internal LineProviderBehaviour? lineProvider;
