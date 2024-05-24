@@ -11,6 +11,7 @@ using Yarn.Unity;
 using UnityEngine.Events;
 using System;
 using UnityEngine.UIElements;
+using Yarn.Unity.Attributes;
 
 
 #nullable enable
