@@ -11,6 +11,7 @@ using Yarn.Unity;
 using UnityEngine.Events;
 using System;
 using UnityEngine.UIElements;
+using Yarn.Unity.Attributes;
 
 
 #nullable enable
@@ -83,6 +84,7 @@ namespace Yarn.Unity
                 }
                 return variableStorage;
             }
+            set => variableStorage = value;
         }
 
         [SerializeReference] internal LineProviderBehaviour? lineProvider;

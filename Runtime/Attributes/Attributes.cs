@@ -1,6 +1,6 @@
 using System;
 
-namespace Yarn.Unity
+namespace Yarn.Unity.Attributes
 {
 
 #nullable enable
