@@ -587,5 +587,18 @@ namespace Yarn.Unity.Tests
 
             runner.Stop();
         }
+
+        [Test]
+        public void DialogueRunner_CanQueryNodeGroupCandidates() {
+            runner.Dialogue.GetAvailableContentForNodeGroup("NodeGroups").Should().HaveCount(1);
+
+            runner.VariableStorage.SetValue("$nodeGroupCondition1", true);
+
+            runner.Dialogue.GetAvailableContentForNodeGroup("NodeGroups").Should().HaveCount(3);
+
+            runner.VariableStorage.SetValue("$nodeGroupCondition2", true);
+
+            runner.Dialogue.GetAvailableContentForNodeGroup("NodeGroups").Should().HaveCount(7);
+        }
     }
 }
