@@ -381,12 +381,6 @@
             The name of the header that indicates a node's title.
             </summary>
         </member>
-        <member name="F:Yarn.Compiler.SpecialHeaderNames.WhenHeader">
-            <summary>
-            The name of a header that indicates a node's condition when part of
-            a node group.
-            </summary>
-        </member>
         <member name="F:Yarn.Compiler.SpecialHeaderNames.NodeGroupHeader">
             <summary>
             The name of the header that indicates which node group a node
@@ -614,6 +608,31 @@
             <param name="key">The key of the header to find.</param>
             <returns>A collection of headers whose <see cref="F:Yarn.Compiler.YarnSpinnerParser.HeaderContext.header_key"/>
             is <paramref name="key"/>. </returns>
+        </member>
+        <member name="M:Yarn.Compiler.YarnSpinnerParser.GetValueCountInExpression(Antlr4.Runtime.ParserRuleContext)">
+            <summary>
+            Gets the total number of boolean operations - ands, ors, nots, and
+            xors - present in an expression and its sub-expressions.
+            </summary>
+            <param name="context">An expression.</param>
+            <returns>The total number of boolean operations in the
+            expression.</returns>
+        </member>
+        <member name="T:Yarn.Compiler.YarnSpinnerParser.Line_conditionContext">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.Compiler.YarnSpinnerParser.Line_conditionContext.ConditionCount">
+            <summary>
+            Gets the complexity of this line's condition.
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.YarnSpinnerParser.When_headerContext">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.Compiler.YarnSpinnerParser.When_headerContext.ConditionCount">
+            <summary>
+            Gets the complexity of this line's condition.
+            </summary>
         </member>
         <member name="P:Yarn.Compiler.YarnSpinnerParser.Line_statementContext.LineID">
             <summary>
@@ -1106,13 +1125,13 @@
             The severity of the issue.
             </summary>
         </member>
-        <member name="F:Yarn.Compiler.Diagnostic.DiagnosticSeverity.Error">
+        <member name="F:Yarn.Compiler.Diagnostic.DiagnosticSeverity.Info">
             <summary>
-            An error.
+            An informational diagnostic.
             </summary>
             <remarks>
-            If a Yarn source file contains errors, it cannot be compiled,
-            and the compilation process will fail.
+            Infos represent possible issues or steps that the user may wish
+            to fix, but are unlikely to cause problems.
             </remarks>
         </member>
         <member name="F:Yarn.Compiler.Diagnostic.DiagnosticSeverity.Warning">
@@ -1124,13 +1143,13 @@
             but do not cause the compilation process to fail.
             </remarks>
         </member>
-        <member name="F:Yarn.Compiler.Diagnostic.DiagnosticSeverity.Info">
+        <member name="F:Yarn.Compiler.Diagnostic.DiagnosticSeverity.Error">
             <summary>
-            An informational diagnostic.
+            An error.
             </summary>
             <remarks>
-            Infos represent possible issues or steps that the user may wish
-            to fix, but are unlikely to cause problems.
+            If a Yarn source file contains errors, it cannot be compiled,
+            and the compilation process will fail.
             </remarks>
         </member>
         <member name="M:Yarn.Compiler.Diagnostic.ToString">
@@ -1318,6 +1337,20 @@
         <member name="M:Yarn.Compiler.YarnSpinnerParserBaseListener.ExitNode(Yarn.Compiler.YarnSpinnerParser.NodeContext)">
             <summary>
             Exit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.node"/>.
+            <para>The default implementation does nothing.</para>
+            </summary>
+            <param name="context">The parse tree.</param>
+        </member>
+        <member name="M:Yarn.Compiler.YarnSpinnerParserBaseListener.EnterWhen_header(Yarn.Compiler.YarnSpinnerParser.When_headerContext)">
+            <summary>
+            Enter a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.when_header"/>.
+            <para>The default implementation does nothing.</para>
+            </summary>
+            <param name="context">The parse tree.</param>
+        </member>
+        <member name="M:Yarn.Compiler.YarnSpinnerParserBaseListener.ExitWhen_header(Yarn.Compiler.YarnSpinnerParser.When_headerContext)">
+            <summary>
+            Exit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.when_header"/>.
             <para>The default implementation does nothing.</para>
             </summary>
             <param name="context">The parse tree.</param>
@@ -2137,6 +2170,17 @@
             <param name="context">The parse tree.</param>
             <return>The visitor result.</return>
         </member>
+        <member name="M:Yarn.Compiler.YarnSpinnerParserBaseVisitor`1.VisitWhen_header(Yarn.Compiler.YarnSpinnerParser.When_headerContext)">
+            <summary>
+            Visit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.when_header"/>.
+            <para>
+            The default implementation returns the result of calling <see cref="M:Antlr4.Runtime.Tree.AbstractParseTreeVisitor`1.VisitChildren(Antlr4.Runtime.Tree.IRuleNode)"/>
+            on <paramref name="context"/>.
+            </para>
+            </summary>
+            <param name="context">The parse tree.</param>
+            <return>The visitor result.</return>
+        </member>
         <member name="M:Yarn.Compiler.YarnSpinnerParserBaseVisitor`1.VisitHeader(Yarn.Compiler.YarnSpinnerParser.HeaderContext)">
             <summary>
             Visit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.header"/>.
@@ -2767,6 +2811,18 @@
         <member name="M:Yarn.Compiler.IYarnSpinnerParserListener.ExitNode(Yarn.Compiler.YarnSpinnerParser.NodeContext)">
             <summary>
             Exit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.node"/>.
+            </summary>
+            <param name="context">The parse tree.</param>
+        </member>
+        <member name="M:Yarn.Compiler.IYarnSpinnerParserListener.EnterWhen_header(Yarn.Compiler.YarnSpinnerParser.When_headerContext)">
+            <summary>
+            Enter a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.when_header"/>.
+            </summary>
+            <param name="context">The parse tree.</param>
+        </member>
+        <member name="M:Yarn.Compiler.IYarnSpinnerParserListener.ExitWhen_header(Yarn.Compiler.YarnSpinnerParser.When_headerContext)">
+            <summary>
+            Exit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.when_header"/>.
             </summary>
             <param name="context">The parse tree.</param>
         </member>
@@ -3454,6 +3510,13 @@
             <param name="context">The parse tree.</param>
             <return>The visitor result.</return>
         </member>
+        <member name="M:Yarn.Compiler.IYarnSpinnerParserVisitor`1.VisitWhen_header(Yarn.Compiler.YarnSpinnerParser.When_headerContext)">
+            <summary>
+            Visit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.when_header"/>.
+            </summary>
+            <param name="context">The parse tree.</param>
+            <return>The visitor result.</return>
+        </member>
         <member name="M:Yarn.Compiler.IYarnSpinnerParserVisitor`1.VisitHeader(Yarn.Compiler.YarnSpinnerParser.HeaderContext)">
             <summary>
             Visit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.header"/>.
@@ -3878,6 +3941,25 @@
             A Lexer subclass that detects newlines and generates indent and
             dedent tokens accordingly.
             </summary>
+        </member>
+        <member name="M:Yarn.Compiler.IndentAwareLexer.IsInWhenClause">
+            <summary>
+            Returns a value indicating whether the lexer is currently lexing an
+            expression that's part of a 'when' clause.
+            </summary>
+            <remarks>
+            This value is set by <see cref="M:Yarn.Compiler.IndentAwareLexer.SetInWhenClause(System.Boolean)"/>.
+            </remarks>
+        </member>
+        <member name="M:Yarn.Compiler.IndentAwareLexer.SetInWhenClause(System.Boolean)">
+            <summary>
+            Sets a value indicating whether the lexer is currently lexing an
+            expression that's part of a 'when' clause.
+            </summary>
+            <param name="val">The value to set.</param>
+            <remarks>
+            This value can be accessed by calling <see cref="M:Yarn.Compiler.IndentAwareLexer.IsInWhenClause"/>.
+            </remarks>
         </member>
         <member name="F:Yarn.Compiler.IndentAwareLexer.pendingTokens">
             <summary>
@@ -5079,16 +5161,6 @@
             </summary>
             <param name="lineStatement"></param>
             <param name="onceVariable"></param>
-        </member>
-        <member name="M:Yarn.Compiler.CodeGenerationVisitor.GetValueCountInExpression(Yarn.Compiler.YarnSpinnerParser.ExpressionContext)">
-            <summary>
-            Gets the total number of values - functions calls, variables, and
-            constant values - present in an expression and its sub-expressions.
-            </summary>
-            <remarks>Function call arguments and their sub-expressions are not
-            included in the count.</remarks>
-            <param name="context">An expression.</param>
-            <returns>The total number of values in the expression.</returns>
         </member>
         <member name="M:Yarn.Compiler.CodeGenerationVisitor.GenerateCodeForOperation(Yarn.Operator,Antlr4.Runtime.IToken,Yarn.IType,Antlr4.Runtime.ParserRuleContext[])">
             <summary>
