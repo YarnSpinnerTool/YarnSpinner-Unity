@@ -1,0 +1,40 @@
+﻿title: NodeGroups
+when: $nodeGroupCondition1
+---
+Candidate A
+===
+title: NodeGroups
+when: $nodeGroupCondition1
+---
+Candidate B
+===
+title: NodeGroups
+when: $nodeGroupCondition2
+---
+Candidate C
+===
+title: NodeGroups
+when: $nodeGroupCondition2
+---
+Candidate D
+===
+title: NodeGroups
+when: $nodeGroupCondition1 && $nodeGroupCondition2
+---
+Candidate E
+===
+title: NodeGroups
+when: $nodeGroupCondition1 && $nodeGroupCondition2
+---
+Candidate F
+===
+title: NodeGroups
+when: always
+---
+Candidate G
+===
+title: NodeGroups
+when: false
+---
+Candidate G
+===
