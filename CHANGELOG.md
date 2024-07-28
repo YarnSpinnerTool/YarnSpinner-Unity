@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Added onOptionSelected event to DialogueRunner which is raised once a dialogue view selected an option.
+
 ### Changed
 
 - Fixed an issue where, on Windows, projects would fail to automatically update when a file that belonged to them was created or edited.

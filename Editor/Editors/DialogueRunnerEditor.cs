@@ -33,6 +33,7 @@ namespace Yarn.Unity.Editor
         private SerializedProperty onDialogueStartProperty;
         private SerializedProperty onDialogueCompleteProperty;
         private SerializedProperty onCommandProperty;
+        private SerializedProperty onOptionSelectedProperty;
 
         private void OnEnable()
         {
@@ -49,6 +50,7 @@ namespace Yarn.Unity.Editor
             onDialogueStartProperty = serializedObject.FindProperty(nameof(DialogueRunner.onDialogueStart));
             onDialogueCompleteProperty = serializedObject.FindProperty(nameof(DialogueRunner.onDialogueComplete));
             onCommandProperty = serializedObject.FindProperty(nameof(DialogueRunner.onCommand));
+            onOptionSelectedProperty = serializedObject.FindProperty(nameof(DialogueRunner.onOptionSelected));
         }
 
         public override void OnInspectorGUI()
@@ -136,6 +138,7 @@ namespace Yarn.Unity.Editor
                 EditorGUILayout.PropertyField(onDialogueStartProperty);
                 EditorGUILayout.PropertyField(onDialogueCompleteProperty);
                 EditorGUILayout.PropertyField(onCommandProperty);
+                EditorGUILayout.PropertyField(onOptionSelectedProperty);
             }
 
             EditorGUILayout.EndFoldoutHeaderGroup();

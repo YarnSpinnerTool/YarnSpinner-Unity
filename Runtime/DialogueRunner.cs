@@ -101,6 +101,17 @@ namespace Yarn.Unity
         public class StringUnityEvent : UnityEvent<string> { }
 
         /// <summary>
+        /// A type of <see cref="UnityEvent"/> that takes a single integer
+        /// parameter.
+        /// </summary>
+        /// <remarks>
+        /// A concrete subclass of <see cref="UnityEvent"/> is needed in
+        /// order for Unity to serialise the type correctly.
+        /// </remarks>
+        [Serializable]
+        public class IntUnityEvent : UnityEvent<int> { }
+
+        /// <summary>
         /// A Unity event that is called when a node starts running.
         /// </summary>
         /// <remarks>
@@ -159,6 +170,15 @@ namespace Yarn.Unity
         /// <seealso cref="AddCommandHandler(string, CommandHandler)"/>
         /// <seealso cref="YarnCommandAttribute"/>
         public StringUnityEvent onCommand;
+
+        /// <summary>
+        /// A <see cref="IntUnityEvent"/> that is called when an option is selected.
+        /// </summary>
+        /// <remarks>
+        /// This event receives as a parameter the index of the option that
+        /// was selected.
+        /// </remarks>
+        public IntUnityEvent onOptionSelected;
 
         /// <summary>
         /// Gets the name of the current node that is being run.
@@ -1022,6 +1042,9 @@ namespace Yarn.Unity
             // Mark that this is the currently selected option in the
             // Dialogue
             Dialogue.SetSelectedOption(optionIndex);
+
+            // Notify listeners that an option was selected
+            onOptionSelected.Invoke(optionIndex);
 
             if (runSelectedOptionAsLine)
             {
