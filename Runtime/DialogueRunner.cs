@@ -1039,12 +1039,12 @@ namespace Yarn.Unity
                 throw new InvalidOperationException("Selecting an option on the same frame that options are provided is not allowed. Wait at least one frame before selecting an option.");
             }
             
+            // Notify listeners that an option was selected
+            onOptionSelected.Invoke(optionIndex);
+
             // Mark that this is the currently selected option in the
             // Dialogue
             Dialogue.SetSelectedOption(optionIndex);
-
-            // Notify listeners that an option was selected
-            onOptionSelected.Invoke(optionIndex);
 
             if (runSelectedOptionAsLine)
             {
