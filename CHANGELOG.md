@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Added DismissOptions method to DialogueViewBase
+  - Inheriting classes can implement this method to respond to option selections from other Dialogue Views
+
 ### Changed
 
 - Fixed an issue where, on Windows, projects would fail to automatically update when a file that belonged to them was created or edited.

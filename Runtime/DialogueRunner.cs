@@ -608,8 +608,6 @@ namespace Yarn.Unity
         /// </summary>
         private readonly HashSet<DialogueViewBase> ActiveDialogueViews = new HashSet<DialogueViewBase>();
 
-        Action<int> selectAction;
-
         /// <summary>
         /// The underlying object that executes Yarn instructions
         /// and provides lines, options and commands.
@@ -741,7 +739,6 @@ namespace Yarn.Unity
                 PrepareForLinesHandler = PrepareForLines
             };
 
-            selectAction = SelectedOption;
             return dialogue;
         }
 
@@ -803,7 +800,7 @@ namespace Yarn.Unity
                         IsAvailable = options.Options[i].IsAvailable,
                     };
                 }
-                
+
                 // Don't allow selecting options on the same frame that we
                 // provide them
                 IsOptionSelectionAllowed = false;
@@ -812,7 +809,8 @@ namespace Yarn.Unity
                 {
                     if (dialogueView == null || dialogueView.isActiveAndEnabled == false) continue;
 
-                    dialogueView.RunOptions(optionSet, selectAction);
+                    dialogueView.RunOptions(optionSet,
+                        selectedOptionIndex => DialogueViewCompletedOptions(selectedOptionIndex, dialogueView));
                 }
 
                 IsOptionSelectionAllowed = true;
@@ -1015,10 +1013,6 @@ namespace Yarn.Unity
         /// Action{int})"/> is in the middle of being called.</exception>
         void SelectedOption(int optionIndex)
         {
-            if (IsOptionSelectionAllowed == false) {
-                throw new InvalidOperationException("Selecting an option on the same frame that options are provided is not allowed. Wait at least one frame before selecting an option.");
-            }
-            
             // Mark that this is the currently selected option in the
             // Dialogue
             Dialogue.SetSelectedOption(optionIndex);
@@ -1041,7 +1035,7 @@ namespace Yarn.Unity
             {
                 ContinueDialogue();
             }
-
+            
         }
 
         private static IEnumerator WaitForYieldInstruction(YieldInstruction yieldInstruction, Action onSuccessfulDispatch)
@@ -1085,6 +1079,16 @@ namespace Yarn.Unity
             {
                 DismissLineFromViews(dialogueViews);
             }
+        }
+
+        private void DialogueViewCompletedOptions(int selectedOptionIndex, DialogueViewBase dialogueView)
+        {
+            if (IsOptionSelectionAllowed == false)
+            {
+                throw new InvalidOperationException("Selecting an option on the same frame that options are provided is not allowed. Wait at least one frame before selecting an option.");
+            }
+
+            DismissOptionsFromViews(selectedOptionIndex, dialogueViews);
         }
 
         void ContinueDialogue(bool dontRestart = false)
@@ -1174,6 +1178,56 @@ namespace Yarn.Unity
                 // Then we're ready to continue to the next piece of
                 // content.
                 ContinueDialogue();
+            }
+        }
+
+        private void DismissOptionsFromViews(int selectedOptionIndex, IEnumerable<DialogueViewBase> dialogueViews)
+        {
+            ActiveDialogueViews.Clear();
+
+            foreach (var dialogueView in dialogueViews)
+            {
+                // Skip any dialogueView that is null or not enabled
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false)
+                {
+                    continue;
+                }
+
+                // we do this in two passes - first by adding each
+                // dialogueView into ActiveDialogueViews, then by asking
+                // them to dismiss the line - because calling
+                // view.DismissLine might immediately call its completion
+                // handler (which means that we'd be repeatedly returning
+                // to zero active dialogue views, which means
+                // DialogueViewCompletedDismissal will mark the line as
+                // entirely done)
+                ActiveDialogueViews.Add(dialogueView);
+            }
+
+            foreach (var dialogueView in dialogueViews)
+            {
+                if (dialogueView == null || dialogueView.isActiveAndEnabled == false)
+                {
+                    continue;
+                }
+
+                dialogueView.DismissOptions(selectedOptionIndex,
+                    () => DialogueViewCompletedOptionsDismissal(selectedOptionIndex, dialogueView));
+            }
+        }
+
+        private void DialogueViewCompletedOptionsDismissal(int optionIndex, DialogueViewBase dialogueView)
+        {
+            // A dialogue view just completed dismissing its options. Remove
+            // it from the set of active views.
+            ActiveDialogueViews.Remove(dialogueView);
+
+            // Have all of the views completed dismissal? 
+            if (ActiveDialogueViews.Count == 0)
+            {
+                // Then we're ready to continue to the next piece of
+                // content.
+                SelectedOption(optionIndex);
             }
         }
 #endregion
