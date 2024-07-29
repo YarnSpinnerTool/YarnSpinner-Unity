@@ -17,3 +17,4 @@ The following people have contributed to the development of Yarn Spinner. If you
 * 2023: Mitch Zais <https://github.com/Invertex>
 * 2023: Thomas Ingram (https://vertx.xyz)
 * 2023: Isaac Berman (https://github.com/bermanisaac)
+* 2024: Josh Guerrero (https://github.com/joshgrrro)
