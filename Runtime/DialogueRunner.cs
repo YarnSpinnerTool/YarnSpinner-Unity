@@ -599,6 +599,27 @@ namespace Yarn.Unity
             }
         }
 
+        /// <summary>
+        /// Sets the dialogue runner's Yarn Project.
+        /// </summary>
+        /// <remarks>
+        /// If the dialogue runner is currently running (that is, <see
+        /// cref="IsDialogueRunning"/> is <see langword="true"/>), an <see
+        /// cref="InvalidOperationException"/> is thrown.
+        /// </remarks>
+        /// <param name="project">The new <see cref="YarnProject"/> to be
+        /// used.</param>
+        /// <exception cref="InvalidOperationException">Thrown when attempting
+        /// to set a new project while a dialogue is currently
+        /// running.</exception>
+        public void SetProject(YarnProject project) {
+            if (this.IsDialogueRunning) {
+                // Can't change project if we're already running.
+                throw new InvalidOperationException("Can't set project, because dialogue is currently running.");
+            }
+            this.yarnProject = project;
+        }
+
         public void StartDialogue(string nodeName)
         {
             if (yarnProject == null) {
