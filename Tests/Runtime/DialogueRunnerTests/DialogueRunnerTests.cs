@@ -246,8 +246,14 @@ namespace Yarn.Unity.Tests
             testDefaults.Add("$string", "this is a string");
             testDefaults.Add("$bool", true);
             testDefaults.Add("$true", false);
+            testDefaults.Add("$nodeGroupCondition1", false);
+            testDefaults.Add("$nodeGroupCondition2", false);
 
-            CollectionAssert.AreEquivalent(yarnProject.InitialValues, testDefaults);
+            foreach (var testDefault in testDefaults) {
+                yarnProject.InitialValues.Should().ContainKey(testDefault.Key);
+                var value = yarnProject.InitialValues[testDefault.Key];
+                value.ToString().Should().BeEqualTo(testDefault.Value.ToString());
+            }
 
             yield return null;
         }
@@ -590,15 +596,15 @@ namespace Yarn.Unity.Tests
 
         [Test]
         public void DialogueRunner_CanQueryNodeGroupCandidates() {
-            runner.Dialogue.GetAvailableContentForNodeGroup("NodeGroups").Should().HaveCount(1);
+            runner.Dialogue.GetSaliencyOptionsForNodeGroup("NodeGroups").Where(c => c.FailingConditionValueCount == 0).Should().HaveCount(1);
 
             runner.VariableStorage.SetValue("$nodeGroupCondition1", true);
 
-            runner.Dialogue.GetAvailableContentForNodeGroup("NodeGroups").Should().HaveCount(3);
+            runner.Dialogue.GetSaliencyOptionsForNodeGroup("NodeGroups").Where(c => c.FailingConditionValueCount == 0).Should().HaveCount(3);
 
             runner.VariableStorage.SetValue("$nodeGroupCondition2", true);
 
-            runner.Dialogue.GetAvailableContentForNodeGroup("NodeGroups").Should().HaveCount(7);
+            runner.Dialogue.GetSaliencyOptionsForNodeGroup("NodeGroups").Where(c => c.FailingConditionValueCount == 0).Should().HaveCount(7);
         }
     }
 }
