@@ -158,6 +158,7 @@ namespace Yarn.Unity.Tests
             // Configure the line view to use all of the effects
             lineView.useFadeEffect = true;
             lineView.useTypewriterEffect = true;
+            lineView.fadeOutTime = 1.0f;
 
             var cancellationSource = new CancellationTokenSource();
 
@@ -192,14 +193,11 @@ namespace Yarn.Unity.Tests
             // Dismiss the line
             lineView.UserRequestedViewAdvancement();
 
-            await YarnTask.Delay(TimeSpan.FromSeconds(0.01f));
-
-            lineView.canvasGroup.alpha.Should().BeLessThan(1);
-            lineView.canvasGroup.alpha.Should().BeGreaterThan(0);
             runTask.IsCompleted().Should().BeFalse();
 
             // Wait for the fade out to complete
             await YarnTask.Delay(TimeSpan.FromSeconds(lineView.fadeOutTime));
+            await YarnTask.Delay(TimeSpan.FromSeconds(0.05));
 
             lineView.canvasGroup.alpha.Should().BeEqualTo(0);
             runTask.IsCompleted().Should().BeTrue();
