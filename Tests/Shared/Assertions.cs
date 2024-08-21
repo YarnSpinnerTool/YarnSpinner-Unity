@@ -328,7 +328,7 @@ namespace Yarn.Unity.Tests
             NullCheck(Subject, message);
             if (Subject.Count() != count)
             {
-                throw new AssertionException($"Expected collection to have count {count}", message);
+                throw new AssertionException($"Expected collection to have count {count}, but it had {Subject.Count()}", message);
             }
         }
 
@@ -416,6 +416,44 @@ namespace Yarn.Unity.Tests
                 }
             }
             throw new AssertionException("Expected collection to contain a matching value", message);
+        }
+
+        public void ContainItems(IEnumerable<KeyValuePair<TKey, TValue>> items, string? message = null)
+        {
+            ContainItems(items, null, message);
+        }
+
+        public void ContainItems(IEnumerable<KeyValuePair<TKey, TValue>> items, System.Func<TValue, TValue, bool>? comparer, string? message = null)
+        {
+            NullCheck(Subject, message);
+
+            var keyComparer = EqualityComparer<TKey>.Default;
+
+            if (comparer == null)
+            {
+                var valueComparer = EqualityComparer<TValue>.Default;
+                comparer = (a, b) =>
+                {
+                    return valueComparer.Equals(a, b);
+                };
+            }
+            foreach (var item in items)
+            {
+                var matchingElements = Subject.Where(kv => keyComparer.Equals(kv.Key, item.Key));
+                if (matchingElements.Any() == false)
+                {
+                    // No keys in subject matched
+                    throw new AssertionException($"Expected collection to have a value for \"{item.Key}\"", message);
+                }
+
+                var element = matchingElements.Single();
+
+                if (comparer(element.Value, item.Value) == false)
+                {
+                    // The value for this key didn't match
+                    throw new AssertionException($"Expected collection to have \"{item.Key}\" value \"{item.Value}\", not \"{element.Value}\" ", message);
+                }
+            }
         }
     }
 
