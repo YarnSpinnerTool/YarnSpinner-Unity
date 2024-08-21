@@ -24,7 +24,7 @@ using UnityEngine.Localization.Tables;
 
 namespace Yarn.Unity.Editor
 {
-    [ScriptedImporter(5, new[] { "yarnproject" }, 1000), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
+    [ScriptedImporter(6, new[] { "yarnproject" }, 1000), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
     [InitializeOnLoad]
     public class YarnProjectImporter : ScriptedImporter
     {

@@ -371,28 +371,6 @@
             input (for example, user-defined enum types.)
             </summary>
         </member>
-        <member name="T:Yarn.Compiler.SpecialHeaderNames">
-            <summary>
-            Contains header names and strings used by the compiler.
-            </summary>
-        </member>
-        <member name="F:Yarn.Compiler.SpecialHeaderNames.TitleHeader">
-            <summary>
-            The name of the header that indicates a node's title.
-            </summary>
-        </member>
-        <member name="F:Yarn.Compiler.SpecialHeaderNames.NodeGroupHeader">
-            <summary>
-            The name of the header that indicates which node group a node
-            belongs to.
-            </summary>
-        </member>
-        <member name="F:Yarn.Compiler.SpecialHeaderNames.TrackingVariableNameHeader">
-            <summary>
-            The name of the header that indicates the name of the tracking
-            variable for this node.
-            </summary>
-        </member>
         <member name="F:Yarn.Compiler.ContentIdentifierType.Line">
             <summary>
             The content identifier is a <c>#line:</c> tag.
@@ -576,6 +554,11 @@
             class.
             </summary>
         </member>
+        <member name="P:Yarn.Compiler.YarnSpinnerParser.NodeContext.SourceFileName">
+            <summary>
+            Gets the path to the file that this node was parsed from, if any.
+            </summary>
+        </member>
         <member name="P:Yarn.Compiler.YarnSpinnerParser.NodeContext.NodeTitle">
             <summary>
             Gets the title of this node, as specified in its '<c>title</c>'
@@ -609,7 +592,7 @@
             <returns>A collection of headers whose <see cref="F:Yarn.Compiler.YarnSpinnerParser.HeaderContext.header_key"/>
             is <paramref name="key"/>. </returns>
         </member>
-        <member name="M:Yarn.Compiler.YarnSpinnerParser.GetValueCountInExpression(Antlr4.Runtime.ParserRuleContext)">
+        <member name="M:Yarn.Compiler.YarnSpinnerParser.GetBooleanOperatorCountInExpression(Antlr4.Runtime.ParserRuleContext)">
             <summary>
             Gets the total number of boolean operations - ands, ors, nots, and
             xors - present in an expression and its sub-expressions.
@@ -629,7 +612,7 @@
         <member name="T:Yarn.Compiler.YarnSpinnerParser.When_headerContext">
             <inheritdoc/>
         </member>
-        <member name="P:Yarn.Compiler.YarnSpinnerParser.When_headerContext.ConditionCount">
+        <member name="P:Yarn.Compiler.YarnSpinnerParser.When_headerContext.ComplexityScore">
             <summary>
             Gets the complexity of this line's condition.
             </summary>
@@ -2113,6 +2096,34 @@
             </summary>
             <param name="context">The parse tree.</param>
         </member>
+        <member name="M:Yarn.Compiler.YarnSpinnerParserBaseListener.EnterStructured_command(Yarn.Compiler.YarnSpinnerParser.Structured_commandContext)">
+            <summary>
+            Enter a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.structured_command"/>.
+            <para>The default implementation does nothing.</para>
+            </summary>
+            <param name="context">The parse tree.</param>
+        </member>
+        <member name="M:Yarn.Compiler.YarnSpinnerParserBaseListener.ExitStructured_command(Yarn.Compiler.YarnSpinnerParser.Structured_commandContext)">
+            <summary>
+            Exit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.structured_command"/>.
+            <para>The default implementation does nothing.</para>
+            </summary>
+            <param name="context">The parse tree.</param>
+        </member>
+        <member name="M:Yarn.Compiler.YarnSpinnerParserBaseListener.EnterStructured_command_value(Yarn.Compiler.YarnSpinnerParser.Structured_command_valueContext)">
+            <summary>
+            Enter a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.structured_command_value"/>.
+            <para>The default implementation does nothing.</para>
+            </summary>
+            <param name="context">The parse tree.</param>
+        </member>
+        <member name="M:Yarn.Compiler.YarnSpinnerParserBaseListener.ExitStructured_command_value(Yarn.Compiler.YarnSpinnerParser.Structured_command_valueContext)">
+            <summary>
+            Exit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.structured_command_value"/>.
+            <para>The default implementation does nothing.</para>
+            </summary>
+            <param name="context">The parse tree.</param>
+        </member>
         <member name="M:Yarn.Compiler.YarnSpinnerParserBaseListener.EnterEveryRule(Antlr4.Runtime.ParserRuleContext)">
             <inheritdoc/>
             <remarks>The default implementation does nothing.</remarks>
@@ -2756,6 +2767,28 @@
         <member name="M:Yarn.Compiler.YarnSpinnerParserBaseVisitor`1.VisitOnce_alternate_clause(Yarn.Compiler.YarnSpinnerParser.Once_alternate_clauseContext)">
             <summary>
             Visit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.once_alternate_clause"/>.
+            <para>
+            The default implementation returns the result of calling <see cref="M:Antlr4.Runtime.Tree.AbstractParseTreeVisitor`1.VisitChildren(Antlr4.Runtime.Tree.IRuleNode)"/>
+            on <paramref name="context"/>.
+            </para>
+            </summary>
+            <param name="context">The parse tree.</param>
+            <return>The visitor result.</return>
+        </member>
+        <member name="M:Yarn.Compiler.YarnSpinnerParserBaseVisitor`1.VisitStructured_command(Yarn.Compiler.YarnSpinnerParser.Structured_commandContext)">
+            <summary>
+            Visit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.structured_command"/>.
+            <para>
+            The default implementation returns the result of calling <see cref="M:Antlr4.Runtime.Tree.AbstractParseTreeVisitor`1.VisitChildren(Antlr4.Runtime.Tree.IRuleNode)"/>
+            on <paramref name="context"/>.
+            </para>
+            </summary>
+            <param name="context">The parse tree.</param>
+            <return>The visitor result.</return>
+        </member>
+        <member name="M:Yarn.Compiler.YarnSpinnerParserBaseVisitor`1.VisitStructured_command_value(Yarn.Compiler.YarnSpinnerParser.Structured_command_valueContext)">
+            <summary>
+            Visit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.structured_command_value"/>.
             <para>
             The default implementation returns the result of calling <see cref="M:Antlr4.Runtime.Tree.AbstractParseTreeVisitor`1.VisitChildren(Antlr4.Runtime.Tree.IRuleNode)"/>
             on <paramref name="context"/>.
@@ -3482,6 +3515,30 @@
             </summary>
             <param name="context">The parse tree.</param>
         </member>
+        <member name="M:Yarn.Compiler.IYarnSpinnerParserListener.EnterStructured_command(Yarn.Compiler.YarnSpinnerParser.Structured_commandContext)">
+            <summary>
+            Enter a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.structured_command"/>.
+            </summary>
+            <param name="context">The parse tree.</param>
+        </member>
+        <member name="M:Yarn.Compiler.IYarnSpinnerParserListener.ExitStructured_command(Yarn.Compiler.YarnSpinnerParser.Structured_commandContext)">
+            <summary>
+            Exit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.structured_command"/>.
+            </summary>
+            <param name="context">The parse tree.</param>
+        </member>
+        <member name="M:Yarn.Compiler.IYarnSpinnerParserListener.EnterStructured_command_value(Yarn.Compiler.YarnSpinnerParser.Structured_command_valueContext)">
+            <summary>
+            Enter a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.structured_command_value"/>.
+            </summary>
+            <param name="context">The parse tree.</param>
+        </member>
+        <member name="M:Yarn.Compiler.IYarnSpinnerParserListener.ExitStructured_command_value(Yarn.Compiler.YarnSpinnerParser.Structured_command_valueContext)">
+            <summary>
+            Exit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.structured_command_value"/>.
+            </summary>
+            <param name="context">The parse tree.</param>
+        </member>
         <member name="T:Yarn.Compiler.IYarnSpinnerParserVisitor`1">
             <summary>
             This interface defines a complete generic visitor for a parse tree produced
@@ -3896,6 +3953,20 @@
             <param name="context">The parse tree.</param>
             <return>The visitor result.</return>
         </member>
+        <member name="M:Yarn.Compiler.IYarnSpinnerParserVisitor`1.VisitStructured_command(Yarn.Compiler.YarnSpinnerParser.Structured_commandContext)">
+            <summary>
+            Visit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.structured_command"/>.
+            </summary>
+            <param name="context">The parse tree.</param>
+            <return>The visitor result.</return>
+        </member>
+        <member name="M:Yarn.Compiler.IYarnSpinnerParserVisitor`1.VisitStructured_command_value(Yarn.Compiler.YarnSpinnerParser.Structured_command_valueContext)">
+            <summary>
+            Visit a parse tree produced by <see cref="M:Yarn.Compiler.YarnSpinnerParser.structured_command_value"/>.
+            </summary>
+            <param name="context">The parse tree.</param>
+            <return>The visitor result.</return>
+        </member>
         <member name="M:Yarn.Compiler.ICodeEmitter.Emit(Antlr4.Runtime.IToken,Yarn.Instruction)">
             <summary>
             Creates a new instruction, and appends it to the current node in the
@@ -4056,13 +4127,16 @@
             The message associated with the warning.
             </summary>
         </member>
-        <member name="M:Yarn.Compiler.NodeGroupCompiler.#ctor(System.String,System.Collections.Generic.IDictionary{System.String,Yarn.Compiler.Declaration},System.Collections.Generic.IEnumerable{Yarn.Compiler.YarnSpinnerParser.NodeContext})">
+        <member name="M:Yarn.Compiler.NodeGroupCompiler.#ctor(System.String,System.Collections.Generic.IDictionary{System.String,Yarn.Compiler.Declaration},System.Collections.Generic.IEnumerable{Yarn.Compiler.YarnSpinnerParser.NodeContext},System.Collections.Generic.List{Yarn.Node})">
             <summary>
             Initializes a new instance of the NodeGroupCompiler class.
             </summary>
-            <param name="nodeGroupName"></param>
-            <param name="variableDeclarations"></param>
-            <param name="nodes"></param>
+            <param name="nodeGroupName">The name of the node group to
+            compile.</param>
+            <param name="variableDeclarations">The collection of existing
+            variable declarations found during compilation.</param>
+            <param name="nodeContexts">The collection of node group parser
+            contexts that all belong to this node group.</param>
         </member>
         <member name="M:Yarn.Compiler.NodeGroupCompiler.Emit(Antlr4.Runtime.IToken,Yarn.Instruction)">
             <inheritdoc/>
@@ -4265,16 +4339,16 @@
             may be found.
             </summary>
         </member>
-        <member name="M:Yarn.Compiler.SmartVariableCompiler.Compile(Yarn.Compiler.Declaration,Yarn.Node@,Yarn.Compiler.NodeDebugInfo@)">
+        <member name="M:Yarn.Compiler.SmartVariableCompiler.Compile(Yarn.Compiler.Declaration)">
             <summary>
             Compiles a Declaration describing a smart variable, and produces a
             <see cref="T:Yarn.Node"/> and a <see cref="T:Yarn.Compiler.NodeDebugInfo"/>.
             </summary>
             <param name="decl">The Declaration to generate an implementation
             node for.</param>
-            <param name="node">The resulting implementation node.</param>
-            <param name="debugInfo">The debug info for <paramref
-            name="node"/>.</param>
+            <returns>A <see cref="T:Yarn.Compiler.NodeCompilationResult"/> that contains the
+            generated node for this smart variable and its debugger
+            information.</returns>
         </member>
         <member name="T:Yarn.Compiler.StringInfo">
             <summary>
@@ -4387,6 +4461,42 @@
             contains a line with this ID, <see langword="false"/>
             otherwise.</returns>
         </member>
+        <member name="T:Yarn.Compiler.StructuredCommandParser">
+            <summary>
+            Contains methods for parsing structured commands.
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.StructuredCommandParser.ParseResult">
+            <summary>
+            Represents the result of a parse operation containing both the
+            parsed context and diagnostics.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.StructuredCommandParser.ParseResult.context">
+            <summary>
+            The parsed structured command context.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.StructuredCommandParser.ParseResult.diagnostics">
+            <summary>
+            A collection of diagnostics produced during parsing.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.StructuredCommandParser.ParseResult.IsValid">
+            <summary>
+            Gets a value indicating whether the parse result is valid (that
+            is, it contains no parse errors.)
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.StructuredCommandParser.ParseStructuredCommand(System.String)">
+            <summary>
+            Parses the given source string into a structured command.
+            </summary>
+            <param name="source">The string containing the possible structured
+            command text to be parsed.</param>
+            <returns>A <see cref="T:Yarn.Compiler.StructuredCommandParser.ParseResult"/> object encapsulating the parsed
+            context and any diagnostics.</returns>
+        </member>
         <member name="T:Yarn.Compiler.TypeCheckerListener">
             <summary>
             <see cref="T:Yarn.Compiler.TypeCheckerListener"/> creates type constraints (subclasses
@@ -4396,15 +4506,6 @@
             the types of expressions and values in the source code (or to determine
             if there was a type error.)
             </summary>
-        </member>
-        <member name="F:Yarn.Compiler.TypeCheckerListener.NodeHeaderTitle">
-            <summary>
-            The special header key used to identify the name of a node.
-            </summary>
-            <remarks>
-            This value is used to help determine when <see
-            cref="F:Yarn.Compiler.TypeCheckerListener.currentNodeName"/> needs to change.
-            </remarks>
         </member>
         <member name="F:Yarn.Compiler.TypeCheckerListener.typeParameterCount">
             <summary>
@@ -4925,6 +5026,11 @@
             Gets the index of the first instruction of the node that this block is in.
             </summary>
         </member>
+        <member name="F:Yarn.Compiler.BasicBlock.Node">
+            <summary>
+            Gets the Node that this block was extracted from.
+            </summary>
+        </member>
         <member name="P:Yarn.Compiler.BasicBlock.Name">
             <summary>
             Gets a descriptive name for the block.
@@ -4935,6 +5041,18 @@
         </member>
         <member name="M:Yarn.Compiler.BasicBlock.ToString">
             <inheritdoc/>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.ToString(Yarn.Library,Yarn.Compiler.CompilationResult)">
+            <summary>
+            Gets a string containing the textual description of the instructions
+            in this <see cref="T:Yarn.Compiler.BasicBlock"/>.
+            </summary>
+            <param name="library">The <see cref="T:Yarn.Library"/> to use when
+            converting instructions to strings.</param>
+            <param name="compilationResult">The <see cref="T:Yarn.Compiler.CompilationResult"/>
+            that produced <see cref="F:Yarn.Compiler.BasicBlock.Node"/>.</param>
+            <returns>A string containing the text version of the
+            instructions.</returns>
         </member>
         <member name="P:Yarn.Compiler.BasicBlock.Ancestors">
             <summary>
@@ -4973,6 +5091,19 @@
             <exception cref="T:System.ArgumentNullException">Thrown when <paramref
             name="nodeName"/> is <see langword="null"/>.</exception>
         </member>
+        <member name="M:Yarn.Compiler.BasicBlock.AddDestination(Yarn.Compiler.BasicBlock,Yarn.Compiler.BasicBlock.Condition,System.String)">
+            <summary>
+            Adds a new destination to this block that points to a node, with a
+            option's line ID for context.
+            </summary>
+            <param name="descendant">The new descendant node.</param>
+            <param name="condition">The condition under which the node <paramref
+            name="descendant"/> will be run.</param>
+            <param name="lineID">The line ID of the option that must be selected
+            in order for <paramref name="descendant"/> to run.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown when <paramref
+            name="descendant"/> is <see langword="null"/>.</exception>
+        </member>
         <member name="T:Yarn.Compiler.BasicBlock.Destination">
             <summary>
             A destination represents a <see cref="T:Yarn.Compiler.BasicBlock"/> or node that may
@@ -4983,35 +5114,24 @@
             blocks and nodes.
             </remarks>
         </member>
-        <member name="T:Yarn.Compiler.BasicBlock.Destination.DestinationType">
-            <summary>
-            The type of a Destination.
-            </summary>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.Destination.Type">
-            <summary>
-            Gets the Destination's type - whether the destination is a
-            block, or a node.
-            </summary>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.Destination.NodeName">
-            <summary>
-            The name of the node that this destination refers to.
-            </summary>
-            <remarks>This value is only valid when <see cref="P:Yarn.Compiler.BasicBlock.Destination.Type"/> is
-            <see cref="F:Yarn.Compiler.BasicBlock.Destination.DestinationType.Node"/>.</remarks>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.Destination.Block">
-            <summary>
-            The block that this destination refers to.
-            </summary>
-            <remarks>This value is only valid when <see cref="P:Yarn.Compiler.BasicBlock.Destination.Type"/> is
-            <see cref="F:Yarn.Compiler.BasicBlock.Destination.DestinationType.Block"/>.</remarks>
-        </member>
         <member name="P:Yarn.Compiler.BasicBlock.Destination.Condition">
             <summary>
             The condition that causes this destination to be reached.
             </summary>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.NodeDestination.NodeName">
+            <summary>
+            The name of the node that this destination refers to.
+            </summary>
+            <remarks>This value is only valid when <see cref="T:System.Type"/> is
+            <see cref="!:DestinationType.Node"/>.</remarks>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.BlockDestination.Block">
+            <summary>
+            The block that this destination refers to.
+            </summary>
+            <remarks>This value is only valid when <see cref="T:System.Type"/> is
+            <see cref="!:DestinationType.Block"/>.</remarks>
         </member>
         <member name="P:Yarn.Compiler.BasicBlock.Descendants">
             <summary>
@@ -5159,8 +5279,11 @@
             Generates code that evaluates any conditions present on the line and
             places the result on the stack.
             </summary>
-            <param name="lineStatement"></param>
-            <param name="onceVariable"></param>
+            <param name="lineStatement">The line statement containing
+            potential condition information.</param>
+            <param name="onceVariable">An output parameter to store the name of
+            the relevant 'once' variable for this statement if present, or <see
+            langword="null"/> if not.</param>
         </member>
         <member name="M:Yarn.Compiler.CodeGenerationVisitor.GenerateCodeForOperation(Yarn.Operator,Antlr4.Runtime.IToken,Yarn.IType,Antlr4.Runtime.ParserRuleContext[])">
             <summary>
