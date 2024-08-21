@@ -167,7 +167,7 @@ namespace Yarn.Unity.Tests
 
             if (Comparer<TSubject>.Default.Compare(Subject, other) != -1)
             {
-                throw new AssertionException($"Expected {Subject} to be greater than {other}", message);
+                throw new AssertionException($"Expected {Subject} to be less than {other}", message);
             }
         }
 
