@@ -34,10 +34,14 @@ namespace Yarn.Unity
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async static YarnTask WaitUntilCanceled(System.Threading.CancellationToken token)
         {
+#if USE_UNITASK
+            await YarnTask.WaitUntilCanceled(token);
+#else
             while (token.IsCancellationRequested == false)
             {
                 await YarnTask.Yield();
             }
+#endif
         }
 
 #if !USE_UNITASK
