@@ -517,15 +517,13 @@ namespace Yarn.Unity
             }
 
             var dialogueSelectionTCS = new YarnOptionCompletionSource();
-            int pendingOptionViews = 0;
             int viewsNotReturningOption = 0;
 
             async YarnTask WaitForOptionsView(AsyncDialogueViewBase? view) {
                 if (view == null) {
                     return;
                 }
-                pendingOptionViews += 1;
-
+                
                 var result = await view.RunOptionsAsync(localisedOptions, optionCancellationSource.Token);
                 if (result != null) {
                     // We no longer need the other views, so tell them to stop
@@ -535,7 +533,7 @@ namespace Yarn.Unity
                 } else {
                     // Our view did not return an option. 
                     viewsNotReturningOption += 1;
-                    if (viewsNotReturningOption >= pendingOptionViews) {
+                    if (viewsNotReturningOption >= this.dialogueViews.Count) {
                         // No view returned an option, so it's unanimous. Set the result to 'null'.
                         dialogueSelectionTCS.TrySetResult(null);
                     }
