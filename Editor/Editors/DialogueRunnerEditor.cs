@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System;
 using System.Reflection;
 using Yarn.Unity.UnityLocalization;
+using Yarn.Unity.Attributes;
 
 namespace Yarn.Unity.Editor
 {
