@@ -253,8 +253,6 @@ namespace Yarn.Unity
                 // time for.
                 while (accumulator >= secondsPerLetter)
                 {
-                    text.maxVisibleCharacters += 1;
-
                     // ok so the change needs to be that if at any point we hit the pause position
                     // we instead stop worrying about letters
                     // and instead we do a normal wait for the necessary duration
@@ -271,6 +269,8 @@ namespace Yarn.Unity
                             accumulator = Time.deltaTime;
                         }
                     }
+
+                    text.maxVisibleCharacters += 1;
 
                     onCharacterTyped?.Invoke();
                     accumulator -= secondsPerLetter;
