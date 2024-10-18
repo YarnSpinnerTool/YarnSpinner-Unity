@@ -287,6 +287,12 @@ namespace Yarn.Unity
         /// <inheritdoc/>
         public override void InterruptLine(LocalizedLine dialogueLine, Action onInterruptLineFinished)
         {
+            if (this == null) {
+                // This line view has been destroyed, possibly as part of
+                // leaving play mode. Don't take any action.
+                return;
+            }
+
             currentLine = dialogueLine;
 
             // Cancel all coroutines that we're currently running. This will
