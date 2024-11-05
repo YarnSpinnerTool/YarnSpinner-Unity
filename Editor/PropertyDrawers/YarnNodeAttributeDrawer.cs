@@ -216,6 +216,12 @@ namespace Yarn.Unity
 
                         foreach (var name in project.Program.Nodes.Keys)
                         {
+                            if (name.StartsWith("$"))
+                            {
+                                // Skip smart variable nodes
+                                continue;
+                            }
+
                             menu.AddItem(new GUIContent(name), name == nodeName && !hasMixedNodeValues, () =>
                             {
                                 property.stringValue = name;
