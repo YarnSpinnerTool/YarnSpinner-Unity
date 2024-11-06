@@ -40,6 +40,22 @@ namespace System.Diagnostics.CodeAnalysis
 
 namespace Yarn.Unity
 {
+    public struct LineCancellationToken
+    {
+        public CancellationToken HardToken;
+        // this token will ALWAYS be a dependant token on the above
+        public CancellationToken SoftToken;
+
+        public bool IsCancellationRequested
+        {
+            get { return HardToken.IsCancellationRequested; }
+        }
+        public bool IsHurryUpRequested
+        {
+            get { return SoftToken.IsCancellationRequested; }
+        }
+    }
+
     [System.Serializable]
     public class UnityEventString : UnityEvent<string> { }
 
@@ -190,6 +206,7 @@ namespace Yarn.Unity
 
         private CancellationTokenSource? dialogueCancellationSource;
         private CancellationTokenSource? currentLineCancellationSource;
+        private CancellationTokenSource? currentLineHurryUpSource;
 
         internal ICommandDispatcher CommandDispatcher { get; private set; }
         
@@ -276,6 +293,8 @@ namespace Yarn.Unity
             // cleaning up the old cancellation token
             currentLineCancellationSource?.Dispose();
             currentLineCancellationSource = null;
+            currentLineHurryUpSource?.Dispose();
+            currentLineHurryUpSource = null;
 
             var pendingTasks = new HashSet<YarnTask>();
             foreach (var view in this.dialogueViews)
@@ -384,7 +403,7 @@ namespace Yarn.Unity
 
         private async YarnTask OnLineReceivedAsync(Line line)
         {
-            var localisedLine = await LineProvider.GetLocalizedLineAsync(line, this.Dialogue, dialogueCancellationSource?.Token ?? CancellationToken.None);
+            var localisedLine = await LineProvider.GetLocalizedLineAsync(line, dialogueCancellationSource?.Token ?? CancellationToken.None);
             
             if (localisedLine == LocalizedLine.InvalidLine)
             {
@@ -417,6 +436,7 @@ namespace Yarn.Unity
             // dialogue cancellation (if we have one). Dispose of the previous one,
             // if we have it.
             currentLineCancellationSource?.Dispose();
+            currentLineHurryUpSource?.Dispose();
 
             if (dialogueCancellationSource != null)
             {
@@ -426,6 +446,14 @@ namespace Yarn.Unity
             {
                 currentLineCancellationSource = new CancellationTokenSource();
             }
+
+            // now we make a new dependant hurry up cancellation token
+            currentLineHurryUpSource = CancellationTokenSource.CreateLinkedTokenSource(currentLineCancellationSource.Token);
+            var metaToken = new LineCancellationToken
+            {
+                HardToken = currentLineCancellationSource.Token,
+                SoftToken = currentLineHurryUpSource.Token,
+            };
 
             var pendingTasks = new HashSet<YarnTask>();
 
@@ -447,8 +475,8 @@ namespace Yarn.Unity
                 // Tell all of our views to run this line, and give them a
                 // cancellation token they can use to interrupt the line if needed.
 
-                async YarnTask RunLineAndInvokeCompletion(AsyncDialogueViewBase view, LocalizedLine line, CancellationToken token) {
-
+                async YarnTask RunLineAndInvokeCompletion(AsyncDialogueViewBase view, LocalizedLine line, LineCancellationToken token)
+                {
                     try
                     {
                         // Run the line and wait for it to finish
@@ -458,13 +486,14 @@ namespace Yarn.Unity
                     {
                         Debug.LogException(e, view);
                     }
-                    if (view.EndLineWhenViewFinishes) {
+                    if (view.EndLineWhenViewFinishes)
+                    {
                         // When this view finishes, we end the entire line.
                         currentLineCancellationSource.Cancel();
                     }
                 }
 
-                YarnTask task = RunLineAndInvokeCompletion(view, localisedLine, currentLineCancellationSource.Token);
+                YarnTask task = RunLineAndInvokeCompletion(view, localisedLine, metaToken);
                 
                 pendingTasks.Add(task);
             }
@@ -474,6 +503,8 @@ namespace Yarn.Unity
 
             currentLineCancellationSource.Dispose();
             currentLineCancellationSource = null;
+            currentLineHurryUpSource.Dispose();
+            currentLineHurryUpSource = null;
         }
 
         private void OnOptionsReceived(OptionSet options)
@@ -501,7 +532,7 @@ namespace Yarn.Unity
             for (int i = 0; i < options.Options.Length; i++)
             {
                 var opt = options.Options[i];
-                LocalizedLine localizedLine = await LineProvider.GetLocalizedLineAsync(opt.Line, this.Dialogue, optionCancellationSource.Token);
+                LocalizedLine localizedLine = await LineProvider.GetLocalizedLineAsync(opt.Line, optionCancellationSource.Token);
 
                 if (localizedLine == LocalizedLine.InvalidLine) {
                     Debug.LogError($"Failed to get a localised line for line {opt.Line.ID} (option {i + 1})!");
@@ -517,26 +548,20 @@ namespace Yarn.Unity
             }
 
             var dialogueSelectionTCS = new YarnOptionCompletionSource();
-            int viewsNotReturningOption = 0;
 
-            async YarnTask WaitForOptionsView(AsyncDialogueViewBase? view) {
-                if (view == null) {
+            async YarnTask WaitForOptionsView(AsyncDialogueViewBase? view)
+            {
+                if (view == null)
+                {
                     return;
                 }
-                
                 var result = await view.RunOptionsAsync(localisedOptions, optionCancellationSource.Token);
-                if (result != null) {
+                if (result != null)
+                {
                     // We no longer need the other views, so tell them to stop
                     // by cancelling the option selection.
                     optionCancellationSource.Cancel();
                     dialogueSelectionTCS.TrySetResult(result);
-                } else {
-                    // Our view did not return an option. 
-                    viewsNotReturningOption += 1;
-                    if (viewsNotReturningOption >= this.dialogueViews.Count) {
-                        // No view returned an option, so it's unanimous. Set the result to 'null'.
-                        dialogueSelectionTCS.TrySetResult(null);
-                    }
                 }
             }
             
@@ -545,12 +570,19 @@ namespace Yarn.Unity
             {
                 pendingTasks.Add(WaitForOptionsView(view));
             }
+            await YarnTask.WhenAll(pendingTasks);
 
+            // at this point now every view has finished their handling of the options
+            // the first one to return a non-null value will be the one that is chosen option
+            // or if everyone returned null that's an error
             DialogueOption? selectedOption;
 
-            try {
+            try
+            {
                 selectedOption = await dialogueSelectionTCS.Task;
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 // If a view threw an exception while getting the option,
                 // propagate it
                 Debug.LogException(e);
@@ -664,6 +696,22 @@ namespace Yarn.Unity
             // a CancellationToken, will be able to respond to the request to
             // cancel.
             currentLineCancellationSource.Cancel();
+        }
+        public void HurryUpCurrentLine()
+        {
+            if (currentLineCancellationSource == null)
+            {
+                // We aren't running a line, so there's nothing to cancel.
+                return;
+            }
+            if (currentLineHurryUpSource == null)
+            {
+                // we are running a line but don't have a hurry up token
+                // is this a bug..?
+                return;
+            }
+
+            currentLineHurryUpSource.Cancel();
         }
     }
 }

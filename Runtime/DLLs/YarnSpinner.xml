@@ -4,44 +4,6 @@
         <name>YarnSpinner</name>
     </assembly>
     <members>
-        <member name="T:Yarn.Utility.CRC32">
-            <summary>
-            Provides a method for generating CRC32 hashes of strings.
-            </summary>
-        </member>
-        <member name="M:Yarn.Utility.CRC32.GetChecksum(System.Byte[])">
-            <summary>
-            Computes a CRC32 checksum from the given bytes.
-            </summary>
-            <param name="bytes">The bytes to generate a checksum
-            for.</param>
-            <returns>A CRC32 checksum derived from <paramref
-            name="bytes"/>.</returns>
-        </member>
-        <member name="M:Yarn.Utility.CRC32.GetChecksum(System.String)">
-            <summary>
-            Computes a CRC32 checksum from the given string.
-            </summary>
-            <remarks>
-            This method converts the string to a UTF-8 encoding, and then
-            computes a CRC32 checksum from those bytes.
-            </remarks>
-            <param name="s">The string to generate a checksum for.</param>
-            <returns>A CRC32 checksum derived from <paramref
-            name="s"/>.</returns>
-        </member>
-        <member name="M:Yarn.Utility.CRC32.GetChecksumString(System.String)">
-            <summary>
-            Gets the CRC-32 hash of <paramref name="s"/> as a string
-            containing 8 lowercase hexadecimal characters.
-            </summary>
-            <remarks>
-            This method converts the string to a UTF-8 encoding, and then
-            computes a CRC32 checksum from those bytes.
-            </remarks>
-            <param name="s">The string to get the checksum of.</param>
-            <returns>The string containing the checksum.</returns>
-        </member>
         <member name="T:Yarn.Line">
              <summary>
              A line of dialogue, sent from the <see cref="T:Yarn.Dialogue"/> to the game.
@@ -57,24 +19,14 @@
              <item>Use <see cref="M:Yarn.Dialogue.ExpandSubstitutions(System.String,System.Collections.Generic.IList{System.String})"/> to replace all
              substitutions in the user-facing text.</item>
             
-             <item>Use <see cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/> to parse all markup in the
+             <item>Use <see cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/> to parse all markup in the
              line.</item>
              </list>
             
-             <para>You typically do not create instances of this struct yourself.
-             They are created by the <see cref="T:Yarn.Dialogue"/> during program
-             execution.</para>
+             <para>You do not create instances of this struct yourself. They are
+             created by the <see cref="T:Yarn.Dialogue"/> during program execution.</para>
              </remarks>
              <seealso cref="P:Yarn.Dialogue.LineHandler"/>
-        </member>
-        <member name="M:Yarn.Line.#ctor(System.String,System.String[])">
-            <summary>
-            Initialises a new instance of the <see cref="T:Yarn.Line"/> struct.
-            </summary>
-            <param name="stringID">The unique line ID for this content.</param>
-            <param name="substitutions">The list of values that should be
-            substituted into the final line.
-            </param>
         </member>
         <member name="F:Yarn.Line.ID">
             <summary>
@@ -83,8 +35,8 @@
         </member>
         <member name="F:Yarn.Line.Substitutions">
             <summary>
-            The values that should be inserted into the user-facing text before
-            delivery.
+            The values that should be inserted into the user-facing text
+            before delivery.
             </summary>
         </member>
         <member name="T:Yarn.OptionSet">
@@ -93,7 +45,7 @@
             cref="T:Yarn.Dialogue"/> to the game.
             </summary>
             <remarks>
-            You typically do not create instances of this struct yourself. They are
+            You do not create instances of this struct yourself. They are
             created by the <see cref="T:Yarn.Dialogue"/> during program execution.
             </remarks>
             <seealso cref="P:Yarn.Dialogue.OptionsHandler"/>
@@ -124,7 +76,7 @@
             cref="M:Yarn.Dialogue.SetSelectedOption(System.Int32)"/>.
             </remarks>
         </member>
-        <member name="P:Yarn.OptionSet.Option.DestinationInstruction">
+        <member name="P:Yarn.OptionSet.Option.DestinationNode">
             <summary>
             Gets the name of the node that will be run if this option
             is selected.
@@ -188,83 +140,9 @@
             </remarks>
             <param name="message">The text that should be logged.</param>
         </member>
-        <member name="T:Yarn.IMarkupParser">
-            <summary>
-            Contains methods for parsing raw text into a <see
-            cref="T:Yarn.Markup.MarkupParseResult"/>.
-            </summary>
-        </member>
-        <member name="M:Yarn.IMarkupParser.ParseMarkup(System.String,System.String)">
-            <summary>
-            Parses a string into markup, given a locale.
-            </summary>
-            <param name="rawText">The text to parse.</param>
-            <param name="localeCode">The locale to use when parsing the text.</param>
-            <returns></returns>
-        </member>
-        <member name="T:Yarn.VariableKind">
-            <summary>
-            Represents different kinds of variables that can be fetched from a <see
-            cref="T:Yarn.Dialogue"/> using <see cref="M:Yarn.IVariableAccess.TryGetValue``1(System.String,``0@)"/>.
-            </summary>
-        </member>
-        <member name="F:Yarn.VariableKind.Unknown">
-            <summary>
-            The kind of the variable cannot be determined. It may not be known
-            to the system.
-            </summary>
-        </member>
-        <member name="F:Yarn.VariableKind.Stored">
-            <summary>
-            The variable's value is stored in memory, and may be persisted to
-            disk.
-            </summary>
-        </member>
-        <member name="F:Yarn.VariableKind.Smart">
-            <summary>
-            The variable's value is computed at run-time, and is not persisted
-            to disk. 
-            </summary>
-        </member>
-        <member name="T:Yarn.IVariableAccess">
-            <summary>Provides a mechanism for retrieving values.</summary>
-        </member>
-        <member name="M:Yarn.IVariableAccess.TryGetValue``1(System.String,``0@)">
-            <summary>
-            Given a variable name, attempts to fetch a value for the variable,
-            either from storage, initial values found in <see cref="P:Yarn.IVariableAccess.Program"/>,
-            or by evaluating a smart variable found in <see cref="P:Yarn.IVariableAccess.Program"/>.
-            </summary>
-            <typeparam name="T">The type of the value to return. The fetched
-            value will be converted to this type, if possible.</typeparam>
-            <param name="variableName">The name of the variable.</param>
-            <param name="result">If this method returns <see langword="true"/>,
-            this parameter will contain the fetched value.</param>
-            <returns><see langword="true"/> if a value could be fetched; <see
-            langword="false"/> otherwise.</returns>
-        </member>
-        <member name="M:Yarn.IVariableAccess.GetVariableKind(System.String)">
-            <summary>
-            Gets the kind of variable named <paramref name="name"/>.
-            </summary>
-            <param name="name">The name of the variable.</param>
-            <returns>A <see cref="T:Yarn.VariableKind"/> enum representing the kind of
-            the variable named <paramref name="name"/>.</returns>
-        </member>
-        <member name="P:Yarn.IVariableAccess.Program">
-            <summary>
-            Gets or sets the Yarn <see cref="P:Yarn.IVariableAccess.Program"/> that stores information
-            about the initial values of variables, and is able to produce values
-            for smart variables.
-            </summary>
-        </member>
-        <member name="P:Yarn.IVariableAccess.SmartVariableEvaluator">
-            <summary>
-            Gets or sets the object to use when evaluating smart variables.
-            </summary>
-        </member>
         <member name="T:Yarn.IVariableStorage">
-            <summary>Provides a mechanism for storing values.</summary>
+            <summary>Provides a mechanism for storing and retrieving instances
+            of the <see cref="T:Yarn.Value"/> class.</summary>
         </member>
         <member name="M:Yarn.IVariableStorage.SetValue(System.String,System.String)">
             <summary>
@@ -290,6 +168,23 @@
             variable.</param>
             <param name="boolValue">The boolean value to store.</param>
         </member>
+        <member name="M:Yarn.IVariableStorage.TryGetValue``1(System.String,``0@)">
+            <summary>
+            Retrieves a value of type <typeparamref name="T"/> by name.
+            </summary>
+            <typeparam name="T">The type of the variable to
+            retrieve.</typeparam>
+            <param name="variableName">The name of the variable to retrieve the
+            value of.</param>
+            <param name="result">On return, if this method returned true,
+            contains the retrieved value. If this method returned false,
+            contains the default value of <typeparamref name="T"/> (for example,
+            <c>0</c> for <see cref="T:System.Single"/> values, <see langword="null"/> for
+            strings, and so on.)</param>
+            <returns><see langword="true"/> if a value named <paramref
+            name="variableName"/> of type <typeparamref name="T"/> was
+            retrieved; <see langword="false"/> otherwise.</returns>
+        </member>
         <member name="M:Yarn.IVariableStorage.Clear">
             <summary>
             Removes all variables from storage.
@@ -301,10 +196,7 @@
             that keeps all variables in memory.
             </summary>
         </member>
-        <member name="P:Yarn.MemoryVariableStore.Program">
-            <inheritdoc/>
-        </member>
-        <member name="P:Yarn.MemoryVariableStore.SmartVariableEvaluator">
+        <member name="M:Yarn.MemoryVariableStore.TryGetValue``1(System.String,``0@)">
             <inheritdoc/>
         </member>
         <member name="M:Yarn.MemoryVariableStore.Clear">
@@ -461,6 +353,22 @@
             a line is ready to be shown to the user.
             </summary>
         </member>
+        <member name="P:Yarn.Dialogue.LanguageCode">
+            <summary>
+            Gets or sets the <see cref="T:Yarn.Dialogue"/>'s locale, as an IETF BCP 47
+            code.
+            </summary>
+            <remarks>
+            <para>
+            This code is used to determine how the <c>plural</c> and <c>ordinal</c>
+            markers determine the plural class of numbers.
+            </para>
+            <para>
+            For example, the code "en-US" represents the English language as
+            used in the United States.
+            </para>
+            </remarks>
+        </member>
         <member name="P:Yarn.Dialogue.OptionsHandler">
             <summary>
             Gets or sets the <see cref="T:Yarn.OptionsHandler"/> that is called
@@ -505,21 +413,6 @@
             </summary>
             <value></value>
         </member>
-        <member name="F:Yarn.Dialogue.vm">
-            <summary>
-            The virtual machine to use when running dialogue.
-            </summary>
-        </member>
-        <member name="F:Yarn.Dialogue.smartVariableVM">
-            <summary>
-            The virtual machine to use when evaluating smart variables.
-            </summary>
-            <remarks>
-            This is kept separate from the main VM in order to prevent
-            evaluating smart variables from modifying the evaluation state of
-            dialogue.
-            </remarks>
-        </member>
         <member name="P:Yarn.Dialogue.Library">
             <summary>
             Gets the <see cref="T:Yarn.Library"/> that this Dialogue uses to
@@ -528,17 +421,6 @@
             <remarks>
             When the Dialogue is constructed, the Library is initialized with
             the built-in operators like <c>+</c>, <c>-</c>, and so on.
-            </remarks>
-        </member>
-        <member name="P:Yarn.Dialogue.ContentSaliencyStrategy">
-            <summary>
-            Gets or sets the content saliency strategy used by this <see cref="T:Yarn.Dialogue"/>.
-            </summary>
-            <remarks>
-            A content saliency strategy is a class that implements <see
-            cref="T:Yarn.Saliency.IContentSaliencyStrategy"/> and selects the most
-            appropriate content in a line group, or any other situation where
-            content saliency is relevant.
             </remarks>
         </member>
         <member name="M:Yarn.Dialogue.#ctor(Yarn.IVariableStorage)">
@@ -554,9 +436,22 @@
             Loads all nodes from the provided <see cref="T:Yarn.Program"/>.
             </summary>
             <remarks>
-            This method replaces any existing nodes have been loaded.
+            This method replaces any existing nodes have been loaded. If you
+            want to load nodes from an _additional_ Program, use the <see
+            cref="M:Yarn.Dialogue.AddProgram(Yarn.Program)"/> method.
             </remarks>
             <param name="program">The <see cref="T:Yarn.Program"/> to use.</param>
+        </member>
+        <member name="M:Yarn.Dialogue.AddProgram(Yarn.Program)">
+            <summary>
+            Loads the nodes from the specified <see cref="T:Yarn.Program"/>, and
+            adds them to the nodes already loaded.
+            </summary>
+            <param name="program">The additional program to load.</param>
+            <remarks>
+            If <see cref="P:Yarn.Dialogue.Program"/> is <see langword="null"/>, this method has
+            the effect as calling <see cref="M:Yarn.Dialogue.SetProgram(Yarn.Program)"/>.
+            </remarks>
         </member>
         <member name="M:Yarn.Dialogue.LoadProgram(System.String)">
             <summary>
@@ -581,7 +476,7 @@
             </summary>
             <param name="startNode">The name of the node that will be run. The
             node have been loaded by calling <see cref="M:Yarn.Dialogue.SetProgram(Yarn.Program)"/>
-            or <see cref="!:AddProgram(Program)"/>.</param>
+            or <see cref="M:Yarn.Dialogue.AddProgram(Yarn.Program)"/>.</param>
             <remarks>
             <para>
             After this method is called, you call <see cref="M:Yarn.Dialogue.Continue"/> to
@@ -715,6 +610,14 @@
             Unloads all nodes from the Dialogue.
             </summary>
         </member>
+        <member name="M:Yarn.Dialogue.GetByteCode">
+            <summary>
+            Returns a textual version of the current program's bytecode.
+            </summary>
+            <remarks>This can be useful for diagnostic purposes.</remarks>
+            <returns>The bytecode of <see cref="P:Yarn.Dialogue.Program"/>, as a
+            string.</returns>
+        </member>
         <member name="M:Yarn.Dialogue.NodeExists(System.String)">
             <summary>
             Gets a value indicating whether a specified node exists in the
@@ -731,7 +634,7 @@
             </summary>
             <param name="context">The Context that performs the analysis</param>
         </member>
-        <member name="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)">
+        <member name="M:Yarn.Dialogue.ParseMarkup(System.String)">
             <summary>
             Parses a line of text, and produces a <see
             cref="T:Yarn.Markup.MarkupParseResult"/> containing the results.
@@ -741,7 +644,7 @@
             cref="F:Yarn.Markup.MarkupParseResult.Text"/> will have any <c>select</c>,
             <c>plural</c> or <c>ordinal</c> markers replaced with the appropriate
             text, following this <see cref="T:Yarn.Dialogue"/>'s <see
-            cref="!:LanguageCode"/>.
+            cref="P:Yarn.Dialogue.LanguageCode"/>.
             </remarks>
             <param name="line">The line of text to parse.</param>
             <returns>The results of parsing the markup.</returns>
@@ -769,7 +672,7 @@
             <c>\</c>.
             </summary>
         </member>
-        <member name="M:Yarn.Dialogue.Yarn#Markup#IAttributeMarkerProcessor#ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker,System.String)">
+        <member name="M:Yarn.Dialogue.Yarn#Markup#IAttributeMarkerProcessor#ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker)">
             <summary>Returns the text that should be used to replace the
             contents of <paramref name="marker"/>.</summary>
             <param name="marker">The marker to generate replacement text
@@ -780,55 +683,6 @@
             cref="T:System.ArgumentException">Thrown when the string contains a
             <c>plural</c> or <c>ordinal</c> marker, but the specified value cannot be
             parsed as a number.</throws>
-        </member>
-        <member name="M:Yarn.Dialogue.TryGetSmartVariable``1(System.String,``0@)">
-            <inheritdoc />
-        </member>
-        <member name="M:Yarn.Dialogue.GetSaliencyOptionsForNodeGroup(System.String)">
-            <summary>
-            Queries the <see cref="T:Yarn.Dialogue"/> for what content could possibly
-            run if the node group nodeGroup was run.
-            </summary>
-            <remarks>
-            <para>This method evaluates all nodes in the given node group, and
-            returns a <see cref="T:Yarn.Saliency.ContentSaliencyOption"/> object for
-            each node. This object contains the current number of passing and
-            failing 'when' clauses on the node, as well as the complexity score
-            for that node. This is the same information that's passed to a <see
-            cref="T:Yarn.Saliency.IContentSaliencyStrategy"/> object's <see
-            cref="M:Yarn.Saliency.IContentSaliencyStrategy.QueryBestContent(System.Collections.Generic.IEnumerable{Yarn.Saliency.ContentSaliencyOption})"/>
-            method. This method is read-only, and calling it will not modify any
-            variable state.
-            </para>
-            <para>Note that this method does not filter its output, and may
-            include content options whose <see
-            cref="P:Yarn.Saliency.ContentSaliencyOption.FailingConditionValueCount"/>
-            is greater than zero. It's up to the caller of this function to
-            filter out these options if they're not wanted.</para> 
-            <para>
-            This method can be used to see if <em>any</em> content will appear
-            when a given node group is run. If the collection returned by this
-            method is empty, then running this node group will not result in any
-            content. This can be used, for example, to decide whether to show a
-            'character can be spoken to' indicator. You can also examine the
-            individal <see cref="T:Yarn.Saliency.ContentSaliencyOption"/> objects to
-            see if any content is available that passes a filter, such as
-            whether content might appear that has a user-defined 'plot critical'
-            tag.
-            </para> 
-            </remarks>
-            <param name="nodeGroup">The name of the node group to get available
-            content for.</param>
-            <returns>A collection of <see
-            cref="T:Yarn.Saliency.ContentSaliencyOption"/> objects that may appear if
-            and when the node group <paramref name="nodeGroup"/> is run.
-            </returns>
-        </member>
-        <member name="F:Yarn.Dialogue.StandardLibrary.Random">
-            <summary>
-            The internal random number generator used by functions like
-            'random' and 'dice'.
-            </summary>
         </member>
         <member name="T:Yarn.DialogueException">
             <summary>
@@ -938,11 +792,11 @@
             this method does nothing.
             </remarks>
         </member>
-        <member name="M:Yarn.Library.RegisterMethods(Yarn.TypeBase)">
+        <member name="M:Yarn.Library.RegisterMethods(Yarn.IType)">
             <summary>
             Registers the methods found inside a type.
             </summary>
-            <param name="typeLiteral">The type to register methods from.</param>
+            <param name="type">The type to register methods from.</param>
         </member>
         <member name="M:Yarn.Library.GenerateUniqueVisitedVariableForNode(System.String)">
             <summary>
@@ -970,43 +824,21 @@
             <param name="nodeName">The name of the node whos line IDs you covet.</param>
             <returns>The line IDs of all lines and options inside the node, or null if <paramref name="nodeName"/> doesn't exist in the program.</returns>
         </member>
-        <member name="P:Yarn.Program.SmartVariableNodes">
+        <member name="M:Yarn.Program.Combine(Yarn.Program[])">
             <summary>
-            Gets the collection of nodes that contain the code for evaluating a
-            smart variable.
+            Creates a new Program by merging multiple Programs together.
             </summary>
-        </member>
-        <member name="M:Yarn.Program.TryGetInitialValue``1(System.String,``0@)">
-            <summary>
-            Attempts to fetch a value for a variable named <paramref
-            name="variableName"/> from this program's collection of initial
-            values.
-            </summary>
-            <typeparam name="T">The type of variable to retrieve.</typeparam>
-            <param name="variableName">The name of the variable to retrieve a
-            value for.</param>
-            <param name="result">On return, contains the value of the variable,
-            or the default value of <typeparamref name="T"/> if not known.
-            Depending on what <typeparamref name="T"/> is, this value may be
-            <see langword="null"/>.</param>
-            <returns><see langword="true"/> if an initial value for <paramref
-            name="variableName"/> was found; <see langword="false"/>
-            otherwise.</returns>
-            <exception cref="T:System.InvalidOperationException">Thrown the stored
-            initial value found for <paramref name="variableName"/> is not known
-            to this version of Yarn Spinner.</exception>
-            <exception cref="T:System.InvalidCastException">Thrown when the initial value
-            found for <paramref name="variableName"/> cannot be cast or
-            converted to <typeparamref name="T"/>.</exception>
-        </member>
-        <member name="M:Yarn.Program.GetVariableKind(System.String)">
-            <summary>
-            Gets a value indicating the kind of variable <paramref name="name"/>
-            represents.
-            </summary>
-            <param name="name">The name of a variable.</param>
-            <returns>The kind of variable that <paramref name="name"/>
-            represents.</returns>
+            <remarks>
+            The new program will contain every node from every input
+            program.
+            </remarks>
+            <param name="programs">The Programs to combine
+            together.</param>
+            <returns>The new, combined program.</returns>
+            <throws cref="T:System.ArgumentException">Thrown when no Programs are
+            provided as parameters.</throws>
+            <throws cref="T:System.InvalidOperationException">Thrown when more than
+            one Program contains a node of the same name.</throws>
         </member>
         <member name="F:Yarn.Program.NameFieldNumber">
             <summary>Field number for the "name" field.</summary>
@@ -1038,377 +870,148 @@
             <summary>
             An instruction in a Yarn Program.
             </summary>
-        </member>
-        <member name="F:Yarn.Instruction.JumpToFieldNumber">
-            <summary>Field number for the "jumpTo" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.JumpTo">
             <summary>
-            Jumps to a specified position in the current node.
+            A single Yarn instruction.
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.PeekAndJumpFieldNumber">
-            <summary>Field number for the "peekAndJump" field.</summary>
+        <member name="F:Yarn.Instruction.OpcodeFieldNumber">
+            <summary>Field number for the "opcode" field.</summary>
         </member>
-        <member name="P:Yarn.Instruction.PeekAndJump">
+        <member name="P:Yarn.Instruction.Opcode">
             <summary>
-            Peeks a number on the stack, and jumps to that position in the
-            current node.
+            The operation that this instruction will perform.
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.RunLineFieldNumber">
-            <summary>Field number for the "runLine" field.</summary>
+        <member name="F:Yarn.Instruction.OperandsFieldNumber">
+            <summary>Field number for the "operands" field.</summary>
         </member>
-        <member name="P:Yarn.Instruction.RunLine">
+        <member name="P:Yarn.Instruction.Operands">
             <summary>
-            Runs a line of dialogue.
+            The list of operands, if any, that this instruction uses.
             </summary>
-        </member>
-        <member name="F:Yarn.Instruction.RunCommandFieldNumber">
-            <summary>Field number for the "runCommand" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.RunCommand">
-            <summary>
-            Runs a command.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.AddOptionFieldNumber">
-            <summary>Field number for the "addOption" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.AddOption">
-            <summary>
-            Adds an option to the 'pending options' list.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.ShowOptionsFieldNumber">
-            <summary>Field number for the "showOptions" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.ShowOptions">
-            <summary>
-            Shows all options in the 'pending options' list, then clears the list.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.PushStringFieldNumber">
-            <summary>Field number for the "pushString" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.PushString">
-            <summary>
-            Pushes a string onto the stack.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.PushFloatFieldNumber">
-            <summary>Field number for the "pushFloat" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.PushFloat">
-            <summary>
-            Pushes a floating point number onto the stack.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.PushBoolFieldNumber">
-            <summary>Field number for the "pushBool" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.PushBool">
-            <summary>
-            Pushes a boolean onto the stack.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.JumpIfFalseFieldNumber">
-            <summary>Field number for the "jumpIfFalse" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.JumpIfFalse">
-            <summary>
-            Peeks a boolean on the stack, and if it's false, jumps to the
-            indicated position in the current node.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.PopFieldNumber">
-            <summary>Field number for the "pop" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Pop">
-            <summary>
-            Pops a value of any kind off the stack.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.CallFuncFieldNumber">
-            <summary>Field number for the "callFunc" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.CallFunc">
-            <summary>
-            Calls a named function.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.PushVariableFieldNumber">
-            <summary>Field number for the "pushVariable" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.PushVariable">
-            <summary>
-            Pushes the value of the named variable onto the stack.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.StoreVariableFieldNumber">
-            <summary>Field number for the "storeVariable" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.StoreVariable">
-            <summary>
-            Peeks a value of any kind on the stack, and stores it in the
-            indicated variable.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.StopFieldNumber">
-            <summary>Field number for the "stop" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Stop">
-            <summary>
-            Halts execution.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.RunNodeFieldNumber">
-            <summary>Field number for the "runNode" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.RunNode">
-            <summary>
-            Jumps to the start of a named node.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.PeekAndRunNodeFieldNumber">
-            <summary>Field number for the "peekAndRunNode" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.PeekAndRunNode">
-            <summary>
-            Peeks a string on the stack, and jumps to the start of that node.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.DetourToNodeFieldNumber">
-            <summary>Field number for the "detourToNode" field.</summary>
-        </member>
-        <member name="F:Yarn.Instruction.PeekAndDetourToNodeFieldNumber">
-            <summary>Field number for the "peekAndDetourToNode" field.</summary>
-        </member>
-        <member name="F:Yarn.Instruction.ReturnFieldNumber">
-            <summary>Field number for the "return" field.</summary>
-        </member>
-        <member name="F:Yarn.Instruction.AddSaliencyCandidateFieldNumber">
-            <summary>Field number for the "addSaliencyCandidate" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.AddSaliencyCandidate">
-            <summary>
-            Pops a boolean from the stack, and adds a saliency candidate to the
-            current list.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.AddSaliencyCandidateFromNodeFieldNumber">
-            <summary>Field number for the "addSaliencyCandidateFromNode" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.AddSaliencyCandidateFromNode">
-            <summary>
-            Add a saliency candidate to the current list, given a node name.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.SelectSaliencyCandidateFieldNumber">
-            <summary>Field number for the "selectSaliencyCandidate" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.SelectSaliencyCandidate">
-             <summary>
-             Attempt to select a single saliency candidate from the current list:
-             - if one is selected, pushes the destination of that candidate and
-               the value 'true'
-             - if none is selected, pushes the value 'false'
-            
-             In all circumstances, clears the saliency candidate list before
-             returning.
-             </summary>
-        </member>
-        <member name="T:Yarn.Instruction.InstructionTypeOneofCase">
-            <summary>Enum of possible cases for the "InstructionType" oneof.</summary>
         </member>
         <member name="T:Yarn.Instruction.Types">
             <summary>Container for nested types declared in the Instruction message type.</summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.PushStringInstruction.ValueFieldNumber">
-            <summary>Field number for the "value" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.PushStringInstruction.Value">
+        <member name="T:Yarn.Instruction.Types.OpCode">
             <summary>
-            The value to push.
+            The type of instruction that this is.
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.PushFloatInstruction.ValueFieldNumber">
-            <summary>Field number for the "value" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.PushFloatInstruction.Value">
+        <member name="F:Yarn.Instruction.Types.OpCode.JumpTo">
             <summary>
-            The value to push.
+            Jumps to a named position in the node.
+            opA = string: label name
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.PushBoolInstruction.ValueFieldNumber">
-            <summary>Field number for the "value" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.PushBoolInstruction.Value">
+        <member name="F:Yarn.Instruction.Types.OpCode.Jump">
             <summary>
-            The value to push.
+            Peeks a string from stack, and jumps to that named position in
+            the node. 
+            No operands.
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.JumpToInstruction.DestinationFieldNumber">
-            <summary>Field number for the "destination" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.JumpToInstruction.Destination">
+        <member name="F:Yarn.Instruction.Types.OpCode.RunLine">
             <summary>
-            The instruction number in the current node to jump to.
+            Delivers a string ID to the client.
+            opA = string: string ID
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.RunLineInstruction.LineIDFieldNumber">
-            <summary>Field number for the "lineID" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.RunLineInstruction.LineID">
+        <member name="F:Yarn.Instruction.Types.OpCode.RunCommand">
             <summary>
-            The ID of the localised content that should be shown for this line.
+            Delivers a command to the client.
+            opA = string: command text
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.RunLineInstruction.SubstitutionCountFieldNumber">
-            <summary>Field number for the "substitutionCount" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.RunLineInstruction.SubstitutionCount">
+        <member name="F:Yarn.Instruction.Types.OpCode.AddOption">
             <summary>
-            The number of substitutions present in this line that must be popped
-            off the stack.
+            Adds an entry to the option list (see ShowOptions).
+            - opA = string: string ID for option to add
+            - opB = string: destination to go to if this option is selected
+            - opC = number: number of expressions on the stack to insert
+              into the line
+            - opD = bool: whether the option has a condition on it (in which
+              case a value should be popped off the stack and used to signal
+              the game that the option should be not available)
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.RunCommandInstruction.CommandTextFieldNumber">
-            <summary>Field number for the "commandText" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.RunCommandInstruction.CommandText">
+        <member name="F:Yarn.Instruction.Types.OpCode.ShowOptions">
             <summary>
-            The text of the command to send to the client. 
+            Presents the current list of options to the client, then clears
+            the list. The most recently selected option will be on the top
+            of the stack when execution resumes.
+            No operands.
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.RunCommandInstruction.SubstitutionCountFieldNumber">
-            <summary>Field number for the "substitutionCount" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.RunCommandInstruction.SubstitutionCount">
+        <member name="F:Yarn.Instruction.Types.OpCode.PushString">
             <summary>
-            The number of substitutions present in this command that must be popped
-            off the stack.
+            Pushes a string onto the stack.
+            opA = string: the string to push to the stack.
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.AddOptionInstruction.LineIDFieldNumber">
-            <summary>Field number for the "lineID" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.AddOptionInstruction.LineID">
+        <member name="F:Yarn.Instruction.Types.OpCode.PushFloat">
             <summary>
-            The ID of the content that should be shown for this option.
+            Pushes a floating point number onto the stack.
+            opA = float: number to push to stack
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.AddOptionInstruction.DestinationFieldNumber">
-            <summary>Field number for the "destination" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.AddOptionInstruction.Destination">
+        <member name="F:Yarn.Instruction.Types.OpCode.PushBool">
             <summary>
-            The instruction number in the current node to jump to if this option
-            is selected.
+            Pushes a boolean onto the stack.
+            opA = bool: the bool to push to stack
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.AddOptionInstruction.SubstitutionCountFieldNumber">
-            <summary>Field number for the "substitutionCount" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.AddOptionInstruction.SubstitutionCount">
+        <member name="F:Yarn.Instruction.Types.OpCode.PushNull">
             <summary>
-            The number of substitutions present in this option that must be popped
-            off the stack.
+            Pushes a null value onto the stack.
+            No operands.
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.AddOptionInstruction.HasConditionFieldNumber">
-            <summary>Field number for the "hasCondition" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.AddOptionInstruction.HasCondition">
+        <member name="F:Yarn.Instruction.Types.OpCode.JumpIfFalse">
             <summary>
-            A value indicating whether this instruction has a line condition on
-            it, whose evaluated value must be popped off the stack.
+            Jumps to the named position in the the node, if the top of the
+            stack is not null, zero or false.
+            opA = string: label name 
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.JumpIfFalseInstruction.DestinationFieldNumber">
-            <summary>Field number for the "destination" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.JumpIfFalseInstruction.Destination">
+        <member name="F:Yarn.Instruction.Types.OpCode.Pop">
             <summary>
-            The instruction number in the current node to jump to.
+            Discards top of stack.
+            No operands.
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.CallFunctionInstruction.FunctionNameFieldNumber">
-            <summary>Field number for the "functionName" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.CallFunctionInstruction.FunctionName">
+        <member name="F:Yarn.Instruction.Types.OpCode.CallFunc">
             <summary>
-            The name of the function to call.
+            Calls a function in the client. Pops as many arguments as the
+            client indicates the function receives, and the result (if any)
+            is pushed to the stack.		
+            opA = string: name of the function
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.PushVariableInstruction.VariableNameFieldNumber">
-            <summary>Field number for the "variableName" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.PushVariableInstruction.VariableName">
+        <member name="F:Yarn.Instruction.Types.OpCode.PushVariable">
             <summary>
-            The name of the variable whose value should be pushed onto the stack.
+            Pushes the contents of a variable onto the stack.
+            opA = name of variable 
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.StoreVariableInstruction.VariableNameFieldNumber">
-            <summary>Field number for the "variableName" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.StoreVariableInstruction.VariableName">
+        <member name="F:Yarn.Instruction.Types.OpCode.StoreVariable">
             <summary>
-            The name of the variable whose value should be updated with the value
-            currently on top of the stack.
+            Stores the contents of the top of the stack in the named
+            variable. 
+            opA = name of variable
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.RunNodeInstruction.NodeNameFieldNumber">
-            <summary>Field number for the "nodeName" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.RunNodeInstruction.NodeName">
+        <member name="F:Yarn.Instruction.Types.OpCode.Stop">
             <summary>
-            The name of the node to begin running.
+            Stops execution of the program.
+            No operands.
             </summary>
         </member>
-        <member name="F:Yarn.Instruction.Types.DetourToNodeInstruction.NodeNameFieldNumber">
-            <summary>Field number for the "nodeName" field.</summary>
-        </member>
-        <member name="F:Yarn.Instruction.Types.AddSaliencyCandidateInstruction.ContentIDFieldNumber">
-            <summary>Field number for the "contentID" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.AddSaliencyCandidateInstruction.ContentID">
+        <member name="F:Yarn.Instruction.Types.OpCode.RunNode">
             <summary>
-            The unique ID for this piece of content, such as a line ID.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.Types.AddSaliencyCandidateInstruction.ComplexityScoreFieldNumber">
-            <summary>Field number for the "complexityScore" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.AddSaliencyCandidateInstruction.ComplexityScore">
-            <summary>
-            The complexity score of the candidate.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.Types.AddSaliencyCandidateInstruction.DestinationFieldNumber">
-            <summary>Field number for the "destination" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.AddSaliencyCandidateInstruction.Destination">
-            <summary>
-            The instruction number in the current node to jump to if this
-            candidate is selected.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.Types.AddSaliencyCandidateFromNodeInstruction.NodeNameFieldNumber">
-            <summary>Field number for the "nodeName" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.AddSaliencyCandidateFromNodeInstruction.NodeName">
-            <summary>
-            The name of the node to get saliency information from.
-            </summary>
-        </member>
-        <member name="F:Yarn.Instruction.Types.AddSaliencyCandidateFromNodeInstruction.DestinationFieldNumber">
-            <summary>Field number for the "destination" field.</summary>
-        </member>
-        <member name="P:Yarn.Instruction.Types.AddSaliencyCandidateFromNodeInstruction.Destination">
-            <summary>
-            The instruction number in the current node to jump to if this
-            candidate is selected.
+            Pops a string off the top of the stack, and runs the node with
+            that name.
+            No operands.
             </summary>
         </member>
         <member name="T:Yarn.Node">
@@ -1418,57 +1021,6 @@
             </summary>
             <summary>
             A collection of instructions
-            </summary>
-        </member>
-        <member name="P:Yarn.Node.Tags">
-            <summary>
-            Gets the collection of tags defined for this node, if any. If no
-            tags are defined, returns an empty collection.
-            </summary>
-        </member>
-        <member name="F:Yarn.Node.TitleHeader">
-            <summary>
-            The name of the header that indicates a node's title.
-            </summary>
-        </member>
-        <member name="F:Yarn.Node.NodeGroupHeader">
-            <summary>
-            The name of the header that indicates which node group a node
-            belongs to.
-            </summary>
-        </member>
-        <member name="P:Yarn.Node.TrackingVariableName">
-            <summary>
-            Gets the name of the variable used for tracking the number of times
-            this node has completed, or <see langword="null"/> if this node is
-            not tracked.
-            </summary>
-        </member>
-        <member name="P:Yarn.Node.ContentSaliencyConditionVariables">
-            <summary>
-            Gets an enumerable containing the names of variables that must be
-            evaluated in order to determine whether this node can be selected as
-            a piece of salient content.
-            </summary>
-            <remarks>
-            The list of variables is stored in the header as a
-            semicolon-delimited string.
-            </remarks>
-        </member>
-        <member name="P:Yarn.Node.ContentSaliencyConditionComplexityScore">
-            <summary>
-            Gets the content saliency condition complexity score for this node.
-            </summary>
-            <returns>
-            An integer representing the content saliency condition complexity
-            score if a valid header is found; otherwise, returns -1 if the
-            header is not present or does not contain a valid value.
-            </returns>
-        </member>
-        <member name="P:Yarn.Node.NodeGroup">
-            <summary>
-            Gets the name of the node group that this node is a part of, or <see
-            langword="null"/> if it is not part of a node group.
             </summary>
         </member>
         <member name="F:Yarn.Node.NameFieldNumber">
@@ -1487,313 +1039,34 @@
             The list of instructions in this node.
             </summary>
         </member>
+        <member name="F:Yarn.Node.LabelsFieldNumber">
+            <summary>Field number for the "labels" field.</summary>
+        </member>
+        <member name="P:Yarn.Node.Labels">
+            <summary>
+            A jump table, mapping the names of labels to positions in the
+            instructions list.
+            </summary>
+        </member>
+        <member name="F:Yarn.Node.TagsFieldNumber">
+            <summary>Field number for the "tags" field.</summary>
+        </member>
+        <member name="P:Yarn.Node.Tags">
+            <summary>
+            The tags associated with this node.
+            </summary>
+        </member>
+        <member name="F:Yarn.Node.SourceTextStringIDFieldNumber">
+            <summary>Field number for the "sourceTextStringID" field.</summary>
+        </member>
+        <member name="P:Yarn.Node.SourceTextStringID">
+            <summary>
+            the entry in the program's string table that contains the original
+            text of this node; null if this is not available    
+            </summary>
+        </member>
         <member name="F:Yarn.Node.HeadersFieldNumber">
             <summary>Field number for the "headers" field.</summary>
-        </member>
-        <member name="P:Yarn.Node.Headers">
-            <summary>
-            The headers present on this node.
-            </summary>
-        </member>
-        <member name="T:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy">
-            <summary>
-            A content saliency strategy that returns the first of the best,
-            least-recently seen choices from the provided options.
-            </summary>
-            <remarks>
-            This strategy stores information about the number of times each piece of
-            content has been seen in the provided <see cref="P:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.VariableStorage"/>.
-            </remarks>
-        </member>
-        <member name="M:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.#ctor(Yarn.IVariableStorage)">
-            <summary>
-            Initalises a new instance of the <see
-            cref="T:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy"/> class.
-            </summary>
-            <param name="storage">The variable storage to use when determining
-            which content to show.</param>
-            <exception cref="T:System.ArgumentNullException">Thrown when the provided
-            <paramref name="storage"/> argument is null.</exception>
-        </member>
-        <member name="P:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.VariableStorage">
-            <summary>
-            Gets the variable storage to use for storing information about how
-            often we've seen content.
-            </summary>
-        </member>
-        <member name="M:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)">
-            <inheritdoc/>
-            <remarks>This method increments the view count for <paramref
-            name="content"/>, so that the next time QueryBestContent is run, it
-            has an updated count of the number of times the content has been
-            viewed.</remarks>
-        </member>
-        <member name="M:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.QueryBestContent(System.Collections.Generic.IEnumerable{Yarn.Saliency.ContentSaliencyOption})">
-            <inheritdoc/>
-        </member>
-        <member name="T:Yarn.Saliency.BestSaliencyStrategy">
-            <summary>
-            A content saliency strategy that returns the best of the provided
-            options.
-            </summary>
-            <remarks>
-            This strategy always selects the single best of the available items,
-            regardless of how many times it has been seen before. For a saliency
-            strategy that takes into account how recently content has been seen, see
-            <see cref="T:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy"/>.
-            </remarks>
-        </member>
-        <member name="M:Yarn.Saliency.BestSaliencyStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)">
-            <inheritdoc/>
-        </member>
-        <member name="M:Yarn.Saliency.BestSaliencyStrategy.QueryBestContent(System.Collections.Generic.IEnumerable{Yarn.Saliency.ContentSaliencyOption})">
-            <inheritdoc/>
-        </member>
-        <member name="T:Yarn.Saliency.ContentSaliencyContentType">
-            <summary>
-            Indicates what type of content a <see cref="T:Yarn.Saliency.ContentSaliencyOption"/>
-            represents.
-            </summary>
-            <seealso cref="P:Yarn.Saliency.ContentSaliencyOption.ContentType"/>
-        </member>
-        <member name="F:Yarn.Saliency.ContentSaliencyContentType.Node">
-            <summary>
-            The content represents a node in a node group.
-            </summary>
-        </member>
-        <member name="F:Yarn.Saliency.ContentSaliencyContentType.Line">
-            <summary>
-            The content represents a line in a line group.
-            </summary>
-        </member>
-        <member name="T:Yarn.Saliency.ContentSaliencyOption">
-            <summary>
-            Represents a piece of content that may be selected by an <see
-            cref="T:Yarn.Saliency.IContentSaliencyStrategy"/>.
-            </summary>
-        </member>
-        <member name="M:Yarn.Saliency.ContentSaliencyOption.#ctor(System.String)">
-            <summary>
-            Initializes a new instance of the ContentSaliencyOption class with
-            the specified content ID.
-            </summary>
-            <param name="id">A string representing the unique identifier for the
-            content.</param>
-            <exception cref="T:System.ArgumentNullException">Thrown when the
-            provided ID is null.</exception>
-        </member>
-        <member name="P:Yarn.Saliency.ContentSaliencyOption.PassingConditionValueCount">
-            <summary>
-            Gets the number of conditions that passed for this piece of content.
-            </summary>
-        </member>
-        <member name="P:Yarn.Saliency.ContentSaliencyOption.FailingConditionValueCount">
-            <summary>
-            Get the number of conditions that failed for this piece of content.
-            </summary>
-        </member>
-        <member name="P:Yarn.Saliency.ContentSaliencyOption.ContentID">
-            <summary>
-            Gets a string that uniquely identifies this content.
-            </summary>
-        </member>
-        <member name="P:Yarn.Saliency.ContentSaliencyOption.ComplexityScore">
-            <summary>
-            Gets the complexity score of this option.
-            </summary>
-        </member>
-        <member name="P:Yarn.Saliency.ContentSaliencyOption.ContentType">
-            <summary>
-            Gets the type of content that this option represents.
-            </summary>
-            <remarks>
-            This information may be used by custom <see
-            cref="T:Yarn.Saliency.IContentSaliencyStrategy"/> classes to allow them to have
-            different behaviour depending on the type of the content.
-            </remarks> 
-        </member>
-        <member name="P:Yarn.Saliency.ContentSaliencyOption.ViewCountKey">
-            <summary>
-            Gets a unique variable name that can be used for tracking the view
-            count of a specific piece of content. This value is <see
-            langword="null"/> if <see cref="P:Yarn.Saliency.ContentSaliencyOption.ContentID"/> is <see
-            langword="null"/> or empty.
-            </summary>
-        </member>
-        <member name="P:Yarn.Saliency.ContentSaliencyOption.Destination">
-            <summary>
-            The destination instruction that the virtual machine will jump to if
-            this option is selected.
-            </summary>
-            <remarks>This property is internal to Yarn Spinner, and is used by
-            the <see cref="T:Yarn.VirtualMachine"/> class.</remarks>
-        </member>
-        <member name="T:Yarn.Saliency.FirstSaliencyStrategy">
-            <summary>
-            A content saliency strategy that always returns the first non-failing
-            item in the list of available options.
-            </summary>
-            <remarks>
-            This saliency strategy is used when a <see cref="T:Yarn.Dialogue"/> has no
-            provided saliency strategy, but is required to make a decision.
-            </remarks>
-        </member>
-        <member name="M:Yarn.Saliency.FirstSaliencyStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)">
-            <inheritdoc/>
-        </member>
-        <member name="M:Yarn.Saliency.FirstSaliencyStrategy.QueryBestContent(System.Collections.Generic.IEnumerable{Yarn.Saliency.ContentSaliencyOption})">
-            <inheritdoc/>
-        </member>
-        <member name="T:Yarn.Saliency.IContentSaliencyStrategy">
-            <summary>
-            Contains methods for choosing a piece of content from a collection of
-            options.
-            </summary>
-        </member>
-        <member name="M:Yarn.Saliency.IContentSaliencyStrategy.QueryBestContent(System.Collections.Generic.IEnumerable{Yarn.Saliency.ContentSaliencyOption})">
-            <summary>
-            Chooses an item from content that is the most appropriate (or
-            <i>salient</i>) for the user's current context.
-            </summary>
-            <remarks>Implementations of this method should not modify any state
-            - that is, they should be 'read-only' operations. If a strategy
-            needs to record information about when a piece of content has been
-            selected, it should do it in the <see cref="M:Yarn.Saliency.IContentSaliencyStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)"/>
-            method.</remarks>
-            <param name="content">A collection of content items. This collection
-            may be empty.</param>
-            <returns>An item from <paramref name="content"/> that is the most
-            appropriate for display, or <see langword="null"/> if no content
-            should be displayed.</returns>
-        </member>
-        <member name="M:Yarn.Saliency.IContentSaliencyStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)">
-            <summary>
-            Called by Yarn Spinner to indicate that a piece of salient content
-            has been selected, and this system should update any state related
-            to how it selects content.
-            </summary>
-            <remarks>If a content saliency strategy does not need to keep track
-            of any state, then this method can be empty.</remarks>
-            <param name="content">The content that has been selected.</param>
-        </member>
-        <member name="T:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy">
-            <summary>
-            A content saliency strategy that returns a random choice of the best,
-            least-recently seen choices from the provided options.
-            </summary>
-            <remarks>
-            This strategy stores information about the number of times each piece of
-            content has been seen in the provided <see cref="P:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.VariableStorage"/>.
-            </remarks>
-        </member>
-        <member name="M:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.#ctor(Yarn.IVariableStorage)">
-            <summary>
-            Initializes a new instance of the <see
-            cref="T:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy"/> class.
-            </summary>
-            <param name="storage">The variable storage to use when determining
-            which content to show.</param>
-            <exception cref="T:System.ArgumentNullException">Thrown when the provided
-            <paramref name="storage"/> argument is null.</exception>
-        </member>
-        <member name="P:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.VariableStorage">
-            <summary>
-            Gets the variable storage to use for storing information about how
-            often we've seen content.
-            </summary>
-        </member>
-        <member name="M:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)">
-            <inheritdoc/>
-            <remarks>This method increments the view count for <paramref
-            name="content"/>, so that the next time QueryBestContent is run, it
-            has an updated count of the number of times the content has been
-            viewed.</remarks>
-        </member>
-        <member name="M:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.QueryBestContent(System.Collections.Generic.IEnumerable{Yarn.Saliency.ContentSaliencyOption})">
-            <inheritdoc/>
-        </member>
-        <member name="T:Yarn.Saliency.EnumerableRandomExtension">
-            <summary>
-            Contains extension methods for <see cref="T:System.Collections.Generic.IEnumerable`1"/>.
-            </summary>
-        </member>
-        <member name="M:Yarn.Saliency.EnumerableRandomExtension.RandomElement``1(System.Collections.Generic.IEnumerable{``0})">
-            <summary>
-            Returns a random element from <paramref name="enumerable"/>.
-            </summary>
-            <remarks>
-            This method uses System.Random to make a selection, which is
-            cryptographically insecure. This means that this method should not
-            be used for security-critical decisions.
-            </remarks>
-            <typeparam name="T">The type of element in <paramref
-            name="enumerable"/>.</typeparam>
-            <param name="enumerable">The collection to choose an item
-            from.</param>
-            <returns>A random element in <paramref
-            name="enumerable"/>.</returns>
-            <exception cref="T:System.ArgumentException">Thrown when <paramref
-            name="enumerable"/> contains no items.</exception>
-        </member>
-        <member name="T:Yarn.SmartVariableEvaluationVirtualMachine">
-            <summary>
-            A lightweight, static 'virtual machine' designed for evaluating smart
-            variables.
-            </summary>
-            <remarks>
-            This class implements a subset of the <see cref="!:Instruction.Opcode"/>
-            operations, and is designed for evaluating smart variable implementation
-            nodes.
-            </remarks>
-        </member>
-        <member name="M:Yarn.SmartVariableEvaluationVirtualMachine.TryGetSmartVariable``1(System.String,Yarn.IVariableAccess,Yarn.Library,``0@)">
-            <summary>
-            Evaluates a smart variable.
-            </summary>
-            <typeparam name="T">The type of the variable to return.</typeparam>
-            <param name="name">The name of the smart variable.</param>
-            <param name="variableAccess">An <see cref="T:Yarn.IVariableAccess"/> object
-            that can be used for fetching variable values.</param>
-            <param name="library">A <see cref="T:Yarn.Library"/> containing functions
-            to use while evaluating the variable.</param>
-            <param name="result">On return, the computed value of the smart
-            variable.</param>
-            <returns><see langword="true"/> if the variable could be fetched as
-            type <typeparamref name="T"/>; <see langword="false"/>
-            otherwise.</returns>
-            <exception cref="T:System.ArgumentNullException">Thrown if <paramref
-            name="variableAccess"/> or <paramref name="library"/> is
-            null.</exception>
-            <exception cref="T:System.ArgumentException">Thrown if <paramref
-            name="name"/> is null or empty.</exception>
-            <exception cref="T:System.InvalidOperationException">Thrown if an error
-            occurs during the evaluation of the variable.</exception>
-        </member>
-        <member name="M:Yarn.SmartVariableEvaluationVirtualMachine.GetSaliencyOptionsForNodeGroup(System.String,Yarn.IVariableAccess,Yarn.Library)">
-            <summary>
-            Retrieves a collection of content saliency options available for the
-            specified node group.
-            </summary>
-            <remarks>
-            This method iterates through all nodes in the program to find those
-            that belong to the specified node group. It calculates the
-            complexity score and counts the number of conditions that pass or
-            fail for each node, then creates a saliency option for each
-            qualifying node.
-            </remarks>
-            <param name="nodeGroupName">The name of the node group to search for
-            available content.</param>
-            <param name="variableAccess">The object to use when accessing
-            variables.</param>
-            <param name="library">The library containing function
-            definitions.</param>
-            <returns>An enumerable collection of <see
-            cref="T:Yarn.Saliency.ContentSaliencyOption"/> objects representing
-            available content saliency options for the specified node
-            group.</returns>
-            <exception cref="T:System.ArgumentException">Thrown when the provided
-            <paramref name="nodeGroupName"/> is not a valid node group name in
-            the program.</exception>
         </member>
         <member name="T:Yarn.AnyType">
             <summary>
@@ -1819,7 +1092,8 @@
         </member>
         <member name="T:Yarn.BooleanType">
             <summary>
-            A type that represents boolean values.
+            An <see cref="T:Yarn.IBridgeableType`1"/> that bridges to <see
+            cref="T:System.Boolean"/> values.
             </summary>
         </member>
         <member name="P:Yarn.BooleanType.DefaultValue">
@@ -1837,51 +1111,45 @@
         <member name="P:Yarn.BooleanType.DefaultMethods">
             <inheritdoc/>
         </member>
-        <member name="T:Yarn.EnumType">
+        <member name="T:Yarn.BuiltinTypes">
             <summary>
-            A type that represents enumerations.
+            Contains the built-in types available in the Yarn language.
             </summary>
         </member>
-        <member name="M:Yarn.EnumType.#ctor(System.String,System.String,Yarn.TypeBase)">
+        <member name="F:Yarn.BuiltinTypes.Undefined">
+            <summary>An undefined type.</summary>
+            <remarks>This value is not valid except during compilation. It
+            is used to represent values that have not yet been assigned a
+            type by the type system.</remarks>
+        </member>
+        <member name="P:Yarn.BuiltinTypes.String">
+            <summary>Gets the type representing strings.</summary>
+        </member>
+        <member name="P:Yarn.BuiltinTypes.Number">
+            <summary>Gets the type representing numbers.</summary>
+        </member>
+        <member name="P:Yarn.BuiltinTypes.Boolean">
+            <summary>Gets the type representing boolean values.</summary>
+        </member>
+        <member name="P:Yarn.BuiltinTypes.Any">
+            <summary>Gets the type representing any value.</summary>
+        </member>
+        <member name="P:Yarn.BuiltinTypes.TypeMappings">
             <summary>
-            Initializes a new instance of the <see cref="T:Yarn.EnumType"/> class that
-            represents an enum type. This type has no methods of its own, and is
-            a subtype of <see cref="P:Yarn.Types.Any"/>.
-            </summary>
-            <param name="name">The name of this method.</param>
-            <param name="description">A string that describes this
-            method.</param>
-            <param name="rawType"></param>
-        </member>
-        <member name="P:Yarn.EnumType.Name">
-            <inheritdoc/>
-        </member>
-        <member name="P:Yarn.EnumType.Parent">
-            <inheritdoc/>
-        </member>
-        <member name="P:Yarn.EnumType.Description">
-            <inheritdoc/>
-        </member>
-        <member name="P:Yarn.EnumType.RawType">
-            <summary>
-            Gets the type of this enum's members.
-            </summary>
-        </member>
-        <member name="P:Yarn.EnumType.EnumCases">
-            <summary>
-            Gets the collection of enum cases in this enum.
+            Gets a dictionary that maps CLR types to their corresponding
+            Yarn types.
             </summary>
         </member>
-        <member name="M:Yarn.EnumType.AddMember(System.String,Yarn.ConstantTypeProperty)">
+        <member name="P:Yarn.BuiltinTypes.AllBuiltinTypes">
             <summary>
-            Adds a new case to this enumeration type.
+            Gets a <see cref="T:System.Collections.Generic.IEnumerable`1"/> containing all built-in
+            properties defined in this class.
             </summary>
-            <param name="name">The name of the case.</param>
-            <param name="member">The member to add for the given name.</param>
+            <value>The list of built-in type objects.</value>
         </member>
         <member name="T:Yarn.FunctionType">
             <summary>
-            A type that represents a function.
+            A type that represents functions.
             </summary>
             <remarks>
             Functions have parameters and a return type, and can be called from
@@ -1915,7 +1183,7 @@
             <i>arity</i>).
             </remarks>
         </member>
-        <member name="P:Yarn.FunctionType.TypeMembers">
+        <member name="P:Yarn.FunctionType.Methods">
             <inheritdoc/>
         </member>
         <member name="M:Yarn.FunctionType.AddParameter(Yarn.IType)">
@@ -1924,6 +1192,30 @@
             </summary>
             <param name="parameterType">The type of parameter to
             add.</param>
+        </member>
+        <member name="T:Yarn.IBridgeableType`1">
+            <summary>
+            Defines properties that describe a type in the Yarn language that
+            can be converted to and from a type in the Common Language Runtime.
+            </summary>
+            <typeparam name="TBridgedType">The CLR type that this type can be
+            bridged to.</typeparam>
+        </member>
+        <member name="P:Yarn.IBridgeableType`1.DefaultValue">
+            <summary>
+            Gets a default value appropriate for <typeparamref
+            name="TBridgedType"/>.
+            </summary>
+            <value>A default value.</value>
+        </member>
+        <member name="M:Yarn.IBridgeableType`1.ToBridgedType(Yarn.Value)">
+            <summary>
+            Converts a Value to the type <typeparamref
+            name="TBridgedType"/>.
+            </summary>
+            <param name="value">The Value to convert from.</param>
+            <returns>A value of type <typeparamref name="TBridgedType"/>,
+            derived from <paramref name="value"/>.</returns>
         </member>
         <member name="T:Yarn.IType">
             <summary>
@@ -1939,8 +1231,8 @@
             <summary>
             Gets the parent of this type.
             </summary>
-            <remarks>All types have <see cref="P:Yarn.Types.Any"/> as their
-            ultimate parent type (except for <see cref="P:Yarn.Types.Any"/>
+            <remarks>All types have <see cref="P:Yarn.BuiltinTypes.Any"/> as their
+            ultimate parent type (except for <see cref="P:Yarn.BuiltinTypes.Any"/>
             itself.)</remarks>
         </member>
         <member name="P:Yarn.IType.Description">
@@ -1948,14 +1240,15 @@
             Gets a more verbose description of this type.
             </summary>
         </member>
-        <member name="P:Yarn.IType.TypeMembers">
+        <member name="P:Yarn.IType.Methods">
             <summary>
-            Gets the collection of type information for this type's type members.
+            Gets the collection of methods that are available on this type.
             </summary>
         </member>
         <member name="T:Yarn.NumberType">
             <summary>
-            A type that represents floating-point number values.
+            An <see cref="T:Yarn.IBridgeableType`1"/> that bridges to <see
+            cref="T:System.Single"/> values.
             </summary>
         </member>
         <member name="P:Yarn.NumberType.DefaultValue">
@@ -1975,7 +1268,8 @@
         </member>
         <member name="T:Yarn.StringType">
             <summary>
-            A type that represents string values.
+            An <see cref="T:Yarn.IBridgeableType`1"/> that bridges to <see
+            cref="T:System.String"/> values.
             </summary>
         </member>
         <member name="M:Yarn.StringType.#ctor">
@@ -2008,142 +1302,9 @@
         <member name="M:Yarn.StringType.ToString">
             <inheritdoc/>
         </member>
-        <member name="T:Yarn.ITypeMember">
-            <summary>
-            Provides properties used to work with members of a type.
-            </summary>
-        </member>
-        <member name="P:Yarn.ITypeMember.Type">
-            <summary>
-            Gets or sets the type of this member.
-            </summary>
-        </member>
-        <member name="T:Yarn.ConstantTypeProperty">
-            <summary>
-            Represents a property that belongs to a type and contains a read-only
-            value.
-            </summary>
-            <remarks>
-            This kind of type member is useful for constant properties, like enum
-            cases.
-            </remarks>
-        </member>
-        <member name="P:Yarn.ConstantTypeProperty.Type">
-            <summary>
-            Gets the type of this property.
-            </summary>
-        </member>
-        <member name="P:Yarn.ConstantTypeProperty.Value">
-            <summary>
-            Gets the value that is stored in this property.
-            </summary>
-        </member>
-        <member name="P:Yarn.ConstantTypeProperty.Description">
-            <summary>
-            Gets a string describing this property.
-            </summary>
-        </member>
         <member name="T:Yarn.TypeBase">
             <summary>
-            Provides the base class for all concrete types.
-            </summary>
-        </member>
-        <member name="P:Yarn.TypeBase.Name">
-            <summary>
-            Gets the name of this type.
-            </summary>
-        </member>
-        <member name="P:Yarn.TypeBase.Parent">
-            <summary>
-            Gets the parent of this type.
-            </summary>
-        </member>
-        <member name="P:Yarn.TypeBase.Description">
-            <summary>
-            Gets a string describing this type.
-            </summary>
-        </member>
-        <member name="M:Yarn.TypeBase.ToString">
-            <inheritdoc />
-        </member>
-        <member name="P:Yarn.TypeBase.Methods">
-            <summary>
-            Gets the collection of methods that are defined on this type.
-            </summary>
-        </member>
-        <member name="P:Yarn.TypeBase.TypeMembers">
-            <summary>
-            Gets a dictionary containing the members of this type.
-            </summary>
-        </member>
-        <member name="P:Yarn.TypeBase.ConvertibleToTypes">
-            <summary>
-            Gets the collection of types that this type may be converted to.
-            </summary>
-        </member>
-        <member name="P:Yarn.TypeBase.TypeDepth">
-            <summary>
-            Gets the depth of this type in the hierarchy, measured as the total
-            number of parent-child relationships between this type and a root of
-            the type system.
-            </summary>
-            <remarks>
-            <see cref="P:Yarn.Types.Any"/> and <see cref="P:Yarn.Types.Error"/> have a depth
-            of zero.
-            </remarks>
-        </member>
-        <member name="M:Yarn.TypeBase.AddConvertibleTo(Yarn.TypeBase)">
-            <summary>
-            Registers that this type is convertible to <paramref name="otherType"/>.
-            </summary>
-            <param name="otherType"></param>
-        </member>
-        <member name="M:Yarn.TypeBase.IsConvertibleTo(Yarn.TypeBase)">
-            <summary>
-            Checks if this type is convertible to the type represented by
-            <paramref name="otherType"/>.
-            </summary>
-            <remarks>
-            A type is convertible to another type if: 
-            <list type="number">
-            <item>there is an explicit conversion available, or</item>
-            <item>it is a descendant of that type, or</item>
-            <item>
-            the two types are identical.</item></list>
-            </remarks>
-            <param name="otherType">The type to check.</param>
-            <returns><see langword="true"/> if this type is convertible to
-            <paramref name="otherType"/>.</returns>
-        </member>
-        <member name="T:Yarn.Types">
-            <summary>
-            Contains the built-in types available in the Yarn language.
-            </summary>
-        </member>
-        <member name="P:Yarn.Types.String">
-            <summary>Gets the type representing strings.</summary>
-        </member>
-        <member name="P:Yarn.Types.Number">
-            <summary>Gets the type representing numbers.</summary>
-        </member>
-        <member name="P:Yarn.Types.Boolean">
-            <summary>Gets the type representing boolean values.</summary>
-        </member>
-        <member name="P:Yarn.Types.Any">
-            <summary>Gets the type representing any value.</summary>
-        </member>
-        <member name="P:Yarn.Types.Error">
-            <summary>Gets the type representing a typing error.</summary>
-        </member>
-        <member name="P:Yarn.Types.AllBuiltinTypes">
-            <summary>
-            Gets the collection of all built-in types.
-            </summary>
-        </member>
-        <member name="P:Yarn.Types.TypeMappings">
-            <summary>
-            Gets a dictionary that maps CLR types to their corresponding
-            Yarn types.
+            Provides the abstract base class for all types.
             </summary>
         </member>
         <member name="T:Yarn.TypeUtil">
@@ -2191,19 +1352,6 @@
             <returns><see langword="true"/> if <paramref name="subType"/>
             is the same or a subtype of <paramref name="parentType"/>; <see
             langword="false"/> otherwise.</returns>
-        </member>
-        <member name="T:Yarn.IYarnValue">
-            <summary>
-            Represents a read-only value in the Yarn Spinner virtual machine.
-            </summary>
-        </member>
-        <member name="M:Yarn.IYarnValue.ConvertTo``1">
-            <summary>
-            Converts this <see cref="T:Yarn.IYarnValue"/> to type <typeparamref
-            name="T"/>.
-            </summary>
-            <typeparam name="T">The type to convert to.</typeparam>
-            <returns>A value of type T.</returns>
         </member>
         <member name="T:Yarn.Value">
             <summary>
@@ -2283,12 +1431,6 @@
             A string.
             </summary>
         </member>
-        <member name="P:Yarn.Operand.HasStringValue">
-            <summary>Gets whether the "string_value" field is set</summary>
-        </member>
-        <member name="M:Yarn.Operand.ClearStringValue">
-            <summary> Clears the value of the oneof if it's currently set to "string_value" </summary>
-        </member>
         <member name="F:Yarn.Operand.BoolValueFieldNumber">
             <summary>Field number for the "bool_value" field.</summary>
         </member>
@@ -2297,12 +1439,6 @@
             A boolean (true or false).
             </summary>
         </member>
-        <member name="P:Yarn.Operand.HasBoolValue">
-            <summary>Gets whether the "bool_value" field is set</summary>
-        </member>
-        <member name="M:Yarn.Operand.ClearBoolValue">
-            <summary> Clears the value of the oneof if it's currently set to "bool_value" </summary>
-        </member>
         <member name="F:Yarn.Operand.FloatValueFieldNumber">
             <summary>Field number for the "float_value" field.</summary>
         </member>
@@ -2310,12 +1446,6 @@
             <summary>
             A floating point number.
             </summary>
-        </member>
-        <member name="P:Yarn.Operand.HasFloatValue">
-            <summary>Gets whether the "float_value" field is set</summary>
-        </member>
-        <member name="M:Yarn.Operand.ClearFloatValue">
-            <summary> Clears the value of the oneof if it's currently set to "float_value" </summary>
         </member>
         <member name="T:Yarn.Operand.ValueOneofCase">
             <summary>Enum of possible cases for the "value" oneof.</summary>
@@ -2387,26 +1517,6 @@
         <member name="F:Yarn.Operator.Modulo">
             <summary>A binary operator that represents the remainder
             operation.</summary>
-        </member>
-        <member name="T:Yarn.ISmartVariableEvaluator">
-            <summary>
-            Contains methods for evaluating the value of smart variables
-            </summary>
-        </member>
-        <member name="M:Yarn.ISmartVariableEvaluator.TryGetSmartVariable``1(System.String,``0@)">
-            <summary>
-            Evaluate the value of a smart variable named <paramref
-            name="name"/>.
-            </summary>
-            <typeparam name="T">The type of the returned value.</typeparam>
-            <param name="name">The name of the variable.</param>
-            <param name="result">On return, contains the returned value of the
-            smart variable, or the <see langword="default"/> value of
-            <typeparamref name="T"/> if a smart variable named <paramref
-            name="name"/> could not be found or its value could not be returned
-            as type <typeparamref name="T"/>.</param>
-            <returns><see langword="true"/> if the smart variable was evaluated,
-            <see langword="false"/> otherwise.</returns>
         </member>
         <member name="F:Yarn.VirtualMachine.State.currentNodeName">
             <summary>The name of the node that we're currently
@@ -2494,6 +1604,9 @@
             cref="T:Yarn.VirtualMachine"/> is not in a state where <see
             cref="M:Yarn.VirtualMachine.Continue"/> could be called.</throws>
         </member>
+        <member name="M:Yarn.VirtualMachine.FindInstructionPointForLabel(System.String)">
+            Looks up the instruction number for a named label in the current node.
+        </member>
         <member name="T:Yarn.YarnSpinnerReflection">
             <summary>Holder for reflection information generated from yarn_spinner.proto</summary>
         </member>
@@ -2503,170 +1616,15 @@
         <member name="F:Yarn.Header.KeyFieldNumber">
             <summary>Field number for the "key" field.</summary>
         </member>
-        <member name="P:Yarn.Header.Key">
-            <summary>
-            The name of the header.
-            </summary>
-        </member>
         <member name="F:Yarn.Header.ValueFieldNumber">
             <summary>Field number for the "value" field.</summary>
-        </member>
-        <member name="P:Yarn.Header.Value">
-            <summary>
-            The value of the header.
-            </summary>
-        </member>
-        <member name="T:Yarn.InstructionV1">
-            <summary>
-            A single Yarn instruction.
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.OpcodeFieldNumber">
-            <summary>Field number for the "opcode" field.</summary>
-        </member>
-        <member name="P:Yarn.InstructionV1.Opcode">
-            <summary>
-            The operation that this instruction will perform.
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.OperandsFieldNumber">
-            <summary>Field number for the "operands" field.</summary>
-        </member>
-        <member name="P:Yarn.InstructionV1.Operands">
-            <summary>
-            The list of operands, if any, that this instruction uses.
-            </summary>
-        </member>
-        <member name="T:Yarn.InstructionV1.Types">
-            <summary>Container for nested types declared in the InstructionV1 message type.</summary>
-        </member>
-        <member name="T:Yarn.InstructionV1.Types.OpCode">
-            <summary>
-            The type of instruction that this is.
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.JumpTo">
-            <summary>
-            Jumps to a named position in the node.
-            opA = string: label name
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.Jump">
-            <summary>
-            Peeks a string from stack, and jumps to that named position in
-            the node. 
-            No operands.
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.RunLine">
-            <summary>
-            Delivers a string ID to the client.
-            opA = string: string ID
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.RunCommand">
-            <summary>
-            Delivers a command to the client.
-            opA = string: command text
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.AddOption">
-            <summary>
-            Adds an entry to the option list (see ShowOptions).
-            - opA = string: string ID for option to add
-            - opB = string: destination to go to if this option is selected
-            - opC = number: number of expressions on the stack to insert
-              into the line
-            - opD = bool: whether the option has a condition on it (in which
-              case a value should be popped off the stack and used to signal
-              the game that the option should be not available)
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.ShowOptions">
-            <summary>
-            Presents the current list of options to the client, then clears
-            the list. The most recently selected option will be on the top
-            of the stack when execution resumes.
-            No operands.
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.PushString">
-            <summary>
-            Pushes a string onto the stack.
-            opA = string: the string to push to the stack.
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.PushFloat">
-            <summary>
-            Pushes a floating point number onto the stack.
-            opA = float: number to push to stack
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.PushBool">
-            <summary>
-            Pushes a boolean onto the stack.
-            opA = bool: the bool to push to stack
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.PushNull">
-            <summary>
-            Pushes a null value onto the stack.
-            No operands.
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.JumpIfFalse">
-            <summary>
-            Jumps to the named position in the the node, if the top of the
-            stack is not null, zero or false.
-            opA = string: label name 
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.Pop">
-            <summary>
-            Discards top of stack.
-            No operands.
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.CallFunc">
-            <summary>
-            Calls a function in the client. Pops as many arguments as the
-            client indicates the function receives, and the result (if any)
-            is pushed to the stack.		
-            opA = string: name of the function
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.PushVariable">
-            <summary>
-            Pushes the contents of a variable onto the stack.
-            opA = name of variable 
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.StoreVariable">
-            <summary>
-            Stores the contents of the top of the stack in the named
-            variable. 
-            opA = name of variable
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.Stop">
-            <summary>
-            Stops execution of the program.
-            No operands.
-            </summary>
-        </member>
-        <member name="F:Yarn.InstructionV1.Types.OpCode.RunNode">
-            <summary>
-            Pops a string off the top of the stack, and runs the node with
-            that name.
-            No operands.
-            </summary>
         </member>
         <member name="T:Yarn.Markup.IAttributeMarkerProcessor">
             <summary>Provides a mechanism for producing replacement text for a
             marker.</summary>
             <seealso cref="M:Yarn.Markup.LineParser.RegisterMarkerProcessor(System.String,Yarn.Markup.IAttributeMarkerProcessor)"/>
         </member>
-        <member name="M:Yarn.Markup.IAttributeMarkerProcessor.ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker,System.String)">
+        <member name="M:Yarn.Markup.IAttributeMarkerProcessor.ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker)">
             <summary>
             Produces the replacement text that should be inserted into a parse
             result for a given attribute.
@@ -2678,7 +1636,6 @@
             </remarks>
             <param name="marker">The marker that should have text
             inserted.</param>
-            <param name="localeCode">The locale to use when preparing replacement text.</param>
             <returns>The replacement text to insert.</returns>
         </member>
         <member name="T:Yarn.Markup.LineParser">
@@ -2778,20 +1735,19 @@
             <param name="markerProcessor">The object that should be invoked
             when markers with this name are encountered.</param>
         </member>
-        <member name="M:Yarn.Markup.LineParser.ParseMarkup(System.String,System.String)">
+        <member name="M:Yarn.Markup.LineParser.ParseMarkup(System.String)">
             <summary>Parses a line of text, and produces a
             <see cref="T:Yarn.Markup.MarkupParseResult"/> containing the processed
             text.</summary>
             <param name="input">The text to parse.</param>
             <returns>The resulting markup information.</returns>
         </member>
-        <member name="M:Yarn.Markup.LineParser.ProcessReplacementMarker(Yarn.Markup.MarkupAttributeMarker,System.String)">
+        <member name="M:Yarn.Markup.LineParser.ProcessReplacementMarker(Yarn.Markup.MarkupAttributeMarker)">
             <summary>
             Parses a marker and generates replacement text to insert into
             the plain text.
             </summary>
             <param name="marker">The marker to parse.</param>
-            <param name="localeCode">The locale code to use when processing the marker.</param>
             <returns>The replacement text to insert.</returns>
         </member>
         <member name="M:Yarn.Markup.LineParser.ParseRawTextUpToAttributeClose(System.String)">
@@ -2962,7 +1918,7 @@
             You do not create instances of this struct yourself. It is created
             by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
             </remarks>
-            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/>
+            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/>
         </member>
         <member name="F:Yarn.Markup.MarkupParseResult.Text">
             <summary>
@@ -3087,7 +2043,7 @@
             You do not create instances of this struct yourself. It is created
             by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
             </remarks>
-            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/>
+            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/>
         </member>
         <member name="M:Yarn.Markup.MarkupAttribute.#ctor(System.Int32,System.Int32,System.Int32,System.String,System.Collections.Generic.IEnumerable{Yarn.Markup.MarkupProperty})">
             <summary>
@@ -3155,7 +2111,7 @@
             You do not create instances of this struct yourself. It is created
             by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
             </remarks>
-            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/>
+            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/>
         </member>
         <member name="M:Yarn.Markup.MarkupProperty.#ctor(System.String,Yarn.Markup.MarkupValue)">
             <summary>
@@ -3183,7 +2139,7 @@
             You do not create instances of this struct yourself. It is created
             by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
             </remarks>
-            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/>
+            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/>
         </member>
         <member name="P:Yarn.Markup.MarkupValue.IntegerValue">
             <summary>Gets the integer value of this property.</summary>
@@ -3221,9 +2177,6 @@
         <member name="M:Yarn.Markup.MarkupValue.ToString">
             <inheritdoc/>
         </member>
-        <member name="M:Yarn.Markup.MarkupValue.ToString(System.IFormatProvider)">
-            <inheritdoc/>
-        </member>
         <member name="T:Yarn.Markup.MarkupAttributeMarker">
             <summary>
             Represents a marker (e.g. <c>[a]</c>) in line of marked up text.
@@ -3232,7 +2185,7 @@
             You do not create instances of this struct yourself. It is created
             by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
             </remarks>
-            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/>
+            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/>
         </member>
         <member name="M:Yarn.Markup.MarkupAttributeMarker.#ctor(System.String,System.Int32,System.Int32,System.Collections.Generic.List{Yarn.Markup.MarkupProperty},Yarn.Markup.TagType)">
             <summary>
@@ -3309,7 +2262,7 @@
             <summary>A markup text processor that implements the <c>[nomarkup]</c>
             attribute's behaviour.</summary>
         </member>
-        <member name="M:Yarn.Markup.NoMarkupTextProcessor.ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker,System.String)">
+        <member name="M:Yarn.Markup.NoMarkupTextProcessor.ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker)">
             <inheritdoc/>
         </member>
         <member name="T:Yarn.Markup.TagType">

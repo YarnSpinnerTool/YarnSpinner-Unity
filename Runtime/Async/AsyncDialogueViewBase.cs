@@ -16,14 +16,10 @@ using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
 
 namespace Yarn.Unity
 {
-    public enum ViewBehaviour {
-        LineStopsWhenThisViewCompletes,
-        LineKeepsRunningWhenThisViewCompletes,
-    }
 
     public abstract class AsyncDialogueViewBase : MonoBehaviour
     {
-        public abstract YarnTask RunLineAsync(LocalizedLine line, CancellationToken token);
+        public abstract YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token);
         public abstract YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken);
         public abstract YarnTask OnDialogueStartedAsync();
         public abstract YarnTask OnDialogueCompleteAsync();

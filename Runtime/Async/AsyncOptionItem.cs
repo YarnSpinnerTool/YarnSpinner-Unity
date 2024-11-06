@@ -2,31 +2,32 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
+
 #if USE_TMP
-using TMPro;
+    using TMPro;
 #else
-using TextMeshProUGUI = Yarn.Unity.TMPShim;
+    using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
-using YarnCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption>;
+#if USE_UNITASK
+    using YarnOptionCompletionSource = Cysharp.Threading.Tasks.UniTaskCompletionSource<Yarn.Unity.DialogueOption>;
+#else
+    using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption>;
+#endif
 
 namespace Yarn.Unity
 {
-    public class OptionView : UnityEngine.UI.Selectable, ISubmitHandler, IPointerClickHandler, IPointerEnterHandler
+    public class AsyncOptionItem : UnityEngine.UI.Selectable, ISubmitHandler, IPointerClickHandler, IPointerEnterHandler
     {
         [SerializeField] TextMeshProUGUI text;
-        [SerializeField] bool showCharacterName = false;
 
-        public Action<DialogueOption> OnOptionSelected;
-        public MarkupPalette palette;
+        public YarnOptionCompletionSource OnOptionSelected;
 
-        DialogueOption _option;
+        private bool hasSubmittedOptionSelection = false;
 
-        bool hasSubmittedOptionSelection = false;
-
+        private DialogueOption _option;
         public DialogueOption Option
         {
             get => _option;
@@ -39,31 +40,12 @@ namespace Yarn.Unity
 
                 // When we're given an Option, use its text and update our
                 // interactibility.
-                Markup.MarkupParseResult line;
-                if (showCharacterName)
-                {
-                    line = value.Line.Text;
-                }
-                else
-                {
-                    line = value.Line.TextWithoutCharacterName;
-                }
-
-                if (palette != null)
-                {
-                    text.text = LineView.PaletteMarkedUpText(line, palette, false);
-                }
-                else
-                {
-                    text.text = line.Text;
-                }
-
+                text.text = value.Line.TextWithoutCharacterName.Text;
                 interactable = value.IsAvailable;
             }
         }
 
-        // If we receive a submit or click event, invoke our "we just selected
-        // this option" handler.
+        // If we receive a submit or click event, invoke our "we just selected this option" handler.
         public void OnSubmit(BaseEventData eventData)
         {
             InvokeOptionSelected();
@@ -84,7 +66,7 @@ namespace Yarn.Unity
             if (hasSubmittedOptionSelection == false)
             {
                 hasSubmittedOptionSelection = true;
-                OnOptionSelected.Invoke(Option);
+                OnOptionSelected.SetResult(this.Option);
             }
         }
 

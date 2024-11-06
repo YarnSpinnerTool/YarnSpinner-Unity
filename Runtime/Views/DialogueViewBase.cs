@@ -396,7 +396,7 @@ namespace Yarn.Unity
 
         // This method implements the v3 async pattern for dialogue views on top
         // of the v2 API.
-        public override async YarnTask RunLineAsync(LocalizedLine line, CancellationToken token)
+        public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
         {
             // phaseComplete is a flag that represents whether the current
             // 'phase' of a v2-style dialogue view (Run, Interrupt, Dismiss) is

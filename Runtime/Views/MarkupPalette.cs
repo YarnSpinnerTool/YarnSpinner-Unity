@@ -23,6 +23,10 @@ namespace Yarn.Unity
         {
             public string Marker;
             public Color Color;
+            public bool Boldened;
+            public bool Italicised;
+            public bool Underlined;
+            public bool Strikedthrough;
         }
 
         /// <summary>
@@ -49,5 +53,31 @@ namespace Yarn.Unity
             colour = Color.black;
             return false;
         }
+
+        public bool PaletteForMarker(string Marker, out ColorMarker palette)
+        {
+            foreach (var item in ColourMarkers)
+            {
+                if (item.Marker == Marker)
+                {
+                    palette = item;
+                    return true;
+                }
+            }
+
+            palette = new ColorMarker();
+            return false;
+        }
     }
 }
+
+// ok so there are TWO things I want to do now
+// first is beef this up so that it supports multiple different relative
+// colour
+// bold or do we just do font-weight
+// italics
+// underline, strikethrough
+
+// and then make another one called StyleMarkupProcessor
+// this just converts [style = h1] into <style="h1"> for the more advanced stuff
+

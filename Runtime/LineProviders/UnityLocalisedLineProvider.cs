@@ -76,10 +76,20 @@ namespace Yarn.Unity.UnityLocalization
             }
         }
 
+        private Markup.LineParser lineParser = new Markup.LineParser();
+        private Markup.BuiltInMarkupReplacer builtInReplacer = new Markup.BuiltInMarkupReplacer();
+
         private Dictionary<string, Object> currentlyLoadedAssets = new Dictionary<string, Object>();
 
         private StringTable? currentStringTable;
         private AssetTable? currentAssetTable;
+
+        void Awake()
+        {
+            lineParser.RegisterMarkerProcessor("select", builtInReplacer);
+            lineParser.RegisterMarkerProcessor("plural", builtInReplacer);
+            lineParser.RegisterMarkerProcessor("ordinal", builtInReplacer);
+        }
 
         public override void Start()
         {
@@ -93,7 +103,7 @@ namespace Yarn.Unity.UnityLocalization
             }
         }
 
-        public override async YarnLineTask GetLocalizedLineAsync(Line line, IMarkupParser markupParser, CancellationToken cancellationToken)
+        public override async YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken)
         {
             if (stringsTable.IsEmpty)
             {
@@ -115,7 +125,7 @@ namespace Yarn.Unity.UnityLocalization
             var text = line.ID;
             text = currentStringTable[line.ID]?.LocalizedValue ?? $"!! Error: Missing localisation for line {line.ID} in string table {currentStringTable.LocaleIdentifier}";
 
-            var markup = markupParser.ParseMarkup(Dialogue.ExpandSubstitutions(text, line.Substitutions), currentStringTable.LocaleIdentifier.Code);
+            var markup = lineParser.ParseString(Markup.LineParser.ExpandSubstitutions(text, line.Substitutions), this.LocaleCode);
 
             // Construct the localized line
             LocalizedLine localizedLine = new LocalizedLine()
@@ -142,6 +152,14 @@ namespace Yarn.Unity.UnityLocalization
             }
 
             return localizedLine;
+        }
+        public override void RegisterMarkerProcessor(string attributeName, Markup.IAttributeMarkerProcessor markerProcessor)
+        {
+            lineParser.RegisterMarkerProcessor(attributeName, markerProcessor);
+        }
+        public override void DeregisterMarkerProcessor(string attributeName)
+        {
+            lineParser.DeregisterMarkerProcessor(attributeName);
         }
 
         async YarnTask EnsureStringsTableLoaded(CancellationToken cancellationToken)
@@ -199,7 +217,7 @@ namespace Yarn.Unity.UnityLocalization
             Debug.LogError(NotInstalledError);
         }
 
-        public override YarnLineTask GetLocalizedLineAsync(Yarn.Line line, IMarkupParser markupParser, CancellationToken cancellationToken)
+        public override YarnLineTask GetLocalizedLineAsync(Yarn.Line line, CancellationToken cancellationToken)
         {
             Debug.LogError($"{nameof(UnityLocalisedLineProvider)}: Can't create a localised line for ID {line.ID} because the Unity Localization package is not installed in this project. To fix this, install Unity Localization.");
 
@@ -210,12 +228,20 @@ namespace Yarn.Unity.UnityLocalization
                 Substitutions = line.Substitutions,
             });
         }
+        public override void RegisterMarkerProcessor(string attributeName, Markup.IAttributeMarkerProcessor markerProcessor)
+        {
+            Debug.LogWarning($"Unable to add a marker processor for {attributeName}, as the Unity Localization package is not installed in this project");
+        }
+        public override void DeregisterMarkerProcessor(string attributeName)
+        {
+            Debug.LogWarning($"Unable to remove a marker processor for {attributeName}, as the Unity Localization package is not installed in this project");
+        }
     }
 #endif
 
 #if UNITY_EDITOR
     [CustomEditor(typeof(UnityLocalisedLineProvider))]
-    public class UnityLocalisedLineProviderEditor : Editor {
+    public class UnityLocalisedLineProviderEditor : UnityEditor.Editor {
         private SerializedProperty stringsTableProperty;
         private SerializedProperty assetTableProperty;
 

@@ -23,9 +23,11 @@ namespace Yarn.Unity
     using Cysharp.Threading.Tasks;
     using YarnTask = Cysharp.Threading.Tasks.UniTask;
     using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
+    using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<DialogueOption?>;
 #else
     using YarnTask = System.Threading.Tasks.Task;
     using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
+    using YarnOptionTask = System.Threading.Tasks.Task<DialogueOption?>;
     using System.Threading.Tasks;
 #endif
 
@@ -42,6 +44,37 @@ namespace Yarn.Unity
                 await YarnTask.Yield();
             }
 #endif
+        }
+
+        public async static YarnTask Delay(int milliseconds, CancellationToken token)
+        {
+            try
+            {
+                await YarnTask.Delay(milliseconds, token);
+            }
+            catch (TaskCanceledException)
+            {
+                // we don't want to throw an exception for this because this is valid behaviour
+                // why did you do it this way c# ?
+                // WHY?
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public async static YarnTask WaitUntil(System.Func<bool> predicate, System.Threading.CancellationToken token)
+        {
+            while (!token.IsCancellationRequested && predicate() == false)
+            {
+                await YarnTask.Yield();
+            }
+        }
+
+        public static YarnOptionTask NoOptionSelected
+        {
+            get
+            { 
+                return YarnTask.FromResult<DialogueOption?>(null);
+            }
         }
 
 #if !USE_UNITASK

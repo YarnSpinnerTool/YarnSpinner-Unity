@@ -8,9 +8,21 @@ using UnityEngine;
 using System.Collections.Generic;
 
 #if USE_TMP
-using TMPro;
+    using TMPro;
 #else
-using TextMeshProUGUI = Yarn.Unity.TMPShim;
+    using TextMeshProUGUI = Yarn.Unity.TMPShim;
+#endif
+
+#if USE_UNITASK
+    using Cysharp.Threading.Tasks;
+    using Cysharp.Threading.Tasks;
+    using YarnTask = Cysharp.Threading.Tasks.UniTask;
+    using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
+#else
+    using System.Threading;
+    using System.Threading.Tasks;
+    using YarnTask = System.Threading.Tasks.Task;
+    using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
 #endif
 
 namespace Yarn.Unity
@@ -134,6 +146,27 @@ namespace Yarn.Unity
             }
 
             stopToken?.Complete();
+        }
+
+        public static async YarnTask FadeAlpha(CanvasGroup canvas, float from, float to, float duration, CancellationToken token)
+        {
+            if (duration == 0)
+            {
+                canvas.alpha = to;
+                return;
+            }
+
+            canvas.alpha = from;
+
+            float accumulator = 0;
+            while (!token.IsCancellationRequested && accumulator < duration)
+            {
+                accumulator += Time.deltaTime;
+                canvas.alpha = Mathf.Lerp(from, to, accumulator / duration);
+                await YarnTask.Yield();
+            }
+
+            canvas.alpha = to;
         }
 
         /// <summary>

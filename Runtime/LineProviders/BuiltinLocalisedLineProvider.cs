@@ -53,7 +53,26 @@ namespace Yarn.Unity
 
         IAddressablesHelper addressablesHelper = new AddressablesHelper();
 
-        public override async YarnLineTask GetLocalizedLineAsync(Line line, IMarkupParser markupParser, CancellationToken cancellationToken)
+        private Markup.LineParser lineParser = new Markup.LineParser();
+        private Markup.BuiltInMarkupReplacer builtInReplacer = new Markup.BuiltInMarkupReplacer();
+
+        public override void RegisterMarkerProcessor(string attributeName, Markup.IAttributeMarkerProcessor markerProcessor)
+        {
+            lineParser.RegisterMarkerProcessor(attributeName, markerProcessor);
+        }
+        public override void DeregisterMarkerProcessor(string attributeName)
+        {
+            lineParser.DeregisterMarkerProcessor(attributeName);
+        }
+
+        void Awake()
+        {
+            lineParser.RegisterMarkerProcessor("select", builtInReplacer);
+            lineParser.RegisterMarkerProcessor("plural", builtInReplacer);
+            lineParser.RegisterMarkerProcessor("ordinal", builtInReplacer);
+        }
+
+        public override async YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken)
         {
             Localization loc = CurrentLocalization;
 
@@ -83,7 +102,7 @@ namespace Yarn.Unity
                 return LocalizedLine.InvalidLine;
             }
 
-            var parseResult = markupParser.ParseMarkup(Dialogue.ExpandSubstitutions(text, line.Substitutions), this.LocaleCode);
+            var parseResult = lineParser.ParseString(Markup.LineParser.ExpandSubstitutions(text, line.Substitutions), this.LocaleCode);
 
             Object? asset;
 

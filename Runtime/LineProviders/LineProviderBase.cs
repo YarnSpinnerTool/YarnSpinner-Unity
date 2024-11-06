@@ -9,6 +9,8 @@ using UnityEngine;
 using System.Threading;
 using Yarn.Unity;
 using Yarn;
+using Yarn.Markup;
+
 
 #if USE_UNITASK
     using Cysharp.Threading.Tasks;
@@ -26,8 +28,11 @@ public interface ILineProvider
 {
     public YarnProject? YarnProject { get; set; }
     public string LocaleCode { get; }
-    public YarnLineTask GetLocalizedLineAsync(Line line, IMarkupParser markupParser, CancellationToken cancellationToken);
+    public YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken);
     public YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken);
+
+    public void RegisterMarkerProcessor(string attributeName, Yarn.Markup.IAttributeMarkerProcessor markerProcessor);
+    public void DeregisterMarkerProcessor(string attributeName);
 }
 
 
@@ -69,7 +74,7 @@ namespace Yarn.Unity
         /// <see cref="LocalizedLine"/> from.</param>
         /// <returns>A localized line, ready to be presented to the
         /// player.</returns>
-        public abstract YarnLineTask GetLocalizedLineAsync(Line line, IMarkupParser markupParser, CancellationToken cancellationToken);
+        public abstract YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken);
 
         /// <summary>
         /// The YarnProject that contains the localized data for lines.
@@ -133,6 +138,9 @@ namespace Yarn.Unity
         public virtual void Start()
         {
         }
+
+        public abstract void RegisterMarkerProcessor(string attributeName, IAttributeMarkerProcessor markerProcessor);
+        public abstract void DeregisterMarkerProcessor(string attributeName);
     }
 
 }
