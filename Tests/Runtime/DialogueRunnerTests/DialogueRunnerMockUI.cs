@@ -140,8 +140,7 @@ namespace Yarn.Unity.Tests
             Debug.Log($"Variadic static function: {required}, ({string.Join(", ", bools)})");
         }
 
-
-        public override async YarnTask RunLineAsync(LocalizedLine line, CancellationToken token)
+        public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
         {
             // Store the localised text in our CurrentLine property
             CurrentLine = line.Text.Text;

@@ -91,9 +91,7 @@ namespace Yarn.Unity.Tests
 
             lineView.canvasGroup.alpha.Should().BeEqualTo(0, "The line view is not yet visible");
 
-            var tokenSource = new CancellationTokenSource();
-
-            var runTask = lineView.RunLineAsync(line, tokenSource.Token);
+            var runTask = lineView.RunLineAsync(line, default);
 
             await YarnTask.Delay(TimeSpan.FromSeconds(0.5f));
 
@@ -107,10 +105,17 @@ namespace Yarn.Unity.Tests
 
         private LocalizedLine MakeLocalizedLine(string lineText, string[]? substitutions = null, string[]? metadata = null, string? lineID = null)
         {
+            string locale = "en-AU";
             Markup.MarkupParseResult ParseMarkup(string text, string[] substitutions)
             {
-                text = Dialogue.ExpandSubstitutions(text, substitutions);
-                return dialogueRunner.Dialogue.ParseMarkup(text, "en");
+                var expandedText = Markup.LineParser.ExpandSubstitutions(text, substitutions);
+                var lineParser = new Markup.LineParser();
+                var builtinReplacer = new Markup.BuiltInMarkupReplacer();
+                lineParser.RegisterMarkerProcessor("select", builtinReplacer);
+                lineParser.RegisterMarkerProcessor("plural", builtinReplacer);
+                lineParser.RegisterMarkerProcessor("ordinal", builtinReplacer);
+
+                return lineParser.ParseString(lineText, locale);
             }
 
             return new LocalizedLine()
@@ -135,11 +140,17 @@ namespace Yarn.Unity.Tests
 
             var cancellationSource = new CancellationTokenSource();
 
-            // Set the line view's 'interrupt handler' to be one that cancels the line
+            // Set the line view's 'interrupt handler' to be one that soft-cancels the line
             lineView.requestInterrupt = () => cancellationSource.Cancel();
 
-            YarnTask runTask = lineView.RunLineAsync(line, cancellationSource.Token);
-            
+            var lineCancellationToken = new LineCancellationToken
+            {
+                SoftToken = cancellationSource.Token,
+                HardToken = default
+            };
+
+            YarnTask runTask = lineView.RunLineAsync(line, lineCancellationToken);
+
             runTask.IsCompleted().Should().BeFalse();
             lineView.lineText.text.Should().BeEqualTo("Line 1");
 
@@ -162,10 +173,16 @@ namespace Yarn.Unity.Tests
 
             var cancellationSource = new CancellationTokenSource();
 
-            // Set the line view's 'interrupt handler' to be one that cancels the line
+            // Set the line view's 'interrupt handler' to be one that soft-cancels the line
             lineView.requestInterrupt = () => cancellationSource.Cancel();
 
-            YarnTask runTask = lineView.RunLineAsync(line, cancellationSource.Token);
+            var lineCancellationToken = new LineCancellationToken
+            {
+                SoftToken = cancellationSource.Token,
+                HardToken = default
+            };
+
+            YarnTask runTask = lineView.RunLineAsync(line, lineCancellationToken);
 
             int characterCount = lineView.lineText.textInfo.characterCount;
             characterCount.Should().BeGreaterThan(0);

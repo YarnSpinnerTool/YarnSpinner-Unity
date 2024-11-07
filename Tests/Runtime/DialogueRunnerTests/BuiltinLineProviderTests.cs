@@ -77,8 +77,8 @@ namespace Yarn.Unity.Tests
 
             yield return new WaitUntil(() => loaded);
 
-            runner = GameObject.FindObjectOfType<DialogueRunner>();
-            lineProvider = GameObject.FindObjectOfType<BuiltinLocalisedLineProvider>();
+            runner = GameObject.FindAnyObjectByType<DialogueRunner>();
+            lineProvider = GameObject.FindAnyObjectByType<BuiltinLocalisedLineProvider>();
 
             runner.Should().NotBeNull();
             runner.lineProvider!.Should().NotBeNull();
@@ -96,7 +96,7 @@ namespace Yarn.Unity.Tests
             var line = new Line("line:shadowtest_1", new string[] { });
             
             lineProvider.LocaleCode = "en";
-            var localisedLine = await lineProvider.GetLocalizedLineAsync(line, this.runner.Dialogue, CancellationToken.None);
+            var localisedLine = await lineProvider.GetLocalizedLineAsync(line, CancellationToken.None);
 
             localisedLine.Should().NotBeNull();
 
@@ -113,7 +113,7 @@ namespace Yarn.Unity.Tests
             var line = new Line("line:doesnotexist", new string[] { });
 
             lineProvider.LocaleCode = "en";
-            var localisedLine = await lineProvider.GetLocalizedLineAsync(line, this.runner.Dialogue, CancellationToken.None);
+            var localisedLine = await lineProvider.GetLocalizedLineAsync(line, CancellationToken.None);
 
             localisedLine.Should().BeSameObjectAs(LocalizedLine.InvalidLine);
         });
@@ -132,9 +132,9 @@ namespace Yarn.Unity.Tests
             var sourceLineID = yarnProject.lineMetadata.GetShadowLineSource(shadowLineID)!;
             sourceLineID.Should().NotBeNull();
 
-            var sourceLine = await lineProvider.GetLocalizedLineAsync(new Line(sourceLineID, new string[] { }), this.runner.Dialogue, CancellationToken.None);
+            var sourceLine = await lineProvider.GetLocalizedLineAsync(new Line(sourceLineID, new string[] { }), CancellationToken.None);
 
-            var shadowLine = await lineProvider.GetLocalizedLineAsync(new Line(shadowLineID, new string[] { }), this.runner.Dialogue, CancellationToken.None);
+            var shadowLine = await lineProvider.GetLocalizedLineAsync(new Line(shadowLineID, new string[] { }), CancellationToken.None);
 
             shadowLine.TextID.Should().NotBeEqualTo(sourceLineID, "shadow lines have their own unique line IDs");
             shadowLine.RawText!.Should().BeEqualTo(sourceLine.RawText, "shadow lines have the same text as their source");
