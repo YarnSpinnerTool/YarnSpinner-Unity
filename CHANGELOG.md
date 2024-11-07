@@ -12,8 +12,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added shadow line support to BuiltInLineProvider.
 - Added support for generating C# variable storage classes that expose properties for string, number and boolean variables found in a Yarn Project.
 - `YarnCommand` methods may now use `params` array parameters.
+- Asynchronous Default View and Prefab:
+  - `AsyncLineView` is intended as a full replacement for `LineView`.
+  - `AsyncOptionsView` is intended as a full replacement for `OptionsListView`.
+  - `AsyncOptionItem` is intended as a full replacement for `OtionView`.
+  - `SkipThing` is a temporary replacement for `DialogueAdvanceInput`.
+  - `Async Dialogue System` prefab is intended as a full replacement for `Dialogue System` prefab.
+- New approach to handling replacement markup:
+  - `AttributeMarkerProcessor` defines the required fields and methods to create replacement markup processors.
+  - `PaletteMarkerProcessor` implements `MarkupPalletes` replacement.
+  - `StyleMarkerProcessor` implements TMP style tag replacement.
+- New approach to handling display-time markup:
+  - `TemporalMarkupHandler` defines the required fields and methods to create markup handlers.
+  - Typewriter is now implemented as a markup handler inside `TypewriterHandler`.
+- `LineCancellationToken` is a combination of two cancellation tokens
+  - this allows for the highly common model of asking a line to hurry up vs skip
+  - New method `HurryUpCurrentLine` on `DialogueRunner` is how to trigger this.
+- Async form of `FadeAlpha` added to `Effects`.
+- Cancellable `Delay` added to `AsyncHelpers`.
+- Cancellable `WaitUntil` that uses a predicate added to `AsyncHelpers`.
 
 ### Changed
+
+- Line Providers are now responsible for performing markup parsing
+  - for the most part this will done by calling `Yarn.Markup.LineParser.ExpandSubstitutions`.
+  - Built in and Unity Loc line providers now handle this for you.
+- `MarkupPallete` now supports more than just colour.
 
 ### Removed
 
@@ -22,6 +46,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Obsolete property `YarnFunctionAttribute.FunctionName`
   - Obsolete property `YarnCommandAttribute.CommandString`
   - Obsolete method `YarnProject.GetProgram`
+- `ViewBehaviour` enum inside of `AsyncDialogueViewBase`.
 
 ## [2.4.2] 2024-02-24
 
