@@ -124,7 +124,7 @@ namespace Yarn.Unity
 
         [Group("Behaviour")]
         [Label("Start Automatically")]
-        public bool autoStart = true;
+        public bool autoStart = false;
 
         [Group("Behaviour")]
         [ShowIf(nameof(autoStart))]

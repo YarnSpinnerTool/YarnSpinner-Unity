@@ -38,6 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - for the most part this will done by calling `Yarn.Markup.LineParser.ExpandSubstitutions`.
   - Built in and Unity Loc line providers now handle this for you.
 - `MarkupPallete` now supports more than just colour.
+- Dialogue Runner's "Start Automatically" option now defaults to off, not on.
 
 ### Removed
 
