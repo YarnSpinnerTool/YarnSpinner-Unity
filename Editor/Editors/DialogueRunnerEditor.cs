@@ -96,6 +96,16 @@ namespace Yarn.Unity.Editor
             }
             return result;
         }
+
+        public static AttributeEvaluationResult Evaluate(this MustNotBeNullAttribute mustNotBeNullAttribute, SerializedProperty property)
+        {
+            if (property.propertyType != SerializedPropertyType.ObjectReference)
+            {
+                return $"{property.name} must be an object reference";
+            }
+
+            return property.objectReferenceValue != null;
+        }
     }
 
     struct PropertyInfo
@@ -200,6 +210,13 @@ namespace Yarn.Unity.Editor
                     case LabelAttribute labelAttribute:
                         label = labelAttribute.label;
                         result = true;
+                        break;
+                    case MustNotBeNullAttribute mustNotBeNullAttribute:
+                        result = mustNotBeNullAttribute.Evaluate(property.serializedProperty);
+                        if (result.Result == AttributeExtensions.AttributeEvaluationResult.ResultType.Failed)
+                        {
+                            messageBoxes.Add((mustNotBeNullAttribute.label ?? $"{ObjectNames.NicifyVariableName(property.serializedProperty.name)} must not be null", MessageType.Error));
+                        }
                         break;
                     default:
                         result = new AttributeExtensions.AttributeEvaluationResult

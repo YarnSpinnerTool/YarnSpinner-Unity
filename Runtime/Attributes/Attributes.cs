@@ -70,4 +70,13 @@ namespace Yarn.Unity
             this.label = groupName;
         }
     }
+
+    public class MustNotBeNullAttribute : YarnEditorAttribute
+    {
+        public string? label;
+        public MustNotBeNullAttribute(string? label = null)
+        {
+            this.label = label;
+        }
+    }
 }
