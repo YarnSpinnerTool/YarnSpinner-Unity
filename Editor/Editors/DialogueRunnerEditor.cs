@@ -427,7 +427,11 @@ namespace Yarn.Unity.Editor
     public class VoiceOverViewEditor : YarnEditor { }
 
     [CustomEditor(typeof(AsyncLineView))]
-    public class AsyncLineViewEditor: Yarn.Unity.Editor.YarnEditor { }
+    public class AsyncLineViewEditor : YarnEditor { }
+
+    [CustomEditor(typeof(AsyncOptionsView))]
+    public class AsyncOptionsViewEditor : YarnEditor { }
+
 
     [CustomEditor(typeof(DialogueRunner))]
     public class DialogueRunnerEditor : YarnEditor

@@ -2,27 +2,32 @@ using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Markup;
 
+#nullable enable
+
 #if USE_TMP
-    using TMPro;
+using TMPro;
 #else
-    using TextMeshProUGUI = Yarn.Unity.TMPShim;
+using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
 #if USE_UNITASK
-    using Cysharp.Threading.Tasks;
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-    using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
+using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
+using YarnTask = Cysharp.Threading.Tasks.UniTask;
+using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption?>;
 #else
-    using System.Threading;
-    using YarnTask = System.Threading.Tasks.Task;
-    using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
+using System.Threading;
+using YarnTask = System.Threading.Tasks.Task;
+using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption?>;
 #endif
 
 namespace Yarn.Unity
 {
     public class AsyncLineView : AsyncDialogueViewBase
     {
+        [SerializeField] DialogueRunner? dialogueRunner;
+
+        [Space]
         // main ui fields
         public CanvasGroup canvas;
         public TMP_Text LineText;
@@ -36,7 +41,7 @@ namespace Yarn.Unity
         public TMP_Text CharacterName;
 
         [Group("Character")] [ShowIf(nameof(ShowsCharacterName))]
-        public GameObject characterNameContainer = null;
+        public GameObject? characterNameContainer = null;
 
 
         // fade up and down fields
@@ -83,8 +88,6 @@ namespace Yarn.Unity
             return YarnTask.CompletedTask;
         }
 
-
-        private DialogueRunner runner;
         public void Awake()
         {
             if (TypewriterEffect)
@@ -101,7 +104,15 @@ namespace Yarn.Unity
                 characterNameContainer = CharacterName.gameObject;
             }
 
-            runner = FindObjectOfType<DialogueRunner>();
+            if (dialogueRunner == null)
+            {
+                // If we weren't provided with a dialogue runner at design time, try to find one now
+                dialogueRunner = FindAnyObjectByType<DialogueRunner>();
+                if (dialogueRunner == null)
+                {
+                    Debug.LogWarning($"{nameof(AsyncLineView)} failed to find a dialogue runner! Please ensure that a {nameof(DialogueRunner)} is present, or set the {nameof(dialogueRunner)} property in the Inspector.", this);
+                }
+            }
         }
 
         public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
@@ -128,7 +139,13 @@ namespace Yarn.Unity
             // setting the continue button up to let us advance dialogue
             if (continueButton != null)
             {
-                continueButton.onClick.AddListener(() => runner.CancelCurrentLine());
+                continueButton.onClick.AddListener(() =>
+                {
+                    if (dialogueRunner != null)
+                    {
+                        dialogueRunner.CancelCurrentLine();
+                    }
+                });
             }
 
             // letting every temporal processor know that fade up (if set) is about to begin
@@ -237,10 +254,10 @@ namespace Yarn.Unity
 
         private float accumulatedTime = 0;
         internal bool stopwatchRunning = false;
-        private Stack<(int position, float duration)> pauses;
+        private Stack<(int position, float duration)> pauses = new Stack<(int position, float duration)>();
         private float accumulatedPauses = 0;
 
-        private float secondsPerLetter
+        private float SecondsPerLetter
         {
             get
             {
@@ -292,7 +309,7 @@ namespace Yarn.Unity
             float timePoint = accumulatedPauses;
             if (lettersPerSecond > 0)
             {
-                timePoint += (float)currentCharacterIndex * secondsPerLetter;
+                timePoint += (float)currentCharacterIndex * SecondsPerLetter;
             }
 
             await YarnAsync.WaitUntil(() => accumulatedTime >= timePoint, cancellationToken);

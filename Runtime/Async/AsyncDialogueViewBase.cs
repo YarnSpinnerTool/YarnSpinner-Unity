@@ -2,14 +2,15 @@ using UnityEngine;
 using System.Threading;
 using UnityEngine.Events;
 
+#nullable enable
 
 #if USE_UNITASK
 using Cysharp.Threading.Tasks;
 using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
+using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption?>;
 #else
 using YarnTask = System.Threading.Tasks.Task;
-using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
+using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption?>;
 #endif
 
 #nullable enable

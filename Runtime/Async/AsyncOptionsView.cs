@@ -2,57 +2,82 @@ using System.Collections.Generic;
 using UnityEngine;
 
 #if USE_TMP
-    using TMPro;
+using TMPro;
 #else
-    using TextMeshProUGUI = Yarn.Unity.TMPShim;
+using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
 #if USE_UNITASK
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-    using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
-    using YarnOptionCompletionSource = Cysharp.Threading.Tasks.UniTaskCompletionSource<Yarn.Unity.DialogueOption>;
+using Cysharp.Threading.Tasks;
+using YarnTask = Cysharp.Threading.Tasks.UniTask;
+using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
+using YarnOptionCompletionSource = Cysharp.Threading.Tasks.UniTaskCompletionSource<Yarn.Unity.DialogueOption>;
 #else
-    using System.Threading;
-    using YarnTask = System.Threading.Tasks.Task;
-    using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
-    using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption>;
+using System.Threading;
+using YarnTask = System.Threading.Tasks.Task;
+using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
+using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption>;
 #endif
+
+#nullable enable
 
 namespace Yarn.Unity
 {
     public class AsyncOptionsView : AsyncDialogueViewBase
     {
-        [SerializeField] CanvasGroup canvasGroup;
+        [SerializeField] CanvasGroup? canvasGroup;
+
+        [MustNotBeNull]
         [SerializeField] AsyncOptionItem optionViewPrefab;
 
         // A cached pool of OptionView objects so that we can reuse them
         List<AsyncOptionItem> optionViews = new List<AsyncOptionItem>();
 
-        [SerializeField] TextMeshProUGUI lastLineText;
-        [SerializeField] GameObject lastLineContainer;
-
-        [SerializeField] TextMeshProUGUI lastLineCharacterNameText;
-        [SerializeField] GameObject lastLineCharacterNameContainer;
-        LocalizedLine lastSeenLine;
+        [Space]
         [SerializeField] bool showsLastLine;
 
+        [ShowIf(nameof(showsLastLine))]
+        [Indent]
+        [SerializeField] TextMeshProUGUI? lastLineText;
+
+        [ShowIf(nameof(showsLastLine))]
+        [Indent]
+        [SerializeField] GameObject? lastLineContainer;
+
+        [ShowIf(nameof(showsLastLine))]
+        [Indent]
+        [SerializeField] TextMeshProUGUI? lastLineCharacterNameText;
+
+        [ShowIf(nameof(showsLastLine))]
+        [Indent]
+        [SerializeField] GameObject? lastLineCharacterNameContainer;
+
+
+        LocalizedLine lastSeenLine;
+
+        [Space]
         public bool showUnavailableOptions = false;
 
         public override YarnTask OnDialogueCompleteAsync()
         {
-            canvasGroup.alpha = 0;
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 0;
+                canvasGroup.interactable = false;
+                canvasGroup.blocksRaycasts = false;
+            }
 
             return YarnTask.CompletedTask;
         }
 
         void Start()
         {
-            canvasGroup.alpha = 0;
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 0;
+                canvasGroup.interactable = false;
+                canvasGroup.blocksRaycasts = false;
+            }
 
             if (lastLineContainer == null && lastLineText != null)
             {
@@ -65,9 +90,12 @@ namespace Yarn.Unity
         }
         public override YarnTask OnDialogueStartedAsync()
         {
-            canvasGroup.alpha = 0;
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 0;
+                canvasGroup.interactable = false;
+                canvasGroup.blocksRaycasts = false;
+            }
 
             return YarnTask.CompletedTask;
         }
@@ -92,7 +120,7 @@ namespace Yarn.Unity
 
             // the tasks we are making to give to the options for their selection event
             List<YarnOptionTask> tasks = new List<YarnOptionTask>();
-            
+
             // adding in a cancellation task
             // this exists to let us bail out early if the dialogue is cancelled
             // in later version of dotnet there exists a way to bind a cancellation token to a WhenAny task, but not in our version
@@ -113,7 +141,7 @@ namespace Yarn.Unity
                     continue;
                 }
                 optionView.gameObject.SetActive(true);
-                optionView.Option = option; 
+                optionView.Option = option;
 
                 YarnOptionCompletionSource tcs = new YarnOptionCompletionSource();
                 tasks.Add(tcs.Task);
@@ -128,7 +156,7 @@ namespace Yarn.Unity
             }
 
             // Update the last line, if one is configured
-            if (lastLineContainer != null)
+            if (lastLineContainer != null && lastLineText != null)
             {
                 if (lastSeenLine != null && showsLastLine)
                 {
@@ -136,7 +164,7 @@ namespace Yarn.Unity
                     // and the last line has a character then we show the nameplate
                     // otherwise we turn off the nameplate
                     var line = lastSeenLine.Text;
-                    if (lastLineCharacterNameContainer != null)
+                    if (lastLineCharacterNameContainer != null && lastLineCharacterNameText != null)
                     {
                         if (string.IsNullOrWhiteSpace(lastSeenLine.CharacterName))
                         {
@@ -167,13 +195,20 @@ namespace Yarn.Unity
             await Effects.FadeAlpha(canvasGroup, 0, 1, 1, cancellationToken);
 
             // allow interactivity and wait for an option to be selected
-            canvasGroup.interactable = true;
-            canvasGroup.blocksRaycasts = true;
+            if (canvasGroup != null)
+            {
+                canvasGroup.interactable = true;
+                canvasGroup.blocksRaycasts = true;
+            }
+
             var completedTask = await YarnTask.WhenAny(tasks);
 
             // now one of the option items has been selected so we do cleanup
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
+            if (canvasGroup != null)
+            {
+                canvasGroup.interactable = false;
+                canvasGroup.blocksRaycasts = false;
+            }
 
             // fade down
             await Effects.FadeAlpha(canvasGroup, 1, 0, 1, cancellationToken);
@@ -198,7 +233,10 @@ namespace Yarn.Unity
         private AsyncOptionItem CreateNewOptionView()
         {
             var optionView = Instantiate(optionViewPrefab);
-            optionView.transform.SetParent(canvasGroup.transform, false);
+
+            var targetTransform = canvasGroup != null ? canvasGroup.transform : this.transform;
+
+            optionView.transform.SetParent(targetTransform.transform, false);
             optionView.transform.SetAsLastSibling();
             optionView.gameObject.SetActive(false);
 
