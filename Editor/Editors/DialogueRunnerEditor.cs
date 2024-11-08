@@ -423,12 +423,15 @@ namespace Yarn.Unity.Editor
         }
     }
 
+    [CanEditMultipleObjects]
     [CustomEditor(typeof(VoiceOverView))]
     public class VoiceOverViewEditor : YarnEditor { }
 
+    [CanEditMultipleObjects]
     [CustomEditor(typeof(AsyncLineView))]
     public class AsyncLineViewEditor : YarnEditor { }
 
+    [CanEditMultipleObjects]
     [CustomEditor(typeof(AsyncOptionsView))]
     public class AsyncOptionsViewEditor : YarnEditor { }
 
