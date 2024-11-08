@@ -39,6 +39,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Built in and Unity Loc line providers now handle this for you.
 - `MarkupPallete` now supports more than just colour.
 - Dialogue Runner's "Start Automatically" option now defaults to off, not on.
+- Dialogue Runner's "On Command" event has been renamed to "On Unhandled Command", to better reflect when it's called.
 
 ### Removed
 

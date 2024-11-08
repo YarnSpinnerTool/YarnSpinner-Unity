@@ -171,7 +171,8 @@ namespace Yarn.Unity
 
         /// <summary>
         /// A <see cref="StringUnityEvent"/> that is called when a <see
-        /// cref="Command"/> is received.
+        /// cref="Command"/> is received and no command handler was able to
+        /// handle it.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -197,7 +198,8 @@ namespace Yarn.Unity
         /// <seealso cref="AddCommandHandler(string, CommandHandler)"/>
         /// <seealso cref="YarnCommandAttribute"/>
         [Group("Events", foldOut: true)]
-        public UnityEventString onCommand;
+        [UnityEngine.Serialization.FormerlySerializedAs("onCommand")]
+        public UnityEventString onUnhandledCommand;
 
         public IEnumerable<AsyncDialogueViewBase?> DialogueViews {
             get => dialogueViews;
@@ -371,10 +373,10 @@ namespace Yarn.Unity
                 case CommandDispatchResult.StatusType.CommandUnknown:
                     // Attempt a last-ditch dispatch by invoking our 'onCommand'
                     // Unity Event.
-                    if (onCommand != null && onCommand.GetPersistentEventCount() > 0)
+                    if (onUnhandledCommand != null && onUnhandledCommand.GetPersistentEventCount() > 0)
                     {
                         // We can invoke the event!
-                        onCommand.Invoke(command.Text);
+                        onUnhandledCommand.Invoke(command.Text);
                     }
                     else
                     {
