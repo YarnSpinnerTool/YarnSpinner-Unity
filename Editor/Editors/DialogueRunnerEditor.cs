@@ -142,9 +142,12 @@ namespace Yarn.Unity.Editor
             this.field = GetField(property);
         }
 
-        public bool IsInherited {
-            get {
-                if (this.field == null) {
+        public bool IsInherited
+        {
+            get
+            {
+                if (this.field == null)
+                {
                     return false;
                 }
                 var owner = this.serializedProperty.serializedObject.targetObject;
@@ -155,7 +158,8 @@ namespace Yarn.Unity.Editor
         }
     }
 
-    public abstract class YarnEditor : UnityEditor.Editor {
+    public abstract class YarnEditor : UnityEditor.Editor
+    {
 
 #if USE_UNITY_LOCALIZATION
         protected const bool UnityLocalizationAvailable = true;
@@ -502,7 +506,9 @@ namespace Yarn.Unity.Editor
                     EditorGUILayout.HelpBox($"A {ObjectNames.NicifyVariableName(nameof(BuiltinLocalisedLineProvider))} component will be added at run time.", MessageType.Info);
                 }
                 EditorGUI.indentLevel -= 1;
-            } else {
+            }
+            else
+            {
                 // We do have a line provider.
 
                 // If it's a BuiltInLocalisationLineProvider and the project is

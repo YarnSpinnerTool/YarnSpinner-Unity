@@ -82,7 +82,6 @@ namespace Yarn.Unity
             }
         }
 
-        [Header("Async Dialogue Runner!")]
         [SerializeField] internal YarnProject? yarnProject;
         [SerializeField] internal VariableStorageBehaviour? variableStorage;
 

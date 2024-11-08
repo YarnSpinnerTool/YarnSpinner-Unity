@@ -11,7 +11,7 @@ namespace Yarn.Unity
     public class IndentAttribute : YarnEditorAttribute
     {
         public int indentLevel = 1;
-        public IndentAttribute(int indentLevel)
+        public IndentAttribute(int indentLevel = 1)
         {
             if (this.indentLevel < 0)
             {
@@ -20,7 +20,6 @@ namespace Yarn.Unity
             this.indentLevel = indentLevel;
         }
     }
-
 
     public abstract class VisibilityAttribute : YarnEditorAttribute
     {
@@ -50,7 +49,8 @@ namespace Yarn.Unity
     }
 
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
-    public class GroupAttribute : YarnEditorAttribute {
+    public class GroupAttribute : YarnEditorAttribute
+    {
         public string groupName;
         public bool foldOut;
 
@@ -62,7 +62,8 @@ namespace Yarn.Unity
     }
 
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
-    public class LabelAttribute : YarnEditorAttribute {
+    public class LabelAttribute : YarnEditorAttribute
+    {
         public string label;
 
         public LabelAttribute(string groupName)
