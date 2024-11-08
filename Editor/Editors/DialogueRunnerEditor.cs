@@ -36,14 +36,43 @@ namespace Yarn.Unity.Editor
 
     internal static class AttributeExtensions
     {
-        public static bool Evaluate(this VisibilityAttribute visibilityAttribute, SerializedObject target)
+
+        public struct AttributeEvaluationResult
+        {
+            public enum ResultType
+            {
+                Passed,
+                Failed,
+                Error,
+            }
+            public ResultType Result;
+            public string? Message;
+            public static implicit operator AttributeEvaluationResult(bool value)
+            {
+                return new AttributeEvaluationResult
+                {
+                    Result = value ? ResultType.Passed : ResultType.Failed,
+                    Message = null,
+                };
+            }
+            public static implicit operator AttributeEvaluationResult(string errorMessage)
+            {
+                return new AttributeEvaluationResult
+                {
+                    Result = ResultType.Error,
+                    Message = errorMessage,
+                };
+            }
+        }
+
+        public static AttributeEvaluationResult Evaluate(this VisibilityAttribute visibilityAttribute, SerializedObject target)
         {
             var property = target.FindProperty(visibilityAttribute.condition);
 
             if (property == null)
             {
-                // Property is missing; default to showing the field
-                return true;
+                // Property is missing
+                return $"{visibilityAttribute.condition} not found";
             }
 
             bool result;
@@ -57,8 +86,8 @@ namespace Yarn.Unity.Editor
                     result = property.boolValue;
                     break;
                 default:
-                    // Property is an unhandled type; default to showing the field
-                    return true;
+                    // Property is an unhandled type
+                    return $"{visibilityAttribute.condition} must be a boolean or object reference, not {property.propertyType}";
             }
 
             if (visibilityAttribute.invert)
@@ -133,21 +162,27 @@ namespace Yarn.Unity.Editor
 
         private Dictionary<string, PropertyRenderer> customPropertyRenderers = new Dictionary<string, PropertyRenderer>();
 
+        private List<(string Message, MessageType Type)> messageBoxes = new List<(string, MessageType)>();
+
         private void DrawPropertyField(PropertyInfo property)
         {
 
             int indentation = 0;
             GroupAttribute? group = null;
             string? label = null;
+            this.messageBoxes.Clear();
 
             // Get all relevant attributes for this property and get information
             // from it.
             foreach (var attr in property.attributes)
             {
+                AttributeExtensions.AttributeEvaluationResult result;
                 switch (attr)
                 {
                     case VisibilityAttribute visibilityAttribute:
-                        if (visibilityAttribute.Evaluate(property.serializedProperty.serializedObject) == false)
+                        result = visibilityAttribute.Evaluate(property.serializedProperty.serializedObject);
+
+                        if (result.Result == AttributeExtensions.AttributeEvaluationResult.ResultType.Failed)
                         {
                             // A visibility attribute has indicated that we shouldn't
                             // show the field, so skip it
@@ -156,14 +191,34 @@ namespace Yarn.Unity.Editor
                         break;
                     case IndentAttribute indentAttribute:
                         indentation = indentAttribute.indentLevel;
+                        result = true;
                         break;
                     case GroupAttribute groupAttribute:
                         group = groupAttribute;
+                        result = true;
                         break;
                     case LabelAttribute labelAttribute:
                         label = labelAttribute.label;
+                        result = true;
+                        break;
+                    default:
+                        result = new AttributeExtensions.AttributeEvaluationResult
+                        {
+                            Result = AttributeExtensions.AttributeEvaluationResult.ResultType.Error,
+                            Message = $"Unknown attribute {attr.GetType()}",
+                        };
                         break;
                 }
+
+                if (result.Result == AttributeExtensions.AttributeEvaluationResult.ResultType.Error)
+                {
+                    messageBoxes.Add((result.Message ?? "Unknown error", MessageType.Error));
+                }
+            }
+
+            foreach (var box in messageBoxes)
+            {
+                EditorGUILayout.HelpBox(box.Message, box.Type);
             }
 
             // Gets a unique string ID for a given group on a specific object.
