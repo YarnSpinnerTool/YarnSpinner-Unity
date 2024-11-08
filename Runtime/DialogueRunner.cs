@@ -128,6 +128,7 @@ namespace Yarn.Unity
         [Group("Behaviour")]
         [ShowIf(nameof(autoStart))]
         [Indent(1)]
+        [YarnNode(nameof(yarnProject))]
         public string startNode = "Start";
         
         [Group("Behaviour")]
