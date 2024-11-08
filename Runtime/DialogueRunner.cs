@@ -105,7 +105,8 @@ namespace Yarn.Unity
         {
             get
             {
-                if (lineProvider == null) {
+                if (lineProvider == null)
+                {
                     lineProvider = gameObject.AddComponent<BuiltinLocalisedLineProvider>();
                 }
                 return lineProvider;
@@ -130,10 +131,10 @@ namespace Yarn.Unity
         [Indent(1)]
         [YarnNode(nameof(yarnProject))]
         public string startNode = "Start";
-        
+
         [Group("Behaviour")]
         public bool runSelectedOptionAsLine = false;
-        
+
         /// <summary>
         /// A Unity event that is called when a node starts running.
         /// </summary>
@@ -201,27 +202,30 @@ namespace Yarn.Unity
         [UnityEngine.Serialization.FormerlySerializedAs("onCommand")]
         public UnityEventString onUnhandledCommand;
 
-        public IEnumerable<AsyncDialogueViewBase?> DialogueViews {
+        public IEnumerable<AsyncDialogueViewBase?> DialogueViews
+        {
             get => dialogueViews;
             set => dialogueViews = value.ToList();
-        } 
+        }
 
         private CancellationTokenSource? dialogueCancellationSource;
         private CancellationTokenSource? currentLineCancellationSource;
         private CancellationTokenSource? currentLineHurryUpSource;
 
         internal ICommandDispatcher CommandDispatcher { get; private set; }
-        
-        public void Awake() {
+
+        public void Awake()
+        {
             var actions = new Actions(this, Dialogue.Library);
             CommandDispatcher = actions;
             actions.RegisterActions();
 
-            if (this.VariableStorage != null && this.YarnProject != null) {
+            if (this.VariableStorage != null && this.YarnProject != null)
+            {
                 this.VariableStorage.Program = this.YarnProject.Program;
             }
         }
-        
+
         public void Start()
         {
             if (autoStart)
@@ -230,7 +234,8 @@ namespace Yarn.Unity
             }
         }
 
-        public void Stop() {
+        public void Stop()
+        {
             CancelDialogue();
         }
 
@@ -247,16 +252,23 @@ namespace Yarn.Unity
         /// If the dialogue is not currently running when this property is
         /// accessed, the property returns a task that is already complete.
         /// </remarks>
-        public YarnTask DialogueTask {
-            get {
-                async YarnTask WaitUntilComplete() {
-                    while (IsDialogueRunning) {
+        public YarnTask DialogueTask
+        {
+            get
+            {
+                async YarnTask WaitUntilComplete()
+                {
+                    while (IsDialogueRunning)
+                    {
                         await YarnTask.Yield();
                     }
                 }
-                if (IsDialogueRunning) {
+                if (IsDialogueRunning)
+                {
                     return WaitUntilComplete();
-                } else {
+                }
+                else
+                {
                     return YarnTask.CompletedTask;
                 }
             }
@@ -272,10 +284,10 @@ namespace Yarn.Unity
 
             // Cancel the current line, if any.
             currentLineCancellationSource?.Cancel();
-            
+
             // Cancel the entire dialogue.
             dialogueCancellationSource?.Cancel();
-            
+
             // Stop the dialogue. This will cause OnDialogueCompleted to be called.
             Dialogue.Stop();
         }
@@ -321,7 +333,7 @@ namespace Yarn.Unity
                 }
 
                 YarnTask task = RunCompletion();
-                
+
                 pendingTasks.Add(task);
             }
 
@@ -394,7 +406,7 @@ namespace Yarn.Unity
             {
                 return;
             }
-            
+
             Dialogue.Continue();
         }
 
@@ -406,7 +418,7 @@ namespace Yarn.Unity
         private async YarnTask OnLineReceivedAsync(Line line)
         {
             var localisedLine = await LineProvider.GetLocalizedLineAsync(line, dialogueCancellationSource?.Token ?? CancellationToken.None);
-            
+
             if (localisedLine == LocalizedLine.InvalidLine)
             {
                 Debug.LogError($"Failed to get a localised line for {line.ID}!");
@@ -461,7 +473,8 @@ namespace Yarn.Unity
 
             foreach (var view in this.dialogueViews)
             {
-                if (view == null) {
+                if (view == null)
+                {
                     // The view doesn't exist. Skip it.
                     continue;
                 }
@@ -496,7 +509,7 @@ namespace Yarn.Unity
                 }
 
                 YarnTask task = RunLineAndInvokeCompletion(view, localisedLine, metaToken);
-                
+
                 pendingTasks.Add(task);
             }
 
@@ -536,7 +549,8 @@ namespace Yarn.Unity
                 var opt = options.Options[i];
                 LocalizedLine localizedLine = await LineProvider.GetLocalizedLineAsync(opt.Line, optionCancellationSource.Token);
 
-                if (localizedLine == LocalizedLine.InvalidLine) {
+                if (localizedLine == LocalizedLine.InvalidLine)
+                {
                     Debug.LogError($"Failed to get a localised line for line {opt.Line.ID} (option {i + 1})!");
                 }
 
@@ -566,7 +580,7 @@ namespace Yarn.Unity
                     dialogueSelectionTCS.TrySetResult(result);
                 }
             }
-            
+
             var pendingTasks = new List<YarnTask>();
             foreach (var view in this.dialogueViews)
             {
@@ -644,8 +658,10 @@ namespace Yarn.Unity
         /// <exception cref="InvalidOperationException">Thrown when attempting
         /// to set a new project while a dialogue is currently
         /// running.</exception>
-        public void SetProject(YarnProject project) {
-            if (this.IsDialogueRunning) {
+        public void SetProject(YarnProject project)
+        {
+            if (this.IsDialogueRunning)
+            {
                 // Can't change project if we're already running.
                 throw new InvalidOperationException("Can't set project, because dialogue is currently running.");
             }
@@ -654,7 +670,8 @@ namespace Yarn.Unity
 
         public void StartDialogue(string nodeName)
         {
-            if (yarnProject == null) {
+            if (yarnProject == null)
+            {
                 Debug.LogError($"Can't start dialogue: no Yarn Project has been configured.");
                 return;
             }
