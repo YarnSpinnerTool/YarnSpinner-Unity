@@ -26,6 +26,7 @@ public class SkipThing : AsyncDialogueViewBase
     [ShowIf(nameof(multiSoftSkipIsHardSkip))]
     [Indent]
     [Label("Skips to cancel")]
+    // TODO: Update this tooltip once we've settled on our terminology
     [Tooltip("The number of times that a SOFTSKIP occurs before the line is cancelled.")]
     public int skipRequestsBeforeCancellingLine = 2;
 
@@ -42,7 +43,6 @@ public class SkipThing : AsyncDialogueViewBase
     [Space]
     [MessageBox(sourceMethod: nameof(ValidateInputMode))]
     [SerializeField] InputMode inputMode;
-
 
     public MessageBoxAttribute.Message ValidateInputMode()
     {
@@ -116,13 +116,11 @@ public class SkipThing : AsyncDialogueViewBase
     [Indent]
     [SerializeField] KeyCode cancelDialogueKeyCode = KeyCode.None;
 
-
 #if USE_INPUTSYSTEM
     public void OnSkipLine(UnityEngine.InputSystem.InputAction.CallbackContext ctx) => RequestLineAdvancement();
     public void OnCancelLine(UnityEngine.InputSystem.InputAction.CallbackContext ctx) => RequestLineCancellation();
     public void OnCancelDialogue(UnityEngine.InputSystem.InputAction.CallbackContext ctx) => RequestDialogueCancellation();
 #endif
-
 
     public override YarnTask OnDialogueStartedAsync()
     {
@@ -175,6 +173,10 @@ public class SkipThing : AsyncDialogueViewBase
 
     public void RequestLineAdvancement()
     {
+        // Increment our counter of line advancements, and depending on the new
+        // count, request that the runner 'soft-cancel' the line or cancel the
+        // entire line
+
         numberOfSkipsThisLine += 1;
         if (multiSoftSkipIsHardSkip && numberOfSkipsThisLine >= skipRequestsBeforeCancellingLine)
         {
@@ -188,6 +190,7 @@ public class SkipThing : AsyncDialogueViewBase
 
     public void RequestLineCancellation()
     {
+        // Request that the runner cancel the entire line
         runner.CancelCurrentLine();
     }
 
@@ -200,7 +203,7 @@ public class SkipThing : AsyncDialogueViewBase
 
     public void Update()
     {
-        switch (this.inputMode)
+        switch (inputMode)
         {
             case InputMode.KeyCodes:
                 if (Input.GetKeyDown(skipLineKeyCode)) { this.RequestLineAdvancement(); }
@@ -211,6 +214,10 @@ public class SkipThing : AsyncDialogueViewBase
                 if (string.IsNullOrEmpty(skipLineAxis) == false && Input.GetButtonDown(skipLineAxis)) { this.RequestLineAdvancement(); }
                 if (string.IsNullOrEmpty(cancelLineAxis) == false && Input.GetButtonDown(cancelLineAxis)) { this.RequestLineCancellation(); }
                 if (string.IsNullOrEmpty(cancelDialogueAxis) == false && Input.GetButtonDown(cancelDialogueAxis)) { this.RequestDialogueCancellation(); }
+                break;
+            default:
+                // Nothing to do; 'None' takes no action, and 'InputActions'
+                // doesn't poll in Update()
                 break;
         }
     }
