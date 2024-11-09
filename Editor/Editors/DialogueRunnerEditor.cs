@@ -123,6 +123,56 @@ namespace Yarn.Unity.Editor
 
             return property.objectReferenceValue != null;
         }
+
+        public static MessageBoxAttribute.Message GetMessage(this MessageBoxAttribute messageBoxAttribute, SerializedObject serializedObject)
+        {
+            if (serializedObject == null || serializedObject.targetObject == null)
+            {
+                return "Serialized object is null";
+            }
+            var methodName = messageBoxAttribute.SourceMethod;
+            if (serializedObject.isEditingMultipleObjects)
+            {
+                // If we're editing multiple objects, don't show a message box
+                return null;
+            }
+            var target = serializedObject.targetObject;
+            var method = serializedObject.targetObject.GetType().GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            if (method == null)
+            {
+                return $@"Failed to find an instance method ""{methodName}"" on this object";
+            }
+            if (method.ReturnType != typeof(MessageBoxAttribute.Message))
+            {
+                return $@"Method ""{methodName}"" must return a {nameof(MessageBoxAttribute.Message)}";
+            }
+            if (method.GetParameters().Length != 0)
+            {
+                return $@"Method ""{methodName}"" must not accept any parameters";
+            }
+            try
+            {
+                var result = method.Invoke(target, Array.Empty<object>());
+                if (result is MessageBoxAttribute.Message message)
+                {
+                    return message;
+                }
+                else
+                {
+                    return $@"Method ""{methodName}"" did not return a valid message";
+                }
+            }
+            catch (TargetInvocationException e)
+            {
+                Debug.LogException(e.InnerException);
+                return $@"Method ""{methodName}"" threw a {e.InnerException.GetType().Name}: {e.InnerException.Message ?? "(no message)"}";
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e, target);
+                return $@"{e.GetType().Name} thrown when calling ""{methodName}"": {e.Message ?? "(no message)"}";
+            }
+        }
     }
 
     struct PropertyInfo
@@ -236,8 +286,22 @@ namespace Yarn.Unity.Editor
                         result = mustNotBeNullAttribute.Evaluate(property.serializedProperty);
                         if (result.Result == AttributeExtensions.AttributeEvaluationResult.ResultType.Failed)
                         {
-                            messageBoxes.Add((mustNotBeNullAttribute.label ?? $"{ObjectNames.NicifyVariableName(property.serializedProperty.name)} must not be null", MessageType.Error));
+                            messageBoxes.Add((mustNotBeNullAttribute.Label ?? $"{ObjectNames.NicifyVariableName(property.serializedProperty.name)} must not be null", MessageType.Error));
                         }
+                        break;
+                    case MessageBoxAttribute messageBoxAttribute:
+                        MessageBoxAttribute.Message message = messageBoxAttribute.GetMessage(property.serializedProperty.serializedObject);
+                        if (message.text != null)
+                        {
+                            messageBoxes.Add((message.text, message.type switch
+                            {
+                                MessageBoxAttribute.Type.Info => MessageType.Info,
+                                MessageBoxAttribute.Type.Warning => MessageType.Warning,
+                                MessageBoxAttribute.Type.Error => MessageType.Error,
+                                _ => MessageType.None
+                            }));
+                        }
+                        result = true;
                         break;
                     default:
                         result = new AttributeExtensions.AttributeEvaluationResult

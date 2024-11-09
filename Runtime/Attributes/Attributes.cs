@@ -109,6 +109,50 @@ namespace Yarn.Unity
             this.Label = label;
         }
     }
+
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
+    public class MessageBoxAttribute : YarnEditorAttribute
+    {
+        public string SourceMethod { get; }
+
+        public enum Type { None, Info, Warning, Error };
+        public struct Message
+        {
+            public Type type;
+            public string? text;
+
+            public static implicit operator Message(string? text)
+            {
+                return new Message
+                {
+                    type = Type.Error,
+                    text = text,
+                };
+            }
         }
+
+        public MessageBoxAttribute(string sourceMethod)
+        {
+            this.SourceMethod = sourceMethod;
+        }
+
+        public static Message Error(string message)
+        {
+            return new Message { type = Type.Error, text = message };
+        }
+
+        public static Message Warning(string message)
+        {
+            return new Message { type = Type.Warning, text = message };
+        }
+        public static Message Info(string message)
+        {
+            return new Message { type = Type.Info, text = message };
+        }
+        public static Message Neutral(string message)
+        {
+            return new Message { type = Type.None, text = message };
+        }
+        public static Message NoMessage => new Message { type = Type.None, text = null };
     }
 }
