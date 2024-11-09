@@ -76,15 +76,15 @@ public class SkipThing : AsyncDialogueViewBase
 #if USE_INPUTSYSTEM
     [ShowIf(nameof(inputMode), InputMode.InputActions)]
     [Indent]
-    [SerializeField] UnityEngine.InputSystem.InputActionReference skipLineAction;
+    [SerializeField] UnityEngine.InputSystem.InputActionReference? skipLineAction;
 
     [ShowIf(nameof(inputMode), InputMode.InputActions)]
     [Indent]
-    [SerializeField] UnityEngine.InputSystem.InputActionReference cancelLineAction;
+    [SerializeField] UnityEngine.InputSystem.InputActionReference? cancelLineAction;
 
     [ShowIf(nameof(inputMode), InputMode.InputActions)]
     [Indent]
-    [SerializeField] UnityEngine.InputSystem.InputActionReference cancelDialogueAction;
+    [SerializeField] UnityEngine.InputSystem.InputActionReference? cancelDialogueAction;
 
     [Tooltip("If true, the input actions above will be enabled when a line begins.")]
     [ShowIf(nameof(inputMode), InputMode.InputActions)]
@@ -128,9 +128,9 @@ public class SkipThing : AsyncDialogueViewBase
     {
 #if USE_INPUTSYSTEM
         // If we're using the input system, register callbacks to run when our actions are performed.
-        skipLineAction.action.performed += OnSkipLine;
-        cancelLineAction.action.performed += OnCancelLine;
-        cancelDialogueAction.action.performed += OnCancelDialogue;
+        if (skipLineAction != null) { skipLineAction.action.performed += OnSkipLine; }
+        if (cancelLineAction != null) { cancelLineAction.action.performed += OnCancelLine; }
+        if (cancelDialogueAction != null) { cancelDialogueAction.action.performed += OnCancelDialogue; }
 #endif
 
         return YarnTask.CompletedTask;
@@ -141,9 +141,9 @@ public class SkipThing : AsyncDialogueViewBase
         // If we're using the input system, remove the callbacks
 #if USE_INPUTSYSTEM
         // If we're using the input system, register callbacks to run when our actions are performed.
-        skipLineAction.action.performed -= OnSkipLine;
-        cancelLineAction.action.performed -= OnCancelLine;
-        cancelDialogueAction.action.performed -= OnCancelDialogue;
+        if (skipLineAction != null) { skipLineAction.action.performed -= OnSkipLine; }
+        if (cancelLineAction != null) { cancelLineAction.action.performed -= OnCancelLine; }
+        if (cancelDialogueAction != null) { cancelDialogueAction.action.performed -= OnCancelDialogue; }
 #endif
 
         return YarnTask.CompletedTask;
@@ -158,9 +158,9 @@ public class SkipThing : AsyncDialogueViewBase
 #if USE_INPUTSYSTEM
         if (enableActions)
         {
-            skipLineAction.action.Enable();
-            cancelLineAction.action.Enable();
-            cancelDialogueAction.action.Enable();
+            if (skipLineAction != null) { skipLineAction.action.Enable(); }
+            if (cancelLineAction != null) { cancelLineAction.action.Enable(); }
+            if (cancelDialogueAction != null) { cancelDialogueAction.action.Enable(); }
         }
 #endif
 
