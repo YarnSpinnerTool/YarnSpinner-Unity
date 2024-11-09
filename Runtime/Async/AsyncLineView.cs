@@ -12,7 +12,6 @@ using TextMeshProUGUI = Yarn.Unity.TMPShim;
 
 #if USE_UNITASK
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks;
 using YarnTask = Cysharp.Threading.Tasks.UniTask;
 using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption?>;
 #else
@@ -35,24 +34,31 @@ namespace Yarn.Unity
         public UnityEngine.UI.Button continueButton;
 
         // Showing character name fields
-        [Group("Character")] [Label("Shows Name")]
+        [Group("Character")]
+        [Label("Shows Name")]
         public bool ShowsCharacterName = true;
 
-        [Group("Character")] [ShowIf(nameof(ShowsCharacterName))][Label("Name field")]
+        [Group("Character")]
+        [ShowIf(nameof(ShowsCharacterName))]
+        [Label("Name field")]
         public TMP_Text CharacterName;
 
-        [Group("Character")] [ShowIf(nameof(ShowsCharacterName))]
+        [Group("Character")]
+        [ShowIf(nameof(ShowsCharacterName))]
         public GameObject? characterNameContainer = null;
 
 
         // fade up and down fields
-        [Group("Fade")] [Label("Fade UI")]
+        [Group("Fade")]
+        [Label("Fade UI")]
         public bool fade = true;
 
-        [Group("Fade")] [ShowIf(nameof(fade))]
+        [Group("Fade")]
+        [ShowIf(nameof(fade))]
         public float fadeUpDuration = 0.25f;
 
-        [Group("Fade")] [ShowIf(nameof(fade))]
+        [Group("Fade")]
+        [ShowIf(nameof(fade))]
         public float fadeDownDuration = 0.1f;
 
 
@@ -60,21 +66,26 @@ namespace Yarn.Unity
         [Group("Automatically Advance Dialogue")]
         public bool AutoAdvance = false;
 
-        [Group("Automatically Advance Dialogue")] [ShowIf(nameof(AutoAdvance))] [Label("Delay before advancing")]
+        [Group("Automatically Advance Dialogue")]
+        [ShowIf(nameof(AutoAdvance))]
+        [Label("Delay before advancing")]
         public float AutoAdvanceDelay = 0;
 
 
         // typewriter fields
         [Group("Typewriter")]
         public bool TypewriterEffect = true;
-        
-        [Group("Typewriter")] [ShowIf(nameof(TypewriterEffect))] [Label("Letters per second")]
+
+        [Group("Typewriter")]
+        [ShowIf(nameof(TypewriterEffect))]
+        [Label("Letters per second")]
         public int TypewriterLettersPerSecond = 60;
-        
-        [Group("Typewriter")] [ShowIf(nameof(TypewriterEffect))]
+
+        [Group("Typewriter")]
+        [ShowIf(nameof(TypewriterEffect))]
         public UnityEngine.Events.UnityEvent onCharacterTyped;
         private TypewriterHandler typewriter;
-        
+
         public List<TemporalMarkupHandler> temporalProcessors = new List<TemporalMarkupHandler>();
 
         public override YarnTask OnDialogueCompleteAsync()
@@ -240,7 +251,7 @@ namespace Yarn.Unity
         }
     }
 
-    public abstract class TemporalMarkupHandler: MonoBehaviour
+    public abstract class TemporalMarkupHandler : MonoBehaviour
     {
         public abstract void PreFadeSetup(MarkupParseResult line, TMP_Text text);
         public abstract void PrepareForMarkup(MarkupParseResult line, TMP_Text text);
@@ -248,7 +259,7 @@ namespace Yarn.Unity
         public abstract void LineDisplayComplete();
     }
 
-    public sealed class TypewriterHandler: TemporalMarkupHandler
+    public sealed class TypewriterHandler : TemporalMarkupHandler
     {
         public int lettersPerSecond = 60;
         public UnityEngine.Events.UnityEvent onCharacterTyped;
