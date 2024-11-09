@@ -23,18 +23,38 @@ namespace Yarn.Unity
 
     public abstract class VisibilityAttribute : YarnEditorAttribute
     {
-        public bool invert;
+        public enum AttributeMode
+        {
+            BooleanCondition,
+            EnumEquality,
+        }
+        public AttributeMode Mode { get; protected set; }
 
-        public string? condition;
+        public bool Invert { get; protected set; }
+
+        public string? Condition { get; protected set; }
+
+        public int EnumValue { get; protected set; }
     }
 
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
     public class ShowIfAttribute : VisibilityAttribute
     {
+
         public ShowIfAttribute(string condition)
         {
-            this.invert = false;
-            this.condition = condition;
+            this.Invert = false;
+            this.Condition = condition;
+            this.Mode = AttributeMode.BooleanCondition;
+            this.EnumValue = default;
+        }
+
+        public ShowIfAttribute(string condition, object value)
+        {
+            this.Invert = false;
+            this.Condition = condition;
+            this.Mode = AttributeMode.EnumEquality;
+            this.EnumValue = (int)value;
         }
     }
 
@@ -43,8 +63,16 @@ namespace Yarn.Unity
     {
         public HideIfAttribute(string condition)
         {
-            this.invert = true;
-            this.condition = condition;
+            this.Invert = true;
+            this.Condition = condition;
+        }
+
+        public HideIfAttribute(string condition, object value)
+        {
+            this.Invert = true;
+            this.Condition = condition;
+            this.Mode = AttributeMode.EnumEquality;
+            this.EnumValue = (int)value;
         }
     }
 
@@ -64,20 +92,23 @@ namespace Yarn.Unity
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
     public class LabelAttribute : YarnEditorAttribute
     {
-        public string label;
+        public string Label { get; }
 
         public LabelAttribute(string groupName)
         {
-            this.label = groupName;
+            this.Label = groupName;
         }
     }
 
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
     public class MustNotBeNullAttribute : YarnEditorAttribute
     {
-        public string? label;
+        public string? Label { get; }
         public MustNotBeNullAttribute(string? label = null)
         {
-            this.label = label;
+            this.Label = label;
+        }
+    }
         }
     }
 }

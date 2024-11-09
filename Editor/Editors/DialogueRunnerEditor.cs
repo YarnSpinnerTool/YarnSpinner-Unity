@@ -67,30 +67,47 @@ namespace Yarn.Unity.Editor
 
         public static AttributeEvaluationResult Evaluate(this VisibilityAttribute visibilityAttribute, SerializedObject target)
         {
-            var property = target.FindProperty(visibilityAttribute.condition);
+            var property = target.FindProperty(visibilityAttribute.Condition);
 
             if (property == null)
             {
                 // Property is missing
-                return $"{visibilityAttribute.condition} not found";
+                return $"{visibilityAttribute.Condition} not found";
             }
 
             bool result;
 
-            switch (property.propertyType)
+            switch (visibilityAttribute.Mode)
             {
-                case SerializedPropertyType.ObjectReference:
-                    result = property.objectReferenceValue != null;
+                case VisibilityAttribute.AttributeMode.BooleanCondition:
+                    switch (property.propertyType)
+                    {
+                        case SerializedPropertyType.ObjectReference:
+                            result = property.objectReferenceValue != null;
+                            break;
+                        case SerializedPropertyType.Boolean:
+                            result = property.boolValue;
+                            break;
+                        default:
+                            // Property is an unhandled type
+                            return $"{visibilityAttribute.Condition} must be a boolean or object reference, not {property.propertyType}";
+                    }
                     break;
-                case SerializedPropertyType.Boolean:
-                    result = property.boolValue;
-                    break;
+                case VisibilityAttribute.AttributeMode.EnumEquality:
+                    if (property.propertyType == SerializedPropertyType.Enum)
+                    {
+                        return property.intValue == visibilityAttribute.EnumValue;
+                    }
+                    else
+                    {
+                        return $"{visibilityAttribute.Condition} must be an enum, not a {property.propertyType}";
+                    }
                 default:
-                    // Property is an unhandled type
-                    return $"{visibilityAttribute.condition} must be a boolean or object reference, not {property.propertyType}";
+                    return $"Unhandled visibility attribute mode {visibilityAttribute.Mode}";
             }
 
-            if (visibilityAttribute.invert)
+
+            if (visibilityAttribute.Invert)
             {
                 result = !result;
             }
@@ -212,7 +229,7 @@ namespace Yarn.Unity.Editor
                         result = true;
                         break;
                     case LabelAttribute labelAttribute:
-                        label = labelAttribute.label;
+                        label = labelAttribute.Label;
                         result = true;
                         break;
                     case MustNotBeNullAttribute mustNotBeNullAttribute:
