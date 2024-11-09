@@ -318,11 +318,6 @@ namespace Yarn.Unity.Editor
                 }
             }
 
-            foreach (var box in messageBoxes)
-            {
-                EditorGUILayout.HelpBox(box.Message, box.Type);
-            }
-
             // Gets a unique string ID for a given group on a specific object.
             string GetGroupID(GroupAttribute group)
             {
@@ -409,6 +404,12 @@ namespace Yarn.Unity.Editor
                 {
                     EditorGUILayout.PropertyField(property.serializedProperty, new GUIContent(label));
                 }
+            }
+
+            // Render the message boxes we've accumulated
+            foreach (var box in messageBoxes)
+            {
+                EditorGUILayout.HelpBox(box.Message, box.Type);
             }
 
             EditorGUI.indentLevel -= indentation;
