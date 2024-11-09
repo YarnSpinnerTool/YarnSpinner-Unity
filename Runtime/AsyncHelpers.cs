@@ -72,7 +72,7 @@ namespace Yarn.Unity
         public static YarnOptionTask NoOptionSelected
         {
             get
-            { 
+            {
                 return YarnTask.FromResult<DialogueOption?>(null);
             }
         }
@@ -131,11 +131,11 @@ namespace Yarn.Unity
         // when specifying the return type.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static async 
-        #if USE_UNITASK
+#if USE_UNITASK
             UniTask<T?>
-        #else
+#else
             Task<T?>
-        #endif
+#endif
         WaitForAsyncOperation<T>(AsyncOperationHandle<T> operationHandle, CancellationToken cancellationToken)
         {
 #if USE_UNITASK
@@ -203,7 +203,7 @@ namespace Yarn.Unity
 #endif
         }
 
-        #if USE_UNITASK
+#if USE_UNITASK
         internal static bool IsCompleted(this UniTask task) {
             return task.Status != UniTaskStatus.Pending;
         }
@@ -216,19 +216,23 @@ namespace Yarn.Unity
         internal static bool IsCompletedSuccessfully<T>(this UniTask<T> task) {
             return task.Status != UniTaskStatus.Succeeded;
         }
-        #endif
-        
-        internal static bool IsCompleted(this System.Threading.Tasks.Task task) {
+#endif
+
+        internal static bool IsCompleted(this System.Threading.Tasks.Task task)
+        {
             return task.IsCompleted;
         }
-        internal static bool IsCompleted<T>(this System.Threading.Tasks.Task task) {
+        internal static bool IsCompleted<T>(this System.Threading.Tasks.Task task)
+        {
             return task.IsCompleted;
         }
 
-        internal static bool IsCompletedSuccessfully(this System.Threading.Tasks.Task task) {
+        internal static bool IsCompletedSuccessfully(this System.Threading.Tasks.Task task)
+        {
             return task.IsCompletedSuccessfully;
         }
-        internal static bool IsCompletedSuccessfully<T>(this System.Threading.Tasks.Task task) {
+        internal static bool IsCompletedSuccessfully<T>(this System.Threading.Tasks.Task task)
+        {
             return task.IsCompletedSuccessfully;
         }
 
@@ -238,7 +242,8 @@ namespace Yarn.Unity
             return task.AsUniTask();
         }
 #else
-        internal static YarnTask AsYarnTask(this System.Threading.Tasks.Task task) {
+        internal static YarnTask AsYarnTask(this System.Threading.Tasks.Task task)
+        {
             return task;
         }
 #endif
@@ -279,12 +284,13 @@ namespace Yarn.Unity
         }
 #endif
 
-        internal static YarnTask Never(CancellationToken cancellationToken) {
-            #if USE_UNITASK
+        internal static YarnTask Never(CancellationToken cancellationToken)
+        {
+#if USE_UNITASK
             return UniTask.Never(cancellationToken);
-            #else
+#else
             return Task.Delay(Timeout.Infinite, cancellationToken);
-            #endif
+#endif
         }
 
     }
