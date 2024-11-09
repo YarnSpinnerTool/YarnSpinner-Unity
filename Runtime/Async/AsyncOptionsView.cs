@@ -23,6 +23,7 @@ using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Y
 
 namespace Yarn.Unity
 {
+    [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-view/options-list-view")]
     public class AsyncOptionsView : AsyncDialogueViewBase
     {
         [SerializeField] CanvasGroup? canvasGroup;

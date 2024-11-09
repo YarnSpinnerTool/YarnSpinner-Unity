@@ -59,6 +59,7 @@ namespace Yarn.Unity
     [System.Serializable]
     public class UnityEventString : UnityEvent<string> { }
 
+    [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-runner")]
     public partial class DialogueRunner : MonoBehaviour
     {
         private Dialogue? dialogue;
@@ -716,6 +717,7 @@ namespace Yarn.Unity
             // cancel.
             currentLineCancellationSource.Cancel();
         }
+
         public void HurryUpCurrentLine()
         {
             if (currentLineCancellationSource == null)

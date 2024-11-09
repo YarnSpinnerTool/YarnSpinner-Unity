@@ -23,6 +23,7 @@ using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption?>;
 
 namespace Yarn.Unity
 {
+    [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-view/line-view")]
     public class AsyncLineView : AsyncDialogueViewBase
     {
         [SerializeField] DialogueRunner? dialogueRunner;
