@@ -144,7 +144,7 @@ namespace Yarn.Unity
         /// about to start running.
         /// </remarks>
         /// <seealso cref="Dialogue.NodeStartHandler"/>
-        [Group("Events", FoldOut = true)]
+        [Group("Events", foldOut: true)]
         public UnityEventString onNodeStart;
 
         /// <summary>
@@ -155,20 +155,20 @@ namespace Yarn.Unity
         /// just finished running.
         /// </remarks>
         /// <seealso cref="Dialogue.NodeCompleteHandler"/>
-        [Group("Events", FoldOut = true)]
+        [Group("Events", foldOut: true)]
         public UnityEventString onNodeComplete;
 
         /// <summary>
         /// A Unity event that is called when the dialogue starts running.
         /// </summary>
-        [Group("Events", FoldOut = true)]
+        [Group("Events", foldOut: true)]
         public UnityEvent onDialogueStart;
 
         /// <summary>
         /// A Unity event that is called once the dialogue has completed.
         /// </summary>
         /// <seealso cref="Dialogue.DialogueCompleteHandler"/>
-        [Group("Events", FoldOut = true)]
+        [Group("Events", foldOut: true)]
         public UnityEvent onDialogueComplete;
 
         /// <summary>
