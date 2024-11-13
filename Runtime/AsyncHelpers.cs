@@ -46,11 +46,11 @@ namespace Yarn.Unity
 #endif
         }
 
-        public async static YarnTask Delay(int milliseconds, CancellationToken token)
+        public async static YarnTask Delay(TimeSpan timeSpan, CancellationToken token)
         {
             try
             {
-                await YarnTask.Delay(milliseconds, token);
+                await YarnTask.Delay(timeSpan, token);
             }
             catch (TaskCanceledException)
             {
@@ -58,6 +58,11 @@ namespace Yarn.Unity
                 // why did you do it this way c# ?
                 // WHY?
             }
+        }
+
+        public static YarnTask Delay(int milliseconds, CancellationToken token)
+        {
+            return YarnTask.Delay(TimeSpan.FromMilliseconds(milliseconds), token);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
