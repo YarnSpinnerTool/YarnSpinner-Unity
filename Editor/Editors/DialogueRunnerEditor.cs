@@ -322,7 +322,7 @@ namespace Yarn.Unity.Editor
             string GetGroupID(GroupAttribute group)
             {
                 var target = property.serializedProperty.serializedObject.targetObject;
-                var uniqueGroupID = $"{target.GetType()}_{target.GetInstanceID()}_group_{group.groupName}";
+                var uniqueGroupID = $"{target.GetType()}_{target.GetInstanceID()}_group_{group.GroupName}";
                 return uniqueGroupID;
             }
 
@@ -330,18 +330,18 @@ namespace Yarn.Unity.Editor
             // the header and manages its state.
             void StartGroup(GroupAttribute group)
             {
-                if (group.foldOut)
+                if (group.FoldOut)
                 {
                     var uniqueGroupID = GetGroupID(group);
 
                     var isToggled = SessionState.GetBool(uniqueGroupID, false);
-                    GUIContent content = new GUIContent(group.groupName);
+                    GUIContent content = new GUIContent(group.GroupName);
                     isToggled = EditorGUILayout.Foldout(isToggled, content, EditorStyles.foldoutHeader);
                     SessionState.SetBool(uniqueGroupID, isToggled);
                 }
                 else
                 {
-                    EditorGUILayout.LabelField(group.groupName, EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField(group.GroupName, EditorStyles.boldLabel);
                 }
                 EditorGUI.indentLevel += 1;
             }
@@ -364,16 +364,16 @@ namespace Yarn.Unity.Editor
                 // We've left the current group.
                 EndGroup();
             }
-            else if (currentGroup != null && group != null && currentGroup.Equals(group.groupName, StringComparison.Ordinal) == false)
+            else if (currentGroup != null && group != null && currentGroup.Equals(group.GroupName, StringComparison.Ordinal) == false)
             {
                 // We've changed group.
                 EndGroup();
                 StartGroup(group);
             }
 
-            currentGroup = group?.groupName;
+            currentGroup = group?.GroupName;
 
-            if (group?.foldOut ?? false)
+            if (group?.FoldOut ?? false)
             {
                 var id = GetGroupID(group);
                 var isOpen = SessionState.GetBool(id, false);
