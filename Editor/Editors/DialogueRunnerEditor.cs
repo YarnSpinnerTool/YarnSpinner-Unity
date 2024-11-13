@@ -124,6 +124,37 @@ namespace Yarn.Unity.Editor
             return property.objectReferenceValue != null;
         }
 
+        public static AttributeEvaluationResult Evaluate(this MustNotBeNullWhenAttribute mustNotBeNullWhenAttribute, SerializedProperty property)
+        {
+            if (property.propertyType != SerializedPropertyType.ObjectReference)
+            {
+                return $"{property.name} must be an object reference";
+            }
+
+            bool ruleApplies;
+
+            switch (property.propertyType)
+            {
+                case SerializedPropertyType.ObjectReference:
+                    ruleApplies = property.objectReferenceValue != null;
+                    break;
+                case SerializedPropertyType.Boolean:
+                    ruleApplies = property.boolValue;
+                    break;
+                default:
+                    // Property is an unhandled type
+                    return $"{mustNotBeNullWhenAttribute.Condition} must be a boolean or object reference, not {property.propertyType}";
+            }
+
+            if (!ruleApplies)
+            {
+                // The rule doesn't apply, so indicate that we're a-ok
+                return true;
+            }
+
+            return property.objectReferenceValue != null;
+        }
+
         public static MessageBoxAttribute.Message GetMessage(this MessageBoxAttribute messageBoxAttribute, SerializedObject serializedObject)
         {
             if (serializedObject == null || serializedObject.targetObject == null)

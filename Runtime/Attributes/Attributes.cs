@@ -206,6 +206,36 @@ namespace Yarn.Unity
         }
     }
 
+    /// <summary>
+    /// Shows an error message box if this property is null and the variable
+    /// indicated by <see cref="Condition"/> is false.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+    public class MustNotBeNullWhenAttribute : YarnEditorAttribute
+    {
+        /// <summary>
+        /// The name of another property on this object to compare to. This
+        /// variable must be either a boolean value, or a <see
+        /// cref="UnityEngine.Object"/> reference.
+        /// </summary>
+        public string Condition { get; }
+
+        /// <summary>
+        /// The text of the error message to show if the property is null and
+        /// the condition is met. If not provided, a generic error message is
+        /// shown.
+        /// </summary>
+        public string? Label { get; }
+
+        /// <inheritdoc cref="MustNotBeNullWhenAttribute" path="/summary"/>
+        /// <param name="condition"><inheritdoc cref="Condition" path="/summary/node()"/></param>
+        /// <param name="label"><inheritdoc cref="Label" path="/summary/node()"/></param>
+        public MustNotBeNullWhenAttribute(string condition, string? label = null)
+        {
+            this.Condition = condition;
+            this.Label = label;
+        }
+    }
 
     /// <summary>
     /// Shows a message box on the property.
