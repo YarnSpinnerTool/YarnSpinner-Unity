@@ -145,8 +145,8 @@ namespace Yarn.Unity.Tests
 
             var lineCancellationToken = new LineCancellationToken
             {
-                SoftToken = cancellationSource.Token,
-                HardToken = default
+                HurryUpToken = cancellationSource.Token,
+                NextLineToken = CancellationToken.None
             };
 
             YarnTask runTask = lineView.RunLineAsync(line, lineCancellationToken);
@@ -178,8 +178,8 @@ namespace Yarn.Unity.Tests
 
             var lineCancellationToken = new LineCancellationToken
             {
-                SoftToken = cancellationSource.Token,
-                HardToken = default
+                HurryUpToken = cancellationSource.Token,
+                NextLineToken = CancellationToken.None
             };
 
             YarnTask runTask = lineView.RunLineAsync(line, lineCancellationToken);
@@ -196,7 +196,7 @@ namespace Yarn.Unity.Tests
 
             // Wait for the fade to finish
             await YarnTask.Delay(TimeSpan.FromSeconds(lineView.fadeInTime));
-            
+
             lineView.canvasGroup.alpha.Should().BeEqualTo(1);
 
             lineView.lineText.maxVisibleCharacters.Should().BeGreaterThanOrEqualTo(0, "the typewriter effect has begun");

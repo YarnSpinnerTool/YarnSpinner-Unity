@@ -28,32 +28,73 @@ using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
 using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption?>;
 #endif
 
-namespace System.Diagnostics.CodeAnalysis
-{
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
-    public sealed class MemberNotNullAttribute : Attribute
-    {
-        public MemberNotNullAttribute(params string[] members)
-        { }
-    }
-}
-
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// A Line Cancellation Token stores information about whether a dialogue
+    /// view should stop its delivery.
+    /// </summary>
+    /// <remarks>
+    /// <para>Dialogue views receive Line Cancellation Tokens as a parameter to
+    /// <see cref="AsyncDialogueViewBase.RunLineAsync"/>. Line Cancellation
+    /// Tokens indicate whether the user has requested that the line's delivery
+    /// should be hurried up, and whether the dialogue view should stop showing
+    /// the current line.</para>
+    /// </remarks>
     public struct LineCancellationToken
     {
-        public CancellationToken HardToken;
-        // this token will ALWAYS be a dependant token on the above
-        public CancellationToken SoftToken;
+        /// <summary>
+        /// A <see cref="CancellationToken"/> that becomes cancelled when a <see
+        /// cref="DialogueRunner"/> wishes all dialogue views to stop running
+        /// the current line. For example, on-screen UI should be dismissed, and
+        /// any ongoing audio playback should be stopped.
+        /// </summary>
+        public CancellationToken NextLineToken;
 
-        public bool IsCancellationRequested
-        {
-            get { return HardToken.IsCancellationRequested; }
-        }
-        public bool IsHurryUpRequested
-        {
-            get { return SoftToken.IsCancellationRequested; }
-        }
+
+        // this token will ALWAYS be a dependant token on the above 
+
+        /// <summary>
+        /// A <see cref="CancellationToken"/> that becomes cancelled when a <see
+        /// cref="DialogueRunner"/> wishes all dialogue views to speed up their
+        /// delivery of their line, if appropriate. For example, UI animations
+        /// should be played faster or skipped.
+        /// </summary>
+        /// <remarks>This token is linked to <see cref="NextLineToken"/>: if the
+        /// next line token is cancelled, then this token will become cancelled
+        /// as well.</remarks>
+        public CancellationToken HurryUpToken;
+
+        /// <summary>
+        /// Gets a value indicating whether the dialogue runner has requested
+        /// that the next line be shown.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// If this value is <see langword="true"/>, dialogue views should
+        /// presenting the current line, so that the next piece of content can
+        /// be shown to the user.
+        /// </para>
+        /// <para>
+        /// If this property is <see langword="true"/>, then <see
+        /// cref="IsHurryUpRequested"/> will also be true.</para>
+        /// </remarks>
+        public readonly bool IsNextLineRequested => NextLineToken.IsCancellationRequested;
+
+        /// <summary>
+        /// Gets a value indicating whether the user has requested that the line
+        /// be hurried up.
+        /// </summary>
+        /// <remarks><para>If this value is <see langword="true"/>, dialogue
+        /// views should speed up any ongoing delivery of the line, such as
+        /// on-screen animations, but are not required to finish delivering the
+        /// line entirely (that is, UI elements may remain on screen).</para>
+        /// <para>If <see cref="IsNextLineRequested"/> is <see
+        /// langword="true"/>, then this property will also be <see
+        /// langword="true"/>.</para>
+        /// </remarks>
+        ///
+        public readonly bool IsHurryUpRequested => HurryUpToken.IsCancellationRequested;
     }
 
     [System.Serializable]
@@ -359,7 +400,6 @@ namespace Yarn.Unity
 
         private async YarnTask OnCommandReceivedAsync(Command command)
         {
-            Debug.Log($"Running command <<{command.Text}>>");
             CommandDispatchResult dispatchResult = this.CommandDispatcher.DispatchCommand(command.Text, this);
 
             var parts = SplitCommandText(command.Text);
@@ -466,8 +506,8 @@ namespace Yarn.Unity
             currentLineHurryUpSource = CancellationTokenSource.CreateLinkedTokenSource(currentLineCancellationSource.Token);
             var metaToken = new LineCancellationToken
             {
-                HardToken = currentLineCancellationSource.Token,
-                SoftToken = currentLineHurryUpSource.Token,
+                NextLineToken = currentLineCancellationSource.Token,
+                HurryUpToken = currentLineHurryUpSource.Token,
             };
 
             var pendingTasks = new HashSet<YarnTask>();
@@ -481,11 +521,11 @@ namespace Yarn.Unity
                 }
 
                 // Legacy support: if this view is an v2-style DialogueViewBase,
-                // then set its requestInterrupt delegate to be one that cancels the
-                // current line.
+                // then set its requestInterrupt delegate to be one that stops
+                // the current line.
                 if (view is DialogueViewBase dialogueView)
                 {
-                    dialogueView.requestInterrupt = CancelCurrentLine;
+                    dialogueView.requestInterrupt = RequestNextLine;
                 }
 
                 // Tell all of our views to run this line, and give them a
@@ -501,11 +541,6 @@ namespace Yarn.Unity
                     catch (System.Exception e)
                     {
                         Debug.LogException(e, view);
-                    }
-                    if (view.EndLineWhenViewFinishes)
-                    {
-                        // When this view finishes, we end the entire line.
-                        currentLineCancellationSource.Cancel();
                     }
                 }
 
@@ -704,7 +739,7 @@ namespace Yarn.Unity
             }
         }
 
-        public void CancelCurrentLine()
+        public void RequestNextLine()
         {
             if (currentLineCancellationSource == null)
             {
@@ -718,7 +753,7 @@ namespace Yarn.Unity
             currentLineCancellationSource.Cancel();
         }
 
-        public void HurryUpCurrentLine()
+        public void RequestHurryUpLine()
         {
             if (currentLineCancellationSource == null)
             {

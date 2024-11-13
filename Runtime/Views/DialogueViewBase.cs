@@ -410,17 +410,20 @@ namespace Yarn.Unity
             // Wait for one of the following things to happen:
             // 1. RunLine completes successfully and calls PhaseComplete.
             // 2. The line is cancelled.
-            while (phaseComplete == false && token.IsCancellationRequested == false) {
+            while (phaseComplete == false && token.IsNextLineRequested == false)
+            {
                 await YarnTask.Yield();
             }
 
             // If the line was cancelled, tell the view that the line was
             // 'interrupted' and should finish presenting quickly. Wait for the
             // phase to complete.
-            if (token.IsCancellationRequested) {
+            if (token.IsNextLineRequested)
+            {
                 phaseComplete = false;
                 this.InterruptLine(line, PhaseComplete);
-                while (phaseComplete == false) {
+                while (phaseComplete == false)
+                {
                     await YarnTask.Yield();
                 }
             }
@@ -430,7 +433,8 @@ namespace Yarn.Unity
             phaseComplete = false;
             this.DismissLine(PhaseComplete);
 
-            while (phaseComplete == false) {
+            while (phaseComplete == false)
+            {
                 await YarnTask.Yield();
             }
         }
@@ -440,7 +444,7 @@ namespace Yarn.Unity
         public override async YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             int selectedOptionID = -1;
-            
+
             // Run the options, and wait for either a selection to be made, or
             // for this view to be cancelled.
             this.RunOptions(dialogueOptions, (selectedID) =>
@@ -448,19 +452,23 @@ namespace Yarn.Unity
                 selectedOptionID = selectedID;
             });
 
-            while (selectedOptionID == -1 && cancellationToken.IsCancellationRequested == false) {
+            while (selectedOptionID == -1 && cancellationToken.IsCancellationRequested == false)
+            {
                 await YarnTask.Yield();
             }
 
-            if (cancellationToken.IsCancellationRequested) {
+            if (cancellationToken.IsCancellationRequested)
+            {
                 // We were cancelled. Return null.
                 return null;
             }
 
             // Find the option that has the same ID as the one that was
             // selected, and return that.
-            for (int i = 0; i < dialogueOptions.Length; i++) {
-                if (dialogueOptions[i].DialogueOptionID == selectedOptionID) {
+            for (int i = 0; i < dialogueOptions.Length; i++)
+            {
+                if (dialogueOptions[i].DialogueOptionID == selectedOptionID)
+                {
                     return dialogueOptions[i];
                 }
             }

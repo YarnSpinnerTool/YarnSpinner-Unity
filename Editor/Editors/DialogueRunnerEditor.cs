@@ -549,8 +549,8 @@ namespace Yarn.Unity.Editor
     public class AsyncOptionsViewEditor : YarnEditor { }
 
     [CanEditMultipleObjects]
-    [CustomEditor(typeof(SkipThing))]
-    public class SkipThingEditor : YarnEditor { }
+    [CustomEditor(typeof(LineAdvancer))]
+    public class LineAdvancerEditor : YarnEditor { }
 
 
     [CustomEditor(typeof(DialogueRunner))]
