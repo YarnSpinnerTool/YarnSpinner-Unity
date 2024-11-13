@@ -38,10 +38,11 @@ namespace Yarn.Unity
         public void AddCommandHandler(string commandName, Delegate handler) => CommandDispatcher.AddCommandHandler(commandName, handler);
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
+        /// <inheritdoc cref="AddCommandHandler(string, Delegate)" path="/param"/>
         /// <param name="method">The method that will be invoked when the
         /// command is called.</param>
         public void AddCommandHandler(string commandName, MethodInfo method) => CommandDispatcher.AddCommandHandler(commandName, method);
-        
+
         /// <summary>
         /// Removes a command handler.
         /// </summary>
