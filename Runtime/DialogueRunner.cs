@@ -708,7 +708,15 @@ namespace Yarn.Unity
         {
             if (yarnProject == null)
             {
-                Debug.LogError($"Can't start dialogue: no Yarn Project has been configured.");
+                Debug.LogError($"Can't start dialogue: no Yarn Project has been configured.", this);
+                return;
+            }
+
+            if (yarnProject.Program == null)
+            {
+                // The Yarn Project asset reference is valid, but it doesn't
+                // have a program, likely due to a compiler error.
+                Debug.LogError($"Can't start dialogue: Yarn Project doesn't contain a valid program (possibly due to errors in the Yarn scripts?)", this);
                 return;
             }
 
