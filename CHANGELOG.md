@@ -40,6 +40,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `MarkupPallete` now supports more than just colour.
 - Dialogue Runner's "Start Automatically" option now defaults to off, not on.
 - Dialogue Runner's "On Command" event has been renamed to "On Unhandled Command", to better reflect when it's called.
+- `DialogueViewBase` is now deprecated. New Dialogue Views should subclass `AsyncDialogueView`.
+  - The `DialogueViewBase` class now acts as a compatibility layer for the new
+    async dialogue view system, and should not be used in new code.
 
 ### Removed
 
