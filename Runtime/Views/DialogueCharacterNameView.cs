@@ -2,28 +2,42 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using System;
+using System.Threading;
 using UnityEngine.Events;
+
+#nullable enable
+
+#if USE_UNITASK
+using Cysharp.Threading.Tasks;
+using YarnTask = Cysharp.Threading.Tasks.UniTask;
+using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption?>;
+using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
+#else
+using YarnTask = System.Threading.Tasks.Task;
+using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption?>;
+using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
+#endif
 
 namespace Yarn.Unity
 {
     /// <summary>
-    /// A subclass of <see cref="DialogueViewBase"/> that displays
-    /// character names.
+    /// A subclass of <see cref="DialogueViewBase"/> that displays character
+    /// names.
     /// </summary>
     /// <remarks>
-    /// This class uses the `character` attribute on lines that it receives
-    /// to determine its content. When the view's <see cref="RunLine"/>
-    /// method is called with a line whose <see cref="LocalizedLine.Text"/>
-    /// contains a `character` attribute, the <see cref="onNameUpdate"/>
-    /// event is fired. If the line does not contain such an attribute, the
-    /// <see cref="onNameNotPresent"/> event is fired instead.
+    /// <para>This class uses the `character` attribute on lines that it
+    /// receives to determine its content. When the view's <see
+    /// cref="RunLineAsync"/> method is called with a line whose <see
+    /// cref="LocalizedLine.Text"/> contains a `character` attribute, the <see
+    /// cref="onNameUpdate"/> event is fired. If the line does not contain such
+    /// an attribute, the <see cref="onNameNotPresent"/> event is fired
+    /// instead.</para>
     ///
-    /// This view does not present any options or handle commands. It's
-    /// intended to be used alongside other subclasses of DialogueViewBase.
+    /// <para>This view does not present any options or handle commands. It's
+    /// intended to be used alongside other subclasses of <see
+    /// cref="AsyncDialogueViewBase"/>.</para>
     /// </remarks>
-    /// <seealso cref="DialogueUI"/>
-    public class DialogueCharacterNameView : Yarn.Unity.DialogueViewBase
+    public class DialogueCharacterNameView : AsyncDialogueViewBase
     {
         /// <summary>
         /// Invoked when a line is received that contains a character name.
@@ -47,15 +61,30 @@ namespace Yarn.Unity
         /// <seealso cref="onNameUpdate"/>
         public UnityEvent onNameNotPresent;
 
-        public override void DialogueStarted()
+        /// <inheritdoc/>
+        public override YarnTask OnDialogueCompleteAsync()
         {
-            onDialogueStarted?.Invoke();
+            return YarnTask.CompletedTask;
         }
 
-        public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
+        /// <inheritdoc/>
+        public override YarnTask OnDialogueStartedAsync()
+        {
+            onDialogueStarted?.Invoke();
+            return YarnTask.CompletedTask;
+        }
+
+        /// <summary>
+        /// Invokes the <see cref="onNameUpdate"/> or <see
+        /// cref="onNameNotPresent"/> events, depending on the contents of
+        /// <paramref name="line"/>.
+        /// </summary>
+        /// <inheritdoc cref="AsyncDialogueViewBase.RunLineAsync" path="/param" />
+        /// <inheritdoc cref="AsyncDialogueViewBase.RunLineAsync" path="/returns" />
+        public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
         {
             // Try and get the character name from the line
-            string characterName = dialogueLine.CharacterName;
+            string? characterName = line.CharacterName;
 
             // Did we find one?
             if (!string.IsNullOrEmpty(characterName))
@@ -73,8 +102,18 @@ namespace Yarn.Unity
                 onNameNotPresent?.Invoke();
             }
 
-            // Immediately mark this view as having finished its work
-            onDialogueLineFinished();
+            return YarnTask.CompletedTask;
+        }
+
+        /// <summary>Takes no action; this dialogue view does not handle
+        /// options.</summary>
+        /// <inheritdoc cref="AsyncDialogueViewBase.RunLineAsync" path="/param"
+        /// />
+        /// <inheritdoc cref="AsyncDialogueViewBase.RunLineAsync"
+        /// path="/returns" />
+        public override YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        {
+            return YarnAsync.NoOptionSelected;
         }
     }
 }
