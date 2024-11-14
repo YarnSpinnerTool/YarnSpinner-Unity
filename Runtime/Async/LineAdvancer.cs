@@ -16,16 +16,33 @@ using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption?>;
 
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// A dialogue view that listens for user input and sends requests to a <see
+    /// cref="DialogueRunner"/> to advance the presentation of the current line,
+    /// either by asking a dialogue runner to hurry up its delivery, advance to
+    /// the next line, or cancel the entire dialogue session.
+    /// </summary>
     public class LineAdvancer : AsyncDialogueViewBase
     {
         [MustNotBeNull]
         [Tooltip("The dialogue runner that will receive requests to advance or cancel content.")]
         [SerializeField] DialogueRunner runner;
 
+        /// <summary>
+        /// If <see langword="true"/>, repeatedly signalling that the line
+        /// should be hurried up will cause the line advancer to request that
+        /// the next line be shown.
+        /// </summary>
+        /// <seealso cref="advanceRequestsBeforeCancellingLine"/>
         [Space]
         [Tooltip("Does repeatedly requesting a line advance cancel the line?")]
         public bool multiAdvanceIsCancel = false;
 
+        /// <summary>
+        /// The number of times that a 'hurry up' signal occurs before the line
+        /// advancer requests that the next line be shown.
+        /// </summary>
+        /// <seealso cref="multiAdvanceIsCancel"/>
         [ShowIf(nameof(multiAdvanceIsCancel))]
         [Indent]
         [Label("Advance Count")]
@@ -64,10 +81,9 @@ namespace Yarn.Unity
             /// </summary>
             /// <remarks>When a line advancer's <see cref="inputMode"/> is set
             /// to <see cref="None"/>, call the <see
-            /// cref="RequestLineAdvancement"/>, <see
-            /// cref="RequestLineCancellation"/> and <see
-            /// cref="RequestDialogueCancellation"/> methods directly from your
-            /// code to control line advancement.
+            /// cref="RequestLineHurryUp"/>, <see cref="RequestNextLine"/> and
+            /// <see cref="RequestDialogueCancellation"/> methods directly from
+            /// your code to control line advancement.</remarks>
             None,
             /// <summary>
             /// The line advancer responds to input from the legacy <a
@@ -115,8 +131,8 @@ namespace Yarn.Unity
             if (this.inputMode == InputMode.None)
             {
                 return MessageBoxAttribute.Info($"To use this component, call the following methods on it:\n\n" +
-                    $"- {nameof(this.RequestLineAdvancement)}()\n" +
-                    $"- {nameof(this.RequestLineCancellation)}()\n" +
+                    $"- {nameof(this.RequestLineHurryUp)}()\n" +
+                    $"- {nameof(this.RequestNextLine)}()\n" +
                     $"- {nameof(this.RequestDialogueCancellation)}()"
                 );
             }
@@ -144,31 +160,34 @@ namespace Yarn.Unity
 
 #if USE_INPUTSYSTEM
         /// <summary>
-        /// The Input Action that triggers a request to advance to the next piece of content.
+        /// The Input Action that triggers a request to advance to the next
+        /// piece of content.
         /// </summary>
         [ShowIf(nameof(inputMode), InputMode.InputActions)]
         [Indent]
-        [SerializeField] UnityEngine.InputSystem.InputActionReference? advanceLineAction;
+        [SerializeField] UnityEngine.InputSystem.InputActionReference? hurryUpLineAction;
 
         /// <summary>
-        /// The Input Action that triggers an instruction to cancel the current line.
+        /// The Input Action that triggers an instruction to cancel the current
+        /// line.
         /// </summary>
         [ShowIf(nameof(inputMode), InputMode.InputActions)]
         [Indent]
-        [SerializeField] UnityEngine.InputSystem.InputActionReference? cancelLineAction;
+        [SerializeField] UnityEngine.InputSystem.InputActionReference? nextLineAction;
 
         /// <summary>
-        /// The Input Action that triggers an instruction to cancel the entire dialogue.
+        /// The Input Action that triggers an instruction to cancel the entire
+        /// dialogue.
         /// </summary>
         [ShowIf(nameof(inputMode), InputMode.InputActions)]
         [Indent]
         [SerializeField] UnityEngine.InputSystem.InputActionReference? cancelDialogueAction;
 
         /// <summary>
-        /// If true, the <see cref="advanceLineAction"/>, <see
-        /// cref="cancelLineAction"/> and <see cref="cancelDialogueAction"/>
-        /// Input Actions will be enabled when the the dialogue runner signals
-        /// that a line is running.
+        /// If true, the <see cref="hurryUpLineAction"/>, <see
+        /// cref="nextLineAction"/> and <see cref="cancelDialogueAction"/> Input
+        /// Actions will be enabled when the the dialogue runner signals that a
+        /// line is running.
         /// </summary>
         [Tooltip("If true, the input actions above will be enabled when a line begins.")]
         [ShowIf(nameof(inputMode), InputMode.InputActions)]
@@ -176,19 +195,22 @@ namespace Yarn.Unity
         [SerializeField] bool enableActions = true;
 #endif
         /// <summary>
-        /// The legacy Input Axis that triggers a request to advance to the next piece of content.
+        /// The legacy Input Axis that triggers a request to advance to the next
+        /// piece of content.
         /// </summary>
         [ShowIf(nameof(inputMode), InputMode.LegacyInputAxes)]
         [Indent]
-        [SerializeField] string? skipLineAxis = "Jump";
+        [SerializeField] string? hurryUpLineAxis = "Jump";
         /// <summary>
-        /// The legacy Input Axis that triggers an instruction to cancel the current line.
+        /// The legacy Input Axis that triggers an instruction to cancel the
+        /// current line.
         /// </summary>
         [ShowIf(nameof(inputMode), InputMode.LegacyInputAxes)]
         [Indent]
-        [SerializeField] string? cancelLineAxis = "Cancel";
+        [SerializeField] string? nextLineAxis = "Cancel";
         /// <summary>
-        /// The legacy Input Axis that triggers an instruction to cancel the entire dialogue.
+        /// The legacy Input Axis that triggers an instruction to cancel the
+        /// entire dialogue.
         /// </summary>
         [ShowIf(nameof(inputMode), InputMode.LegacyInputAxes)]
         [Indent]
@@ -196,34 +218,37 @@ namespace Yarn.Unity
 
 
         /// <summary>
-        /// The <see cref="KeyCode"/> that triggers a request to advance to the next piece of content.
+        /// The <see cref="KeyCode"/> that triggers a request to advance to the
+        /// next piece of content.
         /// </summary>
         [ShowIf(nameof(inputMode), InputMode.KeyCodes)]
         [Indent]
-        [SerializeField] KeyCode skipLineKeyCode = KeyCode.Space;
+        [SerializeField] KeyCode hurryUpLineKeyCode = KeyCode.Space;
 
         /// <summary>
-        /// The <see cref="KeyCode"/> that triggers an instruction to cancel the current line.
+        /// The <see cref="KeyCode"/> that triggers an instruction to cancel the
+        /// current line.
         /// </summary>
         [ShowIf(nameof(inputMode), InputMode.KeyCodes)]
         [Indent]
-        [SerializeField] KeyCode cancelLineKeyCode = KeyCode.Escape;
+        [SerializeField] KeyCode nextLineKeyCode = KeyCode.Escape;
 
         /// <summary>
-        /// The <see cref="KeyCode"/> that triggers an instruction to cancel the entire dialogue.
+        /// The <see cref="KeyCode"/> that triggers an instruction to cancel the
+        /// entire dialogue.
         /// </summary>
         [ShowIf(nameof(inputMode), InputMode.KeyCodes)]
         [Indent]
         [SerializeField] KeyCode cancelDialogueKeyCode = KeyCode.None;
 
 #if USE_INPUTSYSTEM
-        private void OnSkipLinePerformed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+        private void OnHurryUpLinePerformed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
         {
-            RequestLineAdvancement();
+            RequestLineHurryUp();
         }
-        private void OnCancelLinePerformed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+        private void OnNextLinePerformed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
         {
-            RequestLineCancellation();
+            RequestNextLine();
         }
         private void OnCancelDialoguePerformed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
         {
@@ -231,15 +256,20 @@ namespace Yarn.Unity
         }
 #endif
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Called by a dialogue runner when dialogue starts to add input action
+        /// handlers for advancing the line.
+        /// </summary>
+        /// <returns>A completed task.</returns>
         public override YarnTask OnDialogueStartedAsync()
         {
 #if USE_INPUTSYSTEM
             if (inputMode == InputMode.InputActions)
             {
-                // If we're using the input system, register callbacks to run when our actions are performed.
-                if (advanceLineAction != null) { advanceLineAction.action.performed += OnSkipLinePerformed; }
-                if (cancelLineAction != null) { cancelLineAction.action.performed += OnCancelLinePerformed; }
+                // If we're using the input system, register callbacks to run
+                // when our actions are performed.
+                if (hurryUpLineAction != null) { hurryUpLineAction.action.performed += OnHurryUpLinePerformed; }
+                if (nextLineAction != null) { nextLineAction.action.performed += OnNextLinePerformed; }
                 if (cancelDialogueAction != null) { cancelDialogueAction.action.performed += OnCancelDialoguePerformed; }
             }
 #endif
@@ -247,14 +277,19 @@ namespace Yarn.Unity
             return YarnTask.CompletedTask;
         }
 
+        /// <summary>
+        /// Called by a dialogue runner when dialogue ends to remove the input
+        /// action handlers.
+        /// </summary>
+        /// <returns>A completed task.</returns>
         public override YarnTask OnDialogueCompleteAsync()
         {
 #if USE_INPUTSYSTEM
             // If we're using the input system, remove the callbacks.
             if (inputMode == InputMode.InputActions)
             {
-                if (advanceLineAction != null) { advanceLineAction.action.performed -= OnSkipLinePerformed; }
-                if (cancelLineAction != null) { cancelLineAction.action.performed -= OnCancelLinePerformed; }
+                if (hurryUpLineAction != null) { hurryUpLineAction.action.performed -= OnHurryUpLinePerformed; }
+                if (nextLineAction != null) { nextLineAction.action.performed -= OnNextLinePerformed; }
                 if (cancelDialogueAction != null) { cancelDialogueAction.action.performed -= OnCancelDialoguePerformed; }
             }
 #endif
@@ -262,6 +297,11 @@ namespace Yarn.Unity
             return YarnTask.CompletedTask;
         }
 
+        /// <summary>
+        /// Called by a dialogue view to signal that a line is running.
+        /// </summary>
+        /// <inheritdoc cref="AsyncLineView.RunLineAsync" path="/param"/>
+        /// <returns>A completed task.</returns>
         public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
         {
             // A new line has come in, so reset the number of times we've seen a
@@ -271,8 +311,8 @@ namespace Yarn.Unity
 #if USE_INPUTSYSTEM
             if (enableActions)
             {
-                if (advanceLineAction != null) { advanceLineAction.action.Enable(); }
-                if (cancelLineAction != null) { cancelLineAction.action.Enable(); }
+                if (hurryUpLineAction != null) { hurryUpLineAction.action.Enable(); }
+                if (nextLineAction != null) { nextLineAction.action.Enable(); }
                 if (cancelDialogueAction != null) { cancelDialogueAction.action.Enable(); }
             }
 #endif
@@ -280,22 +320,38 @@ namespace Yarn.Unity
             return YarnTask.CompletedTask;
         }
 
+        /// <summary>
+        /// Called by a dialogue view to signal that options are running.
+        /// </summary>
+        /// <inheritdoc cref="AsyncLineView.RunOptionsAsync" path="/param"/>
+        /// <returns>A completed task indicating that no option was selected by
+        /// this view.</returns>
         public override YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
-            // This line view doesn't take any actions when options are presented.
+            // This line view doesn't take any actions when options are
+            // presented.
             return YarnAsync.NoOptionSelected;
         }
 
-        public void RequestLineAdvancement()
+        /// <summary>
+        /// Requests that the line be hurried up.
+        /// </summary>
+        /// <remarks>If this method has been called more times for a single line
+        /// than <see cref="numberOfAdvancesThisLine"/>, this method requests
+        /// that the dialogue runner proceed to the next line. Otherwise, it
+        /// requests that the dialogue runner instruct all line views to hurry
+        /// up their presentation of the current line.
+        /// </remarks>
+        public void RequestLineHurryUp()
         {
-            // Increment our counter of line advancements, and depending on the new
-            // count, request that the runner 'soft-cancel' the line or cancel the
-            // entire line
+            // Increment our counter of line advancements, and depending on the
+            // new count, request that the runner 'soft-cancel' the line or
+            // cancel the entire line
 
             numberOfAdvancesThisLine += 1;
             if (multiAdvanceIsCancel && numberOfAdvancesThisLine >= advanceRequestsBeforeCancellingLine)
             {
-                RequestLineCancellation();
+                RequestNextLine();
             }
             else
             {
@@ -303,31 +359,42 @@ namespace Yarn.Unity
             }
         }
 
-        public void RequestLineCancellation()
+        /// <summary>
+        /// Requests that the dialogue runner proceeds to the next line.
+        /// </summary>
+        public void RequestNextLine()
         {
-            // Request that the runner cancel the entire line
             runner.RequestNextLine();
         }
 
+        /// <summary>
+        /// Requests that the dialogue runner to instruct all line views to
+        /// dismiss their content, and then stops the dialogue.
+        /// </summary>
         public void RequestDialogueCancellation()
         {
-            // Stop the dialogue runner, which will cancel the current line as well
-            // as the entire dialogue.
+            // Stop the dialogue runner, which will cancel the current line as
+            // well as the entire dialogue.
             runner.Stop();
         }
 
-        public void Update()
+        /// <summary>
+        /// Called by Unity every frame to check to see if, depending on <see
+        /// cref="inputMode"/>, the <see cref="LineAdvancer"/> should take
+        /// action.
+        /// </summary>
+        protected void Update()
         {
             switch (inputMode)
             {
                 case InputMode.KeyCodes:
-                    if (Input.GetKeyDown(skipLineKeyCode)) { this.RequestLineAdvancement(); }
-                    if (Input.GetKeyDown(cancelLineKeyCode)) { this.RequestLineCancellation(); }
+                    if (Input.GetKeyDown(hurryUpLineKeyCode)) { this.RequestLineHurryUp(); }
+                    if (Input.GetKeyDown(nextLineKeyCode)) { this.RequestNextLine(); }
                     if (Input.GetKeyDown(cancelDialogueKeyCode)) { this.RequestDialogueCancellation(); }
                     break;
                 case InputMode.LegacyInputAxes:
-                    if (string.IsNullOrEmpty(skipLineAxis) == false && Input.GetButtonDown(skipLineAxis)) { this.RequestLineAdvancement(); }
-                    if (string.IsNullOrEmpty(cancelLineAxis) == false && Input.GetButtonDown(cancelLineAxis)) { this.RequestLineCancellation(); }
+                    if (string.IsNullOrEmpty(hurryUpLineAxis) == false && Input.GetButtonDown(hurryUpLineAxis)) { this.RequestLineHurryUp(); }
+                    if (string.IsNullOrEmpty(nextLineAxis) == false && Input.GetButtonDown(nextLineAxis)) { this.RequestNextLine(); }
                     if (string.IsNullOrEmpty(cancelDialogueAxis) == false && Input.GetButtonDown(cancelDialogueAxis)) { this.RequestDialogueCancellation(); }
                     break;
                 default:
