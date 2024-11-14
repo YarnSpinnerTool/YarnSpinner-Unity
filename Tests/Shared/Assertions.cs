@@ -13,12 +13,29 @@ using System.Diagnostics.CodeAnalysis;
 namespace Yarn.Unity.Tests
 {
 
+    /// <summary>
+    /// Contains assertions for objects.
+    /// </summary>
+    /// <typeparam name="TSubject">The type of object to assert
+    /// against.</typeparam>
     public partial class ObjectAssertions<TSubject>
     {
 
+        /// <summary>
+        /// The subject of the assertions.
+        /// </summary>
         [AllowNull]
         public TSubject Subject { get; internal set; }
 
+        /// <summary>
+        /// Checks to see if <paramref name="assertion"/> is <see
+        /// langword="null"/>, and if it is, throws an exception.
+        /// </summary>
+        /// <param name="assertion">The object to test.</param>
+        /// <param name="message">An optional message to include in the
+        /// exception, if thrown.</param>
+        /// <exception cref="AssertionException">Thrown if <paramref
+        /// name="assertion"/> is <see langword="null"/>.</exception>
         protected static void NullCheck([NotNull] object? assertion, string? message)
         {
             if (assertion == null)
@@ -27,6 +44,13 @@ namespace Yarn.Unity.Tests
             }
         }
 
+        /// <summary>
+        /// Asserts that the <see cref="Subject"/> is <see langword="null"/>.
+        /// </summary>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        /// <exception cref="AssertionException">Thrown if <see cref="Subject"/>
+        /// is not null.</exception>
         public void BeNull(string? message = null)
         {
             if (Subject != null)
@@ -35,6 +59,13 @@ namespace Yarn.Unity.Tests
             }
         }
 
+        /// <summary>
+        /// Asserts that the <see cref="Subject"/> is not <see langword="null"/>.
+        /// </summary>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        /// <exception cref="AssertionException">Thrown if <see cref="Subject"/>
+        /// is null.</exception>
         public void NotBeNull(string? message = null)
         {
             if (Subject == null)
@@ -43,6 +74,16 @@ namespace Yarn.Unity.Tests
             }
         }
 
+        /// <summary>
+        /// Asserts that the <see cref="Subject"/> is equal to another object.
+        /// </summary>
+        /// <param name="other">The object to compare with the <see
+        /// cref="Subject"/>.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        /// <exception cref="AssertionException">Thrown if the <see
+        /// cref="Subject"/> is not equal to <paramref
+        /// name="other"/>.</exception>
         public void BeEqualTo(TSubject? other, string? message = null)
         {
             var comparer = EqualityComparer<TSubject>.Default;
@@ -61,6 +102,16 @@ namespace Yarn.Unity.Tests
             }
         }
 
+        /// <summary>
+        /// Asserts that the <see cref="Subject"/> is not equal to another
+        /// object.
+        /// </summary>
+        /// <param name="other">The object to compare with the <see
+        /// cref="Subject"/>.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        /// <exception cref="AssertionException">Thrown if the <see
+        /// cref="Subject"/> is equal to <paramref name="other"/>.</exception>
         public void NotBeEqualTo(TSubject? other, string? message = null)
         {
             var comparer = EqualityComparer<TSubject>.Default;
@@ -78,6 +129,16 @@ namespace Yarn.Unity.Tests
             }
         }
 
+        /// <summary>
+        /// Asserts that the <see cref="Subject"/> is the same object as
+        /// another.
+        /// </summary>
+        /// <param name="other">The object to compare with the <see
+        /// cref="Subject"/>.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        /// <returns>The current <see cref="ObjectAssertions{TSubject}"/>
+        /// instance for method chaining.</returns>
         public ObjectAssertions<TSubject> BeSameObjectAs(TSubject other, string? message = null)
         {
             NullCheck(Subject, message);
@@ -90,6 +151,16 @@ namespace Yarn.Unity.Tests
             return this;
         }
 
+        /// <summary>
+        /// Asserts that the <see cref="Subject"/> is not the same object as
+        /// another.
+        /// </summary>
+        /// <param name="other">The object to compare with the <see
+        /// cref="Subject"/>.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        /// <returns>The current <see cref="ObjectAssertions{TSubject}"/>
+        /// instance for method chaining.</returns>
         public ObjectAssertions<TSubject> NotBeSameObjectAs(TSubject other, string? message = null)
         {
             NullCheck(Subject, message);
@@ -102,6 +173,17 @@ namespace Yarn.Unity.Tests
             return this;
         }
 
+        /// <summary>
+        /// Asserts that the <see cref="Subject"/> is of a type <typeparamref
+        /// name="T"/>, or of a type assignable to <typeparamref
+        /// name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The type to compare with the <see
+        /// cref="Subject"/>.</typeparam>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        /// <returns>The current <see cref="ObjectAssertions{TSubject}"/>
+        /// instance for method chaining.</returns>
         public ObjectAssertions<TSubject> BeOfType<T>(string? message = null)
         {
             NullCheck(Subject, message);
@@ -114,6 +196,16 @@ namespace Yarn.Unity.Tests
             return this;
         }
 
+        /// <summary>
+        /// Asserts that the <see cref="Subject"/> is of the exact type
+        /// <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The type to compare with the <see
+        /// cref="Subject"/>.</typeparam>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        /// <returns>The current <see cref="ObjectAssertions{TSubject}"/>
+        /// instance for method chaining.</returns>
         public ObjectAssertions<TSubject> BeOfExactType<T>(string? message = null)
         {
             NullCheck(Subject, message);
@@ -127,9 +219,18 @@ namespace Yarn.Unity.Tests
         }
     }
 
+    /// <summary>
+    /// Contains assertions for boolean values.
+    /// </summary>
     public partial class BooleanAssertions : ObjectAssertions<bool>
     {
 
+        /// <summary>
+        /// Asserts that the <see cref="ObjectAssertions{T}.Subject"/> is <see
+        /// langword="true"/>.
+        /// </summary>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
         public void BeTrue(string? message = null)
         {
             if (Subject != true)
@@ -138,6 +239,12 @@ namespace Yarn.Unity.Tests
             }
         }
 
+        /// <summary>
+        /// Asserts that the <see cref="ObjectAssertions{T}.Subject"/> is <see
+        /// langword="false"/>.
+        /// </summary>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
         public void BeFalse(string? message = null)
         {
             if (Subject != false)
@@ -148,9 +255,20 @@ namespace Yarn.Unity.Tests
 
     }
 
+    /// <summary>
+    /// Contains assertions for <see cref="IComparable"/> values.
+    /// </summary>
+    /// <typeparam name="TSubject">The type of the value.</typeparam>
     public class ComparableAssertions<TSubject> : ObjectAssertions<TSubject> where TSubject : IComparable<TSubject>
     {
 
+        /// <summary>
+        /// Asserts that the subject is greater than <paramref name="other"/>.
+        /// </summary>
+        /// <param name="other">The object to compare with the <see
+        /// cref="ObjectAssertions{T}.Subject"/>.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
         public void BeGreaterThan(TSubject other, string? message = null)
         {
             NullCheck(Subject, message);
@@ -161,6 +279,13 @@ namespace Yarn.Unity.Tests
             }
         }
 
+        /// <summary>
+        /// Asserts that the subject is less than <paramref name="other"/>.
+        /// </summary>
+        /// <param name="other">The object to compare with the <see
+        /// cref="ObjectAssertions{T}.Subject"/>.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
         public void BeLessThan(TSubject other, string? message = null)
         {
             NullCheck(Subject, message);
@@ -171,6 +296,14 @@ namespace Yarn.Unity.Tests
             }
         }
 
+        /// <summary>
+        /// Asserts that the subject is greater than or equal to <paramref
+        /// name="other"/>.
+        /// </summary>
+        /// <param name="other">The object to compare with the <see
+        /// cref="ObjectAssertions{T}.Subject"/>.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
         public void BeGreaterThanOrEqualTo(TSubject other, string? message = null)
         {
             NullCheck(Subject, message);
@@ -181,6 +314,14 @@ namespace Yarn.Unity.Tests
             }
         }
 
+        /// <summary>
+        /// Asserts that the subject is less than or equal to <paramref
+        /// name="other"/>.
+        /// </summary>
+        /// <param name="other">The object to compare with the <see
+        /// cref="ObjectAssertions{T}.Subject"/>.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
         public void BeLessThanOrEqualTo(TSubject other, string? message = null)
         {
 
@@ -193,15 +334,30 @@ namespace Yarn.Unity.Tests
         }
     }
 
+    /// <summary>
+    /// Contains assertions for numeric values.
+    /// </summary>
+    /// <typeparam name="TItem">The type of the value.</typeparam>
     public class NumericAssertions<TItem> : ComparableAssertions<TItem> where TItem : IComparable<TItem>
     {
 
     }
 
+    /// <summary>
+    /// Contains assertions for <see cref="IEnumerable{TItem}"/> values.
+    /// </summary>
+    /// <typeparam name="TItem">The type of the value.</typeparam>
     public class EnumerableAssertions<TItem> : ObjectAssertions<IEnumerable<TItem>>
     {
 
 
+        /// <summary>
+        /// Asserts that the collection is empty.
+        /// </summary>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        /// <returns>The current <see cref="ObjectAssertions{TSubject}"/>
+        /// instance for method chaining.</returns>
         public EnumerableAssertions<TItem> BeEmpty(string? message = null)
         {
             NullCheck(Subject, message);
@@ -212,6 +368,14 @@ namespace Yarn.Unity.Tests
             }
             return this;
         }
+
+        /// <summary>
+        /// Asserts that the collection is not empty.
+        /// </summary>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        /// <returns>The current <see cref="ObjectAssertions{TSubject}"/>
+        /// instance for method chaining.</returns>
         public EnumerableAssertions<TItem> NotBeEmpty(string? message = null)
         {
             NullCheck(Subject, message);
@@ -224,6 +388,15 @@ namespace Yarn.Unity.Tests
         }
 
 
+        /// <summary>
+        /// Asserts that the collection contains an item matching a predicate.
+        /// </summary>
+        /// <param name="predicate">The predicate to match against items in the
+        /// collection.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        /// <returns>A new <see cref="ObjectAssertions{TItem}"/> instance
+        /// containing the matched item.</returns>
         public ObjectAssertions<TItem> Contain(Func<TItem, bool> predicate, string? message = null)
         {
             NullCheck(Subject, message);
@@ -240,6 +413,13 @@ namespace Yarn.Unity.Tests
 
         }
 
+        /// <summary>
+        /// Asserts that the collection contains a specific item.
+        /// </summary>
+        /// <param name="match">The item to match against items in the
+        /// collection.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
         public void Contain(TItem match, string? message = null)
         {
             var comparer = EqualityComparer<TItem>.Default;
@@ -248,6 +428,13 @@ namespace Yarn.Unity.Tests
 
 
 
+        /// <summary>
+        /// Asserts that the colection contains exactly the specified items.
+        /// </summary>
+        /// <param name="expectation">The collection of items expected to be in
+        /// the subject collection.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
         public void ContainExactly(IEnumerable<TItem> expectation, string? message = null)
         {
             NullCheck(Subject, message);
@@ -269,7 +456,13 @@ namespace Yarn.Unity.Tests
             }
         }
 
-
+        /// <summary>
+        /// Asserts that the collection contains all of the specified items.
+        /// </summary>
+        /// <param name="expectation">The collection of items expected to be in
+        /// the subject collection.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
         public void ContainAllOf(IEnumerable<TItem> expectation, string? message = null)
         {
 
@@ -284,12 +477,27 @@ namespace Yarn.Unity.Tests
             }
         }
 
+        /// <summary>
+        /// Asserts that the collection does not contain a specific item.
+        /// </summary>
+        /// <param name="match">The item that is expected to be absent from the
+        /// subject collection.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
         public void NotContain(TItem match, string? message = null)
         {
             var comparer = EqualityComparer<TItem>.Default;
             NotContain((item) => comparer.Equals(item, match), message);
         }
 
+        /// <summary>
+        /// Asserts that the collection does not contain any of the specified
+        /// items.
+        /// </summary>
+        /// <param name="expectation">The collection of items expected to be
+        /// absent from the subject collection.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
         public void NotContainAnyOf(IEnumerable<TItem> expectation, string? message = null)
         {
             NullCheck(Subject, message);
@@ -303,7 +511,14 @@ namespace Yarn.Unity.Tests
             }
         }
 
-
+        /// <summary>
+        /// Asserts that the collection does not contain an item matching a
+        /// given predicate.
+        /// </summary>
+        /// <param name="predicate">A function to test each item in the
+        /// collection for a condition.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
         public void NotContain(Func<TItem, bool> predicate, string? message = null)
         {
             if (Subject == null)
@@ -323,6 +538,13 @@ namespace Yarn.Unity.Tests
 
         }
 
+        /// <summary>
+        /// Asserts that the collection has a specific number of items.
+        /// </summary>
+        /// <param name="count">The expected number of items in the subject
+        /// collection.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
         public void HaveCount(int count, string? message = null)
         {
             NullCheck(Subject, message);
@@ -332,6 +554,16 @@ namespace Yarn.Unity.Tests
             }
         }
 
+        /// <summary>
+        /// Asserts that the subject collection contains exactly one item
+        /// matching a specified condition.
+        /// </summary>
+        /// <param name="test">A function delegate to test each item in the
+        /// collection.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        /// <returns>An <see cref="ObjectAssertions{TItem}"/> with the single
+        /// matching item as its subject.</returns>
         public ObjectAssertions<TItem> ContainSingle(Func<TItem, bool> test, string? message = null)
         {
             NullCheck(Subject, message);
@@ -358,8 +590,24 @@ namespace Yarn.Unity.Tests
 
     }
 
+    /// <summary>
+    /// Contains assertions for dictionaries.
+    /// </summary>
+    /// <typeparam name="TKey">The type of the keys in the
+    /// dictionary.</typeparam>
+    /// <typeparam name="TValue">The type of the values in the
+    /// dictionary.</typeparam>
     public class DictionaryAssertions<TKey, TValue> : EnumerableAssertions<KeyValuePair<TKey, TValue>>
     {
+        /// <summary>
+        /// Asserts that the subject dictionary contains an entry with the
+        /// specified key.
+        /// </summary>
+        /// <param name="match">The key to search for in the collection</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        /// <returns>An <see cref="ObjectAssertions{TItem}"/> with the single
+        /// matching item as its subject.</returns>
         public ObjectAssertions<KeyValuePair<TKey, TValue>> ContainKey(TKey match, string? message = null)
         {
             NullCheck(Subject, message);
@@ -376,6 +624,16 @@ namespace Yarn.Unity.Tests
             throw new AssertionException($"Expected collection to contain a key matching {match}", message);
         }
 
+        /// <summary>
+        /// Asserts that the subject dictionary contains an entry with the
+        /// specified value.
+        /// </summary>
+        /// <param name="match">The value to search for in the
+        /// collection</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        /// <returns>An <see cref="ObjectAssertions{TItem}"/> with the single
+        /// matching item as its subject.</returns>
         public ObjectAssertions<KeyValuePair<TKey, TValue>> ContainValue(TValue match, string? message = null)
         {
             NullCheck(Subject, message);
@@ -392,6 +650,16 @@ namespace Yarn.Unity.Tests
             throw new AssertionException($"Expected collection to contain a key matching {match}", message);
         }
 
+        /// <summary>
+        /// Asserts that the subject dictionary contains an entry with a key
+        /// that matches the specified condition.
+        /// </summary>
+        /// <param name="match">A function to test each key in the
+        /// collection</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        /// <returns>An <see cref="ObjectAssertions{TItem}"/> with the matching
+        /// item as its subject.</returns>
         public ObjectAssertions<TKey> ContainKey(Func<TKey, bool> match, string? message = null)
         {
             NullCheck(Subject, message);
@@ -405,6 +673,16 @@ namespace Yarn.Unity.Tests
             throw new AssertionException("Expected collection to contain a matching key", message);
         }
 
+        /// <summary>
+        /// Asserts that the subject dictionary contains an entry with a value
+        /// that matches the specified condition.
+        /// </summary>
+        /// <param name="match">A function to test each value in the
+        /// collection</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        /// <returns>An <see cref="ObjectAssertions{TItem}"/> with the matching
+        /// item as its subject.</returns>
         public ObjectAssertions<TValue> ContainValue(Func<TValue, bool> match, string? message = null)
         {
             NullCheck(Subject, message);
@@ -418,11 +696,30 @@ namespace Yarn.Unity.Tests
             throw new AssertionException("Expected collection to contain a matching value", message);
         }
 
+        /// <summary>
+        /// Asserts that the subject dictionary contains all specified key-value
+        /// pairs.
+        /// </summary>
+        /// <param name="items">The key-value pairs to check for in the
+        /// collection.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
         public void ContainItems(IEnumerable<KeyValuePair<TKey, TValue>> items, string? message = null)
         {
             ContainItems(items, null, message);
         }
 
+        /// <summary>
+        /// Asserts that the subject dictionary contains all specified key-value
+        /// pairs.
+        /// </summary>
+        /// <param name="items">The key-value pairs to check for in the
+        /// collection.</param>
+        /// <param name="comparer">An optional function to compare values. If
+        /// this is null, <see cref="EqualityComparer{TValue}"/> is
+        /// used.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
         public void ContainItems(IEnumerable<KeyValuePair<TKey, TValue>> items, System.Func<TValue, TValue, bool>? comparer, string? message = null)
         {
             NullCheck(Subject, message);
@@ -457,14 +754,28 @@ namespace Yarn.Unity.Tests
         }
     }
 
+    /// <summary>
+    /// Contains assertions for strings.
+    /// </summary>
     public class StringAssertions : ObjectAssertions<string>
     {
     }
 
+
+    /// <summary>
+    /// Adds the Should() method to supported types.
+    /// </summary>
     public static class AssertionExtensions
     {
 
 
+        /// <summary>
+        /// Gets an assertions object for the given subject.
+        /// </summary>
+        /// <param name="subject">The object to create an assertions object
+        /// for.</param>
+        /// <returns>An assertions object for <paramref
+        /// name="subject"/>.</returns>
         public static ObjectAssertions<object> Should(this object? subject)
         {
             return new ObjectAssertions<object>
@@ -472,30 +783,94 @@ namespace Yarn.Unity.Tests
                 Subject = subject
             };
         }
+
+        /// <summary>
+        /// Gets an assertions object for the given boolean subject.
+        /// </summary>
+        /// <param name="subject">The boolean value to create an assertions
+        /// object for.</param>
+        /// <returns>An assertions object for <paramref
+        /// name="subject"/>.</returns>
         public static BooleanAssertions Should(this bool subject)
         {
             return new BooleanAssertions { Subject = subject };
         }
+
+        /// <summary>
+        /// Gets an assertions object for the given enumerable subject.
+        /// </summary>
+        /// <typeparam name="TItem">The type of elements in the
+        /// enumerable.</typeparam>
+        /// <param name="subject">The enumerable to create an assertions object
+        /// for.</param>
+        /// <returns>An assertions object for <paramref
+        /// name="subject"/>.</returns>
         public static EnumerableAssertions<TItem> Should<TItem>(this IEnumerable<TItem> subject)
         {
             return new EnumerableAssertions<TItem> { Subject = subject };
         }
+
+        /// <summary>
+        /// Gets an assertions object for the given dictionary subject.
+        /// </summary>
+        /// <typeparam name="TKey">The type of keys in the
+        /// dictionary.</typeparam>
+        /// <typeparam name="TValue">The type of values in the
+        /// dictionary.</typeparam>
+        /// <param name="subject">The dictionary to create an assertions object
+        /// for.</param>
+        /// <returns>An assertions object for <paramref
+        /// name="subject"/>.</returns>
         public static DictionaryAssertions<TKey, TValue> Should<TKey, TValue>(this IDictionary<TKey, TValue> subject)
         {
             return new DictionaryAssertions<TKey, TValue> { Subject = subject };
         }
+
+        /// <summary>
+        /// Gets an assertions object for the given integer subject.
+        /// </summary>
+        /// <param name="subject">The integer value to create an assertions
+        /// object for.</param>
+        /// <returns>An assertions object for <paramref
+        /// name="subject"/>.</returns>
         public static NumericAssertions<int> Should(this int subject)
         {
             return new NumericAssertions<int> { Subject = subject };
         }
+
+        /// <summary>
+        /// Gets an assertions object for the given <see langword="float"/>
+        /// subject.
+        /// </summary>
+        /// <param name="subject">The float value to create an assertions object
+        /// for.</param>
+        /// <returns>An assertions object for <paramref
+        /// name="subject"/>.</returns>
         public static NumericAssertions<float> Should(this float subject)
         {
             return new NumericAssertions<float> { Subject = subject };
         }
+
+        /// <summary>
+        /// Gets an assertions object for the given <see langword="double"/>
+        /// subject.
+        /// </summary>
+        /// <param name="subject">The double value to create an assertions
+        /// object for.</param>
+        /// <returns>An assertions object for <paramref
+        /// name="subject"/>.</returns>
         public static NumericAssertions<double> Should(this double subject)
         {
             return new NumericAssertions<double> { Subject = subject };
         }
+
+        /// <summary>
+        /// Gets an assertions object for the given string subject.
+        /// </summary>
+        /// <param name="subject">The string to create an assertions object
+        /// for.</param>
+        /// <returns>An assertions object for <paramref
+        /// name="subject"/>.</returns>
         public static StringAssertions Should(this string? subject)
         {
             return new StringAssertions { Subject = subject };
