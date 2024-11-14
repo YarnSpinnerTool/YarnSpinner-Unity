@@ -3,9 +3,9 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
 using System.Collections.Generic;
-using UnityEngine;
-using System.Reflection;
 using System.Linq;
+using System.Reflection;
+using UnityEngine;
 
 namespace Yarn.Unity
 {
@@ -59,7 +59,8 @@ namespace Yarn.Unity
         }
 
         [System.Serializable]
-        public struct ShadowTableEntry {
+        public struct ShadowTableEntry
+        {
             public string sourceLineID;
             public string[] shadowMetadata;
         }
@@ -73,9 +74,9 @@ namespace Yarn.Unity
         /// </summary>
         private Dictionary<string, System.IConvertible> initialValues;
         /// <summary>
-        /// The default values of all declared or inferred variables in the
-        /// <see cref="Program"/>.
-        /// Organised by their name as written in the yarn files.
+        /// The default values of all declared or inferred variables in the <see
+        /// cref="Program"/>. Organised by their name as written in the yarn
+        /// files.
         /// </summary>
         public Dictionary<string, System.IConvertible> InitialValues
         {
@@ -94,46 +95,46 @@ namespace Yarn.Unity
                     switch (value.ValueCase)
                     {
                         case Yarn.Operand.ValueOneofCase.StringValue:
-                        {
-                            initialValues[pair.Key] = value.StringValue;
-                            break;
-                        }
+                            {
+                                initialValues[pair.Key] = value.StringValue;
+                                break;
+                            }
                         case Yarn.Operand.ValueOneofCase.BoolValue:
-                        {
-                            initialValues[pair.Key] = value.BoolValue;
-                            break;
-                        }
+                            {
+                                initialValues[pair.Key] = value.BoolValue;
+                                break;
+                            }
                         case Yarn.Operand.ValueOneofCase.FloatValue:
-                        {
-                            initialValues[pair.Key] = value.FloatValue;
-                            break;
-                        }
+                            {
+                                initialValues[pair.Key] = value.FloatValue;
+                                break;
+                            }
                         default:
-                        {
-                            Debug.LogWarning($"{pair.Key} is of an invalid type: {value.ValueCase}");
-                            break;
-                        }
+                            {
+                                Debug.LogWarning($"{pair.Key} is of an invalid type: {value.ValueCase}");
+                                break;
+                            }
                     }
                 }
                 return initialValues;
             }
         }
 
-        // ok assumption is that this can be lazy loaded and then kept around
-        // as not every node has headers you care about but some will and be read A LOT
-        // so we will fill a dict on request and just keep it around
-        // is somewhat unnecessary as people can get this out themselves if they want
-        // but I think peeps will wanna use headers like a dictionary
-        // so we will do the transformation for you
-        private Dictionary<string, Dictionary<string, List<string>>>nodeHeaders = new Dictionary<string, Dictionary<string, List<string>>>();
-        
+        // ok assumption is that this can be lazy loaded and then kept around as
+        // not every node has headers you care about but some will and be read A
+        // LOT so we will fill a dict on request and just keep it around is
+        // somewhat unnecessary as people can get this out themselves if they
+        // want but I think peeps will wanna use headers like a dictionary so we
+        // will do the transformation for you
+        private Dictionary<string, Dictionary<string, List<string>>> nodeHeaders = new Dictionary<string, Dictionary<string, List<string>>>();
+
         /// <summary>
         /// Gets the headers for the requested node.
         /// </summary>
         /// <remarks>
-        /// The first time this is called, the values are extracted from
-        /// <see cref="Program"/> and cached inside <see cref="nodeHeaders"/>.
-        /// Future calls will then return the cached values.
+        /// The first time this is called, the values are extracted from <see
+        /// cref="Program"/> and cached inside <see cref="nodeHeaders"/>. Future
+        /// calls will then return the cached values.
         /// </remarks>
         public Dictionary<string, List<string>> GetHeaders(string nodeName)
         {
@@ -153,16 +154,16 @@ namespace Yarn.Unity
 
             var rawHeaders = rawNode.Headers;
 
-            // this should NEVER happen
-            // because there will always be at least the title, right?
+            // this should NEVER happen because there will always be at least
+            // the title, right?
             if (rawHeaders == null || rawHeaders.Count == 0)
             {
                 return new Dictionary<string, List<string>>();
             }
 
-            // ok so this is an array of (string, string) tuples
-            // with potentially duplicated keys inside the array
-            // we'll convert it all into a dict of string arrays
+            // ok so this is an array of (string, string) tuples with
+            // potentially duplicated keys inside the array we'll convert it all
+            // into a dict of string arrays
             Dictionary<string, List<string>> headers = new Dictionary<string, List<string>>();
             foreach (var pair in rawHeaders)
             {
@@ -210,10 +211,13 @@ namespace Yarn.Unity
         /// Returns a list of all line and option IDs within the requested nodes
         /// </summary>
         /// <remarks>
-        /// This is intended to be used either to precache multiple nodes worth of lines or for debugging
+        /// This is intended to be used either to precache multiple nodes worth
+        /// of lines or for debugging
         /// </remarks>
-        /// <param name="nodes">the names of all nodes whos line IDs you covet</param>
-        /// <returns>The ids of all lines and options in the requested <paramref name="nodes"/> </returns>
+        /// <param name="nodes">the names of all nodes whos line IDs you
+        /// covet</param>
+        /// <returns>The ids of all lines and options in the requested <paramref
+        /// name="nodes"/> </returns>
         public IEnumerable<string> GetLineIDsForNodes(IEnumerable<string> nodes)
         {
             var ids = new List<string>();
@@ -249,20 +253,23 @@ namespace Yarn.Unity
                 return cachedProgram;
             }
         }
-        private void Awake() 
+        private void Awake()
         {
-            // We have to invalidate the cache on Awake.
-            // Note that this cannot be done through the importer 
-            // (e.g., with a setter method that sets compiledYarnProgram and invalidates cachedProgram)
-            // because the YarnProject the importer accesses is NOT the same object as the 
-            // one currently loaded in the editor. (You can tell by comparing their HashCodes)
-            // If there are other sources that can change the value of compiledYarnProgram aside from
-            // the importer in runtime, maybe we can add such a method, but until then, this is sufficient.
+            // We have to invalidate the cache on Awake. Note that this cannot
+            // be done through the importer (e.g., with a setter method that
+            // sets compiledYarnProgram and invalidates cachedProgram) because
+            // the YarnProject the importer accesses is NOT the same object as
+            // the one currently loaded in the editor. (You can tell by
+            // comparing their HashCodes) If there are other sources that can
+            // change the value of compiledYarnProgram aside from the importer
+            // in runtime, maybe we can add such a method, but until then, this
+            // is sufficient.
             cachedProgram = null;
         }
     }
 
-    public enum LocalizationType {
+    public enum LocalizationType
+    {
         YarnInternal,
         Unity,
     }

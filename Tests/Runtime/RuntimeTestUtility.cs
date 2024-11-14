@@ -5,6 +5,8 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 using NUnit.Framework;
 using System.Linq;
 
+#nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -22,7 +24,7 @@ namespace Yarn.Unity.Tests
         private static string GeneratedRegistrationPath => TestFilesDirectoryPath + "YarnActionRegistration.cs";
 
         private static string GeneratedAssemblyDefinitionFilePath => TestFilesDirectoryPath + "RuntimeTestAssembly.asmdef";
-        
+
         public static void AddSceneToBuild(string GUID)
         {
 #if UNITY_EDITOR

@@ -12,9 +12,10 @@ namespace Yarn.Unity
     /// Represents a collection of marker names and colours.
     /// </summary>
     /// <remarks>
-    /// This is intended to be used with the LineView, and also be a sample of using the markup system.
+    /// This is intended to be used with the LineView, and also be a sample of
+    /// using the markup system.
     /// </remarks>
-    
+
     [CreateAssetMenu(fileName = "NewPalette", menuName = "Yarn Spinner/Markup Palette", order = 102)]
     public class MarkupPalette : ScriptableObject
     {
@@ -37,8 +38,10 @@ namespace Yarn.Unity
         /// <summary>
         /// Determines the colour for a particular marker inside this palette.
         /// </summary>
-        /// <param name="Marker">The marker of which you are covetous of it's colour.</param>
-        /// <param name="colour">The colour of the marker, or black if it doesn't exist.</param>
+        /// <param name="Marker">The marker of which you are covetous of it's
+        /// colour.</param>
+        /// <param name="colour">The colour of the marker, or black if it
+        /// doesn't exist.</param>
         /// <returns>True if the marker exists within this palette.</returns>
         public bool ColorForMarker(string Marker, out Color colour)
         {
@@ -71,13 +74,10 @@ namespace Yarn.Unity
     }
 }
 
-// ok so there are TWO things I want to do now
-// first is beef this up so that it supports multiple different relative
-// colour
-// bold or do we just do font-weight
-// italics
-// underline, strikethrough
+// ok so there are TWO things I want to do now first is beef this up so that it
+// supports multiple different relative colour bold or do we just do font-weight
+// italics underline, strikethrough
 
-// and then make another one called StyleMarkupProcessor
-// this just converts [style = h1] into <style="h1"> for the more advanced stuff
+// and then make another one called StyleMarkupProcessor this just converts
+// [style = h1] into <style="h1"> for the more advanced stuff
 

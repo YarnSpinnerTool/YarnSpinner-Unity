@@ -27,16 +27,16 @@ using System.Threading;
 using Yarn.Unity.UnityLocalization;
 
 #if USE_UNITASK
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-    using YarnIntTask = Cysharp.Threading.Tasks.UniTask<int>;
-    using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
-    using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object>;
+using Cysharp.Threading.Tasks;
+using YarnTask = Cysharp.Threading.Tasks.UniTask;
+using YarnIntTask = Cysharp.Threading.Tasks.UniTask<int>;
+using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
+using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object>;
 #else
-    using YarnTask = System.Threading.Tasks.Task;
-    using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
-    using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object>;
-    using System.Threading.Tasks;
+using YarnTask = System.Threading.Tasks.Task;
+using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
+using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object>;
+using System.Threading.Tasks;
 #endif
 
 namespace Yarn.Unity.UnityLocalization
@@ -57,7 +57,8 @@ namespace Yarn.Unity.UnityLocalization
 
     public class UnityLocalisedLineProvider : LineProviderBehaviour
     {
-        // the string table asset that has all of our (hopefully) localised strings inside
+        // the string table asset that has all of our (hopefully) localised
+        // strings inside
         [SerializeField] internal LocalizedStringTable stringsTable;
         [SerializeField] internal LocalizedAssetTable assetTable;
 
@@ -241,7 +242,8 @@ namespace Yarn.Unity.UnityLocalization
 
 #if UNITY_EDITOR
     [CustomEditor(typeof(UnityLocalisedLineProvider))]
-    public class UnityLocalisedLineProviderEditor : UnityEditor.Editor {
+    public class UnityLocalisedLineProviderEditor : UnityEditor.Editor
+    {
         private SerializedProperty stringsTableProperty;
         private SerializedProperty assetTableProperty;
 
@@ -251,7 +253,8 @@ namespace Yarn.Unity.UnityLocalization
 
             var stringTableName = stringsTableProperty.FindPropertyRelative("m_TableReference").FindPropertyRelative("m_TableCollectionName").stringValue;
 
-            if (string.IsNullOrEmpty(stringTableName)) {
+            if (string.IsNullOrEmpty(stringTableName))
+            {
                 EditorGUI.indentLevel += 1;
                 EditorGUILayout.HelpBox("Choose a strings table to make this line provider able to deliver line text.", MessageType.Warning);
                 EditorGUI.indentLevel -= 1;
@@ -260,11 +263,12 @@ namespace Yarn.Unity.UnityLocalization
 
             serializedObject.ApplyModifiedProperties();
         }
-        public void OnEnable() {
-            #if USE_UNITY_LOCALIZATION
+        public void OnEnable()
+        {
+#if USE_UNITY_LOCALIZATION
             this.stringsTableProperty = serializedObject.FindProperty(nameof(UnityLocalisedLineProvider.stringsTable));
             this.assetTableProperty = serializedObject.FindProperty(nameof(UnityLocalisedLineProvider.assetTable));
-            #endif
+#endif
         }
     }
 #endif

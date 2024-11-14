@@ -5,6 +5,7 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+
 #if USE_TMP
 using TMPro;
 #else
@@ -34,16 +35,20 @@ namespace Yarn.Unity
 
             Color colorToUse = defaultColor;
 
-            if (string.IsNullOrEmpty(characterName) == false) {
-                foreach (var color in colorData) {
-                    if (color.characterName.Equals(characterName, StringComparison.InvariantCultureIgnoreCase)) {
+            if (string.IsNullOrEmpty(characterName) == false)
+            {
+                foreach (var color in colorData)
+                {
+                    if (color.characterName.Equals(characterName, StringComparison.InvariantCultureIgnoreCase))
+                    {
                         colorToUse = color.displayColor;
                         break;
                     }
                 }
             }
 
-            foreach (var text in lineTexts) {
+            foreach (var text in lineTexts)
+            {
                 text.color = colorToUse;
             }
 

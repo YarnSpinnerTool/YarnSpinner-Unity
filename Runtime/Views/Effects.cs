@@ -8,21 +8,21 @@ using UnityEngine;
 using System.Collections.Generic;
 
 #if USE_TMP
-    using TMPro;
+using TMPro;
 #else
-    using TextMeshProUGUI = Yarn.Unity.TMPShim;
+using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
 #if USE_UNITASK
-    using Cysharp.Threading.Tasks;
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-    using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
+using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
+using YarnTask = Cysharp.Threading.Tasks.UniTask;
+using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
 #else
-    using System.Threading;
-    using System.Threading.Tasks;
-    using YarnTask = System.Threading.Tasks.Task;
-    using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
+using System.Threading;
+using System.Threading.Tasks;
+using YarnTask = System.Threading.Tasks.Task;
+using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
 #endif
 
 namespace Yarn.Unity
@@ -58,9 +58,9 @@ namespace Yarn.Unity
         /// cref="WasInterrupted"/> property to determine if the coroutine
         /// should exit. If it is <see langword="true"/>, the coroutine should
         /// exit (via the <c>yield break</c> statement.) At the normal exit of
-        /// your coroutine, call the <see cref="Complete"/> method to mark that the
-        /// coroutine is no longer running. To make a coroutine stop, call the
-        /// <see cref="Interrupt"/> method.
+        /// your coroutine, call the <see cref="Complete"/> method to mark that
+        /// the coroutine is no longer running. To make a coroutine stop, call
+        /// the <see cref="Interrupt"/> method.
         /// </para>
         /// <para>
         /// You can also use the <see cref="CanInterrupt"/> property to
@@ -68,12 +68,14 @@ namespace Yarn.Unity
         /// a coroutine that's using it is currently running.)
         /// </para>
         /// </remarks>
-        public class CoroutineInterruptToken {
+        public class CoroutineInterruptToken
+        {
 
             /// <summary>
             /// The state that the token is in.
             /// </summary>
-            enum State {
+            enum State
+            {
                 NotRunning,
                 Running,
                 Interrupted,
@@ -85,7 +87,8 @@ namespace Yarn.Unity
             public void Start() => state = State.Running;
             public void Interrupt()
             {
-                if (CanInterrupt == false) {
+                if (CanInterrupt == false)
+                {
                     throw new InvalidOperationException($"Cannot stop {nameof(CoroutineInterruptToken)}; state is {state} (and not {nameof(State.Running)}");
                 }
                 state = State.Interrupted;
@@ -116,7 +119,8 @@ namespace Yarn.Unity
 
             while (timeElapsed < fadeTime)
             {
-                if (stopToken?.WasInterrupted ?? false) {
+                if (stopToken?.WasInterrupted ?? false)
+                {
                     yield break;
                 }
 
@@ -174,15 +178,25 @@ namespace Yarn.Unity
         /// cref="TextMeshProUGUI"/> object over time.
         /// </summary>
         /// <remarks>
-        /// <para>This method works by adjusting the value of the <paramref name="text"/> parameter's <see cref="TextMeshProUGUI.maxVisibleCharacters"/> property. This means that word wrapping will not change half-way through the presentation of a word.</para>
-        /// <para style="note">Depending on the value of <paramref name="lettersPerSecond"/>, <paramref name="onCharacterTyped"/> may be called multiple times per frame.</para>
-        /// <para>Due to an internal implementation detail of TextMeshProUGUI, this method will always take at least one frame to execute, regardless of the length of the <paramref name="text"/> parameter's text.</para>
+        /// <para>This method works by adjusting the value of the <paramref
+        /// name="text"/> parameter's <see
+        /// cref="TextMeshProUGUI.maxVisibleCharacters"/> property. This means
+        /// that word wrapping will not change half-way through the presentation
+        /// of a word.</para>
+        /// <para style="note">Depending on the value of <paramref
+        /// name="lettersPerSecond"/>, <paramref name="onCharacterTyped"/> may
+        /// be called multiple times per frame.</para>
+        /// <para>Due to an internal implementation detail of TextMeshProUGUI,
+        /// this method will always take at least one frame to execute,
+        /// regardless of the length of the <paramref name="text"/> parameter's
+        /// text.</para>
         /// </remarks>
         /// <param name="text">A TextMeshProUGUI object to reveal the text
         /// of.</param>
         /// <param name="lettersPerSecond">The number of letters that should be
         /// revealed per second.</param>
-        /// <param name="onCharacterTyped">An <see cref="Action"/> that should be called for each character that was revealed.</param>
+        /// <param name="onCharacterTyped">An <see cref="Action"/> that should
+        /// be called for each character that was revealed.</param>
         /// <param name="stopToken">A <see cref="CoroutineInterruptToken"/> that
         /// can be used to interrupt the coroutine.</param>
         public static IEnumerator Typewriter(TextMeshProUGUI text, float lettersPerSecond, Action onCharacterTyped, CoroutineInterruptToken stopToken = null)
@@ -202,7 +216,8 @@ namespace Yarn.Unity
         /// A basic wait coroutine that can be interrupted.
         /// </summary>
         /// <remarks>
-        /// This is designed to be used as part of the <see cref="PausableTypewriter"/> but theoretically anything can use it.
+        /// This is designed to be used as part of the <see
+        /// cref="PausableTypewriter"/> but theoretically anything can use it.
         /// </remarks>
         /// <param name="duration">The length of the pause</param>
         /// <param name="stopToken">An interrupt token for this wait</param>
@@ -222,21 +237,41 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// A coroutine that gradually reveals the text in a <see cref="TextMeshProUGUI"/> object over time.
+        /// A coroutine that gradually reveals the text in a <see
+        /// cref="TextMeshProUGUI"/> object over time.
         /// </summary>
         /// <remarks>
-        /// Essentially identical to <see cref="Effects.Typewriter"/> but supports pausing the animation based on <paramref name="pausePositions"/> values.
-        /// <para>This method works by adjusting the value of the <paramref name="text"/> parameter's <see cref="TextMeshProUGUI.maxVisibleCharacters"/> property. This means that word wrapping will not change half-way through the presentation of a word.</para>
-        /// <para style="note">Depending on the value of <paramref name="lettersPerSecond"/>, <paramref name="onCharacterTyped"/> may be called multiple times per frame.</para>
-        /// <para>Due to an internal implementation detail of TextMeshProUGUI, this method will always take at least one frame to execute, regardless of the length of the <paramref name="text"/> parameter's text.</para>
+        /// Essentially identical to <see cref="Effects.Typewriter"/> but
+        /// supports pausing the animation based on <paramref
+        /// name="pausePositions"/> values.
+        /// <para>This method works by adjusting the value of the <paramref
+        /// name="text"/> parameter's <see
+        /// cref="TextMeshProUGUI.maxVisibleCharacters"/> property. This means
+        /// that word wrapping will not change half-way through the presentation
+        /// of a word.</para>
+        /// <para style="note">Depending on the value of <paramref
+        /// name="lettersPerSecond"/>, <paramref name="onCharacterTyped"/> may
+        /// be called multiple times per frame.</para>
+        /// <para>Due to an internal implementation detail of TextMeshProUGUI,
+        /// this method will always take at least one frame to execute,
+        /// regardless of the length of the <paramref name="text"/> parameter's
+        /// text.</para>
         /// </remarks>
-        /// <param name="text">A TextMeshProUGUI object to reveal the text of</param>
-        /// <param name="lettersPerSecond">The number of letters that should be revealed per second.</param>
-        /// <param name="onCharacterTyped">An <see cref="Action"/> that should be called for each character that was revealed.</param>
-        /// <param name="onPauseStarted">An <see cref="Action"/> that will be called when the typewriter effect is paused.</param>
-        /// <param name="onPauseEnded">An <see cref="Action"/> that will be called when the typewriter effect is restarted.</param>
-        /// <param name="pausePositions">A stack of character position and pause duration tuples used to pause the effect. Generally created by <see cref="LineView.GetPauseDurationsInsideLine"/></param>
-        /// <param name="stopToken">A <see cref="CoroutineInterruptToken"/> that can be used to interrupt the coroutine.</param>
+        /// <param name="text">A TextMeshProUGUI object to reveal the text
+        /// of</param>
+        /// <param name="lettersPerSecond">The number of letters that should be
+        /// revealed per second.</param>
+        /// <param name="onCharacterTyped">An <see cref="Action"/> that should
+        /// be called for each character that was revealed.</param>
+        /// <param name="onPauseStarted">An <see cref="Action"/> that will be
+        /// called when the typewriter effect is paused.</param>
+        /// <param name="onPauseEnded">An <see cref="Action"/> that will be
+        /// called when the typewriter effect is restarted.</param>
+        /// <param name="pausePositions">A stack of character position and pause
+        /// duration tuples used to pause the effect. Generally created by <see
+        /// cref="LineView.GetPauseDurationsInsideLine"/></param>
+        /// <param name="stopToken">A <see cref="CoroutineInterruptToken"/> that
+        /// can be used to interrupt the coroutine.</param>
         public static IEnumerator PausableTypewriter(TextMeshProUGUI text, float lettersPerSecond, Action onCharacterTyped, Action onPauseStarted, Action onPauseEnded, Stack<(int position, float duration)> pausePositions, CoroutineInterruptToken stopToken = null)
         {
             stopToken?.Start();
@@ -245,8 +280,7 @@ namespace Yarn.Unity
             text.maxVisibleCharacters = 0;
 
             // Wait a single frame to let the text component process its
-            // content, otherwise text.textInfo.characterCount won't be
-            // accurate
+            // content, otherwise text.textInfo.characterCount won't be accurate
             yield return null;
 
             // How many visible characters are present in the text?
@@ -264,15 +298,14 @@ namespace Yarn.Unity
             // Convert 'letters per second' into its inverse
             float secondsPerLetter = 1.0f / lettersPerSecond;
 
-            // If lettersPerSecond is larger than the average framerate, we
-            // need to show more than one letter per frame, so simply
-            // adding 1 letter every secondsPerLetter won't be good enough
-            // (we'd cap out at 1 letter per frame, which could be slower
-            // than the user requested.)
+            // If lettersPerSecond is larger than the average framerate, we need
+            // to show more than one letter per frame, so simply adding 1 letter
+            // every secondsPerLetter won't be good enough (we'd cap out at 1
+            // letter per frame, which could be slower than the user requested.)
             //
-            // Instead, we'll accumulate time every frame, and display as
-            // many letters in that frame as we need to in order to achieve
-            // the requested speed.
+            // Instead, we'll accumulate time every frame, and display as many
+            // letters in that frame as we need to in order to achieve the
+            // requested speed.
             var accumulator = Time.deltaTime;
 
             while (text.maxVisibleCharacters < characterCount)
@@ -282,15 +315,16 @@ namespace Yarn.Unity
                     yield break;
                 }
 
-                // We need to show as many letters as we have accumulated
-                // time for.
+                // We need to show as many letters as we have accumulated time
+                // for.
                 while (accumulator >= secondsPerLetter)
                 {
                     text.maxVisibleCharacters += 1;
 
-                    // ok so the change needs to be that if at any point we hit the pause position
-                    // we instead stop worrying about letters
-                    // and instead we do a normal wait for the necessary duration
+                    // ok so the change needs to be that if at any point we hit
+                    // the pause position we instead stop worrying about letters
+                    // and instead we do a normal wait for the necessary
+                    // duration
                     if (pausePositions != null && pausePositions.Count != 0)
                     {
                         if (text.maxVisibleCharacters == pausePositions.Peek().Item1)
@@ -313,8 +347,8 @@ namespace Yarn.Unity
                 yield return null;
             }
 
-            // We either finished displaying everything, or were
-            // interrupted. Either way, display everything now.
+            // We either finished displaying everything, or were interrupted.
+            // Either way, display everything now.
             text.maxVisibleCharacters = characterCount;
 
             stopToken?.Complete();

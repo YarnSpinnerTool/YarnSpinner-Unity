@@ -88,7 +88,8 @@ namespace Yarn.Unity.Tests
         {
             var comparer = EqualityComparer<TSubject>.Default;
 
-            if (Subject == null && other == null) {
+            if (Subject == null && other == null)
+            {
                 // They're both null, so they're equal
                 return;
             }
@@ -117,8 +118,8 @@ namespace Yarn.Unity.Tests
             var comparer = EqualityComparer<TSubject>.Default;
 
             if (Subject == null && other != null
-            || Subject != null && other == null
-            ) {
+                || Subject != null && other == null)
+            {
                 // One of them is not null, so they're not equal
                 return;
             }
@@ -465,7 +466,6 @@ namespace Yarn.Unity.Tests
         /// assertion fails.</param>
         public void ContainAllOf(IEnumerable<TItem> expectation, string? message = null)
         {
-
             NullCheck(Subject, message);
 
             foreach (var item in expectation)
@@ -535,7 +535,6 @@ namespace Yarn.Unity.Tests
             }
 
             throw new AssertionException($"Expected collection to not contain item matching predicate", message);
-
         }
 
         /// <summary>
@@ -778,10 +777,7 @@ namespace Yarn.Unity.Tests
         /// name="subject"/>.</returns>
         public static ObjectAssertions<object> Should(this object? subject)
         {
-            return new ObjectAssertions<object>
-            {
-                Subject = subject
-            };
+            return new ObjectAssertions<object> { Subject = subject };
         }
 
         /// <summary>

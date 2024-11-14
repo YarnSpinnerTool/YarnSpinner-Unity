@@ -13,13 +13,13 @@ using Yarn.Markup;
 
 
 #if USE_UNITASK
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-    using YarnIntTask = Cysharp.Threading.Tasks.UniTask<int>;
-    using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
+using Cysharp.Threading.Tasks;
+using YarnTask = Cysharp.Threading.Tasks.UniTask;
+using YarnIntTask = Cysharp.Threading.Tasks.UniTask<int>;
+using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
 #else
 using YarnTask = System.Threading.Tasks.Task;
-    using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
+using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
 #endif
 
 #nullable enable
@@ -44,19 +44,17 @@ namespace Yarn.Unity
     /// </summary>
     /// <remarks>
     /// <para>
-    /// <see cref="DialogueRunner"/>s use a <see
-    /// cref="LineProviderBehaviour"/> to get <see cref="LocalizedLine"/>s,
-    /// which contain the localized information that <see
-    /// cref="DialogueViewBase"/> classes use to present content to the
-    /// player. 
+    /// <see cref="DialogueRunner"/>s use a <see cref="LineProviderBehaviour"/>
+    /// to get <see cref="LocalizedLine"/>s, which contain the localized
+    /// information that <see cref="DialogueViewBase"/> classes use to present
+    /// content to the player. 
     /// </para>
     /// <para>
     /// Subclasses of this abstract class may return subclasses of <see
     /// cref="LocalizedLine"/>. For example, <see
     /// cref="BuiltinLocalisedLineProvider"/> returns an <see
-    /// cref="AudioLocalizedLine"/>, which includes <see
-    /// cref="AudioClip"/>; views that make use of audio can then access
-    /// this additional data.
+    /// cref="AudioLocalizedLine"/>, which includes <see cref="AudioClip"/>;
+    /// views that make use of audio can then access this additional data.
     /// </para>
     /// </remarks>
     /// <seealso cref="DialogueViewBase"/>
@@ -67,11 +65,11 @@ namespace Yarn.Unity
         /// specified <see cref="Yarn.Line"/>.
         /// </summary>
         /// <remarks>
-        /// This method should not be called if <see
-        /// cref="LinesAvailable"/> returns <see langword="false"/>.
+        /// This method should not be called if <see cref="LinesAvailable"/>
+        /// returns <see langword="false"/>.
         /// </remarks>
-        /// <param name="line">The <see cref="Yarn.Line"/> to produce the
-        /// <see cref="LocalizedLine"/> from.</param>
+        /// <param name="line">The <see cref="Yarn.Line"/> to produce the <see
+        /// cref="LocalizedLine"/> from.</param>
         /// <returns>A localized line, ready to be presented to the
         /// player.</returns>
         public abstract YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken);
@@ -79,25 +77,24 @@ namespace Yarn.Unity
         /// <summary>
         /// The YarnProject that contains the localized data for lines.
         /// </summary>
-        /// <remarks>This property is set at run-time by the object that
-        /// will be requesting content (typically a <see
-        /// cref="DialogueRunner"/>).
+        /// <remarks>This property is set at run-time by the object that will be
+        /// requesting content (typically a <see cref="DialogueRunner"/>).
         public YarnProject? YarnProject { get; set; }
 
         /// <summary>
-        /// Signals to the line provider that lines with the provided line
-        /// IDs may be presented shortly.        
+        /// Signals to the line provider that lines with the provided line IDs
+        /// may be presented shortly.        
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Subclasses of <see cref="LineProviderBehaviour"/> can override
-        /// this to prepare any neccessary resources needed to present
-        /// these lines, like pre-loading voice-over audio. The default
-        /// implementation does nothing.
+        /// Subclasses of <see cref="LineProviderBehaviour"/> can override this
+        /// to prepare any neccessary resources needed to present these lines,
+        /// like pre-loading voice-over audio. The default implementation does
+        /// nothing.
         /// </para>
         /// <para style="info">
-        /// Not every line may run; this method serves as a way to give the
-        /// line provider advance notice that a line <i>may</i> run, not <i>will</i>
+        /// Not every line may run; this method serves as a way to give the line
+        /// provider advance notice that a line <i>may</i> run, not <i>will</i>
         /// run.
         /// </para>
         /// <para>
@@ -128,12 +125,12 @@ namespace Yarn.Unity
         public abstract string LocaleCode { get; set; }
 
         /// <summary>
-        /// Called by Unity when the <see cref="LineProviderBehaviour"/>
-        /// has first appeared in the scene.
+        /// Called by Unity when the <see cref="LineProviderBehaviour"/> has
+        /// first appeared in the scene.
         /// </summary>
         /// <remarks>
-        /// This method is <see langword="public"/> <see
-        /// langword="virtual"/> to allow subclasses to override it.
+        /// This method is <see langword="public"/> <see langword="virtual"/> to
+        /// allow subclasses to override it.
         /// </remarks>
         public virtual void Start()
         {

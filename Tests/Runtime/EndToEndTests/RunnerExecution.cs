@@ -35,7 +35,8 @@ namespace Yarn.Unity.Tests
         /// <param name="nodeName"></param>
         /// <param name="timeoutMilliseconds"></param>
         /// <returns></returns>
-        public static RunnerExecution StartDialogue(string nodeName, int timeoutMilliseconds = 2000) {
+        public static RunnerExecution StartDialogue(string nodeName, int timeoutMilliseconds = 2000)
+        {
             return new RunnerExecution(nodeName, timeoutMilliseconds);
         }
 
@@ -49,8 +50,10 @@ namespace Yarn.Unity.Tests
             dialogueRunner.StartDialogue(nodeName);
         }
 
-        private YarnTask CompletionTask => YarnTask.Run(async () => {
-            while (dialogueRunner.IsDialogueRunning) {
+        private YarnTask CompletionTask => YarnTask.Run(async () =>
+        {
+            while (dialogueRunner.IsDialogueRunning)
+            {
                 await YarnTask.Yield();
             }
         });

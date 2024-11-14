@@ -7,8 +7,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-internal class DemoAction {
-    public static async System.Threading.Tasks.Task DemoCommandAsync() {
+internal class DemoAction
+{
+    public static async System.Threading.Tasks.Task DemoCommandAsync()
+    {
         await System.Threading.Tasks.Task.Delay(1000);
     }
 }
@@ -21,7 +23,8 @@ namespace Yarn.Unity
         [UnityEditor.InitializeOnLoadMethod]
 #endif
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        public static void AddRegisterFunction() {
+        public static void AddRegisterFunction()
+        {
             // When the domain is reloaded, scripts are recompiled, or the game
             // starts, add RegisterActions as a method that populates a
             // DialogueRunner or Library with commands and functions.

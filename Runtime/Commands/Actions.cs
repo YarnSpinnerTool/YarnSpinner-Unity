@@ -13,21 +13,21 @@ using UnityEngine;
 #nullable enable
 
 #if USE_UNITASK
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-    using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
+using Cysharp.Threading.Tasks;
+using YarnTask = Cysharp.Threading.Tasks.UniTask;
+using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
 #else
-    using YarnTask = System.Threading.Tasks.Task;
-    using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
+using YarnTask = System.Threading.Tasks.Task;
+using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
 #endif
 
 namespace Yarn.Unity
 {
-    using Converter = System.Func<string, int, object?>;
     using ActionRegistrationMethod = System.Action<IActionRegistration, RegistrationType>;
+    using Converter = System.Func<string, int, object?>;
 
-
-    public enum RegistrationType {
+    public enum RegistrationType
+    {
         /// <summary>
         /// Actions are being registered during a Yarn script compilation.
         /// </summary>
@@ -38,41 +38,55 @@ namespace Yarn.Unity
         Runtime
     }
 
-    public interface ICommand {
+    public interface ICommand
+    {
         string Name { get; }
     }
 
-    internal static class DiagnosticUtility {
-        public static string EnglishPluraliseNounCount(int count, string name, bool prefixCount = false) {
+    internal static class DiagnosticUtility
+    {
+        public static string EnglishPluraliseNounCount(int count, string name, bool prefixCount = false)
+        {
             string result;
-            if (count == 1) {
+            if (count == 1)
+            {
                 result = name;
-            } else {
+            }
+            else
+            {
                 result = name + "s";
             }
-            if (prefixCount) {
+            if (prefixCount)
+            {
                 return count.ToString() + " " + result;
-            } else {
+            }
+            else
+            {
                 return result;
             }
         }
 
-        public static string EnglishPluraliseWasVerb(int count) {
-            if (count == 1) {
+        public static string EnglishPluraliseWasVerb(int count)
+        {
+            if (count == 1)
+            {
                 return "was";
-            } else {
+            }
+            else
+            {
                 return "were";
             }
         }
     }
 
-    
+
 
     public class Actions : ICommandDispatcher
     {
         internal class CommandRegistration : ICommand
         {
-            public CommandRegistration(string name, Delegate @delegate) {
+            public CommandRegistration(string name, Delegate @delegate)
+            {
                 Name = name;
                 Method = @delegate.Method;
                 Target = @delegate.Target;
@@ -184,14 +198,20 @@ namespace Yarn.Unity
                 var (min, max) = ParameterCount;
 
                 int argumentCount = args.Length;
-                if (argumentCount < min || argumentCount > max) {
+                if (argumentCount < min || argumentCount > max)
+                {
                     // Wrong number of arguments.
                     string requirementDescription;
-                    if (min == 0) {
+                    if (min == 0)
+                    {
                         requirementDescription = $"at most {max} {DiagnosticUtility.EnglishPluraliseNounCount(max, "parameter")}";
-                    } else if (min != max) {
+                    }
+                    else if (min != max)
+                    {
                         requirementDescription = $"between {min} and {max} {DiagnosticUtility.EnglishPluraliseNounCount(max, "parameter")}";
-                    } else {
+                    }
+                    else
+                    {
                         requirementDescription = $"{min} {DiagnosticUtility.EnglishPluraliseNounCount(max, "parameter")}";
                     }
                     message = $"{this.Name} requires {requirementDescription}, but {argumentCount} {DiagnosticUtility.EnglishPluraliseWasVerb(argumentCount)} provided.";
@@ -209,8 +229,9 @@ namespace Yarn.Unity
 
                     string arg = args[i];
                     Converter converter = Converters[i];
-                    
-                    if (parameterIsParamsArray) {
+
+                    if (parameterIsParamsArray)
+                    {
                         // Consume all remaining arguments, passing them through
                         // the final converter, and produce an array from the
                         // results. This array will be the final parameter to
@@ -219,16 +240,18 @@ namespace Yarn.Unity
                         var paramIndex = i;
                         // var paramsArray = new List<object?>();
                         var paramsArray = Array.CreateInstance(parameterArrayElementType, argumentCount - i);
-                        while (i < argumentCount) {
+                        while (i < argumentCount)
+                        {
                             arg = args[i];
-                            if (converter == null) {
+                            if (converter == null)
+                            {
                                 paramsArray.SetValue(arg, i);
                             }
                             else
                             {
                                 try
                                 {
-                                    paramsArray.SetValue(converter.Invoke(arg, i), i-paramIndex);
+                                    paramsArray.SetValue(converter.Invoke(arg, i), i - paramIndex);
                                 }
                                 catch (Exception e)
                                 {
@@ -268,14 +291,18 @@ namespace Yarn.Unity
                     var parameter = parameters[i];
                     if (parameter.IsOptional)
                     {
-                        // If this parameter is optional, provide the Missing type.
+                        // If this parameter is optional, provide the Missing
+                        // type.
                         finalArgs[i] = System.Type.Missing;
                     }
                     else if (parameter.GetCustomAttribute<ParamArrayAttribute>() != null)
                     {
-                        // If the parameter is a params array, provide an empty array of the appropriate type.
-                        finalArgs[i] = Array.CreateInstance(parameter.ParameterType.GetElementType(),0);
-                    } else {
+                        // If the parameter is a params array, provide an empty
+                        // array of the appropriate type.
+                        finalArgs[i] = Array.CreateInstance(parameter.ParameterType.GetElementType(), 0);
+                    }
+                    else
+                    {
                         throw new InvalidOperationException($"Can't provide a default value for parameter {parameter.Name}");
                     }
                 }
@@ -284,8 +311,10 @@ namespace Yarn.Unity
                 return CommandDispatchResult.ParameterParseStatusType.Succeeded;
             }
 
-            private (int Min, int Max) ParameterCount {
-                get {
+            private (int Min, int Max) ParameterCount
+            {
+                get
+                {
                     var parameters = Method.GetParameters();
                     int optional = 0;
                     bool lastCommandIsParams = false;
@@ -295,7 +324,8 @@ namespace Yarn.Unity
                         {
                             optional += 1;
                         }
-                        if (parameter.ParameterType.IsArray && parameter.GetCustomAttribute<ParamArrayAttribute>()!= null) {
+                        if (parameter.ParameterType.IsArray && parameter.GetCustomAttribute<ParamArrayAttribute>() != null)
+                        {
                             // If the parameter is a params array, then:
                             // 1. It's 'optional' in that you can pass in no
                             //    values (so, for our purposes, the minimum
@@ -310,7 +340,8 @@ namespace Yarn.Unity
 
                     int min = parameters.Length - optional;
                     int max = parameters.Length;
-                    if (lastCommandIsParams) {
+                    if (lastCommandIsParams)
+                    {
                         max = int.MaxValue;
                     }
                     return (min, max);
@@ -366,14 +397,20 @@ namespace Yarn.Unity
                     }
 
                     target = targetComponent;
-                } else if (Method.IsStatic) {
+                }
+                else if (Method.IsStatic)
+                {
                     // The method is static; it therefore doesn't need a target.
                     target = null;
-                } else if (Target != null) {
+                }
+                else if (Target != null)
+                {
                     // The method is an instance method, so use the target we've
                     // stored.
                     target = Target;
-                } else {
+                }
+                else
+                {
                     // We don't know what to call this method on.
                     throw new InvalidOperationException($"Internal error: {nameof(CommandRegistration)} \"{this.Name}\" has no {nameof(Target)}, but method is not static and ${DynamicallyFindsTarget} is false");
                 }
@@ -402,7 +439,7 @@ namespace Yarn.Unity
                 {
                     // The method returned a Coroutine object.
                     return new CommandDispatchResult(
-                        CommandDispatchResult.StatusType.Succeeded, 
+                        CommandDispatchResult.StatusType.Succeeded,
                         dispatcher.WaitForCoroutine(coro)
                     );
                 }
@@ -410,18 +447,19 @@ namespace Yarn.Unity
                 {
                     // The method returned an IEnumerator.
                     return new CommandDispatchResult(
-                        CommandDispatchResult.StatusType.Succeeded, 
+                        CommandDispatchResult.StatusType.Succeeded,
                         dispatcher.WaitForCoroutine(enumerator)
                     );
                 }
-                else if (returnValue is System.Threading.Tasks.Task task) {
+                else if (returnValue is System.Threading.Tasks.Task task)
+                {
                     // The method returned a task. Convert it to a YarnTask.
                     return new CommandDispatchResult(
-                        CommandDispatchResult.StatusType.Succeeded, 
+                        CommandDispatchResult.StatusType.Succeeded,
                         task.AsYarnTask()
                     );
                 }
-                #if USE_UNITASK
+#if USE_UNITASK
                 else if (returnValue is Cysharp.Threading.Tasks.UniTask unitask) {
                     // The method returned a UniTask. No need to convert it to
                     // YarnTask, because if UniTask is installed, YarnTask means
@@ -431,7 +469,7 @@ namespace Yarn.Unity
                         unitask
                     );
                 }
-                #endif
+#endif
                 else
                 {
                     // The method returned no value.
@@ -439,30 +477,36 @@ namespace Yarn.Unity
                 }
             }
 
-            public string UsageString {
-                get {
+            public string UsageString
+            {
+                get
+                {
                     var components = new List<string>();
 
                     components.Add(Name);
 
-                    if (DynamicallyFindsTarget) {
+                    if (DynamicallyFindsTarget)
+                    {
                         var declaringTypeName = DeclaringType.Name;
                         components.Add($"target <i>({declaringTypeName})</i>");
                     }
 
-                    foreach (var parameter in Method.GetParameters()) {
+                    foreach (var parameter in Method.GetParameters())
+                    {
                         var type = parameter.ParameterType;
                         string typeName;
 
-                        if (TypeFriendlyNames.TryGetValue(type, out typeName) == false) {
+                        if (TypeFriendlyNames.TryGetValue(type, out typeName) == false)
+                        {
                             typeName = type.Name;
                         }
 
                         string displayName = $"{parameter.Name} <i>({typeName})</i>";
 
-                        if (parameter.IsOptional) {
+                        if (parameter.IsOptional)
+                        {
                             displayName = $"[{displayName} = {parameter.DefaultValue}]";
-                            
+
                         }
 
                         components.Add(displayName);
@@ -496,22 +540,28 @@ namespace Yarn.Unity
             ActionRegistrar = actionRegistrar;
         }
 
-        private static string GetFullMethodName(MethodInfo method) {
+        private static string GetFullMethodName(MethodInfo method)
+        {
             return $"{method.DeclaringType.FullName}.{method.Name}";
         }
- 
-        public void RegisterActions() {
-            foreach (var registrationFunction in ActionRegistrationMethods) {
+
+        public void RegisterActions()
+        {
+            foreach (var registrationFunction in ActionRegistrationMethods)
+            {
                 registrationFunction.Invoke(ActionRegistrar, RegistrationType.Runtime);
             }
         }
 
         public void AddCommandHandler(string commandName, Delegate handler)
         {
-            if (_commands.ContainsKey(commandName)) {
+            if (_commands.ContainsKey(commandName))
+            {
                 Debug.LogError($"Failed to register command {commandName}: a command by this name has already been registered.");
                 return;
-            } else {
+            }
+            else
+            {
 #if YARN_SOURCE_GENERATION_DEBUG_LOGGING
                 Debug.Log($"Registering command {commandName}");
 #endif
@@ -533,20 +583,25 @@ namespace Yarn.Unity
             Library.RegisterFunction(name, implementation);
         }
 
-        public void AddCommandHandler(string commandName, MethodInfo methodInfo) {
-            if (_commands.ContainsKey(commandName)) {
+        public void AddCommandHandler(string commandName, MethodInfo methodInfo)
+        {
+            if (_commands.ContainsKey(commandName))
+            {
                 Debug.LogError($"Failed to register command {commandName}: a command by this name has already been registered.");
                 return;
-            } else {
+            }
+            else
+            {
                 _commands.Add(commandName, new CommandRegistration(commandName, methodInfo));
             }
         }
         public void RemoveCommandHandler(string commandName)
         {
-            if (_commands.Remove(commandName) == false) {
+            if (_commands.Remove(commandName) == false)
+            {
                 Debug.LogError($"Can't remove command {commandName}, because no command with this name is currently registered.");
             }
-            
+
         }
 
         public void RemoveFunction(string name)
@@ -577,13 +632,15 @@ namespace Yarn.Unity
 
             if (_commands.TryGetValue(commandPieces[0], out var registration))
             {
-                // The first part of the command is the command name itself. Remove
-                // it to get the collection of parameters that were passed to the
-                // command.
+                // The first part of the command is the command name itself.
+                // Remove it to get the collection of parameters that were
+                // passed to the command.
                 commandPieces.RemoveAt(0);
 
                 return registration.Invoke(coroutineHost, commandPieces);
-            } else {
+            }
+            else
+            {
                 return new CommandDispatchResult(CommandDispatchResult.StatusType.CommandUnknown);
             }
         }
@@ -610,7 +667,8 @@ namespace Yarn.Unity
             string name = parameter.Name;
             var parameterIsParamsArray = parameter.GetCustomAttribute<ParamArrayAttribute>() != null;
 
-            if (targetType.IsArray && parameterIsParamsArray) {
+            if (targetType.IsArray && parameterIsParamsArray)
+            {
                 // This parameter is a params array. Make a converter for that
                 // array's element type; at dispatch time, we'll repeatedly call
                 // it with the arguments found in the command.
@@ -618,9 +676,12 @@ namespace Yarn.Unity
                 var paramsArrayType = targetType.GetElementType();
                 var elementConverter = CreateConverterFunction(paramsArrayType, name);
                 return elementConverter;
-                
-            } else {
-                // This parameter is for a single value. Make a converter that receives a single string, 
+
+            }
+            else
+            {
+                // This parameter is for a single value. Make a converter that
+                // receives a single string, 
                 return CreateConverterFunction(targetType, name);
             }
         }
@@ -637,7 +698,8 @@ namespace Yarn.Unity
                 return (arg, i) => GameObject.Find(arg);
             }
 
-            // find components of the GameObject with the component, if available
+            // find components of the GameObject with the component, if
+            // available
             if (typeof(Component).IsAssignableFrom(targetType))
             {
                 return (arg, i) =>
@@ -658,7 +720,7 @@ namespace Yarn.Unity
                 {
                     // If the argument is the name of the parameter, interpret
                     // the argument as 'true'.
-                    if (arg.Equals(parameterName, StringComparison.InvariantCultureIgnoreCase)) 
+                    if (arg.Equals(parameterName, StringComparison.InvariantCultureIgnoreCase))
                     {
                         return true;
                     }
@@ -736,20 +798,24 @@ namespace Yarn.Unity
 
             public void AddCommandHandler(string commandName, Delegate handler)
             {
-                // No action; this class does not handle commands, only functions.
+                // No action; this class does not handle commands, only
+                // functions.
                 return;
             }
 
             public void AddCommandHandler(string commandName, MethodInfo methodInfo)
             {
-                // No action; this class does not handle commands, only functions.
+                // No action; this class does not handle commands, only
+                // functions.
                 return;
             }
 
-            public void AddFunction(string name, Delegate implementation) {
+            public void AddFunction(string name, Delegate implementation)
+            {
                 // Check to see if the function already exists in our Library,
                 // and error out if it does
-                if (library.FunctionExists(name)) {
+                if (library.FunctionExists(name))
+                {
                     throw new ArgumentException($"Cannot register function {name}: a function with this name already exists");
                 }
                 // Register this function in the library

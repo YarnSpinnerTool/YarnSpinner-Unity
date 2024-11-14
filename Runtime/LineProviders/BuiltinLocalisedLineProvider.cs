@@ -1,14 +1,14 @@
 #nullable enable
 
-using System.Threading;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace Yarn.Unity
 {
     using UnityEngine;
-
     using System.Threading;
+
 #if USE_UNITASK
     using Cysharp.Threading.Tasks;
     using YarnTask = Cysharp.Threading.Tasks.UniTask;
@@ -174,8 +174,8 @@ namespace Yarn.Unity
     using YarnTask = Cysharp.Threading.Tasks.UniTask;
     using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
 #else
-    using YarnTask = System.Threading.Tasks.Task;
     using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
+    using YarnTask = System.Threading.Tasks.Task;
 #endif
 
 
@@ -194,8 +194,8 @@ namespace Yarn.Unity
 
             if (handle.IsValid() == false)
             {
-                // We don't have a loading handle for this asset. Start
-                // loading it now.
+                // We don't have a loading handle for this asset. Start loading
+                // it now.
 
                 string assetAddress = Localization.GetAddressForLine(assetID, localeID);
 
@@ -228,7 +228,8 @@ namespace Yarn.Unity
 
             if (location == null || location.Count == 0)
             {
-                // No location available for this asset. Don't attempt to load it.
+                // No location available for this asset. Don't attempt to load
+                // it.
                 return;
             }
             var assetLoadOperation = Addressables.LoadAssetAsync<UnityEngine.Object>(address);

@@ -31,7 +31,8 @@ namespace Yarn.Unity
         /// <param name="language">The language to use when generating the
         /// address.</param>
         /// <returns>The address to use.</returns>
-        internal static string GetAddressForLine(string lineID, string language) {
+        internal static string GetAddressForLine(string lineID, string language)
+        {
             return $"line_{language}_{lineID.Replace("line:", "")}";
         }
 
@@ -55,7 +56,7 @@ namespace Yarn.Unity
         /// contains assets that are linked to strings.
         /// </summary>
         public bool ContainsLocalizedAssets { get => _containsLocalizedAssets; internal set => _containsLocalizedAssets = value; }
-        
+
         /// <summary>
         /// Gets a value indicating whether this <see cref="Localization"/>
         /// makes use of Addressable Assets (<see langword="true"/>), or if it
@@ -64,9 +65,9 @@ namespace Yarn.Unity
         /// <remarks>
         /// If this property is <see langword="true"/>, <see
         /// cref="GetLocalizedObject"/> and <see
-        /// cref="ContainsLocalizedObject"/> should not be used to
-        /// retrieve localised objects. Instead, the Addressable Assets API
-        /// should be used.
+        /// cref="ContainsLocalizedObject"/> should not be used to retrieve
+        /// localised objects. Instead, the Addressable Assets API should be
+        /// used.
         /// </remarks>
         public bool UsesAddressableAssets { get => _usesAddressableAssets; internal set => _usesAddressableAssets = value; }
 
@@ -114,7 +115,8 @@ namespace Yarn.Unity
         /// ID.)</param>
         /// <param name="value">The user-facing text for this string, in the
         /// language specified by <see cref="LocaleCode"/>.</param>
-        internal void AddLocalisedStringToAsset(string key, string value) {
+        internal void AddLocalisedStringToAsset(string key, string value)
+        {
             _stringTable.Add(key, value);
         }
 
@@ -162,7 +164,8 @@ namespace Yarn.Unity
         {
             foreach (var entry in stringTableEntries)
             {
-                if (entry.Text != null) {
+                if (entry.Text != null)
+                {
                     AddLocalizedString(entry.ID, entry.Text);
                 }
             }
@@ -174,7 +177,8 @@ namespace Yarn.Unity
 
         public T? GetLocalizedObject<T>(string key) where T : UnityEngine.Object
         {
-            if (_usesAddressableAssets) {
+            if (_usesAddressableAssets)
+            {
                 Debug.LogWarning($"Localization {name} uses addressable assets. Use the Addressable Assets API to load the asset.");
             }
 
@@ -237,17 +241,17 @@ namespace Yarn.Unity
 namespace Yarn.Unity
 {
     /// <summary>
-    /// Provides methods for finding voice over <see cref="AudioClip"/>s in
-    /// the project matching a Yarn linetag/string ID and a language ID.
+    /// Provides methods for finding voice over <see cref="AudioClip"/>s in the
+    /// project matching a Yarn linetag/string ID and a language ID.
     /// </summary>
     public static class FindVoiceOver
     {
         /// <summary>
-        /// Finds all voice over <see cref="AudioClip"/>s in the project
-        /// with a filename matching a Yarn linetag and a language ID.
+        /// Finds all voice over <see cref="AudioClip"/>s in the project with a
+        /// filename matching a Yarn linetag and a language ID.
         /// </summary>
-        /// <param name="linetag">The linetag/string ID the voice over
-        /// filename should match.</param>
+        /// <param name="linetag">The linetag/string ID the voice over filename
+        /// should match.</param>
         /// <param name="language">The language ID the voice over filename
         /// should match.</param>
         /// <returns>A string array with GUIDs of all matching <see
@@ -278,8 +282,7 @@ namespace Yarn.Unity
         public static string[] SearchAssetDatabase(string searchPattern, string language)
         {
             var result = AssetDatabase.FindAssets(searchPattern);
-            // Check if result is ambiguous and try to improve the
-            // situation
+            // Check if result is ambiguous and try to improve the situation
             if (result.Length > 1)
             {
                 var assetsInMatchingLanguageDirectory = GetAsseetsInMatchingLanguageDirectory(result, language);

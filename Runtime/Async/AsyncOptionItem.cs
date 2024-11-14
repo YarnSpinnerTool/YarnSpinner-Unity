@@ -6,15 +6,15 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 #if USE_TMP
-    using TMPro;
+using TMPro;
 #else
-    using TextMeshProUGUI = Yarn.Unity.TMPShim;
+using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
 #if USE_UNITASK
-    using YarnOptionCompletionSource = Cysharp.Threading.Tasks.UniTaskCompletionSource<Yarn.Unity.DialogueOption>;
+using YarnOptionCompletionSource = Cysharp.Threading.Tasks.UniTaskCompletionSource<Yarn.Unity.DialogueOption>;
 #else
-    using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption>;
+using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption>;
 #endif
 
 namespace Yarn.Unity
@@ -45,7 +45,8 @@ namespace Yarn.Unity
             }
         }
 
-        // If we receive a submit or click event, invoke our "we just selected this option" handler.
+        // If we receive a submit or click event, invoke our "we just selected
+        // this option" handler.
         public void OnSubmit(BaseEventData eventData)
         {
             InvokeOptionSelected();
@@ -53,16 +54,18 @@ namespace Yarn.Unity
 
         public void InvokeOptionSelected()
         {
-            // turns out that Selectable subclasses aren't intrinsically interactive/non-interactive
-            // based on their canvasgroup, you still need to check at the moment of interaction
+            // turns out that Selectable subclasses aren't intrinsically
+            // interactive/non-interactive based on their canvasgroup, you still
+            // need to check at the moment of interaction
             if (!IsInteractable())
             {
                 return;
             }
-            
-            // We only want to invoke this once, because it's an error to
-            // submit an option when the Dialogue Runner isn't expecting it. To
-            // prevent this, we'll only invoke this if the flag hasn't been cleared already.
+
+            // We only want to invoke this once, because it's an error to submit
+            // an option when the Dialogue Runner isn't expecting it. To prevent
+            // this, we'll only invoke this if the flag hasn't been cleared
+            // already.
             if (hasSubmittedOptionSelection == false)
             {
                 hasSubmittedOptionSelection = true;

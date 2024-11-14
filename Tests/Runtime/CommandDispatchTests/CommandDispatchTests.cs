@@ -31,7 +31,8 @@ namespace Yarn.Unity.Tests
 
         public void Setup()
         {
-            if (Directory.Exists(TestFilesDirectoryPath) == false) {
+            if (Directory.Exists(TestFilesDirectoryPath) == false)
+            {
                 UnityEditor.AssetDatabase.CreateFolder("Assets", TestFolderName);
                 UnityEditor.AssetDatabase.CopyAsset(TestScriptPathSource, TestScriptPathInProject);
             }
@@ -46,7 +47,8 @@ namespace Yarn.Unity.Tests
         }
 
         [Test]
-        public void CommandDispatch_Passes() {
+        public void CommandDispatch_Passes()
+        {
             var dialogueRunnerGO = new GameObject("Dialogue Runner");
             var dialogueRunner = dialogueRunnerGO.AddComponent<DialogueRunner>();
 

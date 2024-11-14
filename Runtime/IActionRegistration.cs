@@ -2,10 +2,10 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using UnityEngine;
+using System;
 using System.Collections;
 using System.Reflection;
-using System;
+using UnityEngine;
 
 namespace Yarn.Unity
 {
@@ -51,13 +51,12 @@ namespace Yarn.Unity
         /// <summary>
         /// Removes a command handler.
         /// </summary>
-        /// <param name="commandName">The name of the command to
-        /// remove.</param>
+        /// <param name="commandName">The name of the command to remove.</param>
         void RemoveCommandHandler(string commandName);
 
         /// <summary>
-        /// Add a new function that returns a value, so that it can be
-        /// called from Yarn scripts.
+        /// Add a new function that returns a value, so that it can be called
+        /// from Yarn scripts.
         /// </summary>
         /// <remarks>
         /// <para>When this function has been registered, it can be called from

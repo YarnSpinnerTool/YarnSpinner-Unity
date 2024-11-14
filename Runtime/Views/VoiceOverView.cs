@@ -18,11 +18,11 @@ namespace Yarn.Unity
     using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
     using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<DialogueOption?>;
 #else
-    using YarnTask = System.Threading.Tasks.Task;
+    using System.Threading;
+    using System.Threading.Tasks;
     using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
     using YarnOptionTask = System.Threading.Tasks.Task<DialogueOption?>;
-    using System.Threading.Tasks;
-    using System.Threading;
+    using YarnTask = System.Threading.Tasks.Task;
 #endif
 
     /// <summary>

@@ -25,11 +25,12 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Adds any metadata if they are defined for each line. The metadata is internally
-        /// stored as a single string with each piece of metadata separated by a single
-        /// whitespace.
+        /// Adds any metadata if they are defined for each line. The metadata is
+        /// internally stored as a single string with each piece of metadata
+        /// separated by a single whitespace.
         /// </summary>
-        /// <param name="lineMetadataTableEntries">IEnumerable with metadata entries.</param>
+        /// <param name="lineMetadataTableEntries">IEnumerable with metadata
+        /// entries.</param>
         internal void AddMetadata(IEnumerable<LineMetadataTableEntry> lineMetadataTableEntries)
         {
             foreach (var entry in lineMetadataTableEntries)
@@ -58,7 +59,8 @@ namespace Yarn.Unity
         /// Returns metadata for a given line ID, if any is defined.
         /// </summary>
         /// <param name="lineID">The line ID.</param>
-        /// <returns>An array of each piece of metadata if defined, otherwise returns null.</returns>
+        /// <returns>An array of each piece of metadata if defined, otherwise
+        /// returns null.</returns>
         public string[]? GetMetadata(string lineID)
         {
             if (_lineMetadata.TryGetValue(lineID, out var result))
@@ -69,8 +71,10 @@ namespace Yarn.Unity
             return null;
         }
 
-        public string? GetShadowLineSource(string lineID) {
-            if (_lineMetadata.TryGetValue(lineID, out var metadataString) == false) {
+        public string? GetShadowLineSource(string lineID)
+        {
+            if (_lineMetadata.TryGetValue(lineID, out var metadataString) == false)
+            {
                 // The line has no metadata, so it is not a shadow line.
                 return null;
             }

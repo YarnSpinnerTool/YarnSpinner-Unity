@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Yarn.Unity {
-    public partial class DialogueRunner {
+namespace Yarn.Unity
+{
+    public partial class DialogueRunner
+    {
         /// <summary>
         /// Loads all variables from the <see cref="PlayerPrefs"/> object into
         /// the Dialogue Runner's variable storage.
@@ -161,7 +163,7 @@ namespace Yarn.Unity {
                 return false;
             }
         }
-        
+
         // takes in a JSON string and converts it into a tuple of dictionaries
         // intended to let you just dump these straight into the variable storage
         // throws exceptions if unable to convert or if the conversion half works

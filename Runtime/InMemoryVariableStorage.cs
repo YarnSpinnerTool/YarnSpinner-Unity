@@ -2,11 +2,11 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 using Yarn.Unity;
-using System;
 
 namespace Yarn.Unity
 {
@@ -117,13 +117,11 @@ namespace Yarn.Unity
 
         /// <summary>
         /// Throws a <see cref="System.ArgumentException"/> if <paramref
-        /// name="variableName"/> is not a valid Yarn Spinner variable
-        /// name.
+        /// name="variableName"/> is not a valid Yarn Spinner variable name.
         /// </summary>
         /// <param name="variableName">The variable name to test.</param>
-        /// <exception cref="System.ArgumentException">Thrown when
-        /// <paramref name="variableName"/> is not a valid variable
-        /// name.</exception> 
+        /// <exception cref="System.ArgumentException">Thrown when <paramref
+        /// name="variableName"/> is not a valid variable name.</exception> 
         private void ValidateVariableName(string variableName)
         {
             if (variableName.StartsWith("$") == false)
@@ -143,7 +141,7 @@ namespace Yarn.Unity
         public override void SetValue(string variableName, float floatValue)
         {
             ValidateVariableName(variableName);
-            
+
             variables[variableName] = floatValue;
             variableTypes[variableName] = typeof(float);
         }
@@ -151,14 +149,15 @@ namespace Yarn.Unity
         public override void SetValue(string variableName, bool boolValue)
         {
             ValidateVariableName(variableName);
-            
+
             variables[variableName] = boolValue;
             variableTypes[variableName] = typeof(bool);
         }
 
-        private static bool TryGetAsType<T>(Dictionary<string,object>dictionary, string key, out T result) {
+        private static bool TryGetAsType<T>(Dictionary<string, object> dictionary, string key, out T result)
+        {
 
-            if (dictionary.TryGetValue(key, out var objectResult) == true 
+            if (dictionary.TryGetValue(key, out var objectResult) == true
                 && typeof(T).IsAssignableFrom(objectResult.GetType()))
             {
                 result = (T)objectResult;
@@ -172,30 +171,34 @@ namespace Yarn.Unity
         /// <summary>
         /// Retrieves a <see cref="Value"/> by name.
         /// </summary>
-        /// <param name="variableName">The name of the variable to retrieve
-        /// the value of. Don't forget to include the "$" at the
-        /// beginning!</param>
+        /// <param name="variableName">The name of the variable to retrieve the
+        /// value of. Don't forget to include the "$" at the beginning!</param>
         /// <returns>The <see cref="Value"/>. If a variable by the name of
         /// <paramref name="variableName"/> is not present, returns a value
         /// representing `null`.</returns>
-        /// <exception cref="System.ArgumentException">Thrown when
-        /// variableName is not a valid variable name.</exception>
-        public override bool TryGetValue<T>(string variableName, out T result) {
+        /// <exception cref="System.ArgumentException">Thrown when variableName
+        /// is not a valid variable name.</exception>
+        public override bool TryGetValue<T>(string variableName, out T result)
+        {
 
             // Ensure that the variable name is valid.
             ValidateVariableName(variableName);
-                    
+
             switch (GetVariableKind(variableName))
             {
                 case VariableKind.Stored:
-                    // This is a stored value. First, attempt to fetch it from the
-                    // variable storage.
+                    // This is a stored value. First, attempt to fetch it from
+                    // the variable storage.
 
-                    // Try to get the value from the dictionary, and check to see that it's the 
-                    if (TryGetAsType(variables, variableName, out result)) {
+                    // Try to get the value from the dictionary, and check to
+                    // see that it's the 
+                    if (TryGetAsType(variables, variableName, out result))
+                    {
                         // We successfully fetched it from storage.
                         return true;
-                    } else {
+                    }
+                    else
+                    {
                         return this.Program.TryGetInitialValue<T>(variableName, out result);
                     }
                 case VariableKind.Smart:
@@ -238,7 +241,8 @@ namespace Yarn.Unity
         #endregion
 
         /// <summary>
-        /// returns a boolean value representing if the particular variable is inside the variable storage
+        /// returns a boolean value representing if the particular variable is
+        /// inside the variable storage
         /// </summary>
         public override bool Contains(string variableName)
         {
@@ -266,12 +270,12 @@ namespace Yarn.Unity
         }
 
         #region Save/Load
-        public override (Dictionary<string,float>,Dictionary<string,string>,Dictionary<string,bool>) GetAllVariables()
+        public override (Dictionary<string, float>, Dictionary<string, string>, Dictionary<string, bool>) GetAllVariables()
         {
             Dictionary<string, float> floatDict = new Dictionary<string, float>();
             Dictionary<string, string> stringDict = new Dictionary<string, string>();
             Dictionary<string, bool> boolDict = new Dictionary<string, bool>();
-            
+
             foreach (var variable in variables)
             {
                 var type = variableTypes[variable.Key];

@@ -109,11 +109,13 @@ namespace Yarn.Unity
         internal TextMeshProUGUI characterNameText = null;
 
         /// <summary>
-        /// The gameobject that holds the <see cref="characterNameText"/> textfield.
+        /// The gameobject that holds the <see cref="characterNameText"/>
+        /// textfield.
         /// </summary>
         /// <remarks>
-        /// This is needed in situations where the character name is contained within an entirely different game object.
-        /// Most of the time this will just be the same gameobject as <see cref="characterNameText"/>.
+        /// This is needed in situations where the character name is contained
+        /// within an entirely different game object. Most of the time this will
+        /// just be the same gameobject as <see cref="characterNameText"/>.
         /// </remarks>
         [SerializeField] internal GameObject characterNameContainer = null;
 
@@ -153,18 +155,22 @@ namespace Yarn.Unity
         internal UnityEngine.Events.UnityEvent onCharacterTyped;
 
         /// <summary>
-        /// A Unity Event that is called when a pause inside of the typewriter effect occurs.
+        /// A Unity Event that is called when a pause inside of the typewriter
+        /// effect occurs.
         /// </summary>
         /// <remarks>
-        /// This event is only invoked when <see cref="useTypewriterEffect"/> is <see langword="true"/>.
+        /// This event is only invoked when <see cref="useTypewriterEffect"/> is
+        /// <see langword="true"/>.
         /// </remarks>
         /// <seealso cref="useTypewriterEffect"/>
         [SerializeField] internal UnityEngine.Events.UnityEvent onPauseStarted;
         /// <summary>
-        /// A Unity Event that is called when a pause inside of the typewriter effect finishes and the typewriter has started once again.
+        /// A Unity Event that is called when a pause inside of the typewriter
+        /// effect finishes and the typewriter has started once again.
         /// </summary>
         /// <remarks>
-        /// This event is only invoked when <see cref="useTypewriterEffect"/> is <see langword="true"/>.
+        /// This event is only invoked when <see cref="useTypewriterEffect"/> is
+        /// <see langword="true"/>.
         /// </remarks>
         /// <seealso cref="useTypewriterEffect"/>
         [SerializeField] internal UnityEngine.Events.UnityEvent onPauseEnded;
@@ -228,7 +234,7 @@ namespace Yarn.Unity
 
         [SerializeField]
         internal MarkupPalette palette;
-        
+
         /// <summary>
         /// The current <see cref="LocalizedLine"/> that this line view is
         /// displaying.
@@ -261,8 +267,8 @@ namespace Yarn.Unity
 
         private IEnumerator DismissLineInternal(Action onDismissalComplete)
         {
-            // disabling interaction temporarily while dismissing the line
-            // we don't want people to interrupt a dismissal
+            // disabling interaction temporarily while dismissing the line we
+            // don't want people to interrupt a dismissal
             var interactable = canvasGroup.interactable;
             canvasGroup.interactable = false;
 
@@ -272,12 +278,12 @@ namespace Yarn.Unity
                 yield return StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeOutTime, currentStopToken));
                 currentStopToken.Complete();
             }
-            
+
             canvasGroup.alpha = 0;
             canvasGroup.blocksRaycasts = false;
             // turning interaction back on, if it needs it
             canvasGroup.interactable = interactable;
-            
+
             if (onDismissalComplete != null)
             {
                 onDismissalComplete();
@@ -287,7 +293,8 @@ namespace Yarn.Unity
         /// <inheritdoc/>
         public override void InterruptLine(LocalizedLine dialogueLine, Action onInterruptLineFinished)
         {
-            if (this == null) {
+            if (this == null)
+            {
                 // This line view has been destroyed, possibly as part of
                 // leaving play mode. Don't take any action.
                 return;
@@ -298,9 +305,9 @@ namespace Yarn.Unity
             // Cancel all coroutines that we're currently running. This will
             // stop the RunLineInternal coroutine, if it's running.
             StopAllCoroutines();
-            
-            // for now we are going to just immediately show everything
-            // later we will make it fade in
+
+            // for now we are going to just immediately show everything later we
+            // will make it fade in
             lineText.gameObject.SetActive(true);
             canvasGroup.gameObject.SetActive(true);
 
@@ -366,15 +373,16 @@ namespace Yarn.Unity
                 Markup.MarkupParseResult text = dialogueLine.TextWithoutCharacterName;
                 if (characterNameContainer != null && characterNameText != null)
                 {
-                    // we are set up to show a character name, but there isn't one
-                    // so just hide the container
+                    // we are set up to show a character name, but there isn't
+                    // one so just hide the container
                     if (string.IsNullOrWhiteSpace(dialogueLine.CharacterName))
                     {
                         characterNameContainer.SetActive(false);
                     }
                     else
                     {
-                        // we have a character name text view, show the character name
+                        // we have a character name text view, show the
+                        // character name
                         characterNameText.text = dialogueLine.CharacterName;
                         characterNameContainer.SetActive(true);
                     }
@@ -390,7 +398,8 @@ namespace Yarn.Unity
                     }
                 }
 
-                // if we have a palette file need to add those colours into the text
+                // if we have a palette file need to add those colours into the
+                // text
                 if (palette != null)
                 {
                     lineText.text = LineView.PaletteMarkedUpText(text, palette);
@@ -433,7 +442,8 @@ namespace Yarn.Unity
                 {
                     var pauses = LineView.GetPauseDurationsInsideLine(text);
 
-                    // setting the canvas all back to its defaults because if we didn't also fade we don't have anything visible
+                    // setting the canvas all back to its defaults because if we
+                    // didn't also fade we don't have anything visible
                     canvasGroup.alpha = 1f;
                     canvasGroup.interactable = true;
                     canvasGroup.blocksRaycasts = true;
@@ -502,9 +512,9 @@ namespace Yarn.Unity
         /// <inheritdoc/>
         public override void UserRequestedViewAdvancement()
         {
-            // We received a request to advance the view. If we're in the middle of
-            // an animation, skip to the end of it. If we're not current in an
-            // animation, interrupt the line so we can skip to the next one.
+            // We received a request to advance the view. If we're in the middle
+            // of an animation, skip to the end of it. If we're not current in
+            // an animation, interrupt the line so we can skip to the next one.
 
             // we have no line, so the user just mashed randomly
             if (currentLine == null)
@@ -512,11 +522,10 @@ namespace Yarn.Unity
                 return;
             }
 
-            // we may want to change this later so the interrupted
-            // animation coroutine is what actually interrupts
-            // for now this is fine.
-            // Is an animation running that we can stop?
-            if (currentStopToken.CanInterrupt) 
+            // we may want to change this later so the interrupted animation
+            // coroutine is what actually interrupts for now this is fine. Is an
+            // animation running that we can stop?
+            if (currentStopToken.CanInterrupt)
             {
                 // Stop the current animation, and skip to the end of whatever
                 // started it.
@@ -524,8 +533,8 @@ namespace Yarn.Unity
             }
             else
             {
-                // No animation is now running. Signal that we want to
-                // interrupt the line instead.
+                // No animation is now running. Signal that we want to interrupt
+                // the line instead.
                 requestInterrupt?.Invoke();
             }
         }
@@ -557,16 +566,22 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Applies the <paramref name="palette"/> to the line based on it's markup.
+        /// Applies the <paramref name="palette"/> to the line based on it's
+        /// markup.
         /// </summary>
         /// <remarks>
         /// This is static so that other dialogue views can reuse this code.
-        /// While this is simplistic it is useful enough that multiple pieces might well want it.
+        /// While this is simplistic it is useful enough that multiple pieces
+        /// might well want it.
         /// </remarks>
-        /// <param name="line">The parsed marked up line with it's attributes.</param>
-        /// <param name="palette">The palette mapping attributes to colours.</param>
-        /// <param name="applyLineBreaks">If the [br /] marker is found in the line should this be replaced with a line break?</param>
-        /// <returns>A TMP formatted string with the palette markup values injected within.</returns>
+        /// <param name="line">The parsed marked up line with it's
+        /// attributes.</param>
+        /// <param name="palette">The palette mapping attributes to
+        /// colours.</param>
+        /// <param name="applyLineBreaks">If the [br /] marker is found in the
+        /// line should this be replaced with a line break?</param>
+        /// <returns>A TMP formatted string with the palette markup values
+        /// injected within.</returns>
         public static string PaletteMarkedUpText(Markup.MarkupParseResult line, MarkupPalette palette, bool applyLineBreaks = true)
         {
             string lineOfText = line.Text;
@@ -577,8 +592,9 @@ namespace Yarn.Unity
                 Color markerColour;
                 if (palette.ColorForMarker(attribute.Name, out markerColour))
                 {
-                    // we use the range on the marker to insert the TMP <color> tags
-                    // not the best approach but will work ok for this use case
+                    // we use the range on the marker to insert the TMP <color>
+                    // tags not the best approach but will work ok for this use
+                    // case
                     lineOfText = lineOfText.Insert(attribute.Position + attribute.Length, "</color>");
                     lineOfText = lineOfText.Insert(attribute.Position, $"<color=#{ColorUtility.ToHtmlStringRGB(markerColour)}>");
                 }
@@ -604,25 +620,30 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Creates a stack of typewriter pauses to use to temporarily halt the typewriter effect.
+        /// Creates a stack of typewriter pauses to use to temporarily halt the
+        /// typewriter effect.
         /// </summary>
         /// <remarks>
-        /// This is intended to be used in conjunction with the <see cref="Effects.PausableTypewriter"/> effect.
-        /// The stack of tuples created are how the typewriter effect knows when, and for how long, to halt the effect.
+        /// This is intended to be used in conjunction with the <see
+        /// cref="Effects.PausableTypewriter"/> effect. The stack of tuples
+        /// created are how the typewriter effect knows when, and for how long,
+        /// to halt the effect.
         /// <para>
-        /// The pause duration property is in milliseconds but all the effects code assumes seconds
-        /// So here we will be dividing it by 1000 to make sure they interconnect correctly.
+        /// The pause duration property is in milliseconds but all the effects
+        /// code assumes seconds So here we will be dividing it by 1000 to make
+        /// sure they interconnect correctly.
         /// </para>
         /// </remarks>
         /// <param name="line">The line from which we covet the pauses</param>
-        /// <returns>A stack of positions and duration pause tuples from within the line</returns>
+        /// <returns>A stack of positions and duration pause tuples from within
+        /// the line</returns>
         public static Stack<(int position, float duration)> GetPauseDurationsInsideLine(Markup.MarkupParseResult line)
         {
             var pausePositions = new Stack<(int, float)>();
             var label = "pause";
-            
-            // sorting all the attributes in reverse positional order
-            // this is so we can build the stack up in the right positioning
+
+            // sorting all the attributes in reverse positional order this is so
+            // we can build the stack up in the right positioning
             var attributes = line.Attributes;
             attributes.Sort((a, b) => (b.Position.CompareTo(a.Position)));
             foreach (var attribute in line.Attributes)
@@ -633,16 +654,18 @@ namespace Yarn.Unity
                     continue;
                 }
 
-                // did they set a custom duration or not, as in did they do this:
-                //     Alice: this is my line with a [pause = 1000 /]pause in the middle
-                // or did they go:
-                //     Alice: this is my line with a [pause /]pause in the middle
+                // did they set a custom duration or not, as in did they do
+                //     this: Alice: this is my line with a [pause = 1000 /]pause
+                //     in the middle or did they go: Alice: this is my line with
+                //     a [pause /]pause in the middle
                 if (attribute.Properties.TryGetValue(label, out Yarn.Markup.MarkupValue value))
                 {
-                    // depending on the property value we need to take a different path
-                    // this is because they have made it an integer or a float which are roughly the same
-                    // note to self: integer and float really ought to be convertible...
-                    // but they also might have done something weird and we need to handle that
+                    // depending on the property value we need to take a
+                    // different path this is because they have made it an
+                    // integer or a float which are roughly the same note to
+                    // self: integer and float really ought to be convertible...
+                    // but they also might have done something weird and we need
+                    // to handle that
                     switch (value.Type)
                     {
                         case Yarn.Markup.MarkupValueType.Integer:
@@ -660,7 +683,8 @@ namespace Yarn.Unity
                 }
                 else
                 {
-                    // they haven't set a duration, so we will instead use the default of one second
+                    // they haven't set a duration, so we will instead use the
+                    // default of one second
                     pausePositions.Push((attribute.Position, 1));
                 }
             }

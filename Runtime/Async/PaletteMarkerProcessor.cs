@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using Yarn.Markup;
 using Yarn.Unity;
-using System.Text;
 
 public class PaletteMarkerProcessor : Yarn.Unity.AttributeMarkerProcessor
 {
@@ -22,7 +22,8 @@ public class PaletteMarkerProcessor : Yarn.Unity.AttributeMarkerProcessor
             return error;
         }
 
-        // we will always add the colour because we don't really know what the default is anyways
+        // we will always add the colour because we don't really know what the
+        // default is anyways
         childBuilder.Insert(0, $"<color=#{ColorUtility.ToHtmlStringRGBA(style.Color)}>");
         childBuilder.Append("</color>");
 
@@ -51,8 +52,9 @@ public class PaletteMarkerProcessor : Yarn.Unity.AttributeMarkerProcessor
             childBuilder.Append("</s>");
         }
 
-        // we don't need to modify the children attributes because TMP knows that the <color> tags aren't visible
-        // so we can just say we are done now
+        // we don't need to modify the children attributes because TMP knows
+        // that the <color> tags aren't visible so we can just say we are done
+        // now
         return AttributeMarkerProcessor.NoDiagnostics;
     }
 
