@@ -647,7 +647,7 @@ namespace Yarn.Unity.Tests
                 }
             }
 
-            throw new AssertionException($"Expected collection to contain a key matching {match}", message);
+            throw new AssertionException($"Expected collection to contain a value matching {match}", message);
         }
 
         /// <summary>
