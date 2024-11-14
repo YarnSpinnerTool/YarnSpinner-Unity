@@ -23,6 +23,11 @@ using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Y
 
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// Receives options from a <see cref="DialogueRunner"/>, and displays and
+    /// manages a collection of <see cref="AsyncOptionItem"/> views for the user
+    /// to choose from.
+    /// </summary>
     [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-view/options-list-view")]
     public class AsyncOptionsView : AsyncDialogueViewBase
     {
@@ -56,9 +61,19 @@ namespace Yarn.Unity
 
         LocalizedLine lastSeenLine;
 
+        /// <summary>
+        /// Controls whether or not to display options whose <see
+        /// cref="OptionSet.Option.IsAvailable"/> value is <see
+        /// langword="false"/>.
+        /// </summary>
         [Space]
         public bool showUnavailableOptions = false;
 
+        /// <summary>
+        /// Called by a <see cref="DialogueRunner"/> to dismiss the options view
+        /// when dialogue is complete.
+        /// </summary>
+        /// <returns>A completed task.</returns>
         public override YarnTask OnDialogueCompleteAsync()
         {
             if (canvasGroup != null)
@@ -71,7 +86,10 @@ namespace Yarn.Unity
             return YarnTask.CompletedTask;
         }
 
-        void Start()
+        /// <summary>
+        /// Called by Unity to set up the object.
+        /// </summary>
+        protected void Start()
         {
             if (canvasGroup != null)
             {
@@ -89,6 +107,12 @@ namespace Yarn.Unity
                 lastLineCharacterNameContainer = lastLineCharacterNameText.gameObject;
             }
         }
+
+        /// <summary>
+        /// Called by a <see cref="DialogueRunner"/> to set up the options view
+        /// when dialogue begins.
+        /// </summary>
+        /// <returns>A completed task.</returns>
         public override YarnTask OnDialogueStartedAsync()
         {
             if (canvasGroup != null)
@@ -101,6 +125,17 @@ namespace Yarn.Unity
             return YarnTask.CompletedTask;
         }
 
+        /// <summary>
+        /// Called by a <see cref="DialogueRunner"/> when a line needs to be
+        /// presented, and stores the line as the 'last seen line' so that it
+        /// can be shown when options appear.
+        /// </summary>
+        /// <remarks>This view does not display lines directly, but instead
+        /// stores lines so that when options are run, the last line that ran
+        /// before the options appeared can be shown.</remarks>
+        /// <inheritdoc cref="AsyncDialogueViewBase.RunLineAsync"
+        /// path="/param"/>
+        /// <returns>A completed task.</returns>
         public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
         {
             if (showsLastLine)
@@ -110,6 +145,14 @@ namespace Yarn.Unity
             return YarnTask.CompletedTask;
         }
 
+        /// <summary>
+        /// Called by a <see cref="DialogueRunner"/> to display a collection of
+        /// options to the user. 
+        /// </summary>
+        /// <inheritdoc cref="AsyncDialogueViewBase.RunOptionsAsync"
+        /// path="/param"/>
+        /// <inheritdoc cref="AsyncDialogueViewBase.RunOptionsAsync"
+        /// path="/returns"/>
         public override async YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             // If we don't already have enough option views, create more
@@ -146,7 +189,7 @@ namespace Yarn.Unity
 
                 YarnOptionCompletionSource tcs = new YarnOptionCompletionSource();
                 tasks.Add(tcs.Task);
-                optionView.OnOptionSelected = tcs;
+                optionView.onOptionSelected = tcs;
 
                 // The first available option is selected by default
                 if (optionViewsCreated == 0)

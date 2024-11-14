@@ -19,15 +19,28 @@ using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Y
 
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// An on-screen item view that displays a single option, and signals if the
+    /// user selects it.
+    /// </summary>
     public class AsyncOptionItem : UnityEngine.UI.Selectable, ISubmitHandler, IPointerClickHandler, IPointerEnterHandler
     {
         [SerializeField] TextMeshProUGUI text;
 
-        public YarnOptionCompletionSource OnOptionSelected;
+        /// <summary>
+        /// An completion source that will become completed when the user
+        /// selects this view.
+        /// </summary>
+        public YarnOptionCompletionSource onOptionSelected;
 
         private bool hasSubmittedOptionSelection = false;
 
         private DialogueOption _option;
+
+        /// <summary>
+        /// Gets or sets the <see cref="Option"/> associated with this option
+        /// view.
+        /// </summary>
         public DialogueOption Option
         {
             get => _option;
@@ -47,11 +60,21 @@ namespace Yarn.Unity
 
         // If we receive a submit or click event, invoke our "we just selected
         // this option" handler.
+
+        /// <summary>
+        /// Selects <see cref="Option"/> when this option item receives a submit
+        /// event.
+        /// </summary>
+        /// <param name="eventData">Data related to the submit event.</param>
         public void OnSubmit(BaseEventData eventData)
         {
             InvokeOptionSelected();
         }
 
+        /// <summary>
+        /// Sets the result of <see cref="onOptionSelected"/> to the the current
+        /// <see cref="Option"/>, if this option view is interactable.
+        /// </summary>
         public void InvokeOptionSelected()
         {
             // turns out that Selectable subclasses aren't intrinsically
@@ -69,19 +92,29 @@ namespace Yarn.Unity
             if (hasSubmittedOptionSelection == false)
             {
                 hasSubmittedOptionSelection = true;
-                OnOptionSelected.SetResult(this.Option);
+                onOptionSelected.SetResult(this.Option);
             }
         }
 
+        /// <summary>
+        /// Selects <see cref="Option"/> when this option item receives a
+        /// pointer click event.
+        /// </summary>
+        /// <param name="eventData">Data related to the click event.</param>
         public void OnPointerClick(PointerEventData eventData)
         {
             InvokeOptionSelected();
         }
 
-        // If we mouse-over, we're telling the UI system that this element is
-        // the currently 'selected' (i.e. focused) element. 
+        /// <summary>
+        /// Selects the option item when a pointer enters the view.
+        /// </summary>
+        /// <param name="eventData">Data related to the pointer enter
+        /// event.</param>
         public override void OnPointerEnter(PointerEventData eventData)
         {
+            // If we mouse-over, we're telling the UI system that this element is
+            // the currently 'selected' (i.e. focused) element. 
             base.Select();
         }
     }
