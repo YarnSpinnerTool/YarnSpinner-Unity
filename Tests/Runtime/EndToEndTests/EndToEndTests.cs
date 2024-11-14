@@ -24,6 +24,7 @@ namespace Yarn.Unity.Tests
     using static RunnerExecution;
 
 #nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
     public class CoroutineHost : MonoBehaviour { }
 
@@ -111,10 +112,9 @@ namespace Yarn.Unity.Tests
         });
 
         [UnityTest]
-        public IEnumerator LineGroups_DeliverContent() => YarnAsync.ToCoroutine(async () =>
+        public IEnumerator LineGroups_DeliverContent() => YarnAsync.ToCoroutine(() =>
         {
-
-            
+            throw new System.NotImplementedException();
         });
 
     }

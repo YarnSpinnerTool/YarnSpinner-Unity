@@ -26,6 +26,7 @@ namespace Yarn.Unity.Tests
 #endif
 
 #nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
     /// <summary>
     /// An IMarkupParser that performs no processing.
@@ -94,7 +95,7 @@ namespace Yarn.Unity.Tests
         public IEnumerator LineProvider_CorrectLineID_FetchesLineContent() => YarnAsync.ToCoroutine(async () =>
         {
             var line = new Line("line:shadowtest_1", new string[] { });
-            
+
             lineProvider.LocaleCode = "en";
             var localisedLine = await lineProvider.GetLocalizedLineAsync(line, CancellationToken.None);
 
@@ -107,7 +108,7 @@ namespace Yarn.Unity.Tests
             localisedLine.CharacterName!.Should().BeEqualTo("Ava");
         });
 
-        [UnityTest] 
+        [UnityTest]
         public IEnumerator LineProvider_IncorrectLineID_FetchesInvalidLineMarker() => YarnAsync.ToCoroutine(async () =>
         {
             var line = new Line("line:doesnotexist", new string[] { });
@@ -142,9 +143,9 @@ namespace Yarn.Unity.Tests
 
             shadowLine.Metadata.Should().NotBeEmpty("shadow line contains metadata");
             shadowLine.Metadata.Should().NotContainAnyOf(sourceLine.Metadata, "shadow line does not contain its source line's metadata");
-            
+
             // var line = new Line("line:shadowtest_1", new string[] { });
-            
+
             // lineProvider.LocaleCode = "en";
             // var localisedLine = await lineProvider.GetLocalizedLineAsync(line, this.runner.Dialogue, CancellationToken.None);
 
@@ -156,6 +157,6 @@ namespace Yarn.Unity.Tests
             // localisedLine.CharacterName!.Should().NotBeNull();
             // localisedLine.CharacterName!.Should().BeEqualTo("Ava");
         });
-        
+
     }
 }

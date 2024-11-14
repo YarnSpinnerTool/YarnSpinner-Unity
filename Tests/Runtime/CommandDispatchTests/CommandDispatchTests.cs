@@ -13,6 +13,9 @@ using UnityEngine.TestTools;
 using Yarn.Unity;
 using System.IO;
 
+#nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
 namespace Yarn.Unity.Tests
 {
     [TestFixture]

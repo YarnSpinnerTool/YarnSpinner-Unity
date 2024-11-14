@@ -23,6 +23,7 @@ namespace Yarn.Unity.Tests
 #endif
 
 #nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
     [TestFixture]
     public class DialogueRunnerTests : IPrebuildSetup, IPostBuildCleanup
@@ -59,8 +60,8 @@ namespace Yarn.Unity.Tests
 
             yield return new WaitUntil(() => loaded);
 
-            runner = GameObject.FindObjectOfType<DialogueRunner>();
-            dialogueUI = GameObject.FindObjectOfType<DialogueRunnerMockUI>();
+            runner = UnityEngine.Object.FindAnyObjectByType<DialogueRunner>();
+            dialogueUI = UnityEngine.Object.FindAnyObjectByType<DialogueRunnerMockUI>();
 
             runner.Should().NotBeNull();
             dialogueUI.Should().NotBeNull();
@@ -249,7 +250,8 @@ namespace Yarn.Unity.Tests
             testDefaults.Add("$nodeGroupCondition1", false);
             testDefaults.Add("$nodeGroupCondition2", false);
 
-            foreach (var testDefault in testDefaults) {
+            foreach (var testDefault in testDefaults)
+            {
                 yarnProject.InitialValues.Should().ContainKey(testDefault.Key);
                 var value = yarnProject.InitialValues[testDefault.Key];
                 value.ToString().Should().BeEqualTo(testDefault.Value.ToString());
@@ -427,9 +429,9 @@ namespace Yarn.Unity.Tests
             var dispatcher = runner.CommandDispatcher;
 
             LogAssert.Expect(LogType.Log, expectedLog);
-            
+
             var result = dispatcher.DispatchCommand(command, runner);
-            
+
             Assert.AreEqual(CommandDispatchResult.StatusType.Succeeded, result.Status);
         }
         [TestCase("testInstanceVariadic DialogueRunner 1 one")]
@@ -441,7 +443,7 @@ namespace Yarn.Unity.Tests
             var dispatcher = runner.CommandDispatcher;
 
             var result = dispatcher.DispatchCommand(command, runner);
-            
+
             Assert.AreEqual(CommandDispatchResult.StatusType.InvalidParameter, result.Status);
         }
 
@@ -507,7 +509,7 @@ namespace Yarn.Unity.Tests
         {
 
 
-            var variableStorage = GameObject.FindObjectOfType<VariableStorageBehaviour>();
+            var variableStorage = UnityEngine.Object.FindAnyObjectByType<VariableStorageBehaviour>();
 
             runner.StartDialogue("VariableTest");
             yield return null;
@@ -595,16 +597,17 @@ namespace Yarn.Unity.Tests
         }
 
         [Test]
-        public void DialogueRunner_CanQueryNodeGroupCandidates() {
-            runner.Dialogue.GetSaliencyOptionsForNodeGroup("NodeGroups").Where(c => c.FailingConditionValueCount == 0).Should().HaveCount(1);
+        public void DialogueRunner_CanQueryNodeGroupCandidates()
+        {
+            runner.Dialogue.GetSaliencyOptionsForNodeGroup("NodeGroups").Where(c => c?.FailingConditionValueCount == 0).Should().HaveCount(1);
 
             runner.VariableStorage.SetValue("$nodeGroupCondition1", true);
 
-            runner.Dialogue.GetSaliencyOptionsForNodeGroup("NodeGroups").Where(c => c.FailingConditionValueCount == 0).Should().HaveCount(3);
+            runner.Dialogue.GetSaliencyOptionsForNodeGroup("NodeGroups").Where(c => c?.FailingConditionValueCount == 0).Should().HaveCount(3);
 
             runner.VariableStorage.SetValue("$nodeGroupCondition2", true);
 
-            runner.Dialogue.GetSaliencyOptionsForNodeGroup("NodeGroups").Where(c => c.FailingConditionValueCount == 0).Should().HaveCount(7);
+            runner.Dialogue.GetSaliencyOptionsForNodeGroup("NodeGroups").Where(c => c?.FailingConditionValueCount == 0).Should().HaveCount(7);
         }
     }
 }

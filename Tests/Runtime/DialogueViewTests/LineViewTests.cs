@@ -8,7 +8,6 @@ namespace Yarn.Unity.Tests
     using System.Diagnostics.CodeAnalysis;
     using System.Threading;
     using NUnit.Framework;
-    using UnityEngine;
     using UnityEngine.TestTools;
     using UnityEngine.SceneManagement;
     using System;
@@ -21,6 +20,7 @@ namespace Yarn.Unity.Tests
 #endif
 
 #nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
     public class LineViewTests : IPrebuildSetup, IPostBuildCleanup
     {
@@ -58,7 +58,7 @@ namespace Yarn.Unity.Tests
                 await YarnTask.Yield();
             }
 
-            dialogueRunner = GameObject.FindObjectOfType<DialogueRunner>();
+            dialogueRunner = UnityEngine.Object.FindAnyObjectByType<DialogueRunner>();
             dialogueRunner.Should().NotBeNull();
 
             lineView = dialogueRunner.GetComponentInChildren<LineView>();

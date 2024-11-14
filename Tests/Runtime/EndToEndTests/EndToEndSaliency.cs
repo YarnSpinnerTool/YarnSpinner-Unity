@@ -7,6 +7,7 @@ using UnityEngine;
 using Yarn.Saliency;
 
 #nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 namespace Yarn.Unity.Tests
 {
@@ -20,7 +21,7 @@ namespace Yarn.Unity.Tests
 
         public void Awake()
         {
-            dialogueRunner = FindObjectOfType<DialogueRunner>();
+            dialogueRunner = FindAnyObjectByType<DialogueRunner>();
         }
 
         public void Update()
@@ -31,8 +32,8 @@ namespace Yarn.Unity.Tests
         [YarnCommand("set_saliency")]
         public static void SetSaliency(string saliencyType)
         {
-            var instance = FindObjectOfType<EndToEndSaliency>();
-            var storage = FindObjectOfType<VariableStorageBehaviour>();
+            var instance = FindAnyObjectByType<EndToEndSaliency>();
+            var storage = FindAnyObjectByType<VariableStorageBehaviour>();
 
             switch (saliencyType)
             {

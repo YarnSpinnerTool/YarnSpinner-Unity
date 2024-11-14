@@ -10,6 +10,7 @@ using System;
 using System.Threading;
 
 #nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 #if USE_UNITASK
 using Cysharp.Threading.Tasks;
@@ -28,7 +29,9 @@ namespace Yarn.Unity.Tests
     {
         private static GameObject GetObject(string objectName)
         {
-            var allObjects = GameObject.FindObjectsOfType<GameObject>(includeInactive: true);
+            var allObjects = GameObject.FindObjectsByType<GameObject>(
+                FindObjectsInactive.Include,
+                FindObjectsSortMode.None);
             foreach (var obj in allObjects)
             {
                 if (obj.name == objectName)
@@ -54,7 +57,7 @@ namespace Yarn.Unity.Tests
         }
 
         [YarnCommand("move_to")]
-        public static async YarnTask MoveToMarker(string moverName, 
+        public static async YarnTask MoveToMarker(string moverName,
             string markerName, float speed = 20f, float distance = 2f)
         {
             await MoveToMarkerAsync(moverName, markerName, speed, distance);
@@ -62,7 +65,7 @@ namespace Yarn.Unity.Tests
 
         public static async YarnTask RunDialogueAsync(string nodeName)
         {
-            var dialogueRunner = GameObject.FindObjectOfType<DialogueRunner>();
+            var dialogueRunner = GameObject.FindAnyObjectByType<DialogueRunner>();
             dialogueRunner.StartDialogue(nodeName);
 
             while (dialogueRunner.IsDialogueRunning)
@@ -76,7 +79,7 @@ namespace Yarn.Unity.Tests
         {
             async YarnTask LineWait(CancellationToken token)
             {
-                LineView? view = GameObject.FindObjectOfType<LineView>();
+                LineView? view = GameObject.FindAnyObjectByType<LineView>();
                 if (view == null)
                 {
                     throw new NullReferenceException("Line view not found");
@@ -108,7 +111,7 @@ namespace Yarn.Unity.Tests
         {
             async YarnTask OptionsWait(CancellationToken token)
             {
-                OptionsListView? view = GameObject.FindObjectOfType<OptionsListView>();
+                OptionsListView? view = GameObject.FindAnyObjectByType<OptionsListView>();
                 if (view == null)
                 {
                     throw new NullReferenceException("Options view not found");
@@ -144,15 +147,23 @@ namespace Yarn.Unity.Tests
 
         public static async YarnTask WaitForTaskAsync(YarnTask task, string? failureMessage = null, int timeoutMilliseconds = 2000)
         {
-            try {
+            try
+            {
                 await YarnAsync.Wait(task, TimeSpan.FromMilliseconds(timeoutMilliseconds));
-            } catch (TimeoutException timeout) {
-                if (failureMessage == null) {
+            }
+            catch (TimeoutException timeout)
+            {
+                if (failureMessage == null)
+                {
                     throw;
-                } else {
+                }
+                else
+                {
                     throw new TimeoutException(failureMessage, timeout);
                 }
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 // Rethrow non-timeout exceptions to our main context
                 throw;
             }

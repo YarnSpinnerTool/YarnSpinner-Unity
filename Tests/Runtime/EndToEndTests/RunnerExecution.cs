@@ -46,7 +46,7 @@ namespace Yarn.Unity.Tests
         private RunnerExecution(string nodeName, int timeoutMilliseconds)
         {
             this.timeoutMilliseconds = timeoutMilliseconds;
-            dialogueRunner = GameObject.FindObjectOfType<DialogueRunner>();
+            dialogueRunner = GameObject.FindAnyObjectByType<DialogueRunner>();
             dialogueRunner.StartDialogue(nodeName);
         }
 
