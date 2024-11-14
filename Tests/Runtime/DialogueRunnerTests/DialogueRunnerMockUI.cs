@@ -1,4 +1,4 @@
-﻿/*
+/*
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
@@ -7,15 +7,16 @@ using System.Collections;
 using System.Collections.Generic;
 
 #nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 #if USE_UNITASK
 using Cysharp.Threading.Tasks;
 using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
+using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption?>;
 using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
 #else
 using YarnTask = System.Threading.Tasks.Task;
-using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
+using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption?>;
 using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
 #endif
 
@@ -54,53 +55,67 @@ namespace Yarn.Unity.Tests
 
         // A Yarn command that receives integer parameters
         [YarnCommand("testCommandInteger")]
-        public void TestCommandIntegers(int a, int b) {
-            Debug.Log($"{a+b}");
+        public void TestCommandIntegers(int a, int b)
+        {
+            Debug.Log($"{a + b}");
         }
 
         // A Yarn command that receives string parameters
         [YarnCommand("testCommandString")]
-        public void TestCommandStrings(string a, string b) {
-            Debug.Log($"{a+b}");
+        public void TestCommandStrings(string a, string b)
+        {
+            Debug.Log($"{a + b}");
         }
 
         // A Yarn command that receives a game object parameter
         [YarnCommand("testCommandGameObject")]
-        public void TestCommandGameObject(GameObject go) {
-            if (go != null) {
+        public void TestCommandGameObject(GameObject go)
+        {
+            if (go != null)
+            {
                 Debug.Log($"{go.name}");
-            } else {
+            }
+            else
+            {
                 Debug.Log($"(null)");
-            }           
+            }
         }
 
         // A Yarn command that receives a component parameter
         [YarnCommand("testCommandComponent")]
-        public void TestCommandComponent(MeshRenderer r) {
-            if (r != null) {
+        public void TestCommandComponent(MeshRenderer r)
+        {
+            if (r != null)
+            {
                 Debug.Log($"{r.name}'s MeshRenderer");
-            } else {
+            }
+            else
+            {
                 Debug.Log($"(null)");
             }
         }
 
         // A Yarn command that has optional parameters
         [YarnCommand("testCommandOptionalParams")]
-        public void TestCommandOptionalParams(int a, int b = 2) {
+        public void TestCommandOptionalParams(int a, int b = 2)
+        {
             Debug.Log($"{a + b}");
         }
 
         // A Yarn command that receives no parameters
         [YarnCommand("testCommandNoParameters")]
-        public void TestCommandNoParameters() {
+        public void TestCommandNoParameters()
+        {
             Debug.Log($"success");
         }
 
         // A Yarn command that begins a coroutine
         [YarnCommand("testCommandCoroutine")]
-        public IEnumerator TestCommandCoroutine(int frameDelay) {
+        public IEnumerator TestCommandCoroutine(int frameDelay)
+        {
             // Wait the specified number of frames
-            while (frameDelay > 0) {
+            while (frameDelay > 0)
+            {
                 frameDelay -= 1;
                 yield return null;
             }
@@ -132,11 +147,13 @@ namespace Yarn.Unity.Tests
         }
 
         [YarnCommand("testInstanceVariadic")]
-        public void VariadicInstanceFunction(int required, params bool[] bools) {
+        public void VariadicInstanceFunction(int required, params bool[] bools)
+        {
             Debug.Log($"Variadic instance function: {required}, ({string.Join(", ", bools)})");
         }
         [YarnCommand("testStaticVariadic")]
-        public static void VariadicStaticFunction(int required, params bool[] bools) {
+        public static void VariadicStaticFunction(int required, params bool[] bools)
+        {
             Debug.Log($"Variadic static function: {required}, ({string.Join(", ", bools)})");
         }
 
@@ -146,7 +163,8 @@ namespace Yarn.Unity.Tests
             CurrentLine = line.Text.Text;
             CurrentAsset = line.Asset;
 
-            while (!readyToAdvance) {
+            while (!readyToAdvance)
+            {
                 await YarnTask.Yield();
             }
             readyToAdvance = false;
@@ -189,7 +207,8 @@ namespace Yarn.Unity.Tests
             readyToAdvance = true;
         }
 
-        public void SelectOption(int index) {
+        public void SelectOption(int index)
+        {
             PerformSelectOption.Should().NotBeNull();
             PerformSelectOption!(index);
         }
@@ -197,7 +216,8 @@ namespace Yarn.Unity.Tests
         internal void AssertCurrentOptionsAre(params string[] options)
         {
             CurrentOptions.Should().HaveCount(options.Length);
-            for (int i = 0; i < options.Length; i++) {
+            for (int i = 0; i < options.Length; i++)
+            {
                 CurrentOptions[i].Should().BeEqualTo(options[i]);
             }
         }
