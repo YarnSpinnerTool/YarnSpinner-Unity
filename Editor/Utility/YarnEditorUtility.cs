@@ -87,6 +87,10 @@ namespace Yarn.Unity.Editor
                 GetTemplateYarnScriptPath());
         }
 
+        /// <summary>
+        /// Creates a new Yarn Project asset in the current folder, and begins
+        /// interactively renaming it.
+        /// </summary>
         [MenuItem("Assets/Create/Yarn Spinner/Yarn Project", false, 101)]
         public static void CreateYarnProject()
         {
@@ -102,11 +106,10 @@ namespace Yarn.Unity.Editor
         }
 
         /// <summary>
-        /// Creates a new Yarn project at the given path, using the default
-        /// template.
+        /// Writes a Yarn Project to <paramref name="path"/>.
         /// </summary>
-        /// <param name="path">The path at which to create the
-        /// script.</param>
+        /// <param name="path">The path at which to write the file.</param>
+        /// <param name="project">The Yarn Project to write to disk.</param>
         public static Object CreateYarnProject(string path, Compiler.Project project)
         {
             var text = project.GetJson();

@@ -9,6 +9,10 @@ namespace Yarn.Unity.Editor
     using UnityEngine.EventSystems;
     using Yarn.Unity;
 
+    /// <summary>
+    /// Adds a menu item to the menu bar for creating an instance of the
+    /// dialogue runner prefab.
+    /// </summary>
     public static class CreateDialogueRunnerMenuItem
     {
         const string DialogueRunnerPrefabGUID = "7f29e5f7ffdea4a6793cefb278b61f0c";
