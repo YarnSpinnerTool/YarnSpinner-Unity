@@ -121,17 +121,19 @@ namespace Yarn.Unity.Editor
 
                 foreach (var loc in localizations)
                 {
-                    if (loc.languageID == importData.baseLanguageName) {
+                    if (loc.languageID == importData.baseLanguageName)
+                    {
                         // This is the base language - no strings file to
                         // update.
                         continue;
                     }
-                    
-                    if (loc.stringsFile == null) {
+
+                    if (loc.stringsFile == null)
+                    {
                         Debug.LogWarning($"Can't update localization for {loc.languageID} because it doesn't have a strings file.", yarnProjectImporter);
                         continue;
                     }
-                    
+
                     var fileWasChanged = UpdateLocalizationFile(baseLocalizationStrings, loc.languageID, loc.stringsFile);
 
                     if (fileWasChanged)
@@ -449,7 +451,7 @@ namespace Yarn.Unity.Editor
                     continue;
                 }
                 allExistingTags.AddRange(result.StringTable.Where(i => i.Value.isImplicitTag == false).Select(i => i.Key));
-                
+
                 // we add the implicit lines IDs only for this project
                 if (tuple.Item2)
                 {
@@ -494,7 +496,7 @@ namespace Yarn.Unity.Editor
                     // tags added where they're needed.
                     var tagged = Yarn.Compiler.Utility.TagLines(contents, allExistingTags);
                     var taggedVersion = tagged.Item1;
-                    
+
                     // if the file has an error it returns null
                     // we want to bail out then otherwise we'd wipe the yarn file
                     if (taggedVersion == null)
@@ -619,7 +621,8 @@ namespace Yarn.Unity.Editor
             return true;
         }
 
-        internal static void ConvertImplicitVariableDeclarationsToExplicit(YarnProjectImporter yarnProjectImporter) {
+        internal static void ConvertImplicitVariableDeclarationsToExplicit(YarnProjectImporter yarnProjectImporter)
+        {
             var allFilePaths = yarnProjectImporter.ImportData.yarnFiles.Select(textAsset => AssetDatabase.GetAssetPath(textAsset));
 
             var library = Actions.GetLibrary();
@@ -629,9 +632,12 @@ namespace Yarn.Unity.Editor
 
             Compiler.CompilationResult explicitResult;
 
-            try {
+            try
+            {
                 explicitResult = Compiler.Compiler.Compile(explicitDeclarationsCompilerJob);
-            } catch (System.Exception e) {
+            }
+            catch (System.Exception e)
+            {
                 Debug.LogError($"Compile error: {e}");
                 return;
             }
@@ -642,9 +648,12 @@ namespace Yarn.Unity.Editor
 
             Compiler.CompilationResult implicitResult;
 
-            try {
+            try
+            {
                 implicitResult = Compiler.Compiler.Compile(implicitDeclarationsCompilerJob);
-            } catch (System.Exception e) {
+            }
+            catch (System.Exception e)
+            {
                 Debug.LogError($"Compile error: {e}");
                 return;
             }
@@ -678,10 +687,13 @@ namespace Yarn.Unity.Editor
 
             // Does the existing text contain anything besides the default?
             var defaultProjectPattern = new System.Text.RegularExpressions.Regex(@"^title:.*?\n---[\n\s]*===[\n\s]*$", System.Text.RegularExpressions.RegexOptions.Multiline);
-            if (defaultProjectPattern.IsMatch(existingText)) {
+            if (defaultProjectPattern.IsMatch(existingText))
+            {
                 // The project contains no content, so there's no need to copy
                 // it out.
-            } else {
+            }
+            else
+            {
                 // Create a unique path to store our variables
                 var newFilePath = Path.GetDirectoryName(importer.assetPath) + "/Variables.yarn";
                 newFilePath = AssetDatabase.GenerateUniqueAssetPath(newFilePath);
