@@ -235,17 +235,24 @@ namespace Yarn.Unity.Editor
 
             bool ruleApplies;
 
-            switch (property.propertyType)
+            var targetProperty = property.serializedObject.FindProperty(mustNotBeNullWhenAttribute.Condition);
+
+            if (targetProperty == null)
+            {
+                return $"Unknown property {mustNotBeNullWhenAttribute.Condition}";
+            }
+
+            switch (targetProperty.propertyType)
             {
                 case SerializedPropertyType.ObjectReference:
-                    ruleApplies = property.objectReferenceValue != null;
+                    ruleApplies = targetProperty.objectReferenceValue != null;
                     break;
                 case SerializedPropertyType.Boolean:
-                    ruleApplies = property.boolValue;
+                    ruleApplies = targetProperty.boolValue;
                     break;
                 default:
                     // Property is an unhandled type
-                    return $"{mustNotBeNullWhenAttribute.Condition} must be a boolean or object reference, not {property.propertyType}";
+                    return $"{mustNotBeNullWhenAttribute.Condition} must be a boolean or object reference, not {targetProperty.propertyType}";
             }
 
             if (!ruleApplies)
@@ -484,6 +491,16 @@ namespace Yarn.Unity.Editor
                         if (result.Result == AttributeExtensions.AttributeEvaluationResult.ResultType.Failed)
                         {
                             messageBoxes.Add((mustNotBeNullAttribute.Label ?? $"{ObjectNames.NicifyVariableName(property.serializedProperty.name)} must not be null", MessageType.Error));
+                        }
+                        break;
+                    case MustNotBeNullWhenAttribute mustNotBeNullWhenAttribute:
+                        result = mustNotBeNullWhenAttribute.Evaluate(property.serializedProperty);
+                        if (result.Result == AttributeExtensions.AttributeEvaluationResult.ResultType.Failed)
+                        {
+                            messageBoxes.Add((mustNotBeNullWhenAttribute.Label
+                                ?? $"{ObjectNames.NicifyVariableName(property.serializedProperty.name)} must not be " +
+                                    $"null when {ObjectNames.NicifyVariableName(mustNotBeNullWhenAttribute.Condition)} is set",
+                                MessageType.Error));
                         }
                         break;
                     case MessageBoxAttribute messageBoxAttribute:
