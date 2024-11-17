@@ -20,14 +20,39 @@ namespace Yarn.Unity.Editor
 
 #nullable enable
 
+    /// <summary>
+    /// A delegate that renders a serialized property in the Inspector.
+    /// </summary>
+    /// <seealso cref="CustomUIForAttribute"/>
     delegate void PropertyRenderer(SerializedProperty property);
 
-
+    /// <summary>
+    /// An attribute that allows an editor to override the appearance of a named
+    /// property in the Inspector.
+    /// </summary>
+    /// <remarks>
+    /// When applied to a method in a <see cref="YarnEditor"/> subclass that
+    /// takes a single <see cref="SerializedProperty"/> argument and returns
+    /// <see langword="void"/>, the method will be invoked when the editor needs
+    /// to draw UI for the property (instead of drawing the default property
+    /// field.)
+    /// </remarks>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
     public class CustomUIForAttribute : YarnEditorAttribute
     {
+        /// <summary>
+        /// The name of the property that this attribute is for.
+        /// </summary>
+        /// <remarks>
+        /// This must match a property on a serialized object, and will be used
+        /// to determine which property to render.
+        /// </remarks>
         public string propertyName;
 
+        /// <summary>
+        /// Initializes a new <see cref="CustomUIForAttribute"/> with the
+        /// specified property name.
+        /// </summary>
         public CustomUIForAttribute(string methodName)
         {
             this.propertyName = methodName;
@@ -37,21 +62,64 @@ namespace Yarn.Unity.Editor
     internal static class AttributeExtensions
     {
 
+        /// <summary>
+        /// A struct that represents the result of evaluating an attribute.
+        /// </summary>
         public readonly struct AttributeEvaluationResult
         {
+            /// <summary>
+            /// The type of result this is.
+            /// </summary>
             public enum ResultType
             {
+                /// <summary>
+                /// The attribute was successfully evaluated to a true value.
+                /// </summary>
                 Passed,
+                /// <summary>
+                /// The attribute was successfully evaluated to a false value.
+                /// </summary>
                 Failed,
+                /// <summary>
+                /// The attribute evaluation failed with an error message.
+                /// </summary>
                 Error,
             }
+
+            /// <summary>
+            /// Gets or sets the type of result this is.
+            /// </summary>
             public readonly ResultType Result;
+
+            /// <summary>
+            /// Gets or sets a message indicating why the evaluation failed, if
+            /// it did.
+            /// </summary>
+            /// <remarks>This value is non-<see langword="null"/> if <see
+            /// cref="Result"/> is equal to <see cref="ResultType.Error"/>.
+            /// </remarks>
             public readonly string? Message;
+
+            /// <summary>
+            /// Initializes a new AttributeEvaluationResult with the specified
+            /// result and message.
+            /// </summary>
             private AttributeEvaluationResult(ResultType result, string? message)
             {
                 this.Result = result;
                 this.Message = message;
             }
+
+            /// <summary>
+            /// Implicitly converts a boolean value to an <see
+            /// cref="AttributeEvaluationResult"/>.
+            /// </summary>
+            /// <remarks>
+            /// The resulting <see cref="AttributeEvaluationResult"/> will have
+            /// a <see cref="Result"/> of either <see cref="ResultType.Passed"/>
+            /// or <see cref="ResultType.Failed"/>, depending on the value of
+            /// <paramref name="value"/>.
+            /// </remarks>
             public static implicit operator AttributeEvaluationResult(bool value)
             {
                 return new AttributeEvaluationResult
@@ -60,6 +128,15 @@ namespace Yarn.Unity.Editor
                     message: null
                 );
             }
+
+            /// <summary>
+            /// Implicitly converts a string value to an <see
+            /// cref="AttributeEvaluationResult"/>.
+            /// </summary>
+            /// <remarks>
+            /// The resulting <see cref="AttributeEvaluationResult"/> will have
+            /// a <see cref="Result"/> of <see cref="ResultType.Error"/>.
+            /// </remarks>
             public static implicit operator AttributeEvaluationResult(string errorMessage)
             {
                 return new AttributeEvaluationResult
@@ -70,6 +147,13 @@ namespace Yarn.Unity.Editor
             }
         }
 
+        /// <summary>
+        /// Evaluates a <see cref="VisibilityAttribute"/> on a serialized
+        /// object.
+        /// </summary>
+        /// <returns>An <see cref="AttributeEvaluationResult"/> indicating
+        /// whether the attribute was successfully evaluated and
+        /// passed.</returns>
         public static AttributeEvaluationResult Evaluate(this VisibilityAttribute visibilityAttribute, SerializedObject target)
         {
             var property = target.FindProperty(visibilityAttribute.Condition);
@@ -119,6 +203,13 @@ namespace Yarn.Unity.Editor
             return result;
         }
 
+        /// <summary>
+        /// Evaluates a <see cref="MustNotBeNullAttribute"/> on a serialized
+        /// property. 
+        /// </summary>
+        /// <returns>An <see cref="AttributeEvaluationResult"/> indicating
+        /// whether the attribute was successfully evaluated and
+        /// passed.</returns>
         public static AttributeEvaluationResult Evaluate(this MustNotBeNullAttribute mustNotBeNullAttribute, SerializedProperty property)
         {
             if (property.propertyType != SerializedPropertyType.ObjectReference)
@@ -129,6 +220,12 @@ namespace Yarn.Unity.Editor
             return property.objectReferenceValue != null;
         }
 
+        /// <summary>
+        /// Evaluates a <see cref="MustNotBeNullWhenAttribute"/> on a serialized
+        /// property. 
+        /// </summary>
+        /// <returns>An AttributeEvaluationResult indicating whether the
+        /// attribute was successfully evaluated and passed.</returns>
         public static AttributeEvaluationResult Evaluate(this MustNotBeNullWhenAttribute mustNotBeNullWhenAttribute, SerializedProperty property)
         {
             if (property.propertyType != SerializedPropertyType.ObjectReference)
@@ -160,6 +257,13 @@ namespace Yarn.Unity.Editor
             return property.objectReferenceValue != null;
         }
 
+        /// <summary>
+        /// Gets information for showing a message box from a
+        /// MessageBoxAttribute on a serialized object.
+        /// </summary>
+        /// <returns>A <see cref="MessageBoxAttribute.Message"/> with the text
+        /// and type of the message box.
+        /// </returns>
         public static MessageBoxAttribute.Message GetMessage(this MessageBoxAttribute messageBoxAttribute, SerializedObject serializedObject)
         {
             if (serializedObject == null || serializedObject.targetObject == null)
@@ -333,6 +437,10 @@ namespace Yarn.Unity.Editor
 
         private List<(string Message, MessageType Type)> messageBoxes = new List<(string, MessageType)>();
 
+        /// <summary>
+        /// Draws a single property in the Inspector.
+        /// </summary>
+        /// <param name="property"></param>
         private void DrawPropertyField(PropertyInfo property)
         {
 
@@ -508,7 +616,8 @@ namespace Yarn.Unity.Editor
             }
             else
             {
-                // We don't have a PropertyInfo for this property - just draw the default field
+                // We don't have a PropertyInfo for this property - just draw
+                // the default field
                 EditorGUILayout.PropertyField(property);
             }
         }
@@ -549,12 +658,14 @@ namespace Yarn.Unity.Editor
                 // Does the attribute reference a property that exists?
                 if (propertyInfos.TryGetValue(attr.propertyName, out var prop) == false)
                 {
-                    // We don't have a property named attr.propertyName. Log a warning about it.
+                    // We don't have a property named attr.propertyName. Log a
+                    // warning about it.
                     Debug.LogWarning($"{serializedObject.targetObject.GetType()} has no property '{attr.propertyName}' (or it is not visible)");
                     continue;
                 }
 
-                // Does the attribute reference a property that we already have a renderer for?
+                // Does the attribute reference a property that we already have
+                // a renderer for?
                 if (this.customPropertyRenderers.ContainsKey(attr.propertyName))
                 {
                     Debug.LogWarning($"{nameof(DialogueRunnerEditor)} already has a custom renderer for {attr.propertyName}");
@@ -567,6 +678,9 @@ namespace Yarn.Unity.Editor
             }
         }
 
+        /// <summary>
+        /// Draws the Inspector for the edited object.
+        /// </summary>
         public override void OnInspectorGUI()
         {
             this.currentGroup = null;
@@ -590,27 +704,46 @@ namespace Yarn.Unity.Editor
         }
     }
 
+    /// <summary>
+    /// The editor for <see cref="VoiceOverView"/> objects.
+    /// </summary>
     [CanEditMultipleObjects]
     [CustomEditor(typeof(VoiceOverView))]
     public class VoiceOverViewEditor : YarnEditor { }
 
+    /// <summary>
+    /// The editor for <see cref="AsyncLineViewEditor"/> objects.
+    /// </summary>
     [CanEditMultipleObjects]
     [CustomEditor(typeof(AsyncLineView))]
     public class AsyncLineViewEditor : YarnEditor { }
 
+    /// <summary>
+    /// The editor for <see cref="AsyncOptionsViewEditor"/> objects.
+    /// </summary>
     [CanEditMultipleObjects]
     [CustomEditor(typeof(AsyncOptionsView))]
     public class AsyncOptionsViewEditor : YarnEditor { }
 
+    /// <summary>
+    /// The editor for <see cref="LineAdvancerEditor"/> objects.
+    /// </summary>
     [CanEditMultipleObjects]
     [CustomEditor(typeof(LineAdvancer))]
     public class LineAdvancerEditor : YarnEditor { }
 
 
+    /// <summary>
+    /// The editor for <see cref="DialogueRunner"/> objects.
+    /// </summary>
     [CanEditMultipleObjects]
     [CustomEditor(typeof(DialogueRunner))]
     public class DialogueRunnerEditor : YarnEditor
     {
+        /// <summary>
+        /// Draws the variable storage property in the inspector. If it's null,
+        /// shows an info box.
+        /// </summary>
         [CustomUIFor(nameof(DialogueRunner.variableStorage))]
         public void DrawVariableStorage(SerializedProperty variableStorageProperty)
         {
@@ -624,6 +757,9 @@ namespace Yarn.Unity.Editor
             }
         }
 
+        /// <summary>
+        /// Draws the line provider property in the inspector.
+        /// </summary>
         [CustomUIFor(nameof(DialogueRunner.lineProvider))]
         public void DrawLineProvider(SerializedProperty lineProviderProperty)
         {
@@ -643,10 +779,11 @@ namespace Yarn.Unity.Editor
                 if (yarnProjectIsUnityLoc)
                 {
 #if USE_UNITY_LOCALIZATION
-                    // If this is a project using Unity localisation, we can't add a
-                    // line provider at runtime because we won't know what string
-                    // table it should use. In this situation, we'll show a warning
-                    // and offer a quick button they can click to add one.
+                    // If this is a project using Unity localisation, we can't
+                    // add a line provider at runtime because we won't know what
+                    // string table it should use. In this situation, we'll show
+                    // a warning and offer a quick button they can click to add
+                    // one.
                     string unityLocalizedLineProvider = ObjectNames.NicifyVariableName(nameof(UnityLocalization.UnityLocalisedLineProvider));
                     EditorGUILayout.HelpBox($"This project uses Unity Localization. You will need to add a {unityLocalizedLineProvider} for it to work. Click the button below to add one, and then set it up.", MessageType.Warning);
 
@@ -656,6 +793,8 @@ namespace Yarn.Unity.Editor
 
                     if (existingLineProvider != null)
                     {
+                        // If there is an existing UnityLocalizedLineProvider,
+                        // offer a button to use it.
                         if (GUILayout.Button($"Use {unityLocalizedLineProvider}"))
                         {
                             lineProviderProperty.objectReferenceValue = existingLineProvider;
@@ -663,6 +802,8 @@ namespace Yarn.Unity.Editor
                     }
                     else
                     {
+                        // If there isn't an existing
+                        // UnityLocalizedLineProvider, offer a button to add it.
                         if (GUILayout.Button($"Add {unityLocalizedLineProvider}"))
                         {
                             var lineProvider = gameObject.AddComponent<UnityLocalization.UnityLocalisedLineProvider>();
@@ -706,7 +847,5 @@ namespace Yarn.Unity.Editor
                 }
             }
         }
-
-
     }
 }
