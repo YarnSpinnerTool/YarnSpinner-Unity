@@ -37,7 +37,7 @@ namespace Yarn.Unity.Editor
     internal static class AttributeExtensions
     {
 
-        public struct AttributeEvaluationResult
+        public readonly struct AttributeEvaluationResult
         {
             public enum ResultType
             {
@@ -45,23 +45,28 @@ namespace Yarn.Unity.Editor
                 Failed,
                 Error,
             }
-            public ResultType Result;
-            public string? Message;
+            public readonly ResultType Result;
+            public readonly string? Message;
+            private AttributeEvaluationResult(ResultType result, string? message)
+            {
+                this.Result = result;
+                this.Message = message;
+            }
             public static implicit operator AttributeEvaluationResult(bool value)
             {
                 return new AttributeEvaluationResult
-                {
-                    Result = value ? ResultType.Passed : ResultType.Failed,
-                    Message = null,
-                };
+                (
+                    result: value ? ResultType.Passed : ResultType.Failed,
+                    message: null
+                );
             }
             public static implicit operator AttributeEvaluationResult(string errorMessage)
             {
                 return new AttributeEvaluationResult
-                {
-                    Result = ResultType.Error,
-                    Message = errorMessage,
-                };
+                (
+                    result: ResultType.Error,
+                    message: errorMessage
+                );
             }
         }
 
@@ -206,12 +211,34 @@ namespace Yarn.Unity.Editor
         }
     }
 
-    struct PropertyInfo
+    /// <summary>
+    /// Contains information about a property in a serialized object relevant to
+    /// the Yarn Spinner attribute system.
+    /// </summary>
+    readonly struct PropertyInfo
     {
+        /// <summary>
+        /// A property on a <see cref="SerializedObject"/>.
+        /// </summary>
         public readonly SerializedProperty serializedProperty;
+
+        /// <summary>
+        /// The collection of Yarn Editor attributes on the field that <see
+        /// cref="serializedProperty"/> represents.
+        /// </summary>
         public readonly YarnEditorAttribute[] attributes;
+
+        /// <summary>
+        /// The field that <see cref="serializedProperty"/> represents.
+        /// </summary>
         private readonly FieldInfo? field;
 
+        /// <summary>
+        /// Gets the collection of all attributes associated with the field that
+        /// a <see cref="SerializedProperty"/> represents.
+        /// </summary>
+        /// <param name="property"></param>
+        /// <returns></returns>
         public static IEnumerable<Attribute> GetAttributes(SerializedProperty property)
         {
             // The script property doesn't correspond to a field on the target
@@ -223,13 +250,18 @@ namespace Yarn.Unity.Editor
                 return Array.Empty<Attribute>();
             }
 
+            // Attempt to find the field that backs the property
             FieldInfo? field = GetField(property);
             if (field != null)
             {
+                // We found the field; get all custom attributes from it
                 return field.GetCustomAttributes();
             }
             else
             {
+                // We didn't find it. This is generally an error; we'll complain
+                // about it and return an empty collection of attributes so that
+                // we don't break the Inspector.
                 Debug.LogWarning($"Failed to find field {property.name} on object {property.serializedObject.targetObject.name}");
                 return Array.Empty<Attribute>();
             }
@@ -242,6 +274,12 @@ namespace Yarn.Unity.Editor
             return field;
         }
 
+        /// <summary>
+        /// Initialises a new <see cref="PropertyInfo"/> given a serialized
+        /// property.
+        /// </summary>
+        /// <param name="property">The serialized property to create the <see
+        /// cref="PropertyInfo"/> from.</param>
         public PropertyInfo(SerializedProperty property)
         {
             this.serializedProperty = property;
@@ -249,6 +287,11 @@ namespace Yarn.Unity.Editor
             this.field = GetField(property);
         }
 
+        /// <summary>
+        /// Get a value indicating whether <see cref="serializedProperty"/> was
+        /// declared on a parent type of its <see
+        /// cref="SerializedProperty.serializedObject"/>.
+        /// </summary>
         public bool IsInherited
         {
             get
@@ -265,15 +308,20 @@ namespace Yarn.Unity.Editor
         }
     }
 
+    /// <summary>
+    /// A custom editor that makes use of <see cref="YarnEditorAttribute"/>
+    /// attributes to control the appearance of variables in the Inspector.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// To use this editor for your classes, create a subclass of it and use the
+    /// <see cref="CustomEditor"/> attribute to mark it as the editor for your
+    /// type. The Yarn Editor attributes will then start working in the
+    /// Inspector for your objects.
+    /// </para>
+    /// </remarks>
     public abstract class YarnEditor : UnityEditor.Editor
     {
-
-#if USE_UNITY_LOCALIZATION
-        protected const bool UnityLocalizationAvailable = true;
-#else
-        protected const bool UnityLocalizationAvailable = false;
-#endif
-
         internal const string ScriptPropertyName = "m_Script";
         private static bool ShowCallbacks = false;
 
@@ -305,8 +353,9 @@ namespace Yarn.Unity.Editor
 
                         if (result.Result == AttributeExtensions.AttributeEvaluationResult.ResultType.Failed)
                         {
-                            // A visibility attribute has indicated that we shouldn't
-                            // show the field, so skip it
+                            // A visibility attribute has indicated that we
+                            // shouldn't show the field, so exit from this
+                            // method early and don't draw the property.
                             return;
                         }
                         break;
@@ -344,11 +393,7 @@ namespace Yarn.Unity.Editor
                         result = true;
                         break;
                     default:
-                        result = new AttributeExtensions.AttributeEvaluationResult
-                        {
-                            Result = AttributeExtensions.AttributeEvaluationResult.ResultType.Error,
-                            Message = $"Unknown attribute {attr.GetType()}",
-                        };
+                        result = $"Unknown attribute {attr.GetType()}";
                         break;
                 }
 
@@ -562,6 +607,7 @@ namespace Yarn.Unity.Editor
     public class LineAdvancerEditor : YarnEditor { }
 
 
+    [CanEditMultipleObjects]
     [CustomEditor(typeof(DialogueRunner))]
     public class DialogueRunnerEditor : YarnEditor
     {
