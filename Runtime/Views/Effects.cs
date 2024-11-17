@@ -180,9 +180,9 @@ namespace Yarn.Unity
         /// <remarks>
         /// <para>This method works by adjusting the value of the <paramref
         /// name="text"/> parameter's <see
-        /// cref="TextMeshProUGUI.maxVisibleCharacters"/> property. This means
-        /// that word wrapping will not change half-way through the presentation
-        /// of a word.</para>
+        /// cref="TMP_Text.maxVisibleCharacters"/> property. This means that
+        /// word wrapping will not change half-way through the presentation of a
+        /// word.</para>
         /// <para style="note">Depending on the value of <paramref
         /// name="lettersPerSecond"/>, <paramref name="onCharacterTyped"/> may
         /// be called multiple times per frame.</para>
@@ -246,7 +246,7 @@ namespace Yarn.Unity
         /// name="pausePositions"/> values.
         /// <para>This method works by adjusting the value of the <paramref
         /// name="text"/> parameter's <see
-        /// cref="TextMeshProUGUI.maxVisibleCharacters"/> property. This means
+        /// cref="TMP_Text.maxVisibleCharacters"/> property. This means
         /// that word wrapping will not change half-way through the presentation
         /// of a word.</para>
         /// <para style="note">Depending on the value of <paramref
