@@ -45,14 +45,14 @@ namespace Yarn.Unity
         /// <seealso cref="useFadeEffect"/>
         [Space]
         [MustNotBeNull]
-        public CanvasGroup canvasGroup;
+        public CanvasGroup? canvasGroup;
 
         /// <summary>
         /// The <see cref="TMP_Text"/> object that displays the text of
         /// dialogue lines.
         /// </summary>
         [MustNotBeNull]
-        public TMP_Text lineText;
+        public TMP_Text? lineText;
 
         /// <summary>
         /// The <see cref="Button"/> that represents an on-screen button that
@@ -97,7 +97,8 @@ namespace Yarn.Unity
         [Group("Character")]
         [ShowIf(nameof(showCharacterNameInLineView))]
         [Label("Name field")]
-        public TMP_Text characterNameText;
+        [MustNotBeNullWhen(nameof(showCharacterNameInLineView), "A text field must be provided when Shows Name is set")]
+        public TMP_Text? characterNameText;
 
         /// <summary>
         /// The game object that holds the <see cref="characterNameText"/> text
@@ -248,14 +249,20 @@ namespace Yarn.Unity
         /// <inheritdoc/>
         public override YarnTask OnDialogueCompleteAsync()
         {
-            canvasGroup.alpha = 0;
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 0;
+            }
             return YarnTask.CompletedTask;
         }
 
         /// <inheritdoc/>
         public override YarnTask OnDialogueStartedAsync()
         {
-            canvasGroup.alpha = 0;
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 0;
+            }
             return YarnTask.CompletedTask;
         }
 
@@ -294,12 +301,25 @@ namespace Yarn.Unity
         /// <inheritdoc cref="AsyncDialogueViewBase.RunLineAsync(LocalizedLine, LineCancellationToken)" path="/returns"/>
         public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
         {
+            if (lineText == null)
+            {
+                Debug.LogError($"Line view does not have a text view. Skipping line {line.TextID} (\"{line.RawText}\")");
+                return;
+            }
+
             MarkupParseResult text;
 
             // configuring the text fields
             if (showCharacterNameInLineView)
             {
-                characterNameText.text = line.CharacterName;
+                if (characterNameText == null)
+                {
+                    Debug.LogWarning($"Line view is configured to show character names, but no character name text view was provided.", this);
+                }
+                else
+                {
+                    characterNameText.text = line.CharacterName;
+                }
                 text = line.TextWithoutCharacterName;
             }
             else
@@ -338,15 +358,18 @@ namespace Yarn.Unity
                 }
             }
 
-            // fading up the UI
-            if (useFadeEffect)
+            if (canvasGroup != null)
             {
-                await Effects.FadeAlpha(canvasGroup, 0, 1, fadeDownDuration, token.HurryUpToken);
-            }
-            else
-            {
-                // We're not fading up, so set the canvas group's alpha to 1 immediately.
-                canvasGroup.alpha = 1;
+                // fading up the UI
+                if (useFadeEffect)
+                {
+                    await Effects.FadeAlpha(canvasGroup, 0, 1, fadeDownDuration, token.HurryUpToken);
+                }
+                else
+                {
+                    // We're not fading up, so set the canvas group's alpha to 1 immediately.
+                    canvasGroup.alpha = 1;
+                }
             }
 
             if (temporalProcessors.Count > 0)
@@ -398,14 +421,17 @@ namespace Yarn.Unity
                 await YarnAsync.WaitUntilCanceled(token.NextLineToken);
             }
 
-            // we fade down the UI
-            if (useFadeEffect)
+            if (canvasGroup != null)
             {
-                await Effects.FadeAlpha(canvasGroup, 1, 0, fadeDownDuration, token.HurryUpToken);
-            }
-            else
-            {
-                canvasGroup.alpha = 0;
+                // we fade down the UI
+                if (useFadeEffect)
+                {
+                    await Effects.FadeAlpha(canvasGroup, 1, 0, fadeDownDuration, token.HurryUpToken);
+                }
+                else
+                {
+                    canvasGroup.alpha = 0;
+                }
             }
 
             // the final bit of clean up is to remove the cancel listener from the button
