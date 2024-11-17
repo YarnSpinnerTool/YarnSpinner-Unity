@@ -214,6 +214,15 @@ namespace Yarn.Unity.Editor
 
         public static IEnumerable<Attribute> GetAttributes(SerializedProperty property)
         {
+            // The script property doesn't correspond to a field on the target
+            // object, so we won't find one when we ask for it. In this
+            // situation, always return an empty collection if we're getting a
+            // property with that name
+            if (property.name == YarnEditor.ScriptPropertyName)
+            {
+                return Array.Empty<Attribute>();
+            }
+
             FieldInfo? field = GetField(property);
             if (field != null)
             {
