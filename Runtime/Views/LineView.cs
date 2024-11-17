@@ -20,6 +20,7 @@ namespace Yarn.Unity
     /// A Dialogue View that presents lines of dialogue, using Unity UI
     /// elements.
     /// </summary>
+    [Obsolete]
     public class LineView : DialogueViewBase
     {
         /// <summary>

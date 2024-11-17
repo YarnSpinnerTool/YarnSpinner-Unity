@@ -14,6 +14,7 @@ using TextMeshProUGUI = Yarn.Unity.TMPShim;
 
 namespace Yarn.Unity
 {
+    [Obsolete]
     public class OptionsListView : DialogueViewBase
     {
         [SerializeField] CanvasGroup canvasGroup;
