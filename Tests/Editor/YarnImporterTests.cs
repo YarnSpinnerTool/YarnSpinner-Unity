@@ -24,7 +24,8 @@ namespace Yarn.Unity.Tests
         [SetUp]
         public void Setup()
         {
-            if (Directory.Exists(Path.Combine("Assets", YarnTestUtility.TestFolderName)) == false) {
+            if (Directory.Exists(Path.Combine("Assets", YarnTestUtility.TestFolderName)) == false)
+            {
                 AssetDatabase.CreateFolder("Assets", YarnTestUtility.TestFolderName);
             }
         }
@@ -58,7 +59,7 @@ namespace Yarn.Unity.Tests
         {
             // Arrange: 
             // Set up a Yarn project and a Yarn script.
-             var project = SetUpProject(new[] {
+            var project = SetUpProject(new[] {
                 string.Join("\n", new[] {
                     "title: Test",
                     "---",
@@ -193,9 +194,12 @@ But not all of them are.
                     // everything but their prefix
 
                     string id;
-                    if (e.ID.StartsWith("line:sh_")) {
+                    if (e.ID.StartsWith("line:sh_"))
+                    {
                         id = e.ID.Substring(0, "line:sh_".Length);
-                    } else {
+                    }
+                    else
+                    {
                         id = e.ID;
                     }
                     return (id, node: e.Node, lineNo: e.LineNumber, metadata: string.Join(" ", e.Metadata));
@@ -285,8 +289,9 @@ But not all of them are.
             // Add a new fake localisation to the project by adding it to the
             // project file and saving it
             var projectFile = Yarn.Compiler.Project.LoadFromFile(projectFilePath);
-            
-            projectFile.Localisation.Add("test", new Compiler.Project.LocalizationInfo {
+
+            projectFile.Localisation.Add("test", new Compiler.Project.LocalizationInfo
+            {
                 Strings = YarnProjectImporter.UnityProjectRootVariable + "/" + destinationStringsFilePath,
             });
 
@@ -317,13 +322,14 @@ But not all of them are.
             // Act:
             // Create a .CSV File, and add it to the Yarn project. 
             YarnProjectUtility.WriteStringsFile(destinationStringsFilePath, importer);
-            
+
             AssetDatabase.Refresh();
 
             // Add a new fake localisation to the project by adding it to the
             // project file and saving it
             var projectFile = Yarn.Compiler.Project.LoadFromFile(projectFilePath);
-            projectFile.Localisation.Add("test", new Compiler.Project.LocalizationInfo {
+            projectFile.Localisation.Add("test", new Compiler.Project.LocalizationInfo
+            {
                 Strings = $"Generated.csv"
             });
             projectFile.SaveToFile(projectFilePath);
@@ -511,14 +517,15 @@ But not all of them are.
             //   therefore has no strings file)
             // - has an assets folder to pull from
 
-            var project = SetUpProject(new Yarn.Compiler.Project {
+            var project = SetUpProject(new Yarn.Compiler.Project
+            {
                 BaseLanguage = defaultLanguage,
                 Localisation = new Dictionary<string, Compiler.Project.LocalizationInfo> {
                     {
-                        defaultLanguage, 
+                        defaultLanguage,
                         new Compiler.Project.LocalizationInfo {
                             Assets = Path.Combine(
-                                YarnProjectImporter.UnityProjectRootPath, 
+                                YarnProjectImporter.UnityProjectRootPath,
                                 AssetDatabase.GetAssetPath(
                                     YarnTestUtility.GetFolder("Editor Test Resources")
                                 )
@@ -570,7 +577,8 @@ But not all of them are.
         }
 
         [Test]
-        public void YarnImporter_CanCreateNewProjectFromScript() {
+        public void YarnImporter_CanCreateNewProjectFromScript()
+        {
             // Arrange:
             // Create a Yarn script.
             var scriptPath = YarnTestUtility.TestFilesDirectoryPath + "/NewScript.yarn";
@@ -581,7 +589,7 @@ But not all of them are.
             // Act:
             // Create a Yarn Project from that script.
             var projectPath = YarnProjectUtility.CreateYarnProject(importer);
-            
+
             // Assert: A new Yarn Project should exist, and is imported as
             // a Yarn Project that has the original Yarn script as one of
             // its source scripts.
@@ -622,15 +630,16 @@ But not all of them are.
             Assert.NotNull(projectImporter);
             Assert.NotNull(scriptImporter);
             Assert.NotNull(scriptAsset);
-            
+
             Assert.That(projectImporter.ImportData.yarnFiles, Contains.Item(scriptAsset));
-            
+
             Assert.That(scriptImporter.DestinationProjects, Contains.Item(projectAsset));
             Assert.That(scriptImporter.DestinationProjectImporters, Contains.Item(projectImporter));
         }
 
         [Test]
-        public void YarnImporter_OnCreatingScriptWithNoLineIDs_HasImplicitLineIDs() {
+        public void YarnImporter_OnCreatingScriptWithNoLineIDs_HasImplicitLineIDs()
+        {
             var project = SetUpProject(new[] {
                 string.Join("\n", new[] {
                     "title: Test",
@@ -648,7 +657,8 @@ But not all of them are.
             Assert.True(importer.ImportData.containsImplicitLineIDs);
         }
         [Test]
-        public void YarnImporter_OnCreatingScriptNoLineIDs_HasNoImplicitLineIDs() {
+        public void YarnImporter_OnCreatingScriptNoLineIDs_HasNoImplicitLineIDs()
+        {
             var project = SetUpProject(new[] {
                 string.Join("\n", new[] {
                     "title: Test",
@@ -677,11 +687,12 @@ But not all of them are.
         });
 
         [Test]
-        public void YarnImporter_OnNonJSONProjectFormat_ProducesUsefulError() {
+        public void YarnImporter_OnNonJSONProjectFormat_ProducesUsefulError()
+        {
 
             //Given
             var outputPath = Path.Combine(YarnTestUtility.TestFilesDirectoryPath, "Project.yarnproject");
-            
+
             LogAssert.Expect(LogType.Error, new Regex(".*needs to be upgraded.*"));
 
             // When
@@ -697,11 +708,12 @@ But not all of them are.
         }
 
         [Test]
-        public void YarnImporter_OnNonJSONProjectFormat_CanUpgrade() {
+        public void YarnImporter_OnNonJSONProjectFormat_CanUpgrade()
+        {
             var outputPath = Path.Combine(YarnTestUtility.TestFilesDirectoryPath, "Project.yarnproject");
 
             // When
-            
+
             File.WriteAllText(outputPath, OldStyleProjectText);
 
             // Expect an import error to be logged
@@ -720,7 +732,8 @@ But not all of them are.
             Assert.That(importer.ImportData.serializedDeclarations, Has.Count.EqualTo(3));
         }
         [Test]
-        public void YarnImporter_ProgramCacheIsInvalidatedAfterReimport() {
+        public void YarnImporter_ProgramCacheIsInvalidatedAfterReimport()
+        {
             // Arrange: 
             // Set up a Yarn project and a Yarn script.
             var project = SetUpProject(new[] {
@@ -738,14 +751,14 @@ But not all of them are.
             // Retrieve the Yarn script.
             var searchResults = AssetDatabase.FindAssets(
                 $"t:{nameof(TextAsset)}", // Look for TextAssets...
-                new[] {$"{YarnTestUtility.TestFilesDirectoryPath}"} // Under the test file directory.
+                new[] { $"{YarnTestUtility.TestFilesDirectoryPath}" } // Under the test file directory.
             );
             // (Sanity check) There should only be one text asset (the script referenced by the Yarn project) here.
             Assert.AreEqual(1, searchResults.Length);
             var yarnScriptPath = AssetDatabase.GUIDToAssetPath(searchResults[0]);
             // Edit the Yarn script with new content.
             File.WriteAllText(
-                yarnScriptPath, 
+                yarnScriptPath,
                 string.Join("\n", new[] {
                     "title: Start",
                     "---",
@@ -764,7 +777,8 @@ But not all of them are.
         }
 
         [Test]
-        public void YarnImporter_OnImportScriptWithShadowLines_CreatesShadowTable() {
+        public void YarnImporter_OnImportScriptWithShadowLines_CreatesShadowTable()
+        {
             var project = SetUpProject(YarnTestUtility.TestYarnScriptSource);
 
             var metadata = project.lineMetadata;
@@ -780,7 +794,7 @@ But not all of them are.
             // The entry should have its own metadata, distinct from the source
             project.lineMetadata.GetMetadata(sourceLineID).Should().Contain("meta1");
             project.lineMetadata.GetMetadata(shadowLineID).Should().Contain("meta2");
-            
+
             project.lineMetadata.GetMetadata(shadowLineID).Should().NotContain("meta1");
             project.lineMetadata.GetMetadata(sourceLineID).Should().NotContain("meta2");
         }
