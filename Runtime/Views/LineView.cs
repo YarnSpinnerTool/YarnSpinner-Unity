@@ -607,6 +607,14 @@ namespace Yarn.Unity
             return lineOfText;
         }
 
+        /// <summary>
+        /// Inserts TextMeshPro line break markup in a line where Yarn line
+        /// break attributes appear.
+        /// </summary>
+        /// <param name="line">The line containing Yarn line break
+        /// attributes.</param>
+        /// <returns>A string containing TextMeshPro <c>&lt;br/&gt;</c> markers
+        /// where Yarn <c>[br/]</c> attributes appear.</returns>
         public static string AddLineBreaks(Markup.MarkupParseResult line)
         {
             string lineOfText = line.Text;
