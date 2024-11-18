@@ -6,9 +6,19 @@ using Yarn.Markup;
 
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// An attribute marker processor receives a marker found in a Yarn line,
+    /// and optionally rewrites the marker and its children into a new form.
+    /// </summary>
+    /// <seealso cref="LineProviderBehaviour"/>
     public abstract class AttributeMarkerProcessor : MonoBehaviour, IAttributeMarkerProcessor
     {
-        public static List<LineParser.MarkupDiagnostic> NoDiagnostics = new List<LineParser.MarkupDiagnostic>();
+        /// <summary>
+        /// An empty collection of diagnostics.
+        /// </summary>
+        public static readonly List<LineParser.MarkupDiagnostic> NoDiagnostics = new List<LineParser.MarkupDiagnostic>();
+
+        // TODO: Check with Tim about specific details of docs here
         public abstract List<LineParser.MarkupDiagnostic> ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, string localeCode);
     }
 }
