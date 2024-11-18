@@ -358,5 +358,82 @@ namespace Yarn.Unity
 
             return results;
         }
+
+        /// <summary>
+        /// Creates a stack of typewriter pauses to use to temporarily halt the
+        /// typewriter effect.
+        /// </summary>
+        /// <remarks>
+        /// This is intended to be used in conjunction with the <see
+        /// cref="Effects.PausableTypewriter"/> effect. The stack of tuples
+        /// created are how the typewriter effect knows when, and for how long,
+        /// to halt the effect.
+        /// <para>
+        /// The pause duration property is in milliseconds but all the effects
+        /// code assumes seconds So here we will be dividing it by 1000 to make
+        /// sure they interconnect correctly.
+        /// </para>
+        /// </remarks>
+        /// <param name="line">The line from which we covet the pauses</param>
+        /// <returns>A stack of positions and duration pause tuples from within
+        /// the line</returns>
+        public static Stack<(int position, float duration)> GetPauseDurationsInsideLine(Markup.MarkupParseResult line)
+        {
+            var pausePositions = new Stack<(int, float)>();
+            var label = "pause";
+
+            // sorting all the attributes in reverse positional order this is so
+            // we can build the stack up in the right positioning
+            var attributes = line.Attributes;
+            attributes.Sort((a, b) => (b.Position.CompareTo(a.Position)));
+            foreach (var attribute in line.Attributes)
+            {
+                // if we aren't a pause skip it
+                if (attribute.Name != label)
+                {
+                    continue;
+                }
+
+                // did they set a custom duration or not, as in did they do
+                // this: 
+                //
+                // Alice: this is my line with a [pause = 1000 /]pause in the
+                //     middle 
+                //
+                // or did they go:
+                //
+                // Alice: this is my line with a [pause /]pause in the middle
+                if (attribute.Properties.TryGetValue(label, out Yarn.Markup.MarkupValue value))
+                {
+                    // depending on the property value we need to take a
+                    // different path this is because they have made it an
+                    // integer or a float which are roughly the same note to
+                    // self: integer and float really ought to be convertible...
+                    // but they also might have done something weird and we need
+                    // to handle that
+                    switch (value.Type)
+                    {
+                        case Yarn.Markup.MarkupValueType.Integer:
+                            float duration = value.IntegerValue;
+                            pausePositions.Push((attribute.Position, duration / 1000));
+                            break;
+                        case Yarn.Markup.MarkupValueType.Float:
+                            pausePositions.Push((attribute.Position, value.FloatValue / 1000));
+                            break;
+                        default:
+                            Debug.LogWarning($"Pause property is of type {value.Type}, which is not allowed. Defaulting to one second.");
+                            pausePositions.Push((attribute.Position, 1));
+                            break;
+                    }
+                }
+                else
+                {
+                    // they haven't set a duration, so we will instead use the
+                    // default of one second
+                    pausePositions.Push((attribute.Position, 1));
+                }
+            }
+            return pausePositions;
+        }
     }
 }

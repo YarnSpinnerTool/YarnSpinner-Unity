@@ -582,7 +582,7 @@ namespace Yarn.Unity
         /// path="/param"/>
         public override void OnLineTextWillAppear(MarkupParseResult line, TMP_Text text)
         {
-            pauses = LineView.GetPauseDurationsInsideLine(line);
+            pauses = DialogueRunner.GetPauseDurationsInsideLine(line);
 
             accumulatedTime = 0;
             StopwatchRunning = true;
