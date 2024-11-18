@@ -33,9 +33,13 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
             return null;
         }
 
-        // One of those files is (AssemblyName).AdditionalFile.txt, and it
+        // One of those files is (AssemblyName).[Unity]AdditionalFile.txt, and it
         // contains the path to the project
-        var relevantFiles = context.AdditionalFiles.Where(i => i.Path.Contains($"{context.Compilation.AssemblyName}.AdditionalFile.txt"));
+        var relevantFiles = context.AdditionalFiles.Where(
+            i => i.Path.Contains($"{context.Compilation.AssemblyName}.AdditionalFile.txt")
+                || i.Path.Contains($"{context.Compilation.AssemblyName}.UnityAdditionalFile.txt")
+        );
+
         if (!relevantFiles.Any())
         {
             return null;
