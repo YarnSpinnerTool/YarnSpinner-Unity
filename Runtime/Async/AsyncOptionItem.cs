@@ -11,10 +11,12 @@ using TMPro;
 using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
+#nullable enable
+
 #if USE_UNITASK
-using YarnOptionCompletionSource = Cysharp.Threading.Tasks.UniTaskCompletionSource<Yarn.Unity.DialogueOption>;
+using YarnOptionCompletionSource = Cysharp.Threading.Tasks.UniTaskCompletionSource<Yarn.Unity.DialogueOption?>;
 #else
-using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption>;
+using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption?>;
 #endif
 
 namespace Yarn.Unity
@@ -25,23 +27,24 @@ namespace Yarn.Unity
     /// </summary>
     public class AsyncOptionItem : UnityEngine.UI.Selectable, ISubmitHandler, IPointerClickHandler, IPointerEnterHandler
     {
-        [SerializeField] TextMeshProUGUI text;
+        [MustNotBeNull]
+        [SerializeField] TextMeshProUGUI? text;
 
         /// <summary>
         /// An completion source that will become completed when the user
         /// selects this view.
         /// </summary>
-        public YarnOptionCompletionSource onOptionSelected;
+        public YarnOptionCompletionSource? onOptionSelected;
 
         private bool hasSubmittedOptionSelection = false;
 
-        private DialogueOption _option;
+        private DialogueOption? _option;
 
         /// <summary>
         /// Gets or sets the <see cref="Option"/> associated with this option
         /// view.
         /// </summary>
-        public DialogueOption Option
+        public DialogueOption? Option
         {
             get => _option;
 
@@ -53,8 +56,22 @@ namespace Yarn.Unity
 
                 // When we're given an Option, use its text and update our
                 // interactibility.
-                text.text = value.Line.TextWithoutCharacterName.Text;
-                interactable = value.IsAvailable;
+                if (value != null)
+                {
+                    if (text != null)
+                    {
+                        text.text = value.Line.TextWithoutCharacterName.Text;
+                    }
+                    interactable = value.IsAvailable;
+                }
+                else
+                {
+                    if (text != null)
+                    {
+                        text.text = string.Empty;
+                    }
+                    interactable = false;
+                }
             }
         }
 
@@ -92,7 +109,8 @@ namespace Yarn.Unity
             if (hasSubmittedOptionSelection == false)
             {
                 hasSubmittedOptionSelection = true;
-                onOptionSelected.SetResult(this.Option);
+
+                onOptionSelected?.TrySetResult(this.Option);
             }
         }
 

@@ -10,15 +10,16 @@ using TMPro;
 using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
+using System.Threading;
+using UnityEngine.UI;
+
 #if USE_UNITASK
 using Cysharp.Threading.Tasks;
 using YarnTask = Cysharp.Threading.Tasks.UniTask;
 using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption?>;
 #else
-using System.Threading;
 using YarnTask = System.Threading.Tasks.Task;
 using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption?>;
-using UnityEngine.UI;
 #endif
 
 namespace Yarn.Unity
@@ -238,7 +239,7 @@ namespace Yarn.Unity
         [ShowIf(nameof(useTypewriterEffect))]
         public UnityEngine.Events.UnityEvent? onCharacterTyped;
 
-        private TypewriterHandler typewriter;
+        private TypewriterHandler? typewriter;
 
         /// <summary>
         /// A list of <see cref="TemporalMarkupHandler"/> objects that will be
@@ -363,7 +364,7 @@ namespace Yarn.Unity
                 // fading up the UI
                 if (useFadeEffect)
                 {
-                    await Effects.FadeAlpha(canvasGroup, 0, 1, fadeDownDuration, token.HurryUpToken);
+                    await Effects.FadeAlphaAsync(canvasGroup, 0, 1, fadeDownDuration, token.HurryUpToken);
                 }
                 else
                 {
@@ -389,8 +390,13 @@ namespace Yarn.Unity
                         // if the typewriter exists we need to turn it on and off depending on if a line is blocking or not
                         if (useTypewriterEffect)
                         {
+                            if (typewriter == null)
+                            {
+                                throw new System.InvalidOperationException($"Error when displaying line: {nameof(useTypewriterEffect)} was enabled but {nameof(typewriter)} is null?");
+                            }
+
                             var task = processor.PresentCharacter(i, lineText, token.HurryUpToken);
-                            if (!task.IsCompleted && processor != typewriter)
+                            if (!task.IsCompleted() && processor != typewriter)
                             {
                                 typewriter.StopwatchRunning = false;
                             }
@@ -426,7 +432,7 @@ namespace Yarn.Unity
                 // we fade down the UI
                 if (useFadeEffect)
                 {
-                    await Effects.FadeAlpha(canvasGroup, 1, 0, fadeDownDuration, token.HurryUpToken);
+                    await Effects.FadeAlphaAsync(canvasGroup, 1, 0, fadeDownDuration, token.HurryUpToken);
                 }
                 else
                 {

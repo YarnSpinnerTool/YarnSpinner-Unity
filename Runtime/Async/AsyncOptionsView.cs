@@ -7,19 +7,21 @@ using TMPro;
 using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
+#nullable enable
+
+using System.Threading;
+
 #if USE_UNITASK
 using Cysharp.Threading.Tasks;
 using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
-using YarnOptionCompletionSource = Cysharp.Threading.Tasks.UniTaskCompletionSource<Yarn.Unity.DialogueOption>;
+using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption?>;
+using YarnOptionCompletionSource = Cysharp.Threading.Tasks.UniTaskCompletionSource<Yarn.Unity.DialogueOption?>;
 #else
-using System.Threading;
 using YarnTask = System.Threading.Tasks.Task;
-using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
-using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption>;
+using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption?>;
+using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption?>;
 #endif
 
-#nullable enable
 
 namespace Yarn.Unity
 {
@@ -34,7 +36,7 @@ namespace Yarn.Unity
         [SerializeField] CanvasGroup? canvasGroup;
 
         [MustNotBeNull]
-        [SerializeField] AsyncOptionItem optionViewPrefab;
+        [SerializeField] AsyncOptionItem? optionViewPrefab;
 
         // A cached pool of OptionView objects so that we can reuse them
         List<AsyncOptionItem> optionViews = new List<AsyncOptionItem>();
@@ -58,8 +60,7 @@ namespace Yarn.Unity
         [Indent]
         [SerializeField] GameObject? lastLineCharacterNameContainer;
 
-
-        LocalizedLine lastSeenLine;
+        LocalizedLine? lastSeenLine;
 
         /// <summary>
         /// Controls whether or not to display options whose <see
@@ -162,18 +163,22 @@ namespace Yarn.Unity
                 optionViews.Add(optionView);
             }
 
-            // the tasks we are making to give to the options for their selection event
-            List<YarnOptionTask> tasks = new List<YarnOptionTask>();
-
             // adding in a cancellation task
             // this exists to let us bail out early if the dialogue is cancelled
             // in later version of dotnet there exists a way to bind a cancellation token to a WhenAny task, but not in our version
             // alas
-            var cancellationTask = new YarnOptionTask(() => { return null; }, cancellationToken);
-            tasks.Add(cancellationTask);
+            YarnOptionCompletionSource tcs = new YarnOptionCompletionSource();
+
+            async YarnOptionTask WaitForCancellation()
+            {
+                await YarnAsync.WaitUntilCanceled(cancellationToken);
+
+                return null;
+            }
 
             // tracks the options views created so we can use it to configure the interaction correctly
             int optionViewsCreated = 0;
+
             for (int i = 0; i < dialogueOptions.Length; i++)
             {
                 var optionView = optionViews[i];
@@ -187,8 +192,6 @@ namespace Yarn.Unity
                 optionView.gameObject.SetActive(true);
                 optionView.Option = option;
 
-                YarnOptionCompletionSource tcs = new YarnOptionCompletionSource();
-                tasks.Add(tcs.Task);
                 optionView.onOptionSelected = tcs;
 
                 // The first available option is selected by default
@@ -236,7 +239,7 @@ namespace Yarn.Unity
             }
 
             // fade up the UI now
-            await Effects.FadeAlpha(canvasGroup, 0, 1, 1, cancellationToken);
+            await Effects.FadeAlphaAsync(canvasGroup, 0, 1, 1, cancellationToken);
 
             // allow interactivity and wait for an option to be selected
             if (canvasGroup != null)
@@ -245,7 +248,7 @@ namespace Yarn.Unity
                 canvasGroup.blocksRaycasts = true;
             }
 
-            var completedTask = await YarnTask.WhenAny(tasks);
+            var selectedResult = await YarnAsync.WhenAny(tcs.Task, WaitForCancellation());
 
             // now one of the option items has been selected so we do cleanup
             if (canvasGroup != null)
@@ -255,7 +258,7 @@ namespace Yarn.Unity
             }
 
             // fade down
-            await Effects.FadeAlpha(canvasGroup, 1, 0, 1, cancellationToken);
+            await Effects.FadeAlphaAsync(canvasGroup, 1, 0, 1, cancellationToken);
 
             // disabling ALL the options views now
             foreach (var optionView in optionViews)
@@ -267,11 +270,11 @@ namespace Yarn.Unity
             // if we are cancelled we still need to return but we don't want to have a selection, so we return no selected option
             if (cancellationToken.IsCancellationRequested)
             {
-                return YarnAsync.NoOptionSelected.Result;
+                return null;
             }
 
             // finally we return the selected option
-            return completedTask.Result;
+            return selectedResult;
         }
 
         private AsyncOptionItem CreateNewOptionView()
@@ -279,6 +282,11 @@ namespace Yarn.Unity
             var optionView = Instantiate(optionViewPrefab);
 
             var targetTransform = canvasGroup != null ? canvasGroup.transform : this.transform;
+
+            if (optionView == null)
+            {
+                throw new System.InvalidOperationException($"Can't create new option view: {nameof(optionView)} is null");
+            }
 
             optionView.transform.SetParent(targetTransform.transform, false);
             optionView.transform.SetAsLastSibling();

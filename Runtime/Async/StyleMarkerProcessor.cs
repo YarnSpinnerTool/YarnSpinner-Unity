@@ -4,11 +4,20 @@ using System.Text;
 using UnityEngine;
 using Yarn.Markup;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// An attribute marker processor that inserts TextMeshPro style tags where
+    /// Yarn Spinner <c>[style]</c> tags appear in a line.
+    /// </summary>
     public class StyleMarkerProcessor : AttributeMarkerProcessor
     {
-        public LineProviderBehaviour lineProvider;
+        [SerializeField]
+        public LineProviderBehaviour? lineProvider;
+
+        /// <inheritdoc/>
         public override List<LineParser.MarkupDiagnostic> ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, string localeCode)
         {
             // throw new System.NotImplementedException();
@@ -34,7 +43,7 @@ namespace Yarn.Unity
         {
             if (lineProvider == null)
             {
-                lineProvider = (LineProviderBehaviour)GameObject.FindObjectOfType<DialogueRunner>().LineProvider;
+                lineProvider = (LineProviderBehaviour)GameObject.FindAnyObjectByType<DialogueRunner>().LineProvider;
             }
             lineProvider.RegisterMarkerProcessor("style", this);
         }

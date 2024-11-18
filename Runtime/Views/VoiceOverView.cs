@@ -10,6 +10,7 @@ using UnityEngine;
 
 namespace Yarn.Unity
 {
+    using System.Diagnostics.CodeAnalysis;
 
 #if USE_UNITASK
     using System.Threading;
@@ -33,17 +34,27 @@ namespace Yarn.Unity
     public class VoiceOverView : AsyncDialogueViewBase
     {
 
+        /// <summary>
+        /// If <see langword="true"/>, the voice over view will request that the
+        /// dialogue runner proceed to the next line when audio for the line has
+        /// finished playing.
+        /// </summary>
         [Group("Line Management")]
         public bool endLineWhenVoiceoverComplete = true;
 
+        /// <summary>
+        /// The dialogue runner to notify of line completion.
+        /// </summary>
+        /// <remarks>This value is only used when <see
+        /// cref="endLineWhenVoiceoverComplete"/> is <see
+        /// langword="true"/>.</remarks>
         [Group("Line Management")]
         [ShowIf(nameof(endLineWhenVoiceoverComplete))]
         [MustNotBeNull("Required when " + nameof(endLineWhenVoiceoverComplete) + " is set")]
         public DialogueRunner? dialogueRunner;
 
         /// <summary>
-        /// The fade out time when <see cref="UserRequestedViewAdvancement"/> is
-        /// called.
+        /// The fade out time when the line is interrupted during playback.
         /// </summary>
         [Group("Timing")]
         public float fadeOutTimeOnLineFinish = 0.05f;
@@ -68,6 +79,7 @@ namespace Yarn.Unity
         /// <remarks>If this is <see langword="null"/>, a new <see
         /// cref="AudioSource"/> will be added at runtime.</remarks>
         [SerializeField]
+        [NotNull]
         public AudioSource audioSource;
 
         void Awake()
@@ -195,11 +207,12 @@ namespace Yarn.Unity
             return YarnTask.CompletedTask;
         }
 
+        /// <inheritdoc/>
         public override YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             return YarnAsync.NoOptionSelected;
         }
-
+        /// <inheritdoc/>
         public override YarnTask OnDialogueStartedAsync()
         {
             return YarnTask.CompletedTask;

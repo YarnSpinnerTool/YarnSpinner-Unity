@@ -26,6 +26,7 @@ namespace Yarn.Unity
     /// <see cref="dialogueView"/>.
     /// </para>
     /// </remarks>
+    [Obsolete]
     public class DialogueAdvanceInput : MonoBehaviour
     {
         /// <summary>

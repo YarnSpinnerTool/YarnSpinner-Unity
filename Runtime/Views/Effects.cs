@@ -13,14 +13,13 @@ using TMPro;
 using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
+using System.Threading;
+
 #if USE_UNITASK
-using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using YarnTask = Cysharp.Threading.Tasks.UniTask;
 using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
 #else
-using System.Threading;
-using System.Threading.Tasks;
 using YarnTask = System.Threading.Tasks.Task;
 using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
 #endif
@@ -100,7 +99,7 @@ namespace Yarn.Unity
         /// <summary>
         /// A coroutine that fades a <see cref="CanvasGroup"/> object's opacity
         /// from <paramref name="from"/> to <paramref name="to"/> over the
-        /// course of <see cref="fadeTime"/> seconds, and then invokes <paramref
+        /// course of <paramref name="fadeTime"/> seconds, and then invokes <paramref
         /// name="onComplete"/>.
         /// </summary>
         /// <param name="from">The opacity value to start fading from, ranging
@@ -152,7 +151,12 @@ namespace Yarn.Unity
             stopToken?.Complete();
         }
 
-        public static async YarnTask FadeAlpha(CanvasGroup canvas, float from, float to, float duration, CancellationToken token)
+        public static IEnumerator FadeAlpha(CanvasGroup canvas, float from, float to, float duration, CancellationToken token)
+        {
+            return YarnAsync.ToCoroutine(() => FadeAlphaAsync(canvas, from, to, duration, token));
+        }
+
+        public static async YarnTask FadeAlphaAsync(CanvasGroup canvas, float from, float to, float duration, CancellationToken token)
         {
             if (duration == 0)
             {

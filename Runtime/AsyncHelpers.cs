@@ -50,9 +50,9 @@ namespace Yarn.Unity
         {
             try
             {
-                await YarnTask.Delay(timeSpan, token);
+                await YarnTask.Delay(timeSpan, cancellationToken: token);
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 // we don't want to throw an exception for this because this is valid behaviour
                 // why did you do it this way c# ?
@@ -62,7 +62,7 @@ namespace Yarn.Unity
 
         public static YarnTask Delay(int milliseconds, CancellationToken token)
         {
-            return YarnTask.Delay(TimeSpan.FromMilliseconds(milliseconds), token);
+            return YarnTask.Delay(TimeSpan.FromMilliseconds(milliseconds), cancellationToken: token);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -135,7 +135,7 @@ namespace Yarn.Unity
         // a task-like object that yields type T, we need to use gross ifdefs
         // when specifying the return type.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static async 
+        public static async
 #if USE_UNITASK
             UniTask<T?>
 #else
@@ -144,8 +144,8 @@ namespace Yarn.Unity
         WaitForAsyncOperation<T>(AsyncOperationHandle<T> operationHandle, CancellationToken cancellationToken)
         {
 #if USE_UNITASK
-        // TODO: use cancellationToken
-        return await operationHandle;
+            // TODO: use cancellationToken
+            return await operationHandle;
 #else
 
             while (operationHandle.IsDone == false)
@@ -158,7 +158,8 @@ namespace Yarn.Unity
                 await YarnTask.Yield();
             }
 
-            if (operationHandle.Status == AsyncOperationStatus.Failed) {
+            if (operationHandle.Status == AsyncOperationStatus.Failed)
+            {
                 throw operationHandle.OperationException;
             }
 
@@ -170,7 +171,7 @@ namespace Yarn.Unity
         public static async YarnTask WaitForAsyncOperation(AsyncOperationHandle operationHandle, CancellationToken cancellationToken)
         {
 #if USE_UNITASK
-        await operationHandle.ToUniTask(cancellationToken: cancellationToken);
+            await operationHandle.ToUniTask(cancellationToken: cancellationToken);
 #else
             while (operationHandle.IsDone == false)
             {
@@ -209,17 +210,21 @@ namespace Yarn.Unity
         }
 
 #if USE_UNITASK
-        internal static bool IsCompleted(this UniTask task) {
+        internal static bool IsCompleted(this UniTask task)
+        {
             return task.Status != UniTaskStatus.Pending;
         }
-        internal static bool IsCompleted<T>(this UniTask<T> task) {
+        internal static bool IsCompleted<T>(this UniTask<T> task)
+        {
             return task.Status != UniTaskStatus.Pending;
         }
-        internal static bool IsCompletedSuccessfully(this UniTask task) {
-            return task.Status != UniTaskStatus.Succeeded;
+        internal static bool IsCompletedSuccessfully(this UniTask task)
+        {
+            return task.Status == UniTaskStatus.Succeeded;
         }
-        internal static bool IsCompletedSuccessfully<T>(this UniTask<T> task) {
-            return task.Status != UniTaskStatus.Succeeded;
+        internal static bool IsCompletedSuccessfully<T>(this UniTask<T> task)
+        {
+            return task.Status == UniTaskStatus.Succeeded;
         }
 #endif
 
@@ -286,6 +291,21 @@ namespace Yarn.Unity
             {
                 throw new TimeoutException();
             }
+        }
+#endif
+
+#if USE_UNITASK
+        internal static async UniTask<T> WhenAny<T>(params UniTask<T>[] tasks)
+        {
+            var (_, result) = await UniTask.WhenAny<T>(tasks);
+            return result;
+        }
+#else
+        internal static async Task<T> WhenAny<T>(params System.Threading.Tasks.Task<T>[] tasks)
+        {
+            var result = await Task.WhenAny<T>(tasks);
+
+            return result.Result;
         }
 #endif
 

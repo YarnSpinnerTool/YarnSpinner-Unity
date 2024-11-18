@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using UnityEngine;
 using Yarn.Unity;
+using System.Threading;
 
 #nullable enable
 
@@ -9,7 +10,6 @@ using Cysharp.Threading.Tasks;
 using YarnTask = Cysharp.Threading.Tasks.UniTask;
 using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption?>;
 #else
-using System.Threading;
 using YarnTask = System.Threading.Tasks.Task;
 using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption?>;
 #endif
@@ -26,7 +26,7 @@ namespace Yarn.Unity
     {
         [MustNotBeNull]
         [Tooltip("The dialogue runner that will receive requests to advance or cancel content.")]
-        [SerializeField] DialogueRunner runner;
+        [SerializeField] DialogueRunner? runner;
 
         /// <summary>
         /// If <see langword="true"/>, repeatedly signalling that the line
@@ -349,13 +349,22 @@ namespace Yarn.Unity
             // cancel the entire line
 
             numberOfAdvancesThisLine += 1;
+
             if (multiAdvanceIsCancel && numberOfAdvancesThisLine >= advanceRequestsBeforeCancellingLine)
             {
                 RequestNextLine();
             }
             else
             {
-                runner.RequestHurryUpLine();
+                if (runner != null)
+                {
+                    runner.RequestHurryUpLine();
+                }
+                else
+                {
+                    Debug.LogError($"{nameof(LineAdvancer)} dialogue runner is null", this);
+                    return;
+                }
             }
         }
 
@@ -364,7 +373,15 @@ namespace Yarn.Unity
         /// </summary>
         public void RequestNextLine()
         {
-            runner.RequestNextLine();
+            if (runner != null)
+            {
+                runner.RequestNextLine();
+            }
+            else
+            {
+                Debug.LogError($"{nameof(LineAdvancer)} dialogue runner is null", this);
+                return;
+            }
         }
 
         /// <summary>
@@ -375,7 +392,10 @@ namespace Yarn.Unity
         {
             // Stop the dialogue runner, which will cancel the current line as
             // well as the entire dialogue.
-            runner.Stop();
+            if (runner != null)
+            {
+                runner.Stop();
+            }
         }
 
         /// <summary>
