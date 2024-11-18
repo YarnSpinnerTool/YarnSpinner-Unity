@@ -320,6 +320,8 @@ namespace Yarn.Unity.ActionAnalyser
             List<ITypeSymbol> validTaskTypes = new List<ITypeSymbol?> {
                     compilation.GetTypeByMetadataName("System.Threading.Tasks.Task"),
                     compilation.GetTypeByMetadataName("Cysharp.Threading.Tasks.UniTask"),
+                    compilation.GetTypeByMetadataName("UnityEngine.Awaitable"),
+                    compilation.GetTypeByMetadataName("Yarn.Unity.YarnTask"),
             }.NonNull(throwIfAnyNull: false)
             .ToList();
 
