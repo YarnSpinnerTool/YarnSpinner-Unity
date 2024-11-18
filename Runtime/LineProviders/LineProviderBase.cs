@@ -11,14 +11,16 @@ using Yarn.Unity;
 using Yarn;
 using Yarn.Markup;
 
-
 #if USE_UNITASK
     using Cysharp.Threading.Tasks;
     using YarnTask = Cysharp.Threading.Tasks.UniTask;
     using YarnIntTask = Cysharp.Threading.Tasks.UniTask<int>;
     using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
+#elif UNITY_2023_1_OR_NEWER
+    using YarnTask = UnityEngine.Awaitable;
+    using YarnLineTask = UnityEngine.Awaitable<Yarn.Unity.LocalizedLine>;
 #else
-using YarnTask = System.Threading.Tasks.Task;
+    using YarnTask = System.Threading.Tasks.Task;
     using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
 #endif
 
@@ -111,7 +113,7 @@ namespace Yarn.Unity
         public virtual YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken)
         {
             // No-op by default.
-            return YarnTask.CompletedTask;
+            return YarnAsync.CompletedTask;
         }
 
         public virtual bool LinesAvailable => true;

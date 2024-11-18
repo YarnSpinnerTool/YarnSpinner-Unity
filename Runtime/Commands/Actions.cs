@@ -16,6 +16,9 @@ using UnityEngine;
     using Cysharp.Threading.Tasks;
     using YarnTask = Cysharp.Threading.Tasks.UniTask;
     using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
+#elif UNITY_2023_1_OR_NEWER
+    using YarnTask = UnityEngine.Awaitable;
+    using YarnObjectTask = UnityEngine.Awaitable<UnityEngine.Object?>;
 #else
     using YarnTask = System.Threading.Tasks.Task;
     using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
@@ -329,7 +332,7 @@ namespace Yarn.Unity
                     {
                         // We need at least one parameter, which is the
                         // component to look for
-                        return new CommandDispatchResult(CommandDispatchResult.StatusType.InvalidParameterCount, YarnTask.CompletedTask)
+                        return new CommandDispatchResult(CommandDispatchResult.StatusType.InvalidParameterCount, YarnAsync.CompletedTask)
                         {
                             Message = $"{this.Name} needs a target, but none was specified",
                         };
@@ -398,44 +401,59 @@ namespace Yarn.Unity
 
                 var returnValue = this.Method.Invoke(target, finalParameters);
 
-                if (returnValue is Coroutine coro)
+                switch (returnValue)
                 {
-                    // The method returned a Coroutine object.
-                    return new CommandDispatchResult(
-                        CommandDispatchResult.StatusType.Succeeded, 
-                        dispatcher.WaitForCoroutine(coro)
-                    );
-                }
-                else if (returnValue is IEnumerator enumerator)
-                {
-                    // The method returned an IEnumerator.
-                    return new CommandDispatchResult(
-                        CommandDispatchResult.StatusType.Succeeded, 
-                        dispatcher.WaitForCoroutine(enumerator)
-                    );
-                }
-                else if (returnValue is System.Threading.Tasks.Task task) {
-                    // The method returned a task. Convert it to a YarnTask.
-                    return new CommandDispatchResult(
-                        CommandDispatchResult.StatusType.Succeeded, 
-                        task.AsYarnTask()
-                    );
-                }
-                #if USE_UNITASK
-                else if (returnValue is Cysharp.Threading.Tasks.UniTask unitask) {
-                    // The method returned a UniTask. No need to convert it to
-                    // YarnTask, because if UniTask is installed, YarnTask means
-                    // UniTask.
-                    return new CommandDispatchResult(
-                        CommandDispatchResult.StatusType.Succeeded, 
-                        unitask
-                    );
-                }
-                #endif
-                else
-                {
-                    // The method returned no value.
-                    return new CommandDispatchResult(CommandDispatchResult.StatusType.Succeeded);
+#if USE_UNITASK
+                    case Cysharp.Threading.Tasks.UniTask unitask:
+                    {
+                        // The method returned a UniTask. No need to convert it to
+                        // YarnTask, because if UniTask is installed, YarnTask means
+                        // UniTask.
+                        return new CommandDispatchResult(
+                            CommandDispatchResult.StatusType.Succeeded, 
+                            unitask
+                        );
+                    }
+#endif
+#if UNITY_2023_1_OR_NEWER
+                    case UnityEngine.Awaitable awaitable:
+                    {
+                        // The method returns an awaitable. We don't need to convert it because if we are here we don't have unitask installed.
+                        // This means YarnTask is an Awaitable.
+                        return new CommandDispatchResult(
+                            CommandDispatchResult.StatusType.Succeeded, 
+                            awaitable
+                        );
+                    }
+#endif
+                    case System.Threading.Tasks.Task task:
+                    {
+                        // The method returned a task. Convert it to a YarnTask.
+                        return new CommandDispatchResult(
+                            CommandDispatchResult.StatusType.Succeeded, 
+                            task.AsYarnTask()
+                        );
+                    }
+                    case Coroutine coro:
+                    {
+                        // The method returned a Coroutine object.
+                        return new CommandDispatchResult(
+                            CommandDispatchResult.StatusType.Succeeded, 
+                            dispatcher.WaitForCoroutine(coro)
+                        );
+                    }
+                    case IEnumerator enumerator:
+                    {
+                        // The method returned an IEnumerator.
+                        return new CommandDispatchResult(
+                            CommandDispatchResult.StatusType.Succeeded, 
+                            dispatcher.WaitForCoroutine(enumerator)
+                        );
+                    }
+                    default:
+                    {
+                        return new CommandDispatchResult(CommandDispatchResult.StatusType.Succeeded);
+                    }
                 }
             }
 
@@ -572,7 +590,7 @@ namespace Yarn.Unity
             {
                 // No text was found inside the command, so we won't be able to
                 // find it.
-                return new CommandDispatchResult(CommandDispatchResult.StatusType.CommandUnknown, YarnTask.CompletedTask);
+                return new CommandDispatchResult(CommandDispatchResult.StatusType.CommandUnknown, YarnAsync.CompletedTask);
             }
 
             if (_commands.TryGetValue(commandPieces[0], out var registration))

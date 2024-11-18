@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Markup;
+using System.Threading;
 
 #if USE_TMP
     using TMPro;
@@ -10,11 +11,12 @@ using Yarn.Markup;
 
 #if USE_UNITASK
     using Cysharp.Threading.Tasks;
-    using Cysharp.Threading.Tasks;
     using YarnTask = Cysharp.Threading.Tasks.UniTask;
     using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
+#elif UNITY_2023_1_OR_NEWER
+    using YarnTask = UnityEngine.Awaitable;
+    using YarnOptionTask = UnityEngine.Awaitable<Yarn.Unity.DialogueOption>;
 #else
-    using System.Threading;
     using YarnTask = System.Threading.Tasks.Task;
     using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
 #endif
@@ -74,13 +76,13 @@ namespace Yarn.Unity
         public override YarnTask OnDialogueCompleteAsync()
         {
             canvas.alpha = 0;
-            return YarnTask.CompletedTask;
+            return YarnAsync.CompletedTask;
         }
 
         public override YarnTask OnDialogueStartedAsync()
         {
             canvas.alpha = 0;
-            return YarnTask.CompletedTask;
+            return YarnAsync.CompletedTask;
         }
 
 

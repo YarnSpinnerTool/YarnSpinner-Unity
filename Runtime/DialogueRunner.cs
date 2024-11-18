@@ -16,16 +16,21 @@ using UnityEngine.UIElements;
 #nullable enable
 
 #if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
-using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
-using YarnOptionCompletionSource = Cysharp.Threading.Tasks.UniTaskCompletionSource<Yarn.Unity.DialogueOption?>;
+    using Cysharp.Threading.Tasks;
+    using YarnTask = Cysharp.Threading.Tasks.UniTask;
+    using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
+    using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
+    using YarnOptionCompletionSource = Cysharp.Threading.Tasks.UniTaskCompletionSource<Yarn.Unity.DialogueOption?>;
+#elif UNITY_2023_1_OR_NEWER
+    using YarnTask = UnityEngine.Awaitable;
+    using YarnOptionTask = UnityEngine.Awaitable<Yarn.Unity.DialogueOption>;
+    using YarnLineTask = UnityEngine.Awaitable<Yarn.Unity.LocalizedLine>;
+    using YarnOptionCompletionSource = UnityEngine.AwaitableCompletionSource<Yarn.Unity.DialogueOption?>;
 #else
-using YarnTask = System.Threading.Tasks.Task;
-using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
-using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
-using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption?>;
+    using YarnTask = System.Threading.Tasks.Task;
+    using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
+    using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
+    using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption?>;
 #endif
 
 namespace System.Diagnostics.CodeAnalysis
@@ -248,14 +253,15 @@ namespace Yarn.Unity
         public YarnTask DialogueTask {
             get {
                 async YarnTask WaitUntilComplete() {
-                    while (IsDialogueRunning) {
-                        await YarnTask.Yield();
+                    while (IsDialogueRunning)
+                    {
+                        await YarnAsync.Yield();
                     }
                 }
                 if (IsDialogueRunning) {
                     return WaitUntilComplete();
                 } else {
-                    return YarnTask.CompletedTask;
+                    return YarnAsync.CompletedTask;
                 }
             }
         }
@@ -324,7 +330,8 @@ namespace Yarn.Unity
             }
 
             // Wait for all views to finish doing their clean up
-            await YarnTask.WhenAll(pendingTasks);
+            // await YarnTask.WhenAll(pendingTasks);
+            await YarnAsync.WhenAll(pendingTasks);
         }
 
         private void OnNodeCompleted(string completedNodeName)
@@ -499,7 +506,7 @@ namespace Yarn.Unity
             }
 
             // Wait for all line view tasks to finish delivering the line.
-            await YarnTask.WhenAll(pendingTasks);
+            await YarnAsync.WhenAll(pendingTasks);
 
             currentLineCancellationSource.Dispose();
             currentLineCancellationSource = null;
@@ -522,6 +529,7 @@ namespace Yarn.Unity
             if (dialogueCancellationSource != null)
             {
                 optionCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(dialogueCancellationSource.Token);
+                Debug.Log("linked token");
             }
             else
             {
@@ -570,7 +578,7 @@ namespace Yarn.Unity
             {
                 pendingTasks.Add(WaitForOptionsView(view));
             }
-            await YarnTask.WhenAll(pendingTasks);
+            await YarnAsync.WhenAll(pendingTasks);
 
             // at this point now every view has finished their handling of the options
             // the first one to return a non-null value will be the one that is chosen option
@@ -579,7 +587,7 @@ namespace Yarn.Unity
 
             try
             {
-                selectedOption = await dialogueSelectionTCS.Task;
+                selectedOption = await dialogueSelectionTCS.AsTask();
             }
             catch (Exception e)
             {
@@ -679,7 +687,7 @@ namespace Yarn.Unity
                     }
                     tasks.Add(view.OnDialogueStartedAsync());
                 }
-                await YarnTask.WhenAll(tasks);
+                await YarnAsync.WhenAll(tasks);
                 Dialogue.Continue();
             }
         }

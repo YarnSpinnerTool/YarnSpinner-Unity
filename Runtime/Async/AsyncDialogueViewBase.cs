@@ -7,6 +7,9 @@ using UnityEngine.Events;
 using Cysharp.Threading.Tasks;
 using YarnTask = Cysharp.Threading.Tasks.UniTask;
 using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
+#elif UNITY_2023_1_OR_NEWER
+using YarnTask = UnityEngine.Awaitable;
+using YarnOptionTask = UnityEngine.Awaitable<Yarn.Unity.DialogueOption>;
 #else
 using YarnTask = System.Threading.Tasks.Task;
 using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;

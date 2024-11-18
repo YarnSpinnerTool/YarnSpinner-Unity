@@ -15,6 +15,9 @@ namespace Yarn.Unity
     using YarnIntTask = Cysharp.Threading.Tasks.UniTask<int>;
     using YarnLineTask = Cysharp.Threading.Tasks.UniTask<LocalizedLine>;
     using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
+#elif UNITY_2023_1_OR_NEWER
+    using YarnTask = UnityEngine.Awaitable;
+    using YarnLineTask = UnityEngine.Awaitable<LocalizedLine>;
 #else
     using YarnTask = System.Threading.Tasks.Task;
     using YarnLineTask = System.Threading.Tasks.Task<LocalizedLine>;
@@ -173,6 +176,9 @@ namespace Yarn.Unity
     using Cysharp.Threading.Tasks;
     using YarnTask = Cysharp.Threading.Tasks.UniTask;
     using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
+#elif UNITY_2023_1_OR_NEWER
+    using YarnTask = UnityEngine.Awaitable;
+    using YarnObjectTask = UnityEngine.Awaitable<UnityEngine.Object?>;
 #else
     using YarnTask = System.Threading.Tasks.Task;
     using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
@@ -266,13 +272,13 @@ namespace Yarn.Unity
         public YarnObjectTask GetObject(string assetID, string localeID, CancellationToken cancellationToken)
         {
             Debug.LogWarning($"Can't fetch assets for line {assetID}: the localisation object uses Addressable Assets, but the Addressables package isn't installed.");
-            return YarnTask.FromResult<Object?>(null);
+            return YarnAsync.FromResult<Object?>(null);
         }
 
         public YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, string localeID, CancellationToken cancellationToken)
         {
             // No-op, because addressables support is not available.
-            return YarnTask.CompletedTask;
+            return YarnAsync.CompletedTask;
         }
     }
 

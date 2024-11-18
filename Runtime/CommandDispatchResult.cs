@@ -10,6 +10,9 @@ using System;
     using Cysharp.Threading.Tasks;
     using YarnTask = Cysharp.Threading.Tasks.UniTask;
     using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
+#elif UNITY_2023_1_OR_NEWER
+    using YarnTask = UnityEngine.Awaitable;
+    using YarnObjectTask = UnityEngine.Awaitable<UnityEngine.Object?>;
 #else
     using YarnTask = System.Threading.Tasks.Task;
     using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
@@ -60,7 +63,7 @@ namespace Yarn.Unity
         public CommandDispatchResult(StatusType status)
         {
             Status = status;
-            Task = YarnTask.CompletedTask;;
+            Task = YarnAsync.CompletedTask;
             Message = null;
         }
         public CommandDispatchResult(StatusType status, YarnTask task)

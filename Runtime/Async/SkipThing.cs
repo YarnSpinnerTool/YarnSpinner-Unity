@@ -3,7 +3,17 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Yarn.Unity;
 
+#if USE_UNITASK
+using Cysharp.Threading.Tasks;
+using YarnTask = Cysharp.Threading.Tasks.UniTask;
+using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
+#elif UNITY_2023_1_OR_NEWER
+using YarnTask = UnityEngine.Awaitable;
+using YarnOptionTask = UnityEngine.Awaitable<Yarn.Unity.DialogueOption>;
+#else
 using YarnTask = System.Threading.Tasks.Task;
+using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
+#endif
 
 // this will become the dialogue request interrupt thing
 public class SkipThing : AsyncDialogueViewBase
@@ -17,21 +27,21 @@ public class SkipThing : AsyncDialogueViewBase
     
     public override YarnTask OnDialogueCompleteAsync()
     {
-        return YarnTask.CompletedTask;
+        return YarnAsync.CompletedTask;
     }
 
     public override YarnTask OnDialogueStartedAsync()
     {
-        return YarnTask.CompletedTask;
+        return YarnAsync.CompletedTask;
     }
 
     public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
         numberOfSkipsThisLine = 0;
-        return YarnTask.CompletedTask;
+        return YarnAsync.CompletedTask;
     }
 
-    public override Task<DialogueOption> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+    public override YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
     {
         return YarnAsync.NoOptionSelected;
     }

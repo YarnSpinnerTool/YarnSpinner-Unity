@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 #if USE_TMP
@@ -12,8 +13,11 @@ using UnityEngine;
     using YarnTask = Cysharp.Threading.Tasks.UniTask;
     using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
     using YarnOptionCompletionSource = Cysharp.Threading.Tasks.UniTaskCompletionSource<Yarn.Unity.DialogueOption>;
+#elif UNITY_2023_1_OR_NEWER
+    using YarnTask = UnityEngine.Awaitable;
+    using YarnOptionTask = UnityEngine.Awaitable<Yarn.Unity.DialogueOption>;
+    using YarnOptionCompletionSource = UnityEngine.AwaitableCompletionSource<Yarn.Unity.DialogueOption>;
 #else
-    using System.Threading;
     using YarnTask = System.Threading.Tasks.Task;
     using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
     using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption>;
@@ -45,7 +49,7 @@ namespace Yarn.Unity
             canvasGroup.interactable = false;
             canvasGroup.blocksRaycasts = false;
 
-            return YarnTask.CompletedTask;
+            return YarnAsync.CompletedTask;
         }
 
         void Start()
@@ -69,7 +73,7 @@ namespace Yarn.Unity
             canvasGroup.interactable = false;
             canvasGroup.blocksRaycasts = false;
 
-            return YarnTask.CompletedTask;
+            return YarnAsync.CompletedTask;
         }
 
         public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
@@ -78,7 +82,7 @@ namespace Yarn.Unity
             {
                 lastSeenLine = line;
             }
-            return YarnTask.CompletedTask;
+            return YarnAsync.CompletedTask;
         }
 
         public override async YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
@@ -90,15 +94,8 @@ namespace Yarn.Unity
                 optionViews.Add(optionView);
             }
 
-            // the tasks we are making to give to the options for their selection event
-            List<YarnOptionTask> tasks = new List<YarnOptionTask>();
-            
-            // adding in a cancellation task
-            // this exists to let us bail out early if the dialogue is cancelled
-            // in later version of dotnet there exists a way to bind a cancellation token to a WhenAny task, but not in our version
-            // alas
-            var cancellationTask = new YarnOptionTask(() => { return null; }, cancellationToken);
-            tasks.Add(cancellationTask);
+            YarnOptionCompletionSource tcs = new YarnOptionCompletionSource();
+            var completionCancelSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
             // tracks the options views created so we can use it to configure the interaction correctly
             int optionViewsCreated = 0;
@@ -113,11 +110,10 @@ namespace Yarn.Unity
                     continue;
                 }
                 optionView.gameObject.SetActive(true);
-                optionView.Option = option; 
+                optionView.Option = option;
 
-                YarnOptionCompletionSource tcs = new YarnOptionCompletionSource();
-                tasks.Add(tcs.Task);
                 optionView.OnOptionSelected = tcs;
+                optionView.completionToken = completionCancelSource.Token;
 
                 // The first available option is selected by default
                 if (optionViewsCreated == 0)
@@ -169,7 +165,8 @@ namespace Yarn.Unity
             // allow interactivity and wait for an option to be selected
             canvasGroup.interactable = true;
             canvasGroup.blocksRaycasts = true;
-            var completedTask = await YarnTask.WhenAny(tasks);
+            var completedTask = await tcs.AsTask();
+            completionCancelSource.Cancel();
 
             // now one of the option items has been selected so we do cleanup
             canvasGroup.interactable = false;
@@ -183,16 +180,16 @@ namespace Yarn.Unity
             {
                 optionView.gameObject.SetActive(false);
             }
-            await YarnTask.Yield();
+            await YarnAsync.Yield();
 
             // if we are cancelled we still need to return but we don't want to have a selection, so we return no selected option
             if (cancellationToken.IsCancellationRequested)
             {
-                return YarnAsync.NoOptionSelected.Result;
+                return await YarnAsync.NoOptionSelected;
             }
 
             // finally we return the selected option
-            return completedTask.Result;
+            return completedTask;
         }
 
         private AsyncOptionItem CreateNewOptionView()

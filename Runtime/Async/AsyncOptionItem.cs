@@ -13,6 +13,8 @@ using UnityEngine.EventSystems;
 
 #if USE_UNITASK
     using YarnOptionCompletionSource = Cysharp.Threading.Tasks.UniTaskCompletionSource<Yarn.Unity.DialogueOption>;
+#elif UNITY_2023_1_OR_NEWER
+    using YarnOptionCompletionSource = UnityEngine.AwaitableCompletionSource<Yarn.Unity.DialogueOption>;
 #else
     using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption>;
 #endif
@@ -24,6 +26,7 @@ namespace Yarn.Unity
         [SerializeField] TextMeshProUGUI text;
 
         public YarnOptionCompletionSource OnOptionSelected;
+        public System.Threading.CancellationToken completionToken;
 
         private bool hasSubmittedOptionSelection = false;
 
@@ -53,17 +56,18 @@ namespace Yarn.Unity
 
         public void InvokeOptionSelected()
         {
+            Debug.Log($"{name}:{_option.DialogueOptionID} has been selected!");
             // turns out that Selectable subclasses aren't intrinsically interactive/non-interactive
             // based on their canvasgroup, you still need to check at the moment of interaction
             if (!IsInteractable())
             {
                 return;
             }
-            
+
             // We only want to invoke this once, because it's an error to
             // submit an option when the Dialogue Runner isn't expecting it. To
             // prevent this, we'll only invoke this if the flag hasn't been cleared already.
-            if (hasSubmittedOptionSelection == false)
+            if (hasSubmittedOptionSelection == false && !completionToken.IsCancellationRequested)
             {
                 hasSubmittedOptionSelection = true;
                 OnOptionSelected.SetResult(this.Option);

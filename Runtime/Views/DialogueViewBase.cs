@@ -7,14 +7,17 @@ using System.Threading;
 using UnityEngine;
 
 #if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
-using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
+    using Cysharp.Threading.Tasks;
+    using YarnTask = Cysharp.Threading.Tasks.UniTask;
+    using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
+    using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
+#elif UNITY_2023_1_OR_NEWER
+    using YarnTask = UnityEngine.Awaitable;
+    using YarnOptionTask = UnityEngine.Awaitable<Yarn.Unity.DialogueOption>;
 #else
-using YarnTask = System.Threading.Tasks.Task;
-using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
-using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
+    using YarnTask = System.Threading.Tasks.Task;
+    using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
+    using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
 #endif
 
 namespace Yarn.Unity
@@ -384,14 +387,14 @@ namespace Yarn.Unity
         {
             // Invoke the synchronous version of 'dialogue started'
             this.DialogueStarted();
-            return YarnTask.CompletedTask;
+            return YarnAsync.CompletedTask;
         }
 
         public override YarnTask OnDialogueCompleteAsync()
         {
             // Invoke the synchronous version of 'dialogue started'
             this.DialogueComplete();
-            return YarnTask.CompletedTask;
+            return YarnAsync.CompletedTask;
         }
 
         // This method implements the v3 async pattern for dialogue views on top
@@ -411,7 +414,7 @@ namespace Yarn.Unity
             // 1. RunLine completes successfully and calls PhaseComplete.
             // 2. The line is cancelled.
             while (phaseComplete == false && token.IsCancellationRequested == false) {
-                await YarnTask.Yield();
+                await YarnAsync.Yield();
             }
 
             // If the line was cancelled, tell the view that the line was
@@ -421,7 +424,7 @@ namespace Yarn.Unity
                 phaseComplete = false;
                 this.InterruptLine(line, PhaseComplete);
                 while (phaseComplete == false) {
-                    await YarnTask.Yield();
+                    await YarnAsync.Yield();
                 }
             }
 
@@ -431,7 +434,7 @@ namespace Yarn.Unity
             this.DismissLine(PhaseComplete);
 
             while (phaseComplete == false) {
-                await YarnTask.Yield();
+                await YarnAsync.Yield();
             }
         }
 
@@ -449,7 +452,7 @@ namespace Yarn.Unity
             });
 
             while (selectedOptionID == -1 && cancellationToken.IsCancellationRequested == false) {
-                await YarnTask.Yield();
+                await YarnAsync.Yield();
             }
 
             if (cancellationToken.IsCancellationRequested) {

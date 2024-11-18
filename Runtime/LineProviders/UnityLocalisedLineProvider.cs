@@ -32,6 +32,9 @@ using Yarn.Unity.UnityLocalization;
     using YarnIntTask = Cysharp.Threading.Tasks.UniTask<int>;
     using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
     using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object>;
+#elif UNITY_2023_1_OR_NEWER
+    using YarnTask = UnityEngine.Awaitable;
+    using YarnLineTask = UnityEngine.Awaitable<Yarn.Unity.LocalizedLine>;
 #else
     using YarnTask = System.Threading.Tasks.Task;
     using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
@@ -209,7 +212,7 @@ namespace Yarn.Unity.UnityLocalization
         public override YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken)
         {
             Debug.LogError(NotInstalledError);
-            return YarnTask.CompletedTask;
+            return YarnAsync.CompletedTask;
         }
 
         public override void Start()
@@ -221,7 +224,7 @@ namespace Yarn.Unity.UnityLocalization
         {
             Debug.LogError($"{nameof(UnityLocalisedLineProvider)}: Can't create a localised line for ID {line.ID} because the Unity Localization package is not installed in this project. To fix this, install Unity Localization.");
 
-            return YarnTask.FromResult(new LocalizedLine()
+            return YarnAsync.FromResult(new LocalizedLine()
             {
                 TextID = line.ID,
                 RawText = $"{line.ID}: Unable to create a localised line, because the Unity Localization package is not installed in this project.",
