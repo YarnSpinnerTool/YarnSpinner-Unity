@@ -40,7 +40,7 @@ public static class Diagnostics
     public static readonly DiagnosticDescriptor YS1004FunctionMethodsMustHaveAValidReturnType = new DiagnosticDescriptor(
                         "YS1004",
                         title: $"YarnFunction methods must return a valid type",
-                        messageFormat: $"YarnFunction methods must return a valid type (either bool, int, or a numeric type). \"{{0}}\"'s return type is {{1}}.",
+                        messageFormat: $"YarnFunction methods must return a valid type (either bool, string, or a numeric type). \"{{0}}\"'s return type is {{1}}.",
                         category: "Yarn Spinner",
                         defaultSeverity: DiagnosticSeverity.Warning,
                         isEnabledByDefault: true,
