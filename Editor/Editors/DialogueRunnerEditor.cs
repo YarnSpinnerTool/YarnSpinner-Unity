@@ -691,7 +691,6 @@ namespace Yarn.Unity.Editor
 
                 PropertyRenderer propertyRenderer = (PropertyRenderer)method.CreateDelegate(typeof(PropertyRenderer), this);
                 customPropertyRenderers.Add(attr.propertyName, propertyRenderer);
-                Debug.Log($"Registered custom drawer {method.Name} for property {attr.propertyName}");
             }
         }
 
