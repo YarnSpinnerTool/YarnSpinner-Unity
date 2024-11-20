@@ -188,6 +188,19 @@ namespace Yarn.Unity
             return await tcs.Awaitable;
         }
 #endif
+
+        public readonly partial async YarnTask<bool> SuppressCancellationThrow()
+        {
+            try
+            {
+                await Awaitable;
+            }
+            catch (OperationCanceledException)
+            {
+                return true;
+            }
+            return false;
+        }
     }
 
     public partial struct YarnTask<T>
