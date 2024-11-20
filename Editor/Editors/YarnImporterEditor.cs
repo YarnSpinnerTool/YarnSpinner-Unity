@@ -2,12 +2,12 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using UnityEngine;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.AssetImporters;
-using System.Linq;
-using System.IO;
-using System.Collections.Generic;
+using UnityEngine;
 using Yarn.Unity;
 
 namespace Yarn.Unity.Editor
@@ -57,7 +57,8 @@ namespace Yarn.Unity.Editor
                 }
                 else
                 {
-                    foreach (string error in DestinationProjectErrors) {
+                    foreach (string error in DestinationProjectErrors)
+                    {
                         EditorGUILayout.HelpBox(error, MessageType.Error);
                     }
                 }
@@ -65,12 +66,16 @@ namespace Yarn.Unity.Editor
 
             if (destinationYarnProjects.Any() != false)
             {
-                if (destinationYarnProjects.Count() == 1) {
+                if (destinationYarnProjects.Count() == 1)
+                {
                     EditorGUILayout.ObjectField("Project", destinationYarnProjects.First(), typeof(YarnProject), false);
-                } else {
+                }
+                else
+                {
                     EditorGUILayout.LabelField("Projects", EditorStyles.boldLabel);
                     EditorGUI.indentLevel += 1;
-                    foreach (var project in destinationYarnProjects) {
+                    foreach (var project in destinationYarnProjects)
+                    {
                         EditorGUILayout.ObjectField(project, typeof(YarnProject), false);
                     }
                     EditorGUI.indentLevel -= 1;

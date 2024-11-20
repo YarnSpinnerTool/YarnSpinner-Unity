@@ -2,13 +2,13 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 #nullable enable
 
@@ -51,7 +51,8 @@ namespace Yarn.Unity.ActionAnalyser
                 throw new AnalyserException("Unable to find an assembly that defines System.Object");
             }
 
-            static string GetLocationOfAssemblyWithType(string typeName) {
+            static string GetLocationOfAssemblyWithType(string typeName)
+            {
                 return GetTypeByName(typeName)?.Assembly.Location ?? throw new AnalyserException($"Failed to find an assembly for type " + typeName);
             }
 
@@ -78,7 +79,8 @@ namespace Yarn.Unity.ActionAnalyser
                     typeof(System.Attribute).Assembly.Location),
             };
 
-            if (assemblyPaths != null) {
+            if (assemblyPaths != null)
+            {
                 references.AddRange(assemblyPaths.Select(p => MetadataReference.CreateFromFile(p)));
             }
 
@@ -380,7 +382,7 @@ namespace Yarn.Unity.ActionAnalyser
             get
             {
                 // [System.CodeDom.Compiler.GeneratedCode(<toolName>, <toolVersion>)]
-                
+
                 var toolNameArgument = SyntaxFactory.AttributeArgument(
                     SyntaxFactory.LiteralExpression(
                         SyntaxKind.StringLiteralExpression,
@@ -427,11 +429,13 @@ namespace Yarn.Unity.ActionAnalyser
 
             SemanticModel? model = null;
 
-            if (compilation != null) {
+            if (compilation != null)
+            {
                 model = compilation.GetSemanticModel(tree, true);
             }
 
-            if (model == null) {
+            if (model == null)
+            {
                 return Array.Empty<Action>();
             }
 
@@ -456,9 +460,12 @@ namespace Yarn.Unity.ActionAnalyser
                 });
 
                 // Do not visit this class if it is generated code
-                if (hasGeneratedCodeAttribute) {
+                if (hasGeneratedCodeAttribute)
+                {
                     return false;
-                } else {
+                }
+                else
+                {
                     return true;
                 }
             });
@@ -472,8 +479,9 @@ namespace Yarn.Unity.ActionAnalyser
                     var symbolInfo = model.GetSymbolInfo(i.Expression);
 
                     ISymbol? symbol = symbolInfo.Symbol;
-                    
-                    if (symbol == null && symbolInfo.CandidateReason == CandidateReason.OverloadResolutionFailure) {
+
+                    if (symbol == null && symbolInfo.CandidateReason == CandidateReason.OverloadResolutionFailure)
+                    {
                         // We weren't able to determine what specific method
                         // this was. Pick the first one - we don't actually need
                         // to know about what specific overload was used, since
@@ -511,7 +519,8 @@ namespace Yarn.Unity.ActionAnalyser
 
                 SymbolInfo targetSymbolInfo = model.GetSymbolInfo(targetSyntax.Expression);
                 IMethodSymbol? targetSymbol = targetSymbolInfo.Symbol as IMethodSymbol;
-                if (targetSymbol == null && targetSymbolInfo.CandidateReason == CandidateReason.OverloadResolutionFailure) {
+                if (targetSymbol == null && targetSymbolInfo.CandidateReason == CandidateReason.OverloadResolutionFailure)
+                {
                     // We couldn't figure out exactly which of the targets to
                     // use. Choose one.
                     targetSymbol = targetSymbolInfo.CandidateSymbols.FirstOrDefault() as IMethodSymbol;
@@ -564,7 +573,8 @@ namespace Yarn.Unity.ActionAnalyser
             {
                 var attr = methodInfo.ActionAttribute;
 
-                if (attr == null) {
+                if (attr == null)
+                {
                     // Not a valid action; skip
                     continue;
                 }
@@ -598,7 +608,8 @@ namespace Yarn.Unity.ActionAnalyser
                 var lineIndex = position.GetLineSpan().StartLinePosition.Line + 1;
 
                 var methodSymbol = methodInfo.Symbol;
-                if (methodSymbol == null) {
+                if (methodSymbol == null)
+                {
                     logger.WriteLine($"Failed to get a symbol for " + methodInfo.MethodDeclaration.Identifier);
                     continue;
                 }
@@ -715,12 +726,14 @@ namespace Yarn.Unity.ActionAnalyser
             }
         }
 
-        public static IEnumerable<(AttributeSyntax, AttributeData)> GetAttributes(ClassDeclarationSyntax classDecl, SemanticModel model) {
+        public static IEnumerable<(AttributeSyntax, AttributeData)> GetAttributes(ClassDeclarationSyntax classDecl, SemanticModel model)
+        {
             INamedTypeSymbol? classSymbol = model.GetDeclaredSymbol(classDecl);
 
             var methodAttributes = classSymbol?.GetAttributes();
 
-            if (methodAttributes == null) {
+            if (methodAttributes == null)
+            {
                 yield break;
             }
 
@@ -739,7 +752,8 @@ namespace Yarn.Unity.ActionAnalyser
 
             var methodAttributes = methodSymbol?.GetAttributes();
 
-            if (methodAttributes == null) {
+            if (methodAttributes == null)
+            {
                 yield break;
             }
 

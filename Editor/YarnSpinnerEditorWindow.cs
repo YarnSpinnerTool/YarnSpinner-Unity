@@ -5,11 +5,11 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEngine;
+using System.Reflection;
 using UnityEditor;
+using UnityEngine;
 using UnityEngine.Networking;
 using Yarn.Compiler.Upgrader;
-using System.Reflection;
 
 namespace Yarn.Unity
 {
@@ -115,7 +115,7 @@ namespace Yarn.Unity
             EditorApplication.update -= EditorUpdate;
 
             bool isError = supportersRequest.result != UnityWebRequest.Result.Success;
-        
+
             if (isError)
             {
                 Debug.LogError("Error loading Yarn Spinner supporter data: " + supportersRequest.error);

@@ -2,11 +2,11 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using UnityEngine;
-using UnityEditor;
-using Yarn.Unity;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
+using Yarn.Unity;
 
 #if USE_ADDRESSABLES
 using UnityEngine.AddressableAssets;

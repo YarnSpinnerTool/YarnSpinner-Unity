@@ -2,9 +2,9 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using System.Linq;
 
 namespace Yarn.Unity.Editor
 {
@@ -128,9 +128,12 @@ namespace Yarn.Unity.Editor
 
                 SerializedProperty typeProperty = property.FindPropertyRelative("typeName");
 
-                if (propertyIsReadOnly) {
+                if (propertyIsReadOnly)
+                {
                     DrawPropertyField(typePosition, typeProperty, true);
-                } else {
+                }
+                else
+                {
                     var popupElements = YarnProjectImporter.SerializedDeclaration.BuiltInTypesList;
                     var popupElementNames = popupElements.Select(t => t.Name).ToList();
                     var selectedIndex = popupElementNames.IndexOf(typeProperty.stringValue);
@@ -138,7 +141,8 @@ namespace Yarn.Unity.Editor
                     var prefixPosition = EditorGUI.PrefixLabel(typePosition, new GUIContent("Type"));
 
                     selectedIndex = EditorGUI.Popup(prefixPosition, selectedIndex, popupElementNames.ToArray());
-                    if (selectedIndex >= 0 && selectedIndex <= popupElementNames.Count) {
+                    if (selectedIndex >= 0 && selectedIndex <= popupElementNames.Count)
+                    {
                         typeProperty.stringValue = popupElementNames[selectedIndex];
                     }
                 }
@@ -147,13 +151,20 @@ namespace Yarn.Unity.Editor
 
                 var type = YarnProjectImporter.SerializedDeclaration.BuiltInTypesList.FirstOrDefault(t => t.Name == typeProperty.stringValue);
 
-                if (type == Types.Number) {
+                if (type == Types.Number)
+                {
                     defaultValueProperty = property.FindPropertyRelative("defaultValueNumber");
-                } else if (type == Types.String) {
+                }
+                else if (type == Types.String)
+                {
                     defaultValueProperty = property.FindPropertyRelative("defaultValueString");
-                } else if (type == Types.Boolean) {
+                }
+                else if (type == Types.Boolean)
+                {
                     defaultValueProperty = property.FindPropertyRelative("defaultValueBool");
-                } else {
+                }
+                else
+                {
                     defaultValueProperty = null;
                 }
 

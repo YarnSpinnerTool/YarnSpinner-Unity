@@ -2,9 +2,9 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using UnityEngine;
-using UnityEditor;
 using System;
+using UnityEditor;
+using UnityEngine;
 
 namespace Yarn.Unity.Editor
 {
@@ -64,7 +64,7 @@ namespace Yarn.Unity.Editor
                 case (int)DialogueAdvanceInput.ContinueActionType.KeyCode:
                     DrawInputActionTypeKeycode();
                     break;
-                
+
                 case (int)DialogueAdvanceInput.ContinueActionType.VirtualButton:
                     DrawInputActionTypeButton();
                     break;

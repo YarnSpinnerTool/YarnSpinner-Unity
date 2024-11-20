@@ -123,23 +123,23 @@ namespace Yarn.Unity.Editor
             {
                 // neither is configured so we show showCharacterNamePropertyInLineViewProperty
                 case 0:
-                {
-                    EditorGUI.indentLevel += 1;
-                    EditorGUILayout.PropertyField(showCharacterNamePropertyInLineViewProperty);
-                    EditorGUI.indentLevel -= 1;
-                    break;
-                }
+                    {
+                        EditorGUI.indentLevel += 1;
+                        EditorGUILayout.PropertyField(showCharacterNamePropertyInLineViewProperty);
+                        EditorGUI.indentLevel -= 1;
+                        break;
+                    }
                 // one is configured, but not the other, so we show showCharacterNamePropertyInLineViewProperty
                 // and also show a warning that this is likely bad
                 case 1:
-                {
-                    EditorGUI.indentLevel += 1;
-                    EditorGUILayout.HelpBox("Only one of the required name properties is set. This will likely result in unusual behaviours.", MessageType.Warning);
-                    EditorGUILayout.PropertyField(showCharacterNamePropertyInLineViewProperty);
-                    EditorGUI.indentLevel -= 1;
-                    // show a warning in here
-                    break;
-                }
+                    {
+                        EditorGUI.indentLevel += 1;
+                        EditorGUILayout.HelpBox("Only one of the required name properties is set. This will likely result in unusual behaviours.", MessageType.Warning);
+                        EditorGUILayout.PropertyField(showCharacterNamePropertyInLineViewProperty);
+                        EditorGUI.indentLevel -= 1;
+                        // show a warning in here
+                        break;
+                    }
             }
 
             EditorGUILayout.PropertyField(continueButtonProperty);

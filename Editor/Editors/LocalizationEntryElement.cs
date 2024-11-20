@@ -3,14 +3,14 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
 using UnityEditor;
-using UnityEngine;
-
-using UnityEngine.UIElements;
 using UnityEditor.UIElements;
+using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Yarn.Unity.Editor
 {
-    public class LocalizationEntryElement : VisualElement, INotifyValueChanged<ProjectImportData.LocalizationEntry> {
+    public class LocalizationEntryElement : VisualElement, INotifyValueChanged<ProjectImportData.LocalizationEntry>
+    {
         private readonly Foldout foldout;
         private readonly ObjectField assetFolderField;
         private readonly ObjectField stringsFileField;
@@ -23,15 +23,18 @@ namespace Yarn.Unity.Editor
         public bool IsModified { get; private set; }
 
         private string _projectBaseLanguage;
-        public string ProjectBaseLanguage {
+        public string ProjectBaseLanguage
+        {
             get => _projectBaseLanguage;
-            set { 
+            set
+            {
                 _projectBaseLanguage = value;
-                SetValueWithoutNotify(this.data); 
+                SetValueWithoutNotify(this.data);
             }
         }
 
-        public LocalizationEntryElement(VisualTreeAsset asset, ProjectImportData.LocalizationEntry data, string baseLanguage) {
+        public LocalizationEntryElement(VisualTreeAsset asset, ProjectImportData.LocalizationEntry data, string baseLanguage)
+        {
             asset.CloneTree(this);
 
             foldout = this.Q<Foldout>("foldout");
@@ -102,17 +105,20 @@ namespace Yarn.Unity.Editor
             this.data = data;
             Culture culture;
             culture = Cultures.GetCulture(data.languageID);
-            
+
             languagePopup.SetValueWithoutNotify(data.languageID);
             assetFolderField.SetValueWithoutNotify(data.assetsFolder);
             stringsFileField.SetValueWithoutNotify(data.stringsFile);
 
             bool isBaseLanguage = data.languageID == ProjectBaseLanguage;
 
-            if (isBaseLanguage) {
+            if (isBaseLanguage)
+            {
                 stringsFileField.style.display = DisplayStyle.None;
                 stringsFileNotUsedLabel.style.display = DisplayStyle.Flex;
-            } else {
+            }
+            else
+            {
                 stringsFileField.style.display = DisplayStyle.Flex;
                 stringsFileNotUsedLabel.style.display = DisplayStyle.None;
             }

@@ -12,7 +12,8 @@ namespace Yarn.Unity.ActionAnalyser
         public AnalyserException() { }
         public AnalyserException(string message) : base(message) { }
         public AnalyserException(string message, System.Exception inner) : base(message, inner) { }
-        public AnalyserException(string message, System.Exception inner, IEnumerable<Microsoft.CodeAnalysis.Diagnostic> diagnostics) : base(message, inner) {
+        public AnalyserException(string message, System.Exception inner, IEnumerable<Microsoft.CodeAnalysis.Diagnostic> diagnostics) : base(message, inner)
+        {
             this.Diagnostics = diagnostics;
         }
         protected AnalyserException(

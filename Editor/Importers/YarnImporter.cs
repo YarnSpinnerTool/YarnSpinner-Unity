@@ -2,14 +2,14 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using UnityEngine;
-using UnityEditor;
-using UnityEditor.AssetImporters;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using UnityEditor;
+using UnityEditor.AssetImporters;
+using UnityEngine;
 
 #nullable enable
 
@@ -54,10 +54,14 @@ namespace Yarn.Unity.Editor
             }
         }
 
-        public bool HasErrors {
-            get {
-                foreach (var projectImporter in DestinationProjectImporters) {
-                    if (projectImporter.GetErrorsForScript(ImportedScript).Any()) {
+        public bool HasErrors
+        {
+            get
+            {
+                foreach (var projectImporter in DestinationProjectImporters)
+                {
+                    if (projectImporter.GetErrorsForScript(ImportedScript).Any())
+                    {
                         return true;
                     }
                 }

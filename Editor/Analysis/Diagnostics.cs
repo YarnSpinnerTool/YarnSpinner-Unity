@@ -53,7 +53,7 @@ public static class Diagnostics
                         defaultSeverity: DiagnosticSeverity.Warning,
                         isEnabledByDefault: true,
                         helpLinkUri: "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/creating-commands-functions");
-                        
+
     public static readonly DiagnosticDescriptor YS1006YarnFunctionsMustBeStatic = new DiagnosticDescriptor(
                         "YS1006",
                         title: $"YarnFunction methods be static",

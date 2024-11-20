@@ -59,7 +59,7 @@ namespace Yarn.Unity.Editor
         private string baseLanguage = null;
         private List<LocalizationEntryElement> localizationEntryFields = new List<LocalizationEntryElement>();
         private List<SourceFileEntryElement> sourceEntryFields = new List<SourceFileEntryElement>();
-        
+
         private VisualElement localisationFieldsContainer;
         private VisualElement sourceFileEntriesContainer;
         private VisualElement variableStorageSettingsContainer;
@@ -72,7 +72,8 @@ namespace Yarn.Unity.Editor
 
         private bool AnyModifications
         {
-            get {
+            get
+            {
                 return AnyLocalisationModifications
                 || AnySourceFileModifications
                 ;
@@ -80,7 +81,7 @@ namespace Yarn.Unity.Editor
         }
 
         private bool AnyLocalisationModifications => LocalisationsAddedOrRemoved || localizationEntryFields.Any(f => f.IsModified) || BaseLanguageNameModified;
-        
+
         private bool AnySourceFileModifications => SourceFilesAddedOrRemoved || sourceEntryFields.Any(f => f.IsModified);
 
         private bool LocalisationsAddedOrRemoved = false;
@@ -122,7 +123,8 @@ namespace Yarn.Unity.Editor
             }
         }
 
-        protected override void Apply() {
+        protected override void Apply()
+        {
             base.Apply();
 
             var importer = (this.target as YarnProjectImporter);
@@ -131,24 +133,27 @@ namespace Yarn.Unity.Editor
 
             var removedLocalisations = data.Localisation.Keys.Except(localizationEntryFields.Select(f => f.value.languageID)).ToList();
 
-            foreach (var removedLocalisation in removedLocalisations) {
+            foreach (var removedLocalisation in removedLocalisations)
+            {
                 data.Localisation.Remove(removedLocalisation);
             }
 
             data.SourceFilePatterns = this.sourceEntryFields.Select(f => f.value);
 
-            foreach (var locField in localizationEntryFields) {
+            foreach (var locField in localizationEntryFields)
+            {
 
                 // Does this localisation field represent a localisation that
                 // used to be the base localisation, but is now no longer? If it
                 // is, even if it's unmodified, we need to make sure we add it
                 // to the project data.
-                bool wasPreviouslyBaseLocalisation = 
-                    locField.value.languageID == data.BaseLanguage 
+                bool wasPreviouslyBaseLocalisation =
+                    locField.value.languageID == data.BaseLanguage
                     && BaseLanguageNameModified;
 
                 // Skip any records that we don't need to touch
-                if (locField.IsModified == false && !wasPreviouslyBaseLocalisation) {
+                if (locField.IsModified == false && !wasPreviouslyBaseLocalisation)
+                {
                     continue;
                 }
 
@@ -174,9 +179,11 @@ namespace Yarn.Unity.Editor
 
             data.BaseLanguage = this.baseLanguage;
 
-            if (data.Localisation.TryGetValue(data.BaseLanguage, out var baseLanguageInfo)) {
+            if (data.Localisation.TryGetValue(data.BaseLanguage, out var baseLanguageInfo))
+            {
                 if (string.IsNullOrEmpty(baseLanguageInfo.Strings)
-                    && string.IsNullOrEmpty(baseLanguageInfo.Assets)) {
+                    && string.IsNullOrEmpty(baseLanguageInfo.Assets))
+                {
                     // We have a localisation info entry, but it doesn't provide
                     // any useful information (the strings field is unused, and
                     // the assets field defaults to empty anyway). Trim it from
@@ -185,7 +192,8 @@ namespace Yarn.Unity.Editor
                 }
             }
 
-            foreach (var sourceField in this.sourceEntryFields) {
+            foreach (var sourceField in this.sourceEntryFields)
+            {
                 sourceField.ClearModified();
             }
 
@@ -195,7 +203,8 @@ namespace Yarn.Unity.Editor
 
             data.SaveToFile(importer.assetPath);
 
-            if (localizationEntryFields.Any(f => f.value.languageID == this.baseLanguage) == false) {
+            if (localizationEntryFields.Any(f => f.value.languageID == this.baseLanguage) == false)
+            {
                 var newBaseLanguageField = CreateLocalisationEntryElement(new ProjectImportData.LocalizationEntry
                 {
                     assetsFolder = null,
@@ -211,7 +220,7 @@ namespace Yarn.Unity.Editor
         {
             YarnProjectImporter yarnProjectImporter = target as YarnProjectImporter;
             var importData = yarnProjectImporter.ImportData;
-            
+
             var ui = new VisualElement();
 
             ui.styleSheets.Add(yarnProjectStyleSheet);
@@ -231,15 +240,15 @@ namespace Yarn.Unity.Editor
             switch (importData.ImportStatus)
             {
                 case ProjectImportData.ImportStatusCode.NeedsUpgradeFromV1:
-                {
-                    ui.Add(CreateUpgradeUI(yarnProjectImporter));
-                    return ui;
-                }
+                    {
+                        ui.Add(CreateUpgradeUI(yarnProjectImporter));
+                        return ui;
+                    }
                 case ProjectImportData.ImportStatusCode.Unknown:
-                {
-                    ui.Add(CreateUnknownErrorUI());
-                    return ui;
-                }
+                    {
+                        ui.Add(CreateUnknownErrorUI());
+                        return ui;
+                    }
             }
 
             var importDataSO = new SerializedObject(importData);
@@ -315,7 +324,8 @@ namespace Yarn.Unity.Editor
             sourceFilesContainer.Add(sourceFilesHeader);
             sourceFilesContainer.Add(sourceFileEntriesContainer);
 
-            foreach (var path in importData.sourceFilePaths) {
+            foreach (var path in importData.sourceFilePaths)
+            {
                 var locElement = CreateSourceFileEntryElement(path);
                 sourceFileEntriesContainer.Add(locElement);
                 sourceEntryFields.Add(locElement);
@@ -352,7 +362,8 @@ namespace Yarn.Unity.Editor
             languagePopup.RegisterValueChangedCallback(evt =>
             {
                 baseLanguage = evt.newValue;
-                foreach (var loc in localizationEntryFields) {
+                foreach (var loc in localizationEntryFields)
+                {
                     loc.ProjectBaseLanguage = baseLanguage;
                 }
                 BaseLanguageNameModified = true;
@@ -364,7 +375,8 @@ namespace Yarn.Unity.Editor
 
             yarnInternalControls.Add(localisationFieldsContainer);
 
-            foreach (var localisation in importData.localizations) {
+            foreach (var localisation in importData.localizations)
+            {
                 var locElement = CreateLocalisationEntryElement(localisation, baseLanguage);
                 localisationFieldsContainer.Add(locElement);
                 localizationEntryFields.Add(locElement);
@@ -374,7 +386,8 @@ namespace Yarn.Unity.Editor
             addLocalisationButton.text = "Add Localisation";
             addLocalisationButton.clicked += () =>
             {
-                var loc = CreateLocalisationEntryElement(new ProjectImportData.LocalizationEntry() {
+                var loc = CreateLocalisationEntryElement(new ProjectImportData.LocalizationEntry()
+                {
                     languageID = importData.baseLanguageName,
                 }, baseLanguage);
                 localizationEntryFields.Add(loc);
@@ -477,12 +490,12 @@ namespace Yarn.Unity.Editor
             var generateVariablesSourceFileField = new PropertyField(generateVariablesSourceFileProperty);
             var variablesClassNameField = new PropertyField(variablesClassNameProperty);
             var variablesClassNamespaceField = new PropertyField(variablesClassNamespaceProperty);
-            
+
             generateVariablesSourceFileField.Bind(serializedObject);
             variablesClassNameField.Bind(serializedObject);
             variablesClassNamespaceField.Bind(serializedObject);
 
-            
+
             // Find all loaded assemblies that are not YarnSpinner.dll. Find all
             // types that implement IVariableStorage, are not abstract, and are
             // not generated code. Get the full names of the result.
@@ -497,19 +510,21 @@ namespace Yarn.Unity.Editor
                 .ToList();
 
             var variablesClassParentDropdownField = new DropdownField(
-                "Variables Parent Class", 
-                variableStorageClasses, 
+                "Variables Parent Class",
+                variableStorageClasses,
                 variablesClassParentProperty.stringValue
                 );
-                
+
             variablesClassParentDropdownField.RegisterValueChangedCallback(v =>
             {
                 variablesClassParentProperty.stringValue = v.newValue;
                 serializedObject.ApplyModifiedProperties();
             });
 
-            void UpdateVariableSettingsVisibility() {
-                foreach (var field in new VisualElement[] { variablesClassNameField, variablesClassNamespaceField, variablesClassParentDropdownField }) {
+            void UpdateVariableSettingsVisibility()
+            {
+                foreach (var field in new VisualElement[] { variablesClassNameField, variablesClassNamespaceField, variablesClassParentDropdownField })
+                {
                     SetElementVisible(field, generateVariablesSourceFileProperty.boolValue);
                 }
             }
@@ -558,7 +573,8 @@ namespace Yarn.Unity.Editor
             return locElement;
         }
 
-        private SourceFileEntryElement CreateSourceFileEntryElement(string path) {
+        private SourceFileEntryElement CreateSourceFileEntryElement(string path)
+        {
             var sourceElement = new SourceFileEntryElement(sourceFileUIAsset, path, this.target as YarnProjectImporter);
             sourceElement.onDelete += () =>
             {
@@ -569,7 +585,7 @@ namespace Yarn.Unity.Editor
             return sourceElement;
         }
 
-        
+
         private void ExportStringsData(YarnProjectImporter yarnProjectImporter)
         {
             var currentPath = AssetDatabase.GetAssetPath(yarnProjectImporter);
@@ -597,10 +613,14 @@ namespace Yarn.Unity.Editor
             }
         }
 
-        private static void SetElementVisible(VisualElement e, bool visible) {
-            if (visible) {
+        private static void SetElementVisible(VisualElement e, bool visible)
+        {
+            if (visible)
+            {
                 e.style.display = DisplayStyle.Flex;
-            } else {
+            }
+            else
+            {
                 e.style.display = DisplayStyle.None;
 
             }
@@ -610,7 +630,7 @@ namespace Yarn.Unity.Editor
         {
             return base.HasModified() || AnyModifications;
         }
-        
+
         private VisualElement CreateUpgradeUI(YarnProjectImporter importer)
         {
             var ui = new VisualElement();
@@ -682,7 +702,7 @@ namespace Yarn.Unity.Editor
 
         private VisualElement CreateCriticalErrorUI()
         {
-            string[] labels = { 
+            string[] labels = {
                 "This is likely due to a bug on our end, and not in your project.",
                 "Try recreating the project and see if this resolves the issue."
             };
@@ -692,7 +712,7 @@ namespace Yarn.Unity.Editor
 
         private VisualElement CreateUnknownErrorUI()
         {
-            string[] labels = { 
+            string[] labels = {
                 "The type of this Yarn Project is unknown.",
                 "Try recreating the project and see if this resolves the issue."
             };

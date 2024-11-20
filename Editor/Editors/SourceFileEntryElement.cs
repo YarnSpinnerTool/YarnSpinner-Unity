@@ -3,10 +3,9 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
 using UnityEditor;
-using UnityEngine;
-
-using UnityEngine.UIElements;
 using UnityEditor.UIElements;
+using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Yarn.Unity.Editor
 {
@@ -25,7 +24,7 @@ namespace Yarn.Unity.Editor
             asset.CloneTree(this);
             sourceFileField = this.Q<TextField>("sourceFile");
             deleteButton = this.Q<Button>("deleteButton");
-            
+
             IsModified = false;
 
             sourceFileField.RegisterValueChangedCallback((evt) =>
@@ -59,8 +58,9 @@ namespace Yarn.Unity.Editor
             this.path = data;
             sourceFileField.SetValueWithoutNotify(data);
         }
-        
-        public void ClearModified() {
+
+        public void ClearModified()
+        {
             this.IsModified = false;
         }
     }

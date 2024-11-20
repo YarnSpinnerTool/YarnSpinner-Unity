@@ -67,7 +67,7 @@ namespace Yarn.Unity.Editor
         private static YarnSpinnerProjectSettings FromJson(string jsonString, Yarn.Unity.ILogger iLogger = null)
         {
             var logger = ValidLogger(iLogger);
-            
+
             YarnSpinnerProjectSettings settings = new YarnSpinnerProjectSettings();
             var jsonDict = Json.Deserialize(jsonString) as System.Collections.Generic.Dictionary<string, object>;
             if (jsonDict == null)
@@ -76,10 +76,14 @@ namespace Yarn.Unity.Editor
                 return settings;
             }
 
-            T GetValueOrDefault<T>(string key, T defaultValue) {
-                if (jsonDict.TryGetValue(key, out object result)) {
+            T GetValueOrDefault<T>(string key, T defaultValue)
+            {
+                if (jsonDict.TryGetValue(key, out object result))
+                {
                     return (T)result;
-                } else {
+                }
+                else
+                {
                     return defaultValue;
                 }
             }

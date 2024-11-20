@@ -2,10 +2,10 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
+using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using Yarn.Unity;
-using UnityEditor;
-using System.Linq;
 
 namespace Yarn.Unity.Editor
 {
@@ -48,7 +48,7 @@ namespace Yarn.Unity.Editor
                     try
                     {
                         var text = System.IO.File.ReadAllText(existingFile);
-                        return text.Contains(YarnGeneratedCodeSignature) 
+                        return text.Contains(YarnGeneratedCodeSignature)
                             ? existingFile
                             : DefaultOutputFilePath;
                     }

@@ -3,15 +3,15 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.AssetImporters;
 using UnityEngine;
-using System.Linq;
 using Yarn.Compiler;
-using System.IO;
-using System.Text;
 using Yarn.Utility;
-using System.Threading.Tasks;
 
 
 
@@ -116,7 +116,8 @@ namespace Yarn.Unity.Editor
 
         public ProjectImportData ImportData => AssetDatabase.LoadAssetAtPath<ProjectImportData>(this.assetPath);
 
-        public bool GetProjectReferencesYarnFile(YarnImporter yarnImporter) {
+        public bool GetProjectReferencesYarnFile(YarnImporter yarnImporter)
+        {
             try
             {
                 var project = Project.LoadFromFile(this.assetPath);
@@ -177,8 +178,6 @@ namespace Yarn.Unity.Editor
                 // Either way, we can't continue.
                 return;
             }
-
-            Debug.Log($"Beginning compilation of project; project JSON data:\n{project.GetJson()}\n\nProject files:\n{string.Join("\n", project.SourceFiles.Select(f => $"- {f}"))}");
 
             project.AllowLanguagePreviewFeatures = true;
 
@@ -253,7 +252,7 @@ namespace Yarn.Unity.Editor
                 }
 
                 var errors = compilationResult.Diagnostics.Where(d => d.Severity == Diagnostic.DiagnosticSeverity.Error);
-  
+
                 if (errors.Count() > 0)
                 {
                     var errorGroups = errors.GroupBy(e => e.FileName);
@@ -382,7 +381,8 @@ namespace Yarn.Unity.Editor
         {
             string? existingContent = null;
 
-            if (File.Exists(outputPath)) {
+            if (File.Exists(outputPath))
+            {
                 // If the file already exists on disk, read it all in now. We'll
                 // compare it to what we generated and, if the contents match
                 // exactly, we don't need to re-import the resulting C# script.
@@ -584,7 +584,7 @@ namespace Yarn.Unity.Editor
                     WriteLine($"#warning Can't generate a property for variable {decl.Name}, because its type ({decl.Type}) can't be handled.");
                     WriteLine();
                 }
-                
+
 
                 WriteComment($"Accessor for {decl.Type} {decl.Name}");
 
@@ -626,7 +626,7 @@ namespace Yarn.Unity.Editor
                     }
                 }
                 indentLevel -= 1;
-                
+
                 WriteLine($"}}");
 
                 WriteLine();
@@ -696,7 +696,7 @@ namespace Yarn.Unity.Editor
                 }
             }
 
-            SHORTCUT:
+        SHORTCUT:
             if (needsReimport)
             {
                 AssetDatabase.ImportAsset(this.assetPath);
@@ -756,7 +756,8 @@ namespace Yarn.Unity.Editor
                 else
                 {
                     // No strings file provided
-                    if (localisationInfo.stringsFile == null) {
+                    if (localisationInfo.stringsFile == null)
+                    {
                         Debug.LogWarning($"Not creating a localisation for {localisationInfo.languageID} in the Yarn project {projectAsset.name} because a strings file was not specified, and {localisationInfo.languageID} is not the project's base language");
                         continue;
                     }
@@ -769,20 +770,22 @@ namespace Yarn.Unity.Editor
                         Debug.LogWarning($"Not creating a localization for {localisationInfo.languageID} in the Yarn Project {projectAsset.name} because an error was encountered during text parsing: {e}");
                         continue;
                     }
-                } 
+                }
 
                 var newLocalization = ScriptableObject.CreateInstance<Localization>();
                 newLocalization.LocaleCode = localisationInfo.languageID;
 
                 // Add these new lines to the localisation's asset
-                foreach (var entry in stringTable) {
+                foreach (var entry in stringTable)
+                {
                     newLocalization.AddLocalisedStringToAsset(entry.ID, entry.Text);
                 }
 
                 projectAsset.localizations.Add(newLocalization);
                 newLocalization.name = localisationInfo.languageID;
 
-                if (localisationInfo.assetsFolder != null) {
+                if (localisationInfo.assetsFolder != null)
+                {
                     newLocalization.ContainsLocalizedAssets = true;
 
 #if USE_ADDRESSABLES
@@ -829,7 +832,7 @@ namespace Yarn.Unity.Editor
                         Debug.Log($"Imported {stringIDsToAssetPaths.Count()} assets for {project.name} \"{pair.languageID}\" in {stopwatch.ElapsedMilliseconds}ms");
 #endif
                     }
-                
+
                 }
 
                 ctx.AddObjectToAsset("localization-" + localisationInfo.languageID, newLocalization);
@@ -947,15 +950,18 @@ namespace Yarn.Unity.Editor
         /// Gets a value indicating whether this Yarn Project contains any
         /// compile errors.
         /// </summary>
-        internal bool HasErrors {
-            get {
+        internal bool HasErrors
+        {
+            get
+            {
                 var importData = AssetDatabase.LoadAssetAtPath<ProjectImportData>(this.assetPath);
 
-                if (importData == null) {
+                if (importData == null)
+                {
                     // If we have no import data, then a problem has occurred
                     // when importing this project, so indicate 'true' as
                     // signal.
-                    return true; 
+                    return true;
                 }
                 return importData.HasCompileErrors;
             }
@@ -968,57 +974,67 @@ namespace Yarn.Unity.Editor
         /// </summary>
         /// <inheritdoc path="exception"
         /// cref="GetScriptHasLineTags(TextAsset)"/>
-        internal bool CanGenerateStringsTable {
-            get {
+        internal bool CanGenerateStringsTable
+        {
+            get
+            {
                 var importData = AssetDatabase.LoadAssetAtPath<ProjectImportData>(this.assetPath);
 
-                if (importData == null) {
+                if (importData == null)
+                {
                     return false;
                 }
 
                 return importData.HasCompileErrors == false && importData.containsImplicitLineIDs == false;
             }
-        } 
+        }
 
-        internal CompilationJob GetCompilationJob() {
+        internal CompilationJob GetCompilationJob()
+        {
             var project = GetProject();
 
-            if (project == null) {
+            if (project == null)
+            {
                 return default;
             }
 
             return CompilationJob.CreateFromFiles(project.SourceFiles);
         }
 
-        
+
         private IDictionary<string, StringInfo>? CompileStringsOnly()
         {
             var paths = GetProject()?.SourceFiles;
-            
+
             var job = CompilationJob.CreateFromFiles(paths);
             job.CompilationType = CompilationJob.Type.StringsOnly;
 
             return Compiler.Compiler.Compile(job)?.StringTable;
         }
 
-        internal IEnumerable<string> GetErrorsForScript(TextAsset sourceScript) {
-            if (ImportData == null) {
+        internal IEnumerable<string> GetErrorsForScript(TextAsset sourceScript)
+        {
+            if (ImportData == null)
+            {
                 return Enumerable.Empty<string>();
             }
-            foreach (var errorCollection in ImportData.diagnostics) {
-                if (errorCollection.yarnFile == sourceScript) {
+            foreach (var errorCollection in ImportData.diagnostics)
+            {
+                if (errorCollection.yarnFile == sourceScript)
+                {
                     return errorCollection.errorMessages;
                 }
             }
             return Enumerable.Empty<string>();
         }
 
-        internal IEnumerable<StringTableEntry>? GenerateStringsTable() {
+        internal IEnumerable<StringTableEntry>? GenerateStringsTable()
+        {
             var job = GetCompilationJob();
             job.CompilationType = CompilationJob.Type.StringsOnly;
             var result = Compiler.Compiler.Compile(job);
             return GenerateStringsTable(result);
-            
+
         }
 
         /// <summary>
@@ -1054,7 +1070,8 @@ namespace Yarn.Unity.Editor
         {
             CompilationJob compilationJob = GetCompilationJob();
 
-            if (compilationJob.Files.Any() == false) {
+            if (compilationJob.Files.Any() == false)
+            {
                 // We have no scripts to work with. In this case, return an
                 // empty collection - there's no error, but there's no content
                 // either.
@@ -1143,14 +1160,18 @@ namespace Yarn.Unity.Editor
         public const string UnityProjectRootVariable = "${UnityProjectRoot}";
     }
 
-    public static class ProjectExtensions {
+    public static class ProjectExtensions
+    {
 
-        public static bool TryGetStringsPath(this Yarn.Compiler.Project project, string languageCode, out string? fullStringsPath) {
-            if (project.Localisation.TryGetValue(languageCode, out var info) == false) {
+        public static bool TryGetStringsPath(this Yarn.Compiler.Project project, string languageCode, out string? fullStringsPath)
+        {
+            if (project.Localisation.TryGetValue(languageCode, out var info) == false)
+            {
                 fullStringsPath = default;
                 return false;
             }
-            if (string.IsNullOrEmpty(info.Strings)) {
+            if (string.IsNullOrEmpty(info.Strings))
+            {
                 fullStringsPath = default;
                 return false;
             }
@@ -1160,21 +1181,25 @@ namespace Yarn.Unity.Editor
 
             var expandedPath = info.Strings.Replace(YarnProjectImporter.UnityProjectRootVariable, YarnProjectImporter.UnityProjectRootPath);
 
-            if (Path.IsPathRooted(expandedPath) == false) {
+            if (Path.IsPathRooted(expandedPath) == false)
+            {
                 expandedPath = Path.GetFullPath(Path.Combine(projectFolderAbsolute, expandedPath));
             }
-            
+
             fullStringsPath = YarnProjectImporter.GetRelativePath(expandedPath);
 
             return true;
         }
 
-        public static bool TryGetAssetsPath(this Yarn.Compiler.Project project, string languageCode, out string? fullAssetsPath) {
-            if (project.Localisation.TryGetValue(languageCode, out var info) == false) {
+        public static bool TryGetAssetsPath(this Yarn.Compiler.Project project, string languageCode, out string? fullAssetsPath)
+        {
+            if (project.Localisation.TryGetValue(languageCode, out var info) == false)
+            {
                 fullAssetsPath = default;
                 return false;
             }
-            if (string.IsNullOrEmpty(info.Assets)) {
+            if (string.IsNullOrEmpty(info.Assets))
+            {
                 fullAssetsPath = default;
                 return false;
             }
@@ -1183,10 +1208,11 @@ namespace Yarn.Unity.Editor
 
             var expandedPath = info.Assets.Replace(YarnProjectImporter.UnityProjectRootVariable, YarnProjectImporter.UnityProjectRootPath);
 
-            if (Path.IsPathRooted(expandedPath) == false) {
+            if (Path.IsPathRooted(expandedPath) == false)
+            {
                 expandedPath = Path.GetFullPath(Path.Combine(projectFolderAbsolute, expandedPath));
             }
-            
+
             fullAssetsPath = YarnProjectImporter.GetRelativePath(expandedPath);
 
             return true;

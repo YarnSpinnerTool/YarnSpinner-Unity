@@ -5,7 +5,8 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 using Microsoft.CodeAnalysis;
 using System.Linq;
 
-static class SymbolExtensions {
+static class SymbolExtensions
+{
 
     /// <summary>
     /// If the <paramref name="symbol"/> is a method symbol, returns <see langword="true"/> if the method's return type is "awaitable", but not if it's <see langword="dynamic"/>.
