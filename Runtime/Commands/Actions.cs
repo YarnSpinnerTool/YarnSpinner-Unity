@@ -12,15 +12,6 @@ using UnityEngine;
 
 #nullable enable
 
-#if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
-#else
-using YarnTask = System.Threading.Tasks.Task;
-using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
-#endif
-
 namespace Yarn.Unity
 {
     using ActionRegistrationMethod = System.Action<IActionRegistration, RegistrationType>;
@@ -456,7 +447,7 @@ namespace Yarn.Unity
                     // The method returned a task. Convert it to a YarnTask.
                     return new CommandDispatchResult(
                         CommandDispatchResult.StatusType.Succeeded,
-                        task.AsYarnTask()
+                        task
                     );
                 }
 #if USE_UNITASK

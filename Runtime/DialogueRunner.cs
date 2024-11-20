@@ -15,19 +15,6 @@ using UnityEngine.UIElements;
 
 #nullable enable
 
-#if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
-using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
-using YarnOptionCompletionSource = Cysharp.Threading.Tasks.UniTaskCompletionSource<Yarn.Unity.DialogueOption?>;
-#else
-using YarnTask = System.Threading.Tasks.Task;
-using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
-using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
-using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption?>;
-#endif
-
 namespace Yarn.Unity
 {
     /// <summary>
@@ -308,6 +295,23 @@ namespace Yarn.Unity
             get => dialogueViews;
             set => dialogueViews = value.ToList();
         }
+
+        /// <summary>
+        /// Gets a completed <see cref="YarnTask{DialogueOption}"/> that
+        /// contains a <see langword="null"/> value.
+        /// </summary>
+        /// <remarks>Dialogue views can return this value from their <see
+        /// cref="AsyncDialogueViewBase.RunOptionsAsync(DialogueOption[],
+        /// CancellationToken)" method to indicate that no option was selected.
+        /// />
+        public static YarnTask<DialogueOption?> NoOptionSelected
+        {
+            get
+            {
+                return YarnTask.FromResult<DialogueOption?>(null);
+            }
+        }
+
 
         private CancellationTokenSource? dialogueCancellationSource;
         private CancellationTokenSource? currentLineCancellationSource;
@@ -597,10 +601,12 @@ namespace Yarn.Unity
                 // Legacy support: if this view is an v2-style DialogueViewBase,
                 // then set its requestInterrupt delegate to be one that stops
                 // the current line.
+#pragma warning disable CS0618 // 'construct' is obsolete
                 if (view is DialogueViewBase dialogueView)
                 {
                     dialogueView.requestInterrupt = RequestNextLine;
                 }
+#pragma warning restore CS0618 // 'construct' is obsolete
 
                 // Tell all of our views to run this line, and give them a
                 // cancellation token they can use to interrupt the line if needed.
@@ -673,7 +679,7 @@ namespace Yarn.Unity
                 };
             }
 
-            var dialogueSelectionTCS = new YarnOptionCompletionSource();
+            var dialogueSelectionTCS = new YarnTaskCompletionSource<DialogueOption?>();
 
             async YarnTask WaitForOptionsView(AsyncDialogueViewBase? view)
             {

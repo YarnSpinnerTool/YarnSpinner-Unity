@@ -5,15 +5,6 @@ using System.Threading;
 
 #nullable enable
 
-#if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption?>;
-#else
-using YarnTask = System.Threading.Tasks.Task;
-using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption?>;
-#endif
-
 namespace Yarn.Unity
 {
     /// <summary>
@@ -326,11 +317,11 @@ namespace Yarn.Unity
         /// <inheritdoc cref="AsyncLineView.RunOptionsAsync" path="/param"/>
         /// <returns>A completed task indicating that no option was selected by
         /// this view.</returns>
-        public override YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             // This line view doesn't take any actions when options are
             // presented.
-            return YarnAsync.NoOptionSelected;
+            return YarnTask<DialogueOption?>.FromResult(null);
         }
 
         /// <summary>

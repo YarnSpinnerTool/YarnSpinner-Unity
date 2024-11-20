@@ -1,4 +1,8 @@
 #if !USE_UNITY_LOCALIZATION
+using System.Collections.Generic;
+using System.Threading;
+using UnityEngine;
+
 namespace Yarn.Unity.UnityLocalization
 {
 
@@ -27,7 +31,7 @@ namespace Yarn.Unity.UnityLocalization
         }
 
         /// <inheritdoc/>
-        public override YarnLineTask GetLocalizedLineAsync(Yarn.Line line, CancellationToken cancellationToken)
+        public override YarnTask<LocalizedLine> GetLocalizedLineAsync(Yarn.Line line, CancellationToken cancellationToken)
         {
             Debug.LogError($"{nameof(UnityLocalisedLineProvider)}: Can't create a localised line for ID {line.ID} because the Unity Localization package is not installed in this project. To fix this, install Unity Localization.");
 

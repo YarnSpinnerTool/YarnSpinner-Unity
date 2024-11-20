@@ -147,33 +147,29 @@ namespace Yarn.Unity
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
         public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, System.Threading.Tasks.Task> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
 
-#if USE_UNITASK
-       
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
-        public static void AddCommandHandler(this IActionRegistration registration, string commandName, System.Func<Cysharp.Threading.Tasks.UniTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        public static void AddCommandHandler(this IActionRegistration registration, string commandName, System.Func<YarnTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
-        public static void AddCommandHandler<T1>(this IActionRegistration registration, string commandName, System.Func<T1, Cysharp.Threading.Tasks.UniTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        public static void AddCommandHandler<T1>(this IActionRegistration registration, string commandName, System.Func<T1, YarnTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
-        public static void AddCommandHandler<T1, T2>(this IActionRegistration registration, string commandName, System.Func<T1, T2, Cysharp.Threading.Tasks.UniTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        public static void AddCommandHandler<T1, T2>(this IActionRegistration registration, string commandName, System.Func<T1, T2, YarnTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
-        public static void AddCommandHandler<T1, T2, T3>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, Cysharp.Threading.Tasks.UniTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        public static void AddCommandHandler<T1, T2, T3>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, YarnTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
-        public static void AddCommandHandler<T1, T2, T3, T4>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, Cysharp.Threading.Tasks.UniTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        public static void AddCommandHandler<T1, T2, T3, T4>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, YarnTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
-        public static void AddCommandHandler<T1, T2, T3, T4, T5>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, Cysharp.Threading.Tasks.UniTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        public static void AddCommandHandler<T1, T2, T3, T4, T5>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, YarnTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
-        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, Cysharp.Threading.Tasks.UniTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, YarnTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
-        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, Cysharp.Threading.Tasks.UniTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, YarnTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
-        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, Cysharp.Threading.Tasks.UniTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, YarnTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
-        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, Cysharp.Threading.Tasks.UniTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, YarnTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
-        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, Cysharp.Threading.Tasks.UniTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        public static void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this IActionRegistration registration, string commandName, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, YarnTask> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         // GYB11 END
-
-#endif
 
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
         public static void AddCommandHandler<T1>(this IActionRegistration registration, string commandName, System.Func<T1, IEnumerator> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);

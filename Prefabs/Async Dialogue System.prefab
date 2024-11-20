@@ -108,20 +108,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7dd50f871a60b4bbe88a71d308b2613f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dialogueRunner: {fileID: 0}
-  canvas: {fileID: 2958262985454349543}
-  LineText: {fileID: 2958262986520364888}
+  dialogueRunner: {fileID: 8309902628685535410}
+  canvasGroup: {fileID: 2958262985454349543}
+  lineText: {fileID: 2958262986520364888}
   continueButton: {fileID: 2958262986393358535}
-  ShowsCharacterName: 1
-  CharacterName: {fileID: 2958262987206614838}
+  showCharacterNameInLineView: 1
+  characterNameText: {fileID: 2958262987206614838}
   characterNameContainer: {fileID: 0}
-  fade: 1
+  useFadeEffect: 1
   fadeUpDuration: 0.25
   fadeDownDuration: 0.1
-  AutoAdvance: 0
-  AutoAdvanceDelay: 0
-  TypewriterEffect: 1
-  TypewriterLettersPerSecond: 60
+  autoAdvance: 0
+  autoAdvanceDelay: 1
+  useTypewriterEffect: 1
+  typewriterEffectSpeed: 60
   onCharacterTyped:
     m_PersistentCalls:
       m_Calls: []
@@ -1109,18 +1109,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   runner: {fileID: 8309902628685535410}
-  multiSoftSkipIsHardSkip: 1
-  skipRequestsBeforeCancellingLine: 2
+  multiAdvanceIsCancel: 0
+  advanceRequestsBeforeCancellingLine: 2
   inputMode: 0
-  skipLineAction: {fileID: 0}
-  cancelLineAction: {fileID: 0}
+  hurryUpLineAction: {fileID: 0}
+  nextLineAction: {fileID: 0}
   cancelDialogueAction: {fileID: 0}
   enableActions: 1
-  skipLineAxis: Jump
-  cancelLineAxis: Cancel
+  hurryUpLineAxis: Jump
+  nextLineAxis: Cancel
   cancelDialogueAxis: 
-  skipLineKeyCode: 32
-  cancelLineKeyCode: 27
+  hurryUpLineKeyCode: 32
+  nextLineKeyCode: 27
   cancelDialogueKeyCode: 0
 --- !u!1 &7262066351540048079
 GameObject:

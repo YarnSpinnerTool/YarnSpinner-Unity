@@ -5,27 +5,13 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 using System;
 using System.Collections;
 using UnityEngine;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 
 #nullable enable
 
 namespace Yarn.Unity
 {
-    using System.Diagnostics.CodeAnalysis;
-
-#if USE_UNITASK
-    using System.Threading;
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-    using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
-    using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<DialogueOption?>;
-#else
-    using System.Threading;
-    using System.Threading.Tasks;
-    using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
-    using YarnOptionTask = System.Threading.Tasks.Task<DialogueOption?>;
-    using YarnTask = System.Threading.Tasks.Task;
-#endif
-
     /// <summary>
     /// A subclass of <see cref="AsyncDialogueViewBase"/> that plays voice-over
     /// <see cref="AudioClip"/>s for lines of dialogue.
@@ -131,7 +117,7 @@ namespace Yarn.Unity
             // If we need to wait before starting playback, do this now
             if (waitTimeBeforeLineStart > 0)
             {
-                await YarnAsync.Delay(
+                await YarnTask.Delay(
                     TimeSpan.FromSeconds(waitTimeBeforeLineStart),
                     lineCancellationToken.NextLineToken);
             }
@@ -139,9 +125,13 @@ namespace Yarn.Unity
             // Start playing the audio.
             audioSource.PlayOneShot(voiceOverClip);
 
-            // Wait until either the audio source finishes playing, or the line
+            // Playback may not begin immediately, so wait until it does (or if
+            // the line is interrupted.)
+            await YarnTask.WaitUntil(() => audioSource.isPlaying, lineCancellationToken.NextLineToken);
+
+            // Now wait until either the audio source finishes playing, or the line
             // is interrupted.
-            await YarnAsync.WaitUntil(() => audioSource.isPlaying, lineCancellationToken.NextLineToken);
+            await YarnTask.WaitUntil(() => !audioSource.isPlaying, lineCancellationToken.NextLineToken);
 
             // If the line was interrupted while we were playing, we need to
             // wrap up the playback as quickly as we can. We do this here with a
@@ -177,7 +167,7 @@ namespace Yarn.Unity
 
             if (!lineCancellationToken.IsNextLineRequested && waitTimeAfterLineComplete > 0)
             {
-                await YarnAsync.Delay(
+                await YarnTask.Delay(
                     TimeSpan.FromSeconds(waitTimeAfterLineComplete),
                     lineCancellationToken.NextLineToken);
             }
@@ -208,9 +198,9 @@ namespace Yarn.Unity
         }
 
         /// <inheritdoc/>
-        public override YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
-            return YarnAsync.NoOptionSelected;
+            return DialogueRunner.NoOptionSelected;
         }
         /// <inheritdoc/>
         public override YarnTask OnDialogueStartedAsync()

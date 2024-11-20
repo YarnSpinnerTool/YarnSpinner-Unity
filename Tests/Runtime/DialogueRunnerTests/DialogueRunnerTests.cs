@@ -15,13 +15,6 @@ namespace Yarn.Unity.Tests
     using UnityEngine.SceneManagement;
     using UnityEngine.TestTools;
 
-#if USE_UNITASK
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-#else
-    using YarnTask = System.Threading.Tasks.Task;
-#endif
-
 #nullable enable
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 

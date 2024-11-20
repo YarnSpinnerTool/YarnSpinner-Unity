@@ -12,17 +12,6 @@ using System.Threading;
 #nullable enable
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-#if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
-using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
-#else
-using YarnTask = System.Threading.Tasks.Task;
-using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
-using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
-#endif
-
 namespace Yarn.Unity.Tests
 {
     public static class EndToEndUtility
@@ -147,25 +136,31 @@ namespace Yarn.Unity.Tests
 
         public static async YarnTask WaitForTaskAsync(YarnTask task, string? failureMessage = null, int timeoutMilliseconds = 2000)
         {
+            bool timedOut = false;
             try
             {
-                await YarnAsync.Wait(task, TimeSpan.FromMilliseconds(timeoutMilliseconds));
-            }
-            catch (TimeoutException timeout)
-            {
-                if (failureMessage == null)
+                CancellationTokenSource cts = new CancellationTokenSource();
+                async YarnTask Timeout()
                 {
-                    throw;
+                    try
+                    {
+                        await YarnTask.Delay(timeoutMilliseconds, cts.Token);
+                        timedOut = true;
+                    }
+                    catch (OperationCanceledException) { }
                 }
-                else
-                {
-                    throw new TimeoutException(failureMessage, timeout);
-                }
+
+                await YarnTask.WhenAll(task, Timeout());
+
             }
             catch (Exception)
             {
                 // Rethrow non-timeout exceptions to our main context
                 throw;
+            }
+            if (timedOut == true)
+            {
+                throw new TimeoutException(failureMessage);
             }
         }
     }

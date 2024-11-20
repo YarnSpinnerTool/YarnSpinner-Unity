@@ -12,13 +12,6 @@ namespace Yarn.Unity.Tests
     using UnityEngine.SceneManagement;
     using System;
 
-#if USE_UNITASK
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-#else
-    using YarnTask = System.Threading.Tasks.Task;
-#endif
-
 #nullable enable
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
@@ -44,7 +37,7 @@ namespace Yarn.Unity.Tests
         OptionsListView optionsView;
 
         [UnitySetUp]
-        public IEnumerator LoadScene() => YarnAsync.ToCoroutine(async () =>
+        public IEnumerator LoadScene() => YarnTask.ToCoroutine(async () =>
         {
             SceneManager.LoadScene("DialogueViewTests");
             bool loaded = false;
@@ -80,7 +73,7 @@ namespace Yarn.Unity.Tests
 
 
         [UnityTest]
-        public IEnumerator LineView_WhenLineRun_ShowsLine() => YarnAsync.ToCoroutine(async () =>
+        public IEnumerator LineView_WhenLineRun_ShowsLine() => YarnTask.ToCoroutine(async () =>
         {
 
             LocalizedLine line = MakeLocalizedLine(
@@ -130,7 +123,7 @@ namespace Yarn.Unity.Tests
 
         [UnityTest]
         [Timeout(200)] // should complete basically immediately
-        public IEnumerator LineView_WhenManuallyAdvancingLine_CompletesLineTask() => YarnAsync.ToCoroutine(async () =>
+        public IEnumerator LineView_WhenManuallyAdvancingLine_CompletesLineTask() => YarnTask.ToCoroutine(async () =>
         {
             LocalizedLine line = MakeLocalizedLine("Line 1");
 
@@ -162,7 +155,7 @@ namespace Yarn.Unity.Tests
         });
 
         [UnityTest]
-        public IEnumerator LineView_TextEffects_RenderTextGradually() => YarnAsync.ToCoroutine(async () =>
+        public IEnumerator LineView_TextEffects_RenderTextGradually() => YarnTask.ToCoroutine(async () =>
         {
             LocalizedLine line = MakeLocalizedLine("Line 1");
 

@@ -9,19 +9,6 @@ using UnityEngine.Localization.Settings;
 using UnityEngine.Localization.Tables;
 using Yarn.Markup;
 
-#if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnIntTask = Cysharp.Threading.Tasks.UniTask<int>;
-using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
-using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object>;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-#else
-using System.Threading.Tasks;
-using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
-using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object>;
-using YarnTask = System.Threading.Tasks.Task;
-#endif
-
 #nullable enable
 
 namespace Yarn.Unity.UnityLocalization
@@ -90,18 +77,14 @@ namespace Yarn.Unity.UnityLocalization
         /// <inheritdoc/>
         public override void Start()
         {
-            if (stringsTable.IsEmpty != false)
-            {
-                stringsTable.TableChanged += (table) => this.currentStringTable = table;
-            }
-            if (stringsTable.IsEmpty != false)
-            {
-                assetTable.TableChanged += (table) => this.currentAssetTable = table;
-            }
+            // When the strings table changes (for example, due to the user
+            // changing locale), update our local references.
+            stringsTable.TableChanged += (table) => this.currentStringTable = table;
+            assetTable.TableChanged += (table) => this.currentAssetTable = table;
         }
 
         /// <inheritdoc/>
-        public override async YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken)
+        public override async YarnTask<LocalizedLine> GetLocalizedLineAsync(Line line, CancellationToken cancellationToken)
         {
             if (stringsTable.IsEmpty)
             {
@@ -146,7 +129,7 @@ namespace Yarn.Unity.UnityLocalization
             if (this.currentAssetTable != null)
             {
                 // Fetch the asset for this line, if one is available.
-                localizedLine.Asset = await YarnAsync.WaitForAsyncOperation(this.currentAssetTable.GetAssetAsync<Object>(line.ID), cancellationToken);
+                localizedLine.Asset = await YarnTask.WaitForAsyncOperation(this.currentAssetTable.GetAssetAsync<Object>(line.ID), cancellationToken);
             }
 
             return localizedLine;
@@ -170,7 +153,7 @@ namespace Yarn.Unity.UnityLocalization
             if (currentStringTable == null && stringsTable.IsEmpty == false)
             {
                 // We haven't loaded our table yet. Wait for the table to load.
-                this.currentStringTable = await YarnAsync.WaitForAsyncOperation(stringsTable.GetTableAsync(), cancellationToken);
+                this.currentStringTable = await YarnTask.WaitForAsyncOperation(stringsTable.GetTableAsync(), cancellationToken);
             }
         }
 
@@ -179,12 +162,12 @@ namespace Yarn.Unity.UnityLocalization
             if (currentAssetTable == null && assetTable.IsEmpty == false)
             {
                 // We haven't loaded our table yet. Wait for the table to load.
-                this.currentAssetTable = await YarnAsync.WaitForAsyncOperation(assetTable.GetTableAsync(), cancellationToken);
+                this.currentAssetTable = await YarnTask.WaitForAsyncOperation(assetTable.GetTableAsync(), cancellationToken);
             }
             if (currentAssetTable != null)
             {
-                // We have an asset table. Ensure that it's finished preloading.
-                await YarnAsync.WaitForAsyncOperation(this.currentAssetTable.PreloadOperation, cancellationToken);
+                // We now have an asset table. Ensure that it's finished preloading.
+                await YarnTask.WaitForAsyncOperation(this.currentAssetTable.PreloadOperation, cancellationToken);
             }
         }
 
@@ -206,6 +189,7 @@ namespace Yarn.Unity.UnityLocalization
 #if UNITY_EDITOR
 namespace Yarn.Unity.UnityLocalization.Editor
 {
+    using System;
     using UnityEditor;
 
     [CustomEditor(typeof(UnityLocalisedLineProvider))]

@@ -8,17 +8,6 @@ using UnityEngine;
 
 #nullable enable
 
-#if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption?>;
-using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
-#else
-using YarnTask = System.Threading.Tasks.Task;
-using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption?>;
-using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
-#endif
-
 namespace Yarn.Unity
 {
     /// <summary>
@@ -424,7 +413,7 @@ namespace Yarn.Unity
         // This method implements the v3 async pattern for dialogue views on top
         // of the v2 API.
         /// <inheritdoc/>
-        public override async YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override async YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             int selectedOptionID = -1;
 

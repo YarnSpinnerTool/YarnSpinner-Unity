@@ -1,28 +1,13 @@
 #nullable enable
 
-using System.Collections.Generic;
+
 using System.Threading;
 using UnityEngine;
+using System.Collections.Generic;
+using Yarn;
 
 namespace Yarn.Unity
 {
-    using UnityEngine;
-    using System.Threading;
-
-#if USE_UNITASK
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-    using YarnIntTask = Cysharp.Threading.Tasks.UniTask<int>;
-    using YarnLineTask = Cysharp.Threading.Tasks.UniTask<LocalizedLine>;
-    using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
-#else
-    using YarnTask = System.Threading.Tasks.Task;
-    using YarnLineTask = System.Threading.Tasks.Task<LocalizedLine>;
-    using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
-#endif
-
-    using Yarn;
-    using System.Collections.Generic;
 
 #if USE_ADDRESSABLES
     using AddressablesHelper = Yarn.Unity.UnityAddressablesHelper;
@@ -47,9 +32,9 @@ namespace Yarn.Unity
             set => _assetLocaleCode = value;
         }
 
-        private YarnTask prepareForLinesTask = YarnAsync.Never(CancellationToken.None);
+        private YarnTask? prepareForLinesTask = null;
 
-        public override bool LinesAvailable => prepareForLinesTask.IsCompletedSuccessfully();
+        public override bool LinesAvailable => prepareForLinesTask?.IsCompletedSuccessfully() ?? false;
 
         IAddressablesHelper addressablesHelper = new AddressablesHelper();
 
@@ -72,7 +57,7 @@ namespace Yarn.Unity
             lineParser.RegisterMarkerProcessor("ordinal", builtInReplacer);
         }
 
-        public override async YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken)
+        public override async YarnTask<LocalizedLine> GetLocalizedLineAsync(Line line, CancellationToken cancellationToken)
         {
             Localization loc = CurrentLocalization;
 
@@ -140,7 +125,7 @@ namespace Yarn.Unity
                 // assets are pre-loaded.
                 prepareForLinesTask = addressablesHelper.PrepareForLinesAsync(lineIDs, this.AssetLocaleCode, cancellationToken);
 
-                await prepareForLinesTask;
+                await prepareForLinesTask.Value;
             }
             else
             {
@@ -169,15 +154,6 @@ namespace Yarn.Unity
 
 namespace Yarn.Unity
 {
-#if USE_UNITASK
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-    using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
-#else
-    using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
-    using YarnTask = System.Threading.Tasks.Task;
-#endif
-
 
 #if USE_ADDRESSABLES
     using UnityEngine.AddressableAssets;
@@ -188,7 +164,7 @@ namespace Yarn.Unity
     {
         private Dictionary<string, AsyncOperationHandle<UnityEngine.Object>> assetHandles = new Dictionary<string, AsyncOperationHandle<UnityEngine.Object>>();
 
-        public async YarnObjectTask GetObject(string assetID, string localeID, CancellationToken cancellationToken)
+        public async YarnTask<Object?> GetObject(string assetID, string localeID, CancellationToken cancellationToken)
         {
             assetHandles.TryGetValue(assetID, out AsyncOperationHandle<Object> handle);
 
@@ -208,7 +184,7 @@ namespace Yarn.Unity
             {
                 // The asset isn't already in memory. Wait for the handle to
                 // finish loading.
-                await YarnAsync.WaitForAsyncOperation(handle, cancellationToken);
+                await YarnTask.WaitForAsyncOperation(handle, cancellationToken);
             }
 
             // Get the asset itself.
@@ -224,7 +200,7 @@ namespace Yarn.Unity
             // later. If a location is not available, do nothing.
 
             var address = Localization.GetAddressForLine(lineID, localeID);
-            var location = await YarnAsync.WaitForAsyncOperation(Addressables.LoadResourceLocationsAsync(address), cancellationToken);
+            var location = await YarnTask.WaitForAsyncOperation(Addressables.LoadResourceLocationsAsync(address), cancellationToken);
 
             if (location == null || location.Count == 0)
             {
@@ -236,7 +212,7 @@ namespace Yarn.Unity
 
             operationCache.Add(lineID, assetLoadOperation);
 
-            await YarnAsync.WaitForAsyncOperation(assetLoadOperation, cancellationToken);
+            await YarnTask.WaitForAsyncOperation(assetLoadOperation, cancellationToken);
         }
 
         public async YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, string localeID, CancellationToken cancellationToken)
@@ -264,7 +240,7 @@ namespace Yarn.Unity
 
     internal class NullAddressablesHelper : IAddressablesHelper
     {
-        public YarnObjectTask GetObject(string assetID, string localeID, CancellationToken cancellationToken)
+        public YarnTask<Object?> GetObject(string assetID, string localeID, CancellationToken cancellationToken)
         {
             Debug.LogWarning($"Can't fetch assets for line {assetID}: the localisation object uses Addressable Assets, but the Addressables package isn't installed.");
             return YarnTask.FromResult<Object?>(null);
@@ -280,6 +256,6 @@ namespace Yarn.Unity
     internal interface IAddressablesHelper
     {
         public YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, string localeID, CancellationToken cancellationToken);
-        public YarnObjectTask GetObject(string assetID, string localeID, CancellationToken cancellationToken);
+        public YarnTask<UnityEngine.Object?> GetObject(string assetID, string localeID, CancellationToken cancellationToken);
     }
 }

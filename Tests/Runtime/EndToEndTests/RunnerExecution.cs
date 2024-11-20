@@ -7,13 +7,6 @@ namespace Yarn.Unity.Tests
     using System;
     using UnityEngine;
 
-#if USE_UNITASK
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-#else
-    using YarnTask = System.Threading.Tasks.Task;
-#endif
-
     using static EndToEndUtility;
 
     /// <summary>
@@ -43,20 +36,24 @@ namespace Yarn.Unity.Tests
         DialogueRunner dialogueRunner;
         int timeoutMilliseconds;
 
+        YarnTaskCompletionSource dialogueCompletionsource = new();
+
         private RunnerExecution(string nodeName, int timeoutMilliseconds)
         {
             this.timeoutMilliseconds = timeoutMilliseconds;
             dialogueRunner = GameObject.FindAnyObjectByType<DialogueRunner>();
             dialogueRunner.StartDialogue(nodeName);
+
+            async YarnTask CompleteTaskWhenDialogueDone()
+            {
+                await YarnTask.WaitUntil(() => dialogueRunner);
+                dialogueCompletionsource.TrySetResult();
+            }
+
+            CompleteTaskWhenDialogueDone().Forget();
         }
 
-        private YarnTask CompletionTask => YarnTask.Run(async () =>
-        {
-            while (dialogueRunner.IsDialogueRunning)
-            {
-                await YarnTask.Yield();
-            }
-        });
+        private YarnTask CompletionTask => dialogueCompletionsource.Task;
 
         public async System.Threading.Tasks.ValueTask DisposeAsync()
         {

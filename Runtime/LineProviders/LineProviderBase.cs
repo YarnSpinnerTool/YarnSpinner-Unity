@@ -11,17 +11,6 @@ using Yarn.Unity;
 using Yarn;
 using Yarn.Markup;
 
-
-#if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnIntTask = Cysharp.Threading.Tasks.UniTask<int>;
-using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
-#else
-using YarnTask = System.Threading.Tasks.Task;
-using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
-#endif
-
 #nullable enable
 
 /// <summary>
@@ -65,7 +54,7 @@ public interface ILineProvider
     /// name="line"/> should be cancelled.</param>
     /// <returns>A localized line, ready to be presented to the
     /// player.</returns>
-    public YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken);
+    public YarnTask<LocalizedLine> GetLocalizedLineAsync(Line line, CancellationToken cancellationToken);
 
     /// <summary>
     /// Signals to the line provider that lines with the provided line IDs may
@@ -80,11 +69,6 @@ public interface ILineProvider
     /// <para style="info">
     /// Not every line may run; this method serves as a way to give the line
     /// provider advance notice that a line <i>may</i> run, not <i>will</i> run.
-    /// </para>
-    /// <para>
-    /// When this method is run, the value returned by the <see
-    /// cref="LinesAvailable"/> property should change to false until the
-    /// necessary resources have loaded.
     /// </para>
     /// </remarks>
     /// <param name="lineIDs">A collection of line IDs that the line provider
@@ -108,17 +92,6 @@ public interface ILineProvider
     /// <param name="attributeName">The name of the marker to remove processors
     /// for.</param>
     public void DeregisterMarkerProcessor(string attributeName);
-
-    /// <summary>
-    /// Gets a value indicating whether the line provider is currently ready to
-    /// produce lines.
-    /// </summary>
-    /// <remarks>
-    /// If this value is <see langword="false"/>, <see
-    /// cref="GetLocalizedLineAsync(Line, CancellationToken)"/> is expected to
-    /// take longer than usual.
-    /// </remarks>
-    public bool LinesAvailable { get; }
 }
 
 
@@ -137,7 +110,7 @@ namespace Yarn.Unity
     public abstract class LineProviderBehaviour : MonoBehaviour, ILineProvider
     {
         /// <inheritdoc/>
-        public abstract YarnLineTask GetLocalizedLineAsync(Line line, CancellationToken cancellationToken);
+        public abstract YarnTask<LocalizedLine> GetLocalizedLineAsync(Line line, CancellationToken cancellationToken);
 
         /// <inheritdoc/>
         public YarnProject? YarnProject { get; set; }

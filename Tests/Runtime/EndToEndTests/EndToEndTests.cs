@@ -14,12 +14,6 @@ namespace Yarn.Unity.Tests
     using UnityEngine.SceneManagement;
     using UnityEngine.TestTools;
 
-#if USE_UNITASK
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-#else
-#endif
-
     using static EndToEndUtility;
     using static RunnerExecution;
 
@@ -72,13 +66,13 @@ namespace Yarn.Unity.Tests
         }
 
         [UnityTest]
-        public IEnumerator Character_CanWalkToMarker() => YarnAsync.ToCoroutine(async () =>
+        public IEnumerator Character_CanWalkToMarker() => YarnTask.ToCoroutine(async () =>
         {
             await MoveToMarkerAsync("Character1", "Character2");
         });
 
         [UnityTest]
-        public IEnumerator NodeGroups_DeliverContent() => YarnAsync.ToCoroutine(async () =>
+        public IEnumerator NodeGroups_DeliverContent() => YarnTask.ToCoroutine(async () =>
         {
             await MoveToMarkerAsync("Character1", "Character2");
 
@@ -100,7 +94,7 @@ namespace Yarn.Unity.Tests
         });
 
         [UnityTest]
-        public IEnumerator EndToEndTest_CanAwaitContent() => YarnAsync.ToCoroutine(async () =>
+        public IEnumerator EndToEndTest_CanAwaitContent() => YarnTask.ToCoroutine(async () =>
         {
             await using var dialogue = StartDialogue("LinesAndOptions");
 
@@ -112,7 +106,7 @@ namespace Yarn.Unity.Tests
         });
 
         [UnityTest]
-        public IEnumerator LineGroups_DeliverContent() => YarnAsync.ToCoroutine(() =>
+        public IEnumerator LineGroups_DeliverContent() => YarnTask.ToCoroutine(() =>
         {
             throw new System.NotImplementedException();
         });

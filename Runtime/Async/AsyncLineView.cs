@@ -13,15 +13,6 @@ using TextMeshProUGUI = Yarn.Unity.TMPShim;
 using System.Threading;
 using UnityEngine.UI;
 
-#if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption?>;
-#else
-using YarnTask = System.Threading.Tasks.Task;
-using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption?>;
-#endif
-
 namespace Yarn.Unity
 {
     /// <summary>
@@ -420,11 +411,11 @@ namespace Yarn.Unity
             // if we are set to autoadvance how long do we hold for before continuing?
             if (autoAdvance)
             {
-                await YarnAsync.Delay((int)(autoAdvanceDelay * 1000), token.NextLineToken);
+                await YarnTask.Delay((int)(autoAdvanceDelay * 1000), token.NextLineToken);
             }
             else
             {
-                await YarnAsync.WaitUntilCanceled(token.NextLineToken);
+                await YarnTask.WaitUntilCanceled(token.NextLineToken);
             }
 
             if (canvasGroup != null)
@@ -453,9 +444,9 @@ namespace Yarn.Unity
         /// <remarks>
         /// This dialogue view does not handle any options.
         /// </remarks>
-        public override YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
-            return YarnAsync.NoOptionSelected;
+            return YarnTask<DialogueOption?>.FromResult(null);
         }
     }
 
@@ -633,7 +624,7 @@ namespace Yarn.Unity
                 timePoint += (float)currentCharacterIndex * SecondsPerLetter;
             }
 
-            await YarnAsync.WaitUntil(() => accumulatedTime >= timePoint, cancellationToken);
+            await YarnTask.WaitUntil(() => accumulatedTime >= timePoint, cancellationToken);
             text.maxVisibleCharacters += 1;
 
             onCharacterTyped?.Invoke();

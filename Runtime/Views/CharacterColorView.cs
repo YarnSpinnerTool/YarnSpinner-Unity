@@ -9,17 +9,6 @@ using System.Threading;
 
 #nullable enable
 
-#if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption?>;
-using YarnLineTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.LocalizedLine>;
-#else
-using YarnTask = System.Threading.Tasks.Task;
-using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption?>;
-using YarnLineTask = System.Threading.Tasks.Task<Yarn.Unity.LocalizedLine>;
-#endif
-
 #if USE_TMP
 using TMPro;
 #else
@@ -120,9 +109,9 @@ namespace Yarn.Unity
         }
 
         /// <inheritdoc/>
-        public override YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
-            return YarnAsync.NoOptionSelected;
+            return DialogueRunner.NoOptionSelected;
         }
 
         /// <inheritdoc/>

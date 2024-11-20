@@ -11,18 +11,6 @@ using TextMeshProUGUI = Yarn.Unity.TMPShim;
 
 using System.Threading;
 
-#if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption?>;
-using YarnOptionCompletionSource = Cysharp.Threading.Tasks.UniTaskCompletionSource<Yarn.Unity.DialogueOption?>;
-#else
-using YarnTask = System.Threading.Tasks.Task;
-using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption?>;
-using YarnOptionCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption?>;
-#endif
-
-
 namespace Yarn.Unity
 {
     /// <summary>
@@ -46,6 +34,7 @@ namespace Yarn.Unity
 
         [ShowIf(nameof(showsLastLine))]
         [Indent]
+        [MustNotBeNullWhen(nameof(showsLastLine))]
         [SerializeField] TextMeshProUGUI? lastLineText;
 
         [ShowIf(nameof(showsLastLine))]
@@ -154,7 +143,7 @@ namespace Yarn.Unity
         /// path="/param"/>
         /// <inheritdoc cref="AsyncDialogueViewBase.RunOptionsAsync"
         /// path="/returns"/>
-        public override async YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override async YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             // If we don't already have enough option views, create more
             while (dialogueOptions.Length > optionViews.Count)
@@ -163,22 +152,35 @@ namespace Yarn.Unity
                 optionViews.Add(optionView);
             }
 
-            // adding in a cancellation task
-            // this exists to let us bail out early if the dialogue is cancelled
-            // in later version of dotnet there exists a way to bind a cancellation token to a WhenAny task, but not in our version
-            // alas
-            YarnOptionCompletionSource tcs = new YarnOptionCompletionSource();
+            // A completion source that represents the selected option.
+            YarnTaskCompletionSource<DialogueOption?> selectedOptionCompletionSource = new YarnTaskCompletionSource<DialogueOption?>();
 
-            async YarnOptionTask WaitForCancellation()
+            // A cancellation token source that becomes cancelled when any
+            // option item is selected, or when this entire option view is
+            // cancelled
+            var completionCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+            async YarnTask CancelSourceWhenDialogueCancelled()
             {
-                await YarnAsync.WaitUntilCanceled(cancellationToken);
+                await YarnTask.WaitUntilCanceled(completionCancellationSource.Token);
 
-                return null;
+                if (cancellationToken.IsCancellationRequested == true)
+                {
+                    // The overall cancellation token was fired, not just our
+                    // internal 'something was selected' cancellation token.
+                    // This means that the dialogue view has been informed that
+                    // any value it returns will not be used. Set a 'null'
+                    // result on our completion source so that that we can get
+                    // out of here as quickly as possible.
+                    selectedOptionCompletionSource.TrySetResult(null);
+                }
             }
+
+            // Start waiting 
+            CancelSourceWhenDialogueCancelled().Forget();
 
             // tracks the options views created so we can use it to configure the interaction correctly
             int optionViewsCreated = 0;
-
             for (int i = 0; i < dialogueOptions.Length; i++)
             {
                 var optionView = optionViews[i];
@@ -186,13 +188,15 @@ namespace Yarn.Unity
 
                 if (option.IsAvailable == false && showUnavailableOptions == false)
                 {
-                    Debug.Log("option is unavailable, skipping it");
+                    // option is unavailable, skip it
                     continue;
                 }
+
                 optionView.gameObject.SetActive(true);
                 optionView.Option = option;
 
-                optionView.onOptionSelected = tcs;
+                optionView.OnOptionSelected = selectedOptionCompletionSource;
+                optionView.completionToken = completionCancellationSource.Token;
 
                 // The first available option is selected by default
                 if (optionViewsCreated == 0)
@@ -203,7 +207,7 @@ namespace Yarn.Unity
             }
 
             // Update the last line, if one is configured
-            if (lastLineContainer != null && lastLineText != null)
+            if (lastLineContainer != null)
             {
                 if (lastSeenLine != null && showsLastLine)
                 {
@@ -211,7 +215,7 @@ namespace Yarn.Unity
                     // and the last line has a character then we show the nameplate
                     // otherwise we turn off the nameplate
                     var line = lastSeenLine.Text;
-                    if (lastLineCharacterNameContainer != null && lastLineCharacterNameText != null)
+                    if (lastLineCharacterNameContainer != null)
                     {
                         if (string.IsNullOrWhiteSpace(lastSeenLine.CharacterName))
                         {
@@ -221,7 +225,10 @@ namespace Yarn.Unity
                         {
                             line = lastSeenLine.TextWithoutCharacterName;
                             lastLineCharacterNameContainer.SetActive(true);
-                            lastLineCharacterNameText.text = lastSeenLine.CharacterName;
+                            if (lastLineCharacterNameText != null)
+                            {
+                                lastLineCharacterNameText.text = lastSeenLine.CharacterName;
+                            }
                         }
                     }
                     else
@@ -229,7 +236,11 @@ namespace Yarn.Unity
                         line = lastSeenLine.TextWithoutCharacterName;
                     }
 
-                    lastLineText.text = line.Text;
+                    if (lastLineText != null)
+                    {
+                        lastLineText.text = line.Text;
+                    }
+
                     lastLineContainer.SetActive(true);
                 }
                 else
@@ -248,7 +259,9 @@ namespace Yarn.Unity
                 canvasGroup.blocksRaycasts = true;
             }
 
-            var selectedResult = await YarnAsync.WhenAny(tcs.Task, WaitForCancellation());
+            // Wait for a selection to be made, or for the task to be completed.
+            var completedTask = await selectedOptionCompletionSource.Task;
+            completionCancellationSource.Cancel();
 
             // now one of the option items has been selected so we do cleanup
             if (canvasGroup != null)
@@ -270,11 +283,11 @@ namespace Yarn.Unity
             // if we are cancelled we still need to return but we don't want to have a selection, so we return no selected option
             if (cancellationToken.IsCancellationRequested)
             {
-                return null;
+                return await DialogueRunner.NoOptionSelected;
             }
 
             // finally we return the selected option
-            return selectedResult;
+            return completedTask;
         }
 
         private AsyncOptionItem CreateNewOptionView()

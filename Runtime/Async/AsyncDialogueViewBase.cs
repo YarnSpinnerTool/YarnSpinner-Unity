@@ -4,17 +4,6 @@ using UnityEngine.Events;
 
 #nullable enable
 
-#if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption?>;
-#else
-using YarnTask = System.Threading.Tasks.Task;
-using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption?>;
-#endif
-
-#nullable enable
-
 namespace Yarn.Unity
 {
     /// <summary>
@@ -130,7 +119,7 @@ namespace Yarn.Unity
         /// <returns>A task that indicates which option was selected, or that this dialogue view did not select an option.</returns>
         /// <seealso cref="RunLineAsync(LocalizedLine, LineCancellationToken)"/>
         /// <seealso cref="YarnAsync.NoOptionSelected"/> 
-        public abstract YarnOptionTask RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken);
+        public abstract YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken);
 
         /// <summary>Called by the <see cref="DialogueRunner"/> to signal that
         /// dialogue has started.</summary>

@@ -15,15 +15,6 @@ using TextMeshProUGUI = Yarn.Unity.TMPShim;
 
 using System.Threading;
 
-#if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<Yarn.Unity.DialogueOption>;
-#else
-using YarnTask = System.Threading.Tasks.Task;
-using YarnOptionTask = System.Threading.Tasks.Task<Yarn.Unity.DialogueOption>;
-#endif
-
 namespace Yarn.Unity
 {
     /// <summary>
@@ -153,7 +144,7 @@ namespace Yarn.Unity
 
         public static IEnumerator FadeAlpha(CanvasGroup canvas, float from, float to, float duration, CancellationToken token)
         {
-            return YarnAsync.ToCoroutine(() => FadeAlphaAsync(canvas, from, to, duration, token));
+            return YarnTask.ToCoroutine(() => FadeAlphaAsync(canvas, from, to, duration, token));
         }
 
         public static async YarnTask FadeAlphaAsync(CanvasGroup canvas, float from, float to, float duration, CancellationToken token)

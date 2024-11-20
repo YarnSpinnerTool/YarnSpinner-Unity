@@ -15,21 +15,12 @@ namespace Yarn.Unity
     using System.Runtime.CompilerServices;
 
     using UnityEngine;
+
 #if USE_ADDRESSABLES
     using UnityEngine.ResourceManagement.AsyncOperations;
 #endif
 
-#if USE_UNITASK
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-    using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
-    using YarnOptionTask = Cysharp.Threading.Tasks.UniTask<DialogueOption?>;
-#else
-    using YarnTask = System.Threading.Tasks.Task;
-    using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
-    using YarnOptionTask = System.Threading.Tasks.Task<DialogueOption?>;
-    using System.Threading.Tasks;
-#endif
+#if false
 
     public static partial class YarnAsync
     {
@@ -74,14 +65,7 @@ namespace Yarn.Unity
             }
         }
 
-        public static YarnOptionTask NoOptionSelected
-        {
-            get
-            {
-                return YarnTask.FromResult<DialogueOption?>(null);
-            }
-        }
-
+        
 #if !USE_UNITASK
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static YarnTask Forget(this YarnTask task)
@@ -320,4 +304,5 @@ namespace Yarn.Unity
 
     }
 
+#endif
 }

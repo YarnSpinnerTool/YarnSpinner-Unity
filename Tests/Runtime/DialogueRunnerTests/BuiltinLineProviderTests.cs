@@ -18,13 +18,6 @@ namespace Yarn.Unity.Tests
     using UnityEngine.UI;
     using Yarn.Markup;
 
-#if USE_UNITASK
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-#else
-    using YarnTask = System.Threading.Tasks.Task;
-#endif
-
 #nullable enable
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
@@ -92,7 +85,7 @@ namespace Yarn.Unity.Tests
         }
 
         [UnityTest]
-        public IEnumerator LineProvider_CorrectLineID_FetchesLineContent() => YarnAsync.ToCoroutine(async () =>
+        public IEnumerator LineProvider_CorrectLineID_FetchesLineContent() => YarnTask.ToCoroutine(async () =>
         {
             var line = new Line("line:shadowtest_1", new string[] { });
 
@@ -109,7 +102,7 @@ namespace Yarn.Unity.Tests
         });
 
         [UnityTest]
-        public IEnumerator LineProvider_IncorrectLineID_FetchesInvalidLineMarker() => YarnAsync.ToCoroutine(async () =>
+        public IEnumerator LineProvider_IncorrectLineID_FetchesInvalidLineMarker() => YarnTask.ToCoroutine(async () =>
         {
             var line = new Line("line:doesnotexist", new string[] { });
 
@@ -120,7 +113,7 @@ namespace Yarn.Unity.Tests
         });
 
         [UnityTest]
-        public IEnumerator LineProvider_ShadowLineID_FetchesSourceContent() => YarnAsync.ToCoroutine(async () =>
+        public IEnumerator LineProvider_ShadowLineID_FetchesSourceContent() => YarnTask.ToCoroutine(async () =>
         {
 
             lineProvider.LocaleCode = "en";

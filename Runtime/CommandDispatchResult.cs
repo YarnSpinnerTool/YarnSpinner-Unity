@@ -6,16 +6,6 @@ using System;
 
 #nullable enable
 
-#if USE_UNITASK
-using Cysharp.Threading.Tasks;
-using YarnTask = Cysharp.Threading.Tasks.UniTask;
-using YarnObjectTask = Cysharp.Threading.Tasks.UniTask<UnityEngine.Object?>;
-#else
-using YarnTask = System.Threading.Tasks.Task;
-using YarnObjectTask = System.Threading.Tasks.Task<UnityEngine.Object?>;
-using System.Threading.Tasks;
-#endif
-
 namespace Yarn.Unity
 {
     /// <summary>
@@ -61,7 +51,7 @@ namespace Yarn.Unity
         public CommandDispatchResult(StatusType status)
         {
             Status = status;
-            Task = YarnTask.CompletedTask; ;
+            Task = YarnTask.CompletedTask;
             Message = null;
         }
         public CommandDispatchResult(StatusType status, YarnTask task)
