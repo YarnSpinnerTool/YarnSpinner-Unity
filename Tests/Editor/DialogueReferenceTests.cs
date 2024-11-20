@@ -2,12 +2,12 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
+using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -19,8 +19,10 @@ namespace Yarn.Unity.Tests
     {
         public const string TestYarnProjectGUID = "a9b357f08075f43cbad81d8ec757e1f7";
 
-        public YarnProject YarnProject {
-            get {
+        public YarnProject YarnProject
+        {
+            get
+            {
                 string assetPath = AssetDatabase.GUIDToAssetPath(TestYarnProjectGUID);
                 Assert.NotNull(assetPath);
                 YarnProject yarnProject = AssetDatabase.LoadAssetAtPath<YarnProject>(assetPath);
@@ -30,7 +32,8 @@ namespace Yarn.Unity.Tests
         }
 
         [Test]
-        public void DialogueReference_CanFindValidNode() {
+        public void DialogueReference_CanFindValidNode()
+        {
             var dialogueReference = new DialogueReference();
             dialogueReference.nodeName = "Start";
             dialogueReference.project = YarnProject;
@@ -39,7 +42,8 @@ namespace Yarn.Unity.Tests
         }
 
         [Test]
-        public void DialogueReference_CannotFindInvalidNode() {
+        public void DialogueReference_CannotFindInvalidNode()
+        {
             var dialogueReference = new DialogueReference();
 
             // Not valid if node name doesn't exist in project
@@ -50,13 +54,14 @@ namespace Yarn.Unity.Tests
         }
 
         [Test]
-        public void DialogueReference_IsNotValidWhenEmpty() {
+        public void DialogueReference_IsNotValidWhenEmpty()
+        {
             var dialogueReference = new DialogueReference();
 
             // Not valid if project is not set
             dialogueReference.nodeName = "Start";
             dialogueReference.project = null;
-            
+
             Assert.False(dialogueReference.IsValid);
         }
 

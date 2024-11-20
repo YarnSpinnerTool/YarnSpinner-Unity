@@ -2,10 +2,10 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
+using NUnit.Framework;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;

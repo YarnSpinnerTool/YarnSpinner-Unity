@@ -4,13 +4,13 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 // #define KEEP_FILES_ON_TEARDOWN
 
+using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
