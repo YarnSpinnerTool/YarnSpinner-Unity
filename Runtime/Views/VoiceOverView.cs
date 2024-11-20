@@ -127,11 +127,21 @@ namespace Yarn.Unity
 
             // Playback may not begin immediately, so wait until it does (or if
             // the line is interrupted.)
-            await YarnTask.WaitUntil(() => audioSource.isPlaying, lineCancellationToken.NextLineToken);
+            await YarnTask.WaitUntil(() => audioSource.isPlaying, lineCancellationToken.NextLineToken).SuppressCancellationThrow();
 
-            // Now wait until either the audio source finishes playing, or the line
-            // is interrupted.
-            await YarnTask.WaitUntil(() => !audioSource.isPlaying, lineCancellationToken.NextLineToken);
+            if (!DialogueRunner.IsInPlaymode)
+            {
+                return;
+            }
+
+            // Now wait until either the audio source finishes playing, or the
+            // line is interrupted.
+            await YarnTask.WaitUntil(() => !audioSource.isPlaying, lineCancellationToken.NextLineToken).SuppressCancellationThrow();
+
+            if (!DialogueRunner.IsInPlaymode)
+            {
+                return;
+            }
 
             // If the line was interrupted while we were playing, we need to
             // wrap up the playback as quickly as we can. We do this here with a
@@ -169,7 +179,8 @@ namespace Yarn.Unity
             {
                 await YarnTask.Delay(
                     TimeSpan.FromSeconds(waitTimeAfterLineComplete),
-                    lineCancellationToken.NextLineToken);
+                    lineCancellationToken.NextLineToken
+                ).SuppressCancellationThrow();
             }
 
             if (endLineWhenVoiceoverComplete)

@@ -632,9 +632,12 @@ namespace Yarn.Unity
             // Wait for all line view tasks to finish delivering the line.
             await YarnTask.WhenAll(pendingTasks);
 
-            currentLineCancellationSource.Dispose();
+            // We're done; dispose of the cancellation sources. (Null-check them because if we're leaving play mode, then these references may no longer be valid.)
+
+            currentLineCancellationSource?.Dispose();
             currentLineCancellationSource = null;
-            currentLineHurryUpSource.Dispose();
+
+            currentLineHurryUpSource?.Dispose();
             currentLineHurryUpSource = null;
         }
 

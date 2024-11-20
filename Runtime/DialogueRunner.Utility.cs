@@ -435,5 +435,24 @@ namespace Yarn.Unity
             }
             return pausePositions;
         }
+
+        public static bool IsInPlaymode
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (!UnityEditor.EditorApplication.isPlaying)
+                {
+                    return false;
+                }
+
+                if (!UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode && UnityEditor.EditorApplication.isPlaying)
+                {
+                    return false;
+                }
+#endif
+                return true;
+            }
+        }
     }
 }
