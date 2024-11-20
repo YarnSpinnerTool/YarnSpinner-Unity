@@ -116,14 +116,7 @@ namespace Yarn.Unity
         {
             foreach (var awaitable in tasks)
             {
-                try
-                {
-                    await awaitable;
-                }
-                catch (OperationCanceledException)
-                {
-                    continue;
-                }
+                await awaitable;
             }
         }
 
@@ -133,12 +126,6 @@ namespace Yarn.Unity
 
             foreach (var awaitable in tasks)
             {
-                // Unlike WhenAll() (i.e. not returning a value), if an
-                // operation is cancelled, we can't provide a value for it, so
-                // we can no longer provide the complete collection of results,
-                // so we'll let OperationCanceledExceptions propagate out of us
-                // and we won't catch it
-
                 var result = await awaitable;
                 results.Add(result);
             }
