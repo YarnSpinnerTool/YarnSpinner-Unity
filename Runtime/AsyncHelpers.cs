@@ -11,9 +11,8 @@ namespace Yarn.Unity
 {
     using System;
     using System.Collections;
-    using System.Threading;
     using System.Runtime.CompilerServices;
-
+    using System.Threading;
     using UnityEngine;
 
 #if USE_ADDRESSABLES

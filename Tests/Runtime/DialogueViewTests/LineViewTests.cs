@@ -4,13 +4,13 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 namespace Yarn.Unity.Tests
 {
+    using NUnit.Framework;
+    using System;
     using System.Collections;
     using System.Diagnostics.CodeAnalysis;
     using System.Threading;
-    using NUnit.Framework;
-    using UnityEngine.TestTools;
     using UnityEngine.SceneManagement;
-    using System;
+    using UnityEngine.TestTools;
 
 #nullable enable
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member

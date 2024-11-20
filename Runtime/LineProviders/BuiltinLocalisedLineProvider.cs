@@ -1,9 +1,9 @@
 #nullable enable
 
 
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
-using System.Collections.Generic;
 using Yarn;
 
 namespace Yarn.Unity

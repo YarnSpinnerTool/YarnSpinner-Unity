@@ -4,16 +4,15 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 namespace Yarn.Unity.Tests
 {
+    using NUnit.Framework;
     using System.Collections;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using NUnit.Framework;
     using UnityEngine;
     using UnityEngine.SceneManagement;
     using UnityEngine.TestTools;
-
     using static EndToEndUtility;
     using static RunnerExecution;
 

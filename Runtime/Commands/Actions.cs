@@ -568,7 +568,7 @@ namespace Yarn.Unity
                 return;
             }
 #if YARN_SOURCE_GENERATION_DEBUG_LOGGING
-                Debug.Log($"Registering command {name} from method {implementation.Method.DeclaringType.FullName}.{implementation.Method.Name}");
+            Debug.Log($"Registering command {name} from method {implementation.Method.DeclaringType.FullName}.{implementation.Method.Name}");
 #endif
 
             Library.RegisterFunction(name, implementation);

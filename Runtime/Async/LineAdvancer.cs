@@ -1,7 +1,7 @@
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using Yarn.Unity;
-using System.Threading;
 
 #nullable enable
 

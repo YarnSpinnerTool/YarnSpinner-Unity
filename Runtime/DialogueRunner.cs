@@ -2,15 +2,15 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.UIElements;
 using Yarn;
 using Yarn.Unity;
-using UnityEngine.Events;
-using System;
-using UnityEngine.UIElements;
 
 
 #nullable enable
