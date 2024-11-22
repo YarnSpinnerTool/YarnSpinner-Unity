@@ -14,7 +14,7 @@ namespace Yarn.Unity
     public class LineMetadata
     {
         [Serializable]
-        class StringDictionary : SerializedDictionary<string, string> { }
+        class StringDictionary : SerializableDictionary<string, string> { }
 
         [SerializeField]
         private StringDictionary _lineMetadata = new StringDictionary();

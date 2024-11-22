@@ -22,7 +22,7 @@ namespace Yarn.Unity
 
         [SerializeField]
         [HideInInspector]
-        public List<Localization> localizations = new List<Localization>();
+        public SerializableDictionary<string, Localization> localizations = new SerializableDictionary<string, Localization>();
 
         [SerializeField]
         // [HideInInspector]
@@ -66,7 +66,7 @@ namespace Yarn.Unity
         }
 
         [System.Serializable]
-        public class ShadowTableDictionary : SerializedDictionary<string, ShadowTableEntry> { }
+        public class ShadowTableDictionary : SerializableDictionary<string, ShadowTableEntry> { }
 
         /// <summary>
         /// The cached result of reading the default values from the <see
