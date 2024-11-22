@@ -238,11 +238,13 @@ namespace Yarn.Unity.Editor
 #endif
         }
 
-        internal static Dictionary<string, string> FindAssetPathsForLineIDs(IEnumerable<string> lineIDs, string assetsFolderPath)
+        internal static Dictionary<string, string> FindAssetPathsForLineIDs(IEnumerable<string> lineIDs, string assetsFolderPath, System.Type assetType)
         {
-            // Find _all_ files in this director that are not .meta files
+            // Find _all_ files in this director that are not .meta files and
+            // whose main asset is equal to (or derived from) assetType
             var allFiles = Directory.EnumerateFiles(assetsFolderPath, "*", SearchOption.AllDirectories)
-                .Where(path => path.EndsWith(".meta") == false);
+                .Where(path => path.EndsWith(".meta") == false)
+                .Where(path => assetType.IsAssignableFrom(AssetDatabase.GetMainAssetTypeAtPath(path)));
 
             // Match files with those whose filenames contain a line ID
             var matchedFilesAndPaths = lineIDs.GroupJoin(

@@ -819,7 +819,7 @@ namespace Yarn.Unity.Editor
                         IEnumerable<string> lineIDs = stringTable.Select(s => s.ID);
 
                         // Map each line ID to its asset path.
-                        var stringIDsToAssetPaths = YarnProjectUtility.FindAssetPathsForLineIDs(lineIDs, AssetDatabase.GetAssetPath(localisationInfo.assetsFolder));
+                        var stringIDsToAssetPaths = YarnProjectUtility.FindAssetPathsForLineIDs(lineIDs, AssetDatabase.GetAssetPath(localisationInfo.assetsFolder), typeof(UnityEngine.Object));
 
                         // Load the asset, so we can assign the reference.
                         var assetPaths = stringIDsToAssetPaths
