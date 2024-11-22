@@ -15,8 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Asynchronous Default View and Prefab:
   - `AsyncLineView` is intended as a full replacement for `LineView`.
   - `AsyncOptionsView` is intended as a full replacement for `OptionsListView`.
-  - `AsyncOptionItem` is intended as a full replacement for `OtionView`.
-  - `SkipThing` is a temporary replacement for `DialogueAdvanceInput`.
+  - `AsyncOptionItem` is intended as a full replacement for `OptionView`.
+  - `LineAdvancer` is a replacement for `DialogueAdvanceInput`.
   - `Async Dialogue System` prefab is intended as a full replacement for `Dialogue System` prefab.
 - New approach to handling replacement markup:
   - `AttributeMarkerProcessor` defines the required fields and methods to create replacement markup processors.
