@@ -28,6 +28,16 @@ namespace Yarn.Unity.Editor
     [InitializeOnLoad]
     public class YarnProjectImporter : ScriptedImporter
     {
+        /// <summary>
+        /// A regular expression that matches characters following the start of
+        /// the string or an underscore. 
+        /// </summary>
+        /// <remarks>
+        /// Used as part of converting variable names from snake_case to
+        /// CamelCase when generating C# variable source code.
+        /// </remarks>
+        private static readonly System.Text.RegularExpressions.Regex SnakeCaseToCamelCase = new System.Text.RegularExpressions.Regex(@"(^|_)(\w)");
+
         [System.Serializable]
         public class SerializedDeclaration
         {
@@ -608,6 +618,13 @@ namespace Yarn.Unity.Editor
 
                 // Remove '$'
                 string cSharpVariableName = decl.Name.TrimStart('$');
+
+                // Convert snake_case to CamelCase
+                cSharpVariableName = SnakeCaseToCamelCase.Replace(cSharpVariableName, (match) =>
+                {
+                    return match.Groups[2].Value.ToUpperInvariant();
+                });
+
                 // Capitalise first letter
                 cSharpVariableName = cSharpVariableName.Substring(0, 1).ToUpperInvariant() + cSharpVariableName.Substring(1);
 
