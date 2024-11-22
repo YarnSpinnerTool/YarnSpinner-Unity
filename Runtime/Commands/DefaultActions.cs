@@ -43,7 +43,7 @@ namespace Yarn.Unity
         /// Stop is defined inside the Virtual Machine (the compiler traps it
         /// and makes it a special case.) Wait is defined here in Unity.
         /// </summary>
-        /// <param name="duration">How long to wait.</param>
+        /// <param name="duration">How long to wait, in seconds.</param>
         [YarnCommand("wait")]
         public static IEnumerator Wait(float duration)
         {

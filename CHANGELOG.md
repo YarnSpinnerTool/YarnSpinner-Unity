@@ -103,6 +103,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Obsolete property `YarnFunctionAttribute.FunctionName`
   - Obsolete property `YarnCommandAttribute.CommandString`
   - Obsolete method `YarnProject.GetProgram`
+- Removed `YarnParameterAttribute` and `YarnStateInjectorAttribute`.
+  - These attributes were formerly used in earlier versions of Yarn Spinner's
+    action system, but are no longer used.
 
 ## [2.4.1] 2024-01-30
 
@@ -263,7 +266,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   
     This is a change from previous versions of Yarn Spinner for Unity, which searched for commands and functions at run-time, which had performance and compatibility implications on certain platforms (notably, consoles).
     
-    This search is done automatically in Unity 2021.2 and later. In earlier versions of Unity, you will need to manually tell Yarn Spinner for Unity to check your code, by opening the Window menu and choosing Yarn Spinner -> Update Yarn Commands.
+    This search is done automatically in Unity 2021.2 and later. In earlier versions of Unity, you will need to manually tell Yarn Spinner for Unity to check your code, by opening the Window menu and choosing Yarn Spinner -> \mands.
 - In Unity 2021.2 and later, you can now see which commands have been registered using `YarnCommand` by opening the Window menu and choosing Yarn Spinner -> Commands...
 - `DialogueReference` objects can now be implicitly converted to `string`s.
 - The `YarnNode` attribute can be attached to a `string` property to turn it into a drop-down menu for choosing nodes in a Yarn Project.
