@@ -303,8 +303,10 @@ But not all of them are.
             // should be present.
             Assert.IsNotNull(project.baseLocalization);
             Assert.IsNotEmpty(project.localizations);
-            Assert.AreEqual("test", project.localizations[0].LocaleCode);
-            CollectionAssert.AreEquivalent(project.localizations[0].GetLineIDs(), YarnTestUtility.ExpectedStrings.Select(l => l.ID));
+            project.localizations.Should().HaveCount(1);
+            var localization = project.localizations.Should().ContainKey("test").Subject.Value;
+
+            CollectionAssert.AreEquivalent(localization.GetLineIDs(), YarnTestUtility.ExpectedStrings.Select(l => l.ID));
         }
 
         [Test]
@@ -479,8 +481,8 @@ But not all of them are.
             // lines.
             Assert.AreEqual(2, project.localizations.Count);
 
-            var defaultLocalization = project.localizations.First(l => l.LocaleCode == defaultLanguage);
-            var otherLocalization = project.localizations.First(l => l.LocaleCode == otherLanguage);
+            var defaultLocalization = project.localizations.First(l => l.Key == defaultLanguage).Value;
+            var otherLocalization = project.localizations.First(l => l.Key == otherLanguage).Value;
 
             Assert.NotNull(defaultLocalization);
             Assert.NotNull(otherLocalization);
@@ -545,11 +547,11 @@ But not all of them are.
 
             Assert.AreEqual(1, project.localizations.Count);
 
-            Localization localization = project.localizations[0];
+            (string localeCode, Localization localization) = project.localizations.First();
             IEnumerable<AudioClip> allAudioClips = localization.GetLineIDs()
                                                                .Select(id => localization.GetLocalizedObject<AudioClip>(id));
 
-            Assert.AreEqual(defaultLanguage, localization.LocaleCode);
+            Assert.AreEqual(defaultLanguage, localeCode);
             CollectionAssert.AreEquivalent(YarnTestUtility.ExpectedStrings.Select(l => l.ID), localization.GetLineIDs());
             Assert.AreEqual(YarnTestUtility.ExpectedStrings.Count(), allAudioClips.Count());
             CollectionAssert.AllItemsAreNotNull(allAudioClips);

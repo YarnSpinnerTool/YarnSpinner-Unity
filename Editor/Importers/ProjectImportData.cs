@@ -25,6 +25,8 @@ namespace Yarn.Unity
             public string languageID;
             public DefaultAsset assetsFolder;
             public TextAsset stringsFile;
+            public bool isExternal;
+            public Localization? externalLocalization;
         }
 
         [System.Serializable]

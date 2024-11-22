@@ -16,6 +16,10 @@ namespace Yarn.Unity.Editor
         private readonly ObjectField stringsFileField;
         private readonly Button deleteButton;
         private readonly VisualElement stringsFileNotUsedLabel;
+        private readonly Toggle isExternalAssetToggle;
+        private readonly ObjectField externalLocalisationAssetField;
+        private readonly VisualElement externalReferenceFields;
+        private readonly VisualElement internallyGeneratedAssetFields;
         private readonly PopupField<string> languagePopup;
         public event System.Action onDelete;
         ProjectImportData.LocalizationEntry data;
@@ -42,6 +46,10 @@ namespace Yarn.Unity.Editor
             stringsFileField = this.Q<ObjectField>("stringsFile");
             deleteButton = this.Q<Button>("deleteButton");
             stringsFileNotUsedLabel = this.Q("stringsFileNotUsed");
+            isExternalAssetToggle = this.Q<Toggle>("isExternalAsset");
+            externalLocalisationAssetField = this.Q<ObjectField>("externalLocalisationAsset");
+            externalReferenceFields = this.Q<VisualElement>("externalReferenceFields");
+            internallyGeneratedAssetFields = this.Q<VisualElement>("internallyGeneratedAssetFields");
 
             assetFolderField.objectType = typeof(DefaultAsset);
             stringsFileField.objectType = typeof(TextAsset);
@@ -56,6 +64,7 @@ namespace Yarn.Unity.Editor
 
             _projectBaseLanguage = baseLanguage;
 
+
             languagePopup.RegisterValueChangedCallback((evt) =>
             {
                 IsModified = true;
@@ -63,6 +72,22 @@ namespace Yarn.Unity.Editor
                 newEntry.languageID = evt.newValue;
                 this.value = newEntry;
             });
+
+            isExternalAssetToggle.RegisterValueChangedCallback((evt) =>
+            {
+                IsModified = true;
+                var newEntry = this.value;
+                newEntry.isExternal = evt.newValue;
+                this.value = newEntry;
+            });
+            externalLocalisationAssetField.RegisterValueChangedCallback((evt) =>
+            {
+                IsModified = true;
+                var newEntry = this.value;
+                newEntry.externalLocalization = evt.newValue as Localization;
+                this.value = newEntry;
+            });
+
 
             stringsFileField.RegisterValueChangedCallback((evt) =>
             {
@@ -109,6 +134,8 @@ namespace Yarn.Unity.Editor
             languagePopup.SetValueWithoutNotify(data.languageID);
             assetFolderField.SetValueWithoutNotify(data.assetsFolder);
             stringsFileField.SetValueWithoutNotify(data.stringsFile);
+            isExternalAssetToggle.SetValueWithoutNotify(data.isExternal);
+            externalLocalisationAssetField.SetValueWithoutNotify(data.externalLocalization);
 
             bool isBaseLanguage = data.languageID == ProjectBaseLanguage;
 
@@ -122,6 +149,9 @@ namespace Yarn.Unity.Editor
                 stringsFileField.style.display = DisplayStyle.Flex;
                 stringsFileNotUsedLabel.style.display = DisplayStyle.None;
             }
+
+            internallyGeneratedAssetFields.style.display = data.isExternal ? DisplayStyle.None : DisplayStyle.Flex;
+            externalReferenceFields.style.display = data.isExternal ? DisplayStyle.Flex : DisplayStyle.None;
 
             deleteButton.SetEnabled(isBaseLanguage == false);
 

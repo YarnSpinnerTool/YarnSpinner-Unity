@@ -16,6 +16,7 @@ using System.Linq;
 
 namespace Yarn.Unity
 {
+    [CreateAssetMenu(fileName = "NewLocalization", menuName = "Yarn Spinner/Built-In Localization/Localization", order = 105)]
     public class Localization : ScriptableObject
     {
         /// <summary>
@@ -36,18 +37,14 @@ namespace Yarn.Unity
             return $"line_{language}_{lineID.Replace("line:", "")}";
         }
 
-        public string LocaleCode { get => _LocaleCode; set => _LocaleCode = value; }
-
-        [SerializeField] private string _LocaleCode;
-
         [System.Serializable]
-        class StringDictionary : SerializedDictionary<string, string> { }
+        public class LocalizationTableEntry
+        {
+            public string? localizedString;
+            public UnityEngine.Object? localizedAsset;
+        }
 
-        [System.Serializable]
-        class AssetDictionary : SerializedDictionary<string, UnityEngine.Object> { }
-
-        [SerializeField] private StringDictionary _stringTable = new StringDictionary();
-        [SerializeField] private AssetDictionary _assetTable = new AssetDictionary();
+        [SerializeField] internal SerializableDictionary<string, LocalizationTableEntry> entries = new();
 
         private Dictionary<string, string> _runtimeStringTable = new Dictionary<string, string>();
 
@@ -80,15 +77,14 @@ namespace Yarn.Unity
         #region Localized Strings
         public string? GetLocalizedString(string key)
         {
-            string result;
-            if (_runtimeStringTable.TryGetValue(key, out result))
+            if (_runtimeStringTable.TryGetValue(key, out string result))
             {
                 return result;
             }
 
-            if (_stringTable.TryGetValue(key, out result))
+            if (entries.TryGetValue(key, out var entry))
             {
-                return result;
+                return entry.localizedString;
             }
 
             return null;
@@ -101,7 +97,7 @@ namespace Yarn.Unity
         /// <param name="key">The key to search for.</param>
         /// <returns><see langword="true"/> if this Localization has a string
         /// for the given key; <see langword="false"/> otherwise.</returns>
-        public bool ContainsLocalizedString(string key) => _runtimeStringTable.ContainsKey(key) || _stringTable.ContainsKey(key);
+        public bool ContainsLocalizedString(string key) => _runtimeStringTable.ContainsKey(key) || entries.ContainsKey(key);
 
         /// <summary>
         /// Adds a new string to the string table.
@@ -117,7 +113,7 @@ namespace Yarn.Unity
         /// language specified by <see cref="LocaleCode"/>.</param>
         internal void AddLocalisedStringToAsset(string key, string value)
         {
-            _stringTable.Add(key, value);
+            GetOrCreateEntry(key).localizedString = value;
         }
 
         /// <summary>
@@ -153,6 +149,14 @@ namespace Yarn.Unity
             }
         }
 
+        public void AddLocalizedStringsToAsset(IEnumerable<KeyValuePair<string, string>> strings)
+        {
+            foreach (var entry in strings)
+            {
+                GetOrCreateEntry(entry.Key).localizedString = entry.Value;
+            }
+        }
+
         /// <summary>
         /// Adds a collection of strings to the runtime string table.
         /// </summary>
@@ -182,9 +186,9 @@ namespace Yarn.Unity
                 Debug.LogWarning($"Localization {name} uses addressable assets. Use the Addressable Assets API to load the asset.");
             }
 
-            _assetTable.TryGetValue(key, out var result);
+            entries.TryGetValue(key, out var entry);
 
-            if (result is T resultAsTargetObject)
+            if (entry.localizedAsset is T resultAsTargetObject)
             {
                 return resultAsTargetObject;
             }
@@ -192,25 +196,33 @@ namespace Yarn.Unity
             return null;
         }
 
-        public void SetLocalizedObject<T>(string key, T value) where T : UnityEngine.Object => _assetTable.Add(key, value);
+        private LocalizationTableEntry GetOrCreateEntry(string key)
+        {
+            if (entries.TryGetValue(key, out var entry))
+            {
+                return entry;
+            }
+            entry = new LocalizationTableEntry();
+            entries.Add(key, entry);
+            return entry;
+        }
 
-        public bool ContainsLocalizedObject<T>(string key) where T : UnityEngine.Object => _assetTable.ContainsKey(key) && _assetTable[key] is T;
+        public bool ContainsLocalizedObject<T>(string key) where T : UnityEngine.Object => entries.TryGetValue(key, out var asset) && asset is T;
 
-        public void AddLocalizedObject<T>(string key, T value) where T : UnityEngine.Object => _assetTable.Add(key, value);
+        public void AddLocalizedObjectToAsset<T>(string key, T value) where T : UnityEngine.Object => GetOrCreateEntry(key).localizedAsset = value;
 
-        public void AddLocalizedObjects<T>(IEnumerable<KeyValuePair<string, T>> objects) where T : UnityEngine.Object
+        public void AddLocalizedObjectsToAsset<T>(IEnumerable<KeyValuePair<string, T>> objects) where T : UnityEngine.Object
         {
             foreach (var entry in objects)
             {
-                _assetTable.Add(entry.Key, entry.Value);
+                GetOrCreateEntry(entry.Key).localizedAsset = entry.Value;
             }
         }
         #endregion
 
         public virtual void Clear()
         {
-            _stringTable.Clear();
-            _assetTable.Clear();
+            entries.Clear();
             _runtimeStringTable.Clear();
         }
 
@@ -227,7 +239,7 @@ namespace Yarn.Unity
             var allKeys = new List<string>();
 
             var runtimeKeys = _runtimeStringTable.Keys;
-            var compileTimeKeys = _stringTable.Keys;
+            var compileTimeKeys = entries.Keys;
 
             allKeys.AddRange(runtimeKeys);
             allKeys.AddRange(compileTimeKeys);

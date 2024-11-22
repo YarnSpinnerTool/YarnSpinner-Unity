@@ -13,36 +13,86 @@ using UnityEngine.AddressableAssets;
 using UnityEditor.AddressableAssets;
 #endif
 
+#nullable enable
+
 namespace Yarn.Unity.Editor
 {
+    internal class ImportLocalizationFromAssetWindow : EditorWindow
+    {
+        private System.Type assetType;
+
+        public LocalizationEditor Target { get; private set; }
+
+        public string FieldLabel { get; set; } = "Source Asset";
+        public string? HelpBox { get; set; }
+
+        public static ImportLocalizationFromAssetWindow Show<T>(LocalizationEditor target, string windowTitle, System.Action<T> onImport) where T : UnityEngine.Object
+        {
+            var window = EditorWindow.GetWindow<ImportLocalizationFromAssetWindow>(true, windowTitle);
+            window.Target = target;
+            window.assetType = typeof(T);
+            window.maxSize = new Vector2(300, 200);
+            window.onImport = (Object obj) => onImport((T)obj);
+            window.ShowUtility();
+            return window;
+        }
+
+        UnityEngine.Object? asset = null;
+        private System.Action<UnityEngine.Object>? onImport;
+
+        public void OnGUI()
+        {
+            if (Target == null)
+            {
+                // Our target went away; close this window
+                this.Close();
+            }
+
+            asset = EditorGUILayout.ObjectField(FieldLabel, asset, assetType, allowSceneObjects: false);
+
+            if (string.IsNullOrEmpty(this.HelpBox) == false)
+            {
+                EditorGUILayout.HelpBox(this.HelpBox, MessageType.Info);
+            }
+
+            GUILayout.FlexibleSpace();
+
+            using (new EditorGUI.DisabledScope(asset == null))
+            {
+                if (GUILayout.Button("Import") && asset != null)
+                {
+                    onImport?.Invoke(asset);
+                    this.Close();
+                }
+            }
+        }
+    }
     [CustomEditor(typeof(Localization))]
     [CanEditMultipleObjects]
     public class LocalizationEditor : UnityEditor.Editor
     {
-
-        private SerializedProperty languageNameProperty;
+        private SerializedProperty entriesProperty;
         private AudioClip lastPreviewed;
+        private List<Culture> cultures;
+        private int currentPickerWindow;
 
         private void OnEnable()
         {
-            languageNameProperty = serializedObject.FindProperty("_LocaleCode");
+            entriesProperty = serializedObject.FindProperty(nameof(Localization.entries));
             lastPreviewed = null;
+            cultures = Cultures.GetCultures().ToList();
+
         }
 
         public override void OnInspectorGUI()
         {
+            var target = this.target as Localization;
+            if (target == null)
+            {
+                throw new System.InvalidOperationException($"Target is not a {typeof(Localization)}");
+            }
 
-
-            var cultures = Cultures.GetCultures().ToList();
-
-            var cultureDisplayName = cultures.Where(c => c.Name == languageNameProperty.stringValue)
-                                             .Select(c => c.DisplayName)
-                                             .DefaultIfEmpty("Development")
-                                             .FirstOrDefault();
-
-            EditorGUILayout.LabelField("Language", cultureDisplayName);
-
-            EditorGUILayout.Space();
+            var isSubAsset = AssetDatabase.IsSubAsset(target);
 
             if (serializedObject.isEditingMultipleObjects)
             {
@@ -50,9 +100,48 @@ namespace Yarn.Unity.Editor
             }
             else
             {
-                var target = this.target as Localization;
+                if (isSubAsset)
+                {
+                    DrawLocalizationContentsPreview(target);
+                }
+                else
+                {
+                    if (GUILayout.Button("Import String from Yarn Project"))
+                    {
+                        var window = ImportLocalizationFromAssetWindow.Show<YarnProject>(this, "Import from Yarn Project", ImportFromYarnProject);
+                        window.FieldLabel = "Yarn Project";
+                        window.HelpBox = $"The lines in the base localisation of the selected Yarn Project will be imported into this {nameof(Localization)}.";
+                    }
+                    if (GUILayout.Button("Import Strings from CSV"))
+                    {
+                        var window = ImportLocalizationFromAssetWindow.Show<TextAsset>(this, "Import from Yarn Project", ImportFromCSV);
+                        window.FieldLabel = "CSV File";
+                        window.HelpBox = $"The string table entries from the selected CSV file will be imported into this {nameof(Localization)}.\n\nYou can generate a CSV file to use by selecting the Yarn Project and clicking {YarnProjectImporterEditor.AddStringTagsButtonLabel}. You can then translate the CSV file into your target language, and then import it using this window.";
+                    }
+                    if (GUILayout.Button("Import Assets from Folder"))
+                    {
+                        var window = ImportLocalizationFromAssetWindow.Show<DefaultAsset>(this, "Import from Yarn Project", (folder) =>
+                        {
+                            var lineIDs = target.entries.Keys;
+                            var paths = YarnProjectUtility.FindAssetPathsForLineIDs(lineIDs, AssetDatabase.GetAssetPath(folder), typeof(UnityEngine.Object));
+                            foreach (var path in paths)
+                            {
+                                var lineID = path.Key;
+                                var assetPath = path.Value;
 
-                DrawLocalizationContents(target);
+                                var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetPath);
+                                target.AddLocalizedObjectToAsset<UnityEngine.Object>(lineID, asset);
+                            }
+                            serializedObject.Update();
+
+                            EditorUtility.SetDirty(target);
+                            AssetDatabase.SaveAssetIfDirty(target);
+                        });
+                        window.FieldLabel = "Folder";
+                    }
+                    EditorGUILayout.PropertyField(entriesProperty);
+                }
+
             }
 
             if (serializedObject.hasModifiedProperties)
@@ -77,7 +166,7 @@ namespace Yarn.Unity.Editor
         /// <param name="showAssets">If true, this method will show any
         /// assets or addressable assets. If false, this method will only
         /// show the localized text.</param>
-        private void DrawLocalizationContents(Localization target)
+        private void DrawLocalizationContentsPreview(Localization target)
         {
             var lineKeys = target.GetLineIDs();
 
@@ -95,8 +184,9 @@ namespace Yarn.Unity.Editor
 #if USE_ADDRESSABLES
             Dictionary<string, UnityEditor.AddressableAssets.Settings.AddressableAssetEntry> allAddressEntries = null;
 
-            if (target.ContainsLocalizedAssets && target.UsesAddressableAssets) {
-                 allAddressEntries = AddressableAssetSettingsDefaultObject.Settings.groups.SelectMany(g => g.entries).ToDictionary(e => e.address);
+            if (target.ContainsLocalizedAssets && target.UsesAddressableAssets)
+            {
+                allAddressEntries = AddressableAssetSettingsDefaultObject.Settings.groups.SelectMany(g => g.entries).ToDictionary(e => e.address);
 
             }
 #endif
@@ -114,12 +204,13 @@ namespace Yarn.Unity.Editor
                 if (target.ContainsLocalizedAssets && target.UsesAddressableAssets)
                 {
 #if USE_ADDRESSABLES
-                string address = Localization.GetAddressForLine(key, target.LocaleCode);
+                    string address = Localization.GetAddressForLine(key, target.LocaleCode);
 
-                if (allAddressEntries.TryGetValue(address, out var addressableAssetEntry)) {
-                    entry.asset = AssetDatabase.LoadAssetAtPath<Object>(addressableAssetEntry.AssetPath);
-                    anyAssetsFound = true;                
-                }
+                    if (allAddressEntries.TryGetValue(address, out var addressableAssetEntry))
+                    {
+                        entry.asset = AssetDatabase.LoadAssetAtPath<Object>(addressableAssetEntry.AssetPath);
+                        anyAssetsFound = true;
+                    }
 #endif
                 }
                 else
@@ -277,6 +368,55 @@ namespace Yarn.Unity.Editor
                 null,
                 null
             );
+        }
+
+        internal void ImportFromYarnProject(YarnProject project)
+        {
+            var target = this.target as Localization;
+            if (target == null)
+            {
+                return;
+            }
+
+            var lineIDs = project.baseLocalization.GetLineIDs();
+
+            var allLocalisedStrings = lineIDs.Select(id => new KeyValuePair<string, string?>(id, project.baseLocalization.GetLocalizedString(id))).Where(kv => kv.Value != null);
+            var allLocalisedObjects = lineIDs.Select(id => new KeyValuePair<string, Object?>(id, project.baseLocalization.GetLocalizedObject<Object>(id))).Where(kv => kv.Value != null);
+
+            target.AddLocalizedStringsToAsset(allLocalisedStrings!);
+            target.AddLocalizedObjectsToAsset<Object>(allLocalisedObjects!);
+
+            serializedObject.Update();
+
+            EditorUtility.SetDirty(target);
+            AssetDatabase.SaveAssetIfDirty(target);
+        }
+
+        internal void ImportFromCSV(TextAsset asset)
+        {
+            var target = this.target as Localization;
+            if (target == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var stringTable = StringTableEntry.ParseFromCSV(asset.text);
+
+                target.AddLocalizedStringsToAsset(stringTable.Select(s => new KeyValuePair<string, string>(s.ID, s.Text ?? string.Empty)));
+
+                serializedObject.Update();
+
+                EditorUtility.SetDirty(target);
+                AssetDatabase.SaveAssetIfDirty(target);
+
+            }
+            catch (System.ArgumentException e)
+            {
+                Debug.LogWarning($"Failed to import localization from CSV because an error was encountered during text parsing: {e}");
+            }
+
         }
     }
 }

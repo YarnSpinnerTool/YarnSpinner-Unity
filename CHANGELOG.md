@@ -31,6 +31,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Async form of `FadeAlpha` added to `Effects`.
 - Cancellable `Delay` added to `AsyncHelpers`.
 - Cancellable `WaitUntil` that uses a predicate added to `AsyncHelpers`.
+- Localization assets can now be created as external assets, and provided to the Yarn Project importer.
+  - This can be useful if you need to edit the contents of your Localization assets, rather than letting Yarn Spinner create and manage them for you.
 
 ### Changed
 

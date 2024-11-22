@@ -7,6 +7,8 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     [HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
@@ -26,7 +28,7 @@ namespace Yarn.Unity
 
         [SerializeField]
         // [HideInInspector]
-        public LineMetadata lineMetadata;
+        public LineMetadata? lineMetadata;
 
         [SerializeField]
         [HideInInspector]
@@ -36,16 +38,7 @@ namespace Yarn.Unity
         /// The cached result of deserializing <see
         /// cref="compiledYarnProgram"/>.
         /// </summary>
-        private Program cachedProgram = null;
-
-        /// <summary>
-        /// The names of assemblies that <see cref="ActionManager"/> should look
-        /// for commands and functions in when this project is loaded into a
-        /// <see cref="DialogueRunner"/>.
-        /// </summary>
-        [SerializeField]
-        [HideInInspector]
-        public List<string> searchAssembliesForActions = new List<string>();
+        private Program? cachedProgram = null;
 
         /// <summary>
         /// The names of all nodes contained within the <see cref="Program"/>.
@@ -72,7 +65,7 @@ namespace Yarn.Unity
         /// The cached result of reading the default values from the <see
         /// cref="Program"/>.
         /// </summary>
-        private Dictionary<string, System.IConvertible> initialValues;
+        private Dictionary<string, System.IConvertible> initialValues = new();
         /// <summary>
         /// The default values of all declared or inferred variables in the <see
         /// cref="Program"/>. Organised by their name as written in the yarn
@@ -186,6 +179,14 @@ namespace Yarn.Unity
             return headers;
         }
 
+        /// <summary>
+        /// Gets a Localization given a locale code.
+        /// </summary>
+        /// <param name="localeCode">The locale code to find a <see
+        /// cref="Localization"/> for.</param>
+        /// <returns>The Localization if one is found for the locale <paramref
+        /// name="localeCode"/>; <see cref="baseLocalization"/>
+        /// otherwise.</returns>
         public Localization GetLocalization(string localeCode)
         {
             // If localeCode is null, we use the base localization.
@@ -194,12 +195,9 @@ namespace Yarn.Unity
                 return baseLocalization;
             }
 
-            foreach (var loc in localizations)
+            if (localizations.TryGetValue(localeCode, out var result))
             {
-                if (loc.LocaleCode == localeCode)
-                {
-                    return loc;
-                }
+                return result;
             }
 
             // We didn't find a localization. Fall back to the Base

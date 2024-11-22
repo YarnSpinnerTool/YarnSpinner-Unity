@@ -187,15 +187,33 @@ namespace Yarn.Unity.Editor
 
             foreach (var loc in project.Localisation)
             {
-                var hasStringsFile = project.TryGetStringsPath(loc.Key, out var stringsFilePath);
-                var hasAssetsFolder = project.TryGetAssetsPath(loc.Key, out var assetsFolderPath);
+                ProjectImportData.LocalizationEntry locInfo;
 
-                var locInfo = new ProjectImportData.LocalizationEntry
+                if (string.IsNullOrEmpty(loc.Value.Strings) == false && loc.Value.Strings.StartsWith("unity:"))
                 {
-                    languageID = loc.Key,
-                    stringsFile = hasStringsFile ? AssetDatabase.LoadAssetAtPath<TextAsset>(stringsFilePath) : null,
-                    assetsFolder = hasAssetsFolder ? AssetDatabase.LoadAssetAtPath<DefaultAsset>(assetsFolderPath) : null
-                };
+                    // This is an external Localization asset.
+                    locInfo = new ProjectImportData.LocalizationEntry
+                    {
+                        languageID = loc.Key,
+                        isExternal = true,
+                        externalLocalization = AssetDatabase.LoadAssetAtPath<Localization>(AssetDatabase.GUIDToAssetPath(loc.Value.Strings.Substring("unity:".Length)))
+                    };
+                }
+                else
+                {
+                    var hasStringsFile = project.TryGetStringsPath(loc.Key, out var stringsFilePath);
+                    var hasAssetsFolder = project.TryGetAssetsPath(loc.Key, out var assetsFolderPath);
+
+                    // This is a reference to a strings table file and a folder
+                    // containing assets.
+                    locInfo = new ProjectImportData.LocalizationEntry
+                    {
+                        languageID = loc.Key,
+                        isExternal = false,
+                        stringsFile = hasStringsFile ? AssetDatabase.LoadAssetAtPath<TextAsset>(stringsFilePath) : null,
+                        assetsFolder = hasAssetsFolder ? AssetDatabase.LoadAssetAtPath<DefaultAsset>(assetsFolderPath) : null
+                    };
+                }
                 importData.localizations.Add(locInfo);
             }
 
@@ -732,6 +750,13 @@ namespace Yarn.Unity.Editor
 
             foreach (var localisationInfo in importData.localizations)
             {
+                if (localisationInfo.isExternal)
+                {
+                    // Don't need to create a localization asset because an
+                    // external asset was provided
+                    continue;
+                }
+
                 // Don't create a localization if the language ID was not
                 // provided
                 if (string.IsNullOrEmpty(localisationInfo.languageID))
@@ -773,7 +798,6 @@ namespace Yarn.Unity.Editor
                 }
 
                 var newLocalization = ScriptableObject.CreateInstance<Localization>();
-                newLocalization.LocaleCode = localisationInfo.languageID;
 
                 // Add these new lines to the localisation's asset
                 foreach (var entry in stringTable)
@@ -781,7 +805,7 @@ namespace Yarn.Unity.Editor
                     newLocalization.AddLocalisedStringToAsset(entry.ID, entry.Text);
                 }
 
-                projectAsset.localizations.Add(newLocalization);
+                projectAsset.localizations.Add(localisationInfo.languageID, newLocalization);
                 newLocalization.name = localisationInfo.languageID;
 
                 if (localisationInfo.assetsFolder != null)
@@ -825,7 +849,7 @@ namespace Yarn.Unity.Editor
                         var assetPaths = stringIDsToAssetPaths
                             .Select(a => new KeyValuePair<string, Object>(a.Key, AssetDatabase.LoadAssetAtPath<Object>(a.Value)));
 
-                        newLocalization.AddLocalizedObjects(assetPaths);
+                        newLocalization.AddLocalizedObjectsToAsset(assetPaths);
 
 #if YARNSPINNER_DEBUG
                         stopwatch.Stop();
@@ -862,7 +886,6 @@ namespace Yarn.Unity.Editor
 
                 var developmentLocalization = ScriptableObject.CreateInstance<Localization>();
                 developmentLocalization.name = $"Default ({importData.baseLanguageName})";
-                developmentLocalization.LocaleCode = importData.baseLanguageName;
 
 
                 // Add these new lines to the development localisation's asset
@@ -872,11 +895,17 @@ namespace Yarn.Unity.Editor
                 }
 
                 projectAsset.baseLocalization = developmentLocalization;
-                projectAsset.localizations.Add(projectAsset.baseLocalization);
+                projectAsset.localizations.Add(importData.baseLanguageName, projectAsset.baseLocalization);
                 ctx.AddObjectToAsset("default-language", developmentLocalization);
 
                 // Since this is the default language, also populate the line metadata.
                 projectAsset.lineMetadata = new LineMetadata(LineMetadataTableEntriesFromCompilationResult(compilationResult));
+            }
+
+            foreach (var locInfo in importData.localizations.Where(l => l.isExternal && l.externalLocalization != null))
+            {
+                // Add external localisations to this project's list
+                projectAsset.localizations.Add(locInfo.languageID, locInfo.externalLocalization);
             }
         }
 
@@ -895,12 +924,12 @@ namespace Yarn.Unity.Editor
             {
                 if (table.LocaleIdentifier.CultureInfo != defaultCulture)
                 {
-                    var neutralTable = table.LocaleIdentifier.CultureInfo.IsNeutralCulture 
-                        ? table.LocaleIdentifier.CultureInfo 
+                    var neutralTable = table.LocaleIdentifier.CultureInfo.IsNeutralCulture
+                        ? table.LocaleIdentifier.CultureInfo
                         : table.LocaleIdentifier.CultureInfo.Parent;
 
-                    var defaultNeutral = defaultCulture.IsNeutralCulture 
-                        ? defaultCulture 
+                    var defaultNeutral = defaultCulture.IsNeutralCulture
+                        ? defaultCulture
                         : defaultCulture.Parent;
 
                     if (!neutralTable.Equals(defaultNeutral))

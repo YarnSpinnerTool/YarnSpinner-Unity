@@ -100,9 +100,23 @@ namespace Yarn.Unity
             }
             else
             {
+
                 // This localisation doesn't use addressable assets. Fetch the
                 // asset directly from the Localization object.
-                asset = loc.GetLocalizedObject<Object>(sourceLineID);
+                if (YarnProject == null)
+                {
+                    throw new System.InvalidOperationException($"Can't fetch asset: {nameof(YarnProject)} is null");
+                }
+                var assetLocalization = YarnProject.GetLocalization(AssetLocaleCode);
+                if (assetLocalization != null)
+                {
+                    asset = assetLocalization.GetLocalizedObject<Object>(sourceLineID);
+                }
+                else
+                {
+                    // Project has no localisation for locale AssetLocale
+                    asset = null;
+                }
             }
 
             return new LocalizedLine

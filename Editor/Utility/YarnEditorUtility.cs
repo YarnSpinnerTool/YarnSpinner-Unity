@@ -22,6 +22,7 @@ namespace Yarn.Unity.Editor
         // has moved Yarn Spinner around.)
         const string DocumentIconTextureGUID = "0ed312066ea6f40f6af965f21c818b34";
         const string ProjectIconTextureGUID = "f6a533d9225cd40ea9ded31d4f686e3b";
+        const string LocalizationIconTextureGUID = "2cbba4ddd142149b0a38697070990deb";
         const string TemplateFileGUID = "4f4ca4a46020a454f80e2ac78eda5aa1";
 
         /// <summary>
@@ -46,6 +47,19 @@ namespace Yarn.Unity.Editor
         public static Texture2D GetYarnProjectIconTexture()
         {
             string textureAssetPath = AssetDatabase.GUIDToAssetPath(ProjectIconTextureGUID);
+
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(textureAssetPath);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Texture2D"/> that can be used to represent
+        /// built-in Localization objects.
+        /// </summary>
+        /// <returns>A texture to use in the Unity editor for Yarn built-in
+        /// Localization files.</returns>
+        public static Texture2D GetLocalizationIconTexture()
+        {
+            string textureAssetPath = AssetDatabase.GUIDToAssetPath(LocalizationIconTextureGUID);
 
             return AssetDatabase.LoadAssetAtPath<Texture2D>(textureAssetPath);
         }

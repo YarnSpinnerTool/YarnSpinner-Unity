@@ -269,7 +269,7 @@ namespace Yarn.Unity.Editor
                 Compare.By<string>((fileName, lineID) =>
                 {
                     var lineIDWithoutPrefix = lineID.Replace("line:", "");
-                    return Path.GetFileNameWithoutExtension(fileName).Equals(lineIDWithoutPrefix);
+                    return Path.GetFileNameWithoutExtension(fileName).Contains(lineIDWithoutPrefix);
                 })
                 )
                 // Discard any pair where no asset was found

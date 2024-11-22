@@ -36,9 +36,11 @@ namespace Yarn.Unity.Editor
         // YarnProjectImporter. Used during Inspector GUI drawing.
         internal static SerializedProperty CurrentProjectDefaultLanguageProperty;
 
-        const string ProjectUpgradeHelpURL = "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/importing-yarn-files/yarn-projects#upgrading-yarn-projects";
-        const string CreateNewIssueURL = "https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=Project Import Error";
-
+        internal const string ProjectUpgradeHelpURL = "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/importing-yarn-files/yarn-projects#upgrading-yarn-projects";
+        internal const string CreateNewIssueURL = "https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=Project Import Error";
+        internal const string AddStringTagsButtonLabel = "Add Line Tags to Scripts";
+        internal const string GenerateStringsFileButtonLabel = "Export Strings and Metadata as CSV";
+        internal const string UpdateExistingStringsFilesButtonLabel = "Update Existing Strings Files";
         private SerializedProperty compileErrorsProperty;
         private SerializedProperty serializedDeclarationsProperty;
         private SerializedProperty defaultLanguageProperty;
@@ -157,21 +159,34 @@ namespace Yarn.Unity.Editor
                     continue;
                 }
 
-                var stringFile = locField.value.stringsFile;
-                var assetFolder = locField.value.assetsFolder;
-
                 var locInfo = new Project.LocalizationInfo();
 
-                if (stringFile != null)
+                if (locField.value.isExternal && locField.value.externalLocalization != null && AssetDatabase.TryGetGUIDAndLocalFileIdentifier(locField.value.externalLocalization, out var guid, out _))
                 {
-                    string stringFilePath = AssetDatabase.GetAssetPath(stringFile);
-                    locInfo.Strings = Path.GetRelativePath(importerFolder, stringFilePath);
+                    var path = AssetDatabase.GetAssetPath(locField.value.externalLocalization);
+                    locInfo.Strings = "unity:" + guid;
+                    locInfo.Assets = "unity:" + guid;
                 }
-                if (assetFolder != null)
+                else
                 {
-                    string assetFolderPath = AssetDatabase.GetAssetPath(assetFolder);
-                    locInfo.Assets = Path.GetRelativePath(importerFolder, assetFolderPath);
+                    var stringFile = locField.value.stringsFile;
+                    var assetFolder = locField.value.assetsFolder;
+
+
+                    if (stringFile != null)
+                    {
+                        string stringFilePath = AssetDatabase.GetAssetPath(stringFile);
+                        locInfo.Strings = Path.GetRelativePath(importerFolder, stringFilePath);
+                    }
+                    if (assetFolder != null)
+                    {
+                        string assetFolderPath = AssetDatabase.GetAssetPath(assetFolder);
+                        locInfo.Assets = Path.GetRelativePath(importerFolder, assetFolderPath);
+                    }
                 }
+
+
+
 
                 data.Localisation[locField.value.languageID] = locInfo;
                 locField.ClearModified();
@@ -456,21 +471,21 @@ namespace Yarn.Unity.Editor
 
             var cantGenerateUnityStringTableMessage = new IMGUIContainer(() =>
             {
-                EditorGUILayout.HelpBox("All lines must have a line ID tag in order to create a string table. Click 'Add Line Tags to Scripts' to fix this problem.", MessageType.Warning);
+                EditorGUILayout.HelpBox($"All lines must have a line ID tag in order to create a string table. Click '{AddStringTagsButtonLabel}' to fix this problem.", MessageType.Warning);
             });
 
-            addStringTagsButton.text = "Add Line Tags to Scripts";
+            addStringTagsButton.text = AddStringTagsButtonLabel;
             addStringTagsButton.clicked += () =>
             {
                 YarnProjectUtility.AddLineTagsToFilesInYarnProject(yarnProjectImporter);
                 UpdateTaggingButtonsEnabled();
             };
 
-            generateStringsFileButton.text = "Export Strings and Metadata as CSV";
+            generateStringsFileButton.text = GenerateStringsFileButtonLabel;
 
             generateStringsFileButton.clicked += () => ExportStringsData(yarnProjectImporter);
 
-            updateExistingStringsFilesButton.text = "Update Existing Strings Files";
+            updateExistingStringsFilesButton.text = UpdateExistingStringsFilesButtonLabel;
             updateExistingStringsFilesButton.clicked += () =>
             {
                 YarnProjectUtility.UpdateLocalizationCSVs(yarnProjectImporter);
