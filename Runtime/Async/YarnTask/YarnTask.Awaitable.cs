@@ -208,10 +208,19 @@ namespace Yarn.Unity
             return new YarnTask<T> { Awaitable = awaitable };
         }
 
-        readonly public void Forget() { /* no-op */ }
-
-        static readonly AwaitableCompletionSource<T> completionSource = new();
-
+        readonly public async void Forget()
+        {
+            // Run the task, and if it throws an exception, log it (instead of
+            // letting it disappear.)
+            try
+            {
+                await this.Awaitable;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
         public static partial YarnTask<T> FromResult(T value)
         {
             // this is based on https://discussions.unity.com/t/awaitable-fromresult/943659/7
@@ -221,6 +230,7 @@ namespace Yarn.Unity
             builder.SetResult(value);
             return builder.Task;
         }
+
         private readonly struct NullStateMachine : IAsyncStateMachine
         {
             public void MoveNext() { }
