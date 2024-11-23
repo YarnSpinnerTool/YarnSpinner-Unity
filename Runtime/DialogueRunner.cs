@@ -167,6 +167,17 @@ namespace Yarn.Unity
             {
                 if (lineProvider == null)
                 {
+                    // No line provider was created. We'll need to create one.
+                    if (yarnProject != null && yarnProject.localizationType == LocalizationType.Unity)
+                    {
+                        // The Yarn Project uses Unity Localisation; without an
+                        // appropriately configured line provider, we can't show
+                        // any lines.
+                        Debug.LogWarning($"Yarn Project {yarnProject.name} uses Unity Localization, but the " +
+                            $"Dialogue Runner \"{this.name}\" isn't set up to use a {nameof(Yarn.Unity.UnityLocalization.UnityLocalisedLineProvider)}. " +
+                            $"Line text and assets will not be available.", this);
+                    }
+
                     lineProvider = gameObject.AddComponent<BuiltinLocalisedLineProvider>();
                 }
                 return lineProvider;
