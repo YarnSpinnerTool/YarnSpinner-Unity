@@ -70,7 +70,17 @@ namespace Yarn.Unity
             return new YarnTask { Awaitable = Awaiter() };
         }
 
-        readonly public void Forget() { /* no-op */ }
+        readonly public async void Forget()
+        {
+            try
+            {
+                await Awaitable;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static partial async YarnTask Yield()
