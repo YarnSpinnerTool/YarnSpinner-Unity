@@ -7,6 +7,7 @@ using UnityEditor;
 
 namespace Yarn.Unity.Editor
 {
+    [System.Obsolete]
     [CustomEditor(typeof(LineView))]
     public class LineViewEditor : UnityEditor.Editor
     {
