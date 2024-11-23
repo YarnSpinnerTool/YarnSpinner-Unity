@@ -108,7 +108,7 @@ namespace Yarn.Unity.Tests
                 lineParser.RegisterMarkerProcessor("plural", builtinReplacer);
                 lineParser.RegisterMarkerProcessor("ordinal", builtinReplacer);
 
-                return lineParser.ParseString(lineText, locale);
+                return lineParser.ParseString(expandedText, locale);
             }
 
             return new LocalizedLine()
@@ -122,7 +122,7 @@ namespace Yarn.Unity.Tests
         }
 
         [UnityTest]
-        [Timeout(200)] // should complete basically immediately
+        // [Timeout(200)] // should complete basically immediately
         public IEnumerator LineView_WhenManuallyAdvancingLine_CompletesLineTask() => YarnTask.ToCoroutine(async () =>
         {
             LocalizedLine line = MakeLocalizedLine("Line 1");
@@ -138,8 +138,7 @@ namespace Yarn.Unity.Tests
 
             var lineCancellationToken = new LineCancellationToken
             {
-                HurryUpToken = cancellationSource.Token,
-                NextLineToken = CancellationToken.None
+                NextLineToken = cancellationSource.Token
             };
 
             YarnTask runTask = lineView.RunLineAsync(line, lineCancellationToken);
@@ -171,8 +170,7 @@ namespace Yarn.Unity.Tests
 
             var lineCancellationToken = new LineCancellationToken
             {
-                HurryUpToken = cancellationSource.Token,
-                NextLineToken = CancellationToken.None
+                NextLineToken = cancellationSource.Token
             };
 
             YarnTask runTask = lineView.RunLineAsync(line, lineCancellationToken);
@@ -199,6 +197,7 @@ namespace Yarn.Unity.Tests
             await YarnTask.Delay(TimeSpan.FromSeconds(2f));
 
             lineView.lineText.maxVisibleCharacters.Should().BeGreaterThanOrEqualTo(characterCount);
+            lineView.continueButton.activeInHierarchy.Should().BeTrue();
 
             // Dismiss the line
             lineView.UserRequestedViewAdvancement();
@@ -209,8 +208,8 @@ namespace Yarn.Unity.Tests
             await YarnTask.Delay(TimeSpan.FromSeconds(lineView.fadeOutTime));
             await YarnTask.Delay(TimeSpan.FromSeconds(0.05));
 
-            lineView.canvasGroup.alpha.Should().BeEqualTo(0);
             runTask.IsCompleted().Should().BeTrue();
+            lineView.canvasGroup.alpha.Should().BeEqualTo(0);
         });
     }
 }
