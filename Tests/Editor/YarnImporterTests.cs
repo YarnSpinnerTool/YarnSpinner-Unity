@@ -265,7 +265,7 @@ But not all of them are.
 
             project.baseLocalization.Should().NotBeNull();
             project.localizations.Should().HaveCount(1);
-            project.baseLocalization.Should().BeSameObjectAs(project.localizations[0]);
+            project.baseLocalization.Should().BeSameObjectAs(project.localizations.Single().Value);
 
             project.baseLocalization.GetLineIDs().Should().ContainExactly(YarnTestUtility.ExpectedStrings.Select(l => l.ID));
         }
@@ -301,12 +301,13 @@ But not all of them are.
             // Assert:
             // A new localization, based on the .csv file we just created,
             // should be present.
-            Assert.IsNotNull(project.baseLocalization);
-            Assert.IsNotEmpty(project.localizations);
-            project.localizations.Should().HaveCount(1);
+            project.baseLocalization.Should().NotBeNull();
+            project.localizations.Should().NotBeEmpty();
+            project.localizations.Should().HaveCount(2);
+
             var localization = project.localizations.Should().ContainKey("test").Subject.Value;
 
-            CollectionAssert.AreEquivalent(localization.GetLineIDs(), YarnTestUtility.ExpectedStrings.Select(l => l.ID));
+            localization.GetLineIDs().Should().ContainAllOf(YarnTestUtility.ExpectedStrings.Select(l => l.ID));
         }
 
         [Test]
@@ -418,22 +419,23 @@ But not all of them are.
 
             // Assert:
             // A single localization exists, with the default language.
-            Assert.AreEqual(1, project.localizations.Count);
-            Assert.AreSame(project.baseLocalization, project.localizations.First());
+            project.localizations.Should().HaveCount(1);
+            project.baseLocalization.Should().BeSameObjectAs(project.localizations.Single().Value);
 
-            Assert.NotNull(project.baseLocalization);
+            project.baseLocalization.Should().NotBeNull();
 
             var allAssetsAtPath = AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(project));
 
             // Three assets: the project, the import data, and the localization
-            Assert.AreEqual(3, allAssetsAtPath.Count());
+            allAssetsAtPath.Should().HaveCount(3);
 
-            Assert.That(allAssetsAtPath, Has.Exactly(1).Matches(Is.TypeOf<YarnProject>()));
-            Assert.That(allAssetsAtPath, Has.Exactly(1).Matches(Is.TypeOf<ProjectImportData>()));
-            Assert.That(allAssetsAtPath, Has.Exactly(1).Matches(Is.TypeOf<Localization>()));
+            allAssetsAtPath.OfType<YarnProject>().Should().HaveCount(1);
+            allAssetsAtPath.OfType<ProjectImportData>().Should().HaveCount(1);
+            allAssetsAtPath.OfType<Localization>().Should().HaveCount(1);
 
             // The localizations that were imported are the same as the
             // localizations the asset knows about
+            project.baseLocalization.Should().BeSameObjectAs(allAssetsAtPath.OfType<Localization>().First());
             Assert.AreSame(project.baseLocalization, allAssetsAtPath.OfType<Localization>().First());
         }
 
@@ -479,30 +481,30 @@ But not all of them are.
             // define a localization for the default language, an
             // 'implicit' localization was created. Both contain the same
             // lines.
-            Assert.AreEqual(2, project.localizations.Count);
+            project.localizations.Should().HaveCount(2);
 
             var defaultLocalization = project.localizations.First(l => l.Key == defaultLanguage).Value;
             var otherLocalization = project.localizations.First(l => l.Key == otherLanguage).Value;
 
-            Assert.NotNull(defaultLocalization);
-            Assert.NotNull(otherLocalization);
+            defaultLocalization.Should().NotBeNull();
+            otherLocalization.Should().NotBeNull();
 
-            Assert.AreNotSame(defaultLocalization, otherLocalization);
-            Assert.AreSame(defaultLocalization, project.baseLocalization);
+            defaultLocalization.Should().NotBeSameObjectAs(otherLocalization, "both localisations are distinct");
+            defaultLocalization.Should().BeSameObjectAs(project.baseLocalization, "the default language localisation is the project's base localisation");
 
-            CollectionAssert.AreEquivalent(defaultLocalization.GetLineIDs(), otherLocalization.GetLineIDs());
+            defaultLocalization.GetLineIDs().Should().ContainAllOf(otherLocalization.GetLineIDs());
 
             var allAssetsAtPath = AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(project));
 
             // Four assets: the project, the import data, and the two localizations
-            Assert.AreEqual(4, allAssetsAtPath.Count());
-            Assert.That(allAssetsAtPath, Has.Exactly(1).Matches(Is.TypeOf<YarnProject>()));
-            Assert.That(allAssetsAtPath, Has.Exactly(1).Matches(Is.TypeOf<ProjectImportData>()));
-            Assert.That(allAssetsAtPath, Has.Exactly(2).Matches(Is.TypeOf<Localization>()));
+            allAssetsAtPath.Should().HaveCount(4);
+            allAssetsAtPath.OfType<YarnProject>().Should().HaveCount(1);
+            allAssetsAtPath.OfType<ProjectImportData>().Should().HaveCount(1);
+            allAssetsAtPath.OfType<Localization>().Should().HaveCount(2);
 
             // The localizations that were imported are the same as the
             // localizations the asset knows about
-            CollectionAssert.AreEquivalent(project.localizations, allAssetsAtPath.OfType<Localization>());
+            project.localizations.Values.Should().ContainAllOf(allAssetsAtPath.OfType<Localization>());
         }
 
         [Test]
