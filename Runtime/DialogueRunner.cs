@@ -179,6 +179,7 @@ namespace Yarn.Unity
                     }
 
                     lineProvider = gameObject.AddComponent<BuiltinLocalisedLineProvider>();
+                    lineProvider.YarnProject = yarnProject;
                 }
                 return lineProvider;
             }
