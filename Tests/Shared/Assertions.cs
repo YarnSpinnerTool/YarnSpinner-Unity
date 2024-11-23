@@ -205,9 +205,9 @@ namespace Yarn.Unity.Tests
         /// cref="Subject"/>.</typeparam>
         /// <param name="message">An optional message to include if the
         /// assertion fails.</param>
-        /// <returns>The current <see cref="ObjectAssertions{TSubject}"/>
-        /// instance for method chaining.</returns>
-        public ObjectAssertions<TSubject> BeOfExactType<T>(string? message = null)
+        /// <returns>An <see cref="ObjectAssertions{T}"/> object for this
+        /// subject for method chaining.</returns>
+        public ObjectAssertions<T> BeOfExactType<T>(string? message = null)
         {
             NullCheck(Subject, message);
 
@@ -216,7 +216,7 @@ namespace Yarn.Unity.Tests
                 throw new AssertionException($"Expected subject to be exactly {typeof(T)}, but it was {Subject.GetType()}", message);
             }
 
-            return this;
+            return new ObjectAssertions<T> { Subject = (T)(object)this.Subject };
         }
     }
 
