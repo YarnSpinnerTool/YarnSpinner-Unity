@@ -16,6 +16,8 @@ namespace Yarn.Unity.Tests
 {
     public static class EndToEndUtility
     {
+        private const int DelayBetweenInteractions = 10;
+
         private static GameObject GetObject(string objectName)
         {
             var allObjects = GameObject.FindObjectsByType<GameObject>(
@@ -72,12 +74,12 @@ namespace Yarn.Unity.Tests
                 }
                 while (token.IsCancellationRequested == false)
                 {
-                    if (view.lineText.text == lineText)
+                    if (view.lineText.text == lineText && view.continueButton.activeInHierarchy)
                     {
-                        Debug.Log($"Successfully saw line " + lineText);
-                        await YarnTask.Delay(500);
                         // Continue to the next piece of content
                         view.OnContinueClicked();
+                        Debug.Log($"Successfully saw line " + lineText);
+                        await YarnTask.Delay(DelayBetweenInteractions);
                         return;
                     }
                     await YarnTask.Yield();
@@ -108,12 +110,20 @@ namespace Yarn.Unity.Tests
                     var optionsListViews = view.GetComponentsInChildren<OptionView>(includeInactive: false);
                     foreach (var v in optionsListViews)
                     {
+                        // The buttons may not be interactable yet, so don't try
+                        // to use it if it's not
+                        if (!v.IsInteractable())
+                        {
+                            continue;
+                        }
+
                         var text = v.GetComponentInChildren<TMPro.TMP_Text>();
                         if (text.text == optionText)
                         {
-                            await YarnTask.Delay(500);
                             // This is the option!
                             v.InvokeOptionSelected();
+                            Debug.Log($"Successfully selected option " + optionText);
+                            await YarnTask.Delay(DelayBetweenInteractions);
                             return;
                         }
                     }
