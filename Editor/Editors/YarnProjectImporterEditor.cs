@@ -41,17 +41,9 @@ namespace Yarn.Unity.Editor
         internal const string AddStringTagsButtonLabel = "Add Line Tags to Scripts";
         internal const string GenerateStringsFileButtonLabel = "Export Strings and Metadata as CSV";
         internal const string UpdateExistingStringsFilesButtonLabel = "Update Existing Strings Files";
-        private SerializedProperty compileErrorsProperty;
-        private SerializedProperty serializedDeclarationsProperty;
-        private SerializedProperty defaultLanguageProperty;
-        private SerializedProperty sourceScriptsProperty;
-        private SerializedProperty languagesToSourceAssetsProperty;
+
         private SerializedProperty useAddressableAssetsProperty;
 
-        private ReorderableDeclarationsList serializedDeclarationsList;
-
-        private SerializedProperty useUnityLocalisationSystemProperty;
-        private SerializedProperty unityLocalisationTableCollectionProperty;
 
         public VisualTreeAsset editorUI;
         public VisualTreeAsset localizationUIAsset;
@@ -71,7 +63,6 @@ namespace Yarn.Unity.Editor
         private SerializedProperty variablesClassNamespaceProperty;
         private SerializedProperty variablesClassParentProperty;
 
-
         private bool AnyModifications
         {
             get
@@ -89,7 +80,6 @@ namespace Yarn.Unity.Editor
         private bool LocalisationsAddedOrRemoved = false;
         private bool BaseLanguageNameModified = false;
         private bool SourceFilesAddedOrRemoved = false;
-        private bool VariableFileSettingsModified = false;
 
         public override void OnEnable()
         {
