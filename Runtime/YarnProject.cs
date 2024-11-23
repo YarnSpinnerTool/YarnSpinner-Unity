@@ -65,7 +65,8 @@ namespace Yarn.Unity
         /// The cached result of reading the default values from the <see
         /// cref="Program"/>.
         /// </summary>
-        private Dictionary<string, System.IConvertible> initialValues = new();
+        private Dictionary<string, System.IConvertible>? initialValues;
+
         /// <summary>
         /// The default values of all declared or inferred variables in the <see
         /// cref="Program"/>. Organised by their name as written in the yarn
