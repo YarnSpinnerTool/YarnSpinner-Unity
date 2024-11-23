@@ -500,7 +500,7 @@ namespace Yarn.Unity.Editor
                     }
                     else
                     {
-                        WriteLine($"/// {enumCase.Value}");
+                        WriteLine($"/// {enumCase.Key}");
                     }
                     WriteLine($"/// </summary>");
 
