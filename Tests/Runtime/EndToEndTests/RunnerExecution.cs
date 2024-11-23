@@ -15,7 +15,7 @@ namespace Yarn.Unity.Tests
     /// DialogueRunner in the scene. When the object is disposed, it waits for
     /// the DialogueRunner to not be running, and throws an exception on
     /// timeout. It's intended to be used inside <see cref="EndToEndTests"/>,
-    /// with the <see langword="using"/> syntax.
+    /// with the <see langword="await using"/> syntax.
     /// </summary>
     class RunnerExecution : IAsyncDisposable
     {
@@ -57,7 +57,10 @@ namespace Yarn.Unity.Tests
 
         public async System.Threading.Tasks.ValueTask DisposeAsync()
         {
-            await WaitForTaskAsync(CompletionTask, "Expected dialogue to be finished", timeoutMilliseconds);
+            // If we're disposing, then we expect our dialogue runner to be
+            // completed (or to complete shortly). Wait for it to do so (or
+            // throw a TimeoutException).
+            await CompletionTask.WithTimeout("Expected dialogue to be finished", timeoutMilliseconds);
         }
     }
 }

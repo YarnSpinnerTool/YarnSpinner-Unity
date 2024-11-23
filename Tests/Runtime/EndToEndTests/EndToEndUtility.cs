@@ -63,7 +63,6 @@ namespace Yarn.Unity.Tests
             }
         }
 
-
         public static async YarnTask WaitForLineAsync(string lineText, int timeoutMilliseconds = 3000)
         {
             async YarnTask LineWait(CancellationToken token)
@@ -88,10 +87,11 @@ namespace Yarn.Unity.Tests
             }
             var cts = new CancellationTokenSource();
 
-            await WaitForTaskAsync(
-                LineWait(cts.Token),
-                failureMessage: $"Failed to see line \"{lineText}\" within ${timeoutMilliseconds}ms",
-                timeoutMilliseconds);
+            await LineWait(cts.Token)
+                .WithTimeout(
+                    failureMessage: $"Failed to see line \"{lineText}\" within {timeoutMilliseconds}ms",
+                    timeoutMilliseconds
+                );
 
             cts.Cancel();
         }
@@ -126,43 +126,74 @@ namespace Yarn.Unity.Tests
 
             var cts = new CancellationTokenSource();
 
-            await WaitForTaskAsync(
-                OptionsWait(cts.Token),
-                failureMessage: $"Failed to see option \"{optionText}\" within ${timeoutMilliseconds}ms",
-                timeoutMilliseconds);
+            await OptionsWait(cts.Token)
+                .WithTimeout(
+                    failureMessage: $"Failed to see option \"{optionText}\" within ${timeoutMilliseconds}ms",
+                    timeoutMilliseconds
+                );
 
             cts.Cancel();
         }
+    }
 
-        public static async YarnTask WaitForTaskAsync(YarnTask task, string? failureMessage = null, int timeoutMilliseconds = 2000)
+    static class YarnTaskExtensions
+    {
+        public static async YarnTask WithTimeout(this YarnTask task, string? failureMessage = null, int timeoutMilliseconds = 2000)
         {
-            bool timedOut = false;
+            // A completion source that represents whether the task timed out
+            // (true), or didn't (false).
+            YarnTaskCompletionSource<bool> taskCompletionSource = new();
+
+            // A cancellation source used to cancel the timeout if the task
+            // completes in time.
+            CancellationTokenSource cts = new();
+
             try
             {
-                CancellationTokenSource cts = new CancellationTokenSource();
+                async YarnTask RunTask()
+                {
+                    // Run the task, and then attempt to report that we did not
+                    // time out (and we should stop waiting to see if we did).
+                    await task;
+
+                    taskCompletionSource.TrySetResult(false);
+                    cts.Cancel();
+                }
+
                 async YarnTask Timeout()
                 {
+                    // Wait the allotted time, and then attempt to report that
+                    // we timed out; stop the timer early if the task completes
+                    // before this wait does.
                     try
                     {
                         await YarnTask.Delay(timeoutMilliseconds, cts.Token);
-                        timedOut = true;
+
+                        taskCompletionSource.TrySetResult(true);
                     }
-                    catch (OperationCanceledException) { }
+                    catch (OperationCanceledException)
+                    {
+                        // Our delay was cancelled because the main task
+                        // finished. Nothing to do.
+                    }
                 }
 
-                await YarnTask.WhenAll(task, Timeout());
+                RunTask().Forget();
+                Timeout().Forget();
 
+                bool timedOut = await taskCompletionSource.Task;
+                if (timedOut == true)
+                {
+                    // We timed out before completing the task. Throw the
+                    // timeout exception.
+                    throw new TimeoutException(failureMessage);
+                }
             }
             catch (Exception)
             {
-                // Rethrow non-timeout exceptions to our main context
+                // Rethrow non-timeout exceptions to our main context.
                 throw;
-            }
-            if (timedOut == true)
-            {
-                throw new TimeoutException(failureMessage);
             }
         }
     }
-
 }
