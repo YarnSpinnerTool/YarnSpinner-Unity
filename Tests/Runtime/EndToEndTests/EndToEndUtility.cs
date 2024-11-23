@@ -56,11 +56,9 @@ namespace Yarn.Unity.Tests
         {
             var dialogueRunner = GameObject.FindAnyObjectByType<DialogueRunner>();
             dialogueRunner.StartDialogue(nodeName);
+            dialogueRunner.IsDialogueRunning.Should().BeTrue();
 
-            while (dialogueRunner.IsDialogueRunning)
-            {
-                await YarnTask.Yield();
-            }
+            await dialogueRunner.DialogueTask;
         }
 
         public static async YarnTask WaitForLineAsync(string lineText, int timeoutMilliseconds = 3000)
