@@ -72,13 +72,12 @@ namespace Yarn.Unity.Tests
             yield return new WaitUntil(() => loaded);
 
             runner = GameObject.FindAnyObjectByType<DialogueRunner>();
-            lineProvider = GameObject.FindAnyObjectByType<BuiltinLocalisedLineProvider>();
-
             runner.Should().NotBeNull();
-            runner.lineProvider!.Should().NotBeNull();
+            runner.LineProvider.Should().NotBeNull();
+            lineProvider = runner.LineProvider.Should().BeOfExactType<BuiltinLocalisedLineProvider>().Subject;
 
             lineProvider.Should().NotBeNull();
-            lineProvider.Should().BeSameObjectAs(runner.lineProvider!);
+            runner.LineProvider.Should().BeSameObjectAs(lineProvider);
 
             yarnProject = runner.yarnProject!;
             yarnProject.Should().NotBeNull();
@@ -123,11 +122,10 @@ namespace Yarn.Unity.Tests
             var allLines = yarnProject.GetLineIDsForNodes(new[] { "ShadowLines_Kitchen" });
             var shadowLineID = allLines.Should().ContainSingle(l => l.StartsWith("line:shadowtest_") == false).Subject;
 
-            var sourceLineID = yarnProject.lineMetadata.GetShadowLineSource(shadowLineID)!;
+            var sourceLineID = yarnProject.lineMetadata?.GetShadowLineSource(shadowLineID)!;
             sourceLineID.Should().NotBeNull();
 
             var sourceLine = await lineProvider.GetLocalizedLineAsync(new Line(sourceLineID, new string[] { }), CancellationToken.None);
-
             var shadowLine = await lineProvider.GetLocalizedLineAsync(new Line(shadowLineID, new string[] { }), CancellationToken.None);
 
             shadowLine.TextID.Should().NotBeEqualTo(sourceLineID, "shadow lines have their own unique line IDs");
@@ -136,19 +134,6 @@ namespace Yarn.Unity.Tests
 
             shadowLine.Metadata.Should().NotBeEmpty("shadow line contains metadata");
             shadowLine.Metadata.Should().NotContainAnyOf(sourceLine.Metadata, "shadow line does not contain its source line's metadata");
-
-            // var line = new Line("line:shadowtest_1", new string[] { });
-
-            // lineProvider.LocaleCode = "en";
-            // var localisedLine = await lineProvider.GetLocalizedLineAsync(line, this.runner.Dialogue, CancellationToken.None);
-
-            // localisedLine.Should().NotBeNull();
-
-            // localisedLine.TextID.Should().BeEqualTo("line:shadowtest_1");
-            // localisedLine.Asset!.Should().NotBeNull();
-            // localisedLine.Asset!.Should().BeOfType<AudioClip>();
-            // localisedLine.CharacterName!.Should().NotBeNull();
-            // localisedLine.CharacterName!.Should().BeEqualTo("Ava");
         });
 
     }
