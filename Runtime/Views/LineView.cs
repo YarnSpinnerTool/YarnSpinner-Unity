@@ -557,8 +557,9 @@ namespace Yarn.Unity
         /// </remarks>
         public override void DialogueComplete()
         {
-            // do we still have a line lying around?
-            if (currentLine != null)
+            // do we still have a line lying around (and we aren't in the middle
+            // of being destroyed)?
+            if (currentLine != null && gameObject.activeInHierarchy && DialogueRunner.IsInPlaymode)
             {
                 currentLine = null;
                 StopAllCoroutines();

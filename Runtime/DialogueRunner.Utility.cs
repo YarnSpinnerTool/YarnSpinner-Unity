@@ -443,11 +443,14 @@ namespace Yarn.Unity
 #if UNITY_EDITOR
                 if (!UnityEditor.EditorApplication.isPlaying)
                 {
+                    // We are not in playmode at all.
                     return false;
                 }
 
-                if (!UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode && UnityEditor.EditorApplication.isPlaying)
+                if (!UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
                 {
+                    // We are in playmode, but we're about to change out of
+                    // playmode.
                     return false;
                 }
 #endif
