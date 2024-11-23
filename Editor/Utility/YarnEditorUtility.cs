@@ -23,7 +23,8 @@ namespace Yarn.Unity.Editor
         const string DocumentIconTextureGUID = "0ed312066ea6f40f6af965f21c818b34";
         const string ProjectIconTextureGUID = "f6a533d9225cd40ea9ded31d4f686e3b";
         const string LocalizationIconTextureGUID = "2cbba4ddd142149b0a38697070990deb";
-        const string TemplateFileGUID = "4f4ca4a46020a454f80e2ac78eda5aa1";
+        const string YarnScriptTemplateFileGUID = "4f4ca4a46020a454f80e2ac78eda5aa1";
+        const string DialogueViewTemplateFileGUID = "4a168359cda6140c0bddcd5955a326e4";
 
         /// <summary>
         /// Returns a <see cref="Texture2D"/> that can be used to represent
@@ -74,13 +75,32 @@ namespace Yarn.Unity.Editor
         /// text file cannot be found.</throws>
         public static string GetTemplateYarnScriptPath()
         {
-            var path = AssetDatabase.GUIDToAssetPath(TemplateFileGUID);
+            var path = AssetDatabase.GUIDToAssetPath(YarnScriptTemplateFileGUID);
             if (string.IsNullOrEmpty(path))
             {
                 throw new System.IO.FileNotFoundException($"Template file for new Yarn scripts couldn't be found. Have the .meta files for Yarn Spinner been modified or deleted? Try re-importing the Yarn Spinner package to fix this error.");
             }
             return path;
         }
+
+        /// <summary>
+        /// Returns the path to a text file that can be used as the basis
+        /// for newly created C# Dialogue View scripts.
+        /// </summary>
+        /// <returns>A path to a file to use in the Unity editor for
+        /// creating new C# Dialogue View.</returns>
+        /// <throws cref="FileNotFoundException">Thrown if the template
+        /// text file cannot be found.</throws>
+        public static string GetTemplateDialogueViewPath()
+        {
+            var path = AssetDatabase.GUIDToAssetPath(DialogueViewTemplateFileGUID);
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new System.IO.FileNotFoundException($"Template file for Dialogue View scripts couldn't be found. Have the .meta files for Yarn Spinner been modified or deleted? Try re-importing the Yarn Spinner package to fix this error.");
+            }
+            return path;
+        }
+
 
         /// <summary>
         /// Begins the interactive process of creating a new Yarn file in
@@ -120,6 +140,25 @@ namespace Yarn.Unity.Editor
         }
 
         /// <summary>
+        /// Creates a new C# script asset containing a template Dialogue View in
+        /// the current folder, and begins interactively renaming it.
+        /// </summary>
+        [MenuItem("Assets/Create/Yarn Spinner/Dialogue View Script", false, 111)]
+        [MenuItem("Assets/Create/Scripting/Yarn Spinner/Dialogue View Script", false, 101)]
+        public static void CreateDialogueViewScript()
+        {
+            // This method call is undocumented, but public. It's defined
+            // in ProjectWindowUtil, and used by other parts of the editor
+            // to create other kinds of assets (scripts, textures, etc).
+            ProjectWindowUtil.StartNameEditingIfProjectWindowExists(
+                0,
+                ScriptableObject.CreateInstance<DoCreateYarnScriptAsset>(),
+                "NewDialogueView.cs",
+                null,
+                GetTemplateDialogueViewPath());
+        }
+
+        /// <summary>
         /// Writes a Yarn Project to <paramref name="path"/>.
         /// </summary>
         /// <param name="path">The path at which to write the file.</param>
@@ -140,10 +179,10 @@ namespace Yarn.Unity.Editor
         /// script.</param>
         public static Object CreateYarnAsset(string path)
         {
-            return CreateYarnScriptAssetFromTemplate(path, GetTemplateYarnScriptPath());
+            return CreateScriptAssetFromTemplate(path, GetTemplateYarnScriptPath());
         }
 
-        private static Object CreateYarnScriptAssetFromTemplate(string pathName, string resourceFile)
+        private static Object CreateScriptAssetFromTemplate(string pathName, string resourceFile)
         {
             // Read the contents of the template file
             string templateContent;
@@ -153,20 +192,19 @@ namespace Yarn.Unity.Editor
             }
             catch
             {
-                Debug.LogError("Failed to find the Yarn script template file. Creating an empty file instead.");
-                // the minimal valid Yarn script - no headers, no body
-                templateContent = "---\n===\n";
+                Debug.LogError("Failed to find template file. Creating an empty file instead.");
+                templateContent = "";
             }
 
-            // The script name is the name of the file, sans extension.
-            string scriptName = Path.GetFileNameWithoutExtension(pathName);
+            // The file name is the name of the file, sans extension.
+            string fileName = Path.GetFileNameWithoutExtension(pathName);
 
             // Replace any spaces with underscores - these aren't allowed
             // in node names
-            scriptName = scriptName.Replace(" ", "_");
+            fileName = fileName.Replace(" ", "_");
 
-            // Replace the placeholder with the script name
-            templateContent = templateContent.Replace("#SCRIPTNAME#", scriptName);
+            // Replace the placeholder with the file name
+            templateContent = templateContent.Replace("#SCRIPTNAME#", fileName);
 
             // Respect the user's line endings preferences for this new
             // text asset
@@ -187,7 +225,7 @@ namespace Yarn.Unity.Editor
                     break;
                 case LineEndingsMode.Unix:
                 default:
-                    // Unix or a anything else = use Unix endings
+                    // Unix or anything else = use Unix endings
                     lineEndings = unixLineEndings;
                     break;
             }
@@ -221,7 +259,7 @@ namespace Yarn.Unity.Editor
             public override void Action(int instanceId, string pathName, string resourceFile)
             {
                 // Produce the asset.
-                Object o = CreateYarnScriptAssetFromTemplate(pathName, resourceFile);
+                Object o = CreateScriptAssetFromTemplate(pathName, resourceFile);
 
                 // Reveal it on disk.
                 ProjectWindowUtil.ShowCreatedAsset(o);

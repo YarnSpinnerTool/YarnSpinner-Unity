@@ -33,6 +33,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Cancellable `WaitUntil` that uses a predicate added to `AsyncHelpers`.
 - Localization assets can now be created as external assets, and provided to the Yarn Project importer.
   - This can be useful if you need to edit the contents of your Localization assets, rather than letting Yarn Spinner create and manage them for you.
+- You can now create a new Dialogue View script by opening Assets -> Create -> Yarn Spinner -> Dialogue View Script. This will create a new C# file that contains an empty template for building your own Dialogue View.
 
 ### Changed
 
