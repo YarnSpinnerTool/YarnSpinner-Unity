@@ -458,6 +458,43 @@ namespace Yarn.Unity.Tests
         }
 
         /// <summary>
+        /// Asserts that the colection does not exactly contain the same items
+        /// as the specified collection.
+        /// </summary>
+        /// <param name="expectation">The collection of items to test
+        /// against.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        public void NotContainExactly(IEnumerable<TItem> expectation, string? message = null)
+        {
+            NullCheck(Subject, message);
+            NullCheck(expectation, message);
+
+            bool exactMatch = true;
+
+            foreach (var item in Subject)
+            {
+                if (expectation.Contains(item) == false)
+                {
+                    exactMatch = false;
+                    break;
+                }
+            }
+            foreach (var item in expectation)
+            {
+                if (Subject.Contains(item) == false)
+                {
+                    exactMatch = false;
+                    break;
+                }
+            }
+            if (exactMatch)
+            {
+                throw new AssertionException($"Expected collection to not contain exact same items as {expectation}", message);
+            }
+        }
+
+        /// <summary>
         /// Asserts that the collection contains all of the specified items.
         /// </summary>
         /// <param name="expectation">The collection of items expected to be in
