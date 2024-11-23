@@ -777,6 +777,23 @@ namespace Yarn.Unity.Tests
         /// name="subject"/>.</returns>
         public static ObjectAssertions<object> Should(this object? subject)
         {
+            if (subject is UnityEngine.Object unityObject)
+            {
+                // Special-case Unity objects: they override the equality
+                // operator so that 'x == null' may be true if x is not null but
+                // no longer represents an object in memory (aghhhh). This
+                // causes problems with later checks, because our code doesn't
+                // know that it should use the overloaded == operator.
+                //
+                // To get around this, we'll perform the 'sort-of-null' check
+                // here, and if they're in this state, act like the user passed
+                // in an actual 'null' value.
+
+                if (!unityObject)
+                {
+                    return new ObjectAssertions<object> { Subject = null };
+                }
+            }
             return new ObjectAssertions<object> { Subject = subject };
         }
 
