@@ -9,7 +9,9 @@ namespace Yarn.Unity.Editor
     using UnityEngine;
 
     /// <summary>
-    /// An asset post processor that forwards any asset database changes to all YarnProjectImporter for them to verify if they need to update their locale assets.
+    /// An asset post processor that forwards any asset database changes to all
+    /// YarnProjectImporter for them to verify if they need to update their
+    /// locale assets.
     /// </summary>
     class YarnProjectAssetReimport : AssetPostprocessor
     {

@@ -17,15 +17,16 @@ namespace Yarn.Unity.Editor
 {
 
     /// <summary>
-    /// A <see cref="ScriptedImporter"/> for Yarn assets. The actual asset
-    /// used and referenced at runtime and in the editor will be a <see
-    /// cref="YarnScript"/>, which this class wraps around creating the
-    /// asset's corresponding meta file.
+    /// A <see cref="ScriptedImporter"/> for Yarn assets.
     /// </summary>
     [ScriptedImporter(6, new[] { "yarn", "yarnc" }, -1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
     [InitializeOnLoad]
     public class YarnImporter : ScriptedImporter
     {
+        /// <summary>
+        /// Get the collection of <see cref="YarnProject"/> assets that
+        /// reference this Yarn script.
+        /// </summary>
         public IEnumerable<YarnProject> DestinationProjects
         {
             get
@@ -35,6 +36,10 @@ namespace Yarn.Unity.Editor
             }
         }
 
+        /// <summary>
+        /// Get the collection of importers for the <see cref="YarnProject"/> assets that
+        /// reference this Yarn script.
+        /// </summary>
         public IEnumerable<YarnProjectImporter> DestinationProjectImporters
         {
             get
@@ -54,6 +59,10 @@ namespace Yarn.Unity.Editor
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether any of the Yarn Projects in <see
+        /// cref="DestinationProjects"/> reported any errors in this file.
+        /// </summary>
         public bool HasErrors
         {
             get
@@ -71,6 +80,11 @@ namespace Yarn.Unity.Editor
 
         private TextAsset ImportedScript => AssetDatabase.LoadAssetAtPath<TextAsset>(this.assetPath);
 
+        /// <summary>
+        /// Called by Unity to import an asset.
+        /// </summary>
+        /// <param name="ctx">The context for the asset import
+        /// operation.</param>
         public override void OnImportAsset(AssetImportContext ctx)
         {
             var stopwatch = new System.Diagnostics.Stopwatch();
