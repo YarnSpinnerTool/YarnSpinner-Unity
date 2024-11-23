@@ -75,35 +75,52 @@ namespace Yarn.Unity.Tests
         {
             await MoveToMarkerAsync("Character1", "Character2");
 
-            await using (var dialogue = StartDialogue("SpeakToGuard"))
+            await StartDialogue("SpeakToGuard", async () =>
             {
                 await WaitForLineAsync("Halt, scum!");
                 await WaitForLineAsync("None shall pass this point!");
-            }
+            });
 
             var variableStorage = GameObject.FindAnyObjectByType<VariableStorageBehaviour>();
             variableStorage.SetValue("$guard_friendly", true);
 
-            await using (var dialogue = StartDialogue("SpeakToGuard"))
+            await StartDialogue("SpeakToGuard", async () =>
             {
                 await WaitForLineAsync("Halt, traveller!");
                 await WaitForLineAsync("Why, hello there!");
                 await WaitForLineAsync("Ah, my friend! You may pass.");
-            }
+            });
         });
 
         [UnityTest]
         public IEnumerator EndToEndTest_CanAwaitContent() => YarnTask.ToCoroutine(async () =>
         {
-            await using var dialogue = StartDialogue("LinesAndOptions");
+            await StartDialogue("LinesAndOptions", async () =>
+            {
+                await WaitForLineAsync("Line 1");
+                await WaitForLineAsync("Line 2");
+                await WaitForOptionAndSelectAsync("Option 1");
+                await WaitForLineAsync("Option 1 Selected");
+                await WaitForLineAsync("Line 3");
+            });
 
-            await WaitForLineAsync("Line 1");
-            await WaitForLineAsync("Line 2");
-            await WaitForOptionAndSelectAsync("Option 1");
-            await WaitForLineAsync("Option 1 Selected");
-            await WaitForLineAsync("Line 3");
+            bool didTimeout = false;
+
+            try
+            {
+                await StartDialogue("LinesAndOptions", async () =>
+                {
+                    await WaitForLineAsync("Line 1");
+                    // Don't progress any further; dialogue should time out
+                }, 100);
+            }
+            catch (System.TimeoutException)
+            {
+                didTimeout = true;
+            }
+
+            didTimeout.Should().BeTrue("The task is expected to time out");
         });
-
         [UnityTest]
         public IEnumerator LineGroups_DeliverContent() => YarnTask.ToCoroutine(() =>
         {
