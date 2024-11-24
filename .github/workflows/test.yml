@@ -22,7 +22,7 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ matrix.unityVersion }}-${{ matrix.unityLocalisation }}
       cancel-in-progress: true # Cancel other jobs if another one arrives
-    name: Test on ${{ matrix.unityVersion }} for ${{ matrix.targetPlatform }}
+    name: ${{ matrix.unityVersion }} (${{ matrix.targetPlatform }}, ${{ matrix.unityLocalisation && 'with unity loc' || 'no unity loc' }})
     runs-on: [self-hosted, linux]
     strategy:
       fail-fast: false
