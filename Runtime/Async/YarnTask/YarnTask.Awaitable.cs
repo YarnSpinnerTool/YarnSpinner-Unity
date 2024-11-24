@@ -130,9 +130,13 @@ namespace Yarn.Unity
             }
         }
 
-        public static partial async YarnTask<T[]> WhenAll<T>(params YarnTask<T>[] tasks)
+        public static partial YarnTask<T[]> WhenAll<T>(params YarnTask<T>[] tasks)
         {
-            List<T> results = new List<T>(tasks.Length);
+            return WhenAll((IEnumerable<YarnTask<T>>)tasks);
+        }
+        public static partial async YarnTask<T[]> WhenAll<T>(IEnumerable<YarnTask<T>> tasks)
+        {
+            List<T> results = new List<T>(tasks is Array taskArray ? taskArray.Length : 4);
 
             foreach (var awaitable in tasks)
             {
