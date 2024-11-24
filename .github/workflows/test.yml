@@ -4,17 +4,17 @@ env:
   ACTIONS_RUNNER_DEBUG: true
   ACTIONS_STEP_DEBUG: true
 
-on: 
+on:
   push:
-      branches:
-        - main
-        - development/v3
-        - 'feature/**'
-      paths:
-        - 'Editor/**'
-        - 'Runtime/**'
-        - 'Samples~/**'
-        - 'Tests/**'
+    branches:
+      - main
+      - development/v3
+      - "feature/**"
+    paths:
+      - "Editor/**"
+      - "Runtime/**"
+      - "Samples~/**"
+      - "Tests/**"
   workflow_dispatch:
 
 jobs:
@@ -31,9 +31,9 @@ jobs:
         projectPath:
           - YarnSpinner
         unityVersion:
-          - 2021.3.35f1
           - 2022.3.21f1
           - 2023.2.12f1
+          - 6000.0.24f1
         targetPlatform:
           # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           # - StandaloneWindows64 # Build a Windows 64-bit standalone.
@@ -48,7 +48,7 @@ jobs:
           mkdir -p ${{ matrix.projectPath }}/ProjectSettings 
           mkdir -p ${{ matrix.projectPath }}/Packages
           mkdir -p output
-      
+
       # Add the Unity Input System package, and configure the new project to use
       # both the Input System and the legacy Input Manager.
       - name: Add Input System package
@@ -69,7 +69,7 @@ jobs:
             }
           }
           EOF
-      
+
       - name: Check out to Packages/YarnSpinner
         uses: actions/checkout@v2
         with:
@@ -85,7 +85,7 @@ jobs:
             -e TEST_MODE=EditMode \
             --hostname YS-Linux-Build \
             yarnspinner/unity-${{ matrix.unityVersion }}
-                
+
       - name: Run play mode tests
         if: always()
         run: |
@@ -96,7 +96,7 @@ jobs:
             -e TEST_MODE=PlayMode \
             --hostname YS-Linux-Build \
             yarnspinner/unity-${{ matrix.unityVersion }}
-                
+
       - name: Upload test results
         uses: actions/upload-artifact@v2
         if: always()
@@ -104,6 +104,3 @@ jobs:
           name: Test results (edit + play, ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}
           # path: ${{ steps.testRunner.outputs.artifactsPath }}
           path: ./output
-
-                
-    
