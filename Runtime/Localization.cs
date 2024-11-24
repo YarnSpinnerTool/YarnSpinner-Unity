@@ -42,6 +42,10 @@ namespace Yarn.Unity
         {
             public string? localizedString;
             public UnityEngine.Object? localizedAsset;
+
+#if USE_ADDRESSABLES
+            public UnityEngine.AddressableAssets.AssetReference? localizedAssetReference;
+#endif
         }
 
         [SerializeField] internal SerializableDictionary<string, LocalizationTableEntry> entries = new();
@@ -50,18 +54,12 @@ namespace Yarn.Unity
 
         /// <summary>
         /// Gets a value indicating whether this <see cref="Localization"/>
-        /// contains assets that are linked to strings.
-        /// </summary>
-        public bool ContainsLocalizedAssets { get => _containsLocalizedAssets; internal set => _containsLocalizedAssets = value; }
-
-        /// <summary>
-        /// Gets a value indicating whether this <see cref="Localization"/>
         /// makes use of Addressable Assets (<see langword="true"/>), or if it
         /// stores its assets as direct references (<see langword="false"/>).
         /// </summary>
         /// <remarks>
         /// If this property is <see langword="true"/>, <see
-        /// cref="GetLocalizedObject"/> and <see
+        /// cref="GetLocalizedObjectAsync"/> and <see
         /// cref="ContainsLocalizedObject"/> should not be used to retrieve
         /// localised objects. Instead, the Addressable Assets API should be
         /// used.
@@ -72,7 +70,7 @@ namespace Yarn.Unity
         private bool _containsLocalizedAssets;
 
         [SerializeField]
-        private bool _usesAddressableAssets;
+        internal bool _usesAddressableAssets;
 
         #region Localized Strings
         public string? GetLocalizedString(string key)
@@ -152,14 +150,6 @@ namespace Yarn.Unity
             }
         }
 
-        public void AddLocalizedStringsToAsset(IEnumerable<KeyValuePair<string, string>> strings)
-        {
-            foreach (var entry in strings)
-            {
-                GetOrCreateEntry(entry.Key).localizedString = entry.Value;
-            }
-        }
-
         /// <summary>
         /// Adds a collection of strings to the runtime string table.
         /// </summary>
@@ -189,9 +179,17 @@ namespace Yarn.Unity
                 return null;
             }
 
+#if USE_ADDRESSABLES
             if (_usesAddressableAssets)
             {
+                if (entry.localizedAssetReference == null || entry.localizedAssetReference.RuntimeKeyIsValid() == false) { return null; }
+
+                Debug.Log($"Fetching localised asset " + entry.localizedAssetReference.editorAsset);
+
+                // Try to fetch the referenced asset
+                return await UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(entry.localizedAssetReference).Task;
             }
+#endif
 
             if (entry.localizedAsset is T resultAsTargetObject)
             {
@@ -215,14 +213,29 @@ namespace Yarn.Unity
         public bool ContainsLocalizedObject<T>(string key) where T : UnityEngine.Object => entries.TryGetValue(key, out var asset) && asset is T;
 
 #if UNITY_EDITOR
-        public void AddLocalizedObjectToAsset<T>(string key, T value) where T : UnityEngine.Object => GetOrCreateEntry(key).localizedAsset = value;
-
-        public void AddLocalizedObjectsToAsset<T>(IEnumerable<KeyValuePair<string, T>> objects) where T : UnityEngine.Object
+        public void AddLocalizedObjectToAsset<T>(string key, T value) where T : UnityEngine.Object
         {
-            foreach (var entry in objects)
+            var entry = GetOrCreateEntry(key);
+
+#if USE_ADDRESSABLES
+            if (this.UsesAddressableAssets)
             {
-                GetOrCreateEntry(entry.Key).localizedAsset = entry.Value;
+                // This Localization uses Addressables, so rather than storing a
+                // direct reference to the asset, we'll use an indirect
+                // AssetReference.
+                entry.localizedAssetReference = new UnityEngine.AddressableAssets.AssetReference();
+                entry.localizedAssetReference.SetEditorAsset(value);
+                entry.localizedAsset = null;
+                return;
             }
+            else
+            {
+                // Addressables are available, but we're not using addressable
+                // assets, so clear out any asset references.
+                entry.localizedAssetReference = null;
+            }
+#endif
+            entry.localizedAsset = value;
         }
 #endif
         #endregion

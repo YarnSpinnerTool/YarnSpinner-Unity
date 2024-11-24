@@ -19,9 +19,9 @@ namespace Yarn.Unity.Editor
 {
     internal class ImportLocalizationFromAssetWindow : EditorWindow
     {
-        private System.Type assetType;
+        private System.Type? assetType;
 
-        public LocalizationEditor Target { get; private set; }
+        public LocalizationEditor? Target { get; private set; }
 
         public string FieldLabel { get; set; } = "Source Asset";
         public string? HelpBox { get; set; }
@@ -72,13 +72,15 @@ namespace Yarn.Unity.Editor
     public class LocalizationEditor : UnityEditor.Editor
     {
         private SerializedProperty entriesProperty;
-        private AudioClip lastPreviewed;
+        private SerializedProperty usesUnityAddressablesProperty;
+        private AudioClip? lastPreviewed;
         private List<Culture> cultures;
         private int currentPickerWindow;
 
         private void OnEnable()
         {
             entriesProperty = serializedObject.FindProperty(nameof(Localization.entries));
+            usesUnityAddressablesProperty = serializedObject.FindProperty(nameof(Localization._usesAddressableAssets));
             lastPreviewed = null;
             cultures = Cultures.GetCultures().ToList();
 
@@ -106,6 +108,16 @@ namespace Yarn.Unity.Editor
                 }
                 else
                 {
+#if USE_ADDRESSABLES
+                    EditorGUILayout.PropertyField(usesUnityAddressablesProperty);
+                    EditorGUILayout.Space();
+#else
+                    if (usesUnityAddressablesProperty.boolValue)
+                    {
+                        EditorGUILayout.HelpBox("This Localization uses Unity Addressables, but the package is not installed.", MessageType.Warning);
+                        EditorGUILayout.Space();
+                    }
+#endif
                     if (GUILayout.Button("Import String from Yarn Project"))
                     {
                         var window = ImportLocalizationFromAssetWindow.Show<YarnProject>(this, "Import from Yarn Project", ImportFromYarnProject);
@@ -131,6 +143,16 @@ namespace Yarn.Unity.Editor
 
                                 var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetPath);
                                 target.AddLocalizedObjectToAsset<UnityEngine.Object>(lineID, asset);
+
+#if USE_ADDRESSABLES
+                                if (target.UsesAddressableAssets)
+                                {
+                                    // If we're using addressable assets, make
+                                    // sure that the asset we just added has an
+                                    // address
+                                    EnsureAssetIsAddressable(asset, Localization.GetAddressForLine(lineID, target.name));
+                                }
+#endif
                             }
                             serializedObject.Update();
 
@@ -177,73 +199,55 @@ namespace Yarn.Unity.Editor
                 return;
             }
 
-            var localizedLineContent = new List<LocalizedLineEntry>();
+            var localizedLineContent = new List<(string ID, string Line, Object? Asset)>();
 
             var anyAssetsFound = false;
-
-#if USE_ADDRESSABLES
-            Dictionary<string, UnityEditor.AddressableAssets.Settings.AddressableAssetEntry> allAddressEntries = null;
-
-            if (target.ContainsLocalizedAssets && target.UsesAddressableAssets)
-            {
-                allAddressEntries = AddressableAssetSettingsDefaultObject.Settings.groups.SelectMany(g => g.entries).ToDictionary(e => e.address);
-
-            }
-#endif
 
             foreach (var key in lineKeys)
             {
 
-                var entry = new LocalizedLineEntry();
+                if (target.entries.TryGetValue(key, out var entry) == false)
+                {
+                    // We somehow don't have a value for this line ID?
+                    Debug.LogError($"Internal error: failed to find an entry for {key}");
+                    EditorGUILayout.HelpBox($"Internal error: failed to find an entry for {key}", MessageType.Error);
+                    return;
+                }
 
-                entry.id = key;
+                string? text = target.GetLocalizedString(key);
+                Object? asset = null;
 
-                // Get the localized text for this line.
-                entry.text = target.GetLocalizedString(key);
-
-                if (target.ContainsLocalizedAssets && target.UsesAddressableAssets)
+                if (target.UsesAddressableAssets)
                 {
 #if USE_ADDRESSABLES
-                    string address = Localization.GetAddressForLine(key, target.LocaleCode);
-
-                    if (allAddressEntries.TryGetValue(address, out var addressableAssetEntry))
-                    {
-                        entry.asset = AssetDatabase.LoadAssetAtPath<Object>(addressableAssetEntry.AssetPath);
-                        anyAssetsFound = true;
-                    }
+                    asset = entry.localizedAssetReference?.editorAsset;
 #endif
                 }
                 else
                 {
-                    if (target.ContainsLocalizedObject<Object>(key))
-                    {
-                        var o = target.GetLocalizedObject<Object>(key);
-                        entry.asset = o;
-                        anyAssetsFound = true;
-                    }
+                    asset = entry.localizedAsset;
                 }
 
+                anyAssetsFound |= asset != null;
 
-
-                localizedLineContent.Add(entry);
+                localizedLineContent.Add((key, text ?? string.Empty, asset));
             }
 
             foreach (var entry in localizedLineContent)
             {
 
-                var idContent = new GUIContent(entry.id);
+                var idContent = new GUIContent(entry.ID);
 
                 // Create a GUIContent that contains the string as its text
                 // and also as its tooltip. This allows the user to mouse
                 // over this line in the inspector and see more of it.
-                var lineContent = new GUIContent(entry.text, entry.text);
+                var lineContent = new GUIContent(entry.Line, entry.Line);
 
                 // Show the line ID and localized text
                 EditorGUILayout.LabelField(idContent, lineContent);
 
-                if (entry.asset != null)
+                if (entry.Asset != null)
                 {
-
                     // Asset references are never editable here - they're
                     // only updated by the Localization Database. Add a
                     // DisabledGroup here to make all ObjectFields be
@@ -251,10 +255,10 @@ namespace Yarn.Unity.Editor
                     EditorGUI.BeginDisabledGroup(true);
 
                     // Show the object field
-                    EditorGUILayout.ObjectField(" ", entry.asset, typeof(UnityEngine.Object), false);
+                    EditorGUILayout.ObjectField(" ", entry.Asset, typeof(UnityEngine.Object), false);
 
                     // for AudioClips, add a little play preview button
-                    if (entry.asset.GetType() == typeof(UnityEngine.AudioClip))
+                    if (entry.Asset.GetType() == typeof(UnityEngine.AudioClip))
                     {
                         var rect = GUILayoutUtility.GetLastRect();
 
@@ -266,8 +270,8 @@ namespace Yarn.Unity.Editor
                         var wasEnabled = GUI.enabled;
                         GUI.enabled = true;
 
-                        bool isPlaying = IsClipPlaying((AudioClip)entry.asset);
-                        if (lastPreviewed == (AudioClip)entry.asset && isPlaying)
+                        bool isPlaying = IsClipPlaying((AudioClip)entry.Asset);
+                        if (lastPreviewed == (AudioClip)entry.Asset && isPlaying)
                         {
                             rect.width = 54;
                             rect.x += EditorGUIUtility.labelWidth - 56;
@@ -284,8 +288,8 @@ namespace Yarn.Unity.Editor
                             rect.x += EditorGUIUtility.labelWidth - 20;
                             if (GUI.Button(rect, "▸"))
                             {
-                                PlayClip((AudioClip)entry.asset);
-                                lastPreviewed = (AudioClip)entry.asset;
+                                PlayClip((AudioClip)entry.Asset);
+                                lastPreviewed = (AudioClip)entry.Asset;
                             }
                         }
 
@@ -380,11 +384,35 @@ namespace Yarn.Unity.Editor
 
             var lineIDs = project.baseLocalization.GetLineIDs();
 
-            var allLocalisedStrings = lineIDs.Select(id => new KeyValuePair<string, string?>(id, project.baseLocalization.GetLocalizedString(id))).Where(kv => kv.Value != null);
-            var allLocalisedObjects = lineIDs.Select(id => new KeyValuePair<string, Object?>(id, project.baseLocalization.GetLocalizedObject<Object>(id))).Where(kv => kv.Value != null);
+            target.UsesAddressableAssets = project.baseLocalization.UsesAddressableAssets;
 
-            target.AddLocalizedStringsToAsset(allLocalisedStrings!);
-            target.AddLocalizedObjectsToAsset<Object>(allLocalisedObjects!);
+            foreach (var (id, entry) in project.baseLocalization.entries)
+            {
+                var localizedString = entry.localizedString;
+                if (localizedString != null)
+                {
+                    target.AddLocalisedStringToAsset(id, localizedString);
+                }
+
+                Object? asset = null;
+
+                if (project.baseLocalization.UsesAddressableAssets)
+                {
+#if USE_ADDRESSABLES
+                    asset = entry.localizedAssetReference?.editorAsset;
+#endif
+                }
+                else if (entry.localizedAsset != null)
+                {
+                    asset = entry.localizedAsset;
+                }
+
+                if (asset != null)
+                {
+                    target.AddLocalizedObjectToAsset(id, asset);
+                }
+
+            }
 
             serializedObject.Update();
 
@@ -404,7 +432,10 @@ namespace Yarn.Unity.Editor
             {
                 var stringTable = StringTableEntry.ParseFromCSV(asset.text);
 
-                target.AddLocalizedStringsToAsset(stringTable.Select(s => new KeyValuePair<string, string>(s.ID, s.Text ?? string.Empty)));
+                foreach (var entry in stringTable)
+                {
+                    target.AddLocalisedStringToAsset(entry.ID, entry.Text ?? string.Empty);
+                }
 
                 serializedObject.Update();
 
@@ -416,7 +447,34 @@ namespace Yarn.Unity.Editor
             {
                 Debug.LogWarning($"Failed to import localization from CSV because an error was encountered during text parsing: {e}");
             }
-
         }
+
+#if USE_ADDRESSABLES
+        internal static void EnsureAssetIsAddressable(Object asset, string defaultAddress)
+        {
+            if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(asset, out string guid, out _) == false)
+            {
+                Debug.LogError($"Can't make {asset} addressable: no GUID found", asset);
+                return;
+            }
+
+            // Find the existing entry for this asset, if it has one.
+            UnityEditor.AddressableAssets.Settings.AddressableAssetEntry entry = AddressableAssetSettingsDefaultObject.Settings.FindAssetEntry(guid);
+
+            if (entry != null)
+            {
+                // The asset already has an entry. Nothing to do.
+                return;
+            }
+
+            // This asset didn't have an entry. Create one in the default group.
+            Debug.Log($"Marking asset {AssetDatabase.GetAssetPath(asset)} as addressable", asset);
+
+            entry = AddressableAssetSettingsDefaultObject.Settings.CreateOrMoveEntry(guid, AddressableAssetSettingsDefaultObject.Settings.DefaultGroup);
+
+            // Update the entry's address.
+            entry.SetAddress(defaultAddress);
+        }
+#endif
     }
 }

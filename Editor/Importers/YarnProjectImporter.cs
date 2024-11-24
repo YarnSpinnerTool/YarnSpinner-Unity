@@ -907,8 +907,6 @@ namespace Yarn.Unity.Editor
 
                 if (localisationInfo.assetsFolder != null)
                 {
-                    newLocalization.ContainsLocalizedAssets = true;
-
 #if USE_ADDRESSABLES
                     const bool addressablesAvailable = true;
 #else
@@ -917,43 +915,45 @@ namespace Yarn.Unity.Editor
 
                     if (addressablesAvailable && useAddressableAssets)
                     {
-                        // We only need to flag that the assets
-                        // required by this localization are accessed
-                        // via the Addressables system. (Call
-                        // YarnProjectUtility.UpdateAssetAddresses to
-                        // ensure that the appropriate assets have the
-                        // appropriate addresses.)
                         newLocalization.UsesAddressableAssets = true;
                     }
-                    else
-                    {
-                        // We need to find the assets used by this
-                        // localization now, and assign them to the
-                        // Localization object.
+
+                    // We need to find the assets used by this
+                    // localization now, and assign them to the
+                    // Localization object.
 #if YARNSPINNER_DEBUG
-                        // This can take some time, so we'll measure
-                        // how long it takes.
-                        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                    // This can take some time, so we'll measure
+                    // how long it takes.
+                    var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 #endif
 
-                        // Get the line IDs.
-                        IEnumerable<string> lineIDs = stringTable.Select(s => s.ID);
+                    // Get the line IDs.
+                    IEnumerable<string> lineIDs = stringTable.Select(s => s.ID);
 
-                        // Map each line ID to its asset path.
-                        var stringIDsToAssetPaths = YarnProjectUtility.FindAssetPathsForLineIDs(lineIDs, AssetDatabase.GetAssetPath(localisationInfo.assetsFolder), typeof(UnityEngine.Object));
+                    // Map each line ID to its asset path.
+                    var stringIDsToAssetPaths = YarnProjectUtility.FindAssetPathsForLineIDs(lineIDs, AssetDatabase.GetAssetPath(localisationInfo.assetsFolder), typeof(UnityEngine.Object));
 
-                        // Load the asset, so we can assign the reference.
-                        var assetPaths = stringIDsToAssetPaths
-                            .Select(a => new KeyValuePair<string, Object>(a.Key, AssetDatabase.LoadAssetAtPath<Object>(a.Value)));
+                    // Load the asset, so we can assign the reference.
+                    var assetPaths = stringIDsToAssetPaths
+                        .Select(a => new KeyValuePair<string, Object>(a.Key, AssetDatabase.LoadAssetAtPath<Object>(a.Value)));
 
-                        newLocalization.AddLocalizedObjectsToAsset(assetPaths);
-
-#if YARNSPINNER_DEBUG
-                        stopwatch.Stop();
-                        Debug.Log($"Imported {stringIDsToAssetPaths.Count()} assets for {project.name} \"{pair.languageID}\" in {stopwatch.ElapsedMilliseconds}ms");
+                    foreach (var (id, asset) in assetPaths)
+                    {
+                        newLocalization.AddLocalizedObjectToAsset(id, asset);
+#if USE_ADDRESSABLES
+                        if (newLocalization.UsesAddressableAssets)
+                        {
+                            // If we're using addressable assets, make sure that
+                            // the asset we just added has an address
+                            LocalizationEditor.EnsureAssetIsAddressable(asset, Localization.GetAddressForLine(id, localisationInfo.languageID));
+                        }
 #endif
                     }
 
+#if YARNSPINNER_DEBUG
+                    stopwatch.Stop();
+                    Debug.Log($"Imported {stringIDsToAssetPaths.Count()} assets for {project.name} \"{pair.languageID}\" in {stopwatch.ElapsedMilliseconds}ms");
+#endif
                 }
 
                 ctx.AddObjectToAsset("localization-" + localisationInfo.languageID, newLocalization);

@@ -205,25 +205,28 @@ namespace Yarn.Unity.Editor
                 // Get the languages-to-source-assets map
                 .ImportData.localizations
                 // Get the asset folder for them
-                .Select(l => new {l.languageID, l.assetsFolder})
+                .Select(l => new { l.languageID, l.assetsFolder })
                 // Only consider those that have an asset folder
                 .Where(f => f.assetsFolder != null)
                 // Get the path for the asset folder
-                .Select(f => new {f.languageID, path = AssetDatabase.GetAssetPath(f.assetsFolder)})
+                .Select(f => new { f.languageID, path = AssetDatabase.GetAssetPath(f.assetsFolder) })
                 // Use that to get the assets inside these folders
-                .Select(f => new {f.languageID, assetPaths = FindAssetPathsForLineIDs(lineIDs, f.path)});
+                .Select(f => new { f.languageID, assetPaths = FindAssetPathsForLineIDs(lineIDs, f.path, typeof(UnityEngine.Object)) });
 
             var addressableAssetSettings = AddressableAssetSettingsDefaultObject.Settings;
 
-            foreach (var languageToAsset in languageToAssets) {
+            foreach (var languageToAsset in languageToAssets)
+            {
                 var assets = languageToAsset.assetPaths
-                    .Select(pair => new {LineID = pair.Key, GUID = AssetDatabase.AssetPathToGUID(pair.Value)});
-                
-                foreach (var asset in assets) {
+                    .Select(pair => new { LineID = pair.Key, GUID = AssetDatabase.AssetPathToGUID(pair.Value) });
+
+                foreach (var asset in assets)
+                {
                     // Find the existing entry for this asset, if it has one.
                     AddressableAssetEntry entry = addressableAssetSettings.FindAssetEntry(asset.GUID);
 
-                    if (entry == null) {
+                    if (entry == null)
+                    {
                         // This asset didn't have an entry. Create one in the
                         // default group.
                         entry = addressableAssetSettings.CreateOrMoveEntry(asset.GUID, addressableAssetSettings.DefaultGroup);

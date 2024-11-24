@@ -63,6 +63,11 @@ namespace Yarn.Unity.Editor
         private SerializedProperty variablesClassNamespaceProperty;
         private SerializedProperty variablesClassParentProperty;
 
+#if USE_UNITY_LOCALIZATION
+        private SerializedProperty useUnityLocalisationSystemProperty;
+        private SerializedProperty unityLocalisationTableCollectionProperty;
+#endif
+
         private bool AnyModifications
         {
             get
@@ -402,27 +407,8 @@ namespace Yarn.Unity.Editor
             };
             yarnInternalControls.Add(addLocalisationButton);
 
-#if USE_ADDRESSABLES
-            var updateAddressableAssetsButton = new Button();
-            updateAddressableAssetsButton.text = "Update Asset Addresses";
-            updateAddressableAssetsButton.clicked += () =>
-            {
-                YarnProjectUtility.UpdateAssetAddresses(yarnProjectImporter);
-            };
-            yarnInternalControls.Add(updateAddressableAssetsButton);
-
-            bool ShouldShowAssetsButton() => yarnProjectImporter.ImportData.localizations.Any(l => l.assetsFolder != null) && AddressableAssetSettingsDefaultObject.SettingsExists && useAddressableAssetsProperty.boolValue;
-
-            SetElementVisible(updateAddressableAssetsButton, ShouldShowAssetsButton());
-
-            useAddressableAssetsField.RegisterCallback<ChangeEvent<bool>>(evt => 
-            {
-                SetElementVisible(updateAddressableAssetsButton, ShouldShowAssetsButton());
-            });
-#endif
 
 #if USE_UNITY_LOCALIZATION
-
             localisationControls.Add(useUnityLocalisationSystemField);
 
             unityControls.Add(unityLocalisationTableCollectionField);
@@ -434,12 +420,14 @@ namespace Yarn.Unity.Editor
 
             unityControls.Add(emptyTableCollectionWarning);
 
-            void UpdateLocalizationVisibility() {
+            void UpdateLocalizationVisibility()
+            {
                 SetElementVisible(unityControls, useUnityLocalisationSystemProperty.boolValue);
                 SetElementVisible(yarnInternalControls, !useUnityLocalisationSystemProperty.boolValue);
             }
 
-            void UpdateUnityTableCollectionEmptyWarningVisibility(){
+            void UpdateUnityTableCollectionEmptyWarningVisibility()
+            {
                 SetElementVisible(emptyTableCollectionWarning, unityLocalisationTableCollectionProperty.objectReferenceValue == null);
             }
 
@@ -455,8 +443,6 @@ namespace Yarn.Unity.Editor
             {
                 UpdateUnityTableCollectionEmptyWarningVisibility();
             });
-
-            
 #endif
 
             var cantGenerateUnityStringTableMessage = new IMGUIContainer(() =>
