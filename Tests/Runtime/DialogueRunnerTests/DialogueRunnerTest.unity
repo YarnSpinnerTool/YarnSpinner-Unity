@@ -230,6 +230,7 @@ GameObject:
   - component: {fileID: 999971318}
   - component: {fileID: 999971320}
   - component: {fileID: 999971321}
+  - component: {fileID: 999971322}
   m_Layer: 0
   m_Name: DialogueRunner
   m_TagString: Untagged
@@ -250,7 +251,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   yarnProject: {fileID: 7545569452688597077, guid: a9b357f08075f43cbad81d8ec757e1f7, type: 3}
-  _variableStorage: {fileID: 999971321}
+  variableStorage: {fileID: 999971321}
+  lineProvider: {fileID: 999971322}
   dialogueViews:
   - {fileID: 999971320}
   startNode: Start
@@ -313,6 +315,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showDebug: 0
   debugTextView: {fileID: 0}
+--- !u!114 &999971322
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 999971317}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b6798449caec4a32a5ad27badb06624, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _textLocaleCode: en
+  _assetLocaleCode: en
 --- !u!1 &1000874373
 GameObject:
   m_ObjectHideFlags: 0
