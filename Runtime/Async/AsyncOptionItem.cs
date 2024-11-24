@@ -50,7 +50,6 @@ namespace Yarn.Unity
 
         public void InvokeOptionSelected()
         {
-            Debug.Log($"{name}:{_option.DialogueOptionID} has been selected!");
             // turns out that Selectable subclasses aren't intrinsically interactive/non-interactive
             // based on their canvasgroup, you still need to check at the moment of interaction
             if (!IsInteractable())
