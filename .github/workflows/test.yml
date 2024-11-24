@@ -105,6 +105,20 @@ jobs:
             --hostname YS-Linux-Build \
             yarnspinner/unity-${{ matrix.unityVersion }}
 
+      - name: Generate HTML test report (Play Mode)
+        uses: rjtngit/nunit-html-action@v1
+        if: always()
+        with:
+          inputXmlPath: output/TestResults-PlayMode.xml
+          outputHtmlPath: output/TestResults-PlayMode.html
+
+      - name: Generate HTML test report (Edit Mode)
+        uses: rjtngit/nunit-html-action@v1
+        if: always()
+        with:
+          inputXmlPath: output/TestResults-EditMode.xml
+          outputHtmlPath: output/TestResults-EditMode.html
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
