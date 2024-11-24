@@ -344,6 +344,11 @@ namespace Yarn.Unity
             {
                 this.VariableStorage.Program = this.YarnProject.Program;
             }
+
+            if (this.LineProvider != null && this.YarnProject != null)
+            {
+                this.LineProvider.YarnProject = this.YarnProject;
+            }
         }
 
         /// <summary>
