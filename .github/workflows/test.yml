@@ -109,6 +109,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Test results (edit + play, ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}
+          name: Test results (edit + play, ${{ matrix.unityVersion }} ${{ matrix.targetPlatform }} ${{ matrix.unityLocalisation && 'with-unity-loc' || 'no-unity-loc' }})
           # path: ${{ steps.testRunner.outputs.artifactsPath }}
           path: ./output
