@@ -20,7 +20,7 @@ on:
 jobs:
   buildAndTestForSomePlatforms:
     concurrency:
-      group: ${{ github.workflow }}-${{ matrix.unityVersion }}
+      group: ${{ github.workflow }}-${{ matrix.unityVersion }}-${{ matrix.unityLocalisation }}
       cancel-in-progress: true # Cancel other jobs if another one arrives
     name: Test on ${{ matrix.unityVersion }} for ${{ matrix.targetPlatform }}
     runs-on: [self-hosted, linux]
@@ -67,7 +67,7 @@ jobs:
           cat <<EOF > ${{ matrix.projectPath }}/Packages/manifest.json
           {
             "dependencies": {
-              "com.unity.inputsystem": "1.11.2",
+              "com.unity.inputsystem": "1.11.2"
             }
           }
           EOF
