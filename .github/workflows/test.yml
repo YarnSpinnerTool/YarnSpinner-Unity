@@ -126,3 +126,17 @@ jobs:
           name: Test results (edit + play, ${{ matrix.unityVersion }} ${{ matrix.targetPlatform }} ${{ matrix.unityLocalisation && 'with-unity-loc' || 'no-unity-loc' }})
           # path: ${{ steps.testRunner.outputs.artifactsPath }}
           path: ./output
+
+      - name: Upload edit mode test report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Test Report (edit mode, ${{ matrix.unityVersion }} ${{ matrix.targetPlatform }} ${{ matrix.unityLocalisation && 'with-unity-loc' || 'no-unity-loc' }})
+          path: ./output/TestResults-EditMode.html
+
+      - name: Upload play mode test report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Test Report (play mode, ${{ matrix.unityVersion }} ${{ matrix.targetPlatform }} ${{ matrix.unityLocalisation && 'with-unity-loc' || 'no-unity-loc' }})
+          path: ./output/TestResults-PlayMode.html
