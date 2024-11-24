@@ -61,9 +61,9 @@ namespace Yarn.Unity
             // that line's text and asset.
             if (YarnProject != null)
             {
-                metadata = YarnProject.lineMetadata.GetMetadata(line.ID) ?? System.Array.Empty<string>();
+                metadata = YarnProject.lineMetadata?.GetMetadata(line.ID) ?? System.Array.Empty<string>();
 
-                var shadowLineSource = YarnProject.lineMetadata.GetShadowLineSource(line.ID);
+                var shadowLineSource = YarnProject.lineMetadata?.GetShadowLineSource(line.ID);
 
                 if (shadowLineSource != null)
                 {
@@ -76,6 +76,7 @@ namespace Yarn.Unity
             if (text == null)
             {
                 // No line available.
+                Debug.LogWarning($"Localization {loc} does not contain an entry for line {line.ID}", this);
                 return LocalizedLine.InvalidLine;
             }
 
