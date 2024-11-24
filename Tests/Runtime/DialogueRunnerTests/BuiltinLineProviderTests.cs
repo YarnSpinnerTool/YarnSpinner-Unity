@@ -79,8 +79,12 @@ namespace Yarn.Unity.Tests
             lineProvider.Should().NotBeNull();
             runner.LineProvider.Should().BeSameObjectAs(lineProvider);
 
+            lineProvider.YarnProject.Should().NotBeNull();
+
             yarnProject = runner.yarnProject!;
             yarnProject.Should().NotBeNull();
+
+            lineProvider.YarnProject.Should().BeSameObjectAs(yarnProject);
         }
 
         [UnityTest]
