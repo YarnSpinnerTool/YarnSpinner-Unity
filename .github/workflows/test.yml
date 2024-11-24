@@ -31,8 +31,8 @@ jobs:
         projectPath:
           - YarnSpinner
         unityVersion:
-          - 2022.3.21f1
-          - 2023.2.12f1
+          # - 2022.3.21f1
+          # - 2023.2.12f1
           - 6000.0.24f1
         targetPlatform:
           # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
