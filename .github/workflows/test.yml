@@ -98,7 +98,7 @@ jobs:
             yarnspinner/unity-${{ matrix.unityVersion }}
 
       - name: Upload test results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: Test results (edit + play, ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}
