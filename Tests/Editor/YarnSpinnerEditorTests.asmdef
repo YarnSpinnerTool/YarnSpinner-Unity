@@ -9,7 +9,8 @@
         "YarnSpinnerTests.Shared",
         "Unity.Localization",
         "Unity.Localization.Editor",
-        "Unity.Localization.Settings"
+        "Unity.Localization.Settings",
+        "UniTask"
     ],
     "includePlatforms": [
         "Editor"
