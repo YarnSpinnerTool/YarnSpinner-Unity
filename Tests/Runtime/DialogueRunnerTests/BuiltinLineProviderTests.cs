@@ -71,9 +71,13 @@ namespace Yarn.Unity.Tests
 
             yield return new WaitUntil(() => loaded);
 
+            yield return null; // Give all objects a chance to wake up
+
             runner = GameObject.FindAnyObjectByType<DialogueRunner>();
             runner.Should().NotBeNull();
+            runner.YarnProject.Should().NotBeNull();
             runner.LineProvider.Should().NotBeNull();
+
             lineProvider = runner.LineProvider.Should().BeOfExactType<BuiltinLocalisedLineProvider>().Subject;
 
             lineProvider.Should().NotBeNull();
