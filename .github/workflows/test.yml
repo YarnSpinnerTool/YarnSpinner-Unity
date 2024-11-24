@@ -34,6 +34,9 @@ jobs:
           # - 2022.3.21f1
           # - 2023.2.12f1
           - 6000.0.24f1
+        unityLocalisation:
+          - true
+          - false
         targetPlatform:
           # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           # - StandaloneWindows64 # Build a Windows 64-bit standalone.
@@ -64,11 +67,16 @@ jobs:
           cat <<EOF > ${{ matrix.projectPath }}/Packages/manifest.json
           {
             "dependencies": {
-              "com.unity.inputsystem": "1.0.2",
-              "com.unity.localization": "1.3.2"
+              "com.unity.inputsystem": "1.11.2",
             }
           }
           EOF
+
+      - name: Add Unity Localisation Package
+        if: ${{ matrix.unityLocalisation }}
+        run: |
+          jq '.dependencies += {"com.unity.localization": "1.3.2"}' ${{ matrix.projectPath }}/Packages/manifest.json > /tmp/manifest.json
+          mv /tmp/manifest.json ${{ matrix.projectPath }}/Packages/manifest.json
 
       - name: Check out to Packages/YarnSpinner
         uses: actions/checkout@v2
