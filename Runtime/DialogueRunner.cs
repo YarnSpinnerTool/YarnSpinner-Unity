@@ -554,10 +554,8 @@ namespace Yarn.Unity
             {
                 Debug.LogError($"Failed to get a localised line for {line.ID}!");
             }
-            else
-            {
-                await RunLocalisedLine(localisedLine);
-            }
+
+            await RunLocalisedLine(localisedLine);
 
             if (dialogueCancellationSource?.IsCancellationRequested == false)
             {

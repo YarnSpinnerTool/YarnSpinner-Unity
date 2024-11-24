@@ -46,6 +46,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `DialogueViewBase` is now deprecated. New Dialogue Views should subclass `AsyncDialogueView`.
   - The `DialogueViewBase` class now acts as a compatibility layer for the new
     async dialogue view system, and should not be used in new code.
+- If a Line Provider fails to return a valid line, the Dialogue Runner will send the Dialogue Views an 'Invalid Line' line, rather than skipping over it completely.
 
 ### Removed
 
