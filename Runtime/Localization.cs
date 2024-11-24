@@ -99,13 +99,15 @@ namespace Yarn.Unity
         /// for the given key; <see langword="false"/> otherwise.</returns>
         public bool ContainsLocalizedString(string key) => _runtimeStringTable.ContainsKey(key) || entries.ContainsKey(key);
 
+#if UNITY_EDITOR
         /// <summary>
         /// Adds a new string to the string table.
         /// </summary>
         /// <remarks>
-        /// This method updates the localisation asset on disk. It is not
+        /// <para>This method updates the localisation asset on disk. It is not
         /// recommended to call this method during play mode, because changes
-        /// will persist after you leave and may cause conflicts.
+        /// will persist after you leave and may cause conflicts. </para>
+        /// <para>This method is only available in the Editor.</para>
         /// </remarks>
         /// <param name="key">The key for this string (generally, the line
         /// ID.)</param>
@@ -115,6 +117,7 @@ namespace Yarn.Unity
         {
             GetOrCreateEntry(key).localizedString = value;
         }
+#endif
 
         /// <summary>
         /// Adds a new string to the runtime string table.
@@ -209,6 +212,7 @@ namespace Yarn.Unity
 
         public bool ContainsLocalizedObject<T>(string key) where T : UnityEngine.Object => entries.TryGetValue(key, out var asset) && asset is T;
 
+#if UNITY_EDITOR
         public void AddLocalizedObjectToAsset<T>(string key, T value) where T : UnityEngine.Object => GetOrCreateEntry(key).localizedAsset = value;
 
         public void AddLocalizedObjectsToAsset<T>(IEnumerable<KeyValuePair<string, T>> objects) where T : UnityEngine.Object
@@ -218,6 +222,7 @@ namespace Yarn.Unity
                 GetOrCreateEntry(entry.Key).localizedAsset = entry.Value;
             }
         }
+#endif
         #endregion
 
         public virtual void Clear()
