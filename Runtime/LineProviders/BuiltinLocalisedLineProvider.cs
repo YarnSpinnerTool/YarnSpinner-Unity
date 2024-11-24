@@ -118,7 +118,9 @@ namespace Yarn.Unity
                 return;
             }
 
-            if (loc.UsesAddressableAssets)
+            var assetLocalization = YarnProject.GetLocalization(AssetLocaleCode);
+
+            if (assetLocalization.UsesAddressableAssets)
             {
                 // The localization uses addressable assets. Ensure that these
                 // assets are pre-loaded.
