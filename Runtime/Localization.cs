@@ -182,14 +182,16 @@ namespace Yarn.Unity
 
         #region Localised Objects
 
-        public T? GetLocalizedObject<T>(string key) where T : UnityEngine.Object
+        public async YarnTask<T?> GetLocalizedObjectAsync<T>(string key) where T : UnityEngine.Object
         {
-            if (_usesAddressableAssets)
+            if (!entries.TryGetValue(key, out var entry))
             {
-                Debug.LogWarning($"Localization {name} uses addressable assets. Use the Addressable Assets API to load the asset.");
+                return null;
             }
 
-            entries.TryGetValue(key, out var entry);
+            if (_usesAddressableAssets)
+            {
+            }
 
             if (entry.localizedAsset is T resultAsTargetObject)
             {
