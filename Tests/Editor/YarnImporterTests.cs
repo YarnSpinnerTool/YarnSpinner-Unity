@@ -75,11 +75,11 @@ namespace Yarn.Unity.Tests
             // Assert:
             // The Yarn project has a reference to the Yarn script. They
             // all report no compilation errors.
-            Assert.IsFalse(yarnProjectImporter.ImportData.HasCompileErrors);
+            yarnProjectImporter.ImportData.HasCompileErrors.Should().BeFalse();
             CollectionAssert.Contains(scriptImporter.DestinationProjectImporters, yarnProjectImporter);
-            Assert.False(scriptImporter.HasErrors);
+            scriptImporter.HasErrors.Should().BeFalse();
 
-            Assert.AreEqual(ProjectImportData.ImportStatusCode.Succeeded, yarnProjectImporter.ImportData.ImportStatus);
+            ProjectImportData.ImportStatusCode.Succeeded.Should().BeEqualTo(yarnProjectImporter.ImportData.ImportStatus);
         }
 
         [Test]
@@ -98,11 +98,11 @@ namespace Yarn.Unity.Tests
             // and the project will know about this, but they otherwise
             // have correct asset references to each other.
 
-            Assert.IsTrue(yarnProjectImporter.ImportData.HasCompileErrors);
+            yarnProjectImporter.ImportData.HasCompileErrors.Should().BeTrue();
             CollectionAssert.Contains(scriptImporter.DestinationProjectImporters, yarnProjectImporter);
-            Assert.True(scriptImporter.HasErrors);
+            scriptImporter.HasErrors.Should().BeTrue();
 
-            Assert.AreEqual(yarnProjectImporter.ImportData.ImportStatus, ProjectImportData.ImportStatusCode.CompilationFailed);
+            yarnProjectImporter.ImportData.ImportStatus.Should().BeEqualTo(ProjectImportData.ImportStatusCode.CompilationFailed);
         }
 
         [Test]
@@ -120,7 +120,7 @@ But not all of them are.
 
             // Assert: 
             // The project cannot generate a strings table.
-            Assert.IsFalse(importer.CanGenerateStringsTable);
+            importer.CanGenerateStringsTable.Should().BeFalse();
         }
 
         [Test]
@@ -144,7 +144,7 @@ But not all of them are.
             // Assert:
             // The two string tables should be identical.
 
-            Assert.AreEqual(simpleExpected, simpleResult);
+            simpleExpected.Should().BeEqualTo(simpleResult);
         }
 
         [Test]
@@ -156,8 +156,8 @@ But not all of them are.
 
             // Assert:
             // Line metadata entry is generated for the project.
-            Assert.NotNull(project.lineMetadata);
-            Assert.Greater(project.lineMetadata.GetLineIDs().Count(), 0);
+            project.lineMetadata.Should().NotBeNull();
+            project.lineMetadata.GetLineIDs().Count().Should().BeGreaterThan(0);
         }
 
         [Test]
@@ -169,8 +169,8 @@ But not all of them are.
 
             // Assert:
             // Line metadata entry is generated for the project.
-            Assert.NotNull(project.lineMetadata);
-            Assert.IsEmpty(project.lineMetadata.GetLineIDs());
+            project.lineMetadata.Should().NotBeNull();
+            project.lineMetadata.GetLineIDs().Should().BeEmpty();
         }
 
         [Test]
@@ -209,7 +209,7 @@ But not all of them are.
 
             // Assert:
             // Metadata entries should be identical to what we expect.
-            CollectionAssert.AreEquivalent(simpleExpected, simpleResult);
+            simpleExpected.Should().BeEqualTo(simpleResult);
         }
 
         [Test]
@@ -227,8 +227,8 @@ But not all of them are.
             AssetDatabase.Refresh();
 
             // Assert: verify the line metadata exists and contains the expected number of entries.
-            Assert.NotNull(project.lineMetadata);
-            Assert.AreEqual(project.lineMetadata.GetLineIDs().Count(), 2);
+            project.lineMetadata.Should().NotBeNull();
+            project.lineMetadata.GetLineIDs().Count().Should().BeEqualTo(2);
         }
 
         [Test]
@@ -246,8 +246,8 @@ But not all of them are.
             AssetDatabase.Refresh();
 
             // Assert: verify the line metadata exists and is empty.
-            Assert.NotNull(project.lineMetadata);
-            Assert.IsEmpty(project.lineMetadata.GetLineIDs());
+            project.lineMetadata.Should().NotBeNull();
+            project.lineMetadata.GetLineIDs().Should().BeEmpty();
         }
 
         [Test]
@@ -379,11 +379,11 @@ But not all of them are.
             // have been added, removed and changed)
             foreach (var test in tests)
             {
-                CollectionAssert.AreEquivalent(unmodifiedBaseStringsTable.Select(test.test), unmodifiedLocalizedStringsTable.Select(test.test), $"The unmodified string table {test.name}s should be equivalent");
+                unmodifiedBaseStringsTable.Select(test.test).Should().BeEqualTo(unmodifiedLocalizedStringsTable.Select(test.test), $"The unmodified string table {test.name}s should be equivalent");
 
-                CollectionAssert.AreEquivalent(modifiedBaseStringsTable.Select(test.test), modifiedLocalizedStringsTable.Select(test.test), $"The modified string table {test.name}s should be equivalent");
+                modifiedBaseStringsTable.Select(test.test).Should().BeEqualTo(modifiedLocalizedStringsTable.Select(test.test), $"The modified string table {test.name}s should be equivalent");
 
-                CollectionAssert.AreNotEquivalent(unmodifiedBaseStringsTable.Select(test.test), modifiedBaseStringsTable.Select(test.test), $"The unmodified and modified string table {test.name}s should not be equivalent");
+                unmodifiedBaseStringsTable.Select(test.test).Should().NotBeEqualTo(modifiedBaseStringsTable.Select(test.test), $"The unmodified and modified string table {test.name}s should not be equivalent");
             }
         }
 
@@ -392,8 +392,8 @@ But not all of them are.
         {
 
             // Test that YarnEditorUtility can locate the editor assets
-            Assert.IsNotNull(YarnEditorUtility.GetYarnDocumentIconTexture());
-            Assert.IsNotNull(YarnEditorUtility.GetTemplateYarnScriptPath());
+            YarnEditorUtility.GetYarnDocumentIconTexture().Should().NotBeNull();
+            YarnEditorUtility.GetTemplateYarnScriptPath().Should().NotBeNull();
         }
 
         [Test]
@@ -547,15 +547,15 @@ But not all of them are.
             // Assert:
             // A single localization exists that contains the loaded assets.
 
-            Assert.AreEqual(1, project.localizations.Count);
+            1.Should().BeEqualTo(project.localizations.Count);
 
             (string localeCode, Localization localization) = project.localizations.First();
             IEnumerable<AudioClip> allAudioClips = localization.GetLineIDs()
                                                                .Select(id => localization.GetLocalizedObject<AudioClip>(id));
 
-            Assert.AreEqual(defaultLanguage, localeCode);
-            CollectionAssert.AreEquivalent(YarnTestUtility.ExpectedStrings.Select(l => l.ID), localization.GetLineIDs());
-            Assert.AreEqual(YarnTestUtility.ExpectedStrings.Count(), allAudioClips.Count());
+            defaultLanguage.Should().BeEqualTo(localeCode);
+            YarnTestUtility.ExpectedStrings.Select(l => l.ID).Should().BeEqualTo(localization.GetLineIDs());
+            YarnTestUtility.ExpectedStrings.Count().Should().BeEqualTo(allAudioClips.Count());
             CollectionAssert.AllItemsAreNotNull(allAudioClips);
             CollectionAssert.AllItemsAreUnique(allAudioClips);
         }
@@ -576,8 +576,8 @@ But not all of them are.
             // be imported with a YarnImporter.
             var importer = AssetImporter.GetAtPath(scriptPath) as YarnImporter;
 
-            Assert.IsNotNull(scriptAsset);
-            Assert.IsNotNull(importer);
+            scriptAsset.Should().NotBeNull();
+            importer.Should().NotBeNull();
         }
 
         [Test]
@@ -597,15 +597,17 @@ But not all of them are.
             // Assert: A new Yarn Project should exist, and is imported as
             // a Yarn Project that has the original Yarn script as one of
             // its source scripts.
-            Assert.True(File.Exists(projectPath));
+            File.Exists(projectPath).Should().BeTrue();
 
             var project = AssetDatabase.LoadAssetAtPath<YarnProject>(projectPath);
             var projectImporter = AssetImporter.GetAtPath(projectPath) as YarnProjectImporter;
 
-            Assert.IsNotNull(project);
-            Assert.IsNotNull(projectImporter);
-            Assert.Contains(scriptAsset, projectImporter.ImportData.yarnFiles);
-            CollectionAssert.Contains(importer.DestinationProjects, project);
+            scriptAsset.Should().BeOfType<TextAsset>();
+            project.Should().NotBeNull();
+            projectImporter.Should().NotBeNull();
+            projectImporter.ImportData.yarnFiles.Should().Contain(scriptAsset as TextAsset);
+            importer.DestinationProjects.Should().Contain(project);
+
         }
 
         [Test]
@@ -631,14 +633,14 @@ But not all of them are.
 
             var scriptImporter = AssetImporter.GetAtPath(yarnScriptPath) as YarnImporter;
             var scriptAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(yarnScriptPath);
-            Assert.NotNull(projectImporter);
-            Assert.NotNull(scriptImporter);
-            Assert.NotNull(scriptAsset);
+            projectImporter.Should().NotBeNull();
+            scriptImporter.Should().NotBeNull();
+            scriptAsset.Should().NotBeNull();
 
-            Assert.That(projectImporter.ImportData.yarnFiles, Contains.Item(scriptAsset));
+            projectImporter.ImportData.yarnFiles.Should().Contain(scriptAsset);
 
-            Assert.That(scriptImporter.DestinationProjects, Contains.Item(projectAsset));
-            Assert.That(scriptImporter.DestinationProjectImporters, Contains.Item(projectImporter));
+            scriptImporter.DestinationProjects.Should().Contain(projectAsset);
+            scriptImporter.DestinationProjectImporters.Should().Contain(projectImporter);
         }
 
         [Test]
@@ -658,7 +660,7 @@ But not all of them are.
 
             var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
 
-            Assert.True(importer.ImportData.containsImplicitLineIDs);
+            importer.ImportData.containsImplicitLineIDs.Should().BeTrue();
         }
         [Test]
         public void YarnImporter_OnCreatingScriptNoLineIDs_HasNoImplicitLineIDs()
@@ -677,7 +679,7 @@ But not all of them are.
 
             var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
 
-            Assert.False(importer.ImportData.containsImplicitLineIDs);
+            importer.ImportData.containsImplicitLineIDs.Should().BeFalse();
         }
 
         private static string OldStyleProjectText => string.Join("\n", new[] {
@@ -758,7 +760,7 @@ But not all of them are.
                 new[] { $"{YarnTestUtility.TestFilesDirectoryPath}" } // Under the test file directory.
             );
             // (Sanity check) There should only be one text asset (the script referenced by the Yarn project) here.
-            Assert.AreEqual(1, searchResults.Length);
+            searchResults.Should().HaveCount(1);
             var yarnScriptPath = AssetDatabase.GUIDToAssetPath(searchResults[0]);
             // Edit the Yarn script with new content.
             File.WriteAllText(
@@ -778,6 +780,7 @@ But not all of them are.
             // Assert:
             // "before" and "after" are different objects because the cache is invalidated.
             Assert.AreNotEqual(before, after);
+            Assert.AreNotSame(before, after);
         }
 
         [Test]
