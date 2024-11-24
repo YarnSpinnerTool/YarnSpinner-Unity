@@ -624,6 +624,62 @@ namespace Yarn.Unity.Tests
             return new ObjectAssertions<TItem> { Subject = result! };
         }
 
+        /// <summary>
+        /// Asserts that the subject collection contains items equal to those in
+        /// other, and in the same order.
+        /// </summary>
+        /// <param name="other">The collection to compare with the <see
+        /// cref="ObjectAssertions{T}.Subject"/>.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        public new void BeEqualTo(IEnumerable<TItem> other, string? message = null)
+        {
+            NullCheck(Subject, message);
+            NullCheck(other, message);
+
+            var comparer = EqualityComparer<TItem>.Default;
+
+            if (Subject.Count() != other.Count())
+            {
+                throw new AssertionException($"Expected {Subject} to be equal to {other}, but they don't have the same count ({Subject.Count()} vs {other.Count()})", message);
+            }
+
+            for (int i = 0; i < Subject.Count(); i++)
+            {
+                var item1 = Subject.ElementAt(i);
+                var item2 = other.ElementAt(i);
+
+                if (comparer.Equals(item1, item2) == false)
+                {
+                    throw new AssertionException($"Expected {Subject} to be equal to {other}, but they differ at element {i} ({item1} vs {item2})", message);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Asserts that the subject collection does not contain items equal to
+        /// those in other in the same order.
+        /// </summary>
+        /// <param name="other">The collection to compare with the <see
+        /// cref="ObjectAssertions{T}.Subject"/>.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        public new void NotBeEqualTo(IEnumerable<TItem> other, string? message)
+        {
+            NullCheck(Subject, message);
+            NullCheck(other, message);
+
+            try
+            {
+                BeEqualTo(other);
+            }
+            catch (AssertionException)
+            {
+                return;
+            }
+
+            throw new AssertionException($"Expected {Subject} to not be equal to {other}", message);
+        }
     }
 
     /// <summary>
