@@ -49,6 +49,20 @@ namespace Yarn.Unity
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static private AsyncUniTaskMethodBuilder<T> GetBuilder() => AsyncUniTaskMethodBuilder<T>.Create();
     }
+
+#elif YARNTASKS_ARE_SYSTEMTASKS
+    public partial struct YarnTaskMethodBuilder
+    {
+        private AsyncTaskMethodBuilder methodBuilder;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static private AsyncTaskMethodBuilder GetBuilder() => AsyncTaskMethodBuilder.Create();
+    }
+    public partial struct YarnTaskMethodBuilder<T>
+    {
+        private AsyncTaskMethodBuilder<T> methodBuilder;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static private AsyncTaskMethodBuilder<T> GetBuilder() => AsyncTaskMethodBuilder<T>.Create();
+    }
 #endif
 
     public partial struct YarnTaskMethodBuilder
