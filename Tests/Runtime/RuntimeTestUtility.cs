@@ -48,5 +48,27 @@ namespace Yarn.Unity.Tests
             EditorBuildSettings.scenes = EditorBuildSettings.scenes.Where(x => x.guid.ToString() != GUID).ToArray();
 #endif
         }
+
+        internal static void EnsureTMPResourcesAvailable()
+        {
+#if UNITY_EDITOR
+            var s_TextSettings = UnityEngine.Resources.Load<TMPro.TMP_Settings>("TextSettings");
+            if (s_TextSettings != null)
+            {
+                // TMP resources are already available
+                return;
+            }
+            // Install the TMP Essentials package
+            var unityGUIPackageFullPath = System.IO.Path.GetFullPath("Packages/com.unity.ugui");
+            if (System.IO.Directory.Exists(unityGUIPackageFullPath) == false)
+            {
+                throw new System.InvalidOperationException($"Can't install TMP assets: {unityGUIPackageFullPath} is not a valid directory");
+            }
+
+            UnityEngine.Debug.Log($"Importing TextMeshPro essential resources.");
+
+            AssetDatabase.ImportPackage(unityGUIPackageFullPath + "/Package Resources/TMP Essential Resources.unitypackage", false);
+#endif
+        }
     }
 }

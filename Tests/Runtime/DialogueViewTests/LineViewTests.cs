@@ -22,6 +22,12 @@ namespace Yarn.Unity.Tests
         public void Setup()
         {
             RuntimeTestUtility.AddSceneToBuild(DialogueViewTestSceneGUID);
+
+            // TMP text view operations like counting the number of visible
+            // characters won't work unless the TMP essential resources are
+            // installed, so make sure they're part of the project before
+            // testing
+            RuntimeTestUtility.EnsureTMPResourcesAvailable();
         }
 
         public void Cleanup()
