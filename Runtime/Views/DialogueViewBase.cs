@@ -381,7 +381,9 @@ namespace Yarn.Unity
             // Wait for one of the following things to happen:
             // 1. RunLine completes successfully and calls PhaseComplete.
             // 2. The line is cancelled.
-            while (phaseComplete == false && token.IsNextLineRequested == false)
+            while (phaseComplete == false
+                   && token.IsNextLineRequested == false
+                   && Application.exitCancellationToken.IsCancellationRequested == false)
             {
                 await YarnTask.Yield();
             }
@@ -393,7 +395,8 @@ namespace Yarn.Unity
             {
                 phaseComplete = false;
                 this.InterruptLine(line, PhaseComplete);
-                while (phaseComplete == false)
+                while (phaseComplete == false
+                  && Application.exitCancellationToken.IsCancellationRequested == false)
                 {
                     await YarnTask.Yield();
                 }
@@ -404,7 +407,8 @@ namespace Yarn.Unity
             phaseComplete = false;
             this.DismissLine(PhaseComplete);
 
-            while (phaseComplete == false)
+            while (phaseComplete == false
+                  && Application.exitCancellationToken.IsCancellationRequested == false)
             {
                 await YarnTask.Yield();
             }
@@ -424,14 +428,14 @@ namespace Yarn.Unity
                 selectedOptionID = selectedID;
             });
 
-            while (selectedOptionID == -1 && cancellationToken.IsCancellationRequested == false)
+            while (selectedOptionID == -1 && cancellationToken.IsCancellationRequested == false && Application.exitCancellationToken.IsCancellationRequested == false)
             {
                 await YarnTask.Yield();
             }
 
-            if (cancellationToken.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested || Application.exitCancellationToken.IsCancellationRequested)
             {
-                // We were cancelled. Return null.
+                // We were cancelled or are exiting the game. Return null.
                 return null;
             }
 
