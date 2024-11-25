@@ -90,7 +90,7 @@ namespace Yarn.Unity
         {
             IEnumerator InnerCoroutine(Task t)
             {
-                while (t.IsCompleted)
+                while (!t.IsCompleted)
                 {
                     yield return null;
                 }
@@ -183,7 +183,7 @@ namespace Yarn.Unity
 
     public partial class YarnTaskCompletionSource
     {
-        private TaskCompletionSource<int> taskCompletionSource;
+        private TaskCompletionSource<int> taskCompletionSource = new TaskCompletionSource<int>();
 
         public partial bool TrySetResult()
         {
@@ -202,7 +202,7 @@ namespace Yarn.Unity
     }
     public partial class YarnTaskCompletionSource<T>
     {
-        private TaskCompletionSource<T> taskCompletionSource;
+        private TaskCompletionSource<T> taskCompletionSource = new TaskCompletionSource<T>();
 
         public partial bool TrySetResult(T value)
         {
