@@ -156,7 +156,7 @@ namespace Yarn.Unity.Editor
 
                 var locInfo = new Project.LocalizationInfo();
 
-                if (locField.value.isExternal && locField.value.externalLocalization != null && AssetDatabase.TryGetGUIDAndLocalFileIdentifier(locField.value.externalLocalization, out var guid, out _))
+                if (locField.value.isExternal && locField.value.externalLocalization != null && AssetDatabase.TryGetGUIDAndLocalFileIdentifier(locField.value.externalLocalization, out var guid, out long _))
                 {
                     var path = AssetDatabase.GetAssetPath(locField.value.externalLocalization);
                     locInfo.Strings = "unity:" + guid;
