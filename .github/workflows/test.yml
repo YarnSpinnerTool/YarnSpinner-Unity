@@ -70,7 +70,8 @@ jobs:
           cat <<EOF > ${{ matrix.projectPath }}/Packages/manifest.json
           {
             "dependencies": {
-              "com.unity.inputsystem": "1.11.2"
+              "com.unity.inputsystem": "1.11.2",
+              "dev.yarnspinner.tmp-essentials":  "https://github.com/desplesda/dev.yarnspinner.tmp-essentials.git"
             }
           }
           EOF
