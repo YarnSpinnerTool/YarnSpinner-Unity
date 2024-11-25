@@ -49,7 +49,7 @@ namespace Yarn.Unity.Tests
 #endif
         }
 
-        internal static void EnsureTMPResourcesAvailable()
+        internal static void EnsureTMPResourcesAvailableAndExit()
         {
 #if UNITY_EDITOR
             var s_TextSettings = UnityEngine.Resources.Load<TMPro.TMP_Settings>("TextSettings");
@@ -68,6 +68,17 @@ namespace Yarn.Unity.Tests
             UnityEngine.Debug.Log($"Importing TextMeshPro essential resources.");
 
             AssetDatabase.ImportPackage(unityGUIPackageFullPath + "/Package Resources/TMP Essential Resources.unitypackage", false);
+            AssetDatabase.importPackageCompleted += (packageName) =>
+            {
+                UnityEngine.Debug.Log($"Package import complete: " + packageName);
+                if (packageName == "TMP Essential Resources")
+                {
+                    UnityEngine.Debug.Log($"Done importing TMP resources.");
+                    AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+
+                    EditorApplication.Exit(0);
+                }
+            };
 #endif
         }
     }
