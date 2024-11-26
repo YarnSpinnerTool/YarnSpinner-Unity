@@ -15,7 +15,7 @@ namespace Yarn.Unity.Editor
     /// </summary>
     public static class CreateDialogueRunnerMenuItem
     {
-        const string DialogueRunnerPrefabGUID = "7f29e5f7ffdea4a6793cefb278b61f0c";
+        const string DialogueRunnerPrefabGUID = "52571f68872914e24837210513edea1d";
 
         /// <summary>
         /// Instantiates the Dialogue System prefab in the currently active scene,
