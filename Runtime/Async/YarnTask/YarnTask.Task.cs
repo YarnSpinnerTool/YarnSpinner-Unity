@@ -20,7 +20,10 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using Yarn.Unity;
+
+#if USE_ADDRESSABLES
+using UnityEngine.ResourceManagement.AsyncOperations;
+#endif
 
 namespace Yarn.Unity
 {
@@ -152,6 +155,18 @@ namespace Yarn.Unity
             return false;
 
         }
+
+#if USE_ADDRESSABLES
+        public static partial async YarnTask WaitForAsyncOperation(AsyncOperationHandle operationHandle, CancellationToken cancellationToken)
+        {
+            await operationHandle.Task;
+        }
+
+        public static partial async YarnTask<T> WaitForAsyncOperation<T>(AsyncOperationHandle<T> operationHandle, CancellationToken cancellationToken)
+        {
+            return await operationHandle.Task;
+        }
+#endif
 
     }
 
