@@ -1,8 +1,0 @@
-title: Program
----
-/// Ship.yarn, node Ship, line 14
-<<declare $should_see_ship = false>>
-
-/// Ship.yarn, node Ship, line 14
-<<declare $sally_warning = false>>
-===
