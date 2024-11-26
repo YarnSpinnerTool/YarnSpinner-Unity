@@ -88,7 +88,7 @@ jobs:
           jq ".dependencies += {\"dev.yarnspinner.tmp-essentials\": \"https://github.com/desplesda/dev.yarnspinner.tmp-essentials.git#$TMP_VERSION\"}" "$MANIFEST_PATH" > manifest.json
           mv manifest.json "$MANIFEST_PATH"
 
-      - name: Set Up Packages
+      - name: Add Unity Localisation
         if: ${{ matrix.unityLocalisation }}
         run: |
           # Add Unity Localisation package to package manifest
