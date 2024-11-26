@@ -452,7 +452,7 @@ namespace Yarn.Unity.Editor
 #if USE_ADDRESSABLES
         internal static void EnsureAssetIsAddressable(Object asset, string defaultAddress)
         {
-            if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(asset, out string guid, out _) == false)
+            if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(asset, out string guid, out long _) == false)
             {
                 Debug.LogError($"Can't make {asset} addressable: no GUID found", asset);
                 return;
