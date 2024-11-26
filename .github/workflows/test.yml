@@ -76,10 +76,21 @@ jobs:
           }
           EOF
 
-      - name: Add Unity Localisation Package
+      - name: Set Up Packages
         if: ${{ matrix.unityLocalisation }}
         run: |
-          jq '.dependencies += {"com.unity.localization": "1.3.2"}' ${{ matrix.projectPath }}/Packages/manifest.json > manifest.json
+          MANIFEST_PATH=${{ matrix.projectPath }}/Packages/manifest.json
+          # Add Unity Localisation package to package manifest
+          TMP=$(mktemp); jq '.dependencies += {"com.unity.localization": "1.3.2"}' "$MANIFEST_PATH" > "$TMP" && mv "$TMP" "$MANIFEST_PATH"
+          # Select correct TMP Essentials package
+          if [[ ${{matrix.unityVersion}} != "2022"* ]]; then
+          TMP_VERSION="ugui-1.0.0"
+          else
+          TMP_VERSION="ugui-2.0.0"
+          fi
+          echo "Installing TMP Essentials for $TMP_VERSION"
+          # Add the correct version of the TMP Essentials package to package manifest
+          TMP=$(mktemp); jq ".dependencies += {\"dev.yarnspinner.tmp-essentials\": \"https://github.com/desplesda/dev.yarnspinner.tmp-essentials.git#$TMP_VERSION\"}" "$MANIFEST_PATH" > "$TMP" && mv "$TMP" "$MANIFEST_PATH"
           mv manifest.json ${{ matrix.projectPath }}/Packages/manifest.json
 
       - name: Add UniTask Package
