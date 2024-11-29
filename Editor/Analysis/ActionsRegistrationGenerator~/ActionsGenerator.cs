@@ -61,7 +61,9 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
             {
                 // If this directory exists, we're done
                 return projectPath;
-            } else {
+            }
+            else
+            {
                 return null;
             }
         }
@@ -225,7 +227,7 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 return;
             }
 
-            
+
 
             HashSet<string> removals = new HashSet<string>();
             // validating and logging all the actions
@@ -238,12 +240,14 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 }
 
                 var diagnostics = action.Validate(compilation);
-                foreach (var diagnostic in diagnostics) {
+                foreach (var diagnostic in diagnostics)
+                {
                     context.ReportDiagnostic(diagnostic);
                     output.WriteLine($"Skipping '{action.Name}' ({action.MethodName}): {diagnostic}");
                 }
 
-                if (diagnostics.Count > 0) {
+                if (diagnostics.Count > 0)
+                {
                     continue;
                 }
 
@@ -531,9 +535,12 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
     {
         string tempPath;
         var rootPath = GetProjectRoot(context);
-        if (rootPath != null) {
+        if (rootPath != null)
+        {
             tempPath = Path.Combine(rootPath, "Logs", "Packages", "dev.yarnspinner.unity");
-        } else {
+        }
+        else
+        {
             tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "dev.yarnspinner.logs");
         }
 
@@ -602,7 +609,8 @@ internal class ClassDeclarationSyntaxReceiver : ISyntaxReceiver
 
 internal class YSLSGenerator
 {
-    public YSLSGenerator(Yarn.Unity.ILogger logger) {
+    public YSLSGenerator(Yarn.Unity.ILogger logger)
+    {
         this.logger = logger;
     }
     struct YarnActionParameter
