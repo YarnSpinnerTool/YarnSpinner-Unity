@@ -318,7 +318,7 @@ namespace Yarn.Unity.Editor
 
                 // Now to compile the scripts associated with this project.
                 var job = CompilationJob.CreateFromFiles(project.SourceFiles);
-                job.AllowPreviewFeatures = true;
+                job.LanguageVersion = project.FileVersion;
 
                 job.Library = library;
 
