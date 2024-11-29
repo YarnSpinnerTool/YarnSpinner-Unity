@@ -1,5 +1,5 @@
 {
-  "projectFileVersion": 2,
+  "projectFileVersion": 3,
   "sourceFiles": [
     "**/*.yarn"
   ],
@@ -7,8 +7,5 @@
     "**/*~/*"
   ],
   "localisation": {},
-  "baseLanguage": "en",
-  "compilerOptions": {
-    "allowPreviewFeatures": true
-  }
+  "baseLanguage": "en"
 }
