@@ -187,18 +187,23 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 "YarnSpinner.Editor",
             };
 
+            // But DO generate source code for the Samples assembly.
+            var prefixesToKeep = new List<string>()
+            {
+                "YarnSpinner.Unity.Samples",
+            };
+
             if (context.Compilation.AssemblyName == null)
             {
                 output.WriteLine("Not generating registration code, because the provided AssemblyName is null");
                 return;
             }
-            foreach (var prefix in prefixesToIgnore)
+
+            if (prefixesToIgnore.Any(prefix => context.Compilation.AssemblyName.StartsWith(prefix)) && !prefixesToKeep.Any(prefix => context.Compilation.AssemblyName.StartsWith(prefix)))
             {
-                if (context.Compilation.AssemblyName.StartsWith(prefix))
-                {
-                    output.WriteLine($"Not generating registration code for {context.Compilation.AssemblyName}: we've been told to exclude it, because its name begins with one of these prefixes: {string.Join(", ", prefixesToIgnore)}");
-                    return;
-                }
+                output.WriteLine($"Not generating registration code for {context.Compilation.AssemblyName}: we've been told to exclude it, because its name begins with one of these prefixes: {string.Join(", ", prefixesToIgnore)}");
+                return;
+
             }
 
             if (!(context.Compilation is CSharpCompilation compilation))
