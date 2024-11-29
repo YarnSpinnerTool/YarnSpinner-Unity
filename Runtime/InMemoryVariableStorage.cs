@@ -43,11 +43,11 @@ namespace Yarn.Unity
         [HideInInspector] public bool showDebug;
 
         /// <summary>
-        /// A <see cref="UnityEngine.UI.Text"/> that can show the current list
+        /// A <see cref="TMPro.TMP_Text"/> that can show the current list
         /// of all variables in-game. Optional.
         /// </summary>
         [SerializeField, Tooltip("(optional) output list of variables and values to Text UI in-game")]
-        internal UnityEngine.UI.Text debugTextView = null;
+        internal TMPro.TMP_Text debugTextView = null;
 
         internal void Update()
         {
