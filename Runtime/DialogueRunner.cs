@@ -115,6 +115,11 @@ namespace Yarn.Unity
                     dialogue.NodeCompleteHandler = OnNodeCompleted;
                     dialogue.DialogueCompleteHandler = OnDialogueCompleted;
                     dialogue.PrepareForLinesHandler = OnPrepareForLines;
+
+                    if (yarnProject != null)
+                    {
+                        Dialogue.SetProgram(yarnProject.Program);
+                    }
                 }
                 return dialogue;
             }
