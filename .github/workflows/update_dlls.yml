@@ -9,107 +9,101 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       # We need to be able to:
-      # 1. create a branch in a repo ('contents'), and 
+      # 1. create a branch in a repo ('contents'), and
       # 2. create a pull request using that branch ('pull-requests')
       pull-requests: write
       contents: write
-    
+
     steps:
-    - name: Checkout Yarn Spinner for Unity
-      uses: actions/checkout@v2
-      with:
-        path: YarnSpinner-Unity
-    - name: Checkout Yarn Spinner
-      uses: actions/checkout@v2
-      with:
-        repository: YarnSpinnerTool/YarnSpinner
-        path: YarnSpinner
+      - name: Checkout Yarn Spinner for Unity
+        uses: actions/checkout@v2
+        with:
+          path: YarnSpinner-Unity
+      - name: Checkout Yarn Spinner
+        uses: actions/checkout@v2
+        with:
+          repository: YarnSpinnerTool/YarnSpinner
+          path: YarnSpinner
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.x
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
 
-    - name: Fetch all commits
-      run: git fetch --unshallow
-      working-directory: ./YarnSpinner
-    
-    - uses: gittools/actions/gitversion/setup@v0.9.10
-      name: Install GitVersion
-      with:
+      - name: Fetch all commits
+        run: git fetch --unshallow
+        working-directory: ./YarnSpinner
+
+      - uses: gittools/actions/gitversion/setup@v0.9.10
+        name: Install GitVersion
+        with:
           versionSpec: "6.x"
 
-    - name: Install dotnet-assembly-alias
-      run: dotnet tool install -g Alias
+      - name: Install dotnet-assembly-alias
+        run: dotnet tool install -g Alias
 
-    # Update the assembly info for this build of YS, so that the About window is
-    # appropriate
-    - uses: gittools/actions/gitversion/execute@v0.9.10
-      name: Execute GitVersion
-      id: gitversion # step id used as reference for output values
-      with:
-        updateAssemblyInfo: true
-        targetPath: ./YarnSpinner
-    
-    - name: Print version information
-      run: |
-        echo "Major: ${{ steps.gitversion.outputs.major }}"
-        echo "Minor: ${{ steps.gitversion.outputs.minor }}"
-        echo "Patch: ${{ steps.gitversion.outputs.patch }}"
-        echo "MajorMinorPatch: ${{ steps.gitversion.outputs.majorMinorPatch }}"
-        echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
+      # Update the assembly info for this build of YS, so that the About window is
+      # appropriate
+      - uses: gittools/actions/gitversion/execute@v0.9.10
+        name: Execute GitVersion
+        id: gitversion # step id used as reference for output values
+        with:
+          updateAssemblyInfo: true
+          targetPath: ./YarnSpinner
 
-    - name: Restore dependencies
-      run: dotnet restore
-      working-directory: ./YarnSpinner
+      - name: Print version information
+        run: |
+          echo "Major: ${{ steps.gitversion.outputs.major }}"
+          echo "Minor: ${{ steps.gitversion.outputs.minor }}"
+          echo "Patch: ${{ steps.gitversion.outputs.patch }}"
+          echo "MajorMinorPatch: ${{ steps.gitversion.outputs.majorMinorPatch }}"
+          echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
 
-    - name: Build
-      run: dotnet build --no-restore --configuration Release
-      working-directory: ./YarnSpinner
+      - name: Restore dependencies
+        run: dotnet restore
+        working-directory: ./YarnSpinner
 
-    # Don't proceed unless we're including a build of Yarn Spinner that passes
-    # its tests.
-    - name: Test
-      run: dotnet test --no-build --configuration Release --verbosity normal
-      working-directory: ./YarnSpinner
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+        working-directory: ./YarnSpinner
 
-    # We need to copy dependency DLLs into the project, but if a Unity project
-    # contains multiple DLLs with the same name (even from a package), that's an
-    # error. This causes problems for users who want to use, for example,
-    # Google.Protobuf (especially if they want to use a different version). 
-    #
-    # Our solution partly involves renaming the dependency DLLs to have the
-    # prefix 'Yarn.', and updating all references to these renamed DLLs, using
-    # dotnet-assembly-alias
-    # (https://github.com/getsentry/dotnet-assembly-alias/). For more
-    # information on this fix, see
-    # https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/15#issuecomment-1036162152.
-    - name: Rename vendored DLLs
-      run: |
-        assemblyalias --target-directory "YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/" --prefix "Yarn." --assemblies-to-alias "Antlr*;Csv*;Google*;"
-        assemblyalias --target-directory "YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/" --internalize --prefix "Yarn." --assemblies-to-alias "System*;Microsoft.Bcl*;Microsoft.Extensions*"
-    
-    # Copy all of the dependency DLLs into the YarnSpinner-Unity repo, except
-    # for Microsoft.CSharp.dll (which is provided by Unity, so including it
-    # would cause an error.)
-    - name: Copy DLLs
-      run: |
-        cp -v YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/*.dll YarnSpinner-Unity/Runtime/DLLs
-        rm -fv YarnSpinner-Unity/Runtime/DLLs/Microsoft.CSharp.dll
-    
-    # Make the PR against YarnSpinner-Unity that merges this change
-    - name: Create pull request
-      uses: peter-evans/create-pull-request@v3
-      with:
-        path: ./YarnSpinner-Unity
-        commit-message: Update Yarn Spinner DLLs to YarnSpinnerTool/YarnSpinner@${{ steps.gitversion.outputs.shortSha }}
-        branch: update-dlls-${{ steps.gitversion.outputs.shortSha }}
-        title: Update Yarn Spinner DLLs to latest (${{ steps.gitversion.outputs.shortSha }})
-        body: |
-          This is an automated PR made by @${{ github.actor }} that updates the precompiled Yarn Spinner DLLs (and their dependencies) to YarnSpinnerTool/YarnSpinner@${{ steps.gitversion.outputs.shortSha }} (v${{ steps.gitversion.outputs.fullSemVer }}).
+      # Don't proceed unless we're including a build of Yarn Spinner that passes
+      # its tests.
+      - name: Test
+        run: dotnet test --no-build --configuration Release --verbosity normal
+        working-directory: ./YarnSpinner
 
+      # We need to copy dependency DLLs into the project, but if a Unity project
+      # contains multiple DLLs with the same name (even from a package), that's an
+      # error. This causes problems for users who want to use, for example,
+      # Google.Protobuf (especially if they want to use a different version).
+      #
+      # Our solution partly involves renaming the dependency DLLs to have the
+      # prefix 'Yarn.', and updating all references to these renamed DLLs, using
+      # dotnet-assembly-alias
+      # (https://github.com/getsentry/dotnet-assembly-alias/). For more
+      # information on this fix, see
+      # https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/15#issuecomment-1036162152.
+      - name: Rename vendored DLLs
+        run: |
+          assemblyalias --target-directory "YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/" --prefix "Yarn." --assemblies-to-alias "Antlr*;Csv*;Google*;"
+          assemblyalias --target-directory "YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/" --internalize --prefix "Yarn." --assemblies-to-alias "System*;Microsoft.Bcl*;Microsoft.Extensions*"
 
+      # Copy all of the dependency DLLs into the YarnSpinner-Unity repo, except
+      # for Microsoft.CSharp.dll (which is provided by Unity, so including it
+      # would cause an error.)
+      - name: Copy DLLs
+        run: |
+          cp -v YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/*.dll YarnSpinner-Unity/Runtime/DLLs
+          rm -fv YarnSpinner-Unity/Runtime/DLLs/Microsoft.CSharp.dll
 
-      
-
-      
+      # Make the PR against YarnSpinner-Unity that merges this change
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          path: ./YarnSpinner-Unity
+          commit-message: Update Yarn Spinner DLLs to YarnSpinnerTool/YarnSpinner@${{ steps.gitversion.outputs.shortSha }}
+          branch: update-dlls-${{ steps.gitversion.outputs.shortSha }}
+          title: Update Yarn Spinner DLLs to latest (${{ steps.gitversion.outputs.shortSha }})
+          body: |
+            This is an automated PR made by @${{ github.actor }} that updates the precompiled Yarn Spinner DLLs (and their dependencies) to YarnSpinnerTool/YarnSpinner@${{ steps.gitversion.outputs.shortSha }} (v${{ steps.gitversion.outputs.fullSemVer }}).
