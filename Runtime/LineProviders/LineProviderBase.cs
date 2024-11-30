@@ -41,10 +41,6 @@ public interface ILineProvider
     /// Prepares and returns a <see cref="LocalizedLine"/> from the specified
     /// <see cref="Yarn.Line"/>.
     /// </summary>
-    /// <remarks>
-    /// This method should not be called if <see cref="LinesAvailable"/> returns
-    /// <see langword="false"/>.
-    /// </remarks>
     /// <param name="line">The <see cref="Yarn.Line"/> to produce the <see
     /// cref="LocalizedLine"/> from.</param>
     /// <param name="cancellationToken">A cancellation token that indicates
