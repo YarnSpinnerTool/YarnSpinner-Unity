@@ -37,7 +37,7 @@ jobs:
     - uses: gittools/actions/gitversion/setup@v0.9.10
       name: Install GitVersion
       with:
-            versionSpec: '5.x'
+          versionSpec: "6.x"
 
     - name: Install dotnet-assembly-alias
       run: dotnet tool install -g Alias
