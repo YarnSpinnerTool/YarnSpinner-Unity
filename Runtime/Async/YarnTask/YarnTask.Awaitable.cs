@@ -70,6 +70,13 @@ namespace Yarn.Unity
             return new YarnTask { Awaitable = Awaiter() };
         }
 
+#if USE_UNITASK
+        public static implicit operator YarnTask(Cysharp.Threading.Tasks.UniTask uniTask)
+        {
+            return new YarnTask { Awaitable = uniTask.AsAwaitable() };
+        }
+#endif
+
         readonly public async void Forget()
         {
             try
@@ -222,6 +229,13 @@ namespace Yarn.Unity
             return new YarnTask<T> { Awaitable = awaitable };
         }
 
+#if USE_UNITASK
+        public static implicit operator YarnTask<T>(Cysharp.Threading.Tasks.UniTask<T> uniTask)
+        {
+            return new YarnTask<T> { Awaitable = uniTask.AsAwaitable() };
+        }
+#endif
+
         readonly public async void Forget()
         {
             // Run the task, and if it throws an exception, log it (instead of
@@ -274,6 +288,21 @@ namespace Yarn.Unity
         public partial bool TrySetCanceled() => awaitableCompletionSource.TrySetCanceled();
 
         public YarnTask<T> Task => awaitableCompletionSource.Awaitable;
+    }
+
+    static class AwaitableUtility
+    {
+#if USE_UNITASK
+        public static async Awaitable AsAwaitable(this Cysharp.Threading.Tasks.UniTask awaitable)
+        {
+            await awaitable;
+        }
+
+        public static async Awaitable<T> AsAwaitable<T>(this Cysharp.Threading.Tasks.UniTask<T> awaitable)
+        {
+            return await awaitable;
+        }
+#endif
     }
 
 }

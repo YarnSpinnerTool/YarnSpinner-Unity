@@ -50,6 +50,14 @@ namespace Yarn.Unity
             return new YarnTask { Task = task.AsUniTask() };
         }
 
+#if UNITY_2023_1_OR_NEWER
+        // Allow implicitly converting Awaitables to YarnTasks
+        public static implicit operator YarnTask(UnityEngine.Awaitable awaitable)
+        {
+            return new YarnTask { Task = awaitable.AsUniTask() };
+        }
+#endif
+
         readonly public void Forget() => Task.Forget();
 
         public static partial YarnTask WaitUntilCanceled(System.Threading.CancellationToken token)
@@ -150,6 +158,15 @@ namespace Yarn.Unity
         {
             return new YarnTask<T> { Task = task };
         }
+
+#if UNITY_2023_1_OR_NEWER
+        // Allow implicitly converting Awaitables to YarnTasks
+        public static implicit operator YarnTask<T>(UnityEngine.Awaitable<T> awaitable)
+        {
+            return new YarnTask<T> { Task = awaitable.AsUniTask() };
+        }
+#endif
+
 
         readonly public void Forget() => Task.Forget();
 

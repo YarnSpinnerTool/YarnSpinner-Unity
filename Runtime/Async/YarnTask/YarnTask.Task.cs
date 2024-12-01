@@ -45,6 +45,19 @@ namespace Yarn.Unity
         {
             return new YarnTask { Task = task };
         }
+#if UNITY_2023_1_OR_NEWER
+        public static implicit operator YarnTask(Awaitable awaitable)
+        {
+            return new YarnTask { Task = awaitable.AsTask() };
+        }
+#endif
+
+#if USE_UNITASK
+        public static implicit operator YarnTask(Cysharp.Threading.Tasks.UniTask uniTask)
+        {
+            return new YarnTask { Task = Cysharp.Threading.Tasks.UniTaskExtensions.AsTask(uniTask) };
+        }
+#endif
 
         readonly public async void Forget()
         {
@@ -188,6 +201,20 @@ namespace Yarn.Unity
             return new YarnTask<T> { Task = task };
         }
 
+#if UNITY_2023_1_OR_NEWER
+        public static implicit operator YarnTask<T>(Awaitable<T> awaitable)
+        {
+            return new YarnTask<T> { Task = awaitable.AsTask() };
+        }
+#endif
+
+#if USE_UNITASK
+        public static implicit operator YarnTask<T>(Cysharp.Threading.Tasks.UniTask<T> uniTask)
+        {
+            return new YarnTask<T> { Task = Cysharp.Threading.Tasks.UniTaskExtensions.AsTask(uniTask) };
+        }
+#endif
+
         public static partial YarnTask<T> FromResult(T value)
         {
             return Task<T>.FromResult(value);
@@ -233,6 +260,21 @@ namespace Yarn.Unity
         }
 
         public YarnTask<T> Task => taskCompletionSource.Task;
+    }
+
+    static class TaskUtility
+    {
+#if UNITY_2023_1_OR_NEWER
+        public static async Task AsTask(this Awaitable awaitable)
+        {
+            await awaitable;
+        }
+
+        public static async Task<T> AsTask<T>(this Awaitable<T> awaitable)
+        {
+            return await awaitable;
+        }
+#endif
     }
 }
 #endif
