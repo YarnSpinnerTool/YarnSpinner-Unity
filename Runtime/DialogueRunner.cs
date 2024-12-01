@@ -334,17 +334,28 @@ namespace Yarn.Unity
         private CancellationTokenSource? currentLineCancellationSource;
         private CancellationTokenSource? currentLineHurryUpSource;
 
-        internal ICommandDispatcher CommandDispatcher { get; private set; }
+        internal ICommandDispatcher CommandDispatcher
+        {
+            get
+            {
+                if (_commandDispatcher == null)
+                {
+                    var actions = new Actions(this, Dialogue.Library);
+                    _commandDispatcher = actions;
+                    actions.RegisterActions();
+                }
+
+                return _commandDispatcher;
+            }
+        }
+
+        private ICommandDispatcher? _commandDispatcher;
 
         /// <summary>
         /// Called by Unity to set up the object.
         /// </summary>
         protected void Awake()
         {
-            var actions = new Actions(this, Dialogue.Library);
-            CommandDispatcher = actions;
-            actions.RegisterActions();
-
             if (this.VariableStorage != null && this.YarnProject != null)
             {
                 this.VariableStorage.Program = this.YarnProject.Program;
