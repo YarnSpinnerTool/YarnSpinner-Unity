@@ -407,6 +407,19 @@ namespace Yarn.Unity
                         dispatcher.WaitForCoroutine(coro)
                     );
                 }
+#if UNITY_2023_1_OR_NEWER
+                else if (returnValue is Awaitable awaitable)
+                {
+                    // The method returned an Awaitable. Convert it to a
+                    // YarnTask. (Awaitables implement IEnumerator, so check
+                    // this before testing against other IEnumerators like
+                    // coroutines.)
+                    return new CommandDispatchResult(
+                        CommandDispatchResult.StatusType.Succeeded,
+                        awaitable
+                    );
+                }
+#endif
                 else if (returnValue is IEnumerator enumerator)
                 {
                     // The method returned an IEnumerator.
@@ -424,12 +437,11 @@ namespace Yarn.Unity
                     );
                 }
 #if USE_UNITASK
-                else if (returnValue is Cysharp.Threading.Tasks.UniTask unitask) {
-                    // The method returned a UniTask. No need to convert it to
-                    // YarnTask, because if UniTask is installed, YarnTask means
-                    // UniTask.
+                else if (returnValue is Cysharp.Threading.Tasks.UniTask unitask)
+                {
+                    // The method returned a UniTask. Convert it to a YarnTask.
                     return new CommandDispatchResult(
-                        CommandDispatchResult.StatusType.Succeeded, 
+                        CommandDispatchResult.StatusType.Succeeded,
                         unitask
                     );
                 }
