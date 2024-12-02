@@ -7,6 +7,7 @@ using UnityEngine.Localization;
 using UnityEngine.Localization.Metadata;
 using UnityEngine.Localization.Settings;
 using UnityEngine.Localization.Tables;
+using UnityEngine.ResourceManagement.Exceptions;
 using Yarn.Markup;
 
 #nullable enable
@@ -128,8 +129,16 @@ namespace Yarn.Unity.UnityLocalization
 
             if (this.currentAssetTable != null)
             {
-                // Fetch the asset for this line, if one is available.
-                localizedLine.Asset = await YarnTask.WaitForAsyncOperation(this.currentAssetTable.GetAssetAsync<Object>(line.ID), cancellationToken);
+                try
+                {
+                    // Fetch the asset for this line, if one is available.
+                    localizedLine.Asset = await YarnTask.WaitForAsyncOperation(this.currentAssetTable.GetAssetAsync<Object>(line.ID), cancellationToken);
+                }
+                catch (System.Exception e)
+                {
+                    // Failed to fetch an asset.
+                    Debug.LogWarning($"Failed to fetch an asset for {line.ID}: " + e);
+                }
             }
 
             return localizedLine;
