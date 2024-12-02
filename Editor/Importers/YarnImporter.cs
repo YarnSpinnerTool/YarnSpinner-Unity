@@ -162,7 +162,7 @@ namespace Yarn.Unity.Editor
         /// name="limitCharacters"/> characters long. If this is set to -1,
         /// the entire string will be returned.</param>
         /// <returns>A string version of the hash.</returns>
-        internal static string GetHashString(string inputString, int limitCharacters = -1)
+        public static string GetHashString(string inputString, int limitCharacters = -1)
         {
             var sb = new StringBuilder();
             foreach (byte b in GetHash(inputString))
