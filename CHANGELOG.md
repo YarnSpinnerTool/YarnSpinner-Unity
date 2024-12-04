@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - This allows other objects to work with the command dispatcher (for example, registering new methods) in their `Awake` methods, even if their `Awake` methods run before `DialogueRunner`'s.
 - `YarnCommand` and `YarnFunction` commands now allow including `.` characters in their names.
 - Fixed an issue in SerializableDictionary.cs that caused builds to fail.
+- `DialogueRunner.AddCommandHandler` and `DialogueRunner.AddFunction` now validate that the provided names contain no spaces.
 - `DialogueRunner.AddCommandHandler` now supports methods whose last parameter is an array of values.
   - This allows for commands with a variable list of parameters. For example, consider the following method:
     ```csharp
