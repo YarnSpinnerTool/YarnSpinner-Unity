@@ -392,6 +392,12 @@ namespace Yarn.Unity
 
         public void AddCommandHandler(string commandName, Delegate handler)
         {
+            if (commandName.Contains(' '))
+            {
+                Debug.LogError($"Failed to register command {commandName}: command names are not allowed to contain spaces.");
+                return;
+            }
+
             if (_commands.ContainsKey(commandName)) {
                 Debug.LogError($"Failed to register command {commandName}: a command by this name has already been registered.");
                 return;
@@ -402,6 +408,12 @@ namespace Yarn.Unity
 
         public void AddFunction(string name, Delegate implementation)
         {
+            if (name.Contains(' '))
+            {
+                Debug.LogError($"Cannot add function {name}: command names are not allowed to contain spaces.");
+                return;
+            }
+
             if (Library.FunctionExists(name))
             {
                 Debug.LogError($"Cannot add function {name}: one already exists");
@@ -411,6 +423,12 @@ namespace Yarn.Unity
         }
 
         public void AddCommandHandler(string commandName, MethodInfo methodInfo) {
+            if (commandName.Contains(' '))
+            {
+                Debug.LogError($"Failed to register command {commandName}: command names are not allowed to contain spaces.");
+                return;
+            }
+
             if (_commands.ContainsKey(commandName)) {
                 Debug.LogError($"Failed to register command {commandName}: a command by this name has already been registered.");
                 return;
