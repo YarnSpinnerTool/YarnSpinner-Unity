@@ -634,11 +634,9 @@ namespace Yarn.Unity.Editor
                 }
 
                 // We've made changes to the table, so flag it and its shared
-                // data as dirty, and make sure that Unity's written the changes
-                // to disk.
+                // data as dirty.
                 EditorUtility.SetDirty(table);
                 EditorUtility.SetDirty(table.SharedData);
-                AssetDatabase.SaveAssets();
                 return;
             }
             Debug.LogWarning($"Unable to find a locale in the string table that matches the default locale {project.BaseLanguage}");
