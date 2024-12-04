@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Fixed an issue where, on Windows, projects would fail to automatically update when a file that belonged to them was created or edited.
+- Fixed an issue where Unity Localization `rid` values would change on reimport when they didn't have to.
 
 ### Removed
 
