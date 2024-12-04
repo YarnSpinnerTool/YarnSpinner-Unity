@@ -217,10 +217,9 @@ namespace Yarn.Unity.ActionAnalyser
                 diagnostics.Add(Diagnostic.Create(Diagnostics.YS1001ActionMethodsMustBePublic, methodDeclaration.Identifier.GetLocation(), methodDeclaration.Identifier, MethodSymbol.DeclaredAccessibility));
             }
 
-            // This is not a full validation of the naming rules of commands,
-            // but is good enough to catch the most common situations:
-            // whitespace and periods.
-            if (Name.Contains(".") || Name.Any(x => Char.IsWhiteSpace(x)))
+            // Commands are parsed as whitespace, so spaces in the command name
+            // would render the command un-callable.
+            if (Name.Any(x => Char.IsWhiteSpace(x)))
             {
                 diagnostics.Add(Diagnostic.Create(Diagnostics.YS1002ActionMethodsMustHaveAValidName, methodDeclaration.Identifier.GetLocation(), this.Name));
             }

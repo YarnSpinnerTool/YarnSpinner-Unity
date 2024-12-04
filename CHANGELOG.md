@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `UnityLocalisedLineProvider` no longer throws an exception if an asset table is provided but does not contain an asset for a line.
 - `DialogueRunner.CommandDispatcher` is now set up on first access, rather than in `Awake`.
   - This allows other objects to work with the command dispatcher (for example, registering new methods) in their `Awake` methods, even if their `Awake` methods run before `DialogueRunner`'s.
+- `YarnCommand` and `YarnFunction` commands now allow including `.` characters in their names.
 
 ### Changed
 
