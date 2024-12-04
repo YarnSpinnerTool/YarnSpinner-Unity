@@ -73,27 +73,31 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
         {
             output.WriteLine("Unable to determine Yarn settings path as no additional files were included. Settings values will be ignored and codegen will occur.");
         }
-        
+
         try
         {
             output.WriteLine("Source code generation for assembly " + context.Compilation.AssemblyName);
 
-            if (context.AdditionalFiles.Any()) {
+            if (context.AdditionalFiles.Any())
+            {
                 output.WriteLine($"Additional files:");
-                foreach (var item in context.AdditionalFiles) {
+                foreach (var item in context.AdditionalFiles)
+                {
                     output.WriteLine("  " + item.Path);
                 }
             }
 
             output.WriteLine("Referenced assemblies for this compilation:");
-            foreach (var referencedAssembly in context.Compilation.ReferencedAssemblyNames) {
+            foreach (var referencedAssembly in context.Compilation.ReferencedAssemblyNames)
+            {
                 output.WriteLine(" - " + referencedAssembly.Name);
             }
 
             bool compilationReferencesYarnSpinner = context.Compilation.ReferencedAssemblyNames
                 .Any(name => name.Name == YarnSpinnerUnityAssemblyName);
 
-            if (compilationReferencesYarnSpinner == false) {
+            if (compilationReferencesYarnSpinner == false)
+            {
                 // This compilation doesn't reference YarnSpinner.Unity. Any
                 // code that we generate that references symbols in that
                 // assembly won't work.
@@ -170,9 +174,9 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                     continue;
                 }
 
-                // this is not a full validation of the naming rules of commands
-                // but is good enough to catch the most common situations, whitespace and periods
-                if (action.Name.Contains(".") || action.Name.Any(x => Char.IsWhiteSpace(x)))
+                // Commands are parsed as whitespace, so spaces in the command name
+                // would render the command un-callable.
+                if (action.Name.Any(x => Char.IsWhiteSpace(x)))
                 {
                     var descriptor = new DiagnosticDescriptor(
                         "YS1002",
