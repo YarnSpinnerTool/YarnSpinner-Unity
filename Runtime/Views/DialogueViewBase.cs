@@ -298,6 +298,52 @@ namespace Yarn.Unity
         }
 
         /// <summary>
+        /// Called by the <see cref="DialogueRunner"/> to signal that the view
+        /// should dismiss its current options from display, and clean up.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method is called when a Dialogue View attached to a Dialogue
+        /// Runner reports that an option has been selected. When this occurs,
+        /// the Dialogue Runner calls <see cref="DismissOptions"/> on all
+        /// Dialogue Views to tell them to clear their current options from
+        /// display.</para>
+        /// <para>Depending on how the Dialogue View presents options,
+        /// "dismissing" them may mean different things. For example, a
+        /// Dialogue View that presents on-screen text might fade the text away,
+        /// or a Dialogue View that presents voice-over dialogue may not need to
+        /// do anything at all (because audio finished playing when the line(s)
+        /// finished presenting.)
+        /// </para>
+        /// <para style="hint">
+        /// Dismissing the options can take time, but should ideally be as fast as
+        /// possible, because the user will be waiting for the next piece of
+        /// content to appear. </para>
+        /// <para>
+        /// When the options have finished dismissing, this method calls
+        /// onDismissalComplete to indicate that the dismissal is complete. When
+        /// all Dialogue Views on a Dialogue Runner have finished dismissing,
+        /// the Dialogue Runner moves on to the next piece of content.
+        /// </para>
+        /// <para style="note">
+        /// The default implementation of this method immediately calls the
+        /// <paramref name="onDismissalComplete"/> method (that is, it reports
+        /// that it has finished dismissing the options the moment that it receives
+        /// it), and otherwise does nothing.
+        /// </para>
+        /// </remarks>
+        /// <param name="selectedOptionIndex">The index of the option that was
+        /// selected by the user.</param>
+        /// <param name="onDismissalComplete">The method that should be called
+        /// when the view has finished dismissing the line.</param>
+        public virtual void DismissOptions(int selectedOptionIndex, Action onDismissalComplete)
+        {
+            // The default implementation does nothing, and immediately calls
+            // onDismissalComplete.
+            onDismissalComplete?.Invoke();
+        }
+
+        /// <summary>
         /// Called by the <see cref="DialogueRunner"/> to signal that the
         /// dialogue has ended, and no more lines will be delivered.
         /// </summary>
