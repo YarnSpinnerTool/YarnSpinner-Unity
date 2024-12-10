@@ -184,8 +184,6 @@ namespace Yarn.Unity
             {
                 if (entry.localizedAssetReference == null || entry.localizedAssetReference.RuntimeKeyIsValid() == false) { return null; }
 
-                Debug.Log($"Fetching localised asset " + entry.localizedAssetReference.editorAsset);
-
                 // Try to fetch the referenced asset
                 return await UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(entry.localizedAssetReference).Task;
             }
