@@ -33,8 +33,7 @@ namespace Yarn.Unity
         /// and dismissal.
         /// </remarks>
         /// <seealso cref="useFadeEffect"/>
-        [SerializeField]
-        internal CanvasGroup canvasGroup;
+        public CanvasGroup canvasGroup;
 
         /// <summary>
         /// Controls whether the line view should fade in when lines appear, and
@@ -51,8 +50,7 @@ namespace Yarn.Unity
         /// <seealso cref="canvasGroup"/>
         /// <seealso cref="fadeInTime"/>
         /// <seealso cref="fadeOutTime"/>
-        [SerializeField]
-        internal bool useFadeEffect = true;
+        public bool useFadeEffect = true;
 
         /// <summary>
         /// The time that the fade effect will take to fade lines in.
@@ -60,9 +58,8 @@ namespace Yarn.Unity
         /// <remarks>This value is only used when <see cref="useFadeEffect"/> is
         /// <see langword="true"/>.</remarks>
         /// <seealso cref="useFadeEffect"/>
-        [SerializeField]
         [Min(0)]
-        internal float fadeInTime = 0.25f;
+        public float fadeInTime = 0.25f;
 
         /// <summary>
         /// The time that the fade effect will take to fade lines out.
@@ -70,16 +67,14 @@ namespace Yarn.Unity
         /// <remarks>This value is only used when <see cref="useFadeEffect"/> is
         /// <see langword="true"/>.</remarks>
         /// <seealso cref="useFadeEffect"/>
-        [SerializeField]
         [Min(0)]
-        internal float fadeOutTime = 0.05f;
+        public float fadeOutTime = 0.05f;
 
         /// <summary>
         /// The <see cref="TextMeshProUGUI"/> object that displays the text of
         /// dialogue lines.
         /// </summary>
-        [SerializeField]
-        internal TextMeshProUGUI lineText = null;
+        public TextMeshProUGUI lineText = null;
 
         /// <summary>
         /// Controls whether the <see cref="lineText"/> object will show the
@@ -94,9 +89,8 @@ namespace Yarn.Unity
         /// <para>If this value is <see langword="false"/>, character names will
         /// not be shown in the <see cref="lineText"/> object.</para>
         /// </remarks>
-        [SerializeField]
         [UnityEngine.Serialization.FormerlySerializedAs("showCharacterName")]
-        internal bool showCharacterNameInLineView = true;
+        public bool showCharacterNameInLineView = true;
 
         /// <summary>
         /// The <see cref="TextMeshProUGUI"/> object that displays the character
@@ -106,8 +100,7 @@ namespace Yarn.Unity
         /// If the <see cref="LineView"/> receives a line that does not contain
         /// a character name, this object will be left blank.
         /// </remarks>
-        [SerializeField]
-        internal TextMeshProUGUI characterNameText = null;
+        public TextMeshProUGUI characterNameText = null;
 
         /// <summary>
         /// The gameobject that holds the <see cref="characterNameText"/>
@@ -118,7 +111,7 @@ namespace Yarn.Unity
         /// within an entirely different game object. Most of the time this will
         /// just be the same gameobject as <see cref="characterNameText"/>.
         /// </remarks>
-        [SerializeField] internal GameObject characterNameContainer = null;
+        public GameObject characterNameContainer = null;
 
         /// <summary>
         /// Controls whether the text of <see cref="lineText"/> should be
@@ -140,8 +133,7 @@ namespace Yarn.Unity
         /// <seealso cref="lineText"/>
         /// <seealso cref="onCharacterTyped"/>
         /// <seealso cref="typewriterEffectSpeed"/>
-        [SerializeField]
-        internal bool useTypewriterEffect = false;
+        public bool useTypewriterEffect = false;
 
         /// <summary>
         /// A Unity Event that is called each time a character is revealed
@@ -152,8 +144,7 @@ namespace Yarn.Unity
         /// <see langword="true"/>.
         /// </remarks>
         /// <seealso cref="useTypewriterEffect"/>
-        [SerializeField]
-        internal UnityEngine.Events.UnityEvent onCharacterTyped;
+        public UnityEngine.Events.UnityEvent onCharacterTyped;
 
         /// <summary>
         /// A Unity Event that is called when a pause inside of the typewriter
@@ -164,7 +155,7 @@ namespace Yarn.Unity
         /// <see langword="true"/>.
         /// </remarks>
         /// <seealso cref="useTypewriterEffect"/>
-        [SerializeField] internal UnityEngine.Events.UnityEvent onPauseStarted;
+        public UnityEngine.Events.UnityEvent onPauseStarted;
         /// <summary>
         /// A Unity Event that is called when a pause inside of the typewriter
         /// effect finishes and the typewriter has started once again.
@@ -174,16 +165,15 @@ namespace Yarn.Unity
         /// <see langword="true"/>.
         /// </remarks>
         /// <seealso cref="useTypewriterEffect"/>
-        [SerializeField] internal UnityEngine.Events.UnityEvent onPauseEnded;
+        public UnityEngine.Events.UnityEvent onPauseEnded;
 
         /// <summary>
         /// The number of characters per second that should appear during a
         /// typewriter effect.
         /// </summary>
         /// <seealso cref="useTypewriterEffect"/>
-        [SerializeField]
         [Min(0)]
-        internal float typewriterEffectSpeed = 0f;
+        public float typewriterEffectSpeed = 0f;
 
         /// <summary>
         /// The game object that represents an on-screen button that the user
@@ -199,15 +189,14 @@ namespace Yarn.Unity
         /// UI needs, you can provide any object you need.</para>
         /// </remarks>
         /// <seealso cref="autoAdvance"/>
-        [SerializeField]
-        internal GameObject continueButton = null;
+        public GameObject continueButton = null;
 
         /// <summary>
         /// The amount of time to wait after any line
         /// </summary>
-        [SerializeField]
+
         [Min(0)]
-        internal float holdTime = 1f;
+        public float holdTime = 1f;
 
         /// <summary>
         /// Controls whether this Line View will wait for user input before
@@ -230,11 +219,9 @@ namespace Yarn.Unity
         /// read lines of dialogue at their own pace, and give them control over
         /// when to advance to the next line.</para></para>
         /// </remarks>
-        [SerializeField]
-        internal bool autoAdvance = false;
+        public bool autoAdvance = false;
 
-        [SerializeField]
-        internal MarkupPalette palette;
+        public MarkupPalette palette;
 
         /// <summary>
         /// The current <see cref="LocalizedLine"/> that this line view is
