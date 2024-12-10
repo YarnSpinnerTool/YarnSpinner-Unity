@@ -32,8 +32,7 @@ namespace Yarn.Unity
         /// and dismissal.
         /// </remarks>
         /// <seealso cref="useFadeEffect"/>
-        [SerializeField]
-        internal CanvasGroup canvasGroup;
+        public CanvasGroup canvasGroup;
 
         /// <summary>
         /// Controls whether the line view should fade in when lines appear, and
@@ -50,8 +49,7 @@ namespace Yarn.Unity
         /// <seealso cref="canvasGroup"/>
         /// <seealso cref="fadeInTime"/>
         /// <seealso cref="fadeOutTime"/>
-        [SerializeField]
-        internal bool useFadeEffect = true;
+        public bool useFadeEffect = true;
 
         /// <summary>
         /// The time that the fade effect will take to fade lines in.
@@ -59,9 +57,8 @@ namespace Yarn.Unity
         /// <remarks>This value is only used when <see cref="useFadeEffect"/> is
         /// <see langword="true"/>.</remarks>
         /// <seealso cref="useFadeEffect"/>
-        [SerializeField]
         [Min(0)]
-        internal float fadeInTime = 0.25f;
+        public float fadeInTime = 0.25f;
 
         /// <summary>
         /// The time that the fade effect will take to fade lines out.
@@ -69,16 +66,14 @@ namespace Yarn.Unity
         /// <remarks>This value is only used when <see cref="useFadeEffect"/> is
         /// <see langword="true"/>.</remarks>
         /// <seealso cref="useFadeEffect"/>
-        [SerializeField]
         [Min(0)]
-        internal float fadeOutTime = 0.05f;
+        public float fadeOutTime = 0.05f;
 
         /// <summary>
         /// The <see cref="TextMeshProUGUI"/> object that displays the text of
         /// dialogue lines.
         /// </summary>
-        [SerializeField]
-        internal TextMeshProUGUI lineText = null;
+        public TextMeshProUGUI lineText = null;
 
         /// <summary>
         /// Controls whether the <see cref="lineText"/> object will show the
@@ -93,9 +88,8 @@ namespace Yarn.Unity
         /// <para>If this value is <see langword="false"/>, character names will
         /// not be shown in the <see cref="lineText"/> object.</para>
         /// </remarks>
-        [SerializeField]
         [UnityEngine.Serialization.FormerlySerializedAs("showCharacterName")]
-        internal bool showCharacterNameInLineView = true;
+        public bool showCharacterNameInLineView = true;
 
         /// <summary>
         /// The <see cref="TextMeshProUGUI"/> object that displays the character
@@ -105,8 +99,7 @@ namespace Yarn.Unity
         /// If the <see cref="LineView"/> receives a line that does not contain
         /// a character name, this object will be left blank.
         /// </remarks>
-        [SerializeField]
-        internal TextMeshProUGUI characterNameText = null;
+        public TextMeshProUGUI characterNameText = null;
 
         /// <summary>
         /// The gameobject that holds the <see cref="characterNameText"/> textfield.
@@ -115,7 +108,7 @@ namespace Yarn.Unity
         /// This is needed in situations where the character name is contained within an entirely different game object.
         /// Most of the time this will just be the same gameobject as <see cref="characterNameText"/>.
         /// </remarks>
-        [SerializeField] internal GameObject characterNameContainer = null;
+        public GameObject characterNameContainer = null;
 
         /// <summary>
         /// Controls whether the text of <see cref="lineText"/> should be
@@ -137,8 +130,7 @@ namespace Yarn.Unity
         /// <seealso cref="lineText"/>
         /// <seealso cref="onCharacterTyped"/>
         /// <seealso cref="typewriterEffectSpeed"/>
-        [SerializeField]
-        internal bool useTypewriterEffect = false;
+        public bool useTypewriterEffect = false;
 
         /// <summary>
         /// A Unity Event that is called each time a character is revealed
@@ -149,8 +141,7 @@ namespace Yarn.Unity
         /// <see langword="true"/>.
         /// </remarks>
         /// <seealso cref="useTypewriterEffect"/>
-        [SerializeField]
-        internal UnityEngine.Events.UnityEvent onCharacterTyped;
+        public UnityEngine.Events.UnityEvent onCharacterTyped;
 
         /// <summary>
         /// A Unity Event that is called when a pause inside of the typewriter effect occurs.
@@ -159,7 +150,7 @@ namespace Yarn.Unity
         /// This event is only invoked when <see cref="useTypewriterEffect"/> is <see langword="true"/>.
         /// </remarks>
         /// <seealso cref="useTypewriterEffect"/>
-        [SerializeField] internal UnityEngine.Events.UnityEvent onPauseStarted;
+        public UnityEngine.Events.UnityEvent onPauseStarted;
         /// <summary>
         /// A Unity Event that is called when a pause inside of the typewriter effect finishes and the typewriter has started once again.
         /// </summary>
@@ -167,16 +158,15 @@ namespace Yarn.Unity
         /// This event is only invoked when <see cref="useTypewriterEffect"/> is <see langword="true"/>.
         /// </remarks>
         /// <seealso cref="useTypewriterEffect"/>
-        [SerializeField] internal UnityEngine.Events.UnityEvent onPauseEnded;
+        public UnityEngine.Events.UnityEvent onPauseEnded;
 
         /// <summary>
         /// The number of characters per second that should appear during a
         /// typewriter effect.
         /// </summary>
         /// <seealso cref="useTypewriterEffect"/>
-        [SerializeField]
         [Min(0)]
-        internal float typewriterEffectSpeed = 0f;
+        public float typewriterEffectSpeed = 0f;
 
         /// <summary>
         /// The game object that represents an on-screen button that the user
@@ -192,15 +182,14 @@ namespace Yarn.Unity
         /// UI needs, you can provide any object you need.</para>
         /// </remarks>
         /// <seealso cref="autoAdvance"/>
-        [SerializeField]
-        internal GameObject continueButton = null;
+        public GameObject continueButton = null;
 
         /// <summary>
         /// The amount of time to wait after any line
         /// </summary>
-        [SerializeField]
+
         [Min(0)]
-        internal float holdTime = 1f;
+        public float holdTime = 1f;
 
         /// <summary>
         /// Controls whether this Line View will wait for user input before
@@ -223,12 +212,10 @@ namespace Yarn.Unity
         /// read lines of dialogue at their own pace, and give them control over
         /// when to advance to the next line.</para></para>
         /// </remarks>
-        [SerializeField]
-        internal bool autoAdvance = false;
+        public bool autoAdvance = false;
 
-        [SerializeField]
-        internal MarkupPalette palette;
-        
+        public MarkupPalette palette;
+
         /// <summary>
         /// The current <see cref="LocalizedLine"/> that this line view is
         /// displaying.
@@ -272,12 +259,12 @@ namespace Yarn.Unity
                 yield return StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeOutTime, currentStopToken));
                 currentStopToken.Complete();
             }
-            
+
             canvasGroup.alpha = 0;
             canvasGroup.blocksRaycasts = false;
             // turning interaction back on, if it needs it
             canvasGroup.interactable = interactable;
-            
+
             if (onDismissalComplete != null)
             {
                 onDismissalComplete();
@@ -292,7 +279,7 @@ namespace Yarn.Unity
             // Cancel all coroutines that we're currently running. This will
             // stop the RunLineInternal coroutine, if it's running.
             StopAllCoroutines();
-            
+
             // for now we are going to just immediately show everything
             // later we will make it fade in
             lineText.gameObject.SetActive(true);
@@ -510,7 +497,7 @@ namespace Yarn.Unity
             // animation coroutine is what actually interrupts
             // for now this is fine.
             // Is an animation running that we can stop?
-            if (currentStopToken.CanInterrupt) 
+            if (currentStopToken.CanInterrupt)
             {
                 // Stop the current animation, and skip to the end of whatever
                 // started it.
@@ -614,7 +601,7 @@ namespace Yarn.Unity
         {
             var pausePositions = new Stack<(int, float)>();
             var label = "pause";
-            
+
             // sorting all the attributes in reverse positional order
             // this is so we can build the stack up in the right positioning
             var attributes = line.Attributes;
