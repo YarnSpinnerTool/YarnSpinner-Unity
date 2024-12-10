@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Inspector-exposed fields on `LineView` are now public.
 - Fixed an issue where a `.meta` file was causing warnings to appear in Unity on import. ([@Colbydude](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/pull/294))
 - `YarnProjectImporter.GenerateStringsTable` is now public.
+- Yarn Projects now allow choosing more specific cultures (for example 'pt-BR' and 'en-AU' rather than simply 'pt' and 'en') as their base language.
 
 ### Removed
 
