@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed an issue where a `[pause/]` marker at the start of the line would cause all pauses to not work ([@iatenothingbutriceforthreedays](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/pull/291))
 - Inspector-exposed fields on `LineView` are now public.
 - Fixed an issue where a `.meta` file was causing warnings to appear in Unity on import. ([@Colbydude](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/pull/294))
+- `YarnProjectImporter.GenerateStringsTable` is now public.
 
 ### Removed
 
