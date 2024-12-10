@@ -338,14 +338,26 @@ namespace Yarn.Unity
         {
             get
             {
-                if (_commandDispatcher == null)
-                {
-                    var actions = new Actions(this, Dialogue.Library);
-                    _commandDispatcher = actions;
-                    actions.RegisterActions();
-                }
+                EnsureCommandDispatcherReady();
 
-                return _commandDispatcher;
+                if (_commandDispatcher != null)
+                {
+                    return _commandDispatcher;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"{nameof(EnsureCommandDispatcherReady)} failed to set up command dispatcher");
+                }
+            }
+        }
+
+        private void EnsureCommandDispatcherReady()
+        {
+            if (_commandDispatcher == null)
+            {
+                var actions = new Actions(this, Dialogue.Library);
+                _commandDispatcher = actions;
+                actions.RegisterActions();
             }
         }
 
@@ -844,6 +856,9 @@ namespace Yarn.Unity
 
             dialogueCancellationSource = new CancellationTokenSource();
             LineProvider.YarnProject = yarnProject;
+
+            EnsureCommandDispatcherReady();
+
             Dialogue.SetProgram(yarnProject.Program);
             Dialogue.SetNode(nodeName);
 
