@@ -262,6 +262,7 @@ namespace Yarn.Unity
     }
 }
 
+#if UNITY_EDITOR
 namespace Yarn.Unity.Editor
 {
 
@@ -872,3 +873,4 @@ namespace Yarn.Unity.Editor
         }
     }
 }
+#endif
