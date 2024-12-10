@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed an issue where, on Windows, projects would fail to automatically update when a file that belonged to them was created or edited.
 - Fixed an issue where Unity Localization `rid` values would change on reimport when they didn't have to.
+- Fixed an issue where a `[pause/]` marker at the start of the line would cause all pauses to not work ([@iatenothingbutriceforthreedays](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/pull/291))
 
 ### Removed
 
