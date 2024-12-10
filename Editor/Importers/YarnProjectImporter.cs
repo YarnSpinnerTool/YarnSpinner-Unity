@@ -1021,6 +1021,8 @@ namespace Yarn.Unity.Editor
             {
                 if (table.LocaleIdentifier.CultureInfo != defaultCulture)
                 {
+                    // There's no table for our base language, but maybe there
+                    // is one for the parent of our base language.
                     var neutralTable = table.LocaleIdentifier.CultureInfo.IsNeutralCulture
                         ? table.LocaleIdentifier.CultureInfo
                         : table.LocaleIdentifier.CultureInfo.Parent;

@@ -17,18 +17,18 @@ namespace Yarn.Unity.Editor
             return $"{culture.DisplayName} ({culture.Name})";
         }
 
-        public static PopupField<string> Create(string label)
+        public static PopupField<string> Create(string label, bool onlyNeutralCultures = false)
         {
-            var allNeutralCultures = Cultures.GetCultures().Where(c => c.IsNeutralCulture);
+            var allCultures = Cultures.GetCultures().Where(c => !onlyNeutralCultures || c.IsNeutralCulture);
 
             var defaultCulture = System.Globalization.CultureInfo.CurrentCulture;
 
-            if (defaultCulture.IsNeutralCulture == false)
+            if (onlyNeutralCultures && defaultCulture.IsNeutralCulture == false)
             {
                 defaultCulture = defaultCulture.Parent;
             }
 
-            var cultureChoices = allNeutralCultures.Select(c => c.Name).ToList();
+            var cultureChoices = allCultures.Select(c => c.Name).ToList();
 
             var popup = new PopupField<string>(label, cultureChoices, defaultCulture.Name, FormatCulture, FormatCulture);
 
