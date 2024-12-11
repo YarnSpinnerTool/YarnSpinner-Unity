@@ -851,6 +851,38 @@ namespace Yarn.Unity.Tests
     /// </summary>
     public class StringAssertions : ObjectAssertions<string>
     {
+        /// <summary>
+        /// Asserts that the subject string contains a substring, using the
+        /// specified string comparison type.
+        /// </summary>
+        /// <param name="substring">The substring to check for in the
+        /// string.</param>
+        /// <param name="comparison">The type of string comparison to
+        /// perform.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        public void Contain(string substring, StringComparison comparison, string? message = null)
+        {
+            NullCheck(Subject, message);
+            NullCheck(substring, message);
+            if (Subject.Contains(substring, comparison) == false)
+            {
+                throw new AssertionException($"Expected string \"{Subject}\" to contain substring \"{substring}\" (using comparison {comparison})", message);
+            }
+        }
+
+        /// <summary>
+        /// Asserts that the subject string contains a substring, using a
+        /// case-sensitive, culture-insensitive string comparison.
+        /// </summary>
+        /// <param name="substring">The substring to check for in the
+        /// string.</param>
+        /// <param name="message">An optional message to include if the
+        /// assertion fails.</param>
+        public void Contain(string substring, string? message = null)
+        {
+            Contain(substring, StringComparison.InvariantCulture, message);
+        }
     }
 
 
