@@ -1013,6 +1013,18 @@ namespace Yarn.Unity.Tests
         {
             return new StringAssertions { Subject = subject };
         }
+
+        /// <summary>
+        /// Gets an assertions object for the given enum subject.
+        /// </summary>
+        /// <param name="subject">The enum to create an assertions object
+        /// for.</param>
+        /// <returns>An assertions object for <paramref
+        /// name="subject"/>.</returns>
+        public static ObjectAssertions<T> Should<T>(this T subject) where T : struct, Enum
+        {
+            return new ObjectAssertions<T> { Subject = subject };
+        }
     }
 
 
