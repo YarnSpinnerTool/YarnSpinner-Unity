@@ -228,7 +228,7 @@ namespace Yarn.Unity
                 switch (operation.Status)
                 {
                     case AsyncOperationStatus.Succeeded:
-                        completedLoadOperations.Add(stringID, operation);
+                        completedLoadOperations.TryAdd(stringID, operation);
                         break;
                     case AsyncOperationStatus.Failed:
                         Debug.LogError($"Failed to load asset for line {stringID} in localization \"{audioLineProvider.YarnProject.GetLocalization(audioLineProvider.audioLanguageCode).LocaleCode}\"");
