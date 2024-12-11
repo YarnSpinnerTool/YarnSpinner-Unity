@@ -159,10 +159,12 @@ namespace Yarn.Unity
             {
                 var parameters = Method.GetParameters();
 
+                var lastParameterIsArray = parameters.Length > 0 && parameters[parameters.Length - 1].ParameterType.IsArray;
+
                 var (min, max) = ParameterCount;
 
                 int argumentCount = args.Length;
-                if (argumentCount < min || argumentCount > max)
+                if (argumentCount < min || (argumentCount > max && !lastParameterIsArray))
                 {
                     // Wrong number of arguments.
                     string requirementDescription;
@@ -189,13 +191,22 @@ namespace Yarn.Unity
 
                 for (int i = 0; i < argumentCount; i++)
                 {
-                    var parameterIsParamsArray = parameters[i].GetCustomAttribute<ParamArrayAttribute>() != null;
+                    var parameterIsArray = parameters[i].ParameterType.IsArray;
 
                     string arg = args[i];
                     Converter converter = Converters[i];
 
-                    if (parameterIsParamsArray)
+                    if (parameterIsArray)
                     {
+                        if (i < parameters.Length - 1)
+                        {
+                            // The parameter is an array, but it isn't the last
+                            // parameter. That's not allowed.
+                            message = $"Parameter {i} ({parameters[i].Name}): is an array, but is not the last parameter of {parameters[i].Member.Name}.";
+                            result = default;
+                            return CommandDispatchResult.ParameterParseStatusType.InvalidParameterType;
+                        }
+
                         // Consume all remaining arguments, passing them through
                         // the final converter, and produce an array from the
                         // results. This array will be the final parameter to
@@ -631,6 +642,15 @@ namespace Yarn.Unity
 
             foreach (var parameterInfo in parameterInfos)
             {
+                if (parameterInfo.ParameterType.IsArray)
+                {
+                    // Array parameters are permitted, but only if they're the
+                    // last parameter
+                    if (i != parameterInfos.Length - 1)
+                    {
+                        throw new ArgumentException($"Can't register method {method.Name}: Parameter {i + 1} ({parameterInfo.Name}): array parameters are required to be last.");
+                    }
+                }
                 result[i] = CreateConverter(parameterInfo, i);
                 i++;
             }
@@ -641,9 +661,8 @@ namespace Yarn.Unity
         {
             var targetType = parameter.ParameterType;
             string name = parameter.Name;
-            var parameterIsParamsArray = parameter.GetCustomAttribute<ParamArrayAttribute>() != null;
 
-            if (targetType.IsArray && parameterIsParamsArray)
+            if (targetType.IsArray)
             {
                 // This parameter is a params array. Make a converter for that
                 // array's element type; at dispatch time, we'll repeatedly call

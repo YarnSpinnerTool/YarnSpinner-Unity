@@ -15,6 +15,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - This allows other objects to work with the command dispatcher (for example, registering new methods) in their `Awake` methods, even if their `Awake` methods run before `DialogueRunner`'s.
 - `YarnCommand` and `YarnFunction` commands now allow including `.` characters in their names.
 - Fixed an issue in SerializableDictionary.cs that caused builds to fail.
+- `DialogueRunner.AddCommandHandler` now supports methods whose last parameter is an array of values.
+  - This allows for commands with a variable list of parameters. For example, consider the following method:
+    ```csharp
+    void LogStrings(int a, string[] remainder) {
+      Debug.Log($"a = {a}, remainder={string.Join(",", remainder)}");
+    }
+    ```
+    This method can be registered as a Yarn command:
+    ```csharp
+    dialogueRunner.AddCommandHandler<int, string[]>("my_command", LogStrings);
+    ```
+    And called from Yarn Spinner:
+    ```
+    // logs "a = 42, remainder=this,is,pretty,great"
+    <<my_command 42 this is pretty great>> 
+    ```
+    > [!NOTE]
+    > Array parameters are required to be the last parameter of the method.
+
 
 ### Changed
 

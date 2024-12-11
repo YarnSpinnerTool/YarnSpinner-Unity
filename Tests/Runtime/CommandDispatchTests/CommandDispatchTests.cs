@@ -87,5 +87,38 @@ namespace Yarn.Unity.Tests
                 Assert.True(dialogueRunner.Dialogue.Library.FunctionExists(expectedFunctionName), "expected function {0} to be registered", expectedFunctionName);
             }
         }
+
+        [Test]
+        public void DirectRegistrationCommands_CanHaveParamsArray()
+        {
+            void TestCommand(params string[] parameters)
+            {
+                Debug.Log(string.Join(";", parameters));
+            }
+
+            void InvalidArrayPosition(string[] strings, bool boolean)
+            {
+                throw new AssertionException("This method should not be called");
+            }
+
+            var dialogueRunnerGO = new GameObject("Dialogue Runner");
+            var dialogueRunner = dialogueRunnerGO.AddComponent<DialogueRunner>();
+
+            dialogueRunner.AddCommandHandler<string[]>("test_command", TestCommand);
+
+            LogAssert.Expect(LogType.Log, "1;2;3;4");
+
+            var dispatchResult = dialogueRunner.CommandDispatcher.DispatchCommand("test_command 1 2 3 4", dialogueRunner);
+
+            dispatchResult.Status.Should().BeEqualTo(CommandDispatchResult.StatusType.Succeeded, "the command dispatch should succeed");
+            dispatchResult.Task.IsCompletedSuccessfully().Should().BeTrue("the command should run synchronously");
+
+            var notLastParameterException = Assert.Throws<System.ArgumentException>(() =>
+            {
+                dialogueRunner.AddCommandHandler<string[], bool>("invalid_array_type", InvalidArrayPosition);
+            }, "command handler array parameters must be the last parameter");
+
+            notLastParameterException.Message.Should().Contain("array parameters are required to be last");
+        }
     }
 }
