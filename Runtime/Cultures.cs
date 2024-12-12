@@ -53,6 +53,7 @@ namespace Yarn.Unity
         /// <exception cref="ArgumentException">Thrown when no <see
         /// cref="Culture"/> with the given language ID can be
         /// found.</exception>
+        [Obsolete("Use " + nameof(TryGetCulture) + ", which does not throw if the culture can't be found.")]
         public static Culture GetCulture(string name)
         {
             var exists = _allCulturesTable.Value.TryGetValue(name, out var result);
@@ -65,6 +66,21 @@ namespace Yarn.Unity
             {
                 throw new ArgumentException($"Culture {name} not found", name);
             }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="Culture"/> represented by the language code in
+        /// <paramref name="name"/>.
+        /// </summary>
+        /// <param name="name">The name of the <see cref="Culture"/> to
+        /// retrieve.</param>
+        /// <param name="culture">On return, the <see cref="Culture"/> if one
+        /// was found, or a default <see cref="Culture"/> if otherwise.</param>
+        /// <returns><see langword="true"/> if a Culture was found; <see
+        /// langword="false"/> otherwise.</returns>
+        public static bool TryGetCulture(string name, out Culture culture)
+        {
+            return _allCulturesTable.Value.TryGetValue(name, out culture);
         }
 
         /// <summary>
