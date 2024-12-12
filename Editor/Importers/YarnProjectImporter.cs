@@ -575,84 +575,109 @@ namespace Yarn.Unity.Editor
                 return;
             }
 
-            var defaultCulture = new System.Globalization.CultureInfo(project.BaseLanguage);
-
-            // Find the single table that corrresponds to our base language.
-            foreach (var table in unityLocalisationStringTableCollection.StringTables)
+            // Get the Unity string table corresponding to the Yarn Project's
+            // base language. If a table can't be found for the language but can
+            // be for the language's parent, use that. Otherwise, return null.
+            StringTable FindBaseLanguageStringTable()
             {
-                if (table.LocaleIdentifier.CultureInfo != defaultCulture)
+                StringTable baseLanguageStringTable = unityLocalisationStringTableCollection.StringTables
+                    .FirstOrDefault(t => t.LocaleIdentifier == project.BaseLanguage);
+
+                if (baseLanguageStringTable != null)
                 {
-                    // There's no table for our base language, but maybe there
-                    // is one for the parent of our base language.
-                    var neutralTable = table.LocaleIdentifier.CultureInfo.IsNeutralCulture
-                        ? table.LocaleIdentifier.CultureInfo
-                        : table.LocaleIdentifier.CultureInfo.Parent;
-
-                    var defaultNeutral = defaultCulture.IsNeutralCulture
-                        ? defaultCulture
-                        : defaultCulture.Parent;
-
-                    if (!neutralTable.Equals(defaultNeutral))
-                    {
-                        continue;
-                    }
+                    // We found a table that matches the project's language!
+                    return baseLanguageStringTable;
                 }
 
-                foreach (var yarnEntry in compilationResult.StringTable)
+                // We didn't find a string table that exactly matches the locale
+                // code of our Yarn Project's base language. Maybe we can try to
+                // find a string table for our base language's parent.
+
+                System.Globalization.CultureInfo defaultCulture = null;
+                try
                 {
-                    // Grab the data that we'll put in the string table
-                    var lineID = yarnEntry.Key;
-                    var stringInfo = yarnEntry.Value;
-
-                    // Do we already have an entry with this line ID?
-                    UnityEngine.Localization.Tables.StringTableEntry unityEntry = table.GetEntry(lineID);
-
-                    if (unityEntry != null)
-                    {
-                        // We have an existing entry, so update it.
-                        unityEntry.Value = stringInfo.text;
-                    }
-                    else
-                    {
-                        // Create a new entry for this content.
-                        unityEntry = table.AddEntry(lineID, stringInfo.text);
-                    }
-
-                    // Next, set up the metadata on this entry. We'll start by
-                    // getting the list of hashtags on the line, not including
-                    // its line ID (we don't need it in metadata, because it's
-                    // already stored as the table entry's key.)
-                    var tags = RemoveLineIDFromMetadata(stringInfo.metadata).ToArray();
-
-                    // Next, do we already have metadata for the Unity table
-                    // entry?
-                    var existingSharedMetadata = unityEntry.SharedEntry.Metadata.GetMetadata<UnityLocalization.LineMetadata>();
-
-
-                    if (existingSharedMetadata != null)
-                    {
-                        // We do. Update the existing metadata.
-                        existingSharedMetadata.nodeName = stringInfo.nodeName;
-                        existingSharedMetadata.tags = tags;
-                    }
-                    else
-                    {
-                        // Create a new metadata.
-                        unityEntry.SharedEntry.Metadata.AddMetadata(new UnityLocalization.LineMetadata
-                        {
-                            nodeName = stringInfo.nodeName,
-                            tags = tags,
-                        });
-                    }
+                    defaultCulture = new System.Globalization.CultureInfo(project.BaseLanguage);
+                }
+                catch (System.Globalization.CultureNotFoundException)
+                {
+                    // We can't find a CultureInfo for the base language.
+                    return null;
                 }
 
-                // We've made changes to the table, so flag it and its shared
-                // data as dirty.
-                EditorUtility.SetDirty(table);
-                EditorUtility.SetDirty(table.SharedData);
+                if (defaultCulture.IsNeutralCulture)
+                {
+                    // The base language is a neutral culture. It has no parent
+                    // we could look for.
+                    return null;
+                }
+
+                var defaultNeutralCulture = defaultCulture.Parent;
+
+                var defaultNeutralStringTable = unityLocalisationStringTableCollection.StringTables.FirstOrDefault(table => table.LocaleIdentifier == defaultNeutralCulture.Name);
+
+                return defaultNeutralStringTable;
+            }
+
+            var unityStringTable = FindBaseLanguageStringTable();
+
+            if (unityStringTable == null)
+            {
+                Debug.LogWarning($"Unable to find a locale in the string table that matches the default locale {project.BaseLanguage}");
                 return;
             }
-            Debug.LogWarning($"Unable to find a locale in the string table that matches the default locale {project.BaseLanguage}");
+
+            foreach (var yarnEntry in compilationResult.StringTable)
+            {
+                // Grab the data that we'll put in the string table
+                var lineID = yarnEntry.Key;
+                var stringInfo = yarnEntry.Value;
+
+                // Do we already have an entry with this line ID?
+                UnityEngine.Localization.Tables.StringTableEntry unityEntry = unityStringTable.GetEntry(lineID);
+
+                if (unityEntry != null)
+                {
+                    // We have an existing entry, so update it.
+                    unityEntry.Value = stringInfo.text;
+                }
+                else
+                {
+                    // Create a new entry for this content.
+                    unityEntry = unityStringTable.AddEntry(lineID, stringInfo.text);
+                }
+
+                // Next, set up the metadata on this entry. We'll start by
+                // getting the list of hashtags on the line, not including its
+                // line ID (we don't need it in metadata, because it's already
+                // stored as the table entry's key.)
+                var tags = RemoveLineIDFromMetadata(stringInfo.metadata).ToArray();
+
+                // Next, do we already have metadata for the Unity table entry?
+                var existingSharedMetadata = unityEntry.SharedEntry.Metadata.GetMetadata<UnityLocalization.LineMetadata>();
+
+                if (existingSharedMetadata != null)
+                {
+                    // We do. Update the existing metadata.
+                    existingSharedMetadata.nodeName = stringInfo.nodeName;
+                    existingSharedMetadata.tags = tags;
+                }
+                else
+                {
+                    // Create a new metadata.
+                    unityEntry.SharedEntry.Metadata.AddMetadata(new UnityLocalization.LineMetadata
+                    {
+                        nodeName = stringInfo.nodeName,
+                        tags = tags,
+                    });
+                }
+            }
+
+            // We've made changes to the table, so flag it and its shared data
+            // as dirty.
+            EditorUtility.SetDirty(unityStringTable);
+            EditorUtility.SetDirty(unityStringTable.SharedData);
+            return;
+
         }
 #endif
 
