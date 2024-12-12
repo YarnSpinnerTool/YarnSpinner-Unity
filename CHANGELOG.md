@@ -26,7 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     ```
     > [!NOTE]
     > Array parameters are required to be string arrays, and are required to be the last parameter of the method.
-
+- Language popups now allow choosing a custom language code.
 
 ### Changed
 
