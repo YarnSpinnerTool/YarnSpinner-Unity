@@ -16,7 +16,7 @@ namespace Yarn.Unity.Editor
         private readonly ObjectField stringsFileField;
         private readonly Button deleteButton;
         private readonly VisualElement stringsFileNotUsedLabel;
-        private readonly LanguageField languagePopup;
+        private readonly PopupField<string> languagePopup;
         public event System.Action onDelete;
         ProjectImportData.LocalizationEntry data;
 
@@ -48,7 +48,7 @@ namespace Yarn.Unity.Editor
             // Dropdowns don't exist in Unity 2019/20(?), so we need to create
             // one at runtime and swap out a placeholder.
             var existingPopup = this.Q("languagePlaceholder");
-            languagePopup = new LanguageField("Language");
+            languagePopup = LanguagePopup.Create("Language");
             LanguagePopup.ReplaceElement(existingPopup, languagePopup);
 
             _projectBaseLanguage = baseLanguage;
@@ -101,9 +101,7 @@ namespace Yarn.Unity.Editor
         {
             this.data = data;
             Culture culture;
-            var foundCulture = Cultures.TryGetCulture(data.languageID, out culture);
-
-            string foldoutDisplayName = foundCulture ? $"{culture.DisplayName} ({culture.Name})" : $"{data.languageID}";
+            culture = Cultures.GetCulture(data.languageID);
             
             languagePopup.SetValueWithoutNotify(data.languageID);
             assetFolderField.SetValueWithoutNotify(data.assetsFolder);
@@ -121,7 +119,7 @@ namespace Yarn.Unity.Editor
 
             deleteButton.SetEnabled(isBaseLanguage == false);
 
-            foldout.text = foldoutDisplayName;
+            foldout.text = $"{culture.DisplayName} ({culture.Name})";
         }
 
         internal void ClearModified()

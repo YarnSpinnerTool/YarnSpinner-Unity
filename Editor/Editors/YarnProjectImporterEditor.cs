@@ -55,8 +55,6 @@ namespace Yarn.Unity.Editor
         public VisualTreeAsset sourceFileUIAsset;
         public StyleSheet yarnProjectStyleSheet;
 
-        private VisualElement uiRoot;
-
         private string baseLanguage = null;
         private List<LocalizationEntryElement> localizationEntryFields = new List<LocalizationEntryElement>();
         private List<SourceFileEntryElement> sourceEntryFields = new List<SourceFileEntryElement>();
@@ -195,29 +193,12 @@ namespace Yarn.Unity.Editor
             }
         }
 
-        public override void DiscardChanges()
-        {
-            localizationEntryFields.Clear();
-            sourceEntryFields.Clear();
-            LocalisationsAddedOrRemoved = false;
-            BaseLanguageNameModified = false;
-            SourceFilesAddedOrRemoved = false;
-
-            base.DiscardChanges();
-
-            var inspectorRoot = uiRoot.parent;
-            uiRoot.RemoveFromHierarchy();
-
-            inspectorRoot.Add(CreateInspectorGUI());
-        }
-
         public override VisualElement CreateInspectorGUI()
         {
             YarnProjectImporter yarnProjectImporter = target as YarnProjectImporter;
             var importData = yarnProjectImporter.ImportData;
             
             var ui = new VisualElement();
-            uiRoot = ui;
 
             ui.styleSheets.Add(yarnProjectStyleSheet);
 
@@ -345,7 +326,7 @@ namespace Yarn.Unity.Editor
 
             localisationControls.Add(localisationHeader);
 
-            var languagePopup = new LanguageField("Base Language");
+            var languagePopup = LanguagePopup.Create("Base Language");
             var generateStringsFileButton = new Button();
             var addStringTagsButton = new Button();
             var updateExistingStringsFilesButton = new Button();
@@ -364,9 +345,7 @@ namespace Yarn.Unity.Editor
 
             localisationControls.Add(languagePopup);
 
-#if USE_ADDRESSABLES
             yarnInternalControls.Add(useAddressableAssetsField);
-#endif
 
             yarnInternalControls.Add(localisationFieldsContainer);
 
