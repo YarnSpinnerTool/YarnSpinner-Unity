@@ -1,0 +1,2294 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>YarnSpinner</name>
+    </assembly>
+    <members>
+        <member name="T:Yarn.Line">
+             <summary>
+             A line of dialogue, sent from the <see cref="T:Yarn.Dialogue"/> to the game.
+             </summary>
+             <remarks>
+             <para>When the game receives a <see cref="T:Yarn.Line"/>, it should do the
+             following things to prepare the line for presentation to the user.
+             </para>
+             <list type="number">
+             <item>Use the value in the <see cref="F:Yarn.Line.ID"/> field to look up the
+             appropriate user-facing text in the string table. </item>
+            
+             <item>Use <see cref="M:Yarn.Dialogue.ExpandSubstitutions(System.String,System.Collections.Generic.IList{System.String})"/> to replace all
+             substitutions in the user-facing text.</item>
+            
+             <item>Use <see cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/> to parse all markup in the
+             line.</item>
+             </list>
+            
+             <para>You do not create instances of this struct yourself. They are
+             created by the <see cref="T:Yarn.Dialogue"/> during program execution.</para>
+             </remarks>
+             <seealso cref="P:Yarn.Dialogue.LineHandler"/>
+        </member>
+        <member name="F:Yarn.Line.ID">
+            <summary>
+            The string ID for this line.
+            </summary>
+        </member>
+        <member name="F:Yarn.Line.Substitutions">
+            <summary>
+            The values that should be inserted into the user-facing text
+            before delivery.
+            </summary>
+        </member>
+        <member name="T:Yarn.OptionSet">
+            <summary>
+            A set of <see cref="T:Yarn.OptionSet.Option"/>s, sent from the <see
+            cref="T:Yarn.Dialogue"/> to the game.
+            </summary>
+            <remarks>
+            You do not create instances of this struct yourself. They are
+            created by the <see cref="T:Yarn.Dialogue"/> during program execution.
+            </remarks>
+            <seealso cref="P:Yarn.Dialogue.OptionsHandler"/>
+        </member>
+        <member name="T:Yarn.OptionSet.Option">
+            <summary>
+            An option to be presented to the user.
+            </summary>
+        </member>
+        <member name="P:Yarn.OptionSet.Option.Line">
+            <summary>
+            Gets the <see cref="P:Yarn.OptionSet.Option.Line"/> that should be presented to the
+            user for this option.
+            </summary>
+            <remarks>
+            See the documentation for the <see cref="T:Yarn.Line"/> class
+            for information on how to prepare a line before presenting
+            it to the user. 
+            </remarks>
+        </member>
+        <member name="P:Yarn.OptionSet.Option.ID">
+            <summary>
+            Gets the identifying number for this option.
+            </summary>
+            <remarks>
+            When the user selects this option, this value should be
+            used as the parameter for <see
+            cref="M:Yarn.Dialogue.SetSelectedOption(System.Int32)"/>.
+            </remarks>
+        </member>
+        <member name="P:Yarn.OptionSet.Option.DestinationNode">
+            <summary>
+            Gets the name of the node that will be run if this option
+            is selected.
+            </summary>
+            <remarks>
+            The value of this property not be valid if this is a
+            shortcut option.
+            </remarks>
+        </member>
+        <member name="P:Yarn.OptionSet.Option.IsAvailable">
+            <summary>
+            Gets a value indicating whether the player should be
+            permitted to select this option.
+            </summary>
+            <remarks>
+            <para>
+            If this value is <see langword="false"/>, this option had a
+            line condition on it that failed. The option will still be
+            delivered to the game, but, depending on the needs of the
+            game, the game may decide to not allow the player to select
+            it, or not offer it to the player at all.
+            </para>
+            <para>
+            This is intended for situations where games wish to show
+            options that the player _could_ have taken, if some other
+            condition had been met (e.g. having enough "charisma"
+            points).
+            </para>
+            </remarks>
+        </member>
+        <member name="P:Yarn.OptionSet.Options">
+            <summary>
+            Gets the <see cref="T:Yarn.OptionSet.Option"/>s that should be presented to the
+            user.
+            </summary>
+            <seealso cref="T:Yarn.OptionSet.Option"/>
+        </member>
+        <member name="T:Yarn.Command">
+            <summary>
+            A command, sent from the <see cref="T:Yarn.Dialogue"/> to the game.
+            </summary>
+            <remarks>
+            You do not create instances of this struct yourself. They are
+            created by the <see cref="T:Yarn.Dialogue"/> during program execution.
+            </remarks>
+            <seealso cref="P:Yarn.Dialogue.CommandHandler"/>    
+        </member>
+        <member name="P:Yarn.Command.Text">
+            <summary>
+            Gets the text of the command.
+            </summary>
+        </member>
+        <member name="T:Yarn.Logger">
+            <summary>
+            Represents a method that receives diagnostic messages and error
+            information from a <see cref="T:Yarn.Dialogue"/>.
+            </summary>
+            <remarks>
+            The text that this delegate receives may be output to a console, or
+            sent to a log.
+            </remarks>
+            <param name="message">The text that should be logged.</param>
+        </member>
+        <member name="T:Yarn.IVariableStorage">
+            <summary>Provides a mechanism for storing and retrieving instances
+            of the <see cref="T:Yarn.Value"/> class.</summary>
+        </member>
+        <member name="M:Yarn.IVariableStorage.SetValue(System.String,System.String)">
+            <summary>
+            Stores a <see cref="T:System.String"/> in this VariableStorage.
+            </summary>
+            <param name="variableName">The name to associate with this
+            variable.</param>
+            <param name="stringValue">The string to store.</param>
+        </member>
+        <member name="M:Yarn.IVariableStorage.SetValue(System.String,System.Single)">
+            <summary>
+            Stores a <see cref="T:System.Single"/> in this VariableStorage.
+            </summary>
+            <param name="variableName">The name to associate with this
+            variable.</param>
+            <param name="floatValue">The number to store.</param>
+        </member>
+        <member name="M:Yarn.IVariableStorage.SetValue(System.String,System.Boolean)">
+            <summary>
+            Stores a <see cref="T:System.Boolean"/> in this VariableStorage.
+            </summary>
+            <param name="variableName">The name to associate with this
+            variable.</param>
+            <param name="boolValue">The boolean value to store.</param>
+        </member>
+        <member name="M:Yarn.IVariableStorage.TryGetValue``1(System.String,``0@)">
+            <summary>
+            Retrieves a value of type <typeparamref name="T"/> by name.
+            </summary>
+            <typeparam name="T">The type of the variable to
+            retrieve.</typeparam>
+            <param name="variableName">The name of the variable to retrieve the
+            value of.</param>
+            <param name="result">On return, if this method returned true,
+            contains the retrieved value. If this method returned false,
+            contains the default value of <typeparamref name="T"/> (for example,
+            <c>0</c> for <see cref="T:System.Single"/> values, <see langword="null"/> for
+            strings, and so on.)</param>
+            <returns><see langword="true"/> if a value named <paramref
+            name="variableName"/> of type <typeparamref name="T"/> was
+            retrieved; <see langword="false"/> otherwise.</returns>
+        </member>
+        <member name="M:Yarn.IVariableStorage.Clear">
+            <summary>
+            Removes all variables from storage.
+            </summary>
+        </member>
+        <member name="T:Yarn.MemoryVariableStore">
+            <summary>
+            A simple concrete implementation of <see cref="T:Yarn.IVariableStorage"/>
+            that keeps all variables in memory.
+            </summary>
+        </member>
+        <member name="M:Yarn.MemoryVariableStore.TryGetValue``1(System.String,``0@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.MemoryVariableStore.Clear">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.MemoryVariableStore.SetValue(System.String,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.MemoryVariableStore.SetValue(System.String,System.Single)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.MemoryVariableStore.SetValue(System.String,System.Boolean)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Yarn.LineHandler">
+            <summary>
+            Represents the method that is called when the Dialogue delivers a <see
+            cref="T:Yarn.Line"/>.
+            </summary>
+            <param name="line">The <see cref="T:Yarn.Line"/> that has been
+            delivered.</param>
+            <seealso cref="T:Yarn.OptionsHandler"/>
+            <seealso cref="T:Yarn.CommandHandler"/>
+            <seealso cref="T:Yarn.NodeStartHandler"/>
+            <seealso cref="T:Yarn.NodeCompleteHandler"/>
+            <seealso cref="T:Yarn.DialogueCompleteHandler"/>
+        </member>
+        <member name="T:Yarn.OptionsHandler">
+            <summary>
+            Represents the method that is called when the Dialogue delivers an <see
+            cref="T:Yarn.OptionSet"/>.
+            </summary>
+            <param name="options">The <see cref="T:Yarn.OptionSet"/> that has been
+            delivered.</param>
+            <seealso cref="T:Yarn.LineHandler"/>
+            <seealso cref="T:Yarn.CommandHandler"/>
+            <seealso cref="T:Yarn.NodeStartHandler"/>
+            <seealso cref="T:Yarn.NodeCompleteHandler"/>
+            <seealso cref="T:Yarn.DialogueCompleteHandler"/>
+        </member>
+        <member name="T:Yarn.CommandHandler">
+            <summary>
+            Represents the method that is called when the Dialogue delivers a <see
+            cref="T:Yarn.Command"/>.
+            </summary>
+            <param name="command">The <see cref="T:Yarn.Command"/> that has been
+            delivered.</param>
+            <seealso cref="T:Yarn.LineHandler"/>
+            <seealso cref="T:Yarn.OptionsHandler"/>
+            <seealso cref="T:Yarn.NodeStartHandler"/>
+            <seealso cref="T:Yarn.NodeCompleteHandler"/>
+            <seealso cref="T:Yarn.DialogueCompleteHandler"/>
+        </member>
+        <member name="T:Yarn.NodeCompleteHandler">
+            <summary>
+            Represents the method that is called when the Dialogue reaches the end
+            of a node.
+            </summary>
+            <param name="completedNodeName">The name of the node.</param>
+            <remarks>
+            This method may be called multiple times over the course of code
+            execution. A node being complete does not necessarily represent the end
+            of the conversation.
+            </remarks>
+            <seealso cref="T:Yarn.LineHandler"/>
+            <seealso cref="T:Yarn.OptionsHandler"/>
+            <seealso cref="T:Yarn.CommandHandler"/>
+            <seealso cref="T:Yarn.NodeStartHandler"/>
+            <seealso cref="T:Yarn.DialogueCompleteHandler"/>
+        </member>
+        <member name="T:Yarn.NodeStartHandler">
+            <summary>
+            Represents the method that is called when the Dialogue begins executing
+            a node.
+            </summary>
+            <param name="startedNodeName">The name of the node.</param>
+            <seealso cref="T:Yarn.LineHandler"/>
+            <seealso cref="T:Yarn.OptionsHandler"/>
+            <seealso cref="T:Yarn.CommandHandler"/>
+            <seealso cref="T:Yarn.NodeCompleteHandler"/>
+            <seealso cref="T:Yarn.DialogueCompleteHandler"/>
+        </member>
+        <member name="T:Yarn.DialogueCompleteHandler">
+            <summary>
+            Represents the method that is called when the dialogue has reached its
+            end, and no more code remains to be run.
+            </summary>
+            <seealso cref="T:Yarn.LineHandler"/>
+            <seealso cref="T:Yarn.OptionsHandler"/>
+            <seealso cref="T:Yarn.CommandHandler"/>
+            <seealso cref="T:Yarn.NodeStartHandler"/>
+            <seealso cref="T:Yarn.NodeCompleteHandler"/>
+        </member>
+        <member name="T:Yarn.PrepareForLinesHandler">
+            <summary>
+            Represents the method that is called when the dialogue anticipates that
+            it will deliver lines.
+            </summary>
+            <remarks>
+            <para>
+            This method should begin preparing to run the lines. For example, if a
+            game delivers dialogue via voice-over, the appropriate audio files
+            should be loaded.
+            </para>
+            <para>
+            This method serves to provide a hint to the game that a line _may_ be
+            run. Not every line indicated in <paramref name="lineIDs"/> may end up
+            actually running.
+            </para>
+            <para>
+            This method may be called any number of times during a dialogue session.
+            </para>
+            </remarks>
+            <param name="lineIDs">The collection of line IDs that may be delivered
+            at some point soon.</param>
+        </member>
+        <member name="T:Yarn.Dialogue">
+            <summary>
+            Co-ordinates the execution of Yarn programs.
+            </summary>
+        </member>
+        <member name="P:Yarn.Dialogue.VariableStorage">
+            <summary>
+            Gets or sets the object that provides access to storing and
+            retrieving the values of variables.
+            </summary>
+        </member>
+        <member name="P:Yarn.Dialogue.LogDebugMessage">
+            <summary>
+            Invoked when the Dialogue needs to report debugging
+            information.
+            </summary>
+        </member>
+        <member name="P:Yarn.Dialogue.LogErrorMessage">
+            <summary>
+            Invoked when the Dialogue needs to report an error.
+            </summary>
+        </member>
+        <member name="F:Yarn.Dialogue.DefaultStartNodeName">
+            <summary>The node that execution will start from.</summary>
+        </member>
+        <member name="P:Yarn.Dialogue.Program">
+            <summary>Gets or sets the compiled Yarn program.</summary>
+        </member>
+        <member name="P:Yarn.Dialogue.IsActive">
+            <summary>
+            Gets a value indicating whether the Dialogue is currently executing
+            Yarn instructions.
+            </summary>
+        </member>
+        <member name="P:Yarn.Dialogue.LineHandler">
+            <summary>
+            Gets or sets the <see cref="T:Yarn.LineHandler"/> that is called when
+            a line is ready to be shown to the user.
+            </summary>
+        </member>
+        <member name="P:Yarn.Dialogue.LanguageCode">
+            <summary>
+            Gets or sets the <see cref="T:Yarn.Dialogue"/>'s locale, as an IETF BCP 47
+            code.
+            </summary>
+            <remarks>
+            <para>
+            This code is used to determine how the <c>plural</c> and <c>ordinal</c>
+            markers determine the plural class of numbers.
+            </para>
+            <para>
+            For example, the code "en-US" represents the English language as
+            used in the United States.
+            </para>
+            </remarks>
+        </member>
+        <member name="P:Yarn.Dialogue.OptionsHandler">
+            <summary>
+            Gets or sets the <see cref="T:Yarn.OptionsHandler"/> that is called
+            when a set of options are ready to be shown to the user.
+            </summary>
+            <remarks>
+            The Options Handler delivers an <see cref="T:Yarn.OptionSet"/> to the game.
+            Before <see cref="M:Yarn.Dialogue.Continue"/> can be called to resume execution,
+            <see cref="M:Yarn.Dialogue.SetSelectedOption(System.Int32)"/> must be called to indicate which
+            <see cref="T:Yarn.OptionSet.Option"/> was selected by the user. If <see
+            cref="M:Yarn.Dialogue.SetSelectedOption(System.Int32)"/> is not called, an exception is thrown.
+            </remarks>
+        </member>
+        <member name="P:Yarn.Dialogue.CommandHandler">
+            <summary>
+            Gets or sets the <see cref="T:Yarn.CommandHandler"/> that is called
+            when a command is to be delivered to the game.
+            </summary>
+        </member>
+        <member name="P:Yarn.Dialogue.NodeStartHandler">
+            <summary>
+            Gets or sets the <see cref="T:Yarn.NodeStartHandler"/> that is called
+            when a node is started.
+            </summary>
+        </member>
+        <member name="P:Yarn.Dialogue.NodeCompleteHandler">
+            <summary>
+            Gets or sets the <see cref="T:Yarn.NodeCompleteHandler"/> that is
+            called when a node is complete.
+            </summary>
+        </member>
+        <member name="P:Yarn.Dialogue.DialogueCompleteHandler">
+            <summary>
+            Gets or sets the <see cref="T:Yarn.DialogueCompleteHandler"/> that is
+            called when the dialogue reaches its end.
+            </summary>
+        </member>
+        <member name="P:Yarn.Dialogue.PrepareForLinesHandler">
+            <summary>
+            Gets or sets the <see cref="P:Yarn.Dialogue.PrepareForLinesHandler"/> that is called
+            when the dialogue anticipates delivering some lines.
+            </summary>
+            <value></value>
+        </member>
+        <member name="P:Yarn.Dialogue.Library">
+            <summary>
+            Gets the <see cref="T:Yarn.Library"/> that this Dialogue uses to
+            locate functions.
+            </summary>
+            <remarks>
+            When the Dialogue is constructed, the Library is initialized with
+            the built-in operators like <c>+</c>, <c>-</c>, and so on.
+            </remarks>
+        </member>
+        <member name="M:Yarn.Dialogue.#ctor(Yarn.IVariableStorage)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Yarn.Dialogue"/> class.
+            </summary>
+            <param name="variableStorage">The <see
+            cref="T:Yarn.IVariableStorage"/> that this Dialogue should
+            use.</param>
+        </member>
+        <member name="M:Yarn.Dialogue.SetProgram(Yarn.Program)">
+            <summary>
+            Loads all nodes from the provided <see cref="T:Yarn.Program"/>.
+            </summary>
+            <remarks>
+            This method replaces any existing nodes have been loaded. If you
+            want to load nodes from an _additional_ Program, use the <see
+            cref="M:Yarn.Dialogue.AddProgram(Yarn.Program)"/> method.
+            </remarks>
+            <param name="program">The <see cref="T:Yarn.Program"/> to use.</param>
+        </member>
+        <member name="M:Yarn.Dialogue.AddProgram(Yarn.Program)">
+            <summary>
+            Loads the nodes from the specified <see cref="T:Yarn.Program"/>, and
+            adds them to the nodes already loaded.
+            </summary>
+            <param name="program">The additional program to load.</param>
+            <remarks>
+            If <see cref="P:Yarn.Dialogue.Program"/> is <see langword="null"/>, this method has
+            the effect as calling <see cref="M:Yarn.Dialogue.SetProgram(Yarn.Program)"/>.
+            </remarks>
+        </member>
+        <member name="M:Yarn.Dialogue.LoadProgram(System.String)">
+            <summary>
+            Loads a compiled <see cref="T:Yarn.Program"/> from a file.
+            </summary>
+            <param name="fileName">The path of the file to load.</param>
+            <remarks>
+            <para>
+            This method replaces the current value of <see cref="P:Yarn.Dialogue.Program"/> with
+            the result of loading the file.
+            </para>
+            <para>
+            This method does not compile Yarn source. To compile Yarn source
+            code into a <see cref="T:Yarn.Program"/>, Refer to the Yarn compiler.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:Yarn.Dialogue.SetNode(System.String)">
+            <summary>
+            Prepares the <see cref="T:Yarn.Dialogue"/> that the user intends to start
+            running a node.
+            </summary>
+            <param name="startNode">The name of the node that will be run. The
+            node have been loaded by calling <see cref="M:Yarn.Dialogue.SetProgram(Yarn.Program)"/>
+            or <see cref="M:Yarn.Dialogue.AddProgram(Yarn.Program)"/>.</param>
+            <remarks>
+            <para>
+            After this method is called, you call <see cref="M:Yarn.Dialogue.Continue"/> to
+            start executing it.
+            </para>
+            <para>
+            If <see cref="P:Yarn.Dialogue.PrepareForLinesHandler"/> has been set, it may be
+            called when this method is invoked, as the Dialogue determines which
+            lines may be delivered during the <paramref name="startNode"/>
+            node's execution.
+            </para>
+            </remarks>
+            <throws cref="T:Yarn.DialogueException">Thrown when no node named
+            <c>startNode</c> has been loaded.</throws>
+        </member>
+        <member name="M:Yarn.Dialogue.SetSelectedOption(System.Int32)">
+            <summary>
+            Signals to the <see cref="T:Yarn.Dialogue"/> that the user has selected a
+            specified <see cref="T:Yarn.OptionSet.Option"/>.
+            </summary>
+            <remarks>
+            <para>
+            After the Dialogue delivers an <see cref="T:Yarn.OptionSet"/>, this method
+            must be called before <see cref="M:Yarn.Dialogue.Continue"/> is called.
+            </para>
+            <para>
+            The ID number that should be passed as the parameter to this method
+            should be the <see cref="P:Yarn.OptionSet.Option.ID"/> field in the <see
+            cref="T:Yarn.OptionSet.Option"/> that represents the user's selection.
+            </para>
+            </remarks>
+            <param name="selectedOptionID">The ID number of the Option that the
+            user selected.</param>
+            <throws cref="T:Yarn.DialogueException">Thrown when the Dialogue is not
+            expecting an option to be selected.</throws> <throws
+            cref="T:System.ArgumentOutOfRangeException">Thrown when <c>selectedOptionID</c> is
+            not a valid option ID.</throws>
+            <seealso cref="T:Yarn.OptionsHandler"/>
+            <seealso cref="T:Yarn.OptionSet"/>
+            <seealso cref="M:Yarn.Dialogue.Continue"/>
+        </member>
+        <member name="M:Yarn.Dialogue.Continue">
+             <summary>
+             Starts, or continues, execution of the current Program.
+             </summary>
+             <remarks>
+             <para>
+             This method repeatedly executes instructions until one of the
+             following conditions is encountered:
+             </para>
+             <list type="bullet">
+             <item>The <see cref="P:Yarn.Dialogue.LineHandler"/> or <see cref="P:Yarn.Dialogue.CommandHandler"/>
+             is called. After calling either of these handlers, the Dialogue will
+             wait until <see cref="M:Yarn.Dialogue.Continue"/> is called. Continue may be called
+             from inside the <see cref="P:Yarn.Dialogue.LineHandler"/> or <see
+             cref="P:Yarn.Dialogue.CommandHandler"/>, or may be called at any future time.</item>
+            
+             <item>The <see cref="P:Yarn.Dialogue.OptionsHandler"/> is called. When this occurs,
+             the Dialogue is waiting for the user to specify which of the options
+             has been selected, and <see cref="M:Yarn.Dialogue.SetSelectedOption(System.Int32)"/> must be
+             called before <see cref="M:Yarn.Dialogue.Continue"/> is called again.)</item>
+            
+             <item>The Program reaches its end. When this occurs, <see
+             cref="M:Yarn.Dialogue.SetNode(System.String)"/> must be called before <see
+             cref="M:Yarn.Dialogue.Continue"/> is called again.</item>
+            
+             <item>An error occurs while executing the Program.</item>
+             </list>
+            
+             <para>This method has no effect if it is called while the <see
+             cref="T:Yarn.Dialogue"/> is currently in the process of executing
+             instructions.</para>
+             </remarks>
+             <seealso cref="T:Yarn.LineHandler"/>
+             <seealso cref="T:Yarn.OptionsHandler"/>
+             <seealso cref="T:Yarn.CommandHandler"/>
+             <seealso cref="T:Yarn.NodeCompleteHandler"/>
+             <seealso cref="T:Yarn.DialogueCompleteHandler"/>
+        </member>
+        <member name="M:Yarn.Dialogue.Stop">
+            <summary>
+            Immediately stops the <see cref="T:Yarn.Dialogue"/>.
+            </summary>
+        </member>
+        <member name="P:Yarn.Dialogue.NodeNames">
+            <summary>
+            Gets the names of the nodes in the currently loaded Program.
+            </summary>
+        </member>
+        <member name="P:Yarn.Dialogue.CurrentNode">
+            <summary>
+            Gets the name of the node that this Dialogue is currently executing.
+            </summary>
+            <remarks>If <see cref="M:Yarn.Dialogue.Continue"/> has never been called, this value
+            will be <see langword="null"/>.</remarks>
+        </member>
+        <member name="M:Yarn.Dialogue.GetStringIDForNode(System.String)">
+            <summary>
+            Returns the string ID that contains the original, uncompiled source
+            text for a node.
+            </summary>
+            <param name="nodeName">The name of the node.</param>
+            <returns>The string ID.</returns>
+            <remarks>
+            <para>
+            A node's source text will only be present in the string table if its
+            <c>tags</c> header contains <c>rawText</c>.
+            </para>
+            <para>
+            Because the <see cref="T:Yarn.Dialogue"/> class is designed to be unaware
+            of the contents of the string table, this method does not test to
+            see if the string table contains an entry with the line ID. You will
+            need to test for that yourself.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:Yarn.Dialogue.GetTagsForNode(System.String)">
+            <summary>
+            Returns the tags for the node <paramref name="nodeName"/>.
+            </summary>
+            <remarks>
+            The tags for a node are defined by setting the <c>tags</c> header in
+            the node's source code. This header must be a space-separated list.
+            </remarks>
+            <param name="nodeName">The name of the node.</param>
+            <returns>The node's tags, or <see langword="null"/> if the node is
+            not present in the Program.</returns>
+        </member>
+        <member name="M:Yarn.Dialogue.UnloadAll">
+            <summary>
+            Unloads all nodes from the Dialogue.
+            </summary>
+        </member>
+        <member name="M:Yarn.Dialogue.GetByteCode">
+            <summary>
+            Returns a textual version of the current program's bytecode.
+            </summary>
+            <remarks>This can be useful for diagnostic purposes.</remarks>
+            <returns>The bytecode of <see cref="P:Yarn.Dialogue.Program"/>, as a
+            string.</returns>
+        </member>
+        <member name="M:Yarn.Dialogue.NodeExists(System.String)">
+            <summary>
+            Gets a value indicating whether a specified node exists in the
+            Program.
+            </summary>
+            <param name="nodeName">The name of the node.</param>
+            <returns><see langword="true"/> if a node named <c>nodeName</c>
+            exists in the Program, <see langword="false"/>
+            otherwise.</returns>
+        </member>
+        <member name="M:Yarn.Dialogue.Analyse(Yarn.Analysis.Context)">
+            <summary>
+            Begins analysis of the <see cref="P:Yarn.Dialogue.Program"/> by the <paramref name="context"/>
+            </summary>
+            <param name="context">The Context that performs the analysis</param>
+        </member>
+        <member name="M:Yarn.Dialogue.ParseMarkup(System.String)">
+            <summary>
+            Parses a line of text, and produces a <see
+            cref="T:Yarn.Markup.MarkupParseResult"/> containing the results.
+            </summary>
+            <remarks>
+            The <see cref="T:Yarn.Markup.MarkupParseResult"/>'s <see
+            cref="F:Yarn.Markup.MarkupParseResult.Text"/> will have any <c>select</c>,
+            <c>plural</c> or <c>ordinal</c> markers replaced with the appropriate
+            text, following this <see cref="T:Yarn.Dialogue"/>'s <see
+            cref="P:Yarn.Dialogue.LanguageCode"/>.
+            </remarks>
+            <param name="line">The line of text to parse.</param>
+            <returns>The results of parsing the markup.</returns>
+        </member>
+        <member name="M:Yarn.Dialogue.ExpandSubstitutions(System.String,System.Collections.Generic.IList{System.String})">
+            <summary>
+            Replaces all substitution markers in a text with the given
+            substitution list.
+            </summary>
+            <remarks>
+            This method replaces substitution markers - for example, <c>{0}</c>
+            - with the corresponding entry in <paramref name="substitutions"/>.
+            If <paramref name="text"/> contains a substitution marker whose
+            index is not present in <paramref name="substitutions"/>, it is
+            ignored.
+            </remarks>
+            <param name="text">The text containing substitution markers.</param>
+            <param name="substitutions">The list of substitutions.</param>
+            <returns><paramref name="text"/>, with the content from <paramref
+            name="substitutions"/> inserted.</returns>
+        </member>
+        <member name="F:Yarn.Dialogue.ValuePlaceholderRegex">
+            <summary>
+            A regex that matches any <c>%</c> as long as it's not preceded by a
+            <c>\</c>.
+            </summary>
+        </member>
+        <member name="M:Yarn.Dialogue.Yarn#Markup#IAttributeMarkerProcessor#ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker)">
+            <summary>Returns the text that should be used to replace the
+            contents of <paramref name="marker"/>.</summary>
+            <param name="marker">The marker to generate replacement text
+            for.</param>
+            <returns>The replacement text for the marker.</returns>
+            <throws cref="T:System.InvalidOperationException"></throws> <throws
+            cref="T:System.Collections.Generic.KeyNotFoundException"></throws> <throws
+            cref="T:System.ArgumentException">Thrown when the string contains a
+            <c>plural</c> or <c>ordinal</c> marker, but the specified value cannot be
+            parsed as a number.</throws>
+        </member>
+        <member name="T:Yarn.DialogueException">
+            <summary>
+            An exception that is thrown by <see cref="T:Yarn.Dialogue"/> when there is an error in executing a <see cref="T:Yarn.Program"/>.
+            </summary>
+        </member>
+        <member name="T:Yarn.Library">
+            <summary>
+            A collection of functions that can be called from Yarn programs.
+            </summary>
+            <remarks>
+            You do not create instances of this class yourself. The <see
+            cref="T:Yarn.Dialogue"/> class creates one of its own, which you can
+            access via the <see cref="P:Yarn.Dialogue.Library"/> property.
+            </remarks>
+            <seealso cref="T:Yarn.Dialogue"/>
+        </member>
+        <member name="M:Yarn.Library.GetFunction(System.String)">
+            <summary>
+            Returns a <see cref="T:System.Delegate"/> with a given name.
+            </summary>
+            <param name="name">The name of the function to
+            retrieve.</param>
+            <returns>The <see cref="T:System.Delegate"/>.</returns>
+            <throws cref="T:System.InvalidOperationException">Thrown when a function
+            named <c>name</c> is not present in the library.</throws>
+        </member>
+        <member name="M:Yarn.Library.ImportLibrary(Yarn.Library)">
+            <summary>
+            Loads functions from another <see cref="T:Yarn.Library"/>.
+            </summary>
+            <param name="otherLibrary">The library to import functions from.</param>
+            <remarks>
+            If the other library contains a function with the same name as
+            one in this library, the function in the other library takes
+            precedence.
+            </remarks>
+        </member>
+        <member name="M:Yarn.Library.RegisterFunction``1(System.String,System.Func{``0})">
+            <summary>
+            Registers a new function that returns a value, which can be
+            called from a Yarn program.
+            </summary>
+            <param name="name">The name of the function.</param>
+            <param name="implementation">The method to
+            be invoked when the function is called.</param>
+            <typeparam name="TResult">The return type of the
+            function.</typeparam>
+            <exception cref="T:System.ArgumentException">Thrown when a function
+            named <paramref name="name"/> already exists in the <see
+            cref="T:Yarn.Library"/>.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown when name is
+            null.</exception>
+        </member>
+        <member name="M:Yarn.Library.RegisterFunction``2(System.String,System.Func{``0,``1})">
+            <inheritdoc cref="M:Yarn.Library.RegisterFunction``1(System.String,System.Func{``0})"/>
+            <typeparam name="TResult">The return type of the function.</typeparam>
+            <typeparam name="T1">The type of the function's first argument.</typeparam>
+        </member>
+        <member name="M:Yarn.Library.RegisterFunction``3(System.String,System.Func{``0,``1,``2})">
+            <inheritdoc cref="M:Yarn.Library.RegisterFunction``1(System.String,System.Func{``0})"/>
+            <typeparam name="TResult">The return type of the function.</typeparam>
+            <typeparam name="T1">The type of the function's first argument.</typeparam>
+            <typeparam name="T2">The type of the function's second argument.</typeparam>
+        </member>
+        <member name="M:Yarn.Library.RegisterFunction``4(System.String,System.Func{``0,``1,``2,``3})">
+            <inheritdoc cref="M:Yarn.Library.RegisterFunction``1(System.String,System.Func{``0})"/>
+            <typeparam name="TResult">The return type of the function.</typeparam>
+            <typeparam name="T1">The type of the function's first argument.</typeparam>
+            <typeparam name="T2">The type of the function's second argument.</typeparam>
+            <typeparam name="T3">The type of the function's third argument.</typeparam>
+        </member>
+        <member name="M:Yarn.Library.RegisterFunction``5(System.String,System.Func{``0,``1,``2,``3,``4})">
+            <inheritdoc cref="M:Yarn.Library.RegisterFunction``1(System.String,System.Func{``0})"/>
+            <typeparam name="TResult">The return type of the function.</typeparam>
+            <typeparam name="T1">The type of the function's first argument.</typeparam>
+            <typeparam name="T2">The type of the function's second argument.</typeparam>
+            <typeparam name="T3">The type of the function's third argument.</typeparam>
+            <typeparam name="T4">The type of the function's fourth argument.</typeparam>
+        </member>
+        <member name="M:Yarn.Library.RegisterFunction``6(System.String,System.Func{``0,``1,``2,``3,``4,``5})">
+            <inheritdoc cref="M:Yarn.Library.RegisterFunction``1(System.String,System.Func{``0})"/>
+            <typeparam name="TResult">The return type of the function.</typeparam>
+            <typeparam name="T1">The type of the function's first argument.</typeparam>
+            <typeparam name="T2">The type of the function's second argument.</typeparam>
+            <typeparam name="T3">The type of the function's third argument.</typeparam>
+            <typeparam name="T4">The type of the function's fourth argument.</typeparam>
+            <typeparam name="T5">The type of the function's fifth argument.</typeparam>
+        </member>
+        <member name="M:Yarn.Library.RegisterFunction(System.String,System.Delegate)">
+            <inheritdoc cref="M:Yarn.Library.RegisterFunction``1(System.String,System.Func{``0})"/>
+        </member>
+        <member name="M:Yarn.Library.FunctionExists(System.String)">
+            <summary>
+            Gets a value indicating whether this <see cref="T:Yarn.Library"/> contains a function named <c>name</c>.
+            </summary>
+            <param name="name">The name of the function to look for.</param>
+            <returns><c>true</c> if a function exists in this Library; <c>false</c> otherwise.</returns>
+        </member>
+        <member name="M:Yarn.Library.DeregisterFunction(System.String)">
+            <summary>
+            Removes a function from the Library.
+            </summary>
+            <param name="name">The name of the function to remove.</param>
+            <remarks>
+            If no function with the given name is present in the Library,
+            this method does nothing.
+            </remarks>
+        </member>
+        <member name="M:Yarn.Library.RegisterMethods(Yarn.IType)">
+            <summary>
+            Registers the methods found inside a type.
+            </summary>
+            <param name="type">The type to register methods from.</param>
+        </member>
+        <member name="M:Yarn.Library.GenerateUniqueVisitedVariableForNode(System.String)">
+            <summary>
+            Generates a unique tracking variable name.
+            This is intended to be used to generate names for visting.
+            Ideally these will very reproduceable and sensible.
+            For now it will be something terrible and easy.
+            </summary>
+            <param name="nodeName">The name of the node that needs to
+            have a tracking variable created.</param>
+            <returns>The new variable name.</returns>
+        </member>
+        <member name="T:Yarn.Program">
+            <summary>
+            A compiled Yarn program.
+            </summary>
+            <summary>
+            A complete Yarn program.
+            </summary>
+        </member>
+        <member name="M:Yarn.Program.LineIDsForNode(System.String)">
+            <summary>
+            Identifies and returns a list of all line and option IDs inside the node.
+            </summary>
+            <param name="nodeName">The name of the node whos line IDs you covet.</param>
+            <returns>The line IDs of all lines and options inside the node, or null if <paramref name="nodeName"/> doesn't exist in the program.</returns>
+        </member>
+        <member name="M:Yarn.Program.Combine(Yarn.Program[])">
+            <summary>
+            Creates a new Program by merging multiple Programs together.
+            </summary>
+            <remarks>
+            The new program will contain every node from every input
+            program.
+            </remarks>
+            <param name="programs">The Programs to combine
+            together.</param>
+            <returns>The new, combined program.</returns>
+            <throws cref="T:System.ArgumentException">Thrown when no Programs are
+            provided as parameters.</throws>
+            <throws cref="T:System.InvalidOperationException">Thrown when more than
+            one Program contains a node of the same name.</throws>
+        </member>
+        <member name="F:Yarn.Program.NameFieldNumber">
+            <summary>Field number for the "name" field.</summary>
+        </member>
+        <member name="P:Yarn.Program.Name">
+            <summary>
+            The name of the program.
+            </summary>
+        </member>
+        <member name="F:Yarn.Program.NodesFieldNumber">
+            <summary>Field number for the "nodes" field.</summary>
+        </member>
+        <member name="P:Yarn.Program.Nodes">
+            <summary>
+            The collection of nodes in this program.
+            </summary>
+        </member>
+        <member name="F:Yarn.Program.InitialValuesFieldNumber">
+            <summary>Field number for the "initial_values" field.</summary>
+        </member>
+        <member name="P:Yarn.Program.InitialValues">
+            <summary>
+            The collection of initial values for variables; if a PUSH_VARIABLE
+            instruction is run, and the value is not found in the storage, this
+            value will be used
+            </summary>
+        </member>
+        <member name="T:Yarn.Instruction">
+            <summary>
+            An instruction in a Yarn Program.
+            </summary>
+            <summary>
+            A single Yarn instruction.
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.OpcodeFieldNumber">
+            <summary>Field number for the "opcode" field.</summary>
+        </member>
+        <member name="P:Yarn.Instruction.Opcode">
+            <summary>
+            The operation that this instruction will perform.
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.OperandsFieldNumber">
+            <summary>Field number for the "operands" field.</summary>
+        </member>
+        <member name="P:Yarn.Instruction.Operands">
+            <summary>
+            The list of operands, if any, that this instruction uses.
+            </summary>
+        </member>
+        <member name="T:Yarn.Instruction.Types">
+            <summary>Container for nested types declared in the Instruction message type.</summary>
+        </member>
+        <member name="T:Yarn.Instruction.Types.OpCode">
+            <summary>
+            The type of instruction that this is.
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.JumpTo">
+            <summary>
+            Jumps to a named position in the node.
+            opA = string: label name
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.Jump">
+            <summary>
+            Peeks a string from stack, and jumps to that named position in
+            the node. 
+            No operands.
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.RunLine">
+            <summary>
+            Delivers a string ID to the client.
+            opA = string: string ID
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.RunCommand">
+            <summary>
+            Delivers a command to the client.
+            opA = string: command text
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.AddOption">
+            <summary>
+            Adds an entry to the option list (see ShowOptions).
+            - opA = string: string ID for option to add
+            - opB = string: destination to go to if this option is selected
+            - opC = number: number of expressions on the stack to insert
+              into the line
+            - opD = bool: whether the option has a condition on it (in which
+              case a value should be popped off the stack and used to signal
+              the game that the option should be not available)
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.ShowOptions">
+            <summary>
+            Presents the current list of options to the client, then clears
+            the list. The most recently selected option will be on the top
+            of the stack when execution resumes.
+            No operands.
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.PushString">
+            <summary>
+            Pushes a string onto the stack.
+            opA = string: the string to push to the stack.
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.PushFloat">
+            <summary>
+            Pushes a floating point number onto the stack.
+            opA = float: number to push to stack
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.PushBool">
+            <summary>
+            Pushes a boolean onto the stack.
+            opA = bool: the bool to push to stack
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.PushNull">
+            <summary>
+            Pushes a null value onto the stack.
+            No operands.
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.JumpIfFalse">
+            <summary>
+            Jumps to the named position in the the node, if the top of the
+            stack is not null, zero or false.
+            opA = string: label name 
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.Pop">
+            <summary>
+            Discards top of stack.
+            No operands.
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.CallFunc">
+            <summary>
+            Calls a function in the client. Pops as many arguments as the
+            client indicates the function receives, and the result (if any)
+            is pushed to the stack.		
+            opA = string: name of the function
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.PushVariable">
+            <summary>
+            Pushes the contents of a variable onto the stack.
+            opA = name of variable 
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.StoreVariable">
+            <summary>
+            Stores the contents of the top of the stack in the named
+            variable. 
+            opA = name of variable
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.Stop">
+            <summary>
+            Stops execution of the program.
+            No operands.
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.OpCode.RunNode">
+            <summary>
+            Pops a string off the top of the stack, and runs the node with
+            that name.
+            No operands.
+            </summary>
+        </member>
+        <member name="T:Yarn.Node">
+            <summary>
+            A node of Yarn script, contained within a <see cref="T:Yarn.Program"/>, and
+            containing <see cref="T:Yarn.Instruction"/>s.
+            </summary>
+            <summary>
+            A collection of instructions
+            </summary>
+        </member>
+        <member name="F:Yarn.Node.NameFieldNumber">
+            <summary>Field number for the "name" field.</summary>
+        </member>
+        <member name="P:Yarn.Node.Name">
+            <summary>
+            The name of this node.
+            </summary>
+        </member>
+        <member name="F:Yarn.Node.InstructionsFieldNumber">
+            <summary>Field number for the "instructions" field.</summary>
+        </member>
+        <member name="P:Yarn.Node.Instructions">
+            <summary>
+            The list of instructions in this node.
+            </summary>
+        </member>
+        <member name="F:Yarn.Node.LabelsFieldNumber">
+            <summary>Field number for the "labels" field.</summary>
+        </member>
+        <member name="P:Yarn.Node.Labels">
+            <summary>
+            A jump table, mapping the names of labels to positions in the
+            instructions list.
+            </summary>
+        </member>
+        <member name="F:Yarn.Node.TagsFieldNumber">
+            <summary>Field number for the "tags" field.</summary>
+        </member>
+        <member name="P:Yarn.Node.Tags">
+            <summary>
+            The tags associated with this node.
+            </summary>
+        </member>
+        <member name="F:Yarn.Node.SourceTextStringIDFieldNumber">
+            <summary>Field number for the "sourceTextStringID" field.</summary>
+        </member>
+        <member name="P:Yarn.Node.SourceTextStringID">
+            <summary>
+            the entry in the program's string table that contains the original
+            text of this node; null if this is not available    
+            </summary>
+        </member>
+        <member name="F:Yarn.Node.HeadersFieldNumber">
+            <summary>Field number for the "headers" field.</summary>
+        </member>
+        <member name="T:Yarn.AnyType">
+            <summary>
+            Represents any type. This type is used in circumstances when a type
+            is known to have a value, but the specific type is not known or
+            required to be known.
+            </summary>
+            <remarks>
+            This is the parent type of all types.
+            </remarks>
+        </member>
+        <member name="P:Yarn.AnyType.Name">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.AnyType.Parent">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.AnyType.Description">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.AnyType.Methods">
+            <inheritdoc/>
+        </member>
+        <member name="T:Yarn.BooleanType">
+            <summary>
+            An <see cref="T:Yarn.IBridgeableType`1"/> that bridges to <see
+            cref="T:System.Boolean"/> values.
+            </summary>
+        </member>
+        <member name="P:Yarn.BooleanType.DefaultValue">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.BooleanType.Name">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.BooleanType.Parent">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.BooleanType.Description">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.BooleanType.DefaultMethods">
+            <inheritdoc/>
+        </member>
+        <member name="T:Yarn.BuiltinTypes">
+            <summary>
+            Contains the built-in types available in the Yarn language.
+            </summary>
+        </member>
+        <member name="F:Yarn.BuiltinTypes.Undefined">
+            <summary>An undefined type.</summary>
+            <remarks>This value is not valid except during compilation. It
+            is used to represent values that have not yet been assigned a
+            type by the type system.</remarks>
+        </member>
+        <member name="P:Yarn.BuiltinTypes.String">
+            <summary>Gets the type representing strings.</summary>
+        </member>
+        <member name="P:Yarn.BuiltinTypes.Number">
+            <summary>Gets the type representing numbers.</summary>
+        </member>
+        <member name="P:Yarn.BuiltinTypes.Boolean">
+            <summary>Gets the type representing boolean values.</summary>
+        </member>
+        <member name="P:Yarn.BuiltinTypes.Any">
+            <summary>Gets the type representing any value.</summary>
+        </member>
+        <member name="P:Yarn.BuiltinTypes.TypeMappings">
+            <summary>
+            Gets a dictionary that maps CLR types to their corresponding
+            Yarn types.
+            </summary>
+        </member>
+        <member name="P:Yarn.BuiltinTypes.AllBuiltinTypes">
+            <summary>
+            Gets a <see cref="T:System.Collections.Generic.IEnumerable`1"/> containing all built-in
+            properties defined in this class.
+            </summary>
+            <value>The list of built-in type objects.</value>
+        </member>
+        <member name="T:Yarn.FunctionType">
+            <summary>
+            A type that represents functions.
+            </summary>
+            <remarks>
+            Functions have parameters and a return type, and can be called from
+            script. Instances of this type are created when the host
+            application registers new functions (such as through using the <see
+            cref="M:Yarn.Library.RegisterFunction(System.String,System.Delegate)"/> methods or similar.)
+            </remarks>
+        </member>
+        <member name="P:Yarn.FunctionType.Name">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.FunctionType.Description">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.FunctionType.Parent">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.FunctionType.ReturnType">
+            <summary>
+            Gets the type of value that this function returns.
+            </summary>
+        </member>
+        <member name="P:Yarn.FunctionType.Parameters">
+            <summary>
+            Gets the list of the parameter types that this function is
+            called with.
+            </summary>
+            <remarks>
+            The length of this list also determines the number of
+            parameters this function accepts (also known as the function's
+            <i>arity</i>).
+            </remarks>
+        </member>
+        <member name="P:Yarn.FunctionType.Methods">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.FunctionType.AddParameter(Yarn.IType)">
+            <summary>
+            Adds a new parameter to the function.
+            </summary>
+            <param name="parameterType">The type of parameter to
+            add.</param>
+        </member>
+        <member name="T:Yarn.IBridgeableType`1">
+            <summary>
+            Defines properties that describe a type in the Yarn language that
+            can be converted to and from a type in the Common Language Runtime.
+            </summary>
+            <typeparam name="TBridgedType">The CLR type that this type can be
+            bridged to.</typeparam>
+        </member>
+        <member name="P:Yarn.IBridgeableType`1.DefaultValue">
+            <summary>
+            Gets a default value appropriate for <typeparamref
+            name="TBridgedType"/>.
+            </summary>
+            <value>A default value.</value>
+        </member>
+        <member name="M:Yarn.IBridgeableType`1.ToBridgedType(Yarn.Value)">
+            <summary>
+            Converts a Value to the type <typeparamref
+            name="TBridgedType"/>.
+            </summary>
+            <param name="value">The Value to convert from.</param>
+            <returns>A value of type <typeparamref name="TBridgedType"/>,
+            derived from <paramref name="value"/>.</returns>
+        </member>
+        <member name="T:Yarn.IType">
+            <summary>
+            Defines properties that describe a type in the Yarn language.
+            </summary>
+        </member>
+        <member name="P:Yarn.IType.Name">
+            <summary>
+            Gets the name of this type.
+            </summary>
+        </member>
+        <member name="P:Yarn.IType.Parent">
+            <summary>
+            Gets the parent of this type.
+            </summary>
+            <remarks>All types have <see cref="P:Yarn.BuiltinTypes.Any"/> as their
+            ultimate parent type (except for <see cref="P:Yarn.BuiltinTypes.Any"/>
+            itself.)</remarks>
+        </member>
+        <member name="P:Yarn.IType.Description">
+            <summary>
+            Gets a more verbose description of this type.
+            </summary>
+        </member>
+        <member name="P:Yarn.IType.Methods">
+            <summary>
+            Gets the collection of methods that are available on this type.
+            </summary>
+        </member>
+        <member name="T:Yarn.NumberType">
+            <summary>
+            An <see cref="T:Yarn.IBridgeableType`1"/> that bridges to <see
+            cref="T:System.Single"/> values.
+            </summary>
+        </member>
+        <member name="P:Yarn.NumberType.DefaultValue">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.NumberType.Name">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.NumberType.Parent">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.NumberType.Description">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.NumberType.ToBridgedType(Yarn.Value)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Yarn.StringType">
+            <summary>
+            An <see cref="T:Yarn.IBridgeableType`1"/> that bridges to <see
+            cref="T:System.String"/> values.
+            </summary>
+        </member>
+        <member name="M:Yarn.StringType.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Yarn.StringType"/>
+            class.
+            </summary>
+        </member>
+        <member name="P:Yarn.StringType.Name">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.StringType.Parent">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.StringType.Description">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.StringType.DefaultValue">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.StringType.ToBridgedType(Yarn.Value)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.StringType.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.StringType.GetHashCode">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.StringType.ToString">
+            <inheritdoc/>
+        </member>
+        <member name="T:Yarn.TypeBase">
+            <summary>
+            Provides the abstract base class for all types.
+            </summary>
+        </member>
+        <member name="T:Yarn.TypeUtil">
+            <summary>
+            Contains utility methods for working with types and their methods.
+            </summary>
+        </member>
+        <member name="M:Yarn.TypeUtil.FindImplementingTypeForMethod(Yarn.IType,System.String)">
+            <summary>
+            Returns the type that contains the actual implementation of the
+            method indicated by <paramref name="methodName"/>, given a type or
+            sub-type.
+            </summary>
+            <remarks>
+            This method checks to see if <paramref name="type"/> contains a
+            concrete implementation of a method named <paramref
+            name="methodName"/>. If it does, <paramref name="type"/> is
+            returned; otherwise, the parent of <paramref name="type"/> is
+            checked, and so on up the hierarchy. If no type in <paramref
+            name="type"/>'s parent chain implements a method named <paramref
+            name="methodName"/>, this method returns <see langword="null"/>.
+            </remarks>
+            <param name="type">The type, or sub-type, to start searching for an
+            implementation for the method.</param>
+            <param name="methodName">The name of the method to search
+            for.</param>
+            <returns>The <see cref="T:Yarn.IType"/> object that contains an
+            implementation of <paramref name="methodName"/>.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref
+            name="type"/> is <see langword="null"/>.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if methodName is <see
+            langword="null"/> or empty.</exception>
+        </member>
+        <member name="M:Yarn.TypeUtil.IsSubType(Yarn.IType,Yarn.IType)">
+            <summary>
+            Checks to see if <paramref name="subType"/> is equal to
+            <paramref name="parentType"/>, or if <paramref
+            name="parentType"/> exists in <paramref name="subType"/>'s type
+            hierarchy.
+            </summary>
+            <param name="parentType">The parent type to check
+            against.</param>
+            <param name="subType">The type to check if it's a subtype of
+            <paramref name="parentType"/>.</param>
+            <returns><see langword="true"/> if <paramref name="subType"/>
+            is the same or a subtype of <paramref name="parentType"/>; <see
+            langword="false"/> otherwise.</returns>
+        </member>
+        <member name="T:Yarn.Value">
+            <summary>
+            A value from inside Yarn.
+            </summary>
+        </member>
+        <member name="M:Yarn.Value.#ctor(Yarn.Value)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Yarn.Value"/> class,
+            using the specified object.
+            </summary>
+            <remarks>
+            If the <c>value</c> is another <see cref="T:Yarn.Value"/>, its contents
+            will be copied into the new instance.
+            </remarks>
+            <throws cref="T:System.ArgumentException">
+            Thrown when the <c>value</c> is not a <see cref="T:Yarn.Value"/>, string,
+            int, float, double, bool, or null.
+            </throws>
+            <param name="value">The value that this <see cref="T:Yarn.Value"/>
+            should contain.</param>
+        </member>
+        <member name="M:Yarn.Value.CompareTo(System.Object)">
+            <summary>
+            Compares this <see cref="T:Yarn.Value"/> to another object. The other object must either be another instance of <see cref="T:Yarn.Value"/>, or <c>null</c>.
+            </summary>
+            <param name="obj">The object to compare to.</param>
+            <returns>Returns the same results as <see cref="M:System.IComparable.CompareTo(System.Object)"/>.</returns>
+            <exception cref="T:System.ArgumentException">Thrown when <c>obj</c> is not a <see cref="T:Yarn.Value"/>.</exception>
+        </member>
+        <member name="M:Yarn.Value.ToString">
+            <summary>
+            Converts this value to a string.
+            </summary>
+            <returns>The string representation of this value</returns>
+        </member>
+        <member name="T:Yarn.Operand">
+            <summary>
+            A value used by an Instruction.
+            </summary>
+            <summary>
+            A value used by an Instruction.
+            </summary>
+        </member>
+        <member name="M:Yarn.Operand.#ctor(System.Boolean)">
+            <summary>
+            Convenience constructor for the Operand type.
+            </summary>
+            <remarks>
+            so that we don't need to have two separate steps for creating and then preparing the Operand
+            </remarks>
+            <param name="value">The boolean value to be made into the operand</param>
+        </member>
+        <member name="M:Yarn.Operand.#ctor(System.String)">
+            <summary>
+            Convenience constructor for the Operand type.
+            </summary>
+            <remarks>
+            so that we don't need to have two separate steps for creating and then preparing the Operand
+            </remarks>
+            <param name="value">The string value to be made into the operand</param>
+        </member>
+        <member name="M:Yarn.Operand.#ctor(System.Single)">
+            <summary>
+            Convenience constructor for the Operand type.
+            </summary>
+            <remarks>
+            so that we don't need to have two separate steps for creating and then preparing the Operand
+            </remarks>
+            <param name="value">The float value to be made into the operand</param>
+        </member>
+        <member name="F:Yarn.Operand.StringValueFieldNumber">
+            <summary>Field number for the "string_value" field.</summary>
+        </member>
+        <member name="P:Yarn.Operand.StringValue">
+            <summary>
+            A string.
+            </summary>
+        </member>
+        <member name="F:Yarn.Operand.BoolValueFieldNumber">
+            <summary>Field number for the "bool_value" field.</summary>
+        </member>
+        <member name="P:Yarn.Operand.BoolValue">
+            <summary>
+            A boolean (true or false).
+            </summary>
+        </member>
+        <member name="F:Yarn.Operand.FloatValueFieldNumber">
+            <summary>Field number for the "float_value" field.</summary>
+        </member>
+        <member name="P:Yarn.Operand.FloatValue">
+            <summary>
+            A floating point number.
+            </summary>
+        </member>
+        <member name="T:Yarn.Operand.ValueOneofCase">
+            <summary>Enum of possible cases for the "value" oneof.</summary>
+        </member>
+        <member name="T:Yarn.Operator">
+            <summary>
+            Lists the available operators that can be used with Yarn values.
+            </summary>
+        </member>
+        <member name="F:Yarn.Operator.None">
+            <summary>A unary operator that returns its input.</summary>
+        </member>
+        <member name="F:Yarn.Operator.EqualTo">
+            <summary>A binary operator that represents equality.</summary>
+        </member>
+        <member name="F:Yarn.Operator.GreaterThan">
+            <summary>A binary operator that represents a value being
+            greater than another.</summary>
+        </member>
+        <member name="F:Yarn.Operator.GreaterThanOrEqualTo">
+            <summary>A binary operator that represents a value being
+            greater than or equal to another.</summary>
+        </member>
+        <member name="F:Yarn.Operator.LessThan">
+            <summary>A binary operator that represents a value being less
+            than another.</summary>
+        </member>
+        <member name="F:Yarn.Operator.LessThanOrEqualTo">
+            <summary>A binary operator that represents a value being less
+            than or equal to another.</summary>
+        </member>
+        <member name="F:Yarn.Operator.NotEqualTo">
+            <summary>A binary operator that represents
+            inequality.</summary>
+        </member>
+        <member name="F:Yarn.Operator.Or">
+            <summary>A binary operator that represents a logical
+            or.</summary>
+        </member>
+        <member name="F:Yarn.Operator.And">
+            <summary>A binary operator that represents a logical
+            and.</summary>
+        </member>
+        <member name="F:Yarn.Operator.Xor">
+            <summary>A binary operator that represents a logical exclusive
+            or.</summary>
+        </member>
+        <member name="F:Yarn.Operator.Not">
+            <summary>A binary operator that represents a logical
+            not.</summary>
+        </member>
+        <member name="F:Yarn.Operator.UnaryMinus">
+            <summary>A unary operator that represents negation.</summary>
+        </member>
+        <member name="F:Yarn.Operator.Add">
+            <summary>A binary operator that represents addition.</summary>
+        </member>
+        <member name="F:Yarn.Operator.Minus">
+            <summary>A binary operator that represents
+            subtraction.</summary>
+        </member>
+        <member name="F:Yarn.Operator.Multiply">
+            <summary>A binary operator that represents
+            multiplication.</summary>
+        </member>
+        <member name="F:Yarn.Operator.Divide">
+            <summary>A binary operator that represents division.</summary>
+        </member>
+        <member name="F:Yarn.Operator.Modulo">
+            <summary>A binary operator that represents the remainder
+            operation.</summary>
+        </member>
+        <member name="F:Yarn.VirtualMachine.State.currentNodeName">
+            <summary>The name of the node that we're currently
+            in.</summary>
+        </member>
+        <member name="F:Yarn.VirtualMachine.State.programCounter">
+            <summary>The instruction number in the current
+            node.</summary>
+        </member>
+        <member name="F:Yarn.VirtualMachine.State.currentOptions">
+            <summary>The current list of options that will be delivered
+            when the next RunOption instruction is
+            encountered.</summary>
+        </member>
+        <member name="F:Yarn.VirtualMachine.State.stack">
+            <summary>The value stack.</summary>
+        </member>
+        <member name="M:Yarn.VirtualMachine.State.PushValue(Yarn.Value)">
+            <summary>Pushes a <see cref="T:Yarn.Value"/> object onto the
+            stack.</summary>
+            <param name="v">The value to push onto the stack.</param>
+        </member>
+        <member name="M:Yarn.VirtualMachine.State.PopValue">
+            <summary>Removes a value from the top of the stack, and
+            returns it.</summary>
+            <returns>The value that was at the top of the stack when
+            this method was called.</returns>
+        </member>
+        <member name="M:Yarn.VirtualMachine.State.PeekValue">
+            <summary>Peeks at a value from the stack.</summary>
+            <returns>The value at the top of the stack.</returns>
+        </member>
+        <member name="M:Yarn.VirtualMachine.State.ClearStack">
+            <summary>Clears the stack.</summary>
+        </member>
+        <member name="M:Yarn.VirtualMachine.ResetState">
+            Reset the state of the VM
+        </member>
+        <member name="P:Yarn.VirtualMachine.Program">
+            <summary>
+            The <see cref="P:Yarn.VirtualMachine.Program"/> that this virtual machine is running.
+            </summary>
+        </member>
+        <member name="F:Yarn.VirtualMachine.ExecutionState.Stopped">
+            <summary>
+            The VirtualMachine is not running a node.
+            </summary>
+        </member>
+        <member name="F:Yarn.VirtualMachine.ExecutionState.WaitingOnOptionSelection">
+            <summary>
+            The VirtualMachine is waiting on option selection. Call
+            <see cref="M:Yarn.VirtualMachine.SetSelectedOption(System.Int32)"/> before calling <see
+            cref="M:Yarn.VirtualMachine.Continue"/>.
+            </summary>
+        </member>
+        <member name="F:Yarn.VirtualMachine.ExecutionState.WaitingForContinue">
+            <summary>
+            The VirtualMachine has finished delivering content to the
+            client game, and is waiting for <see cref="M:Yarn.VirtualMachine.Continue"/> to
+            be called.
+            </summary>
+        </member>
+        <member name="F:Yarn.VirtualMachine.ExecutionState.DeliveringContent">
+            <summary>
+            The VirtualMachine is delivering a line, options, or a
+            commmand to the client game.
+            </summary>
+        </member>
+        <member name="F:Yarn.VirtualMachine.ExecutionState.Running">
+            <summary>
+            The VirtualMachine is in the middle of executing code.
+            </summary>
+        </member>
+        <member name="M:Yarn.VirtualMachine.Continue">
+            Resumes execution.
+        </member>
+        <member name="M:Yarn.VirtualMachine.CheckCanContinue">
+            <summary>
+            Runs a series of tests to see if the <see
+            cref="T:Yarn.VirtualMachine"/> is in a state where <see
+            cref="M:Yarn.VirtualMachine.Continue"/> can be called. Throws an exception if it
+            can't.
+            </summary>
+            <throws cref="T:Yarn.DialogueException">Thrown when the <see
+            cref="T:Yarn.VirtualMachine"/> is not in a state where <see
+            cref="M:Yarn.VirtualMachine.Continue"/> could be called.</throws>
+        </member>
+        <member name="M:Yarn.VirtualMachine.FindInstructionPointForLabel(System.String)">
+            Looks up the instruction number for a named label in the current node.
+        </member>
+        <member name="T:Yarn.YarnSpinnerReflection">
+            <summary>Holder for reflection information generated from yarn_spinner.proto</summary>
+        </member>
+        <member name="P:Yarn.YarnSpinnerReflection.Descriptor">
+            <summary>File descriptor for yarn_spinner.proto</summary>
+        </member>
+        <member name="F:Yarn.Header.KeyFieldNumber">
+            <summary>Field number for the "key" field.</summary>
+        </member>
+        <member name="F:Yarn.Header.ValueFieldNumber">
+            <summary>Field number for the "value" field.</summary>
+        </member>
+        <member name="T:Yarn.Markup.IAttributeMarkerProcessor">
+            <summary>Provides a mechanism for producing replacement text for a
+            marker.</summary>
+            <seealso cref="M:Yarn.Markup.LineParser.RegisterMarkerProcessor(System.String,Yarn.Markup.IAttributeMarkerProcessor)"/>
+        </member>
+        <member name="M:Yarn.Markup.IAttributeMarkerProcessor.ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker)">
+            <summary>
+            Produces the replacement text that should be inserted into a parse
+            result for a given attribute.
+            </summary>
+            <remarks>
+            If the marker is an <i>open</i> marker, the text from the marker's
+            position to its corresponding closing marker is provided as a string
+            property called <c>contents</c>.
+            </remarks>
+            <param name="marker">The marker that should have text
+            inserted.</param>
+            <returns>The replacement text to insert.</returns>
+        </member>
+        <member name="T:Yarn.Markup.LineParser">
+            <summary>
+            Parses text and produces markup information.
+            </summary>
+        </member>
+        <member name="F:Yarn.Markup.LineParser.ReplacementMarkerContents">
+            <summary>
+            The name of the property in replacement attributes that
+            contains the text of the attribute.
+            </summary>
+        </member>
+        <member name="F:Yarn.Markup.LineParser.CharacterAttribute">
+            <summary>
+            The name of the implicitly-generated <c>character</c> attribute.
+            </summary>
+            <seealso cref="F:Yarn.Markup.LineParser.CharacterAttributeNameProperty"/>
+        </member>
+        <member name="F:Yarn.Markup.LineParser.CharacterAttributeNameProperty">
+            <summary>
+            The name of the 'name' property, on the implicitly-generated
+            <c>character</c> attriubte.
+            </summary>
+            <seealso cref="F:Yarn.Markup.LineParser.CharacterAttribute"/>
+        </member>
+        <member name="F:Yarn.Markup.LineParser.TrimWhitespaceProperty">
+            <summary>
+            The name of the property to use to signify that trailing
+            whitespace should be trimmed if a tag had preceding whitespace
+            or begins the line. This property must be a bool value.
+            </summary>
+        </member>
+        <member name="F:Yarn.Markup.LineParser.EndOfCharacterMarker">
+            <summary>
+            A regular expression that matches a colon followed by optional
+            whitespace.
+            </summary>
+        </member>
+        <member name="F:Yarn.Markup.LineParser.AttributePositionComparison">
+            <summary>
+            A comparison function that sorts <see cref="T:Yarn.Markup.MarkupAttribute"/>s
+            by their source position.
+            </summary>
+            <returns>A value indicating the relative source position of the
+            two attributes.</returns>
+        </member>
+        <member name="F:Yarn.Markup.LineParser.markerProcessors">
+            <summary>
+            A dictionary that maps the names of attributes to an object
+            that can generate replacement text for those attributes.
+            </summary>
+        </member>
+        <member name="F:Yarn.Markup.LineParser.input">
+            <summary>
+            The original text that this line parser is parsing.
+            </summary>
+        </member>
+        <member name="F:Yarn.Markup.LineParser.stringReader">
+            <summary>
+            A string reader used for reading through the <see
+            cref="F:Yarn.Markup.LineParser.input"/>.
+            </summary>
+        </member>
+        <member name="F:Yarn.Markup.LineParser.position">
+            <summary>
+            The current position of the string reader in the plain text,
+            measured in text elements.
+            </summary>
+        </member>
+        <member name="F:Yarn.Markup.LineParser.sourcePosition">
+            <summary>
+            The current position of the string reader in the plain text,
+            measured in characters.
+            </summary>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Yarn.Markup.LineParser"/>
+            class.
+            </summary>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.RegisterMarkerProcessor(System.String,Yarn.Markup.IAttributeMarkerProcessor)">
+            <summary>Registers an object as a marker processor for a given
+            marker name.</summary>
+            <remarks>
+            When a marker processor is registered for a marker name, the
+            parser will ask the processor for text to insert into the plain
+            text. This allows users of the <see cref="T:Yarn.Markup.LineParser"/> class
+            to dynamically replace text in a line. The <c>nomarkup</c> tag is
+            implemented in this way by the <see cref="T:Yarn.Markup.LineParser"/> class
+            directly; the <see cref="T:Yarn.Dialogue"/> class uses this mechanism
+            to implement the <c>select</c>, <c>plural</c> and <c>ordinal</c> markers.
+            </remarks>
+            <param name="attributeName">The name of the marker that should
+            use this marker processor.</param>
+            <param name="markerProcessor">The object that should be invoked
+            when markers with this name are encountered.</param>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.ParseMarkup(System.String)">
+            <summary>Parses a line of text, and produces a
+            <see cref="T:Yarn.Markup.MarkupParseResult"/> containing the processed
+            text.</summary>
+            <param name="input">The text to parse.</param>
+            <returns>The resulting markup information.</returns>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.ProcessReplacementMarker(Yarn.Markup.MarkupAttributeMarker)">
+            <summary>
+            Parses a marker and generates replacement text to insert into
+            the plain text.
+            </summary>
+            <param name="marker">The marker to parse.</param>
+            <returns>The replacement text to insert.</returns>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.ParseRawTextUpToAttributeClose(System.String)">
+            <summary>
+            Parses text up to either a close marker with the given name, or
+            a close-all marker.
+            </summary>
+            <remarks>
+            The closing marker itself is not included in the returned text.
+            </remarks>
+            <param name="name">The name of the close marker to look
+            for.</param>
+            <returns>The text up to the closing marker.</returns>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.BuildAttributesFromMarkers(System.Collections.Generic.List{Yarn.Markup.MarkupAttributeMarker})">
+            <summary>
+            Creates a list of <see cref="T:Yarn.Markup.MarkupAttribute"/>s from loose
+            <see cref="T:Yarn.Markup.MarkupAttributeMarker"/>s.
+            </summary>
+            <param name="markers">The collection of markers.</param>
+            <returns>The list of attributes.</returns>
+            <throws cref="T:Yarn.Markup.MarkupParseException">Thrown when a close marker
+            is encountered, but no corresponding open marker for it
+            exists.</throws>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.ParseAttributeMarker">
+            <summary>
+            Parses an open, close, self-closing, or close-all attribute
+            marker.
+            </summary>
+            <returns>The parsed marker.</returns>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.ParseValue">
+             <summary>
+             Parses a property value.
+             </summary>
+             <remarks>
+             Permitted value types are:
+            
+             <list type="bullet">
+             <item>Integers</item>
+            
+             <item>Floating-point numbers</item>
+            
+             <item>Strings (delimited by double quotes). (Strings may contain
+             escaped quotes with a backslash.)</item>
+            
+             <item>The words <c>true</c> or <c>false</c>
+             </item>
+            
+             <item>Runs of alphanumeric characters, up to but not including a
+             whitespace or the end of a tag; these are interpreted as a string
+             (e.g. <c>[mood=happy]</c> is interpreted the same as
+             <c>[mood="happy"]</c>
+             </item>
+            
+             <item>Expressions (delimited by curly braces), which are processed
+             as inline expressions.
+             </item>
+             </list>
+             </remarks>
+             <returns>The parsed value.</returns>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.Peek(System.Char)">
+            <summary>
+            Peeks ahead in the LineParser's input without consuming any
+            characters.
+            </summary>
+            <remarks>
+            This method returns false if the parser has reached the end of
+            the line.
+            </remarks>
+            <param name="expectedCharacter">The character to look
+            for.</param>
+            <returns>True if the next character is <paramref
+            name="expectedCharacter"/>, false otherwise.</returns>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.PeekWhitespace">
+            <summary>
+            Peeks ahead in the LineParser's input without consuming any
+            characters, looking for whitespace.
+            </summary>
+            <remarks>
+            This method returns false if the parser has reached the end of
+            the line.
+            </remarks>
+            <returns>True if the next character is whitespace, false
+            otherwise.</returns>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.PeekNumeric">
+            <summary>
+            Peeks ahead in the LineParser's input without consuming any
+            characters, looking for numeric characters.
+            </summary>
+            <remarks>
+            This method returns false if the parser has reached the end of
+            the line.
+            </remarks>
+            <returns>True if the next character is numeric, false
+            otherwise.</returns>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.ParseInteger">
+            <summary>
+            Parses an integer from the stream.
+            </summary>
+            <remarks>
+            This method returns false if the parser has reached the end of
+            the line.
+            </remarks>
+            <returns>True if the next character is numeric, false
+            otherwise.</returns>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.AssertNotEndOfInput(System.Int32)">
+            <summary>
+            Throws an exception if <paramref name="value"/> is the
+            end-of-line character.
+            </summary>
+            <param name="value">The character to test, as an
+            integer.</param>
+            <throws cref="T:Yarn.Markup.MarkupParseException">Thrown when <paramref
+            name="value"/> is the end-of-line character.</throws>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.ConsumeWhitespace(System.Boolean)">
+            <summary>
+            Reads and discards whitespace, up to the first non-whitespace
+            character.
+            </summary>
+            <param name="allowEndOfLine">If <see langword="false"/>, a <see
+            cref="T:Yarn.Markup.MarkupParseException"/> will be thrown if the end of the line
+            is reached while reading whitespace.</param>
+            <throws cref="T:Yarn.Markup.MarkupParseException">Thrown when the end of the line
+            is reached, and <paramref name="allowEndOfLine"/> is <see
+            langword="false"/>.</throws>
+        </member>
+        <member name="T:Yarn.Markup.MarkupParseException">
+            <summary>
+            An exception representing something going wrong when parsing markup.
+            </summary>
+            <seealso cref="T:Yarn.Markup.LineParser"/>
+        </member>
+        <member name="M:Yarn.Markup.MarkupParseException.#ctor">
+            <summary>
+            Initializes a new instance of the <see
+            cref="T:Yarn.Markup.MarkupParseException"/> class.
+            </summary>
+        </member>
+        <member name="M:Yarn.Markup.MarkupParseException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see
+            cref="T:Yarn.Markup.MarkupParseException"/> class.
+            </summary>
+            <param name="message">An explanation of the exception.</param>
+        </member>
+        <member name="M:Yarn.Markup.MarkupParseException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see
+            cref="T:Yarn.Markup.MarkupParseException"/> class.
+            </summary>
+            <param name="message">An explanation of the exception.</param>
+            <param name="inner">The exception that caused this
+            exception.</param>
+        </member>
+        <member name="T:Yarn.Markup.MarkupParseResult">
+            <summary>
+            The result of parsing a line of marked-up text.
+            </summary>
+            <remarks>
+            You do not create instances of this struct yourself. It is created
+            by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
+            </remarks>
+            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/>
+        </member>
+        <member name="F:Yarn.Markup.MarkupParseResult.Text">
+            <summary>
+            The original text, with all parsed markers removed.
+            </summary>
+        </member>
+        <member name="F:Yarn.Markup.MarkupParseResult.Attributes">
+            <summary>
+            The list of <see cref="T:Yarn.Markup.MarkupAttribute"/>s in this parse
+            result.
+            </summary>
+        </member>
+        <member name="M:Yarn.Markup.MarkupParseResult.#ctor(System.String,System.Collections.Generic.List{Yarn.Markup.MarkupAttribute})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Yarn.Markup.MarkupParseResult"/> struct.
+            </summary>
+            <param name="text">The plain text.</param>
+            <param name="attributes">The list of attributes.</param>
+        </member>
+        <member name="M:Yarn.Markup.MarkupParseResult.TryGetAttributeWithName(System.String,Yarn.Markup.MarkupAttribute@)">
+            <summary>
+            Gets the first attribute with the specified name, if present.
+            </summary>
+            <param name="name">The name of the attribute to get.</param>
+            <param name="attribute">When this method returns, contains the
+            attribute with the specified name, if the attribute is found;
+            otherwise, the default <see cref="T:Yarn.Markup.MarkupAttribute"/>. This
+            parameter is passed uninitialized.</param>
+            <returns><see langword="true"/> if the <see
+            cref="T:Yarn.Markup.MarkupParseResult"/> contains an attribute with the
+            specified name; otherwise, <see langword="false"/>.</returns>
+        </member>
+        <member name="M:Yarn.Markup.MarkupParseResult.TextForAttribute(Yarn.Markup.MarkupAttribute)">
+            <summary>
+            Returns the substring of <see cref="F:Yarn.Markup.MarkupParseResult.Text"/> covered by
+            <paramref name="attribute"/> Position and Length properties.
+            </summary>
+            <remarks>
+            <para>
+            If the attribute's <see cref="P:Yarn.Markup.MarkupAttribute.Length"/>
+            property is zero, this method returns the empty string.
+            </para>
+            <para>
+            This method does not check to see if <paramref
+            name="attribute"/> is an attribute belonging to this
+            MarkupParseResult. As a result, if you pass an attribute that
+            doesn't belong, it may describe a range of text that does not
+            appear in <see cref="F:Yarn.Markup.MarkupParseResult.Text"/>. If this occurs, an <see
+            cref="T:System.IndexOutOfRangeException"/> will be thrown.
+            </para>
+            </remarks>
+            <param name="attribute">The attribute to get the text
+            for.</param>
+            <returns>The text contained within the attribute.</returns>
+            <throws cref="T:System.IndexOutOfRangeException">Thrown when
+            attribute's <see cref="P:Yarn.Markup.MarkupAttribute.Position"/> and <see
+            cref="P:Yarn.Markup.MarkupAttribute.Length"/> properties describe a range of
+            text outside the maximum range of <see cref="F:Yarn.Markup.MarkupParseResult.Text"/>.</throws>
+        </member>
+        <member name="M:Yarn.Markup.MarkupParseResult.DeleteRange(Yarn.Markup.MarkupAttribute)">
+             <summary>
+             Deletes an attribute from this markup.
+             </summary>
+             <remarks>
+             This method deletes the range of text covered by <paramref
+             name="attributeToDelete"/>, and updates the other attributes in this
+             markup as follows:
+            
+             <list type="bullet">
+             <item>
+             Attributes that start and end before the deleted attribute are
+             unmodified.
+             </item>
+            
+             <item>
+             Attributes that start before the deleted attribute and end inside it
+             are truncated to remove the part overlapping the deleted attribute.
+             </item>
+            
+             <item>
+             Attributes that have the same position and length as the deleted
+             attribute are deleted, if they apply to any text.
+             </item>
+            
+             <item>
+             Attributes that start and end within the deleted attribute are
+             deleted.
+             </item>
+            
+             <item>
+             Attributes that start within the deleted attribute, and end outside
+             it, have their start truncated to remove the part overlapping the
+             deleted attribute.
+             </item>
+            
+             <item>
+             Attributes that start after the deleted attribute have their start
+             point adjusted to account for the deleted text.
+             </item>
+             </list>
+            
+             <para>
+             This method does not modify the current object. A new <see
+             cref="T:Yarn.Markup.MarkupParseResult"/> is returned.
+             </para>
+            
+             <para>
+             If <paramref name="attributeToDelete"/> is not an attribute of this
+             <see cref="T:Yarn.Markup.MarkupParseResult"/>, the behaviour is undefined.
+             </para>
+             </remarks>
+             <param name="attributeToDelete">The attribute to remove.</param>
+             <returns>A new <see cref="T:Yarn.Markup.MarkupParseResult"/> object, with the
+             plain text modified and an updated collection of
+             attributes.</returns>
+        </member>
+        <member name="T:Yarn.Markup.MarkupAttribute">
+            <summary>
+            Represents a range of text in a marked-up string.
+            </summary>
+            <remarks>
+            You do not create instances of this struct yourself. It is created
+            by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
+            </remarks>
+            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/>
+        </member>
+        <member name="M:Yarn.Markup.MarkupAttribute.#ctor(System.Int32,System.Int32,System.Int32,System.String,System.Collections.Generic.IEnumerable{Yarn.Markup.MarkupProperty})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Yarn.Markup.MarkupAttribute"/>
+            struct using specified values.
+            </summary>
+            <param name="position">The position in the plain text where
+            this attribute begins.</param>
+            <param name="sourcePosition">The position in the original
+            source text where this attribute begins.</param>
+            <param name="length">The number of text elements in the plain
+            text that this attribute covers.</param>
+            <param name="name">The name of the attribute.</param>
+            <param name="properties">The properties associated with this
+            attribute.</param>
+        </member>
+        <member name="M:Yarn.Markup.MarkupAttribute.#ctor(Yarn.Markup.MarkupAttributeMarker,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Yarn.Markup.MarkupAttribute"/>
+            struct, using information taken from an opening <see
+            cref="T:Yarn.Markup.MarkupAttributeMarker"/>.
+            </summary>
+            <param name="openingMarker">The marker that represents the
+            start of this attribute.</param>
+            <param name="length">The number of text elements in the plain
+            text that this attribute covers.</param>
+        </member>
+        <member name="P:Yarn.Markup.MarkupAttribute.Position">
+            <summary>
+            Gets the position in the plain text where
+            this attribute begins.
+            </summary>
+        </member>
+        <member name="P:Yarn.Markup.MarkupAttribute.Length">
+            <summary>
+            Gets the number of text elements in the plain
+            text that this attribute covers.
+            </summary>
+        </member>
+        <member name="P:Yarn.Markup.MarkupAttribute.Name">
+            <summary>
+            Gets the name of the attribute.
+            </summary>
+        </member>
+        <member name="P:Yarn.Markup.MarkupAttribute.Properties">
+            <summary>
+            Gets the properties associated with this
+            attribute.
+            </summary>
+        </member>
+        <member name="P:Yarn.Markup.MarkupAttribute.SourcePosition">
+            <summary>
+            Gets the position in the original source text where this
+            attribute begins.
+            </summary>
+        </member>
+        <member name="M:Yarn.Markup.MarkupAttribute.ToString">
+            <inheritdoc/>
+        </member>
+        <member name="T:Yarn.Markup.MarkupProperty">
+            <summary>
+            A property associated with a <see cref="T:Yarn.Markup.MarkupAttribute"/>.
+            </summary>
+            <remarks>
+            You do not create instances of this struct yourself. It is created
+            by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
+            </remarks>
+            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/>
+        </member>
+        <member name="M:Yarn.Markup.MarkupProperty.#ctor(System.String,Yarn.Markup.MarkupValue)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Yarn.Markup.MarkupProperty"/>
+            struct.
+            </summary>
+            <param name="name">The name of the property.</param>
+            <param name="value">The value of the property.</param>
+        </member>
+        <member name="P:Yarn.Markup.MarkupProperty.Name">
+            <summary>
+            Gets the name of the property.
+            </summary>
+        </member>
+        <member name="P:Yarn.Markup.MarkupProperty.Value">
+            <summary>
+            Gets the value of the property.
+            </summary>
+        </member>
+        <member name="T:Yarn.Markup.MarkupValue">
+            <summary>
+            A value associated with a <see cref="T:Yarn.Markup.MarkupProperty"/>.
+            </summary>
+            <remarks>
+            You do not create instances of this struct yourself. It is created
+            by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
+            </remarks>
+            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/>
+        </member>
+        <member name="P:Yarn.Markup.MarkupValue.IntegerValue">
+            <summary>Gets the integer value of this property.</summary>
+            <remarks>
+            This property is only defined when the property's <see
+            cref="P:Yarn.Markup.MarkupValue.Type"/> is <see cref="F:Yarn.Markup.MarkupValueType.Integer"/>.
+            </remarks>
+        </member>
+        <member name="P:Yarn.Markup.MarkupValue.FloatValue">
+            <summary>Gets the float value of this property.</summary>
+            /// <remarks>
+            This property is only defined when the property's <see
+            cref="P:Yarn.Markup.MarkupValue.Type"/> is <see cref="F:Yarn.Markup.MarkupValueType.Float"/>.
+            </remarks>
+        </member>
+        <member name="P:Yarn.Markup.MarkupValue.StringValue">
+            <summary>Gets the string value of this property.</summary>
+            <remarks>
+            This property is only defined when the property's <see
+            cref="P:Yarn.Markup.MarkupValue.Type"/> is <see cref="F:Yarn.Markup.MarkupValueType.String"/>.
+            </remarks>
+        </member>
+        <member name="P:Yarn.Markup.MarkupValue.BoolValue">
+            <summary>Gets the bool value of this property.</summary>
+            <remarks>
+            This property is only defined when the property's <see
+            cref="P:Yarn.Markup.MarkupValue.Type"/> is <see cref="F:Yarn.Markup.MarkupValueType.Bool"/>.
+            </remarks>
+        </member>
+        <member name="P:Yarn.Markup.MarkupValue.Type">
+            <summary>
+            Gets the value's type.
+            </summary>
+        </member>
+        <member name="M:Yarn.Markup.MarkupValue.ToString">
+            <inheritdoc/>
+        </member>
+        <member name="T:Yarn.Markup.MarkupAttributeMarker">
+            <summary>
+            Represents a marker (e.g. <c>[a]</c>) in line of marked up text.
+            </summary>
+            <remarks>
+            You do not create instances of this struct yourself. It is created
+            by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
+            </remarks>
+            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String)"/>
+        </member>
+        <member name="M:Yarn.Markup.MarkupAttributeMarker.#ctor(System.String,System.Int32,System.Int32,System.Collections.Generic.List{Yarn.Markup.MarkupProperty},Yarn.Markup.TagType)">
+            <summary>
+            Initializes a new instance of the <see
+            cref="T:Yarn.Markup.MarkupAttributeMarker"/> struct.
+            </summary>
+            <param name="name">The name of the marker.</param>
+            <param name="position">The position of the marker.</param>
+            <param name="sourcePosition">The position of the marker in the original text.</param>
+            <param name="properties">The properties of the marker.</param>
+            <param name="type">The type of the marker.</param>
+        </member>
+        <member name="P:Yarn.Markup.MarkupAttributeMarker.Name">
+            <summary>
+            Gets the name of the marker.
+            </summary>
+            <remarks>
+            For example, the marker <c>[wave]</c> has the name <c>wave</c>.
+            </remarks>
+        </member>
+        <member name="P:Yarn.Markup.MarkupAttributeMarker.Position">
+            <summary>
+            Gets the position of the marker in the plain text.
+            </summary>
+        </member>
+        <member name="P:Yarn.Markup.MarkupAttributeMarker.Properties">
+            <summary>
+            Gets the list of properties associated with this marker.
+            </summary>
+        </member>
+        <member name="P:Yarn.Markup.MarkupAttributeMarker.Type">
+            <summary>
+            Gets the type of marker that this is.
+            </summary>
+        </member>
+        <member name="P:Yarn.Markup.MarkupAttributeMarker.SourcePosition">
+            <summary>
+            Gets or sets the position of this marker in the original source
+            text.
+            </summary>
+        </member>
+        <member name="M:Yarn.Markup.MarkupAttributeMarker.TryGetProperty(System.String,Yarn.Markup.MarkupValue@)">
+            <summary>
+            Gets the property associated with the specified key, if
+            present.
+            </summary>
+            <param name="name">The name of the property to get.</param>
+            <param name="result">When this method returns, contains the
+            value associated with the specified key, if the key is found;
+            otherwise, the default <see cref="T:Yarn.Markup.MarkupValue"/>. This
+            parameter is passed uninitialized.</param>
+            <returns><see langword="true"/> if the <see
+            cref="T:Yarn.Markup.MarkupAttributeMarker"/> contains an element with the
+            specified key; otherwise, <see langword="false"/>.</returns>
+        </member>
+        <member name="T:Yarn.Markup.MarkupValueType">
+            <summary>
+            A type of <see cref="T:Yarn.Markup.MarkupValue"/>.
+            </summary>
+        </member>
+        <member name="F:Yarn.Markup.MarkupValueType.Integer">
+            <summary>An integer.</summary>
+        </member>
+        <member name="F:Yarn.Markup.MarkupValueType.Float">
+            <summary>A float.</summary>
+        </member>
+        <member name="F:Yarn.Markup.MarkupValueType.String">
+            <summary>A string.</summary>
+        </member>
+        <member name="F:Yarn.Markup.MarkupValueType.Bool">
+            <summary>A bool.</summary>
+        </member>
+        <member name="T:Yarn.Markup.NoMarkupTextProcessor">
+            <summary>A markup text processor that implements the <c>[nomarkup]</c>
+            attribute's behaviour.</summary>
+        </member>
+        <member name="M:Yarn.Markup.NoMarkupTextProcessor.ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Yarn.Markup.TagType">
+            <summary>
+            A type of <see cref="T:Yarn.Markup.MarkupAttributeMarker"/>.
+            </summary>
+        </member>
+        <member name="F:Yarn.Markup.TagType.Open">
+            <summary>
+            An open marker. For example, <c>[a]</c>.
+            </summary>
+        </member>
+        <member name="F:Yarn.Markup.TagType.Close">
+            <summary>
+            A closing marker. For example, <c>[/a]</c>.
+            </summary>
+        </member>
+        <member name="F:Yarn.Markup.TagType.SelfClosing">
+            <summary>
+            A self-closing marker. For example, <c>[a/]</c>.
+            </summary>
+        </member>
+        <member name="F:Yarn.Markup.TagType.CloseAll">
+            <summary>
+            The close-all marker, <c>[/]</c>.
+            </summary>
+        </member>
+    </members>
+</doc>
