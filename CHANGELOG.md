@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 
+## [2.5.1] 2024-12-17
+
+No changes between this version and v2.5.0; this release fixes an issue related to deployment on OpenUPM.
+
 ## [2.5.0] 2024-12-16
 
 ### Added
