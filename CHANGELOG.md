@@ -7,6 +7,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Removed
+
+## [2.5.1] 2024-12-17
+
+No changes between this version and v2.5.0; this release fixes an issue related to deployment on OpenUPM.
+
+## [2.5.0] 2024-12-16
+
+### Added
 - `DialogueRunner.AddCommandHandler` and `DialogueRunner.AddFunction` now validate that the provided names contain no spaces.
 - `DialogueRunner.AddCommandHandler` now supports methods whose last parameter is an array of strings.
   - This allows for commands with a variable list of parameters. For example, consider the following method:
@@ -39,8 +51,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `YarnProjectImporter.GenerateStringsTable` is now public.
 - Yarn Projects now allow choosing more specific cultures (for example 'pt-BR' and 'en-AU' rather than simply 'pt' and 'en') as their base language.
 - Fixed a issue where `AudioLineProvider` would throw an exception if an asset was already loaded and was requested a second time.
-
-### Removed
 
 ## [2.4.2] 2024-02-24
 
