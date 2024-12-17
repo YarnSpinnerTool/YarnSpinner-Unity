@@ -197,6 +197,33 @@ namespace Yarn.Unity
             return null;
         }
 
+#if UNITY_EDITOR
+        internal T? GetLocalizedObjectSync<T>(string key) where T : UnityEngine.Object
+        {
+            if (!entries.TryGetValue(key, out var entry))
+            {
+                return null;
+            }
+
+#if USE_ADDRESSABLES
+            if (_usesAddressableAssets)
+            {
+                if (entry.localizedAssetReference == null || entry.localizedAssetReference.RuntimeKeyIsValid() == false) { return null; }
+
+                // Try to fetch the referenced asset
+                return entry.localizedAssetReference.editorAsset as T;
+            }
+#endif
+
+            if (entry.localizedAsset is T resultAsTargetObject)
+            {
+                return resultAsTargetObject;
+            }
+
+            return null;
+        }
+#endif
+
         private LocalizationTableEntry GetOrCreateEntry(string key)
         {
             if (entries.TryGetValue(key, out var entry))

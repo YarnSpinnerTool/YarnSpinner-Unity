@@ -507,8 +507,8 @@ But not all of them are.
             project.localizations.Values.Should().ContainAllOf(allAssetsAtPath.OfType<Localization>());
         }
 
-        [UnityTest]
-        public IEnumerator YarnProjectImporter_OnLocalizationsConfigured_LocatesAssets() => YarnTask.ToCoroutine(async () =>
+        [Test]
+        public void YarnProjectImporter_OnLocalizationsConfigured_LocatesAssets()
         {
 
             // Arrange: 
@@ -550,15 +550,15 @@ But not all of them are.
             project.localizations.Should().HaveCount(1);
 
             (string localeCode, Localization localization) = project.localizations.First();
-            IEnumerable<AudioClip> allAudioClips = await YarnTask.WhenAll(localization.GetLineIDs()
-                                                               .Select(id => localization.GetLocalizedObjectAsync<AudioClip>(id)));
+            IEnumerable<AudioClip> allAudioClips = localization.GetLineIDs()
+                                                               .Select(id => localization.GetLocalizedObjectSync<AudioClip>(id));
 
             defaultLanguage.Should().BeEqualTo(localeCode);
             YarnTestUtility.ExpectedStrings.Select(l => l.ID).Should().BeEqualTo(localization.GetLineIDs());
             YarnTestUtility.ExpectedStrings.Count().Should().BeEqualTo(allAudioClips.Count());
             CollectionAssert.AllItemsAreNotNull(allAudioClips);
             CollectionAssert.AllItemsAreUnique(allAudioClips);
-        });
+        }
 
         [Test]
         public void YarnImporter_CanCreateNewScript()
