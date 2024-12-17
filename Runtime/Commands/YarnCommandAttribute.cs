@@ -2,9 +2,9 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using UnityEngine;
-using System.Collections;
 using System;
+using System.Collections;
+using UnityEngine;
 
 namespace Yarn.Unity
 {
@@ -25,11 +25,9 @@ namespace Yarn.Unity
     /// one is found, it is checked to see if any of the <see
     /// cref="MonoBehaviour"/>s attached to the class has a <see
     /// cref="YarnCommandAttribute"/> whose <see
-    /// cref="YarnCommandAttribute.CommandString"/> matching the first word of
-    /// the command.
+    /// cref="YarnActionAttribute.Name"/> matches the first word of the command.
     /// </para>
-    /// <para>If the method is static, it will not try to inject an
-    /// object.</para>
+    /// <para>If the method is static, it will not try to use an object.</para>
     /// <para>If a method is found, its parameters are checked:</para>
     /// <list type="bullet">
     /// <item>
@@ -50,9 +48,7 @@ namespace Yarn.Unity
     /// <item>
     /// If a parameter is assignable to <see cref="Component"/>, we will locate
     /// the component based on the name of the object. As per the API of <see
-    /// cref="GameObject.Find(string)"/>, the game object must be active. If
-    /// you'd like to have a custom injector for a parameter, use the <see
-    /// cref="YarnParameterAttribute"/>.
+    /// cref="GameObject.Find(string)"/>, the game object must be active.
     /// </item>
     /// <item>
     /// If a parameter is a <see cref="bool"/>, the string must be <c>true</c>
@@ -75,45 +71,22 @@ namespace Yarn.Unity
     /// <item>Otherwise, it will not be called, and a warning will be
     /// issued.</item>
     /// </list>
-    /// <para>This attribute may be attached to a coroutine. </para>
+    /// <para>This attribute may be attached to a coroutine or to an async
+    /// method.</para>
     /// <para style="note">
     /// The <see cref="DialogueRunner"/> determines if the method is a coroutine
     /// if the method returns <see cref="IEnumerator"/>, or if the method
-    /// returns a <see cref="Coroutine"/>. 
+    /// returns a <see cref="Coroutine"/> or a task.
     /// </para>
     /// <para>
-    /// If the method is a coroutine, or returns a <see cref="Coroutine"/>, the
-    /// DialogueRunner will pause execution until the coroutine ends.
-    /// </para>
-    /// <para>
-    /// Yarn Spinner for Unity finds methods with the YarnCommand attribute by
-    /// reading your source code. If your project uses Unity 2021.1 or earlier,
-    /// you will need to tell Yarn Spinner for Unity to do this manually, by
-    /// opening the Window method and choosing Yarn Spinner -&gt; Update Yarn
-    /// Commands. You don't need to do this on later versions of Unity, as it
-    /// will be done for you automatically when your code compiles.
+    /// If the method is a coroutine, returns a <see cref="Coroutine"/>, or
+    /// returns a task, the DialogueRunner will pause execution until the the
+    /// coroutine or task ends.
     /// </para>
     /// </remarks>
     public class YarnCommandAttribute : YarnActionAttribute
     {
-        /// <summary>
-        /// Override the state injector for this command only.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// If not defined, will use the method marked by <see
-        /// cref="YarnStateInjectorAttribute"/> on the class, or if that is not
-        /// defined and the class subclasses <see cref="MonoBehaviour"/>, using
-        /// <see cref="UnityEngine.GameObject.Find(string)"/>.
-        /// </para>
-        /// <para>
-        /// If none of those conditions are true, but the function is not
-        /// static, an error will be thrown. However, if the function is indeed
-        /// static, this parameter will be ignored.
-        /// </para>
-        /// </remarks>
-        public string Injector { get; set; }
-
+        /// <inheritdoc/>
         public YarnCommandAttribute(string name = null) => Name = name;
     }
     #endregion

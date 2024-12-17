@@ -6,9 +6,11 @@
         "YarnSpinner.Unity.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
+        "YarnSpinnerTests.Shared",
         "Unity.Localization",
         "Unity.Localization.Editor",
-        "Unity.Localization.Settings"
+        "Unity.Localization.Settings",
+        "UniTask"
     ],
     "includePlatforms": [
         "Editor"

@@ -7,12 +7,27 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using System.Threading.Tasks;
 using UnityEngine;
 
+#nullable enable
 
 namespace Yarn.Unity
 {
-    using Converter = System.Func<string, object>;
+    using ActionRegistrationMethod = System.Action<IActionRegistration, RegistrationType>;
+    using Converter = System.Func<string, int, object?>;
+
+    public enum RegistrationType
+    {
+        /// <summary>
+        /// Actions are being registered during a Yarn script compilation.
+        /// </summary>
+        Compilation,
+        /// <summary>
+        /// Actions are being registered for runtime use (i.e. during gameplay.)
+        /// </summary>
+        Runtime
+    }
 
     public interface ICommand
     {
@@ -23,39 +38,12 @@ namespace Yarn.Unity
     {
         public static string EnglishPluraliseNounCount(int count, string name, bool prefixCount = false)
         {
-            string result;
-            if (count == 1)
-            {
-                result = name;
-            }
-            else
-            {
-                result = name + "s";
-            }
-            if (prefixCount)
-            {
-                return count.ToString() + " " + result;
-            }
-            else
-            {
-                return result;
-            }
+            string result = count == 1 ? name : name + "s";
+            return prefixCount ? $"{count} {result}" : result;
         }
 
-        public static string EnglishPluraliseWasVerb(int count)
-        {
-            if (count == 1)
-            {
-                return "was";
-            }
-            else
-            {
-                return "were";
-            }
-        }
+        public static string EnglishPluraliseWasVerb(int count) => count == 1 ? "was" : "were";
     }
-
-
 
     public class Actions : ICommandDispatcher
     {
@@ -99,7 +87,7 @@ namespace Yarn.Unity
 
             public string Name { get; set; }
             public MethodInfo Method { get; set; }
-            private object Target { get; set; }
+            private object? Target { get; set; }
 
             public Type DeclaringType => Method.DeclaringType;
             public Type ReturnType => Method.ReturnType;
@@ -167,13 +155,13 @@ namespace Yarn.Unity
             /// <summary>
             /// Attempt to parse the arguments with cached converters.
             /// </summary>
-            public bool TryParseArgs(string[] args, out object[] result, out string message)
+            public CommandDispatchResult.ParameterParseStatusType TryParseArgs(string[] args, out object?[]? result, out string? message)
             {
                 var parameters = Method.GetParameters();
 
-                var (min, max) = ParameterCount;
+                var lastParameterIsArray = parameters.Length > 0 && parameters[parameters.Length - 1].ParameterType.IsArray;
 
-                bool lastParameterIsArray = parameters.Length > 0 && parameters[parameters.Length - 1].ParameterType.IsArray;
+                var (min, max) = ParameterCount;
 
                 int argumentCount = args.Length;
                 if (argumentCount < min || (argumentCount > max && !lastParameterIsArray))
@@ -194,60 +182,110 @@ namespace Yarn.Unity
                     }
                     message = $"{this.Name} requires {requirementDescription}, but {argumentCount} {DiagnosticUtility.EnglishPluraliseWasVerb(argumentCount)} provided.";
                     result = default;
-                    return false;
+                    return CommandDispatchResult.ParameterParseStatusType.InvalidParameterCount;
                 }
 
-                var finalArgs = new object[parameters.Length];
+                var finalArgs = new object?[parameters.Length];
+
+                var argsQueue = new Queue(args);
 
                 var paramsArgs = new List<object>();
 
                 for (int i = 0; i < argumentCount; i++)
                 {
-                    object convertedArg;
-                    Converter converter;
+                    var parameterIsArray = parameters[i].ParameterType.IsArray;
 
                     string arg = args[i];
+                    Converter converter = Converters[i];
 
-                    try
+                    if (parameterIsArray)
                     {
-                        if (i >= parameters.Length - 1 && lastParameterIsArray)
+                        if (i < parameters.Length - 1)
                         {
-                            converter = Converters[parameters.Length - 1];
-                            convertedArg = converter != null ? converter?.Invoke(arg) : arg;
+                            // The parameter is an array, but it isn't the last
+                            // parameter. That's not allowed.
+                            message = $"Parameter {i} ({parameters[i].Name}): is an array, but is not the last parameter of {parameters[i].Member.Name}.";
+                            result = default;
+                            return CommandDispatchResult.ParameterParseStatusType.InvalidParameterType;
+                        }
 
-                            paramsArgs.Add(convertedArg);
+                        // Consume all remaining arguments, passing them through
+                        // the final converter, and produce an array from the
+                        // results. This array will be the final parameter to
+                        // the method.
+                        var parameterArrayElementType = parameters[i].ParameterType.GetElementType();
+                        var paramIndex = i;
+                        // var paramsArray = new List<object?>();
+                        var paramsArray = Array.CreateInstance(parameterArrayElementType, argumentCount - i);
+                        while (i < argumentCount)
+                        {
+                            arg = args[i];
+                            if (converter == null)
+                            {
+                                paramsArray.SetValue(arg, i);
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    paramsArray.SetValue(converter.Invoke(arg, i), i - paramIndex);
+                                }
+                                catch (Exception e)
+                                {
+                                    message = $"Can't convert parameter {i} to {parameterArrayElementType.Name}: {e.Message}";
+                                    result = default;
+                                    return CommandDispatchResult.ParameterParseStatusType.InvalidParameterType;
+                                }
+                            }
+                            i += 1;
+                        }
+                        finalArgs[paramIndex] = paramsArray;
+                    }
+                    else
+                    {
+                        // Consume a single argument
+                        if (converter == null)
+                        {
+                            finalArgs[i] = arg;
                         }
                         else
                         {
-                            converter = Converters[i];
-                            convertedArg = converter != null ? converter?.Invoke(arg) : arg;
-
-                            finalArgs[i] = convertedArg;
+                            try
+                            {
+                                finalArgs[i] = converter.Invoke(arg, i);
+                            }
+                            catch (Exception e)
+                            {
+                                message = $"Can't convert parameter {i} to {parameters[i].ParameterType.Name}: {e.Message}";
+                                result = default;
+                                return CommandDispatchResult.ParameterParseStatusType.InvalidParameterType;
+                            }
                         }
                     }
-                    catch (Exception e)
-                    {
-                        message = $"Can't convert parameter {i} to {parameters[i].ParameterType.Name}: {e.Message}";
-                        result = default;
-                        return false;
-                    }
                 }
-
-                if (lastParameterIsArray)
-                {
-                    var paramsArray = Array.CreateInstance(parameters[parameters.Length - 1].ParameterType.GetElementType(), paramsArgs.Count);
-                    Array.Copy(paramsArgs.ToArray(), paramsArray, paramsArgs.Count);
-
-                    finalArgs[parameters.Length - 1] = paramsArray;
-                }
-
                 for (int i = argumentCount; i < finalArgs.Length; i++)
                 {
-                    finalArgs[i] = System.Type.Missing;
+                    var parameter = parameters[i];
+                    if (parameter.IsOptional)
+                    {
+                        // If this parameter is optional, provide the Missing
+                        // type.
+                        finalArgs[i] = System.Type.Missing;
+                    }
+                    else if (parameter.GetCustomAttribute<ParamArrayAttribute>() != null)
+                    {
+                        // If the parameter is a params array, provide an empty
+                        // array of the appropriate type.
+                        finalArgs[i] = Array.CreateInstance(parameter.ParameterType.GetElementType(), 0);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Can't provide a default value for parameter {parameter.Name}");
+                    }
                 }
                 result = finalArgs;
                 message = default;
-                return true;
+                return CommandDispatchResult.ParameterParseStatusType.Succeeded;
             }
 
             private (int Min, int Max) ParameterCount
@@ -256,23 +294,40 @@ namespace Yarn.Unity
                 {
                     var parameters = Method.GetParameters();
                     int optional = 0;
+                    bool lastCommandIsParams = false;
                     foreach (var parameter in parameters)
                     {
                         if (parameter.IsOptional)
                         {
                             optional += 1;
                         }
+                        if (parameter.ParameterType.IsArray && parameter.GetCustomAttribute<ParamArrayAttribute>() != null)
+                        {
+                            // If the parameter is a params array, then:
+                            // 1. It's 'optional' in that you can pass in no
+                            //    values (so, for our purposes, the minimum
+                            //    number of parameters you need to pass is not
+                            //    changed)
+                            // 2. The maximum number of parameters you can pass
+                            //    is now effectively unbounded.
+                            lastCommandIsParams = true;
+                            optional += 1;
+                        }
                     }
 
                     int min = parameters.Length - optional;
                     int max = parameters.Length;
+                    if (lastCommandIsParams)
+                    {
+                        max = int.MaxValue;
+                    }
                     return (min, max);
                 }
             }
 
-            internal CommandDispatchResult Invoke(DialogueRunner dispatcher, List<string> parameters, out Coroutine commandCoroutine)
+            internal CommandDispatchResult Invoke(MonoBehaviour dispatcher, List<string> parameters)
             {
-                object target;
+                object? target;
 
                 if (DynamicallyFindsTarget)
                 {
@@ -282,11 +337,9 @@ namespace Yarn.Unity
                     {
                         // We need at least one parameter, which is the
                         // component to look for
-                        commandCoroutine = default;
-                        return new CommandDispatchResult
+                        return new CommandDispatchResult(CommandDispatchResult.StatusType.InvalidParameterCount, YarnTask.CompletedTask)
                         {
                             Message = $"{this.Name} needs a target, but none was specified",
-                            Status = CommandDispatchResult.StatusType.InvalidParameterCount
                         };
                     }
 
@@ -302,11 +355,9 @@ namespace Yarn.Unity
                     if (gameObject == null)
                     {
                         // We couldn't find a target with this name.
-                        commandCoroutine = default;
-                        return new CommandDispatchResult
+                        return new CommandDispatchResult(CommandDispatchResult.StatusType.TargetMissingComponent)
                         {
                             Message = $"No game object named \"{gameObjectName}\" exists",
-                            Status = CommandDispatchResult.StatusType.TargetMissingComponent
                         };
                     }
 
@@ -316,11 +367,9 @@ namespace Yarn.Unity
 
                     if (targetComponent == null)
                     {
-                        commandCoroutine = default;
-                        return new CommandDispatchResult
+                        return new CommandDispatchResult(CommandDispatchResult.StatusType.TargetMissingComponent)
                         {
                             Message = $"{this.Name} can't be called on {gameObjectName}, because it doesn't have a {this.DeclaringType.Name}",
-                            Status = CommandDispatchResult.StatusType.TargetMissingComponent
                         };
                     }
 
@@ -343,12 +392,20 @@ namespace Yarn.Unity
                     throw new InvalidOperationException($"Internal error: {nameof(CommandRegistration)} \"{this.Name}\" has no {nameof(Target)}, but method is not static and ${DynamicallyFindsTarget} is false");
                 }
 
-                if (this.TryParseArgs(parameters.ToArray(), out var finalParameters, out var errorMessage) == false)
+                var parseArgsStatus = this.TryParseArgs(parameters.ToArray(), out var finalParameters, out var errorMessage);
+
+                if (parseArgsStatus != CommandDispatchResult.ParameterParseStatusType.Succeeded)
                 {
-                    commandCoroutine = default;
-                    return new CommandDispatchResult
+                    var status = parseArgsStatus switch
                     {
-                        Status = CommandDispatchResult.StatusType.InvalidParameterCount,
+                        CommandDispatchResult.ParameterParseStatusType.Succeeded => CommandDispatchResult.StatusType.Succeeded,
+                        CommandDispatchResult.ParameterParseStatusType.InvalidParameterType => CommandDispatchResult.StatusType.InvalidParameter,
+                        CommandDispatchResult.ParameterParseStatusType.InvalidParameterCount => CommandDispatchResult.StatusType.InvalidParameterCount,
+                        _ => throw new InvalidOperationException("Internal error: invalid parameter parse result " + parseArgsStatus),
+                    };
+
+                    return new CommandDispatchResult(status)
+                    {
                         Message = errorMessage,
                     };
                 }
@@ -357,27 +414,55 @@ namespace Yarn.Unity
 
                 if (returnValue is Coroutine coro)
                 {
-                    commandCoroutine = coro;
-                    return new CommandDispatchResult
-                    {
-                        Status = CommandDispatchResult.StatusType.SucceededAsync
-                    };
+                    // The method returned a Coroutine object.
+                    return new CommandDispatchResult(
+                        CommandDispatchResult.StatusType.Succeeded,
+                        dispatcher.WaitForCoroutine(coro)
+                    );
                 }
+#if UNITY_2023_1_OR_NEWER
+                else if (returnValue is Awaitable awaitable)
+                {
+                    // The method returned an Awaitable. Convert it to a
+                    // YarnTask. (Awaitables implement IEnumerator, so check
+                    // this before testing against other IEnumerators like
+                    // coroutines.)
+                    return new CommandDispatchResult(
+                        CommandDispatchResult.StatusType.Succeeded,
+                        awaitable
+                    );
+                }
+#endif
                 else if (returnValue is IEnumerator enumerator)
                 {
-                    commandCoroutine = dispatcher.StartCoroutine(enumerator);
-                    return new CommandDispatchResult
-                    {
-                        Status = CommandDispatchResult.StatusType.SucceededAsync
-                    };
+                    // The method returned an IEnumerator.
+                    return new CommandDispatchResult(
+                        CommandDispatchResult.StatusType.Succeeded,
+                        dispatcher.WaitForCoroutine(enumerator)
+                    );
                 }
+                else if (returnValue is System.Threading.Tasks.Task task)
+                {
+                    // The method returned a task. Convert it to a YarnTask.
+                    return new CommandDispatchResult(
+                        CommandDispatchResult.StatusType.Succeeded,
+                        task
+                    );
+                }
+#if USE_UNITASK
+                else if (returnValue is Cysharp.Threading.Tasks.UniTask unitask)
+                {
+                    // The method returned a UniTask. Convert it to a YarnTask.
+                    return new CommandDispatchResult(
+                        CommandDispatchResult.StatusType.Succeeded,
+                        unitask
+                    );
+                }
+#endif
                 else
                 {
-                    commandCoroutine = null;
-                    return new CommandDispatchResult
-                    {
-                        Status = CommandDispatchResult.StatusType.SucceededSync
-                    };
+                    // The method returned no value.
+                    return new CommandDispatchResult(CommandDispatchResult.StatusType.Succeeded);
                 }
             }
 
@@ -434,14 +519,14 @@ namespace Yarn.Unity
         private Dictionary<string, CommandRegistration> _commands = new Dictionary<string, CommandRegistration>();
 
         public Library Library { get; }
-        public DialogueRunner DialogueRunner { get; }
+        public IActionRegistration ActionRegistrar { get; }
 
         public IEnumerable<ICommand> Commands => _commands.Values;
 
-        public Actions(DialogueRunner dialogueRunner, Library library)
+        public Actions(IActionRegistration actionRegistrar, Library library)
         {
             Library = library;
-            DialogueRunner = dialogueRunner;
+            ActionRegistrar = actionRegistrar;
         }
 
         private static string GetFullMethodName(MethodInfo method)
@@ -453,7 +538,7 @@ namespace Yarn.Unity
         {
             foreach (var registrationFunction in ActionRegistrationMethods)
             {
-                registrationFunction.Invoke(DialogueRunner);
+                registrationFunction.Invoke(ActionRegistrar, RegistrationType.Runtime);
             }
         }
 
@@ -472,6 +557,9 @@ namespace Yarn.Unity
             }
             else
             {
+#if YARN_SOURCE_GENERATION_DEBUG_LOGGING
+                Debug.Log($"Registering command {commandName}");
+#endif
                 _commands.Add(commandName, new CommandRegistration(commandName, handler));
             }
         }
@@ -480,7 +568,7 @@ namespace Yarn.Unity
         {
             if (name.Contains(' '))
             {
-                Debug.LogError($"Cannot add function {name}: command names are not allowed to contain spaces.");
+                Debug.LogError($"Cannot add function {name}: function names are not allowed to contain spaces.");
                 return;
             }
 
@@ -489,6 +577,10 @@ namespace Yarn.Unity
                 Debug.LogError($"Cannot add function {name}: one already exists");
                 return;
             }
+#if YARN_SOURCE_GENERATION_DEBUG_LOGGING
+            Debug.Log($"Registering command {name} from method {implementation.Method.DeclaringType.FullName}.{implementation.Method.Name}");
+#endif
+
             Library.RegisterFunction(name, implementation);
         }
 
@@ -510,52 +602,6 @@ namespace Yarn.Unity
                 _commands.Add(commandName, new CommandRegistration(commandName, methodInfo));
             }
         }
-
-        public void AddCommandHandler(string commandName, Func<Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-
-        // GYB1 START
-        public void AddCommandHandler<T1>(string commandName, Func<T1, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2>(string commandName, Func<T1, T2, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3>(string commandName, Func<T1, T2, T3, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Func<T1, T2, T3, T4, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Func<T1, T2, T3, T4, T5, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Func<T1, T2, T3, T4, T5, T6, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        // GYB1 END
-
-        public void AddCommandHandler(string commandName, Action handler) => AddCommandHandler(commandName, (Delegate)handler);
-
-        // GYB2 START
-        public void AddCommandHandler<T1>(string commandName, Action<T1> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2>(string commandName, Action<T1, T2> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3>(string commandName, Action<T1, T2, T3> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Action<T1, T2, T3, T4> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Action<T1, T2, T3, T4, T5> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Action<T1, T2, T3, T4, T5, T6> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(string commandName, Action<T1, T2, T3, T4, T5, T6, T7> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(string commandName, Action<T1, T2, T3, T4, T5, T6, T7, T8> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(string commandName, Action<T1, T2, T3, T4, T5, T6, T7, T8, T9> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string commandName, Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> handler) => AddCommandHandler(commandName, (Delegate)handler);
-        // GYB2 END
-
-        public void AddFunction<TResult>(string name, Func<TResult> implementation) => AddFunction(name, (Delegate)implementation);
-
-        // GYB3 START
-        public void AddFunction<T1, TResult>(string name, Func<T1, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, TResult>(string name, Func<T1, T2, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, T3, TResult>(string name, Func<T1, T2, T3, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, T3, T4, TResult>(string name, Func<T1, T2, T3, T4, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, T3, T4, T5, TResult>(string name, Func<T1, T2, T3, T4, T5, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, T3, T4, T5, T6, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, T3, T4, T5, T6, T7, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        public void AddFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-        // GYB3 END
-
         public void RemoveCommandHandler(string commandName)
         {
             if (_commands.Remove(commandName) == false)
@@ -580,7 +626,7 @@ namespace Yarn.Unity
             // no-op
         }
 
-        CommandDispatchResult ICommandDispatcher.DispatchCommand(string command, out Coroutine commandCoroutine)
+        CommandDispatchResult ICommandDispatcher.DispatchCommand(string command, MonoBehaviour coroutineHost)
         {
             var commandPieces = new List<string>(DialogueRunner.SplitCommandText(command));
 
@@ -588,29 +634,21 @@ namespace Yarn.Unity
             {
                 // No text was found inside the command, so we won't be able to
                 // find it.
-                commandCoroutine = default;
-                return new CommandDispatchResult
-                {
-                    Status = CommandDispatchResult.StatusType.CommandUnknown
-                };
+                return new CommandDispatchResult(CommandDispatchResult.StatusType.CommandUnknown, YarnTask.CompletedTask);
             }
 
             if (_commands.TryGetValue(commandPieces[0], out var registration))
             {
-                // The first part of the command is the command name itself. Remove
-                // it to get the collection of parameters that were passed to the
-                // command.
+                // The first part of the command is the command name itself.
+                // Remove it to get the collection of parameters that were
+                // passed to the command.
                 commandPieces.RemoveAt(0);
 
-                return registration.Invoke(DialogueRunner, commandPieces, out commandCoroutine);
+                return registration.Invoke(coroutineHost, commandPieces);
             }
             else
             {
-                commandCoroutine = default;
-                return new CommandDispatchResult
-                {
-                    Status = CommandDispatchResult.StatusType.CommandUnknown
-                };
+                return new CommandDispatchResult(CommandDispatchResult.StatusType.CommandUnknown);
             }
         }
 
@@ -618,7 +656,7 @@ namespace Yarn.Unity
         {
             ParameterInfo[] parameterInfos = method.GetParameters();
 
-            Converter[] result = (Func<string, object>[])Array.CreateInstance(typeof(Func<string, object>), parameterInfos.Length);
+            Converter[] result = new Converter[parameterInfos.Length];
 
             int i = 0;
 
@@ -627,46 +665,59 @@ namespace Yarn.Unity
                 if (parameterInfo.ParameterType.IsArray)
                 {
                     // Array parameters are permitted, but only if they're the
-                    // last parameter and are an array of strings
+                    // last parameter
                     if (i != parameterInfos.Length - 1)
                     {
                         throw new ArgumentException($"Can't register method {method.Name}: Parameter {i + 1} ({parameterInfo.Name}): array parameters are required to be last.");
                     }
-                    if (parameterInfo.ParameterType.GetElementType() != typeof(string))
-                    {
-                        throw new ArgumentException($"Can't register method {method.Name}: Parameter {i + 1} ({parameterInfo.Name}): array parameters are required to be string arrays.");
-                    }
-                    // Individual elements of the array will be passed to this
-                    // converter; we already know that they'll all be strings,
-                    // so use them as-is.
-                    result[i] = arg => arg;
                 }
-                else
-                {
-                    result[i] = CreateConverter(parameterInfo, i);
-                }
+                result[i] = CreateConverter(parameterInfo, i);
                 i++;
             }
             return result;
         }
 
-        private static Converter CreateConverter(ParameterInfo parameter, int index)
+        private static System.Func<string, int, object?> CreateConverter(ParameterInfo parameter, int index)
         {
             var targetType = parameter.ParameterType;
+            string name = parameter.Name;
+
+            if (targetType.IsArray)
+            {
+                // This parameter is a params array. Make a converter for that
+                // array's element type; at dispatch time, we'll repeatedly call
+                // it with the arguments found in the command.
+
+                var paramsArrayType = targetType.GetElementType();
+                var elementConverter = CreateConverterFunction(paramsArrayType, name);
+                return elementConverter;
+
+            }
+            else
+            {
+                // This parameter is for a single value. Make a converter that
+                // receives a single string, 
+                return CreateConverterFunction(targetType, name);
+            }
+        }
+
+        private static Converter CreateConverterFunction(Type targetType, string parameterName)
+        {
 
             // well, I mean...
-            if (targetType == typeof(string)) { return arg => arg; }
+            if (targetType == typeof(string)) { return (arg, i) => arg; }
 
             // find the GameObject.
             if (typeof(GameObject).IsAssignableFrom(targetType))
             {
-                return GameObject.Find;
+                return (arg, i) => GameObject.Find(arg);
             }
 
-            // find components of the GameObject with the component, if available
+            // find components of the GameObject with the component, if
+            // available
             if (typeof(Component).IsAssignableFrom(targetType))
             {
-                return arg =>
+                return (arg, i) =>
                 {
                     GameObject gameObject = GameObject.Find(arg);
                     if (gameObject == null)
@@ -680,11 +731,11 @@ namespace Yarn.Unity
             // bools can take "true" or "false", or the parameter name.
             if (typeof(bool).IsAssignableFrom(targetType))
             {
-                return arg =>
+                return (arg, i) =>
                 {
                     // If the argument is the name of the parameter, interpret
                     // the argument as 'true'.
-                    if (arg.Equals(parameter.Name, StringComparison.InvariantCultureIgnoreCase))
+                    if (arg.Equals(parameterName, StringComparison.InvariantCultureIgnoreCase))
                     {
                         return true;
                     }
@@ -698,13 +749,13 @@ namespace Yarn.Unity
 
                     // We can't parse the argument.
                     throw new ArgumentException(
-                        $"Can't convert the given parameter at position {index + 1} (\"{arg}\") to parameter " +
-                        $"{parameter.Name} of type {typeof(bool).FullName}.");
+                        $"Can't convert the given parameter at position {i + 1} (\"{arg}\") to parameter " +
+                        $"{parameterName} of type {typeof(bool).FullName}.");
                 };
             }
 
             // Fallback: try converting using IConvertible.
-            return arg =>
+            return (arg, i) =>
             {
                 try
                 {
@@ -713,17 +764,17 @@ namespace Yarn.Unity
                 catch (Exception e)
                 {
                     throw new ArgumentException(
-                        $"Can't convert the given parameter at position {index + 1} (\"{arg}\") to parameter " +
-                        $"{parameter.Name} of type {targetType.FullName}: {e}", e);
+                        $"Can't convert the given parameter at position {i + 1} (\"{arg}\") to parameter " +
+                        $"{parameterName} of type {targetType.FullName}: {e}", e);
                 }
             };
         }
 
 
-        internal static HashSet<System.Action<IActionRegistration>> ActionRegistrationMethods = new HashSet<Action<IActionRegistration>>();
+        internal static HashSet<ActionRegistrationMethod> ActionRegistrationMethods = new HashSet<ActionRegistrationMethod>();
 
 
-        public static void AddRegistrationMethod(Action<IActionRegistration> registerActions)
+        public static void AddRegistrationMethod(ActionRegistrationMethod registerActions)
         {
             ActionRegistrationMethods.Add(registerActions);
         }
@@ -736,59 +787,16 @@ namespace Yarn.Unity
 
             foreach (var registrationMethod in ActionRegistrationMethods)
             {
-                registrationMethod.Invoke(proxy);
+                registrationMethod.Invoke(proxy, RegistrationType.Compilation);
             }
 
             return library;
         }
 
-        public void AddCommandHandler(string commandName, Func<IEnumerator> handler)
+        public void AddCommandHandler(string commandName, Func<object> handler)
         {
             this.AddCommandHandler(commandName, (Delegate)handler);
         }
-
-        // GYB4 START
-        public void AddCommandHandler<T1>(string commandName, Func<T1, IEnumerator> handler)
-        {
-            this.AddCommandHandler(commandName, (Delegate)handler);
-        }
-        public void AddCommandHandler<T1, T2>(string commandName, Func<T1, T2, IEnumerator> handler)
-        {
-            this.AddCommandHandler(commandName, (Delegate)handler);
-        }
-        public void AddCommandHandler<T1, T2, T3>(string commandName, Func<T1, T2, T3, IEnumerator> handler)
-        {
-            this.AddCommandHandler(commandName, (Delegate)handler);
-        }
-        public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Func<T1, T2, T3, T4, IEnumerator> handler)
-        {
-            this.AddCommandHandler(commandName, (Delegate)handler);
-        }
-        public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Func<T1, T2, T3, T4, T5, IEnumerator> handler)
-        {
-            this.AddCommandHandler(commandName, (Delegate)handler);
-        }
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Func<T1, T2, T3, T4, T5, T6, IEnumerator> handler)
-        {
-            this.AddCommandHandler(commandName, (Delegate)handler);
-        }
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, IEnumerator> handler)
-        {
-            this.AddCommandHandler(commandName, (Delegate)handler);
-        }
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, IEnumerator> handler)
-        {
-            this.AddCommandHandler(commandName, (Delegate)handler);
-        }
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, IEnumerator> handler)
-        {
-            this.AddCommandHandler(commandName, (Delegate)handler);
-        }
-        public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, IEnumerator> handler)
-        {
-            this.AddCommandHandler(commandName, (Delegate)handler);
-        }
-        // GYB4 END
 
         /// <summary>
         /// A helper class that registers functions into a <see
@@ -805,56 +813,17 @@ namespace Yarn.Unity
 
             public void AddCommandHandler(string commandName, Delegate handler)
             {
-                // No action; this class does not handle commands, only functions.
+                // No action; this class does not handle commands, only
+                // functions.
                 return;
             }
 
-            public void AddCommandHandler(string commandName, Func<Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-
-            public void AddCommandHandler(string commandName, MethodInfo methodInfo) => AddCommandHandler(commandName, (Delegate)null);
-
-            // GYB5 START
-            public void AddCommandHandler<T1>(string commandName, Func<T1, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2>(string commandName, Func<T1, T2, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3>(string commandName, Func<T1, T2, T3, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Func<T1, T2, T3, T4, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Func<T1, T2, T3, T4, T5, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Func<T1, T2, T3, T4, T5, T6, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, Coroutine> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            // GYB5 END
-
-            public void AddCommandHandler(string commandName, Func<IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-
-            // GYB6 START
-            public void AddCommandHandler<T1>(string commandName, Func<T1, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2>(string commandName, Func<T1, T2, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3>(string commandName, Func<T1, T2, T3, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Func<T1, T2, T3, T4, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Func<T1, T2, T3, T4, T5, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Func<T1, T2, T3, T4, T5, T6, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string commandName, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, IEnumerator> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            // GYB6 END
-
-            public void AddCommandHandler(string commandName, Action handler) => AddCommandHandler(commandName, (Delegate)handler);
-
-            // GYB7 START
-            public void AddCommandHandler<T1>(string commandName, Action<T1> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2>(string commandName, Action<T1, T2> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3>(string commandName, Action<T1, T2, T3> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4>(string commandName, Action<T1, T2, T3, T4> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5>(string commandName, Action<T1, T2, T3, T4, T5> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6>(string commandName, Action<T1, T2, T3, T4, T5, T6> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7>(string commandName, Action<T1, T2, T3, T4, T5, T6, T7> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8>(string commandName, Action<T1, T2, T3, T4, T5, T6, T7, T8> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9>(string commandName, Action<T1, T2, T3, T4, T5, T6, T7, T8, T9> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            public void AddCommandHandler<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string commandName, Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> handler) => AddCommandHandler(commandName, (Delegate)handler);
-            // GYB7 END
+            public void AddCommandHandler(string commandName, MethodInfo methodInfo)
+            {
+                // No action; this class does not handle commands, only
+                // functions.
+                return;
+            }
 
             public void AddFunction(string name, Delegate implementation)
             {
@@ -867,21 +836,6 @@ namespace Yarn.Unity
                 // Register this function in the library
                 library.RegisterFunction(name, implementation);
             }
-
-            public void AddFunction<TResult>(string name, Func<TResult> implementation) => AddFunction(name, (Delegate)implementation);
-
-            // GYB8 START
-            public void AddFunction<T1, TResult>(string name, Func<T1, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, TResult>(string name, Func<T1, T2, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, T3, TResult>(string name, Func<T1, T2, T3, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, T3, T4, TResult>(string name, Func<T1, T2, T3, T4, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, T3, T4, T5, TResult>(string name, Func<T1, T2, T3, T4, T5, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, T3, T4, T5, T6, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, T3, T4, T5, T6, T7, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            public void AddFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> implementation) => AddFunction(name, (Delegate)implementation);
-            // GYB8 END
 
             public void RemoveCommandHandler(string commandName) => throw new InvalidOperationException("This class does not support removing actions.");
 

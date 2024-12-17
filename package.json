@@ -1,9 +1,9 @@
 {
   "name": "dev.yarnspinner.unity",
-  "version": "2.5.1",
+  "version": "3.0.0-beta1",
   "displayName": "Yarn Spinner",
   "description": "Yarn Spinner is the friendly tool for interactive conversations. Write your dialogue in a simple programming language that's designed to be straightforward for writers and powerful for programmers, and then attach it to your scenes to power your conversations.",
-  "unity": "2021.3",
+  "unity": "2022.3",
   "dependencies": {},
   "changelogUrl": "https://github.com/YarnSpinnerTool/YarnSpinner-Unity/blob/main/CHANGELOG.md",
   "documentationUrl": "https://docs.yarnspinner.dev/",
@@ -20,59 +20,9 @@
   "type": "tool",
   "samples": [
     {
-      "displayName": "Intro",
-      "description": "If you're new to Yarn Spinner, start with this demo. A simple conversation with branching, variables, and voice-over.",
-      "path": "Samples~/Intro"
-    },
-    {
-      "displayName": "Space",
-      "description": "A side-scrolling conversation that demonstrates localisation and voiceovers.",
-      "path": "Samples~/Space"
-    },
-    {
-      "displayName": "Sliced Views",
-      "description": "A basic scene that demonstrates the alternative 9-sliced prefabs for the built in views",
-      "path": "Samples~/RoundedViews"
-    },
-    {
-      "displayName": "Visual Novel",
-      "description": "A template for creating a visual novel with extensive use of Yarn Commands.",
-      "path": "Samples~/VisualNovel"
-    },
-    {
-      "displayName": "3D Speech Bubble",
-      "description": "Code for positioning speech bubbles dynamically above characters in a 3D (or 2D) game world.",
-      "path": "Samples~/3D"
-    },
-    {
-      "displayName": "Phone Chat",
-      "description": "A text message style phone conversation template.",
-      "path": "Samples~/PhoneChat"
-    },
-    {
-      "displayName": "Shot Reverse Shot",
-      "description": "How to use Cinemachine to create a custom dialogue view that can do a shot-reverse-shot conversation camera... requires the Cinemachine package.",
-      "path": "Samples~/ShotReverseShot"
-    },
-    {
-      "displayName": "User Input and Yarn",
-      "description": "How to use TMP input fields to get user input into Yarn variables.",
-      "path": "Samples~/HandlingInput"
-    },
-    {
-      "displayName": "Markup Palettes",
-      "description": "Demonstrates how to use the Markup Palettes",
-      "path": "Samples~/MarkupPalette"
-    },
-    {
-      "displayName": "Pausing the Typewriter",
-      "description": "Demonstrates how to use the pausing markup to pause in the middle of line",
-      "path": "Samples~/PausingTypewriter"
-    },
-    {
-      "displayName": "Minimal Dialogue Runner",
-      "description": "An advanced sample covering the necessary elements to create yourself if you want to take full control over Yarn Spinner.",
-      "path": "Samples~/Minimal Viable Dialogue System"
+      "displayName": "Characters",
+      "description": "[beta] An introduction to Yarn Spinner for Unity.",
+      "path": "Samples~/Characters"
     }
   ]
 }

@@ -11,6 +11,8 @@ using TMPro;
 using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
+using YarnCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption>;
+
 namespace Yarn.Unity
 {
     public class OptionView : UnityEngine.UI.Selectable, ISubmitHandler, IPointerClickHandler, IPointerEnterHandler
@@ -69,20 +71,22 @@ namespace Yarn.Unity
 
         public void InvokeOptionSelected()
         {
-            // turns out that Selectable subclasses aren't intrinsically interactive/non-interactive
-            // based on their canvasgroup, you still need to check at the moment of interaction
+            // turns out that Selectable subclasses aren't intrinsically
+            // interactive/non-interactive based on their canvasgroup, you still
+            // need to check at the moment of interaction
             if (!IsInteractable())
             {
                 return;
             }
-            
-            // We only want to invoke this once, because it's an error to
-            // submit an option when the Dialogue Runner isn't expecting it. To
-            // prevent this, we'll only invoke this if the flag hasn't been cleared already.
+
+            // We only want to invoke this once, because it's an error to submit
+            // an option when the Dialogue Runner isn't expecting it. To prevent
+            // this, we'll only invoke this if the flag hasn't been cleared
+            // already.
             if (hasSubmittedOptionSelection == false)
             {
-                OnOptionSelected.Invoke(Option);
                 hasSubmittedOptionSelection = true;
+                OnOptionSelected.Invoke(Option);
             }
         }
 

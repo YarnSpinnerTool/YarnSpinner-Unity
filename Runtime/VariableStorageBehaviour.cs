@@ -3,24 +3,27 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
 using UnityEngine;
-
+using BoolDictionary = System.Collections.Generic.Dictionary<string, bool>;
 using FloatDictionary = System.Collections.Generic.Dictionary<string, float>;
 using StringDictionary = System.Collections.Generic.Dictionary<string, string>;
-using BoolDictionary = System.Collections.Generic.Dictionary<string, bool>;
 
 namespace Yarn.Unity
 {
     /// <summary>
-    /// A <see cref="MonoBehaviour"/> that a <see cref="DialogueRunner"/>
-    /// uses to store and retrieve variables.
+    /// A <see cref="MonoBehaviour"/> that a <see cref="DialogueRunner"/> uses
+    /// to store and retrieve variables.
     /// </summary>
     /// <remarks>
-    /// This abstract class inherits from <see cref="MonoBehaviour"/>,
-    /// which means that subclasses of this class can be attached to <see
+    /// This abstract class inherits from <see cref="MonoBehaviour"/>, which
+    /// means that subclasses of this class can be attached to <see
     /// cref="GameObject"/>s.
     /// </remarks>
     public abstract class VariableStorageBehaviour : MonoBehaviour, Yarn.IVariableStorage
     {
+        public Program Program { get; set; }
+
+        public ISmartVariableEvaluator SmartVariableEvaluator { get; set; }
+
         /// <inheritdoc/>
         public abstract bool TryGetValue<T>(string variableName, out T result);
 
@@ -51,15 +54,27 @@ namespace Yarn.Unity
         /// Provides a unified interface for loading many variables all at once.
         /// Will override anything already in the variable storage.
         /// </summary>
-        /// <param name="clear">Should the load also wipe the storage.
-        /// Defaults to true so all existing variables will be cleared.
+        /// <param name="clear">Should the load also wipe the storage. Defaults
+        /// to true so all existing variables will be cleared.
         /// </param>
         public abstract void SetAllVariables(FloatDictionary floats, StringDictionary strings, BoolDictionary bools, bool clear = true);
 
         /// <summary>
-        /// Provides a unified interface for exporting all variables.
-        /// Intended to be a point for custom saving, editors, etc.
+        /// Provides a unified interface for exporting all variables. Intended
+        /// to be a point for custom saving, editors, etc.
         /// </summary>
         public abstract (FloatDictionary FloatVariables, StringDictionary StringVariables, BoolDictionary BoolVariables) GetAllVariables();
+
+        public VariableKind GetVariableKind(string name)
+        {
+            if (this.Contains(name))
+            {
+                return VariableKind.Stored;
+            }
+            else
+            {
+                return Program.GetVariableKind(name);
+            }
+        }
     }
 }

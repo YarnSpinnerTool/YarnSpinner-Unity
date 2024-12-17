@@ -14,53 +14,8 @@ ScriptedImporter:
   assetBundleName: 
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 053561912b1654d80a424bb0696a74ae, type: 3}
-  sourceScripts:
-  - {fileID: 4900000, guid: 40a60c3c28a91d34bbf2088bb0d2824a, type: 3}
-  - {fileID: 6391573757903218779, guid: 74180fb8dc9ae4d99b133006b66dbf69, type: 3}
-  compileErrors: []
-  serializedDeclarations:
-  - name: $laps
-    typeName: Number
-    defaultValueBool: 0
-    defaultValueNumber: 0
-    defaultValueString: 
-    description: How many laps Jane has walked
-    isImplicit: 0
-    sourceYarnAsset: {instanceID: 0}
-  - name: $float
-    typeName: Number
-    defaultValueBool: 0
-    defaultValueNumber: 1
-    defaultValueString: 
-    description: 
-    isImplicit: 0
-    sourceYarnAsset: {fileID: 4900000, guid: 40a60c3c28a91d34bbf2088bb0d2824a, type: 3}
-  - name: $string
-    typeName: String
-    defaultValueBool: 0
-    defaultValueNumber: 0
-    defaultValueString: this is a string
-    description: 
-    isImplicit: 0
-    sourceYarnAsset: {fileID: 4900000, guid: 40a60c3c28a91d34bbf2088bb0d2824a, type: 3}
-  - name: $bool
-    typeName: Bool
-    defaultValueBool: 1
-    defaultValueNumber: 0
-    defaultValueString: 
-    description: 
-    isImplicit: 0
-    sourceYarnAsset: {fileID: 4900000, guid: 40a60c3c28a91d34bbf2088bb0d2824a, type: 3}
-  - name: $true
-    typeName: Bool
-    defaultValueBool: 0
-    defaultValueNumber: 0
-    defaultValueString: 
-    description: Implicitly declared in DialogueRunnerTest.yarn, node LotsOfVars
-    isImplicit: 1
-    sourceYarnAsset: {fileID: 4900000, guid: 40a60c3c28a91d34bbf2088bb0d2824a, type: 3}
-  defaultLanguage: en-AU
-  languagesToSourceAssets: []
+  generateVariablesSourceFile: 0
+  variablesClassName: YarnVariables
+  variablesClassNamespace: 
+  variablesClassParent: Yarn.Unity.InMemoryVariableStorage
   useAddressableAssets: 0
-  UseUnityLocalisationSystem: 0
-  unityLocalisationStringTableCollection: {instanceID: 0}

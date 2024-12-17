@@ -25,7 +25,7 @@ namespace Yarn.Unity
             //
             // There are some edge cases this won't detect, but will work well
             // enough.
-            if (UnityEngine.Rendering.GraphicsSettings.renderPipelineAsset)
+            if (UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline)
             {
                 Debug.LogWarning("These samples were created using the built in render pipeline, things will not appear correctly. You should upgrade the materials to be compatible.");
             }

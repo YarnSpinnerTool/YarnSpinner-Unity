@@ -6,7 +6,9 @@
         "Unity.Addressables",
         "Unity.ResourceManager",
         "Unity.InputSystem",
-        "Unity.Localization"
+        "Unity.Localization",
+        "UniTask",
+        "UniTask.Addressables"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -56,6 +58,11 @@
             "name": "com.unity.textmeshpro",
             "expression": "1.0.0",
             "define": "USE_TMP"
+        },
+        {
+            "name": "com.cysharp.unitask",
+            "expression": "1.0.0",
+            "define": "USE_UNITASK"
         }
     ],
     "noEngineReferences": false

@@ -4,14 +4,18 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 namespace Yarn.Unity.Editor
 {
-    using UnityEngine;
     using UnityEditor;
+    using UnityEngine;
     using UnityEngine.EventSystems;
     using Yarn.Unity;
 
+    /// <summary>
+    /// Adds a menu item to the menu bar for creating an instance of the
+    /// dialogue runner prefab.
+    /// </summary>
     public static class CreateDialogueRunnerMenuItem
     {
-        const string DialogueRunnerPrefabGUID = "7f29e5f7ffdea4a6793cefb278b61f0c";
+        const string DialogueRunnerPrefabGUID = "52571f68872914e24837210513edea1d";
 
         /// <summary>
         /// Instantiates the Dialogue System prefab in the currently active scene,
@@ -21,7 +25,7 @@ namespace Yarn.Unity.Editor
         /// <exception cref="System.InvalidOperationException">Thrown when the
         /// Dialogue System prefab cannot be found in the Yarn Spinner
         /// package.</exception>
-        [MenuItem("GameObject/Yarn Spinner/Dialogue Runner", priority = 1)]
+        [MenuItem("GameObject/Yarn Spinner/Dialogue Runner", priority = 11)]
         public static DialogueRunner CreateDialogueRunner()
         {
 

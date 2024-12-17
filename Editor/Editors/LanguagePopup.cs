@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using UnityEngine;
+using UnityEditor.UIElements;
 using UnityEngine.UIElements;
-
 #nullable enable
 
 namespace Yarn.Unity.Editor

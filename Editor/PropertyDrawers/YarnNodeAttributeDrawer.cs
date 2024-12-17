@@ -2,8 +2,8 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace Yarn.Unity
 {
@@ -31,32 +31,41 @@ namespace Yarn.Unity
             var attribute = this.attribute as YarnNodeAttribute;
             var propertyPathComponents = new System.Collections.Generic.Stack<string>(property.propertyPath.Split('.'));
 
-            while (true) {
+            while (true)
+            {
                 string testPath;
 
-                if (propertyPathComponents.Count == 0) {
+                if (propertyPathComponents.Count == 0)
+                {
                     testPath = attribute.yarnProjectAttribute;
-                } else {
+                }
+                else
+                {
                     var components = new System.Collections.Generic.List<string>(propertyPathComponents);
                     components.Reverse();
-                    
+
                     testPath = string.Join(".", components) + "." + attribute.yarnProjectAttribute;
                 }
 
                 projectProp = property.serializedObject.FindProperty(testPath);
 
-                if (projectProp != null) {
+                if (projectProp != null)
+                {
                     break;
                 }
 
-                if (propertyPathComponents.Count > 0) {
+                if (propertyPathComponents.Count > 0)
+                {
                     propertyPathComponents.Pop();
-                } else {
+                }
+                else
+                {
                     break;
                 }
             }
 
-            if (projectProp == null) {
+            if (projectProp == null)
+            {
                 EditorGUI.HelpBox(position, $"{attribute.yarnProjectAttribute} does not exist on {property.serializedObject.targetObject.name}", MessageType.Error);
                 return;
             }
@@ -70,11 +79,11 @@ namespace Yarn.Unity
             EditorGUI.indentLevel = 0;
 
             var nodeNameFieldPosition = position;
-            
+
             var project = projectProp.hasMultipleDifferentValues ? null : projectProp.objectReferenceValue as YarnProject;
 
             // -- Node name drop down
-            
+
             // If we want to edit this nodes name as a text field, or if we have
             // multiple values, show a text field and not a dropdown.
             if (editNodeAsText || projectProp.hasMultipleDifferentValues)
@@ -86,15 +95,17 @@ namespace Yarn.Unity
                 // the mixed value dash (—).
                 GUI.SetNextControlName(controlName);
 
-                using (var change = new EditorGUI.ChangeCheckScope()) {
+                using (var change = new EditorGUI.ChangeCheckScope())
+                {
                     var currentText = property.hasMultipleDifferentValues ? "-" : property.stringValue;
                     currentText = EditorGUI.TextField(nodeNameFieldPosition, currentText);
-                    if (change.changed) {
+                    if (change.changed)
+                    {
                         property.stringValue = currentText;
                         property.serializedObject.ApplyModifiedProperties();
                     }
                 }
-                
+
                 if (editNodeAsText)
                 {
                     if (focusNodeTextField)
@@ -216,6 +227,12 @@ namespace Yarn.Unity
 
                         foreach (var name in project.Program.Nodes.Keys)
                         {
+                            if (name.StartsWith("$"))
+                            {
+                                // Skip smart variable nodes
+                                continue;
+                            }
+
                             menu.AddItem(new GUIContent(name), name == nodeName && !hasMixedNodeValues, () =>
                             {
                                 property.stringValue = name;

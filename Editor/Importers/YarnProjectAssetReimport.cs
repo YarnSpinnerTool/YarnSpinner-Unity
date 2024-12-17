@@ -4,12 +4,14 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 namespace Yarn.Unity.Editor
 {
-    using UnityEngine;
-    using UnityEditor;
     using System.Collections.Generic;
-    
+    using UnityEditor;
+    using UnityEngine;
+
     /// <summary>
-    /// An asset post processor that forwards any asset database changes to all YarnProjectImporter for them to verify if they need to update their locale assets.
+    /// An asset post processor that forwards any asset database changes to all
+    /// YarnProjectImporter for them to verify if they need to update their
+    /// locale assets.
     /// </summary>
     class YarnProjectAssetReimport : AssetPostprocessor
     {

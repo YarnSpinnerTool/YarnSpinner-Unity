@@ -1,0 +1,93 @@
+﻿title: Barry
+when: once
+---
+// This node can only ever be run once, and this is the only content for this
+// character. The game won't show the 'interactable' indicator if the character
+// has no content available.
+Barry: Hi, I'm Barry! You can only talk to me this one time!
+===
+title: Larry
+---
+<<once>>
+    // Greet the player the first time.
+    Larry: Hi, I'm Larry! You can talk to me several times!
+<<endonce>>
+
+/// The number of times we have turned the switch on or off.
+<<declare $times_interacted_with_switch = 0 as number>>
+
+/// Whether the switch is currently turned on or off.
+<<declare $switch_on = false as bool>>
+
+<<if $switch_on>>
+    <<once>>
+        // Directly thank the player the first time
+        Larry: Hey, thanks for turning that switch on for me!
+    <<else>>
+        // Run general 'you did it' barks in other circumstances.
+        => Larry: Sure is nice having that switch on!
+        => Larry: Being on is a great thing for a switch to be!
+        => Larry: Wow! Never knew how good a switch being turned on was.
+    <<endonce>>
+<<elseif $times_interacted_with_switch > 0 and not $switch_on>>
+    // We've turned the switch on in the past, but it's not on now. Complain
+    // about it.
+    => Larry: Don't be a jerk! Turn that switch back on!
+    => Larry: Hey! Can you turn that switch back on?
+    => Larry: Aw, I loved it when the switch was on.
+<<else>>
+    // The switch isn't on.
+    <<once if $times_interacted_with_switch == 0>>
+        // We haven't turned the switch on before, so be really direct about it
+        Larry: Hey, can you turn that switch on for me?
+    <<else>>
+        // Be a bit more passive-aggressive about it the rest of the time.
+        => Larry: Sure wish someone would turn that switch on.
+        => Larry: Man, how amazing would it be for that switch to be on...
+        => Larry: My only dream is for the switch to be on...
+    <<endonce>>
+<<endif>>
+===
+title: Switch
+---
+// Toggle the switch on or off.
+<<set $switch_on = !$switch_on>>
+
+// Increment the number of times we've interacted with it.
+<<set $times_interacted_with_switch += 1>>
+
+// Play an animation that shows the switch turning on or off.
+<<if $switch_on>>
+    <<turn_on Switch>>
+<<else>>
+    <<turn_off Switch>>
+<<endif>>
+===
+title: Garry
+---
+
+
+Garry: Emotions test!
+
+<<face Garry smile>>
+Garry: Smiling!
+
+<<face Garry frown>>
+Garry: Frowning!
+
+<<face Garry neutral>>
+Garry: Neutral!
+
+Garry: Let's try animating it!
+
+<<face Garry smile 0.2>>
+Garry: Smiling!
+
+<<face Garry frown 0.2>>
+Garry: Frowning!
+
+<<face Garry neutral 0.2>>
+Garry: Neutral!
+
+
+===

@@ -4,13 +4,59 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [3.0.0-beta1] 2024-11-30
 
 ### Added
 
+- Updated voiceover and translation credits for the Intro sample scene.
+- Added shadow line support to BuiltInLineProvider.
+- Added support for generating C# variable storage classes that expose properties for string, number and boolean variables found in a Yarn Project.
+- `YarnCommand` methods may now use `params` array parameters.
+- Asynchronous Default View and Prefab:
+  - `AsyncLineView` is intended as a full replacement for `LineView`.
+  - `AsyncOptionsView` is intended as a full replacement for `OptionsListView`.
+  - `AsyncOptionItem` is intended as a full replacement for `OptionView`.
+  - `LineAdvancer` is a replacement for `DialogueAdvanceInput`.
+  - `Async Dialogue System` prefab is intended as a full replacement for `Dialogue System` prefab.
+- New approach to handling replacement markup:
+  - `AttributeMarkerProcessor` defines the required fields and methods to create replacement markup processors.
+  - `PaletteMarkerProcessor` implements `MarkupPalletes` replacement.
+  - `StyleMarkerProcessor` implements TMP style tag replacement.
+- New approach to handling display-time markup:
+  - `TemporalMarkupHandler` defines the required fields and methods to create markup handlers.
+  - Typewriter is now implemented as a markup handler inside `TypewriterHandler`.
+- `LineCancellationToken` is a combination of two cancellation tokens
+  - this allows for the highly common model of asking a line to hurry up vs skip
+  - New method `HurryUpCurrentLine` on `DialogueRunner` is how to trigger this.
+- Async form of `FadeAlpha` added to `Effects`.
+- Cancellable `Delay` added to `AsyncHelpers`.
+- Cancellable `WaitUntil` that uses a predicate added to `AsyncHelpers`.
+- Localization assets can now be created as external assets, and provided to the Yarn Project importer.
+  - This can be useful if you need to edit the contents of your Localization assets, rather than letting Yarn Spinner create and manage them for you.
+- You can now create a new Dialogue View script by opening Assets -> Create -> Yarn Spinner -> Dialogue View Script. This will create a new C# file that contains an empty template for building your own Dialogue View.
+
 ### Changed
 
+- Line Providers are now responsible for performing markup parsing
+  - for the most part this will done by calling `Yarn.Markup.LineParser.ExpandSubstitutions`.
+  - Built in and Unity Loc line providers now handle this for you.
+- `MarkupPallete` now supports more than just colour.
+- Dialogue Runner's "Start Automatically" option now defaults to off, not on.
+- Dialogue Runner's "On Command" event has been renamed to "On Unhandled Command", to better reflect when it's called.
+- `DialogueViewBase` is now deprecated. New Dialogue Views should subclass `AsyncDialogueView`.
+  - The `DialogueViewBase` class now acts as a compatibility layer for the new
+    async dialogue view system, and should not be used in new code.
+- If a Line Provider fails to return a valid line, the Dialogue Runner will send the Dialogue Views an 'Invalid Line' line, rather than skipping over it completely.
+- `InMemoryVariableStorage`'s `debugTextView` property is now a TextMeshPro text field, rather than a legacy Text field.
+
 ### Removed
+
+- Remove certain items that were previously marked as obsolete:
+  - Obsolete method `DialogueRunner.ResetDialogue`
+  - Obsolete property `YarnFunctionAttribute.FunctionName`
+  - Obsolete property `YarnCommandAttribute.CommandString`
+  - Obsolete method `YarnProject.GetProgram`
+- `ViewBehaviour` enum inside of `AsyncDialogueViewBase`.
 
 ## [2.5.1] 2024-12-17
 
@@ -100,6 +146,9 @@ No changes between this version and v2.5.0; this release fixes an issue related 
   - Obsolete property `YarnFunctionAttribute.FunctionName`
   - Obsolete property `YarnCommandAttribute.CommandString`
   - Obsolete method `YarnProject.GetProgram`
+- Removed `YarnParameterAttribute` and `YarnStateInjectorAttribute`.
+  - These attributes were formerly used in earlier versions of Yarn Spinner's
+    action system, but are no longer used.
 
 ## [2.4.1] 2024-01-30
 
@@ -260,7 +309,7 @@ No changes between this version and v2.5.0; this release fixes an issue related 
   
     This is a change from previous versions of Yarn Spinner for Unity, which searched for commands and functions at run-time, which had performance and compatibility implications on certain platforms (notably, consoles).
     
-    This search is done automatically in Unity 2021.2 and later. In earlier versions of Unity, you will need to manually tell Yarn Spinner for Unity to check your code, by opening the Window menu and choosing Yarn Spinner -> Update Yarn Commands.
+    This search is done automatically in Unity 2021.2 and later. In earlier versions of Unity, you will need to manually tell Yarn Spinner for Unity to check your code, by opening the Window menu and choosing Yarn Spinner -> \mands.
 - In Unity 2021.2 and later, you can now see which commands have been registered using `YarnCommand` by opening the Window menu and choosing Yarn Spinner -> Commands...
 - `DialogueReference` objects can now be implicitly converted to `string`s.
 - The `YarnNode` attribute can be attached to a `string` property to turn it into a drop-down menu for choosing nodes in a Yarn Project.

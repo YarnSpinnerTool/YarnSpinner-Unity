@@ -2,17 +2,18 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using System.Collections;
-using System.Linq;
-using System.IO;
 using NUnit.Framework;
+using System.Collections;
+using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 using Yarn.Unity;
 
-#pragma warning disable CS0618 // 'member' is obsolete (done to prevent 'DialogueUI is obsolete' messages in Unity - these are valid messages, but it's not useful to warn the Unity developer about code they can't modify)
+#nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 namespace Yarn.Unity.Tests
 {
@@ -28,13 +29,13 @@ namespace Yarn.Unity.Tests
             RuntimeTestUtility.RemoveSceneFromBuild(VariableStorageTestsSceneGUID);
         }
 
-        const string VariableStorageTestsSceneGUID = "5b5f09716ba7bce4a8d2f115ea6083d3"; 
+        const string VariableStorageTestsSceneGUID = "5b5f09716ba7bce4a8d2f115ea6083d3";
 
         // Getters for the various components in the scene that we're
         // working with
-        DialogueRunner Runner => GameObject.FindObjectOfType<DialogueRunner>();
-        LineView UI => GameObject.FindObjectOfType<LineView>();
-        InMemoryVariableStorage VarStorage => GameObject.FindObjectOfType<InMemoryVariableStorage>();
+        DialogueRunner Runner => GameObject.FindAnyObjectByType<DialogueRunner>();
+        LineView UI => GameObject.FindAnyObjectByType<LineView>();
+        InMemoryVariableStorage VarStorage => GameObject.FindAnyObjectByType<InMemoryVariableStorage>();
         TMPro.TextMeshProUGUI TextCanvas => UI.lineText;
 
         [UnitySetUp]
@@ -74,17 +75,20 @@ namespace Yarn.Unity.Tests
             Assert.AreEqual(stringTest, actualUndeclaredResult);
         }
 
-        void TestClearVarStorage() {
+        void TestClearVarStorage()
+        {
             VarStorage.Clear();
             int varCount = 0;
-            foreach ( var variable in VarStorage ) {
+            foreach (var variable in VarStorage)
+            {
                 varCount++;
             }
-            Assert.AreEqual(0,varCount);
+            Assert.AreEqual(0, varCount);
         }
 
         [UnityTest]
-        public IEnumerator TestVariableValuesFromYarnScript() {
+        public IEnumerator TestVariableValuesFromYarnScript()
+        {
             // run all lines
             Runner.StartDialogue(Runner.startNode);
             yield return null;
@@ -109,23 +113,8 @@ namespace Yarn.Unity.Tests
             TestVariableValuesFromYarnScript();
         }
 
-        string testFilePath { get { return System.IO.Path.Combine(Application.persistentDataPath, "YarnVariableStorageTest.json"); }}
-        [UnityTest]
-        public IEnumerator TestSavingAndLoadingFile_PlayerPrefs()
-        {
-            // run all lines
-            Runner.StartDialogue(Runner.startNode);
-            yield return null;
+        string testFilePath { get { return System.IO.Path.Combine(Application.persistentDataPath, "YarnVariableStorageTest.json"); } }
 
-            // save all variable values to a file, clear, then load from a file
-            Runner.SaveStateToPlayerPrefs();
-            TestClearVarStorage();
-            Runner.LoadStateFromPlayerPrefs();
-            TestVariableValuesFromYarnScript();
-
-            // cleanup
-            PlayerPrefs.DeleteKey("YarnBasicSave");
-        }
         [UnityTest]
         public IEnumerator TestSavingAndLoadingFile()
         {
@@ -162,16 +151,19 @@ namespace Yarn.Unity.Tests
         }
 
         [Test]
-        public void VariableStorage_OnUsingValueWithInvalidName_ThrowsError() {
+        public void VariableStorage_OnUsingValueWithInvalidName_ThrowsError()
+        {
             VarStorage.SetValue("$valid", 1);
 
-            Assert.Throws<System.ArgumentException>(() => {
+            Assert.Throws<System.ArgumentException>(() =>
+            {
                 VarStorage.SetValue("invalid", 1);
             });
 
             VarStorage.TryGetValue<float>("$valid", out var result1);
 
-            Assert.Throws<System.ArgumentException>(() => {
+            Assert.Throws<System.ArgumentException>(() =>
+            {
                 VarStorage.TryGetValue<float>("invalid", out var result2);
             });
 

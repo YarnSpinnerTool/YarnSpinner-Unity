@@ -3,45 +3,25 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
 using System;
+using System.Threading;
 using UnityEngine;
+
+#nullable enable
 
 namespace Yarn.Unity
 {
     /// <summary>
-    /// A <see cref="MonoBehaviour"/> that can present lines and options to the
-    /// user, when it receives them from a  <see cref="DialogueRunner"/>.
+    /// Implements the Yarn Spinner 2 callback-based API for dialogue views
+    /// using Yarn Spinner 3.
     /// </summary>
     /// <remarks>
-    /// <para>When the Dialogue Runner encounters content that the user should
-    /// see - that is, lines or options - it sends that content to all of the
-    /// dialogue views stored in <see cref="DialogueRunner.dialogueViews"/>. The
-    /// Dialogue Runner then waits until all Dialogue Views have reported that
-    /// they have finished presenting the content.</para>
-    /// <para>
-    /// To use this class, subclass it, and override its methods. Some of the
-    /// more common methods you may wish to override are: <see cref="RunLine"/>,
-    /// <see cref="InterruptLine"/>, <see cref="DismissLine"/> and <see
-    /// cref="RunOptions"/>. 
-    /// </para>
-    /// <para>Once you have written your subclass, attach it as a component to a
-    /// <see cref="GameObject"/>, and add this game object to the list of
-    /// Dialogue Views in your scene's <see cref="DialogueRunner"/>.
-    /// </para>
-    /// <para>Dialogue Views do not need to handle every kind of content that
-    /// the Dialogue Runner might produce. For example, you might have one
-    /// Dialogue View that handles Lines, and another that handles Options. The
-    /// built-in <see cref="LineView"/> class is an example of this, in that it
-    /// only handles Lines and does nothing when it receives Options.</para>
-    /// <para>
-    /// You may also have multiple Dialogue Views that handle the <i>same</i>
-    /// kind of content. For example, you may have a Dialogue View that receives
-    /// Lines and uses them to play voice-over audio, and a second Dialogue View
-    /// that also receives Lines and uses them to display on-screen subtitles.
-    /// </para>
+    /// You should not use this class in new code. It exists to provide a
+    /// compatibility layer for existing Yarn Spinner dialogue views. New
+    /// dialogue views should subclass <see cref="AsyncDialogueViewBase"/>
+    /// directly.
     /// </remarks>
-    /// <seealso cref="LineProviderBehaviour"/>
-    /// <seealso cref="DialogueRunner.dialogueViews"/>
-    public abstract class DialogueViewBase : MonoBehaviour
+    [Obsolete("Use " + nameof(AsyncDialogueViewBase))]
+    public abstract class DialogueViewBase : AsyncDialogueViewBase
     {
         /// <summary>
         /// Represents the method that should be called when this view wants the
@@ -257,16 +237,16 @@ namespace Yarn.Unity
         /// appropriate user interface elements that let the user choose among
         /// the options.</para>
         /// <para>After this method is called, the <see cref="DialogueRunner"/>
-        /// will wait until the <see cref="onOptionSelected"/> method is
+        /// will wait until the <paramref name="onOptionSelected"/> method is
         /// called.</para>
-        /// <para>After calling the <see cref="onOptionSelected"/> method, the
+        /// <para>After calling the <paramref name="onOptionSelected"/> method, the
         /// Dialogue View should dismiss whatever options UI it presented. The
         /// Dialogue Runner will immediately deliver the next piece of content.
         /// </para>
         ///
         /// <para style="warning">When the Dialogue Runner delivers Options to
         /// its Dialogue Views, it expects precisely one of its views to call
-        /// the <see cref="onOptionSelected"/>.
+        /// the <paramref name="onOptionSelected"/> method.
         /// <list type="bullet">
         /// <item>
         /// If your scene includes <b>no</b> dialogue views that override <see
@@ -366,6 +346,112 @@ namespace Yarn.Unity
         public virtual void UserRequestedViewAdvancement()
         {
             // default implementation does nothing
+        }
+
+        /// <inheritdoc/>
+        public override YarnTask OnDialogueStartedAsync()
+        {
+            // Invoke the synchronous version of 'dialogue started'
+            this.DialogueStarted();
+            return YarnTask.CompletedTask;
+        }
+
+        /// <inheritdoc/>
+        public override YarnTask OnDialogueCompleteAsync()
+        {
+            // Invoke the synchronous version of 'dialogue started'
+            this.DialogueComplete();
+            return YarnTask.CompletedTask;
+        }
+
+        // This method implements the v3 async pattern for dialogue views on top
+        // of the v2 API.
+        /// <inheritdoc/>
+        public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
+        {
+            // phaseComplete is a flag that represents whether the current
+            // 'phase' of a v2-style dialogue view (Run, Interrupt, Dismiss) is
+            // complete or not.
+            bool phaseComplete = false;
+            void PhaseComplete() => phaseComplete = true;
+
+            // Run the line, and make phaseComplete become true when it's done.
+            this.RunLine(line, PhaseComplete);
+
+            // Wait for one of the following things to happen:
+            // 1. RunLine completes successfully and calls PhaseComplete.
+            // 2. The line is cancelled.
+            while (phaseComplete == false
+                   && token.IsNextLineRequested == false
+                   && Application.exitCancellationToken.IsCancellationRequested == false)
+            {
+                await YarnTask.Yield();
+            }
+
+            // If the line was cancelled, tell the view that the line was
+            // 'interrupted' and should finish presenting quickly. Wait for the
+            // phase to complete.
+            if (token.IsNextLineRequested)
+            {
+                phaseComplete = false;
+                this.InterruptLine(line, PhaseComplete);
+                while (phaseComplete == false
+                  && Application.exitCancellationToken.IsCancellationRequested == false)
+                {
+                    await YarnTask.Yield();
+                }
+            }
+
+            // Finally, signal that the line should be dismissed, and wait for
+            // the dismissal to complete.
+            phaseComplete = false;
+            this.DismissLine(PhaseComplete);
+
+            while (phaseComplete == false
+                  && Application.exitCancellationToken.IsCancellationRequested == false)
+            {
+                await YarnTask.Yield();
+            }
+        }
+
+        // This method implements the v3 async pattern for dialogue views on top
+        // of the v2 API.
+        /// <inheritdoc/>
+        public override async YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        {
+            int selectedOptionID = -1;
+
+            // Run the options, and wait for either a selection to be made, or
+            // for this view to be cancelled.
+            this.RunOptions(dialogueOptions, (selectedID) =>
+            {
+                selectedOptionID = selectedID;
+            });
+
+            while (selectedOptionID == -1 && cancellationToken.IsCancellationRequested == false && Application.exitCancellationToken.IsCancellationRequested == false)
+            {
+                await YarnTask.Yield();
+            }
+
+            if (cancellationToken.IsCancellationRequested || Application.exitCancellationToken.IsCancellationRequested)
+            {
+                // We were cancelled or are exiting the game. Return null.
+                return null;
+            }
+
+            // Find the option that has the same ID as the one that was
+            // selected, and return that.
+            for (int i = 0; i < dialogueOptions.Length; i++)
+            {
+                if (dialogueOptions[i].DialogueOptionID == selectedOptionID)
+                {
+                    return dialogueOptions[i];
+                }
+            }
+
+            // If we got here, we weren't cancelled, but we also didn't select
+            // an option that was valid. Throw an error.
+            throw new InvalidOperationException($"Option view selected an invalid option ID ({selectedOptionID})");
         }
     }
 }

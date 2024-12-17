@@ -1,9 +1,13 @@
 {
-  "projectFileVersion": 2,
+  "projectFileVersion": 3,
   "sourceFiles": [
     "**/*.yarn"
   ],
-  "localisation": {},
-  "baseLanguage": "en",
-  "compilerOptions": {}
+  "excludeFiles": [],
+  "localisation": {
+    "en": {
+      "assets": "Voiceover_en"
+    }
+  },
+  "baseLanguage": "en"
 }

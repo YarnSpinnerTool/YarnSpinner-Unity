@@ -14,24 +14,84 @@ using Yarn.Unity.ActionAnalyser;
 using YarnAction = Yarn.Unity.ActionAnalyser.Action;
 using System.IO;
 
+#nullable enable
+
+
+
 [Generator]
 public class ActionRegistrationSourceGenerator : ISourceGenerator
 {
     const string YarnSpinnerUnityAssemblyName = "YarnSpinner.Unity";
     const string DebugLoggingPreprocessorSymbol = "YARN_SOURCE_GENERATION_DEBUG_LOGGING";
+    const string MinimumUnityVersionPreprocessorSymbol = "UNITY_2021_2_OR_NEWER";
+
+    public static string? GetProjectRoot(GeneratorExecutionContext context)
+    {
+        // Try and find any additional files passed to the context
+        if (!context.AdditionalFiles.Any())
+        {
+            return null;
+        }
+
+        // One of those files is (AssemblyName).[Unity]AdditionalFile.txt, and it
+        // contains the path to the project
+        var relevantFiles = context.AdditionalFiles.Where(
+            i => i.Path.Contains($"{context.Compilation.AssemblyName}.AdditionalFile.txt")
+                || i.Path.Contains($"{context.Compilation.AssemblyName}.UnityAdditionalFile.txt")
+        );
+
+        if (!relevantFiles.Any())
+        {
+            return null;
+        }
+
+        var assemblyRelevantFile = relevantFiles.First();
+
+        // The file needs to exist on disk
+        if (!File.Exists(assemblyRelevantFile.Path))
+        {
+            return null;
+        }
+
+        try
+        {
+            // Attempt to read it - it should contain the path to the project directory
+            var projectPath = File.ReadAllText(assemblyRelevantFile.Path);
+            if (Directory.Exists(projectPath))
+            {
+                // If this directory exists, we're done
+                return projectPath;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        catch (IOException)
+        {
+            // We encountered a problem while testing
+            return null;
+        }
+    }
 
     public void Execute(GeneratorExecutionContext context)
     {
-        var output = GetOutput(context);
+        using var output = GetOutput(context);
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+
         output.WriteLine(DateTime.Now);
 
-        // we need to know if the settings are configured to not perform codegen to link attributed methods
-        // this is kinda annoying because the path root of the project settings and the root path of this process are *very* different
-        // so what we do is we use the included Compilation Assembly additional file that Unity gives us.
-        // This file if opened has the path of the Unity project, which we can then use to get the settings
-        // if any stage of this fails then we bail out and assume that codegen is desired
-        string projectPath = null;
-        Yarn.Unity.Editor.YarnSpinnerProjectSettings settings = null;
+        // We need to know if the settings are configured to not perform codegen
+        // to link attributed methods. This is kinda annoying because the path
+        // root of the project settings and the root path of this process are
+        // *very* different. So, what we do is we use the included Compilation
+        // Assembly additional file that Unity gives us. This file, if opened,
+        // has the path of the Unity project, which we can then use to get the
+        // settings. If any stage of this fails, then we bail out and assume
+        // that codegen is desired.
+        string? projectPath = null;
+        Yarn.Unity.Editor.YarnSpinnerProjectSettings? settings = null;
         if (context.AdditionalFiles.Any())
         {
             var relevants = context.AdditionalFiles.Where(i => i.Path.Contains($"{context.Compilation.AssemblyName}.AdditionalFile.txt"));
@@ -50,7 +110,6 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                         if (!settings.automaticallyLinkAttributedYarnCommandsAndFunctions)
                         {
                             output.WriteLine("Skipping codegen due to settings.");
-                            output.Dispose();
                             return;
                         }
                     }
@@ -105,6 +164,23 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 return;
             }
 
+            output.WriteLine("Preprocessor Symbols: ");
+            foreach (var symbol in context.ParseOptions.PreprocessorSymbolNames)
+            {
+                output.WriteLine("- " + symbol);
+            }
+
+            // Don't generate source code if we're not targeting at least Unity
+            // 2021.2. (Unity will not invoke this DLL as a source code
+            // generator until at least this version, but other tools like
+            // OmniSharp might.)
+            if (!context.ParseOptions.PreprocessorSymbolNames.Contains(MinimumUnityVersionPreprocessorSymbol))
+            {
+                output.WriteLine($"Not generating code for assembly {context.Compilation.AssemblyName} because this assembly is not being built for Unity 2021.2 or newer");
+                return;
+            }
+
+
             // Don't generate source code for certain Yarn Spinner provided
             // assemblies - these always manually register any actions in them.
             var prefixesToIgnore = new List<string>()
@@ -113,13 +189,23 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 "YarnSpinner.Editor",
             };
 
-            foreach (var prefix in prefixesToIgnore)
+            // But DO generate source code for the Samples assembly.
+            var prefixesToKeep = new List<string>()
             {
-                if (context.Compilation.AssemblyName.StartsWith(prefix))
-                {
-                    output.WriteLine($"Not generating registration code for {context.Compilation.AssemblyName}: we've been told to exclude it, because its name begins with one of these prefixes: {string.Join(", ", prefixesToIgnore)}");
-                    return;
-                }
+                "YarnSpinner.Unity.Samples",
+            };
+
+            if (context.Compilation.AssemblyName == null)
+            {
+                output.WriteLine("Not generating registration code, because the provided AssemblyName is null");
+                return;
+            }
+
+            if (prefixesToIgnore.Any(prefix => context.Compilation.AssemblyName.StartsWith(prefix)) && !prefixesToKeep.Any(prefix => context.Compilation.AssemblyName.StartsWith(prefix)))
+            {
+                output.WriteLine($"Not generating registration code for {context.Compilation.AssemblyName}: we've been told to exclude it, because its name begins with one of these prefixes: {string.Join(", ", prefixesToIgnore)}");
+                return;
+
             }
 
             if (!(context.Compilation is CSharpCompilation compilation))
@@ -141,6 +227,8 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 return;
             }
 
+
+
             HashSet<string> removals = new HashSet<string>();
             // validating and logging all the actions
             foreach (var action in actions)
@@ -151,26 +239,15 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                     continue;
                 }
 
-                // if an action isn't public we will log a warning
-                // and then later we will also skip it
-                if (action.MethodSymbol.DeclaredAccessibility != Accessibility.Public)
+                var diagnostics = action.Validate(compilation);
+                foreach (var diagnostic in diagnostics)
                 {
-                    var descriptor = new DiagnosticDescriptor(
-                        "YS1001",
-                        $"Yarn {action.Type} methods must be public",
-                        "YarnCommand and YarnFunction methods must be public. \"{0}\" is {1}.",
-                        "Yarn Spinner",
-                        DiagnosticSeverity.Warning,
-                        true,
-                        "[YarnCommand] and [YarnFunction] attributed methods must be public so that the codegen can reference them.",
-                        "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/creating-commands-functions");
-                    context.ReportDiagnostic(Microsoft.CodeAnalysis.Diagnostic.Create(
-                        descriptor,
-                        action.Declaration?.GetLocation(),
-                        action.MethodIdentifierName, action.MethodSymbol.DeclaredAccessibility
-                    ));
-                    output.WriteLine($"Action {action.Name} will be skipped due to it's declared accessibility {action.MethodSymbol.DeclaredAccessibility}");
-                    removals.Add(action.Name);
+                    context.ReportDiagnostic(diagnostic);
+                    output.WriteLine($"Skipping '{action.Name}' ({action.MethodName}): {diagnostic}");
+                }
+
+                if (diagnostics.Count > 0)
+                {
                     continue;
                 }
 
@@ -225,8 +302,8 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 {
                     output.Write($"Generating ysls...");
                     // generating the ysls
-                    YSLSGenerator generator = new YSLSGenerator();
-                    generator.logger = output;
+                    YSLSGenerator generator = new YSLSGenerator(output);
+
                     foreach (var action in actions)
                     {
                         generator.AddAction(action);
@@ -264,16 +341,14 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 output.WriteLine($"skipping ysls generation due to settings not being found");
             }
 
+            stopwatch.Stop();
+            output.WriteLine($"Source code generation completed in {stopwatch.Elapsed.TotalMilliseconds}ms");
             return;
 
         }
         catch (Exception e)
         {
             output.WriteLine($"{e}");
-        }
-        finally
-        {
-            output.Dispose();
         }
     }
 
@@ -475,9 +550,18 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
         context.RegisterForSyntaxNotifications(() => new ClassDeclarationSyntaxReceiver());
     }
 
-    static string TemporaryPath()
+    static string GetTemporaryPath(GeneratorExecutionContext context)
     {
-        var tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "dev.yarnspinner.logs");
+        string tempPath;
+        var rootPath = GetProjectRoot(context);
+        if (rootPath != null)
+        {
+            tempPath = Path.Combine(rootPath, "Logs", "Packages", "dev.yarnspinner.unity");
+        }
+        else
+        {
+            tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "dev.yarnspinner.logs");
+        }
 
         // we need to make the logs folder, but this can potentially fail
         // if it does fail then we will just chuck the logs inside the tmp folder
@@ -499,7 +583,7 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
     {
         if (GetShouldLogToFile(context))
         {
-            var tempPath = ActionRegistrationSourceGenerator.TemporaryPath();
+            var tempPath = ActionRegistrationSourceGenerator.GetTemporaryPath(context);
 
             var path = System.IO.Path.Combine(tempPath, $"{nameof(ActionRegistrationSourceGenerator)}-{context.Compilation.AssemblyName}.txt");
             var outFile = System.IO.File.Open(path, System.IO.FileMode.Create);
@@ -521,7 +605,7 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
     {
         if (GetShouldLogToFile(context))
         {
-            var tempPath = ActionRegistrationSourceGenerator.TemporaryPath();
+            var tempPath = ActionRegistrationSourceGenerator.GetTemporaryPath(context);
             var path = System.IO.Path.Combine(tempPath, $"{nameof(ActionRegistrationSourceGenerator)}-{context.Compilation.AssemblyName}.cs");
             System.IO.File.WriteAllText(path, text);
         }
@@ -544,6 +628,10 @@ internal class ClassDeclarationSyntaxReceiver : ISyntaxReceiver
 
 internal class YSLSGenerator
 {
+    public YSLSGenerator(Yarn.Unity.ILogger logger)
+    {
+        this.logger = logger;
+    }
     struct YarnActionParameter
     {
         internal string Name;

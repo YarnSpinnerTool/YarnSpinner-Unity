@@ -1,3 +1,5 @@
 id,file,node,lineNumber,metadata
-line:0967160,Packages/dev.yarnspinner.unity/Tests/Editor/TestYarnScript.yarn,Start,8,linemetadata lastline
-line:04e806e,Packages/dev.yarnspinner.unity/Tests/Editor/TestYarnScript.yarn,Start,9,linemetadata linemetadata2
+line:0967160,/Users/desplesda/Work/YarnSpinner-Unity/Packages/dev.yarnspinner.unity/Tests/Editor/Editor Test Resources/TestYarnScript.yarn,Start,8,linemetadata lastline
+line:04e806e,/Users/desplesda/Work/YarnSpinner-Unity/Packages/dev.yarnspinner.unity/Tests/Editor/Editor Test Resources/TestYarnScript.yarn,Start,9,linemetadata linemetadata2
+line:shadowsource,/Users/desplesda/Work/YarnSpinner-Unity/Packages/dev.yarnspinner.unity/Tests/Editor/Editor Test Resources/TestYarnScript.yarn,ShadowTest,22,meta1
+line:sh_2176ead6,/Users/desplesda/Work/YarnSpinner-Unity/Packages/dev.yarnspinner.unity/Tests/Editor/Editor Test Resources/TestYarnScript.yarn,ShadowTest,23,shadow:shadowsource meta2

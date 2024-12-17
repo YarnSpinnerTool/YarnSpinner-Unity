@@ -2,6 +2,8 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     public class DialogueOption
@@ -14,12 +16,12 @@ namespace Yarn.Unity
         /// <summary>
         /// The ID of the dialogue option's text
         /// </summary>
-        public string TextID;
+        public string TextID = "<unknown>";
 
         /// <summary>
         /// The line for this dialogue option
         /// </summary>
-        public LocalizedLine Line;
+        public LocalizedLine Line = LocalizedLine.InvalidLine;
 
         /// <summary>
         /// Indicates whether this value should be presented as available

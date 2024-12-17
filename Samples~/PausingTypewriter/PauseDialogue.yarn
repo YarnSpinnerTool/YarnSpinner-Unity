@@ -1,8 +1,0 @@
-﻿title: Start
----
-This is a line without a pause
-This is a line [pause /]with a propertyless pause
-This is a line [pause = 1100 /]with a one point one second pause
-This is a line [pause = 500 /]with two pauses[pause = 500 /] each half a second
-This is a line [pause = 500 /]with two pauses[pause = 2000 /] the second is two seconds long
-===

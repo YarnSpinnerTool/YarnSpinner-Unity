@@ -2,9 +2,10 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 using Yarn.Unity;
 
 namespace Yarn.Unity
@@ -28,10 +29,6 @@ namespace Yarn.Unity
     ///     System.Object value = variable.Value;
     /// }
     /// </code>
-    ///
-    /// <para>Note that as of v2.0, this class no longer uses Yarn.Value, to
-    /// enforce static typing of declared variables within the Yarn
-    /// Program.</para>
     /// </remarks>
     [HelpURL("https://yarnspinner.dev/docs/unity/components/variable-storage/")]
     public class InMemoryVariableStorage : VariableStorageBehaviour, IEnumerable<KeyValuePair<string, object>>
@@ -46,11 +43,11 @@ namespace Yarn.Unity
         [HideInInspector] public bool showDebug;
 
         /// <summary>
-        /// A <see cref="UnityEngine.UI.Text"/> that can show the current list
+        /// A <see cref="TMPro.TMP_Text"/> that can show the current list
         /// of all variables in-game. Optional.
         /// </summary>
         [SerializeField, Tooltip("(optional) output list of variables and values to Text UI in-game")]
-        internal UnityEngine.UI.Text debugTextView = null;
+        internal TMPro.TMP_Text debugTextView = null;
 
         internal void Update()
         {
@@ -84,7 +81,7 @@ namespace Yarn.Unity
         /// </summary>
         void SetVariable(string name, Yarn.IType type, string value)
         {
-            if (type == Yarn.BuiltinTypes.Boolean)
+            if (type == Yarn.Types.Boolean)
             {
                 bool newBool;
                 if (bool.TryParse(value, out newBool))
@@ -96,7 +93,7 @@ namespace Yarn.Unity
                     throw new System.InvalidCastException($"Couldn't initialize default variable {name} with value {value} as Bool");
                 }
             }
-            else if (type == Yarn.BuiltinTypes.Number)
+            else if (type == Yarn.Types.Number)
             {
                 float newNumber;
                 if (float.TryParse(value, out newNumber))
@@ -108,7 +105,7 @@ namespace Yarn.Unity
                     throw new System.InvalidCastException($"Couldn't initialize default variable {name} with value {value} as Number (Float)");
                 }
             }
-            else if (type == Yarn.BuiltinTypes.String)
+            else if (type == Yarn.Types.String)
             {
                 SetValue(name, value); // no special type conversion required
             }
@@ -120,13 +117,11 @@ namespace Yarn.Unity
 
         /// <summary>
         /// Throws a <see cref="System.ArgumentException"/> if <paramref
-        /// name="variableName"/> is not a valid Yarn Spinner variable
-        /// name.
+        /// name="variableName"/> is not a valid Yarn Spinner variable name.
         /// </summary>
         /// <param name="variableName">The variable name to test.</param>
-        /// <exception cref="System.ArgumentException">Thrown when
-        /// <paramref name="variableName"/> is not a valid variable
-        /// name.</exception> 
+        /// <exception cref="System.ArgumentException">Thrown when <paramref
+        /// name="variableName"/> is not a valid variable name.</exception> 
         private void ValidateVariableName(string variableName)
         {
             if (variableName.StartsWith("$") == false)
@@ -146,7 +141,7 @@ namespace Yarn.Unity
         public override void SetValue(string variableName, float floatValue)
         {
             ValidateVariableName(variableName);
-            
+
             variables[variableName] = floatValue;
             variableTypes[variableName] = typeof(float);
         }
@@ -154,32 +149,71 @@ namespace Yarn.Unity
         public override void SetValue(string variableName, bool boolValue)
         {
             ValidateVariableName(variableName);
-            
+
             variables[variableName] = boolValue;
             variableTypes[variableName] = typeof(bool);
+        }
+
+        private static bool TryGetAsType<T>(Dictionary<string, object> dictionary, string key, out T result)
+        {
+
+            if (dictionary.TryGetValue(key, out var objectResult) == true
+                && typeof(T).IsAssignableFrom(objectResult.GetType()))
+            {
+                result = (T)objectResult;
+                return true;
+            }
+
+            result = default;
+            return false;
         }
 
         /// <summary>
         /// Retrieves a <see cref="Value"/> by name.
         /// </summary>
-        /// <param name="variableName">The name of the variable to retrieve
-        /// the value of. Don't forget to include the "$" at the
-        /// beginning!</param>
+        /// <param name="variableName">The name of the variable to retrieve the
+        /// value of. Don't forget to include the "$" at the beginning!</param>
         /// <returns>The <see cref="Value"/>. If a variable by the name of
         /// <paramref name="variableName"/> is not present, returns a value
         /// representing `null`.</returns>
-        /// <exception cref="System.ArgumentException">Thrown when
-        /// variableName is not a valid variable name.</exception>
+        /// <exception cref="System.ArgumentException">Thrown when variableName
+        /// is not a valid variable name.</exception>
         public override bool TryGetValue<T>(string variableName, out T result)
         {
+
+            // Ensure that the variable name is valid.
             ValidateVariableName(variableName);
 
-            // If we don't have a variable with this name, return the null
-            // value
-            if (variables.ContainsKey(variableName) == false)
+            switch (GetVariableKind(variableName))
             {
-                result = default;
-                return false;
+                case VariableKind.Stored:
+                    // This is a stored value. First, attempt to fetch it from
+                    // the variable storage.
+
+                    // Try to get the value from the dictionary, and check to
+                    // see that it's the 
+                    if (TryGetAsType(variables, variableName, out result))
+                    {
+                        // We successfully fetched it from storage.
+                        return true;
+                    }
+                    else
+                    {
+                        return this.Program.TryGetInitialValue<T>(variableName, out result);
+                    }
+                case VariableKind.Smart:
+                    // The variable is a smart variable. Find the node that
+                    // implements it, and use that to get the variable's current
+                    // value.
+
+                    // Update the VM's settings, since ours might have changed
+                    // since we created the VM.
+                    return this.SmartVariableEvaluator.TryGetSmartVariable(variableName, out result);
+                case VariableKind.Unknown:
+                default:
+                    // The variable is not known.
+                    result = default;
+                    return false;
             }
 
             var resultObject = variables[variableName];
@@ -207,7 +241,8 @@ namespace Yarn.Unity
         #endregion
 
         /// <summary>
-        /// returns a boolean value representing if the particular variable is inside the variable storage
+        /// returns a boolean value representing if the particular variable is
+        /// inside the variable storage
         /// </summary>
         public override bool Contains(string variableName)
         {
@@ -235,12 +270,12 @@ namespace Yarn.Unity
         }
 
         #region Save/Load
-        public override (Dictionary<string,float>,Dictionary<string,string>,Dictionary<string,bool>) GetAllVariables()
+        public override (Dictionary<string, float>, Dictionary<string, string>, Dictionary<string, bool>) GetAllVariables()
         {
             Dictionary<string, float> floatDict = new Dictionary<string, float>();
             Dictionary<string, string> stringDict = new Dictionary<string, string>();
             Dictionary<string, bool> boolDict = new Dictionary<string, bool>();
-            
+
             foreach (var variable in variables)
             {
                 var type = variableTypes[variable.Key];

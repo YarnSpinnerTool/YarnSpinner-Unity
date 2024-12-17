@@ -4,6 +4,8 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 using System;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     /// <summary>
@@ -14,12 +16,17 @@ namespace Yarn.Unity
     internal struct CommandDispatchResult
     {
 
+        internal enum ParameterParseStatusType
+        {
+            Succeeded,
+            InvalidParameterType,
+            InvalidParameterCount,
+        }
+
         internal enum StatusType
         {
 
-            SucceededAsync,
-
-            SucceededSync,
+            Succeeded,
 
             NoTargetFound,
 
@@ -27,28 +34,31 @@ namespace Yarn.Unity
 
             InvalidParameterCount,
 
+            InvalidParameter,
+
             /// <summary>
             /// The command could not be found.
             /// </summary>
             CommandUnknown,
-
-            /// <summary>
-            /// The command was located and successfully called.
-            /// </summary>
-            [Obsolete("Use a more specific enum case", true)]
-            Success,
-
-            /// <summary>
-            /// The command was located, but failed to be called.
-            /// </summary>
-            [Obsolete("Use a more specific enum case", true)]
-            Failed,
         };
 
         internal StatusType Status;
 
-        internal string Message;
+        internal string? Message;
 
-        internal bool IsSuccess => this.Status == StatusType.SucceededAsync || this.Status == StatusType.SucceededSync;
+        internal YarnTask Task;
+
+        public CommandDispatchResult(StatusType status)
+        {
+            Status = status;
+            Task = YarnTask.CompletedTask;
+            Message = null;
+        }
+        public CommandDispatchResult(StatusType status, YarnTask task)
+        {
+            Status = status;
+            Task = task;
+            Message = null;
+        }
     }
 }

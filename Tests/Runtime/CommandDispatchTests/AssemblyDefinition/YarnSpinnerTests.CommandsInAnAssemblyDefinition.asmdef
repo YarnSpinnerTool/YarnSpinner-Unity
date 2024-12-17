@@ -2,7 +2,8 @@
     "name": "YarnSpinnerTests.CommandsInAnAssemblyDefinition",
     "rootNamespace": "",
     "references": [
-        "GUID:34aa492b82754644eac2f903cd496268"
+        "GUID:34aa492b82754644eac2f903cd496268",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

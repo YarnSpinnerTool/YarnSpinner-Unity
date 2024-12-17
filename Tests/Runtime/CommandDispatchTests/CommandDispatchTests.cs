@@ -2,16 +2,19 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
+using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using Yarn.Unity;
-using System.IO;
+
+#nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 namespace Yarn.Unity.Tests
 {
@@ -37,17 +40,6 @@ namespace Yarn.Unity.Tests
                 UnityEditor.AssetDatabase.CopyAsset(TestScriptPathSource, TestScriptPathInProject);
             }
 
-#if UNITY_EDITOR && !UNITY_2021_2_OR_NEWER
-            // On Unity 2021.1 and earlier, we need to manually generate the
-            // registration code. On later versions, the source code generator
-            // will handle it for us.
-
-            var analysis = new Yarn.Unity.ActionAnalyser.Analyser(TestScriptPathInProject);
-            var actions = analysis.GetActions();
-            var source = Yarn.Unity.ActionAnalyser.Analyser.GenerateRegistrationFileSource(actions, "Yarn.Unity.Tests.Generated");
-            
-            System.IO.File.WriteAllText(outputFilePath, source);
-#endif
             UnityEditor.AssetDatabase.Refresh();
         }
 
@@ -74,6 +66,8 @@ namespace Yarn.Unity.Tests
                 "static_demo_action",
                 "static_demo_action_with_params",
                 "static_demo_action_with_optional_params",
+                "static_variadic",
+                "instance_variadic",
             };
 
             var expectedFunctionNames = new[] {
@@ -102,14 +96,9 @@ namespace Yarn.Unity.Tests
                 Debug.Log(string.Join(";", parameters));
             }
 
-            void InvalidArrayType(params int[] ints)
-            {
-                Assert.Fail("This method should not be called");
-            }
-
             void InvalidArrayPosition(string[] strings, bool boolean)
             {
-                Assert.Fail("This method should not be called");
+                throw new AssertionException("This method should not be called");
             }
 
             var dialogueRunnerGO = new GameObject("Dialogue Runner");
@@ -119,26 +108,17 @@ namespace Yarn.Unity.Tests
 
             LogAssert.Expect(LogType.Log, "1;2;3;4");
 
-            var dispatchResult = dialogueRunner.CommandDispatcher.DispatchCommand("test_command 1 2 3 4", out Coroutine result);
+            var dispatchResult = dialogueRunner.CommandDispatcher.DispatchCommand("test_command 1 2 3 4", dialogueRunner);
 
-            Assert.IsTrue(dispatchResult.IsSuccess);
-            Assert.AreEqual(dispatchResult.Status, CommandDispatchResult.StatusType.SucceededSync);
-            Assert.IsNull(result);
-
-            var invalidTypeException = Assert.Throws<System.ArgumentException>(() =>
-            {
-                dialogueRunner.AddCommandHandler<int[]>("invalid_array_type", InvalidArrayType);
-            }, "command handler array parameters must be arrays of strings");
-            Assert.True(invalidTypeException.Message.Contains("array parameters are required to be string arrays"));
-
+            dispatchResult.Status.Should().BeEqualTo(CommandDispatchResult.StatusType.Succeeded, "the command dispatch should succeed");
+            dispatchResult.Task.IsCompletedSuccessfully().Should().BeTrue("the command should run synchronously");
 
             var notLastParameterException = Assert.Throws<System.ArgumentException>(() =>
             {
                 dialogueRunner.AddCommandHandler<string[], bool>("invalid_array_type", InvalidArrayPosition);
             }, "command handler array parameters must be the last parameter");
-            Assert.True(notLastParameterException.Message.Contains("array parameters are required to be last"));
 
-
+            notLastParameterException.Message.Should().Contain("array parameters are required to be last");
         }
     }
 }
