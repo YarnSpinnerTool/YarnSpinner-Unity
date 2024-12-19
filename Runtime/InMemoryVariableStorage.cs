@@ -136,6 +136,8 @@ namespace Yarn.Unity
 
             variables[variableName] = stringValue;
             variableTypes[variableName] = typeof(string);
+
+            NotifyVariableChanged(variableName, stringValue);
         }
 
         public override void SetValue(string variableName, float floatValue)
@@ -144,6 +146,8 @@ namespace Yarn.Unity
 
             variables[variableName] = floatValue;
             variableTypes[variableName] = typeof(float);
+
+            NotifyVariableChanged(variableName, floatValue);
         }
 
         public override void SetValue(string variableName, bool boolValue)
@@ -152,6 +156,8 @@ namespace Yarn.Unity
 
             variables[variableName] = boolValue;
             variableTypes[variableName] = typeof(bool);
+
+            NotifyVariableChanged(variableName, boolValue);
         }
 
         private static bool TryGetAsType<T>(Dictionary<string, object> dictionary, string key, out T result)
