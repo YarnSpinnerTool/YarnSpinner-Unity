@@ -97,6 +97,8 @@ jobs:
       - name: Copy DLLs
         run: |
           cp -v YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/*.dll YarnSpinner-Unity/Runtime/DLLs
+          cp -v YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/*.pdb YarnSpinner-Unity/Runtime/DLLs
+          cp -v YarnSpinner/YarnSpinner.Compiler/bin/Release/netstandard2.0/*.xml YarnSpinner-Unity/Runtime/DLLs
           rm -fv YarnSpinner-Unity/Runtime/DLLs/Microsoft.CSharp.dll
 
       # Make the PR against YarnSpinner-Unity that merges this change
