@@ -710,6 +710,35 @@
             <returns>The node's tags, or <see langword="null"/> if the node is
             not present in the Program.</returns>
         </member>
+        <member name="M:Yarn.Dialogue.GetHeaderValue(System.String,System.String)">
+            <summary>
+            Gets the value of the header named <paramref name="headerName"/> on
+            the node named <paramref name="nodeName"/>, or <see
+            langword="null"/> if the header can't be found.
+            </summary>
+            <remarks>If the node has more than one header named <paramref
+            name="headerName"/>, the first one is used.</remarks>
+            <param name="nodeName">The name of the node.</param>
+            <param name="headerName">The name of the header.</param>
+            <returns>The value of the first header on the node with the
+            specified header value.</returns>
+            <exception cref="T:System.InvalidOperationException">Thrown when the program
+            is not loaded, the program contains no nodes, or the program does
+            not contain a node named <paramref name="nodeName"/>.</exception>
+        </member>
+        <member name="M:Yarn.Dialogue.GetHeaders(System.String)">
+            <summary>
+            Gets the collection of headers present on the node named <paramref
+            name="nodeName"/>.
+            </summary>
+            <param name="nodeName">The name of the node to get headers
+            for.</param>
+            <returns>A collection of key-values pairs, each one representing a
+            header on the node.</returns>
+            <exception cref="T:System.InvalidOperationException">Thrown when the program
+            is not loaded, the program contains no nodes, or the program does
+            not contain a node named <paramref name="nodeName"/>.</exception>
+        </member>
         <member name="M:Yarn.Dialogue.UnloadAll">
             <summary>
             Unloads all nodes from the Dialogue.
