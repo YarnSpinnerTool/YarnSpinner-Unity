@@ -59,6 +59,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     >      NotifyVariableChanged(variableName, newValue);
     >  }
     >  ```
+- Typewriter can now be be paused and unpaused through two new methods on the class, `PauseTypewriter` and `ContinueTypewriter`, these halt/continue the typewriter from the last point reached at the time of the method call.
 
 ### Changed
 
