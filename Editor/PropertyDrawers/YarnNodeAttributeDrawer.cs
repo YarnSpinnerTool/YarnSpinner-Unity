@@ -2,6 +2,7 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -225,13 +226,9 @@ namespace Yarn.Unity
                             });
                         }
 
-                        foreach (var name in project.Program.Nodes.Keys)
+                        foreach (var node in GetNodes(project))
                         {
-                            if (name.StartsWith("$"))
-                            {
-                                // Skip smart variable nodes
-                                continue;
-                            }
+                            var name = node.Name;
 
                             menu.AddItem(new GUIContent(name), name == nodeName && !hasMixedNodeValues, () =>
                             {
@@ -248,6 +245,35 @@ namespace Yarn.Unity
             EditorGUI.indentLevel = indent;
 
             EditorGUI.EndProperty();
+        }
+
+        private static IEnumerable<Node> GetNodes(YarnProject project)
+        {
+            foreach (var node in project.Program.Nodes.Values)
+            {
+                if (node.Name.StartsWith("$"))
+                {
+                    // Skip smart variable nodes
+                    continue;
+                }
+
+                bool isNodeGroup = false;
+
+                foreach (var header in node.Headers)
+                {
+                    if (header.Key == Node.NodeGroupHeader)
+                    {
+                        // This node is part of a node group; don't include it
+                        isNodeGroup = true;
+                        break;
+                    }
+                }
+
+                if (!isNodeGroup)
+                {
+                    yield return node;
+                }
+            }
         }
 
         private static bool ShouldEndEditing(string controlName)
