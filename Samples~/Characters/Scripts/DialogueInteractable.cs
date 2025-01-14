@@ -98,6 +98,7 @@ namespace Yarn.Unity.Samples
                         onActiveChanged?.Invoke(false);
                         return;
                     }
+
                 }
 
                 base.IsCurrent = value;

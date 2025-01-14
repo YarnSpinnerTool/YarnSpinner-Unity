@@ -82,3 +82,5 @@ Editor/Analysis/ActionsRegistrationGenerator~/obj
 Editor/Analysis/Analysis.sln*
 
 SourceGenerator/YarnSpinner.Unity.SourceCodeGenerator.deps.json*
+
+*.blend1

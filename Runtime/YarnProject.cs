@@ -130,54 +130,10 @@ namespace Yarn.Unity
         /// cref="Program"/> and cached inside <see cref="nodeHeaders"/>. Future
         /// calls will then return the cached values.
         /// </remarks>
+        [System.Obsolete("Use " + nameof(Dialogue) + "." + nameof(Dialogue.GetHeaders), true)]
         public Dictionary<string, List<string>> GetHeaders(string nodeName)
         {
-            // if the headers have already been extracted just return that
-            Dictionary<string, List<string>> existingValues;
-            if (this.nodeHeaders.TryGetValue(nodeName, out existingValues))
-            {
-                return existingValues;
-            }
-
-            // headers haven't been extracted so we look inside the program
-            Node rawNode;
-            if (!Program.Nodes.TryGetValue(nodeName, out rawNode))
-            {
-                return new Dictionary<string, List<string>>();
-            }
-
-            var rawHeaders = rawNode.Headers;
-
-            // this should NEVER happen because there will always be at least
-            // the title, right?
-            if (rawHeaders == null || rawHeaders.Count == 0)
-            {
-                return new Dictionary<string, List<string>>();
-            }
-
-            // ok so this is an array of (string, string) tuples with
-            // potentially duplicated keys inside the array we'll convert it all
-            // into a dict of string arrays
-            Dictionary<string, List<string>> headers = new Dictionary<string, List<string>>();
-            foreach (var pair in rawHeaders)
-            {
-                List<string> values;
-
-                if (headers.TryGetValue(pair.Key, out values))
-                {
-                    values.Add(pair.Value);
-                }
-                else
-                {
-                    values = new List<string>();
-                    values.Add(pair.Value);
-                }
-                headers[pair.Key] = values;
-            }
-
-            // this.nodeHeaders[nodeName] = headers;
-
-            return headers;
+            throw new System.NotImplementedException();
         }
 
         /// <summary>

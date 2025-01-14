@@ -4,6 +4,79 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Added
+
+- Yarn action handling now supports a wider range of return values.
+- `YarnImporter.GetHashString()` is now public.
+- `UnityLocalisedLineProvider` no longer throws an exception if an asset table is provided but does not contain an asset for a line.
+- `DialogueRunner.CommandDispatcher` is now set up on first access, rather than in `Awake`.
+  - This allows other objects to work with the command dispatcher (for example, registering new methods) in their `Awake` methods, even if their `Awake` methods run before `DialogueRunner`'s.
+- `YarnCommand` and `YarnFunction` commands now allow including `.` characters in their names.
+- Fixed an issue in SerializableDictionary.cs that caused builds to fail.
+- `DialogueRunner.AddCommandHandler` and `DialogueRunner.AddFunction` now validate that the provided names contain no spaces.
+- `DialogueRunner.AddCommandHandler` now supports methods whose last parameter is an array of values.
+  - This allows for commands with a variable list of parameters. For example, consider the following method:
+    ```csharp
+    void LogStrings(int a, string[] remainder) {
+      Debug.Log($"a = {a}, remainder={string.Join(",", remainder)}");
+    }
+    ```
+    This method can be registered as a Yarn command:
+    ```csharp
+    dialogueRunner.AddCommandHandler<int, string[]>("my_command", LogStrings);
+    ```
+    And called from Yarn Spinner:
+    ```
+    // logs "a = 42, remainder=this,is,pretty,great"
+    <<my_command 42 this is pretty great>> 
+    ```
+    > [!NOTE]
+    > Array parameters are required to be the last parameter of the method.
+- Variable storage objects now allow registering a 'change listener' that runs when a variable is changed.  
+  - To add a change listener, call `AddChangeListener` on your variable storage, and provide the name of the variable you want to watch for changes for and a delegate that should run when the variable changes:
+    ```csharp
+    VariableStorageBehaviour storage = // ...
+    
+    var changeListener = storage.AddChangeListener<bool>("$myVariable", (newValue) => {
+      Debug.Log("$myVariable changed to " + newValue);
+    });
+    ```
+    You can remove a change listener by disposing it:
+    ```csharp
+    changeListener.Dispose();
+    ```
+    Change listeners can't be added for smart variables. If you add a change listener for a stored variable (that is, one declared in the Yarn script), the change listener's parameters must match the type of the stored variable.
+
+    > [!NOTE]
+    > If you're implementing your own subclass of `VariableStorageBehaviour`, your `SetValue` methods must call `NotifyVariableChanged` to notify any registered change listeners.
+    >  ```csharp
+    >  public override void SetValue(string variableName, string newValue)
+    >  {
+    >      // ... existing behaviour ...
+    >
+    >      NotifyVariableChanged(variableName, newValue);
+    >  }
+    >  ```
+
+### Changed
+
+- Fixed an issue where, on Windows, projects would fail to automatically update when a file that belonged to them was created or edited.
+- Fixed an issue where Unity Localization `rid` values would change on reimport when they didn't have to.
+- Fixed an issue where a `[pause/]` marker at the start of the line would cause all pauses to not work ([@iatenothingbutriceforthreedays](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/pull/291))
+- Inspector-exposed fields on `LineView` are now public.
+- Fixed an issue where a `.meta` file was causing warnings to appear in Unity on import. ([@Colbydude](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/pull/294))
+- Fixed an issue where functions would not be registered with the VM until after the first call to `CommandDispatcher`.
+- `YarnProjectImporter.GenerateStringsTable` is now public.
+- Yarn Projects now allow choosing more specific cultures (for example 'pt-BR' and 'en-AU' rather than simply 'pt' and 'en') as their base language.
+- `DialogueRunner.dialogueCompleteTask` now uses a completion source, rather than polling.
+- `YarnNode` dropdowns no longer show individual node group members in the list.
+
+### Removed
+
+- `YarnProject.GetHeaders` is now deprecated, in favour of `DialogueRunner.Dialogue.GetHeaders`.
+
 ## [3.0.0-beta1] 2024-11-30
 
 ### Added

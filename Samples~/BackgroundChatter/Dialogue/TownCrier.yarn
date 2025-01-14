@@ -1,0 +1,47 @@
+title: TownCrier
+---
+// Town criers are people who stand in public spaces and loudly announce
+// important news to people. This example uses line groups with conditions to
+// deliver lines about what's happened in the game.
+//
+// The town crier can also be walked up to and interacted with. When this
+// happens, all background chatter stops, and a normal conversation takes place.
+
+=> TownCrier: Hear ye, hear ye!
+
+=> TownCrier: The king has a new advisor! <<if $king_new_advisor>>
+=> TownCrier: A dragon stalks the village! <<if !$dragon_dead>>
+=> TownCrier: The fearsome dragon is slain! <<if $dragon_dead>>
+
+
+<<declare $dragon_dead = false>>
+<<declare $king_new_advisor = false>>
+
+===
+title: TownCrierTalkTo
+---
+Player: Hello.
+TownCrier: Hello, citizen!
+<<jump TownCrierHub>>
+===
+title: TownCrierHub
+---
+-> What's the latest news?
+    <<detour TownCrierNews>>
+-> Goodbye.
+    TownCrier: Farewell!
+    <<stop>>
+
+<<jump TownCrierHub>>
+===
+title: TownCrierNews
+when: $dragon_dead
+---
+TownCrier: The beast that stalked the land of late is slain by a valiant adventurer!
+===
+title: TownCrierNews
+when: !$dragon_dead
+---
+TownCrier: A fearsome dragon stalks the village from the mountains!
+TownCrier: Will a noble hero save us from this fell beast?
+===

@@ -76,46 +76,6 @@ namespace Yarn.Unity
         #region Setters
 
         /// <summary>
-        /// Used internally by serialization functions to wrap around the
-        /// SetValue() methods.
-        /// </summary>
-        void SetVariable(string name, Yarn.IType type, string value)
-        {
-            if (type == Yarn.Types.Boolean)
-            {
-                bool newBool;
-                if (bool.TryParse(value, out newBool))
-                {
-                    SetValue(name, newBool);
-                }
-                else
-                {
-                    throw new System.InvalidCastException($"Couldn't initialize default variable {name} with value {value} as Bool");
-                }
-            }
-            else if (type == Yarn.Types.Number)
-            {
-                float newNumber;
-                if (float.TryParse(value, out newNumber))
-                { // TODO: this won't work for different cultures (e.g. French write "0.53" as "0,53")
-                    SetValue(name, newNumber);
-                }
-                else
-                {
-                    throw new System.InvalidCastException($"Couldn't initialize default variable {name} with value {value} as Number (Float)");
-                }
-            }
-            else if (type == Yarn.Types.String)
-            {
-                SetValue(name, value); // no special type conversion required
-            }
-            else
-            {
-                throw new System.ArgumentOutOfRangeException($"Unsupported type {type.Name}");
-            }
-        }
-
-        /// <summary>
         /// Throws a <see cref="System.ArgumentException"/> if <paramref
         /// name="variableName"/> is not a valid Yarn Spinner variable name.
         /// </summary>
@@ -136,6 +96,8 @@ namespace Yarn.Unity
 
             variables[variableName] = stringValue;
             variableTypes[variableName] = typeof(string);
+
+            NotifyVariableChanged(variableName, stringValue);
         }
 
         public override void SetValue(string variableName, float floatValue)
@@ -144,6 +106,8 @@ namespace Yarn.Unity
 
             variables[variableName] = floatValue;
             variableTypes[variableName] = typeof(float);
+
+            NotifyVariableChanged(variableName, floatValue);
         }
 
         public override void SetValue(string variableName, bool boolValue)
@@ -152,6 +116,8 @@ namespace Yarn.Unity
 
             variables[variableName] = boolValue;
             variableTypes[variableName] = typeof(bool);
+
+            NotifyVariableChanged(variableName, boolValue);
         }
 
         private static bool TryGetAsType<T>(Dictionary<string, object> dictionary, string key, out T result)

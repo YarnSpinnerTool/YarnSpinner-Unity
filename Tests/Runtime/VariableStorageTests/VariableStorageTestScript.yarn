@@ -21,3 +21,8 @@ title: DefaultValueTests
 title: EmptyNode
 ---
 ===
+
+title: SmartVariables
+---
+<<declare $smartBool = true || false>>
+===

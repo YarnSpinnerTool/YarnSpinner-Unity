@@ -168,5 +168,66 @@ namespace Yarn.Unity.Tests
             });
 
         }
+
+        [Test]
+        public void VariableStorage_CanRegisterChangeListeners()
+        {
+            var boolListener = VarStorage.AddChangeListener("$boolVar", (bool value) =>
+            {
+                Debug.Log($"$boolVar changed to " + value);
+            });
+
+            var stringListener = VarStorage.AddChangeListener("$stringVar", (string value) =>
+            {
+                Debug.Log($"$stringVar changed to " + value);
+            });
+
+            var floatListener = VarStorage.AddChangeListener("$floatVar", (float value) =>
+            {
+                Debug.Log($"$floatVar changed to " + value);
+            });
+
+            LogAssert.Expect("$boolVar changed to True");
+            VarStorage.SetValue("$boolVar", true);
+
+            LogAssert.Expect("$stringVar changed to goodbye");
+            VarStorage.SetValue("$stringVar", "goodbye");
+
+            LogAssert.Expect("$floatVar changed to 42");
+            VarStorage.SetValue("$floatVar", 42);
+
+            // Disposing of the listeners removes them
+            boolListener.Dispose();
+            stringListener.Dispose();
+            floatListener.Dispose();
+
+            // After we have removed the listeners, the change listeners don't
+            // get called anymore
+            VarStorage.SetValue("$boolVar", true);
+            VarStorage.SetValue("$stringVar", "goodbye");
+            VarStorage.SetValue("$floatVar", 42);
+
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        [Test]
+        public void VariableStorage_OnAddingInvalidChangeListener_ThrowsError()
+        {
+            Assert.Throws<System.ArgumentException>(() =>
+            {
+                VarStorage.AddChangeListener("$smartBool", (bool value) =>
+                {
+                    Assert.Fail("This method should never be called.");
+                });
+            }, "change listeners cannot be added for smart variables");
+
+            Assert.Throws<System.ArgumentException>(() =>
+            {
+                VarStorage.AddChangeListener("$floatVar", (bool value) =>
+                {
+                    Assert.Fail("This method should never be called.");
+                });
+            }, "change listeners must match the type of their target variable");
+        }
     }
 }

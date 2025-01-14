@@ -8,6 +8,13 @@ Barry: Hi, I'm Barry! You can only talk to me this one time!
 ===
 title: Larry
 ---
+
+<<enum SwitchState>>
+    <<case Off>>
+    <<case Mid>>
+    <<case On>>
+<<endenum>>
+
 <<once>>
     // Greet the player the first time.
     Larry: Hi, I'm Larry! You can talk to me several times!
@@ -16,10 +23,13 @@ title: Larry
 /// The number of times we have turned the switch on or off.
 <<declare $times_interacted_with_switch = 0 as number>>
 
-/// Whether the switch is currently turned on or off.
-<<declare $switch_on = false as bool>>
+<<declare $switch_state = .Off>>
 
-<<if $switch_on>>
+<<declare $switch_on_or_mid = $switch_state == .On || $switch_state == .Mid>>
+
+// TODO: make these all detours
+
+<<if $switch_state == .On>>
     <<once>>
         // Directly thank the player the first time
         Larry: Hey, thanks for turning that switch on for me!
@@ -29,7 +39,10 @@ title: Larry
         => Larry: Being on is a great thing for a switch to be!
         => Larry: Wow! Never knew how good a switch being turned on was.
     <<endonce>>
-<<elseif $times_interacted_with_switch > 0 and not $switch_on>>
+<<elseif $switch_state == .Mid>>
+    // TODO:
+    => Larry: Hey that needs to be brighter
+<<elseif $times_interacted_with_switch > 0 and not $switch_on_or_mid>>
     // We've turned the switch on in the past, but it's not on now. Complain
     // about it.
     => Larry: Don't be a jerk! Turn that switch back on!
@@ -50,21 +63,73 @@ title: Larry
 ===
 title: Switch
 ---
-// Toggle the switch on or off.
-<<set $switch_on = !$switch_on>>
 
 // Increment the number of times we've interacted with it.
 <<set $times_interacted_with_switch += 1>>
 
-// Play an animation that shows the switch turning on or off.
-<<if $switch_on>>
-    <<turn_on Switch>>
-<<else>>
-    <<turn_off Switch>>
+// Update the switch's state. This will also trigger an animation on the switch.
+<<if $times_interacted_with_switch % 4 == 0>>
+    <<set $switch_state = .Off>>
+<<elseif $times_interacted_with_switch % 4 == 1>>
+    <<set $switch_state = .Mid>>
+<<elseif $times_interacted_with_switch % 4 == 2>>
+    <<set $switch_state = .On>>
+<<elseif $times_interacted_with_switch % 4 == 3>>
+    <<set $switch_state = .Mid>>
 <<endif>>
 ===
 title: Garry
 ---
+
+// move this to its own sample
+
+// include more complete detour feature
+
+// enums as its own sample - on off medium sample
+
+// barks sample
+
+// show variable state in a journal; when state changes, show an unread indicator. press a button on keyboard to show/hide it (no GUI input required). make this a prefab we put in all samples
+
+
+// cutscene ("orchestration")
+// - characters move in scene
+// - characters play animations?
+// - camera changes (require cinemachine as part of this sample)
+// - play sound effects
+// - prop manipulation
+// - 
+
+
+// barks
+// - player proximity
+//      - "you there!"
+//      - "you there, vampire!"
+//      - "i hear that the magic sword has been found!"
+// - action reaction
+//      - "fus roh dah" too close to an NPC
+//      - l4d - "running out of ammo!"
+//      - "grenade out!"
+// - hints and reminders (name tbd)
+//      - "what could those markings mean?"
+//      - "that's the wrong solution"
+// - player-originated barks
+//      - "can't use that"
+//      - "i picked up this item and i like it"
+// background conversations
+// - party banter
+//      - elevator chat
+// - marketplace conversation
+//      - "i hear the king has a new advisor" "yes"
+//      - "this is a private conversation"
+//      - chained barks (related sequential line groups)
+
+
+// storylets
+// - the world state machine: set a bunch of flags, and walk into a space in which appropriate content is selected based on saliency and shown
+// - kreminsky's parameterised storylets
+// - basically a lightweight version of weird west
+
 
 
 Garry: Emotions test!
