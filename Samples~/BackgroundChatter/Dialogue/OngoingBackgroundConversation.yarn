@@ -1,0 +1,39 @@
+title: OngoingBackgroundConversation
+when: $gossip == 0
+---
+/// How far through the gossip background conversation we are.
+<<declare $gossip = 0>>
+
+// Update the variable before running any lines in case we walk away and this
+// background chatter is interrupted
+<<set $gossip += 1>>
+
+Gossip1: Did you hear about Barbara?
+Gossip2: About her new sword?
+Gossip1: Wait, new sword?
+Gossip2: Yes! I saw it when I was over for tea yesterday!
+===
+title: OngoingBackgroundConversation
+when: $gossip == 1
+---
+<<set $gossip += 1>>
+
+Gossip1: So she had her sword just.. hanging about?
+Gossip2: Yes, casual as you like!
+Gossip2: I said, "Barbara, that's rather sharp to be leaving out!"
+Gossip1: And she took it figuratively?
+Gossip2: She took it figuratively!
+Gossip2: "Oh, thank you, I'm very proud of it!"
+===
+title: OngoingBackgroundConversation
+when: $gossip == 2
+---
+<<set $gossip += 1>>
+
+Gossip1: Someone should tell her about blade safety.
+Gossip2: She knows all about it! I think she's a showoff.
+Gossip1: Well, she does cultivate a devil-may-care attitude about her.
+Gossip2: That's the modern generation for you.
+Gossip1: Isn't it.
+Gossip2: Isn't it.
+===

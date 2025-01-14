@@ -1,0 +1,20 @@
+title: CallAndResponse
+tags:
+---
+=> BoredGuard1: Can't believe I'm doing the night shift again.
+=> BoredGuard1: Once took down a whole squad, single handed.
+=> BoredGuard1: You hear that?
+=> BoredGuard1: Ever visit the blue quarter after midnight? Wild times.
+=> BoredGuard1: I hear the king has a new advisor. <<if $king_new_advisor>>
+=> BoredGuard1: Can't wait for them to issue us new shoes.
+=> BoredGuard1: My shield's getting rusty.
+
+=> BoredGuard2: Yep.
+=> BoredGuard2: Sure.
+=> BoredGuard2: Yeah.
+=> BoredGuard2: Mmm.
+=> BoredGuard2: Uh-huh.
+=> BoredGuard2: What?
+=> BoredGuard2: Odd.
+=> BoredGuard2: Don't care.
+===

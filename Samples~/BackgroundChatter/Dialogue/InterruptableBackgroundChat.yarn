@@ -1,0 +1,32 @@
+title: InterruptableBackgroundChat
+---
+// This conversation runs in the background, but the player character is
+// involved. If the player walks away from the NPC while it's ongoing, it will
+// stop and the 'walk away' node will play.
+<<once>>
+Fishmonger: You there! Interested in some fresh fish?
+<<else>>
+=> Fishmonger: Still got those fish!
+=> Fishmonger: Nice fresh fish!
+=> Fishmonger: Delicious fish!
+    Fishmonger: Del-fish-ous, I'd say! <<once>>
+<<endonce>>
+
+=> Player: Are they any good?
+=> Player: How fresh are they?
+=> Player: Are they still cold?
+
+=> Fishmonger: They're the finest around!
+=> Fishmonger: Fresh off the cart, barely nine days out of the ocean!
+=> Fishmonger: They're the choicest of fish!
+=> Fishmonger: You've never had anything like them!
+
+===
+title: InterruptableBackgroundChat_WalkAway
+---
+// The conversation started, but the player walked away in the middle of it.
+
+=> Player: Maybe some other time.
+=> Player: Not now.
+=> Player: Not into fish.
+===
