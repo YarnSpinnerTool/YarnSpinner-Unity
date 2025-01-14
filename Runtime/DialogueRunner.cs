@@ -246,7 +246,7 @@ namespace Yarn.Unity
         /// </remarks>
         /// <seealso cref="Dialogue.NodeStartHandler"/>
         [Group("Events", foldOut: true)]
-        public UnityEventString onNodeStart;
+        public UnityEventString? onNodeStart;
 
         /// <summary>
         /// A Unity event that is called when a node is complete.
@@ -257,20 +257,20 @@ namespace Yarn.Unity
         /// </remarks>
         /// <seealso cref="Dialogue.NodeCompleteHandler"/>
         [Group("Events", foldOut: true)]
-        public UnityEventString onNodeComplete;
+        public UnityEventString? onNodeComplete;
 
         /// <summary>
         /// A Unity event that is called when the dialogue starts running.
         /// </summary>
         [Group("Events", foldOut: true)]
-        public UnityEvent onDialogueStart;
+        public UnityEvent? onDialogueStart;
 
         /// <summary>
         /// A Unity event that is called once the dialogue has completed.
         /// </summary>
         /// <seealso cref="Dialogue.DialogueCompleteHandler"/>
         [Group("Events", foldOut: true)]
-        public UnityEvent onDialogueComplete;
+        public UnityEvent? onDialogueComplete;
 
         /// <summary>
         /// A <see cref="UnityEventString"/> that is called when a <see
@@ -301,7 +301,7 @@ namespace Yarn.Unity
         /// <seealso cref="YarnCommandAttribute"/>
         [Group("Events", foldOut: true)]
         [UnityEngine.Serialization.FormerlySerializedAs("onCommand")]
-        public UnityEventString onUnhandledCommand;
+        public UnityEventString? onUnhandledCommand;
 
         /// <summary>
         /// Gets or sets the collection of dialogue views attached to this
