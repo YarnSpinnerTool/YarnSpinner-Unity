@@ -156,6 +156,10 @@ namespace Yarn.Unity
                 {
                     this.variableStorage = gameObject.AddComponent<InMemoryVariableStorage>();
                 }
+                if (this.variableStorage.Program == null && this.YarnProject != null)
+                {
+                    this.variableStorage.Program = this.YarnProject.Program;
+                }
                 return variableStorage;
             }
         }
