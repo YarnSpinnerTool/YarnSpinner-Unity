@@ -337,6 +337,7 @@ namespace Yarn.Unity
         private CancellationTokenSource? dialogueCancellationSource;
         private CancellationTokenSource? currentLineCancellationSource;
         private CancellationTokenSource? currentLineHurryUpSource;
+        private YarnTaskCompletionSource? dialogueCompletionSource;
 
         internal ICommandDispatcher CommandDispatcher
         {
@@ -425,21 +426,12 @@ namespace Yarn.Unity
         {
             get
             {
-                async YarnTask WaitUntilComplete()
-                {
-                    while (IsDialogueRunning)
-                    {
-                        await YarnTask.Yield();
-                    }
-                }
-                if (IsDialogueRunning)
-                {
-                    return WaitUntilComplete();
-                }
-                else
+                if (dialogueCompletionSource == null)
                 {
                     return YarnTask.CompletedTask;
                 }
+
+                return dialogueCompletionSource.Task;
             }
         }
 
@@ -468,6 +460,8 @@ namespace Yarn.Unity
 
         private void OnDialogueCompleted()
         {
+            dialogueCompletionSource?.TrySetResult();
+
             onDialogueComplete?.Invoke();
             OnDialogueCompleteAsync().Forget();
         }
@@ -858,7 +852,9 @@ namespace Yarn.Unity
 
             dialogueCancellationSource?.Dispose();
 
-            dialogueCancellationSource = new CancellationTokenSource();
+            dialogueCompletionSource = new YarnTaskCompletionSource();
+
+            dialogueCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(this.destroyCancellationToken);
             LineProvider.YarnProject = yarnProject;
 
             EnsureCommandDispatcherReady();
