@@ -313,6 +313,11 @@ namespace Yarn.Unity
                     characterNameText.text = line.CharacterName;
                 }
                 text = line.TextWithoutCharacterName;
+                
+                if (line.Text.TryGetAttributeWithName("character", out var characterAttribute))
+                {
+                    text.Attributes.Add(characterAttribute);
+                }
             }
             else
             {
@@ -565,10 +570,27 @@ namespace Yarn.Unity
             }
         }
 
+        public void PauseTypewriter()
+        {
+            if (StopwatchRunning)
+            {
+                StopwatchRunning = false;
+            }
+        }
+        public void ContinueTypewriter()
+        {
+            if (!StopwatchRunning)
+            {
+                StopwatchRunning = true;
+            }
+        }
+
         /// <summary>Resets the typewriter back to the initial state.</summary>
         /// <inheritdoc cref="TemporalMarkupHandler.PrepareForLine" path="/param"/>
         public override void PrepareForLine(MarkupParseResult line, TMP_Text text)
         {
+            pauses = DialogueRunner.GetPauseDurationsInsideLine(line);
+
             text.maxVisibleCharacters = 0;
             accumulatedPauses = 0;
         }
@@ -579,8 +601,6 @@ namespace Yarn.Unity
         /// path="/param"/>
         public override void OnLineTextWillAppear(MarkupParseResult line, TMP_Text text)
         {
-            pauses = DialogueRunner.GetPauseDurationsInsideLine(line);
-
             accumulatedTime = 0;
             StopwatchRunning = true;
         }
