@@ -211,7 +211,7 @@ namespace Yarn.Unity.Tests
 
             foreach (var headerTestData in allHeaders)
             {
-                var yarnHeaders = yarnProject.GetHeaders(headerTestData.Key);
+                var yarnHeaders = new Dictionary<string, string>(this.runner.Dialogue.GetHeaders(headerTestData.Key));
 
                 // its possible we got no headers or more/less headers
                 // so we need to check we found all the ones we expected to see
