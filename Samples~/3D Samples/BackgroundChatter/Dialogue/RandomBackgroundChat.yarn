@@ -1,0 +1,26 @@
+﻿title: RandomBackgroundChat
+when: always
+---
+// This example uses node groups to randomly select a conversation that two characters have.
+
+Townsperson1: I hope they have fresh fish today.
+Townsperson2: They never have fresh fish. We're so far from the ocean.
+Townsperson1: Yes, but they ice it!
+Townsperson2: We're far from the mountains, too.
+===
+title: RandomBackgroundChat
+when: always
+---
+
+Townsperson1: What are you looking for at the market?
+Townsperson2: Bat food.
+Townsperson1: Are you out already?
+Townsperson2: They broke into the stash.
+===
+title: RandomBackgroundChat
+when:always
+---
+Townsperson2: Don't look. Morris the blacksmith is here today.
+Townsperson1: Oh! Do we not like Morris?
+Townsperson2: No. I have a crush and I'm avoiding the issue.
+===
