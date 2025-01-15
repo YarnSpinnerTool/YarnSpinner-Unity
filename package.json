@@ -20,7 +20,7 @@
   "type": "tool",
   "samples": [
     {
-      "displayName": "Characters",
+      "displayName": "3D Samples",
       "description": "[beta] An introduction to Yarn Spinner for Unity.",
       "path": "Samples~/3D Samples"
     }
