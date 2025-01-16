@@ -96,7 +96,7 @@ namespace Yarn.Unity
 
         public static partial async YarnTask WaitUntil(System.Func<bool> predicate, System.Threading.CancellationToken token)
         {
-            while (predicate() == false)
+            while (!token.IsCancellationRequested && predicate() == false)
             {
                 await Task.Yield();
             }
