@@ -46,7 +46,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed an issue where functions would not be registered with the VM until after the first call to `CommandDispatcher`.
 - `YarnProjectImporter.GenerateStringsTable` is now public.
 - Yarn Projects now allow choosing more specific cultures (for example 'pt-BR' and 'en-AU' rather than simply 'pt' and 'en') as their base language.
-- Fixed an issue where the System.Threading.Tasks implementation of YarnTask.WaitUntil did not return early when the CancellationToken was cancelled ([@dogboydog])
+- Fixed an issue where the System.Threading.Tasks implementation of YarnTask.WaitUntil did not return early when the CancellationToken was cancelled ([@dogboydog](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/pull/304))
 
 ### Removed
 
