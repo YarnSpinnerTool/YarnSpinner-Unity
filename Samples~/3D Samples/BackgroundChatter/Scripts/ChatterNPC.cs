@@ -8,8 +8,6 @@ namespace Yarn.Unity.Samples
 
     public class ChatterNPC : MonoBehaviour
     {
-        public string? NPCName;
-
         [SerializeField] Transform? backgroundChatterPoint;
 
         public Transform BackgroundChatterPoint => backgroundChatterPoint != null ? backgroundChatterPoint : this.transform;
@@ -20,7 +18,7 @@ namespace Yarn.Unity.Samples
 
             foreach (var npc in allNPCs)
             {
-                if (npc.NPCName == name)
+                if (npc.name == name)
                 {
                     return npc;
                 }

@@ -50,6 +50,8 @@ Shader "Custom/Fountain"
             //To begin, obtain the position of each vertex and normalize the wave direction
 
             float3 pos = v.vertex.xyz;
+
+            
            
 
             v.vertex.xyz = pos;

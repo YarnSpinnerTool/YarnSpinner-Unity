@@ -1,0 +1,17 @@
+title: RoamingCharacter
+---
+=> Wanderer: Look, I'm a-roamin' about!
+=> Wanderer: Hey, cool stalls at the market!
+=> Wanderer: Woo, look at me go!
+=> Wanderer: Yep, it's market day!
+===
+title: RoamingCharacterTalkTo
+---
+<<pause_walking Wanderer>>
+
+Player: Hello!
+Wanderer: Can't stop! Gotta check out the market!
+
+<<unpause_walking Wanderer>>
+
+===
