@@ -8,6 +8,7 @@ namespace Yarn.Unity.Samples
 
     public class SimpleCharacterInteraction : MonoBehaviour
     {
+        [SerializeField] DialogueRunner? dialogueRunner;
         [SerializeField] float interactionRadius = 1f;
         [SerializeField] Vector3 offset = Vector3.zero;
 
@@ -20,6 +21,14 @@ namespace Yarn.Unity.Samples
         [SerializeField] UnityEvent<Interactable>? onInteracted;
 
         public void SetInteractionAllowed(bool interactionAllowed) => allowInteraction = interactionAllowed;
+
+        public void OnValidate()
+        {
+            if (dialogueRunner == null)
+            {
+                dialogueRunner = FindAnyObjectByType<DialogueRunner>(FindObjectsInactive.Exclude);
+            }
+        }
 
         public void UpdateKnownInteractables()
         {
