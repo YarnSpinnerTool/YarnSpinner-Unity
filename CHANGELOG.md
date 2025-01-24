@@ -73,6 +73,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Yarn Projects now allow choosing more specific cultures (for example 'pt-BR' and 'en-AU' rather than simply 'pt' and 'en') as their base language.
 - `DialogueRunner.dialogueCompleteTask` now uses a completion source, rather than polling.
 - `YarnNode` dropdowns no longer show individual node group members in the list.
+- `IActionRegistration` now correctly supports commands without parameters.
 
 ### Removed
 

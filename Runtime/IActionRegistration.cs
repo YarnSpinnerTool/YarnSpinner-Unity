@@ -172,6 +172,8 @@ namespace Yarn.Unity
         // GYB11 END
 
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
+        public static void AddCommandHandler(this IActionRegistration registration, string commandName, System.Func<IEnumerator> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
+        /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
         public static void AddCommandHandler<T1>(this IActionRegistration registration, string commandName, System.Func<T1, IEnumerator> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
         public static void AddCommandHandler<T1, T2>(this IActionRegistration registration, string commandName, System.Func<T1, T2, IEnumerator> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
