@@ -8,6 +8,8 @@ namespace Yarn.Unity.Samples
     public abstract class Interactable : MonoBehaviour
     {
         [SerializeField] protected UnityEvent<bool>? onActiveChanged;
+        [SerializeField] protected UnityEvent? onInteractionStarted;
+        [SerializeField] protected UnityEvent? onInteractionEnded;
 
         private bool _isCurrent;
 
@@ -150,6 +152,13 @@ namespace Yarn.Unity.Samples
                 Debug.LogError($"Can't run dialogue {dialogue}: not a valid dialogue reference");
                 return;
             }
+            if (dialogueRunner.IsDialogueRunning)
+            {
+                Debug.LogError($"Can't run dialogue {dialogue}: dialogue runner is already running");
+                return;
+            }
+
+            onInteractionStarted?.Invoke();
 
             dialogueRunner.StartDialogue(dialogue);
 
@@ -163,6 +172,7 @@ namespace Yarn.Unity.Samples
                 lookTarget = interactor.transform;
                 await dialogueRunner.DialogueTask;
                 lookTarget = null;
+                onInteractionEnded?.Invoke();
             }
 
             LookAtTargetUntilDialogueComplete().Forget();
