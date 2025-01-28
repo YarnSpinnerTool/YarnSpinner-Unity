@@ -70,9 +70,6 @@ namespace Yarn.Unity.Samples.Editor
 
                     if (showAddButtons)
                     {
-
-
-
                         Handles.BeginGUI();
                         var buttonSize = new Vector2(25, 25);
                         var midpoint = (points[i] + points[i + 1]) * 0.5f;
@@ -88,9 +85,7 @@ namespace Yarn.Unity.Samples.Editor
                         }
                         Handles.EndGUI();
                     }
-
                 }
-
             }
         }
     }
