@@ -20,9 +20,9 @@
   "type": "tool",
   "samples": [
     {
-      "displayName": "3D Samples",
-      "description": "[beta] An introduction to Yarn Spinner for Unity.",
-      "path": "Samples~/3D Samples"
+      "displayName": "Samples",
+      "description": "Samples and demos for Yarn Spinner.",
+      "path": "Samples~/"
     }
   ]
 }
