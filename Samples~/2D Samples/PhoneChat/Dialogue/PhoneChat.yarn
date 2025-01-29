@@ -1,0 +1,17 @@
+title: Start
+---
+<<wait 0.5>>
+A: hey i made this chat demo
+A: it's pretty cool
+B: lmao nice
+B: does it support options
+A: lemme see
+-> A: yep
+-> A: uh huh
+-> A: think so
+B: nice, i bet it also supports wrapping text over multiple lines
+<<wait 3>>
+A: show off
+<<wait 1>>
+System: Blue has left the chat
+===
