@@ -41,7 +41,7 @@ public class PaletteMarkerProcessor : Yarn.Unity.ReplacementMarkupHandler
     /// <returns>A list of markup diagnostics if there are any errors, otherwise an empty list.</returns>
     public override List<LineParser.MarkupDiagnostic> ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, string localeCode)
     {
-        // get the colour for this marker
+        // get the palette for this marker
         if (!palette.FormatForMarker(marker.Name, out var style))
         {
             var error = new List<LineParser.MarkupDiagnostic>
@@ -95,19 +95,24 @@ public class PaletteMarkerProcessor : Yarn.Unity.ReplacementMarkupHandler
     /// </summary>
     protected void Start()
     {
-        if (lineProvider == null)
-        {
-            lineProvider = (LineProviderBehaviour)GameObject.FindAnyObjectByType<DialogueRunner>().LineProvider;
-        }
-
         if (palette == null)
         {
             return;
         }
 
-        foreach (var colour in palette.FormatMarkers)
+        if (palette.FormatMarkers.Count == 0)
         {
-            lineProvider.RegisterMarkerProcessor(colour.Marker, this);
+            return;
+        }
+
+        if (lineProvider == null)
+        {
+            lineProvider = (LineProviderBehaviour)GameObject.FindAnyObjectByType<DialogueRunner>().LineProvider;
+        }
+
+        foreach (var marker in palette.FormatMarkers)
+        {
+            lineProvider.RegisterMarkerProcessor(marker.Marker, this);
         }
     }
 }

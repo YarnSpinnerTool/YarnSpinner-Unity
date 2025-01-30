@@ -61,6 +61,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     >  ```
 - Added a sample (CustomSaliency) showing off making a custom saliency selection strategy.
 - Added a sample (InlineEvents) showing off using `ActionMarkupHandler`'s to perform in line events.
+- The Dialogue System prefab now has support for some common rich text tags
+  - `[i]` will italicise text
+  - `[b]` will embolden text
+  - `[u]` will underline text
+  - `[s]` will strike through text
 
 ### Changed
 
