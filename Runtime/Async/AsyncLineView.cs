@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
+using UnityEngine.UI;
 using Yarn.Markup;
 
 #nullable enable
@@ -10,9 +12,6 @@ using TMPro;
 using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
-using System.Threading;
-using UnityEngine.UI;
-
 namespace Yarn.Unity
 {
     /// <summary>
@@ -20,7 +19,7 @@ namespace Yarn.Unity
     /// elements.
     /// </summary>
     [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-view/line-view")]
-    public class AsyncLineView : AsyncDialogueViewBase
+    public sealed class AsyncLineView : AsyncDialogueViewBase
     {
         [MustNotBeNullWhen(nameof(continueButton), "A " + nameof(DialogueRunner) + " must be provided when a continue button is set.")]
         [SerializeField] DialogueRunner? dialogueRunner;
@@ -216,27 +215,14 @@ namespace Yarn.Unity
         [Min(0)]
         public int typewriterEffectSpeed = 60;
 
-
         /// <summary>
-        /// A Unity Event that is called each time a character is revealed
-        /// during a typewriter effect.
-        /// </summary>
-        /// <remarks>
-        /// This event is only invoked when <see cref="useTypewriterEffect"/> is
-        /// <see langword="true"/>.
-        /// </remarks>
-        /// <seealso cref="useTypewriterEffect"/>
-        [Group("Typewriter")]
-        [ShowIf(nameof(useTypewriterEffect))]
-        public UnityEngine.Events.UnityEvent? onCharacterTyped;
-
-        private TypewriterHandler? typewriter;
-
-        /// <summary>
-        /// A list of <see cref="TemporalMarkupHandler"/> objects that will be
+        /// A list of <see cref="ActionMarkupHandler"/> objects that will be
         /// used to handle markers in the line.
         /// </summary>
-        public List<TemporalMarkupHandler> temporalProcessors = new List<TemporalMarkupHandler>();
+        [Group("Typewriter")]
+        [ShowIf(nameof(useTypewriterEffect))]
+        [Label("Event Processors")]
+        public List<ActionMarkupHandler> temporalProcessors = new List<ActionMarkupHandler>();
 
         /// <inheritdoc/>
         public override YarnTask OnDialogueCompleteAsync()
@@ -265,11 +251,11 @@ namespace Yarn.Unity
         {
             if (useTypewriterEffect)
             {
-                typewriter = gameObject.AddComponent<TypewriterHandler>();
-                typewriter.lettersPerSecond = typewriterEffectSpeed;
-                typewriter.onCharacterTyped = onCharacterTyped;
-                typewriter.hideFlags = HideFlags.HideInInspector | HideFlags.DontSaveInEditor;
-                temporalProcessors.Add(typewriter);
+                // need to add a pause handler also
+                // and add it to the front of the list
+                // that way it always happens first
+                var pauser = gameObject.AddComponent<PauseEventProcessor>();
+                temporalProcessors.Insert(0, pauser);
             }
 
             if (characterNameContainer == null && characterNameText != null)
@@ -331,6 +317,7 @@ namespace Yarn.Unity
             }
             lineText.text = text.Text;
 
+            // note to self: this can be removed and made it's own view
             // setting the continue button up to let us advance dialogue
             if (continueButton != null)
             {
@@ -346,13 +333,19 @@ namespace Yarn.Unity
                 });
             }
 
-            // letting every temporal processor know that fade up (if set) is about to begin
-            if (temporalProcessors.Count > 0)
+            // the typewriter requires all characters to be hidden at the start so they can be shown one at a time
+            if (useTypewriterEffect)
             {
+                lineText.maxVisibleCharacters = 0;
+                // letting every temporal processor know that fade up (if set) is about to begin
                 foreach (var processor in temporalProcessors)
                 {
-                    processor.PrepareForLine(text, lineText);
+                    processor.OnPrepareForLine(text, lineText);
                 }
+            }
+            else
+            {
+                lineText.maxVisibleCharacters = text.Text.Length;
             }
 
             if (canvasGroup != null)
@@ -369,12 +362,18 @@ namespace Yarn.Unity
                 }
             }
 
-            if (temporalProcessors.Count > 0)
+            if (useTypewriterEffect)
             {
                 // letting every temporal processor know that fading is done and display is about to begin
                 foreach (var processor in temporalProcessors)
                 {
-                    processor.OnLineTextWillAppear(text, lineText);
+                    processor.OnLineDisplayBegin(text, lineText);
+                }
+
+                int milliSecondsPerLetter = 0;
+                if (typewriterEffectSpeed > 0)
+                {
+                    milliSecondsPerLetter = (int)(1000f / typewriterEffectSpeed);
                 }
 
                 // going through each character of the line and letting the processors know about it
@@ -383,28 +382,17 @@ namespace Yarn.Unity
                     // telling every processor that it is time to process the current character
                     foreach (var processor in temporalProcessors)
                     {
-                        // if the typewriter exists we need to turn it on and off depending on if a line is blocking or not
-                        if (useTypewriterEffect)
-                        {
-                            if (typewriter == null)
-                            {
-                                throw new System.InvalidOperationException($"Error when displaying line: {nameof(useTypewriterEffect)} was enabled but {nameof(typewriter)} is null?");
-                            }
+                        await processor.OnCharacterWillAppear(i, text, token.HurryUpToken).SuppressCancellationThrow();
+                    }
 
-                            var task = processor.PresentCharacter(i, lineText, token.HurryUpToken);
-                            if (!task.IsCompleted() && processor != typewriter)
-                            {
-                                typewriter.StopwatchRunning = false;
-                            }
-                            await task;
-                            typewriter.StopwatchRunning = true;
-                        }
-                        else
-                        {
-                            await processor.PresentCharacter(i, lineText, token.HurryUpToken);
-                        }
+                    lineText.maxVisibleCharacters += 1;
+                    if (milliSecondsPerLetter > 0)
+                    {
+                        await YarnTask.Delay(System.TimeSpan.FromMilliseconds(milliSecondsPerLetter), token.HurryUpToken).SuppressCancellationThrow();
                     }
                 }
+
+                lineText.maxVisibleCharacters = text.Text.Length;
 
                 // letting each temporal processor know the line has finished displaying
                 foreach (var processor in temporalProcessors)
@@ -416,11 +404,11 @@ namespace Yarn.Unity
             // if we are set to autoadvance how long do we hold for before continuing?
             if (autoAdvance)
             {
-                await YarnTask.Delay((int)(autoAdvanceDelay * 1000), token.NextLineToken);
+                await YarnTask.Delay((int)(autoAdvanceDelay * 1000), token.NextLineToken).SuppressCancellationThrow();
             }
             else
             {
-                await YarnTask.WaitUntilCanceled(token.NextLineToken);
+                await YarnTask.WaitUntilCanceled(token.NextLineToken).SuppressCancellationThrow();
             }
 
             if (canvasGroup != null)
@@ -428,7 +416,7 @@ namespace Yarn.Unity
                 // we fade down the UI
                 if (useFadeEffect)
                 {
-                    await Effects.FadeAlphaAsync(canvasGroup, 1, 0, fadeDownDuration, token.HurryUpToken);
+                    await Effects.FadeAlphaAsync(canvasGroup, 1, 0, fadeDownDuration, token.HurryUpToken).SuppressCancellationThrow();
                 }
                 else
                 {
@@ -452,202 +440,6 @@ namespace Yarn.Unity
         public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             return YarnTask<DialogueOption?>.FromResult(null);
-        }
-    }
-
-    /// <summary>
-    /// A <see cref="TemporalMarkupHandler"/> is an object that reacts to the
-    /// delivery of a line of dialogue, and can optionally control the timing of
-    /// that delivery.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// There are a number of cases where a line's delivery needs to have its
-    /// timing controlled. For example, <see cref="TypewriterHandler"/> adds a
-    /// small delay between each character, creating a 'typewriter' effect as
-    /// each letter appears over time.
-    /// </para>
-    /// <para>
-    /// Another example of a <see cref="TemporalMarkupHandler"/> is an in-line
-    /// event or animation, such as causing a character to play an animation
-    /// (and waiting for that animation to complete before displaying the rest
-    /// of the line).
-    /// </para>
-    /// </remarks>
-    public abstract class TemporalMarkupHandler : MonoBehaviour
-    {
-        /// <summary>
-        /// Called when the line view receives the line, to prepare for showing
-        /// the line.
-        /// </summary>
-        /// <remarks>
-        /// This method is called before any part of the line is visible, and is
-        /// an opportunity to set up any part of the <see
-        /// cref="TemporalMarkupHandler"/>'s display before the user can see it.
-        /// </remarks>
-        /// <param name="line">The line being presented.</param>
-        /// <param name="text">A <see cref="TMP_Text"/> object that the line is
-        /// being displayed in.</param>
-        public abstract void PrepareForLine(MarkupParseResult line, TMP_Text text);
-
-        /// <summary>
-        /// Called immediately before the first character in the line is
-        /// presented. 
-        /// </summary>
-        /// <param name="line">The line being presented.</param>
-        /// <param name="text">A <see cref="TMP_Text"/> object that the line is
-        /// being displayed in.</param>
-        public abstract void OnLineTextWillAppear(MarkupParseResult line, TMP_Text text);
-
-        /// <summary>
-        /// Called repeatedly for each visible character in the line.
-        /// </summary>
-        /// <remarks> This method is a <see cref="TemporalMarkupHandler"/>
-        /// object's main opportunity to take action during line
-        /// display.</remarks>
-        /// <param name="currentCharacterIndex">The zero-based index of the
-        /// character being displayed.</param>
-        /// <param name="text">A <see cref="TMP_Text"/> object that the line is
-        /// being displayed in.</param>
-        /// <param name="cancellationToken">A cancellation token representing
-        /// whether the </param>
-        /// <returns>A task that completes when the <see
-        /// cref="TemporalMarkupHandler"/> has completed presenting this
-        /// character. Dialogue views will wait until this task is complete
-        /// before displaying the remainder of the line.</returns>
-        public abstract YarnTask PresentCharacter(int currentCharacterIndex, TMP_Text text, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Called after the last call to <see cref="PresentCharacter(int,
-        /// TMP_Text, CancellationToken)"/>.
-        /// </summary>
-        /// <remarks>This method is an opportunity for a <see
-        /// cref="TemporalMarkupHandler"/> to finalise its presentation after
-        /// all of the characters in the line have been presented.</remarks>
-        public abstract void OnLineDisplayComplete();
-    }
-
-    /// <summary>
-    /// A <see cref="TemporalMarkupHandler"/> that progressively reveals the
-    /// text of a line at a fixed rate of time.
-    /// </summary>
-    public sealed class TypewriterHandler : TemporalMarkupHandler
-    {
-        /// <summary>
-        /// The number of letters that will be shown per second.
-        /// </summary>
-        public int lettersPerSecond = 60;
-
-        /// <summary>
-        /// An event that will be invoked for each 
-        /// </summary>
-        public UnityEngine.Events.UnityEvent? onCharacterTyped;
-
-        private float accumulatedTime = 0;
-        private Stack<(int position, float duration)> pauses = new Stack<(int position, float duration)>();
-        private float accumulatedPauses = 0;
-
-        private float SecondsPerLetter
-        {
-            get
-            {
-                return 1f / lettersPerSecond;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the <see
-        /// cref="TypewriterHandler"/> is currently tracking the amount of time
-        /// elapsed since the last letter was revealed.
-        /// </summary>
-        internal bool StopwatchRunning { get; set; } = false;
-
-        void Update()
-        {
-            if (StopwatchRunning)
-            {
-                accumulatedTime += Time.deltaTime;
-            }
-        }
-
-        public void PauseTypewriter()
-        {
-            if (StopwatchRunning)
-            {
-                StopwatchRunning = false;
-            }
-        }
-        public void ContinueTypewriter()
-        {
-            if (!StopwatchRunning)
-            {
-                StopwatchRunning = true;
-            }
-        }
-
-        /// <summary>Resets the typewriter back to the initial state.</summary>
-        /// <inheritdoc cref="TemporalMarkupHandler.PrepareForLine" path="/param"/>
-        public override void PrepareForLine(MarkupParseResult line, TMP_Text text)
-        {
-            pauses = DialogueRunner.GetPauseDurationsInsideLine(line);
-
-            text.maxVisibleCharacters = 0;
-            accumulatedPauses = 0;
-        }
-
-        /// <summary>Calculates the points in the typewriter should pause at,
-        /// and starts the typewriter's internal time counter.</summary>
-        /// <inheritdoc cref="TemporalMarkupHandler.OnLineTextWillAppear"
-        /// path="/param"/>
-        public override void OnLineTextWillAppear(MarkupParseResult line, TMP_Text text)
-        {
-            accumulatedTime = 0;
-            StopwatchRunning = true;
-        }
-
-        /// <summary>
-        /// Stops the internal time counter, and finishes displaying the line.
-        /// </summary>
-        public override void OnLineDisplayComplete()
-        {
-            StopwatchRunning = false;
-            accumulatedTime = 0;
-            pauses.Clear();
-            accumulatedPauses = 0;
-        }
-
-        /// <summary>
-        /// Presents a single character of the line, at the appropriate point in
-        /// time.
-        /// </summary>
-        /// <inheritdoc cref="TemporalMarkupHandler.PresentCharacter(int,
-        /// TMP_Text, CancellationToken)" path="/param"/>
-        /// <inheritdoc cref="TemporalMarkupHandler.PresentCharacter(int,
-        /// TMP_Text, CancellationToken)" path="/returns"/>
-        public override async YarnTask PresentCharacter(int currentCharacterIndex, TMP_Text text, CancellationToken cancellationToken)
-        {
-            float pauseDuration = 0;
-            if (pauses.Count > 0)
-            {
-                var pause = pauses.Peek();
-                if (pause.position == currentCharacterIndex)
-                {
-                    pauses.Pop();
-                    pauseDuration = pause.duration;
-                }
-            }
-            accumulatedPauses += pauseDuration;
-
-            float timePoint = accumulatedPauses;
-            if (lettersPerSecond > 0)
-            {
-                timePoint += (float)currentCharacterIndex * SecondsPerLetter;
-            }
-
-            await YarnTask.WaitUntil(() => accumulatedTime >= timePoint, cancellationToken);
-            text.maxVisibleCharacters += 1;
-
-            onCharacterTyped?.Invoke();
         }
     }
 }

@@ -14,7 +14,7 @@ using Yarn.Unity;
 /// example, if the palette defines a style named "happy", this marker processor
 /// will process tags in a Yarn line named <c>[happy]</c> by inserting the
 /// appropriate TextMeshProp style tags defined for the "happy" style.</remarks>
-public class PaletteMarkerProcessor : Yarn.Unity.AttributeMarkerProcessor
+public class PaletteMarkerProcessor : Yarn.Unity.ReplacementMarkupHandler
 {
     /// <summary>
     /// The <see cref="MarkupPalette"/> to use when applying styles.
@@ -51,10 +51,12 @@ public class PaletteMarkerProcessor : Yarn.Unity.AttributeMarkerProcessor
             return error;
         }
 
-        // we will always add the colour because we don't really know what the
-        // default is anyways
-        childBuilder.Insert(0, $"<color=#{ColorUtility.ToHtmlStringRGBA(style.Color)}>");
-        childBuilder.Append("</color>");
+        // do we have a custom colour set?
+        if (style.CustomColor)
+        {
+            childBuilder.Insert(0, $"<color=#{ColorUtility.ToHtmlStringRGBA(style.Color)}>");
+            childBuilder.Append("</color>");
+        }
 
         // do we need to bold it?
         if (style.Boldened)
@@ -84,7 +86,7 @@ public class PaletteMarkerProcessor : Yarn.Unity.AttributeMarkerProcessor
         // we don't need to modify the children attributes because TMP knows
         // that the <color> tags aren't visible so we can just say we are done
         // now
-        return AttributeMarkerProcessor.NoDiagnostics;
+        return ReplacementMarkupHandler.NoDiagnostics;
     }
 
     /// <summary>

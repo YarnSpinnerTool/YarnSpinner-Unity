@@ -748,7 +748,6 @@ namespace Yarn.Unity.Editor
     [CustomEditor(typeof(LineAdvancer))]
     public class LineAdvancerEditor : YarnEditor { }
 
-
     /// <summary>
     /// The editor for <see cref="DialogueRunner"/> objects.
     /// </summary>

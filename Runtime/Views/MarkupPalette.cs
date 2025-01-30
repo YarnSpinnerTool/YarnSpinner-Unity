@@ -29,8 +29,14 @@ namespace Yarn.Unity
             public string Marker;
 
             /// <summary>
+            /// Indicates whethere or not the text associated with this marker should have a custom colour.
+            /// </summary>
+            public bool CustomColor;
+            
+            /// <summary>
             /// The color to use for text associated with this marker.
             /// </summary>
+            [ShowIf(nameof(CustomColor))]
             public Color Color;
 
             /// <summary>
@@ -124,11 +130,3 @@ namespace Yarn.Unity
         }
     }
 }
-
-// ok so there are TWO things I want to do now first is beef this up so that it
-// supports multiple different relative colour bold or do we just do font-weight
-// italics underline, strikethrough
-
-// and then make another one called StyleMarkupProcessor this just converts
-// [style = h1] into <style="h1"> for the more advanced stuff
-

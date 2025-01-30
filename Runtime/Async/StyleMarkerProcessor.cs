@@ -12,7 +12,7 @@ namespace Yarn.Unity
     /// An attribute marker processor that inserts TextMeshPro style tags where
     /// Yarn Spinner <c>[style]</c> tags appear in a line.
     /// </summary>
-    public class StyleMarkerProcessor : AttributeMarkerProcessor
+    public class StyleMarkerProcessor : ReplacementMarkupHandler
     {
         [SerializeField]
         public LineProviderBehaviour? lineProvider;
@@ -35,7 +35,7 @@ namespace Yarn.Unity
             childBuilder.Insert(0, $"<style=\"{property.StringValue}\">");
             childBuilder.Append("</style>");
 
-            return AttributeMarkerProcessor.NoDiagnostics;
+            return ReplacementMarkupHandler.NoDiagnostics;
         }
 
         // Start is called before the first frame update

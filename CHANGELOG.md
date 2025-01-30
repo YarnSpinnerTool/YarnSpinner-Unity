@@ -74,10 +74,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `DialogueRunner.dialogueCompleteTask` now uses a completion source, rather than polling.
 - `YarnNode` dropdowns no longer show individual node group members in the list.
 - `IActionRegistration` now correctly supports commands without parameters.
+- Renamed `TemporalMarkupProcessor` to `ActionMarkupHandler`.
+- Renamed `AttributeMarkerProcessor` to `ReplacementMarkupHandler`
 
 ### Removed
 
 - `YarnProject.GetHeaders` is now deprecated, in favour of `DialogueRunner.Dialogue.GetHeaders`.
+- `TypewriterHandler`, this behaviour is now intrinsic to the `AsyncLineView`.
 
 ## [3.0.0-beta1] 2024-11-30
 
