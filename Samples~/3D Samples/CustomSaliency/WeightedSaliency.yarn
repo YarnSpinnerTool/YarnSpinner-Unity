@@ -1,0 +1,88 @@
+﻿title: Alice
+when: always
+---
+<<if !visited("Alice")>>
+    Alice: I am showing off a custom saliency solution.
+    Player: Oh?
+    Alice: Yep, checkout out WeightedSaliencySelector.cs to see how it works.
+<<endif>>
+
+Alice: This node only has one chance of being selected.
+Alice: You should revisit me to see if I show another.
+
+===
+
+title: Alice
+when: always
+weight: 2
+---
+<<if !visited("Alice")>>
+    Alice: I am showing off a custom saliency solution.
+    Player: Oh?
+    Alice: Yep, checkout out WeightedSaliencySelector.cs to see how it works.
+<<endif>>
+
+Alice: This node has two chances of being selected
+Alice: You should revisit me to see if I show another.
+
+===
+
+title: Alice
+when: always
+weight: 3
+---
+<<if !visited("Alice")>>
+    Alice: I am showing off a custom saliency solution.
+    Player: Oh?
+    Alice: Yep, checkout out WeightedSaliencySelector.cs to see how it works.
+<<endif>>
+
+Alice: This node has three chances of being selected
+Alice: You should revisit me to see if I show another.
+
+===
+
+title: Alice
+when: always
+weight: 4
+---
+<<if !visited("Alice")>>
+    Alice: I am showing off a custom saliency solution.
+    Player: Oh?
+    Alice: Yep, checkout out WeightedSaliencySelector.cs to see how it works.
+<<endif>>
+
+Alice: This node has four chances of being selected
+Alice: You should revisit me to see if I show another.
+
+===
+
+title: Alice
+when: always
+weight: 5
+---
+<<if !visited("Alice")>>
+    Alice: I am showing off a custom saliency solution.
+    Player: Oh?
+    Alice: Yep, checkout out WeightedSaliencySelector.cs to see how it works.
+<<endif>>
+
+Alice: This node has five chances of being selected
+Alice: You should revisit me to see if I show another.
+
+===
+
+title: Barry
+when: always
+---
+<<if !visited("Barry")>>
+    Barry: I am showing off custom weighted saliency.
+    Barry: But doing it through line groups instead of nodes.
+    Barry: See WeightedSaliencySelector.cs to see how it works.
+<<endif>>
+
+=> Barry: This line has a weight of 1 #weight:1
+=> Barry: This line has a weight of 2 #weight:2
+=> Barry: This line has a weight of 3 #weight:3
+
+===
