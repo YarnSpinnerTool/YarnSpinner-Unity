@@ -639,6 +639,12 @@ namespace Yarn.Unity
                     continue;
                 }
 
+                if (view.enabled == false)
+                {
+                    // The view is not enabled. Skip it.
+                    continue;
+                }
+
                 // Legacy support: if this view is an v2-style DialogueViewBase,
                 // then set its requestInterrupt delegate to be one that stops
                 // the current line.
