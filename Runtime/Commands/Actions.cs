@@ -420,6 +420,13 @@ namespace Yarn.Unity
                         dispatcher.WaitForCoroutine(coro)
                     );
                 }
+                else if (returnValue is YarnTask yarnTask)
+                {
+                    return new CommandDispatchResult(
+                        CommandDispatchResult.StatusType.Succeeded,
+                        yarnTask
+                    );
+                }
 #if UNITY_2023_1_OR_NEWER
                 else if (returnValue is Awaitable awaitable)
                 {
