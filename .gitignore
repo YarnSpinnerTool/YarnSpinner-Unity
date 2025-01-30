@@ -84,3 +84,4 @@ Editor/Analysis/Analysis.sln*
 SourceGenerator/YarnSpinner.Unity.SourceCodeGenerator.deps.json*
 
 *.blend1
+*.afdesign~lock~
