@@ -3,6 +3,7 @@
 namespace Yarn.Unity.Samples
 {
     using UnityEngine;
+    using System.Threading;
 
     public class SimpleCharacterMovement : MonoBehaviour
     {
@@ -39,7 +40,7 @@ namespace Yarn.Unity.Samples
 
             if (!allowMovement)
             {
-                input = Vector2.zero;
+                return;
             }
 
             float rawSpeed;
@@ -87,30 +88,43 @@ namespace Yarn.Unity.Samples
 
         public void OnInteracted(Interactable interactable)
         {
-            async YarnTask TurnToInteractor()
-            {
-                float angle;
-                do
-                {
-                    var positionAtSameY = interactable.transform.position;
-                    positionAtSameY.y = transform.position.y;
-                    var lookDirection = positionAtSameY - transform.position;
-                    var desiredOrientation = Quaternion.LookRotation(lookDirection);
-
-                    transform.rotation = Quaternion.RotateTowards(transform.rotation, desiredOrientation, this.turnSpeed * Time.deltaTime);
-                    angle = Quaternion.Angle(transform.rotation, desiredOrientation);
-                    Debug.Log($"{desiredOrientation.eulerAngles}; My angle: " + angle);
-
-                    await YarnTask.Yield();
-                } while (!Application.exitCancellationToken.IsCancellationRequested && !allowMovement && angle > 0.1f);
-
-                Debug.Log($"Turn complete!");
-            }
-
             if (interactable.InteractorShouldTurnToFaceWhenInteracted)
             {
-                TurnToInteractor().Forget();
+                TurnToPosition(interactable.transform.position).Forget();
             }
+        }
+        public async YarnTask TurnToPosition(Vector3 position)
+        {
+            float angle;
+            do
+            {
+                var positionAtSameY = position;
+                positionAtSameY.y = transform.position.y;
+                var lookDirection = positionAtSameY - transform.position;
+                var desiredOrientation = Quaternion.LookRotation(lookDirection);
+
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, desiredOrientation, this.turnSpeed * Time.deltaTime);
+                angle = Quaternion.Angle(transform.rotation, desiredOrientation);
+
+                await YarnTask.Yield();
+            }
+            while (!Application.exitCancellationToken.IsCancellationRequested && !allowMovement && angle > 0.1f);
+        }
+
+        public async YarnTask MoveTo(Vector3 position, CancellationToken cancellationToken)
+        {
+            await TurnToPosition(position);
+
+            do
+            {
+                transform.position = Vector3.MoveTowards(transform.position, position, speed * Time.deltaTime);
+                this.CurrentSpeedFactor = 1;
+
+                await YarnTask.Yield();
+
+            } while (Vector3.Distance(transform.position, position) > 0.05f && !cancellationToken.IsCancellationRequested);
+            
+            this.CurrentSpeedFactor = 0;
         }
     }
 }
