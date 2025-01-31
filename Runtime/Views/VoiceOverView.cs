@@ -84,6 +84,19 @@ namespace Yarn.Unity
             }
         }
 
+        void Reset()
+        {
+            if (dialogueRunner == null)
+            {
+                dialogueRunner = FindAnyObjectByType<DialogueRunner>();
+            }
+
+            if (audioSource == null)
+            {
+                audioSource = GetComponentInChildren<AudioSource>();
+            }
+        }
+
         /// <summary>
         /// Begins playing the associated audio for the specified line.
         /// </summary>
