@@ -1,0 +1,41 @@
+﻿title: Start
+tags:
+---
+Capsley: Whoa hey cool this is a line
+
+Capsley: Let's get this up on the board
+
+<<start_slide>>
+SlideHeader: Yes That's Right
+SlideBullet: i implemented
+SlideBullet: slideshows
+SlideBullet: in Yarn Spinner
+<<end_slide>>
+
+Capsley: whoaaa
+
+<<clear_slide>>
+<<start_slide>>
+SlideImage: code-1
+<<end_slide>>
+
+// Capsley: let's add another bullet
+
+// <<start_slide>>
+// SlideBullet: another bullet
+// <<end_slide>>
+
+// Capsley: Nice. Next slide, please
+
+// <<clear_slide>>
+
+// <<start_slide>>
+// SlideHeader: Slide Two
+// SlideBullet: whoa
+// SlideBullet: amazing
+// SlideBullet: incredible
+// <<end_slide>>
+
+// Capsley: the end!
+
+===

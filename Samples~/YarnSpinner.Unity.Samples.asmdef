@@ -1,5 +1,5 @@
 {
-    "name": "YarnSpinner.Unity.Samples.2D",
+    "name": "YarnSpinner.Unity.Samples",
     "rootNamespace": "",
     "references": [
         "YarnSpinner.Unity",
