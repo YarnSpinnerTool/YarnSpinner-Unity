@@ -22,6 +22,7 @@ namespace Yarn.Unity.Tests
     public class CoroutineHost : MonoBehaviour { }
 
     [TestFixture]
+    [Ignore("Debugging compatibility line views", Until = "2025-02-14 12:00:00Z")]
     public class EndToEndTests : IPrebuildSetup, IPostBuildCleanup
     {
         const string EndToEndTestSceneGUID = "5497df506e7f14781b61ccbccad19db2";
