@@ -211,17 +211,18 @@ namespace Yarn.Unity.Tests
 
             foreach (var headerTestData in allHeaders)
             {
-                var yarnHeaders = new Dictionary<string, string>(this.runner.Dialogue.GetHeaders(headerTestData.Key));
+                var expectedHeaders = headerTestData.Value.SelectMany(h => h.Value.Select(v => KeyValuePair.Create(h.Key, v)));
+                var yarnHeaders = this.runner.Dialogue.GetHeaders(headerTestData.Key);
 
                 // its possible we got no headers or more/less headers
                 // so we need to check we found all the ones we expected to see
-                Assert.AreEqual(headerTestData.Value.Count, yarnHeaders.Count);
+                yarnHeaders.Count().Should().BeEqualTo(expectedHeaders.Count(), headerTestData.ToString());
 
                 foreach (var pair in headerTestData.Value)
                 {
                     // is the lust of strings the same as what the yarn program thinks?
                     // ie do we a value that matches each and every one of our tests?
-                    CollectionAssert.AreEquivalent(pair.Value, yarnHeaders[pair.Key]);
+                    yarnHeaders.Should().Contain(h => h.Key == pair.Key && pair.Value.Contains(h.Value));
                 }
             }
 
