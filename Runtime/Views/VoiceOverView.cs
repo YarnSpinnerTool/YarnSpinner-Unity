@@ -112,7 +112,16 @@ namespace Yarn.Unity
         public override async YarnTask RunLineAsync(LocalizedLine dialogueLine, LineCancellationToken lineCancellationToken)
         {
             // Get the localized voice over audio clip
-            var voiceOverClip = dialogueLine.Asset as AudioClip;
+            AudioClip? voiceOverClip = null;
+
+            if (dialogueLine.Asset is AudioClip clip)
+            {
+                voiceOverClip = clip;
+            }
+            else if (dialogueLine.Asset is IAssetProvider provider && provider.TryGetAsset(out AudioClip? result))
+            {
+                voiceOverClip = result;
+            }
 
             if (voiceOverClip == null)
             {
