@@ -26,13 +26,11 @@ namespace Yarn.Unity
     using UnityEngine.ResourceManagement.AsyncOperations;
 #endif
 
-    public partial struct YarnTask
+    public readonly partial struct YarnTask
     {
+        public readonly Awaitable.Awaiter GetAwaiter() => Awaitable.GetAwaiter();
 
-
-        public Awaitable.Awaiter GetAwaiter() => Awaitable.GetAwaiter();
-
-        Awaitable Awaitable;
+        readonly Awaitable Awaitable;
         readonly public bool IsCompleted() => Awaitable.IsCompleted;
         readonly public bool IsCompletedSuccessfully() => Awaitable.IsCompleted;
 
@@ -51,6 +49,11 @@ namespace Yarn.Unity
             }
         }
 
+        private YarnTask(Awaitable awaitable)
+        {
+            Awaitable = awaitable;
+        }
+
         public static implicit operator Awaitable(YarnTask demoYarnTask)
         {
             return demoYarnTask.Awaitable;
@@ -58,7 +61,7 @@ namespace Yarn.Unity
 
         public static implicit operator YarnTask(Awaitable awaitable)
         {
-            return new YarnTask { Awaitable = awaitable };
+            return new YarnTask(awaitable);
         }
 
         public static implicit operator YarnTask(System.Threading.Tasks.Task task)
@@ -67,7 +70,7 @@ namespace Yarn.Unity
             {
                 await task;
             }
-            return new YarnTask { Awaitable = Awaiter() };
+            return new YarnTask(Awaiter());
         }
 
 #if USE_UNITASK
@@ -213,7 +216,7 @@ namespace Yarn.Unity
 
     public partial struct YarnTask<T>
     {
-        public Awaitable<T>.Awaiter GetAwaiter() => Awaitable.GetAwaiter();
+        public readonly Awaitable<T>.Awaiter GetAwaiter() => Awaitable.GetAwaiter();
 
         Awaitable<T> Awaitable;
         readonly public bool IsCompleted() => Awaitable.GetAwaiter().IsCompleted;
