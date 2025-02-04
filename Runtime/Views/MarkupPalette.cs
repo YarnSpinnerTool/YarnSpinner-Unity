@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Yarn.Unity.Attributes;
 
 namespace Yarn.Unity
 {
@@ -32,7 +33,7 @@ namespace Yarn.Unity
             /// Indicates whethere or not the text associated with this marker should have a custom colour.
             /// </summary>
             public bool CustomColor;
-            
+
             /// <summary>
             /// The color to use for text associated with this marker.
             /// </summary>

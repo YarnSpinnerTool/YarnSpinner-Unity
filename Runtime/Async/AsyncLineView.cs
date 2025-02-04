@@ -3,6 +3,7 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 using Yarn.Markup;
+using Yarn.Unity.Attributes;
 
 #nullable enable
 
@@ -299,7 +300,7 @@ namespace Yarn.Unity
                     characterNameText.text = line.CharacterName;
                 }
                 text = line.TextWithoutCharacterName;
-                
+
                 if (line.Text.TryGetAttributeWithName("character", out var characterAttribute))
                 {
                     text.Attributes.Add(characterAttribute);

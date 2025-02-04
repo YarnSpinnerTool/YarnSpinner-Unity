@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Yarn.Unity.Attributes;
 
 #if USE_TMP
 using TMPro;
