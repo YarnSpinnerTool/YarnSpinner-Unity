@@ -67,7 +67,7 @@ namespace Yarn.Unity.Editor
 
 #if USE_UNITY_LOCALIZATION
         private SerializedProperty useUnityLocalisationSystemProperty;
-        private SerializedProperty unityLocalisationTableCollectionProperty;
+        private SerializedProperty unityLocalisationTableCollectionGUIDProperty;
 #endif
 
         private bool AnyModifications
@@ -80,13 +80,14 @@ namespace Yarn.Unity.Editor
             }
         }
 
-        private bool AnyLocalisationModifications => LocalisationsAddedOrRemoved || localizationEntryFields.Any(f => f.IsModified) || BaseLanguageNameModified;
+        private bool AnyLocalisationModifications => LocalisationsAddedOrRemoved || localizationEntryFields.Any(f => f.IsModified) || BaseLanguageNameModified || StringTableModified;
 
         private bool AnySourceFileModifications => SourceFilesAddedOrRemoved || sourceEntryFields.Any(f => f.IsModified);
 
         private bool LocalisationsAddedOrRemoved = false;
         private bool BaseLanguageNameModified = false;
         private bool SourceFilesAddedOrRemoved = false;
+        private bool StringTableModified = false;
 
         public override void OnEnable()
         {
@@ -96,7 +97,7 @@ namespace Yarn.Unity.Editor
 
 #if USE_UNITY_LOCALIZATION
             useUnityLocalisationSystemProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.UseUnityLocalisationSystem));
-            unityLocalisationTableCollectionProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.unityLocalisationStringTableCollection));
+            unityLocalisationTableCollectionGUIDProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.unityLocalisationStringTableCollectionGUID));
 #endif
 
             generateVariablesSourceFileProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.generateVariablesSourceFile));
@@ -212,6 +213,7 @@ namespace Yarn.Unity.Editor
             BaseLanguageNameModified = false;
             SourceFilesAddedOrRemoved = false;
             LocalisationsAddedOrRemoved = false;
+            StringTableModified = false;
 
             data.SaveToFile(importer.assetPath);
 
@@ -298,7 +300,14 @@ namespace Yarn.Unity.Editor
 
 #if USE_UNITY_LOCALIZATION
             var useUnityLocalisationSystemField = new PropertyField(useUnityLocalisationSystemProperty);
-            var unityLocalisationTableCollectionField = new PropertyField(unityLocalisationTableCollectionProperty);
+
+            // References to string table collections are stored as GUIDs,
+            // because ScriptedImporters can't refer to ScriptableObjects
+            // directly without causing drama. To preserve a good user
+            // experience, we'll add and manage an ObjectField directly.
+            var unityLocalisationTableCollectionField = new ObjectField("String Table Collection");
+            unityLocalisationTableCollectionField.objectType = typeof(StringTableCollection);
+            unityLocalisationTableCollectionField.SetValueWithoutNotify(yarnProjectImporter.UnityLocalisationStringTableCollection);
 #endif
 
             localisationFieldsContainer = new VisualElement();
@@ -449,7 +458,7 @@ namespace Yarn.Unity.Editor
 
             void UpdateUnityTableCollectionEmptyWarningVisibility()
             {
-                SetElementVisible(emptyTableCollectionWarning, unityLocalisationTableCollectionProperty.objectReferenceValue == null);
+                SetElementVisible(emptyTableCollectionWarning, string.IsNullOrEmpty(unityLocalisationTableCollectionGUIDProperty.stringValue));
             }
 
             UpdateLocalizationVisibility();
@@ -460,8 +469,25 @@ namespace Yarn.Unity.Editor
                 UpdateLocalizationVisibility();
             });
 
-            unityLocalisationTableCollectionField.RegisterValueChangeCallback(evt =>
+
+            unityLocalisationTableCollectionField.RegisterValueChangedCallback(evt =>
             {
+                // When the localisation table changes, get the GUID for it and
+                // store it in the property.
+
+                if (evt.newValue != null && AssetDatabase.TryGetGUIDAndLocalFileIdentifier(evt.newValue, out string guid, out long _))
+                {
+                    unityLocalisationTableCollectionGUIDProperty.stringValue = guid;
+                }
+                else
+                {
+                    // The object is null, or a GUID for it can't be found.
+                    unityLocalisationTableCollectionGUIDProperty.stringValue = string.Empty;
+                }
+
+                // Flag that we've changed our importer's settings.
+                StringTableModified = true;
+
                 UpdateUnityTableCollectionEmptyWarningVisibility();
             });
 #endif

@@ -112,11 +112,12 @@ namespace Yarn.Unity.Tests
             a.SourceFilePatterns = newPaths.Select(p => $"./{Path.GetFileName(p)}");
             a.BaseLanguage = "en";
             a.SaveToFile($"{AssetPath}/{projectName}.yarnproject");
-            
+
             // making it use the tables we made
             importer.UseUnityLocalisationSystem = true;
-            importer.unityLocalisationStringTableCollection = tableCollection;
-            
+            AssetDatabase.TryGetGUIDAndLocalFileIdentifier(tableCollection, out var guid, out long _).Should().BeTrue();
+            importer.unityLocalisationStringTableCollectionGUID = guid;
+
             // flagging it as needing save and reimport
             EditorUtility.SetDirty(importer);
             importer.SaveAndReimport();
@@ -141,7 +142,7 @@ namespace Yarn.Unity.Tests
             Assert.NotNull(projectB);
 
             // A and B use the same table so we just grab either of them
-            var table = projectA.unityLocalisationStringTableCollection.StringTables.First();
+            var table = projectA.UnityLocalisationStringTableCollection.StringTables.First();
             // and we need it to not be null
             Assert.NotNull(table);
 

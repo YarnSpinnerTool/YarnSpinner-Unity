@@ -147,7 +147,54 @@ namespace Yarn.Unity.Editor
 
 #if USE_UNITY_LOCALIZATION
         public bool UseUnityLocalisationSystem = false;
-        public StringTableCollection unityLocalisationStringTableCollection;
+
+        // Scripted importers can't have direct references to scriptable
+        // objects, so we'll store the reference as a string containing the
+        // GUID.
+        public string? unityLocalisationStringTableCollectionGUID;
+
+        private StringTableCollection? _cachedStringTableCollection;
+
+        /// <summary>
+        /// Gets or sets the Unity Localization string table collection
+        /// associated with this importer.
+        /// </summary>
+        public StringTableCollection? UnityLocalisationStringTableCollection
+        {
+            get
+            {
+                if (_cachedStringTableCollection == null)
+                {
+                    if (!string.IsNullOrEmpty(unityLocalisationStringTableCollectionGUID))
+                    {
+                        var assetPath = AssetDatabase.GUIDToAssetPath(unityLocalisationStringTableCollectionGUID);
+
+                        if (!string.IsNullOrEmpty(assetPath))
+                        {
+                            _cachedStringTableCollection = AssetDatabase.LoadAssetAtPath<StringTableCollection>(assetPath);
+                        }
+                    }
+                }
+                return _cachedStringTableCollection;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    unityLocalisationStringTableCollectionGUID = string.Empty;
+                    _cachedStringTableCollection = null;
+                    return;
+                }
+
+                if (!AssetDatabase.TryGetGUIDAndLocalFileIdentifier(value, out var guid, out long _))
+                {
+                    throw new System.InvalidOperationException($"String table collection {value.name} has no GUID - is it not an asset stored on disk?");
+                }
+
+                unityLocalisationStringTableCollectionGUID = guid;
+                _cachedStringTableCollection = value;
+            }
+        }
 #endif
 
         /// <summary>
@@ -199,6 +246,38 @@ namespace Yarn.Unity.Editor
             catch
             {
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets the Yarn string table produced as a result of compiling the Yarn
+        /// Project, or <see langword="null"/> if no string table could be produced.
+        /// </summary>
+        private Dictionary<string, StringInfo>? GetYarnStringTable()
+        {
+            Project project;
+            try
+            {
+                project = Project.LoadFromFile(this.assetPath);
+            }
+            catch (System.Exception)
+            {
+                return null;
+            }
+
+            var job = CompilationJob.CreateFromFiles(project.SourceFiles);
+            job.LanguageVersion = project.FileVersion;
+            job.CompilationType = CompilationJob.Type.StringsOnly;
+
+            try
+            {
+                var compilationResult = Compiler.Compiler.Compile(job);
+
+                return new(compilationResult.StringTable);
+            }
+            catch (System.Exception)
+            {
+                return null;
             }
         }
 
@@ -416,7 +495,8 @@ namespace Yarn.Unity.Editor
 #if USE_UNITY_LOCALIZATION
                 if (UseUnityLocalisationSystem)
                 {
-                    AddStringTableEntries(compilationResult, this.unityLocalisationStringTableCollection, project);
+                    // Mark that this project uses Unity Localization; we'll
+                    // populate the string table later, in a post-processor.
                     projectAsset.localizationType = LocalizationType.Unity;
                 }
                 else
@@ -1005,21 +1085,15 @@ namespace Yarn.Unity.Editor
         }
 
 #if USE_UNITY_LOCALIZATION
-        private void AddStringTableEntries(CompilationResult compilationResult, StringTableCollection unityLocalisationStringTableCollection, Yarn.Compiler.Project project)
+        private static void AddStringTableEntries(IDictionary<string, StringInfo> stringTable, StringTableCollection unityLocalisationStringTableCollection, string baseLanguage)
         {
-            if (unityLocalisationStringTableCollection == null)
-            {
-                Debug.LogError("Unable to generate String Table Entries as the string collection is null");
-                return;
-            }
-
             // Get the Unity string table corresponding to the Yarn Project's
             // base language. If a table can't be found for the language but can
             // be for the language's parent, use that. Otherwise, return null.
-            StringTable FindBaseLanguageStringTable()
+            StringTable? FindBaseLanguageStringTable(string baseLanguage)
             {
                 StringTable baseLanguageStringTable = unityLocalisationStringTableCollection.StringTables
-                    .FirstOrDefault(t => t.LocaleIdentifier == project.BaseLanguage);
+                    .FirstOrDefault(t => t.LocaleIdentifier == baseLanguage);
 
                 if (baseLanguageStringTable != null)
                 {
@@ -1030,10 +1104,10 @@ namespace Yarn.Unity.Editor
                 // code of our Yarn Project's base language. Maybe we can try to
                 // find a string table for our base language's parent.
 
-                System.Globalization.CultureInfo defaultCulture = null;
+                System.Globalization.CultureInfo? defaultCulture = null;
                 try
                 {
-                    defaultCulture = new System.Globalization.CultureInfo(project.BaseLanguage);
+                    defaultCulture = new System.Globalization.CultureInfo(baseLanguage);
                 }
                 catch (System.Globalization.CultureNotFoundException)
                 {
@@ -1055,15 +1129,15 @@ namespace Yarn.Unity.Editor
                 return defaultNeutralStringTable;
             }
 
-            var unityStringTable = FindBaseLanguageStringTable();
+            var unityStringTable = FindBaseLanguageStringTable(baseLanguage);
 
             if (unityStringTable == null)
             {
-                Debug.LogWarning($"Unable to find a locale in the string table that matches the default locale {project.BaseLanguage}");
+                Debug.LogWarning($"Unable to find a locale in the string table that matches the default locale {baseLanguage}");
                 return;
             }
 
-            foreach (var yarnEntry in compilationResult.StringTable)
+            foreach (var yarnEntry in stringTable)
             {
                 // Grab the data that we'll put in the string table
                 var lineID = yarnEntry.Key;
@@ -1113,6 +1187,8 @@ namespace Yarn.Unity.Editor
             // as dirty.
             EditorUtility.SetDirty(unityStringTable);
             EditorUtility.SetDirty(unityStringTable.SharedData);
+            EditorUtility.SetDirty(unityLocalisationStringTableCollection);
+            EditorUtility.SetDirty(LocalizationEditorSettings.ActiveLocalizationSettings);
             return;
 
         }
@@ -1159,18 +1235,6 @@ namespace Yarn.Unity.Editor
 
                 return importData.HasCompileErrors == false && importData.containsImplicitLineIDs == false;
             }
-        }
-
-        private CompilationResult? CompileStringsOnly()
-        {
-            var paths = GetProject().SourceFiles;
-
-            var job = CompilationJob.CreateFromFiles(paths);
-            job.CompilationType = CompilationJob.Type.StringsOnly;
-
-            return Compiler.Compiler.Compile(job);
-
-
         }
 
         internal CompilationJob GetCompilationJob()
@@ -1326,10 +1390,49 @@ namespace Yarn.Unity.Editor
         /// </summary>
         /// <param name="metadata">The array with line metadata.</param>
         /// <returns>An IEnumerable with any line ID entries removed.</returns>
-        private IEnumerable<string> RemoveLineIDFromMetadata(string[] metadata)
+        private static IEnumerable<string> RemoveLineIDFromMetadata(string[] metadata)
         {
             return metadata.Where(x => !x.StartsWith("line:"));
         }
+
+#if USE_UNITY_LOCALIZATION
+        /// <summary>
+        /// Attempts to populate the <see cref="StringTableCollection"/>
+        /// associated with this Yarn Project Importer using strings found in
+        /// the project's Yarn scripts.
+        /// </summary>
+        /// <exception cref="System.InvalidOperationException">Thrown when <see
+        /// cref="UseUnityLocalisationSystem"/> is <see
+        /// langword="false"/>.</exception>
+        internal void AddStringsToUnityLocalization()
+        {
+            if (UseUnityLocalisationSystem == false)
+            {
+                throw new System.InvalidOperationException($"Can't add strings to Unity Localization: project {assetPath} does not use Unity Localization.");
+            }
+
+            // Get the Yarn string table from the project
+            Dictionary<string, StringInfo>? table = GetYarnStringTable();
+
+            if (table == null || ImportData == null)
+            {
+                // No lines available, or importer has not successfully imported
+                return;
+            }
+
+            // Get the string table collection from the importer
+            StringTableCollection? tableCollection = UnityLocalisationStringTableCollection;
+
+            if (tableCollection == null)
+            {
+                Debug.LogError("Unable to generate String Table Entries as the string collection is null", (YarnProjectImporter?)this);
+                return;
+            }
+
+            // Populate the string table collection from the Yarn strings
+            AddStringTableEntries(table, tableCollection, ImportData.baseLanguageName);
+        }
+#endif
 
         /// <summary>
         /// A placeholder string that may be used in Yarn Project files that

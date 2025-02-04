@@ -476,11 +476,11 @@ namespace Yarn.Unity.Editor
 #if USE_UNITY_LOCALIZATION
             // if we are using Unity localisation we need to first remove the
             // implicit tags for this project from the strings table
-            if (importer.UseUnityLocalisationSystem && importer.unityLocalisationStringTableCollection != null)
+            if (importer.UseUnityLocalisationSystem && importer.UnityLocalisationStringTableCollection != null)
             {
                 foreach (var implicitTag in extantTags.Item2)
                 {
-                    importer.unityLocalisationStringTableCollection.RemoveEntry(implicitTag);
+                    importer.UnityLocalisationStringTableCollection.RemoveEntry(implicitTag);
                 }
             }
 #endif
