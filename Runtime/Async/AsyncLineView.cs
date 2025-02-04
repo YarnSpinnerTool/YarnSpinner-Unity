@@ -314,7 +314,7 @@ namespace Yarn.Unity
                 {
                     characterNameContainer.SetActive(false);
                 }
-                text = line.Text;
+                text = line.TextWithoutCharacterName;
             }
             lineText.text = text.Text;
 
