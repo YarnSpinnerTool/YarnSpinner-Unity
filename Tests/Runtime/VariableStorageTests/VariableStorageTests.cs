@@ -187,13 +187,13 @@ namespace Yarn.Unity.Tests
                 Debug.Log($"$floatVar changed to " + value);
             });
 
-            LogAssert.Expect("$boolVar changed to True");
+            LogAssert.Expect(LogType.Log, "$boolVar changed to True");
             VarStorage.SetValue("$boolVar", true);
 
-            LogAssert.Expect("$stringVar changed to goodbye");
+            LogAssert.Expect(LogType.Log, "$stringVar changed to goodbye");
             VarStorage.SetValue("$stringVar", "goodbye");
 
-            LogAssert.Expect("$floatVar changed to 42");
+            LogAssert.Expect(LogType.Log, "$floatVar changed to 42");
             VarStorage.SetValue("$floatVar", 42);
 
             // Disposing of the listeners removes them
