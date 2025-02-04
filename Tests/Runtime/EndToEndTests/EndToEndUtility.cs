@@ -148,6 +148,15 @@ namespace Yarn.Unity.Tests
     {
         public static async YarnTask WithTimeout(this YarnTask task, string? failureMessage = null, int timeoutMilliseconds = 2000)
         {
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                // If a debugger is attached, don't do timeouts, because the act
+                // of debugging will likely make us take longer than the timeout
+                // and we'd (potentially spuriously) fail.
+                await task;
+                return;
+            }
+
             // A completion source that represents whether the task timed out
             // (true), or didn't (false).
             YarnTaskCompletionSource<bool> taskCompletionSource = new();
