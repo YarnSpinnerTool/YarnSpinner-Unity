@@ -4,6 +4,7 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 namespace Yarn.Unity.Tests
 {
+    using NUnit.Framework;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -11,21 +12,14 @@ namespace Yarn.Unity.Tests
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading;
-    using NUnit.Framework;
     using UnityEngine;
     using UnityEngine.SceneManagement;
     using UnityEngine.TestTools;
     using UnityEngine.UI;
     using Yarn.Markup;
 
-#if USE_UNITASK
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-#else
-    using YarnTask = System.Threading.Tasks.Task;
-#endif
-
 #nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
     /// <summary>
     /// An IMarkupParser that performs no processing.
@@ -77,26 +71,33 @@ namespace Yarn.Unity.Tests
 
             yield return new WaitUntil(() => loaded);
 
-            runner = GameObject.FindObjectOfType<DialogueRunner>();
-            lineProvider = GameObject.FindObjectOfType<BuiltinLocalisedLineProvider>();
+            yield return null; // Give all objects a chance to wake up
 
+            runner = GameObject.FindAnyObjectByType<DialogueRunner>();
             runner.Should().NotBeNull();
-            runner.lineProvider!.Should().NotBeNull();
+            runner.YarnProject.Should().NotBeNull();
+            runner.LineProvider.Should().NotBeNull();
+
+            lineProvider = runner.LineProvider.Should().BeOfExactType<BuiltinLocalisedLineProvider>().Subject;
 
             lineProvider.Should().NotBeNull();
-            lineProvider.Should().BeSameObjectAs(runner.lineProvider!);
+            runner.LineProvider.Should().BeSameObjectAs(lineProvider);
+
+            lineProvider.YarnProject.Should().NotBeNull();
 
             yarnProject = runner.yarnProject!;
             yarnProject.Should().NotBeNull();
+
+            lineProvider.YarnProject.Should().BeSameObjectAs(yarnProject);
         }
 
         [UnityTest]
-        public IEnumerator LineProvider_CorrectLineID_FetchesLineContent() => YarnAsync.ToCoroutine(async () =>
+        public IEnumerator LineProvider_CorrectLineID_FetchesLineContent() => YarnTask.ToCoroutine(async () =>
         {
             var line = new Line("line:shadowtest_1", new string[] { });
-            
+
             lineProvider.LocaleCode = "en";
-            var localisedLine = await lineProvider.GetLocalizedLineAsync(line, this.runner.Dialogue, CancellationToken.None);
+            var localisedLine = await lineProvider.GetLocalizedLineAsync(line, CancellationToken.None);
 
             localisedLine.Should().NotBeNull();
 
@@ -107,19 +108,19 @@ namespace Yarn.Unity.Tests
             localisedLine.CharacterName!.Should().BeEqualTo("Ava");
         });
 
-        [UnityTest] 
-        public IEnumerator LineProvider_IncorrectLineID_FetchesInvalidLineMarker() => YarnAsync.ToCoroutine(async () =>
+        [UnityTest]
+        public IEnumerator LineProvider_IncorrectLineID_FetchesInvalidLineMarker() => YarnTask.ToCoroutine(async () =>
         {
             var line = new Line("line:doesnotexist", new string[] { });
 
             lineProvider.LocaleCode = "en";
-            var localisedLine = await lineProvider.GetLocalizedLineAsync(line, this.runner.Dialogue, CancellationToken.None);
+            var localisedLine = await lineProvider.GetLocalizedLineAsync(line, CancellationToken.None);
 
             localisedLine.Should().BeSameObjectAs(LocalizedLine.InvalidLine);
         });
 
         [UnityTest]
-        public IEnumerator LineProvider_ShadowLineID_FetchesSourceContent() => YarnAsync.ToCoroutine(async () =>
+        public IEnumerator LineProvider_ShadowLineID_FetchesSourceContent() => YarnTask.ToCoroutine(async () =>
         {
 
             lineProvider.LocaleCode = "en";
@@ -129,12 +130,11 @@ namespace Yarn.Unity.Tests
             var allLines = yarnProject.GetLineIDsForNodes(new[] { "ShadowLines_Kitchen" });
             var shadowLineID = allLines.Should().ContainSingle(l => l.StartsWith("line:shadowtest_") == false).Subject;
 
-            var sourceLineID = yarnProject.lineMetadata.GetShadowLineSource(shadowLineID)!;
+            var sourceLineID = yarnProject.lineMetadata?.GetShadowLineSource(shadowLineID)!;
             sourceLineID.Should().NotBeNull();
 
-            var sourceLine = await lineProvider.GetLocalizedLineAsync(new Line(sourceLineID, new string[] { }), this.runner.Dialogue, CancellationToken.None);
-
-            var shadowLine = await lineProvider.GetLocalizedLineAsync(new Line(shadowLineID, new string[] { }), this.runner.Dialogue, CancellationToken.None);
+            var sourceLine = await lineProvider.GetLocalizedLineAsync(new Line(sourceLineID, new string[] { }), CancellationToken.None);
+            var shadowLine = await lineProvider.GetLocalizedLineAsync(new Line(shadowLineID, new string[] { }), CancellationToken.None);
 
             shadowLine.TextID.Should().NotBeEqualTo(sourceLineID, "shadow lines have their own unique line IDs");
             shadowLine.RawText!.Should().BeEqualTo(sourceLine.RawText, "shadow lines have the same text as their source");
@@ -142,20 +142,7 @@ namespace Yarn.Unity.Tests
 
             shadowLine.Metadata.Should().NotBeEmpty("shadow line contains metadata");
             shadowLine.Metadata.Should().NotContainAnyOf(sourceLine.Metadata, "shadow line does not contain its source line's metadata");
-            
-            // var line = new Line("line:shadowtest_1", new string[] { });
-            
-            // lineProvider.LocaleCode = "en";
-            // var localisedLine = await lineProvider.GetLocalizedLineAsync(line, this.runner.Dialogue, CancellationToken.None);
-
-            // localisedLine.Should().NotBeNull();
-
-            // localisedLine.TextID.Should().BeEqualTo("line:shadowtest_1");
-            // localisedLine.Asset!.Should().NotBeNull();
-            // localisedLine.Asset!.Should().BeOfType<AudioClip>();
-            // localisedLine.CharacterName!.Should().NotBeNull();
-            // localisedLine.CharacterName!.Should().BeEqualTo("Ava");
         });
-        
+
     }
 }

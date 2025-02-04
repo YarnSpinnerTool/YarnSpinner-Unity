@@ -4,9 +4,9 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 #define LOGGING
 
-using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 
 namespace Yarn.Unity.Editor
 {
@@ -61,7 +61,7 @@ namespace Yarn.Unity.Editor
                 var currentGroup = UnityEditor.Build.NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
                 return PlayerSettings
                     .GetScriptingDefineSymbols(currentGroup)
-                    .Split(new[] {';'}, System.StringSplitOptions.RemoveEmptyEntries)
+                    .Split(new[] { ';' }, System.StringSplitOptions.RemoveEmptyEntries)
                     .Contains(SymbolName);
             }
 
@@ -70,7 +70,7 @@ namespace Yarn.Unity.Editor
                 var currentGroup = UnityEditor.Build.NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
                 var currentDefines = PlayerSettings
                     .GetScriptingDefineSymbols(currentGroup)
-                    .Split(new[] {';'}, System.StringSplitOptions.RemoveEmptyEntries);
+                    .Split(new[] { ';' }, System.StringSplitOptions.RemoveEmptyEntries);
 
                 var currentDefinesList = new List<string>(currentDefines);
 

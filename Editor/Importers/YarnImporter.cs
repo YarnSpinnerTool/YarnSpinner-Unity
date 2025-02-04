@@ -2,14 +2,14 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using UnityEngine;
-using UnityEditor;
-using UnityEditor.AssetImporters;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using UnityEditor;
+using UnityEditor.AssetImporters;
+using UnityEngine;
 
 #nullable enable
 
@@ -17,15 +17,16 @@ namespace Yarn.Unity.Editor
 {
 
     /// <summary>
-    /// A <see cref="ScriptedImporter"/> for Yarn assets. The actual asset
-    /// used and referenced at runtime and in the editor will be a <see
-    /// cref="YarnScript"/>, which this class wraps around creating the
-    /// asset's corresponding meta file.
+    /// A <see cref="ScriptedImporter"/> for Yarn assets.
     /// </summary>
-    [ScriptedImporter(4, new[] { "yarn", "yarnc" }, -1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
+    [ScriptedImporter(6, new[] { "yarn", "yarnc" }, -1), HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
     [InitializeOnLoad]
     public class YarnImporter : ScriptedImporter
     {
+        /// <summary>
+        /// Get the collection of <see cref="YarnProject"/> assets that
+        /// reference this Yarn script.
+        /// </summary>
         public IEnumerable<YarnProject> DestinationProjects
         {
             get
@@ -35,6 +36,10 @@ namespace Yarn.Unity.Editor
             }
         }
 
+        /// <summary>
+        /// Get the collection of importers for the <see cref="YarnProject"/> assets that
+        /// reference this Yarn script.
+        /// </summary>
         public IEnumerable<YarnProjectImporter> DestinationProjectImporters
         {
             get
@@ -54,10 +59,18 @@ namespace Yarn.Unity.Editor
             }
         }
 
-        public bool HasErrors {
-            get {
-                foreach (var projectImporter in DestinationProjectImporters) {
-                    if (projectImporter.GetErrorsForScript(ImportedScript).Any()) {
+        /// <summary>
+        /// Gets a value indicating whether any of the Yarn Projects in <see
+        /// cref="DestinationProjects"/> reported any errors in this file.
+        /// </summary>
+        public bool HasErrors
+        {
+            get
+            {
+                foreach (var projectImporter in DestinationProjectImporters)
+                {
+                    if (projectImporter.GetErrorsForScript(ImportedScript).Any())
+                    {
                         return true;
                     }
                 }
@@ -67,6 +80,11 @@ namespace Yarn.Unity.Editor
 
         private TextAsset ImportedScript => AssetDatabase.LoadAssetAtPath<TextAsset>(this.assetPath);
 
+        /// <summary>
+        /// Called by Unity to import an asset.
+        /// </summary>
+        /// <param name="ctx">The context for the asset import
+        /// operation.</param>
         public override void OnImportAsset(AssetImportContext ctx)
         {
             var stopwatch = new System.Diagnostics.Stopwatch();
@@ -144,7 +162,7 @@ namespace Yarn.Unity.Editor
         /// name="limitCharacters"/> characters long. If this is set to -1,
         /// the entire string will be returned.</param>
         /// <returns>A string version of the hash.</returns>
-        internal static string GetHashString(string inputString, int limitCharacters = -1)
+        public static string GetHashString(string inputString, int limitCharacters = -1)
         {
             var sb = new StringBuilder();
             foreach (byte b in GetHash(inputString))

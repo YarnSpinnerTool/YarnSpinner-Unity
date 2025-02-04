@@ -5,6 +5,8 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 using NUnit.Framework;
 using System.Linq;
 
+#nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -22,7 +24,7 @@ namespace Yarn.Unity.Tests
         private static string GeneratedRegistrationPath => TestFilesDirectoryPath + "YarnActionRegistration.cs";
 
         private static string GeneratedAssemblyDefinitionFilePath => TestFilesDirectoryPath + "RuntimeTestAssembly.asmdef";
-        
+
         public static void AddSceneToBuild(string GUID)
         {
 #if UNITY_EDITOR
@@ -44,6 +46,39 @@ namespace Yarn.Unity.Tests
 #if UNITY_EDITOR
             // Filter the list to remove any scene with this GUID
             EditorBuildSettings.scenes = EditorBuildSettings.scenes.Where(x => x.guid.ToString() != GUID).ToArray();
+#endif
+        }
+
+        internal static void EnsureTMPResourcesAvailableAndExit()
+        {
+#if UNITY_EDITOR
+            var s_TextSettings = UnityEngine.Resources.Load<TMPro.TMP_Settings>("TextSettings");
+            if (s_TextSettings != null)
+            {
+                // TMP resources are already available
+                return;
+            }
+            // Install the TMP Essentials package
+            var unityGUIPackageFullPath = System.IO.Path.GetFullPath("Packages/com.unity.ugui");
+            if (System.IO.Directory.Exists(unityGUIPackageFullPath) == false)
+            {
+                throw new System.InvalidOperationException($"Can't install TMP assets: {unityGUIPackageFullPath} is not a valid directory");
+            }
+
+            UnityEngine.Debug.Log($"Importing TextMeshPro essential resources.");
+
+            AssetDatabase.ImportPackage(unityGUIPackageFullPath + "/Package Resources/TMP Essential Resources.unitypackage", false);
+            AssetDatabase.importPackageCompleted += (packageName) =>
+            {
+                UnityEngine.Debug.Log($"Package import complete: " + packageName);
+                if (packageName == "TMP Essential Resources")
+                {
+                    UnityEngine.Debug.Log($"Done importing TMP resources.");
+                    AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+
+                    EditorApplication.Exit(0);
+                }
+            };
 #endif
         }
     }

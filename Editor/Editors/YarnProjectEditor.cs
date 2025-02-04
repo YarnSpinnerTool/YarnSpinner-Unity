@@ -3,9 +3,9 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
 using UnityEditor;
+using UnityEditor.AssetImporters;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
-using UnityEditor.AssetImporters;
 
 namespace Yarn.Unity.Editor
 {
@@ -20,7 +20,8 @@ namespace Yarn.Unity.Editor
 
             var ui = new VisualElement();
 
-            if (importData == null) {
+            if (importData == null)
+            {
                 return new Label("Project failed to import, or needs upgrading.");
             }
 
@@ -33,7 +34,8 @@ namespace Yarn.Unity.Editor
             yarnScriptsField.Bind(importDataSO);
             ui.Add(yarnScriptsField);
             foldout = yarnScriptsField.Q<Foldout>();
-            if (foldout != null) {
+            if (foldout != null)
+            {
                 foldout.value = true;
             }
 
@@ -41,7 +43,8 @@ namespace Yarn.Unity.Editor
             var variablesField = new PropertyField(variablesProperty, "Variables");
             variablesField.Bind(importDataSO);
             foldout = variablesField.Q<Foldout>();
-            if (foldout != null) {
+            if (foldout != null)
+            {
                 foldout.value = true;
             }
 

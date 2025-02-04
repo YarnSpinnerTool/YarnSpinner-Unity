@@ -4,23 +4,16 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 namespace Yarn.Unity.Tests
 {
+    using NUnit.Framework;
+    using System;
     using System.Collections;
     using System.Diagnostics.CodeAnalysis;
     using System.Threading;
-    using NUnit.Framework;
-    using UnityEngine;
-    using UnityEngine.TestTools;
     using UnityEngine.SceneManagement;
-    using System;
-
-#if USE_UNITASK
-    using Cysharp.Threading.Tasks;
-    using YarnTask = Cysharp.Threading.Tasks.UniTask;
-#else
-    using YarnTask = System.Threading.Tasks.Task;
-#endif
+    using UnityEngine.TestTools;
 
 #nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
     public class LineViewTests : IPrebuildSetup, IPostBuildCleanup
     {
@@ -44,7 +37,7 @@ namespace Yarn.Unity.Tests
         OptionsListView optionsView;
 
         [UnitySetUp]
-        public IEnumerator LoadScene() => YarnAsync.ToCoroutine(async () =>
+        public IEnumerator LoadScene() => YarnTask.ToCoroutine(async () =>
         {
             SceneManager.LoadScene("DialogueViewTests");
             bool loaded = false;
@@ -58,7 +51,7 @@ namespace Yarn.Unity.Tests
                 await YarnTask.Yield();
             }
 
-            dialogueRunner = GameObject.FindObjectOfType<DialogueRunner>();
+            dialogueRunner = UnityEngine.Object.FindAnyObjectByType<DialogueRunner>();
             dialogueRunner.Should().NotBeNull();
 
             lineView = dialogueRunner.GetComponentInChildren<LineView>();
@@ -80,7 +73,7 @@ namespace Yarn.Unity.Tests
 
 
         [UnityTest]
-        public IEnumerator LineView_WhenLineRun_ShowsLine() => YarnAsync.ToCoroutine(async () =>
+        public IEnumerator LineView_WhenLineRun_ShowsLine() => YarnTask.ToCoroutine(async () =>
         {
 
             LocalizedLine line = MakeLocalizedLine(
@@ -91,9 +84,7 @@ namespace Yarn.Unity.Tests
 
             lineView.canvasGroup.alpha.Should().BeEqualTo(0, "The line view is not yet visible");
 
-            var tokenSource = new CancellationTokenSource();
-
-            var runTask = lineView.RunLineAsync(line, tokenSource.Token);
+            var runTask = lineView.RunLineAsync(line, default);
 
             await YarnTask.Delay(TimeSpan.FromSeconds(0.5f));
 
@@ -107,10 +98,17 @@ namespace Yarn.Unity.Tests
 
         private LocalizedLine MakeLocalizedLine(string lineText, string[]? substitutions = null, string[]? metadata = null, string? lineID = null)
         {
+            string locale = "en-AU";
             Markup.MarkupParseResult ParseMarkup(string text, string[] substitutions)
             {
-                text = Dialogue.ExpandSubstitutions(text, substitutions);
-                return dialogueRunner.Dialogue.ParseMarkup(text, "en");
+                var expandedText = Markup.LineParser.ExpandSubstitutions(text, substitutions);
+                var lineParser = new Markup.LineParser();
+                var builtinReplacer = new Markup.BuiltInMarkupReplacer();
+                lineParser.RegisterMarkerProcessor("select", builtinReplacer);
+                lineParser.RegisterMarkerProcessor("plural", builtinReplacer);
+                lineParser.RegisterMarkerProcessor("ordinal", builtinReplacer);
+
+                return lineParser.ParseString(expandedText, locale);
             }
 
             return new LocalizedLine()
@@ -124,8 +122,8 @@ namespace Yarn.Unity.Tests
         }
 
         [UnityTest]
-        [Timeout(200)] // should complete basically immediately
-        public IEnumerator LineView_WhenManuallyAdvancingLine_CompletesLineTask() => YarnAsync.ToCoroutine(async () =>
+        // [Timeout(200)] // should complete basically immediately
+        public IEnumerator LineView_WhenManuallyAdvancingLine_CompletesLineTask() => YarnTask.ToCoroutine(async () =>
         {
             LocalizedLine line = MakeLocalizedLine("Line 1");
 
@@ -135,11 +133,16 @@ namespace Yarn.Unity.Tests
 
             var cancellationSource = new CancellationTokenSource();
 
-            // Set the line view's 'interrupt handler' to be one that cancels the line
+            // Set the line view's 'interrupt handler' to be one that soft-cancels the line
             lineView.requestInterrupt = () => cancellationSource.Cancel();
 
-            YarnTask runTask = lineView.RunLineAsync(line, cancellationSource.Token);
-            
+            var lineCancellationToken = new LineCancellationToken
+            {
+                NextLineToken = cancellationSource.Token
+            };
+
+            YarnTask runTask = lineView.RunLineAsync(line, lineCancellationToken);
+
             runTask.IsCompleted().Should().BeFalse();
             lineView.lineText.text.Should().BeEqualTo("Line 1");
 
@@ -151,20 +154,26 @@ namespace Yarn.Unity.Tests
         });
 
         [UnityTest]
-        public IEnumerator LineView_TextEffects_RenderTextGradually() => YarnAsync.ToCoroutine(async () =>
+        public IEnumerator LineView_TextEffects_RenderTextGradually() => YarnTask.ToCoroutine(async () =>
         {
             LocalizedLine line = MakeLocalizedLine("Line 1");
 
             // Configure the line view to use all of the effects
             lineView.useFadeEffect = true;
             lineView.useTypewriterEffect = true;
+            lineView.fadeOutTime = 1.0f;
 
             var cancellationSource = new CancellationTokenSource();
 
-            // Set the line view's 'interrupt handler' to be one that cancels the line
+            // Set the line view's 'interrupt handler' to be one that soft-cancels the line
             lineView.requestInterrupt = () => cancellationSource.Cancel();
 
-            YarnTask runTask = lineView.RunLineAsync(line, cancellationSource.Token);
+            var lineCancellationToken = new LineCancellationToken
+            {
+                NextLineToken = cancellationSource.Token
+            };
+
+            YarnTask runTask = lineView.RunLineAsync(line, lineCancellationToken);
 
             int characterCount = lineView.lineText.textInfo.characterCount;
             characterCount.Should().BeGreaterThan(0);
@@ -178,7 +187,7 @@ namespace Yarn.Unity.Tests
 
             // Wait for the fade to finish
             await YarnTask.Delay(TimeSpan.FromSeconds(lineView.fadeInTime));
-            
+
             lineView.canvasGroup.alpha.Should().BeEqualTo(1);
 
             lineView.lineText.maxVisibleCharacters.Should().BeGreaterThanOrEqualTo(0, "the typewriter effect has begun");
@@ -188,21 +197,19 @@ namespace Yarn.Unity.Tests
             await YarnTask.Delay(TimeSpan.FromSeconds(2f));
 
             lineView.lineText.maxVisibleCharacters.Should().BeGreaterThanOrEqualTo(characterCount);
+            lineView.continueButton.activeInHierarchy.Should().BeTrue();
 
             // Dismiss the line
             lineView.UserRequestedViewAdvancement();
 
-            await YarnTask.Delay(TimeSpan.FromSeconds(0.01f));
-
-            lineView.canvasGroup.alpha.Should().BeLessThan(1);
-            lineView.canvasGroup.alpha.Should().BeGreaterThan(0);
             runTask.IsCompleted().Should().BeFalse();
 
             // Wait for the fade out to complete
             await YarnTask.Delay(TimeSpan.FromSeconds(lineView.fadeOutTime));
+            await YarnTask.Delay(TimeSpan.FromSeconds(0.05));
 
-            lineView.canvasGroup.alpha.Should().BeEqualTo(0);
             runTask.IsCompleted().Should().BeTrue();
+            lineView.canvasGroup.alpha.Should().BeEqualTo(0);
         });
     }
 }

@@ -1,5 +1,5 @@
 {
-  "projectFileVersion": 2,
+  "projectFileVersion": 3,
   "sourceFiles": [
     "./TestYarnScript.yarn"
   ],
@@ -9,6 +9,5 @@
       "assets": "Voiceover/de"
     }
   },
-  "baseLanguage": "de",
-  "compilerOptions": {}
+  "baseLanguage": "de"
 }

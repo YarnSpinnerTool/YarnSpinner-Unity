@@ -8,10 +8,10 @@ namespace Yarn.Unity.Editor
     using System.IO;
     using System.Linq;
     using UnityEditor;
+    using UnityEditor.Compilation;
+    using UnityEditor.UIElements;
     using UnityEngine;
     using UnityEngine.UIElements;
-    using UnityEditor.UIElements;
-    using UnityEditor.Compilation;
 
     class YarnSpinnerProjectSettingsProvider : SettingsProvider
     {
@@ -49,7 +49,7 @@ namespace Yarn.Unity.Editor
                     EditorGUILayout.EndHorizontal();
 
                     if (changeCheck.changed)
-                    {   
+                    {
                         unsavedSettings.autoRefreshLocalisedAssets = localisedAssetUpdate;
                         unsavedSettings.automaticallyLinkAttributedYarnCommandsAndFunctions = linkingAttributedFuncs;
                         unsavedSettings.generateYSLSFile = generateYSLS;

@@ -1,12 +1,12 @@
 using UnityEngine;
+#nullable enable
 
 namespace Yarn.Unity
 {
-    #nullable enable
 
     /// <summary>
-    /// Represents a line, ready to be presented to the user in the
-    /// localisation they have specified.
+    /// Represents a line, ready to be presented to the user in the localisation
+    /// they have specified.
     /// </summary>
     public class LocalizedLine
     {
@@ -34,8 +34,8 @@ namespace Yarn.Unity
         /// The name of the character, if present.
         /// </summary>
         /// <remarks>
-        /// This value will be <see langword="null"/> if the line does not
-        /// have a character name.
+        /// This value will be <see langword="null"/> if the line does not have
+        /// a character name.
         /// </remarks>
         public string? CharacterName
         {
@@ -58,18 +58,18 @@ namespace Yarn.Unity
         public Object? Asset;
 
         /// <summary>
-        /// The underlying <see cref="Yarn.Markup.MarkupParseResult"/> for
-        /// this line.
+        /// The underlying <see cref="Yarn.Markup.MarkupParseResult"/> for this
+        /// line.
         /// </summary>
         public Markup.MarkupParseResult Text { get; set; }
 
         /// <summary>
-        /// The underlying <see cref="Yarn.Markup.MarkupParseResult"/> for
-        /// this line, with any `character` attribute removed.
+        /// The underlying <see cref="Yarn.Markup.MarkupParseResult"/> for this
+        /// line, with any `character` attribute removed.
         /// </summary>
         /// <remarks>
-        /// If the line has no `character` attribute, this method returns
-        /// the same value as <see cref="Text"/>.
+        /// If the line has no `character` attribute, this method returns the
+        /// same value as <see cref="Text"/>.
         /// </remarks>
         public Markup.MarkupParseResult TextWithoutCharacterName
         {

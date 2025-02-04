@@ -2,11 +2,11 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using UnityEngine;
-using UnityEditor;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using UnityEditor;
+using UnityEngine;
 using Yarn.Unity;
 
 #if USE_ADDRESSABLES
@@ -17,20 +17,21 @@ using UnityEditor.AddressableAssets.Settings;
 namespace Yarn.Unity.Editor
 {
     /// <summary>
-    /// Contains methods for performing high-level operations on Yarn
-    /// projects, and their associated localization files.
+    /// Contains methods for performing high-level operations on Yarn projects,
+    /// and their associated localization files.
     /// </summary>
     internal static class YarnProjectUtility
     {
 
         /// <summary>
-        /// Creates a new .yarnproject asset in the same directory as the
-        /// Yarn script represented by serializedObject, and configures the
-        /// script's importer to use the new Yarn Project.
+        /// Creates a new .yarnproject asset in the same directory as the Yarn
+        /// script represented by <paramref name="initialSourceAsset"/>, and
+        /// configures the script's importer to use the new Yarn Project.
         /// </summary>
-        /// <param name="serializedObject">A serialized object that
-        /// represents a <see cref="YarnImporter"/>.</param>
-        /// <returns>The path to the created asset.</returns>
+        /// <param name="initialSourceAsset">An importer for an existing Yarn
+        /// script.</param>
+        /// <returns>The path to the created asset, relative to the Unity
+        /// project root.</returns>
         internal static string CreateYarnProject(YarnImporter initialSourceAsset)
         {
 
@@ -38,8 +39,7 @@ namespace Yarn.Unity.Editor
             var path = initialSourceAsset.assetPath;
             var directory = Path.GetDirectoryName(path);
 
-            // Figure out a new, unique path for the localization we're
-            // creating
+            // Figure out a new, unique path for the localization we're creating
             var databaseFileName = $"Project.yarnproject";
 
             var destinationPath = Path.Combine(directory, databaseFileName);
@@ -60,7 +60,8 @@ namespace Yarn.Unity.Editor
         /// Creates a Unity tweaked default Yarn Project.
         /// </summary>
         /// <remarks>
-        /// This is just a default Yarn Project with the exclusion file pattern set up to ignore ~ folders.
+        /// This is just a default Yarn Project with the exclusion file pattern
+        /// set up to ignore ~ folders.
         /// </remarks>
         /// <returns>A Unity default Yarn Project</returns>
         internal static Yarn.Compiler.Project CreateDefaultYarnProject()
@@ -82,19 +83,21 @@ namespace Yarn.Unity.Editor
         /// <remarks>
         /// This method updates each localization file by performing the
         /// following operations:
+        /// <list type="bullet">
+        /// <item>Inserts new entries if they're present in the base
+        /// localization and not in the translated localization</item>
         ///
-        /// - Inserts new entries if they're present in the base
-        /// localization and not in the translated localization
+        /// <item>Removes entries if they're present in the translated
+        /// localization and not in the base localization</item>
         ///
-        /// - Removes entries if they're present in the translated
-        /// localization and not in the base localization
-        ///
-        /// - Detects if a line in the base localization has changed its
-        /// Lock value from when the translated localization was created,
-        /// and update its Comment
+        /// <item>Detects if a line in the base localization has changed its
+        /// Lock value from when the translated localization was created, and
+        /// update its Comment</item></list>
         /// </remarks>
-        /// <param name="serializedObject">A serialized object that
-        /// represents a <see cref="YarnProjectImporter"/>.</param>
+        /// <param name="yarnProjectImporter">An importer for an existing Yarn
+        /// script.</param>
+        /// <returns>The path to the created asset, relative to the Unity
+        /// project root.</returns>
         internal static void UpdateLocalizationCSVs(YarnProjectImporter yarnProjectImporter)
         {
             if (yarnProjectImporter.CanGenerateStringsTable == false)
@@ -121,17 +124,19 @@ namespace Yarn.Unity.Editor
 
                 foreach (var loc in localizations)
                 {
-                    if (loc.languageID == importData.baseLanguageName) {
+                    if (loc.languageID == importData.baseLanguageName)
+                    {
                         // This is the base language - no strings file to
                         // update.
                         continue;
                     }
-                    
-                    if (loc.stringsFile == null) {
+
+                    if (loc.stringsFile == null)
+                    {
                         Debug.LogWarning($"Can't update localization for {loc.languageID} because it doesn't have a strings file.", yarnProjectImporter);
                         continue;
                     }
-                    
+
                     var fileWasChanged = UpdateLocalizationFile(baseLocalizationStrings, loc.languageID, loc.stringsFile);
 
                     if (fileWasChanged)
@@ -153,18 +158,15 @@ namespace Yarn.Unity.Editor
             {
                 AssetDatabase.StopAssetEditing();
             }
-
-
         }
 
-
         /// <summary>
-        /// Returns an <see cref="IEnumerable"/> containing the string
-        /// table entries for the base language for the specified Yarn
-        /// script.
+        /// Returns an <see cref="IEnumerable{StringTableEntry}"/> containing
+        /// the string table entries for the base language for the specified
+        /// Yarn script.
         /// </summary>
-        /// <param name="serializedObject">A serialized object that
-        /// represents a <see cref="YarnScript"/>.</param>
+        /// <param name="serializedObject">A serialized object that represents a
+        /// Yarn script asset.</param>
         /// <returns>The string table entries.</returns>
         private static IEnumerable<StringTableEntry> GetBaseLanguageStringsForSelectedObject(SerializedObject serializedObject)
         {
@@ -175,7 +177,9 @@ namespace Yarn.Unity.Editor
 
             if (textAsset == null)
             {
-                throw new System.NullReferenceException($"The base language table asset for {serializedObject.targetObject.name} is either null or not a TextAsset. Did the script fail to compile?");
+                throw new System.NullReferenceException(
+                    $"The base language table asset for {serializedObject.targetObject.name} is either " +
+                    "null or not a TextAsset. Did the script fail to compile?");
 
             }
 
@@ -201,28 +205,30 @@ namespace Yarn.Unity.Editor
                 // Get the languages-to-source-assets map
                 .ImportData.localizations
                 // Get the asset folder for them
-                .Select(l => new {l.languageID, l.assetsFolder})
+                .Select(l => new { l.languageID, l.assetsFolder })
                 // Only consider those that have an asset folder
                 .Where(f => f.assetsFolder != null)
                 // Get the path for the asset folder
-                .Select(f => new {f.languageID, path = AssetDatabase.GetAssetPath(f.assetsFolder)})
+                .Select(f => new { f.languageID, path = AssetDatabase.GetAssetPath(f.assetsFolder) })
                 // Use that to get the assets inside these folders
-                .Select(f => new {f.languageID, assetPaths = FindAssetPathsForLineIDs(lineIDs, f.path)});
+                .Select(f => new { f.languageID, assetPaths = FindAssetPathsForLineIDs(lineIDs, f.path, typeof(UnityEngine.Object)) });
 
             var addressableAssetSettings = AddressableAssetSettingsDefaultObject.Settings;
 
-            foreach (var languageToAsset in languageToAssets) {
+            foreach (var languageToAsset in languageToAssets)
+            {
                 var assets = languageToAsset.assetPaths
-                    .Select(pair => new {LineID = pair.Key, GUID = AssetDatabase.AssetPathToGUID(pair.Value)});
-                
-                foreach (var asset in assets) {
-                    // Find the existing entry for this asset, if it has
-                    // one.
+                    .Select(pair => new { LineID = pair.Key, GUID = AssetDatabase.AssetPathToGUID(pair.Value) });
+
+                foreach (var asset in assets)
+                {
+                    // Find the existing entry for this asset, if it has one.
                     AddressableAssetEntry entry = addressableAssetSettings.FindAssetEntry(asset.GUID);
 
-                    if (entry == null) {
-                        // This asset didn't have an entry. Create one in
-                        // the default group.
+                    if (entry == null)
+                    {
+                        // This asset didn't have an entry. Create one in the
+                        // default group.
                         entry = addressableAssetSettings.CreateOrMoveEntry(asset.GUID, addressableAssetSettings.DefaultGroup);
                     }
 
@@ -235,18 +241,20 @@ namespace Yarn.Unity.Editor
 #endif
         }
 
-        internal static Dictionary<string, string> FindAssetPathsForLineIDs(IEnumerable<string> lineIDs, string assetsFolderPath)
+        internal static Dictionary<string, string> FindAssetPathsForLineIDs(IEnumerable<string> lineIDs, string assetsFolderPath, System.Type assetType)
         {
-            // Find _all_ files in this director that are not .meta files
+            // Find _all_ files in this director that are not .meta files and
+            // whose main asset is equal to (or derived from) assetType
             var allFiles = Directory.EnumerateFiles(assetsFolderPath, "*", SearchOption.AllDirectories)
-                .Where(path => path.EndsWith(".meta") == false);
+                .Where(path => path.EndsWith(".meta") == false)
+                .Where(path => assetType.IsAssignableFrom(AssetDatabase.GetMainAssetTypeAtPath(path)));
 
             // Match files with those whose filenames contain a line ID
             var matchedFilesAndPaths = lineIDs.GroupJoin(
                 // the elements we're matching lineIDs to
                 allFiles,
-                // the key for lineIDs (being strings, it's just the line
-                // ID itself)
+                // the key for lineIDs (being strings, it's just the line ID
+                // itself)
                 lineID => lineID,
                 // the key for assets (the filename without the path)
                 assetPath => Path.GetFileName(assetPath),
@@ -259,12 +267,12 @@ namespace Yarn.Unity.Editor
                     }
                     return new { lineID, assetPaths };
                 },
-                // the way we test to see if two elements should be joined
-                // (does the filename contain the line ID?)
+                // the way we test to see if two elements should be joined (does
+                // the filename contain the line ID?)
                 Compare.By<string>((fileName, lineID) =>
                 {
                     var lineIDWithoutPrefix = lineID.Replace("line:", "");
-                    return Path.GetFileNameWithoutExtension(fileName).Equals(lineIDWithoutPrefix);
+                    return Path.GetFileNameWithoutExtension(fileName).Contains(lineIDWithoutPrefix);
                 })
                 )
                 // Discard any pair where no asset was found
@@ -276,18 +284,17 @@ namespace Yarn.Unity.Editor
 
         /// <summary>
         /// Verifies the TextAsset referred to by <paramref
-        /// name="destinationLocalizationAsset"/>, and updates it if
-        /// necessary.
+        /// name="destinationLocalizationAsset"/>, and updates it if necessary.
         /// </summary>
         /// <param name="baseLocalizationStrings">A collection of <see
         /// cref="StringTableEntry"/></param>
         /// <param name="language">The language that <paramref
         /// name="destinationLocalizationAsset"/> provides strings
         /// for.false</param>
-        /// <param name="destinationLocalizationAsset">A TextAsset
-        /// containing localized strings in CSV format.</param>
-        /// <returns>Whether <paramref
-        /// name="destinationLocalizationAsset"/> was modified.</returns>
+        /// <param name="destinationLocalizationAsset">A TextAsset containing
+        /// localized strings in CSV format.</param>
+        /// <returns>Whether <paramref name="destinationLocalizationAsset"/> was
+        /// modified.</returns>
         private static bool UpdateLocalizationFile(IEnumerable<StringTableEntry> baseLocalizationStrings, string language, TextAsset destinationLocalizationAsset)
         {
             var translatedStrings = StringTableEntry.ParseFromCSV(destinationLocalizationAsset.text);
@@ -300,8 +307,7 @@ namespace Yarn.Unity.Editor
             var baseIDs = baseLocalizationStrings.Select(entry => entry.ID);
             var translatedIDs = translatedStrings.Select(entry => entry.ID);
 
-            // The list of line IDs that are ONLY present in each
-            // localisation
+            // The list of line IDs that are ONLY present in each localisation
             var onlyInBaseIDs = baseIDs.Except(translatedIDs);
             var onlyInTranslatedIDs = translatedIDs.Except(baseIDs);
 
@@ -310,9 +316,8 @@ namespace Yarn.Unity.Editor
             // flagged)
             var modificationsNeeded = false;
 
-            // Remove every entry whose ID is only present in the
-            // translated set. This entry has been removed from the base
-            // localization.
+            // Remove every entry whose ID is only present in the translated
+            // set. This entry has been removed from the base localization.
             foreach (var id in onlyInTranslatedIDs.ToList())
             {
                 translatedDictionary.Remove(id);
@@ -326,8 +331,8 @@ namespace Yarn.Unity.Editor
                 StringTableEntry baseEntry = baseDictionary[id];
                 var newEntry = new StringTableEntry(baseEntry)
                 {
-                    // Empty this text, so that it's apparent that a
-                    // translated version needs to be provided.
+                    // Empty this text, so that it's apparent that a translated
+                    // version needs to be provided.
                     Text = string.Empty,
                     Language = language,
                 };
@@ -338,18 +343,17 @@ namespace Yarn.Unity.Editor
             // Finally, we need to check for any entries in the translated
             // localisation that:
             // 1. have the same line ID as one in the base, but
-            // 2. have a different Lock (the hash of the text), which
-            //    indicates that the base text has changed.
+            // 2. have a different Lock (the hash of the text), which indicates
+            //    that the base text has changed.
 
-            // First, get the list of IDs that are in both base and
-            // translated, and then filter this list to any where the lock
-            // values differ
+            // First, get the list of IDs that are in both base and translated,
+            // and then filter this list to any where the lock values differ
             var outOfDateLockIDs = baseDictionary.Keys
                 .Intersect(translatedDictionary.Keys)
                 .Where(id => baseDictionary[id].Lock != translatedDictionary[id].Lock);
 
-            // Now loop over all of these, and update our translated
-            // dictionary to include a note that it needs attention
+            // Now loop over all of these, and update our translated dictionary
+            // to include a note that it needs attention
             foreach (var id in outOfDateLockIDs)
             {
                 // Get the translated entry as it currently exists
@@ -371,8 +375,8 @@ namespace Yarn.Unity.Editor
 
             if (modificationsNeeded == false)
             {
-                // No changes needed to be done to the translated string
-                // table entries. Stop here.
+                // No changes needed to be done to the translated string table
+                // entries. Stop here.
                 return false;
             }
 
@@ -385,8 +389,8 @@ namespace Yarn.Unity.Editor
 
             var outputCSV = StringTableEntry.CreateCSV(outputStringEntries);
 
-            // Write out the replacement text to this existing file,
-            // replacing its existing contents
+            // Write out the replacement text to this existing file, replacing
+            // its existing contents
             var outputFile = AssetDatabase.GetAssetPath(destinationLocalizationAsset);
             File.WriteAllText(outputFile, outputCSV, System.Text.Encoding.UTF8);
 
@@ -399,13 +403,12 @@ namespace Yarn.Unity.Editor
 
         private static (List<string>, List<string>) ExtantLineTags(YarnProjectImporter importer)
         {
-            // First, gather all existing line tags across ALL yarn
-            // projects, so that we don't accidentally overwrite an
-            // existing one. Do this by finding all yarn projects, 
-            // and get the string tags inside them.
-            // By doing it in this way we get the same implicit tags
-            // from the project as the importer would normally do,
-            // letting us then do a direct comparision for them.
+            // First, gather all existing line tags across ALL yarn projects, so
+            // that we don't accidentally overwrite an existing one. Do this by
+            // finding all yarn projects, and get the string tags inside them.
+            // By doing it in this way we get the same implicit tags from the
+            // project as the importer would normally do, letting us then do a
+            // direct comparision for them.
             var allYarnProjects =
                 // get all yarn projects across the entire project
                 AssetDatabase.FindAssets($"t:{nameof(YarnProject)}")
@@ -417,7 +420,8 @@ namespace Yarn.Unity.Editor
                 .OfType<YarnProjectImporter>()
                 // Ensure that its import data is present
                 .Where(i => i.ImportData != null)
-                // get the project out, and also flag if it is the project for THIS importer
+                // get the project out, and also flag if it is the project for
+                // THIS importer
                 .Select(i => (i.GetProject(), i == importer))
                 // remove any nulls just in case any are found
                 .Where(p => p.Item1 != null);
@@ -431,9 +435,9 @@ namespace Yarn.Unity.Editor
             var allExistingTags = new List<string>();
             var projectImplicitTags = new List<string>();
 
-            // Compile all of these, and get whatever existing string tags
-            // they had. Do each in isolation so that we can continue even
-            // if a project contains a parse error.
+            // Compile all of these, and get whatever existing string tags they
+            // had. Do each in isolation so that we can continue even if a
+            // project contains a parse error.
             foreach (var tuple in allYarnProjects)
             {
                 var project = tuple.Item1;
@@ -449,7 +453,7 @@ namespace Yarn.Unity.Editor
                     continue;
                 }
                 allExistingTags.AddRange(result.StringTable.Where(i => i.Value.isImplicitTag == false).Select(i => i.Key));
-                
+
                 // we add the implicit lines IDs only for this project
                 if (tuple.Item2)
                 {
@@ -470,7 +474,8 @@ namespace Yarn.Unity.Editor
             var allExistingTags = extantTags.Item1;
 
 #if USE_UNITY_LOCALIZATION
-            // if we are using Unity localisation we need to first remove the implicit tags for this project from the strings table
+            // if we are using Unity localisation we need to first remove the
+            // implicit tags for this project from the strings table
             if (importer.UseUnityLocalisationSystem && importer.unityLocalisationStringTableCollection != null)
             {
                 foreach (var implicitTag in extantTags.Item2)
@@ -490,20 +495,20 @@ namespace Yarn.Unity.Editor
                     var assetPath = AssetDatabase.GetAssetPath(script);
                     var contents = File.ReadAllText(assetPath);
 
-                    // Produce a version of this file that contains line
-                    // tags added where they're needed.
+                    // Produce a version of this file that contains line tags
+                    // added where they're needed.
                     var tagged = Yarn.Compiler.Utility.TagLines(contents, allExistingTags);
                     var taggedVersion = tagged.Item1;
-                    
-                    // if the file has an error it returns null
-                    // we want to bail out then otherwise we'd wipe the yarn file
+
+                    // if the file has an error it returns null we want to bail
+                    // out then otherwise we'd wipe the yarn file
                     if (taggedVersion == null)
                     {
                         continue;
                     }
 
-                    // If this produced a modified version of the file,
-                    // write it out and re-import it.
+                    // If this produced a modified version of the file, write it
+                    // out and re-import it.
                     if (contents != taggedVersion)
                     {
                         modifiedFiles.Add(Path.GetFileNameWithoutExtension(assetPath));
@@ -542,24 +547,19 @@ namespace Yarn.Unity.Editor
         /// name="destination"/>, containing all of the lines found in the
         /// scripts referred to by <paramref name="yarnProjectImporter"/>.
         /// </summary>
-        /// <remarks>
-        /// The file generated is in a format ready to be added to the <see
-        /// cref="YarnProjectImporter.languagesToSourceAssets"/> list.
-        /// </remarks>
-        /// <param name="yarnProjectImporter">The YarnProjectImporter to
-        /// extract strings from.</param>
-        /// <param name="destination">The path to write the file
-        /// to.</param>
+        /// <param name="yarnProjectImporter">The YarnProjectImporter to extract
+        /// strings from.</param>
+        /// <param name="destination">The path to write the file to.</param>
         /// <returns><see langword="true"/> if the file was written
         /// successfully, <see langword="false"/> otherwise.</returns>
-        /// <exception cref="CsvHelper.CsvHelperException">Thrown when an
-        /// error is encountered when generating the CSV data.</exception>
-        /// <exception cref="IOException">Thrown when an error is
-        /// encountered when writing the data to disk.</exception>
+        /// <exception cref="CsvHelper.CsvHelperException">Thrown when an error
+        /// is encountered when generating the CSV data.</exception>
+        /// <exception cref="IOException">Thrown when an error is encountered
+        /// when writing the data to disk.</exception>
         internal static bool WriteStringsFile(string destination, YarnProjectImporter yarnProjectImporter)
         {
-            // Perform a strings-only compilation to get a full strings
-            // table, and generate the CSV. 
+            // Perform a strings-only compilation to get a full strings table,
+            // and generate the CSV. 
             var job = yarnProjectImporter.GetCompilationJob();
             job.CompilationType = Compiler.CompilationJob.Type.StringsOnly;
             var result = Compiler.Compiler.Compile(job);
@@ -590,19 +590,18 @@ namespace Yarn.Unity.Editor
         /// <summary>
         /// Writes a .csv file to disk at the path indicated by <paramref
         /// name="destination"/>, containing all of the lines found in the
-        /// scripts referred to by <paramref name="yarnProjectImporter"/>
-        /// that contain any metadata associated with them.
+        /// scripts referred to by <paramref name="yarnProjectImporter"/> that
+        /// contain any metadata associated with them.
         /// </summary>
-        /// <param name="yarnProjectImporter">The YarnProjectImporter to
-        /// extract strings from.</param>
-        /// <param name="destination">The path to write the file
-        /// to.</param>
+        /// <param name="yarnProjectImporter">The YarnProjectImporter to extract
+        /// strings from.</param>
+        /// <param name="destination">The path to write the file to.</param>
         /// <returns><see langword="true"/> if the file was written
         /// successfully, <see langword="false"/> otherwise.</returns>
-        /// <exception cref="CsvHelper.CsvHelperException">Thrown when an
-        /// error is encountered when generating the CSV data.</exception>
-        /// <exception cref="IOException">Thrown when an error is
-        /// encountered when writing the data to disk.</exception>
+        /// <exception cref="CsvHelper.CsvHelperException">Thrown when an error
+        /// is encountered when generating the CSV data.</exception>
+        /// <exception cref="IOException">Thrown when an error is encountered
+        /// when writing the data to disk.</exception>
         internal static bool WriteMetadataFile(string destination, YarnProjectImporter yarnProjectImporter)
         {
             var lineMetadataEntries = yarnProjectImporter.GenerateLineMetadataEntries();
@@ -619,7 +618,8 @@ namespace Yarn.Unity.Editor
             return true;
         }
 
-        internal static void ConvertImplicitVariableDeclarationsToExplicit(YarnProjectImporter yarnProjectImporter) {
+        internal static void ConvertImplicitVariableDeclarationsToExplicit(YarnProjectImporter yarnProjectImporter)
+        {
             var allFilePaths = yarnProjectImporter.ImportData.yarnFiles.Select(textAsset => AssetDatabase.GetAssetPath(textAsset));
 
             var library = Actions.GetLibrary();
@@ -629,22 +629,28 @@ namespace Yarn.Unity.Editor
 
             Compiler.CompilationResult explicitResult;
 
-            try {
+            try
+            {
                 explicitResult = Compiler.Compiler.Compile(explicitDeclarationsCompilerJob);
-            } catch (System.Exception e) {
+            }
+            catch (System.Exception e)
+            {
                 Debug.LogError($"Compile error: {e}");
                 return;
             }
 
             var implicitDeclarationsCompilerJob = Compiler.CompilationJob.CreateFromFiles(allFilePaths, library);
-            implicitDeclarationsCompilerJob.CompilationType = Compiler.CompilationJob.Type.DeclarationsOnly;
+            implicitDeclarationsCompilerJob.CompilationType = Compiler.CompilationJob.Type.TypeCheck;
             implicitDeclarationsCompilerJob.VariableDeclarations = explicitResult.Declarations;
 
             Compiler.CompilationResult implicitResult;
 
-            try {
+            try
+            {
                 implicitResult = Compiler.Compiler.Compile(implicitDeclarationsCompilerJob);
-            } catch (System.Exception e) {
+            }
+            catch (System.Exception e)
+            {
                 Debug.LogError($"Compile error: {e}");
                 return;
             }
@@ -678,10 +684,13 @@ namespace Yarn.Unity.Editor
 
             // Does the existing text contain anything besides the default?
             var defaultProjectPattern = new System.Text.RegularExpressions.Regex(@"^title:.*?\n---[\n\s]*===[\n\s]*$", System.Text.RegularExpressions.RegexOptions.Multiline);
-            if (defaultProjectPattern.IsMatch(existingText)) {
+            if (defaultProjectPattern.IsMatch(existingText))
+            {
                 // The project contains no content, so there's no need to copy
                 // it out.
-            } else {
+            }
+            else
+            {
                 // Create a unique path to store our variables
                 var newFilePath = Path.GetDirectoryName(importer.assetPath) + "/Variables.yarn";
                 newFilePath = AssetDatabase.GenerateUniqueAssetPath(newFilePath);

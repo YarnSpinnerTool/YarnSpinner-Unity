@@ -4,25 +4,25 @@ env:
   ACTIONS_RUNNER_DEBUG: true
   ACTIONS_STEP_DEBUG: true
 
-on: 
+on:
   push:
-      branches:
-        - main
-        - development/v3
-        - 'feature/**'
-      paths:
-        - 'Editor/**'
-        - 'Runtime/**'
-        - 'Samples~/**'
-        - 'Tests/**'
+    branches:
+      - main
+      - development/v3
+      - "feature/**"
+    paths:
+      - "Editor/**"
+      - "Runtime/**"
+      - "Samples~/**"
+      - "Tests/**"
   workflow_dispatch:
 
 jobs:
   buildAndTestForSomePlatforms:
     concurrency:
-      group: ${{ github.workflow }}-${{ matrix.unityVersion }}
+      group: ${{ github.workflow }}-${{ matrix.unityVersion }}-${{ matrix.unityLocalisation }}-${{ matrix.uniTask }}
       cancel-in-progress: true # Cancel other jobs if another one arrives
-    name: Test on ${{ matrix.unityVersion }} for ${{ matrix.targetPlatform }}
+    name: ${{ matrix.unityVersion }} (${{ matrix.targetPlatform }}, ${{ matrix.unityLocalisation && 'with unity loc' || 'no unity loc' }}, ${{ matrix.uniTask && 'with unitask' || 'no unitask' }})
     runs-on: [self-hosted, linux]
     strategy:
       fail-fast: false
@@ -31,9 +31,15 @@ jobs:
         projectPath:
           - YarnSpinner
         unityVersion:
-          - 2021.3.35f1
-          - 2022.3.21f1
+          - 2022.3.45f1
           - 2023.2.12f1
+          - 6000.0.24f1
+        unityLocalisation:
+          - true
+          - false
+        uniTask:
+          - true
+          - false
         targetPlatform:
           # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
           # - StandaloneWindows64 # Build a Windows 64-bit standalone.
@@ -48,7 +54,7 @@ jobs:
           mkdir -p ${{ matrix.projectPath }}/ProjectSettings 
           mkdir -p ${{ matrix.projectPath }}/Packages
           mkdir -p output
-      
+
       # Add the Unity Input System package, and configure the new project to use
       # both the Input System and the legacy Input Manager.
       - name: Add Input System package
@@ -64,17 +70,45 @@ jobs:
           cat <<EOF > ${{ matrix.projectPath }}/Packages/manifest.json
           {
             "dependencies": {
-              "com.unity.inputsystem": "1.0.2",
-              "com.unity.localization": "1.3.2"
+              "com.unity.inputsystem": "1.11.2"
             }
           }
           EOF
-      
+
+          # Select correct TMP Essentials package
+          if [[ ${{matrix.unityVersion}} == "2022"* ]]; then
+            TMP_VERSION="ugui-1.0.0"
+          else
+            TMP_VERSION="ugui-2.0.0"
+          fi
+          echo "Installing TMP Essentials for $TMP_VERSION"
+
+          # Add the correct version of the TMP Essentials package to package manifest
+          MANIFEST_PATH=${{ matrix.projectPath }}/Packages/manifest.json
+          jq ".dependencies += {\"dev.yarnspinner.tmp-essentials\": \"https://github.com/desplesda/dev.yarnspinner.tmp-essentials.git#$TMP_VERSION\"}" "$MANIFEST_PATH" > manifest.json
+          mv manifest.json "$MANIFEST_PATH"
+
+      - name: Add Unity Localisation
+        if: ${{ matrix.unityLocalisation }}
+        run: |
+          # Add Unity Localisation package to package manifest
+          MANIFEST_PATH=${{ matrix.projectPath }}/Packages/manifest.json
+          jq '.dependencies += {"com.unity.localization": "1.3.2"}' "$MANIFEST_PATH" > manifest.json
+          mv manifest.json "$MANIFEST_PATH"
+
+      - name: Add UniTask Package
+        if: ${{ matrix.uniTask }}
+        run: |
+          # Add UniTask package to package manifest
+          MANIFEST_PATH=${{ matrix.projectPath }}/Packages/manifest.json
+          jq '.dependencies += {"com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask"}' "$MANIFEST_PATH" > manifest.json
+          mv manifest.json "$MANIFEST_PATH"
+
       - name: Check out to Packages/YarnSpinner
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          path: ${{ matrix.projectPath }}/Packages/YarnSpinner
+          path: ${{ matrix.projectPath }}/Packages/dev.yarnspinner.unity
 
       - name: Run edit mode tests
         run: |
@@ -85,7 +119,7 @@ jobs:
             -e TEST_MODE=EditMode \
             --hostname YS-Linux-Build \
             yarnspinner/unity-${{ matrix.unityVersion }}
-                
+
       - name: Run play mode tests
         if: always()
         run: |
@@ -96,14 +130,25 @@ jobs:
             -e TEST_MODE=PlayMode \
             --hostname YS-Linux-Build \
             yarnspinner/unity-${{ matrix.unityVersion }}
-                
-      - name: Upload test results
-        uses: actions/upload-artifact@v2
+
+      - name: Generate HTML test report (Play Mode)
+        uses: rjtngit/nunit-html-action@v1
         if: always()
         with:
-          name: Test results (edit + play, ${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}
+          inputXmlPath: output/TestResults-PlayMode.xml
+          outputHtmlPath: output/TestResults-PlayMode.html
+
+      - name: Generate HTML test report (Edit Mode)
+        uses: rjtngit/nunit-html-action@v1
+        if: always()
+        with:
+          inputXmlPath: output/TestResults-EditMode.xml
+          outputHtmlPath: output/TestResults-EditMode.html
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Test results (edit + play, ${{ matrix.unityVersion }} ${{ matrix.targetPlatform }} ${{ matrix.unityLocalisation && 'with-unity-loc' || 'no-unity-loc' }} ${{ matrix.uniTask && 'with-unitask' || 'no-unitask' }})
           # path: ${{ steps.testRunner.outputs.artifactsPath }}
           path: ./output
-
-                
-    

@@ -33,9 +33,13 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
             return null;
         }
 
-        // One of those files is (AssemblyName).AdditionalFile.txt, and it
+        // One of those files is (AssemblyName).[Unity]AdditionalFile.txt, and it
         // contains the path to the project
-        var relevantFiles = context.AdditionalFiles.Where(i => i.Path.Contains($"{context.Compilation.AssemblyName}.AdditionalFile.txt"));
+        var relevantFiles = context.AdditionalFiles.Where(
+            i => i.Path.Contains($"{context.Compilation.AssemblyName}.AdditionalFile.txt")
+                || i.Path.Contains($"{context.Compilation.AssemblyName}.UnityAdditionalFile.txt")
+        );
+
         if (!relevantFiles.Any())
         {
             return null;
@@ -57,7 +61,9 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
             {
                 // If this directory exists, we're done
                 return projectPath;
-            } else {
+            }
+            else
+            {
                 return null;
             }
         }
@@ -183,18 +189,23 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 "YarnSpinner.Editor",
             };
 
+            // But DO generate source code for the Samples assembly.
+            var prefixesToKeep = new List<string>()
+            {
+                "YarnSpinner.Unity.Samples",
+            };
+
             if (context.Compilation.AssemblyName == null)
             {
                 output.WriteLine("Not generating registration code, because the provided AssemblyName is null");
                 return;
             }
-            foreach (var prefix in prefixesToIgnore)
+
+            if (prefixesToIgnore.Any(prefix => context.Compilation.AssemblyName.StartsWith(prefix)) && !prefixesToKeep.Any(prefix => context.Compilation.AssemblyName.StartsWith(prefix)))
             {
-                if (context.Compilation.AssemblyName.StartsWith(prefix))
-                {
-                    output.WriteLine($"Not generating registration code for {context.Compilation.AssemblyName}: we've been told to exclude it, because its name begins with one of these prefixes: {string.Join(", ", prefixesToIgnore)}");
-                    return;
-                }
+                output.WriteLine($"Not generating registration code for {context.Compilation.AssemblyName}: we've been told to exclude it, because its name begins with one of these prefixes: {string.Join(", ", prefixesToIgnore)}");
+                return;
+
             }
 
             if (!(context.Compilation is CSharpCompilation compilation))
@@ -216,7 +227,7 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 return;
             }
 
-            
+
 
             HashSet<string> removals = new HashSet<string>();
             // validating and logging all the actions
@@ -229,12 +240,14 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 }
 
                 var diagnostics = action.Validate(compilation);
-                foreach (var diagnostic in diagnostics) {
+                foreach (var diagnostic in diagnostics)
+                {
                     context.ReportDiagnostic(diagnostic);
                     output.WriteLine($"Skipping '{action.Name}' ({action.MethodName}): {diagnostic}");
                 }
 
-                if (diagnostics.Count > 0) {
+                if (diagnostics.Count > 0)
+                {
                     continue;
                 }
 
@@ -522,9 +535,12 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
     {
         string tempPath;
         var rootPath = GetProjectRoot(context);
-        if (rootPath != null) {
+        if (rootPath != null)
+        {
             tempPath = Path.Combine(rootPath, "Logs", "Packages", "dev.yarnspinner.unity");
-        } else {
+        }
+        else
+        {
             tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "dev.yarnspinner.logs");
         }
 
@@ -593,7 +609,8 @@ internal class ClassDeclarationSyntaxReceiver : ISyntaxReceiver
 
 internal class YSLSGenerator
 {
-    public YSLSGenerator(Yarn.Unity.ILogger logger) {
+    public YSLSGenerator(Yarn.Unity.ILogger logger)
+    {
         this.logger = logger;
     }
     struct YarnActionParameter

@@ -9,6 +9,9 @@ namespace Yarn.Unity.Tests
     using UnityEngine;
     using Yarn.Unity;
 
+#nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
     public class TestCommands : MonoBehaviour
     {
         [YarnFunction("testExternalAssemblyFunction")]

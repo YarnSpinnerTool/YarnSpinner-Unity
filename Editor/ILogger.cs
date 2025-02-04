@@ -54,7 +54,7 @@ namespace Yarn.Unity
         public void WriteLine(object text)
         {
 #if UNITY_EDITOR
-        Debug.LogWarning(text.ToString());
+            Debug.LogWarning(text.ToString());
 #endif
         }
     }

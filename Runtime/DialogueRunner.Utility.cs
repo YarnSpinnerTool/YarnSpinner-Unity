@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Yarn.Unity {
-    public partial class DialogueRunner {
+namespace Yarn.Unity
+{
+    public partial class DialogueRunner
+    {
         /// <summary>
         /// Loads all variables from the <see cref="PlayerPrefs"/> object into
         /// the Dialogue Runner's variable storage.
@@ -161,7 +163,7 @@ namespace Yarn.Unity {
                 return false;
             }
         }
-        
+
         // takes in a JSON string and converts it into a tuple of dictionaries
         // intended to let you just dump these straight into the variable storage
         // throws exceptions if unable to convert or if the conversion half works
@@ -240,31 +242,31 @@ namespace Yarn.Unity {
         }
 
         /// <summary>
-        /// Splits input into a number of non-empty sub-strings, separated
-        /// by whitespace, and grouping double-quoted strings into a single
+        /// Splits input into a number of non-empty sub-strings, separated by
+        /// whitespace, and grouping double-quoted strings into a single
         /// sub-string.
         /// </summary>
         /// <param name="input">The string to split.</param>
         /// <returns>A collection of sub-strings.</returns>
         /// <remarks>
-        /// This method behaves similarly to the <see
-        /// cref="string.Split(char[], StringSplitOptions)"/> method with
-        /// the <see cref="StringSplitOptions"/> parameter set to <see
-        /// cref="StringSplitOptions.RemoveEmptyEntries"/>, with the
-        /// following differences:
+        /// This method behaves similarly to the <see cref="string.Split(char[],
+        /// StringSplitOptions)"/> method with the <see
+        /// cref="StringSplitOptions"/> parameter set to <see
+        /// cref="StringSplitOptions.RemoveEmptyEntries"/>, with the following
+        /// differences:
         ///
         /// <list type="bullet">
-        /// <item>Text that appears inside a pair of double-quote
-        /// characters will not be split.</item>
+        /// <item>Text that appears inside a pair of double-quote characters
+        /// will not be split.</item>
         ///
-        /// <item>Text that appears after a double-quote character and
-        /// before the end of the input will not be split (that is, an
-        /// unterminated double-quoted string will be treated as though it
-        /// had been terminated at the end of the input.)</item>
+        /// <item>Text that appears after a double-quote character and before
+        /// the end of the input will not be split (that is, an unterminated
+        /// double-quoted string will be treated as though it had been
+        /// terminated at the end of the input.)</item>
         ///
         /// <item>When inside a pair of double-quote characters, the string
-        /// <c>\\</c> will be converted to <c>\</c>, and the string
-        /// <c>\"</c> will be converted to <c>"</c>.</item>
+        /// <c>\\</c> will be converted to <c>\</c>, and the string <c>\"</c>
+        /// will be converted to <c>"</c>.</item>
         /// </list>
         /// </remarks>
         public static IEnumerable<string> SplitCommandText(string input)
@@ -282,17 +284,16 @@ namespace Yarn.Unity {
                 {
                     if (currentComponent.Length > 0)
                     {
-                        // We've reached the end of a run of visible
-                        // characters. Add this run to the result list and
-                        // prepare for the next one.
+                        // We've reached the end of a run of visible characters.
+                        // Add this run to the result list and prepare for the
+                        // next one.
                         results.Add(currentComponent.ToString());
                         currentComponent.Clear();
                     }
                     else
                     {
-                        // We encountered a whitespace character, but
-                        // didn't have any characters queued up. Skip this
-                        // character.
+                        // We encountered a whitespace character, but didn't
+                        // have any characters queued up. Skip this character.
                     }
 
                     continue;
@@ -305,9 +306,9 @@ namespace Yarn.Unity {
                         c = reader.Read();
                         if (c == -1)
                         {
-                            // Oops, we ended the input while parsing a
-                            // quoted string! Dump our current word
-                            // immediately and return.
+                            // Oops, we ended the input while parsing a quoted
+                            // string! Dump our current word immediately and
+                            // return.
                             results.Add(currentComponent.ToString());
                             return results;
                         }
@@ -317,7 +318,8 @@ namespace Yarn.Unity {
                             var next = reader.Peek();
                             if (next == '\\' || next == '\"')
                             {
-                                // It is! Skip the \ and use the character after it.
+                                // It is! Skip the \ and use the character after
+                                // it.
                                 reader.Read();
                                 currentComponent.Append((char)next);
                             }
@@ -355,6 +357,105 @@ namespace Yarn.Unity {
             }
 
             return results;
+        }
+
+        /// <summary>
+        /// Creates a stack of typewriter pauses to use to temporarily halt the
+        /// typewriter effect.
+        /// </summary>
+        /// <remarks>
+        /// This is intended to be used in conjunction with the <see
+        /// cref="Effects.PausableTypewriter"/> effect. The stack of tuples
+        /// created are how the typewriter effect knows when, and for how long,
+        /// to halt the effect.
+        /// <para>
+        /// The pause duration property is in milliseconds but all the effects
+        /// code assumes seconds So here we will be dividing it by 1000 to make
+        /// sure they interconnect correctly.
+        /// </para>
+        /// </remarks>
+        /// <param name="line">The line from which we covet the pauses</param>
+        /// <returns>A stack of positions and duration pause tuples from within
+        /// the line</returns>
+        public static Stack<(int position, float duration)> GetPauseDurationsInsideLine(Markup.MarkupParseResult line)
+        {
+            var pausePositions = new Stack<(int, float)>();
+            var label = "pause";
+
+            // sorting all the attributes in reverse positional order this is so
+            // we can build the stack up in the right positioning
+            var attributes = line.Attributes;
+            attributes.Sort((a, b) => (b.Position.CompareTo(a.Position)));
+            foreach (var attribute in line.Attributes)
+            {
+                // if we aren't a pause skip it
+                if (attribute.Name != label)
+                {
+                    continue;
+                }
+
+                // did they set a custom duration or not, as in did they do
+                // this: 
+                //
+                // Alice: this is my line with a [pause = 1000 /]pause in the
+                //     middle 
+                //
+                // or did they go:
+                //
+                // Alice: this is my line with a [pause /]pause in the middle
+                if (attribute.Properties.TryGetValue(label, out Yarn.Markup.MarkupValue value))
+                {
+                    // depending on the property value we need to take a
+                    // different path this is because they have made it an
+                    // integer or a float which are roughly the same note to
+                    // self: integer and float really ought to be convertible...
+                    // but they also might have done something weird and we need
+                    // to handle that
+                    switch (value.Type)
+                    {
+                        case Yarn.Markup.MarkupValueType.Integer:
+                            float duration = value.IntegerValue;
+                            pausePositions.Push((attribute.Position, duration / 1000));
+                            break;
+                        case Yarn.Markup.MarkupValueType.Float:
+                            pausePositions.Push((attribute.Position, value.FloatValue / 1000));
+                            break;
+                        default:
+                            Debug.LogWarning($"Pause property is of type {value.Type}, which is not allowed. Defaulting to one second.");
+                            pausePositions.Push((attribute.Position, 1));
+                            break;
+                    }
+                }
+                else
+                {
+                    // they haven't set a duration, so we will instead use the
+                    // default of one second
+                    pausePositions.Push((attribute.Position, 1));
+                }
+            }
+            return pausePositions;
+        }
+
+        public static bool IsInPlaymode
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (!UnityEditor.EditorApplication.isPlaying)
+                {
+                    // We are not in playmode at all.
+                    return false;
+                }
+
+                if (!UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
+                {
+                    // We are in playmode, but we're about to change out of
+                    // playmode.
+                    return false;
+                }
+#endif
+                return true;
+            }
         }
     }
 }

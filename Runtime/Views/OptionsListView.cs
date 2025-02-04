@@ -14,6 +14,7 @@ using TextMeshProUGUI = Yarn.Unity.TMPShim;
 
 namespace Yarn.Unity
 {
+    [Obsolete]
     public class OptionsListView : DialogueViewBase
     {
         [SerializeField] CanvasGroup canvasGroup;
@@ -56,9 +57,9 @@ namespace Yarn.Unity
 
         public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
-            // Don't do anything with this line except note it and
-            // immediately indicate that we're finished with it. RunOptions
-            // will use it to display the text of the previous line.
+            // Don't do anything with this line except note it and immediately
+            // indicate that we're finished with it. RunOptions will use it to
+            // display the text of the previous line.
             lastSeenLine = dialogueLine;
             onDialogueLineFinished();
         }
@@ -104,8 +105,8 @@ namespace Yarn.Unity
             {
                 if (lastSeenLine != null)
                 {
-                    // if we have a last line character name container
-                    // and the last line has a character then we show the nameplate
+                    // if we have a last line character name container and the
+                    // last line has a character then we show the nameplate
                     // otherwise we turn off the nameplate
                     var line = lastSeenLine.Text;
                     if (lastLineCharacterNameContainer != null)
@@ -143,9 +144,9 @@ namespace Yarn.Unity
             OnOptionSelected = onOptionSelected;
 
             // sometimes (not always) the TMP layout in conjunction with the
-            // content size fitters doesn't update the rect transform
-            // until the next frame, and you get a weird pop as it resizes
-            // just forcing this to happen now instead of then
+            // content size fitters doesn't update the rect transform until the
+            // next frame, and you get a weird pop as it resizes just forcing
+            // this to happen now instead of then
             Relayout();
 
             // Fade it all in
@@ -187,7 +188,7 @@ namespace Yarn.Unity
         /// If options are still shown dismisses them.
         /// </remarks>
         public override void DialogueComplete()
-        {   
+        {
             // do we still have any options being shown?
             if (canvasGroup.alpha > 0)
             {
@@ -225,13 +226,15 @@ namespace Yarn.Unity
             // Force re-layout
             var layouts = GetComponentsInChildren<UnityEngine.UI.LayoutGroup>();
 
-            // Perform the first pass of re-layout. This will update the inner horizontal group's sizing, based on the text size.
+            // Perform the first pass of re-layout. This will update the inner
+            // horizontal group's sizing, based on the text size.
             foreach (var layout in layouts)
             {
                 UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(layout.GetComponent<RectTransform>());
             }
-            
-            // Perform the second pass of re-layout. This will update the outer vertical group's positioning of the individual elements.
+
+            // Perform the second pass of re-layout. This will update the outer
+            // vertical group's positioning of the individual elements.
             foreach (var layout in layouts)
             {
                 UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(layout.GetComponent<RectTransform>());

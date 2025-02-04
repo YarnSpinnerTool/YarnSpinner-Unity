@@ -6,6 +6,7 @@ using System.Linq;
 using UnityEngine;
 
 #nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 namespace Yarn.Unity.Tests
 {
@@ -22,12 +23,13 @@ namespace Yarn.Unity.Tests
 
         public void Awake()
         {
-            dialogueRunner = FindObjectOfType<DialogueRunner>();
+            dialogueRunner = FindAnyObjectByType<DialogueRunner>();
         }
 
         public void Update()
         {
-            if (dialogueRunner.IsDialogueRunning) {
+            if (dialogueRunner.IsDialogueRunning)
+            {
                 return;
             }
 
@@ -58,7 +60,7 @@ namespace Yarn.Unity.Tests
 
             if (Input.GetKeyDown(KeyCode.E))
             {
-                var nearbyNPC = FindObjectsOfType<EndToEndTestNPC>()
+                var nearbyNPC = FindObjectsByType<EndToEndTestNPC>(FindObjectsSortMode.None)
                     .Select(n => (NPC: n, Distance: Vector3.Distance(n.transform.position, transform.position)))
                     .OrderBy(p => p.Distance)
                     .FirstOrDefault(p => p.Distance < interactionRange)

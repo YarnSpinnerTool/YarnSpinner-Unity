@@ -2,8 +2,8 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using System.Collections.Generic;
 using CsvHelper;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -17,8 +17,8 @@ namespace Yarn.Unity
         public string Language;
 
         /// <summary>
-        /// The line ID for this line. This value will be the same across
-        /// all localizations.
+        /// The line ID for this line. This value will be the same across all
+        /// localizations.
         /// </summary>
         public string ID;
 
@@ -29,8 +29,7 @@ namespace Yarn.Unity
         public string? Text;
 
         /// <summary>
-        /// The name of the Yarn script in which this line was originally
-        /// found.
+        /// The name of the Yarn script in which this line was originally found.
         /// </summary>
         public string File;
 
@@ -38,14 +37,13 @@ namespace Yarn.Unity
         /// The name of the node in which this line was originally found.
         /// </summary>
         /// <remarks>
-        /// This node can be found in the file indicated by <see
-        /// cref="File"/>.
+        /// This node can be found in the file indicated by <see cref="File"/>.
         /// </remarks>
         public string Node;
 
         /// <summary>
-        /// The line number in the file indicated by <see cref="File"/> at
-        /// which the original version of this line can be found.
+        /// The line number in the file indicated by <see cref="File"/> at which
+        /// the original version of this line can be found.
         /// </summary>
         public string LineNumber;
 
@@ -127,8 +125,8 @@ namespace Yarn.Unity
                 using (var csv = new CsvReader(stringReader, GetConfiguration()))
                 {
                     /*
-                    Do the below instead of GetRecords<T> due to
-                    incompatibility with IL2CPP See more:
+                    Do the below instead of GetRecords<T> due to incompatibility
+                    with IL2CPP See more:
                     https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/36#issuecomment-691489913
                     */
                     var records = new List<StringTableEntry>();

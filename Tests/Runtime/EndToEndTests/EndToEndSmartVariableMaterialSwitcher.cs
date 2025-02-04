@@ -6,6 +6,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+#nullable enable
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
 namespace Yarn.Unity.Tests
 {
 
@@ -17,18 +20,22 @@ namespace Yarn.Unity.Tests
         [SerializeField] Material variableFalse;
         [SerializeField] Material variableTrue;
 
-        void Update() {
-            if (variableStorage.TryGetValue<bool>(smartVariableName, out var result) == false) {
+        void Update()
+        {
+            if (variableStorage.TryGetValue<bool>(smartVariableName, out var result) == false)
+            {
                 Debug.LogWarning($"Failed to get a value for {smartVariableName}!");
                 this.gameObject.SetActive(false);
                 return;
             }
 
-            if (TryGetComponent<Renderer>(out var renderer) == false) {
+            if (TryGetComponent<Renderer>(out var renderer) == false)
+            {
                 return;
             }
 
-            switch (result) {
+            switch (result)
+            {
                 case true:
                     renderer.material = variableTrue;
                     break;

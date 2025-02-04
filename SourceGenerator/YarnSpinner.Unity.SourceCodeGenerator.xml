@@ -1,0 +1,179 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>YarnSpinner.Unity.SourceCodeGenerator</name>
+    </assembly>
+    <members>
+        <member name="F:Yarn.Unity.ActionAnalyser.Analyser.GenerateTestActionRegistrationSymbol">
+            <summary>
+            The name of a scripting define symbol that, if set, indicates that
+            Yarn actions specific to unit tests should be generated.
+            </summary>
+        </member>
+        <member name="M:Yarn.Unity.ActionAnalyser.Analyser.GetAsyncType(Microsoft.CodeAnalysis.IMethodSymbol)">
+            <summary>
+            Returns a value indicating the Unity async type for this action.
+            </summary>
+            <param name="symbol">The method symbol to test.</param>
+            <returns></returns>
+        </member>
+        <member name="F:Yarn.Unity.ActionAnalyser.ActionType.Command">
+            <summary>
+            The method represents a command.
+            </summary>
+        </member>
+        <member name="F:Yarn.Unity.ActionAnalyser.ActionType.Function">
+            <summary>
+            The method represents a function.
+            </summary>
+        </member>
+        <member name="F:Yarn.Unity.ActionAnalyser.ActionType.Invalid">
+            <summary>
+            The method may have been intended to be an action, but its type
+            cannot be determined.
+            </summary>
+        </member>
+        <member name="F:Yarn.Unity.ActionAnalyser.ActionType.NotAnAction">
+            <summary>
+            The method is not a Yarn action.
+            </summary>
+        </member>
+        <member name="F:Yarn.Unity.ActionAnalyser.DeclarationType.Attribute">
+            <summary>
+            The action is declared via a YarnCommand or YarnFunction attribute.
+            </summary>
+        </member>
+        <member name="F:Yarn.Unity.ActionAnalyser.DeclarationType.DirectRegistration">
+            <summary>
+            The action is declared by calling AddCommandHandler or AddFunction
+            on a DialogueRunner.
+            </summary>
+        </member>
+        <member name="F:Yarn.Unity.ActionAnalyser.AsyncType.Sync">
+            <summary>
+            The action operates synchronously.
+            </summary>
+        </member>
+        <member name="F:Yarn.Unity.ActionAnalyser.AsyncType.MaybeAsyncCoroutine">
+            <summary>
+            The action may operate asynchronously, and Dialogue Runners should
+            check the return value of the action to determine whether to block
+            on the method call or not.
+            </summary>
+            <remarks>
+            This is only valid for <see cref="T:Yarn.Unity.ActionAnalyser.Action"/> objects whose <see
+            cref="P:Yarn.Unity.ActionAnalyser.Action.Type"/> is <see cref="F:Yarn.Unity.ActionAnalyser.ActionType.Command"/>.
+            </remarks>
+        </member>
+        <member name="F:Yarn.Unity.ActionAnalyser.AsyncType.AsyncCoroutine">
+            <summary>
+            The action operates asynchronously using a coroutine.
+            </summary>
+        </member>
+        <member name="P:Yarn.Unity.ActionAnalyser.Action.Name">
+            <summary>
+            The name of this action.
+            </summary>
+        </member>
+        <member name="P:Yarn.Unity.ActionAnalyser.Action.MethodSymbol">
+            <summary>
+            The method symbol for this action.
+            </summary>
+        </member>
+        <member name="P:Yarn.Unity.ActionAnalyser.Action.Declaration">
+            <summary>
+            The declaration of this action's method, if available.
+            </summary>
+        </member>
+        <member name="P:Yarn.Unity.ActionAnalyser.Action.Type">
+            <summary>
+            The type of the action.
+            </summary>
+        </member>
+        <member name="P:Yarn.Unity.ActionAnalyser.Action.DeclarationType">
+            <summary>
+            The declaration type of the action.
+            </summary>
+        </member>
+        <member name="P:Yarn.Unity.ActionAnalyser.Action.AsyncType">
+            <summary>
+            The sync/async type of the action.
+            </summary>
+        </member>
+        <member name="P:Yarn.Unity.ActionAnalyser.Action.SemanticModel">
+            <summary>
+            The <see cref="T:Microsoft.CodeAnalysis.SemanticModel"/> that can be
+            used to answer semantic queries about this method.
+            </summary>
+        </member>
+        <member name="P:Yarn.Unity.ActionAnalyser.Action.MethodName">
+            <summary>
+            The fully-qualified name for this method, including the global
+            prefix.
+            </summary>
+        </member>
+        <member name="P:Yarn.Unity.ActionAnalyser.Action.MethodIdentifierName">
+            <summary>
+            Gets the short form of the method, essentially the easy to read form of <see cref="P:Yarn.Unity.ActionAnalyser.Action.MethodName"/>.
+            </summary>
+        </member>
+        <member name="P:Yarn.Unity.ActionAnalyser.Action.IsStatic">
+            <summary>
+            Whether this action is a static method, or an instance method.
+            </summary>
+        </member>
+        <member name="P:Yarn.Unity.ActionAnalyser.Action.SourceFileName">
+            <summary>
+            Gets the path to the file that this action was declared in.
+            </summary>
+        </member>
+        <member name="P:Yarn.Unity.ActionAnalyser.Action.MethodDeclarationSyntax">
+            <summary>
+            The syntax node for the method declaration associated with this action.
+            </summary>
+        </member>
+        <member name="F:Yarn.Unity.ActionAnalyser.Action.Parameters">
+            <summary>
+            The list of parameters that this action takes.
+            </summary>
+        </member>
+        <member name="T:Yarn.Unity.Editor.YarnSpinnerProjectSettings">
+            <summary>
+            Basic data class of unity settings that impact Yarn Spinner.
+            </summary>
+            <remarks>
+            Currently this only supports disabling the automatic reimport of Yarn Projects when locale assets change, but other settings will eventually end up here.
+            </remarks>
+        </member>
+        <member name="T:Yarn.Unity.Editor.Json">
+             <summary>
+             This class encodes and decodes JSON strings.
+             Spec. details, see http://www.json.org/
+            
+             JSON uses Arrays and Objects. These correspond here to the datatypes IList and IDictionary.
+             All numbers are parsed to doubles.
+             </summary>
+        </member>
+        <member name="M:Yarn.Unity.Editor.Json.Deserialize(System.String)">
+            <summary>
+            Parses the string json into a value
+            </summary>
+            <param name="json">A JSON string.</param>
+            <returns>An List&lt;object&gt;, a Dictionary&lt;string, object&gt;, a double, an integer,a string, null, true, or false</returns>
+        </member>
+        <member name="M:Yarn.Unity.Editor.Json.Serialize(System.Object)">
+            <summary>
+            Converts a IDictionary / IList object or a simple type (string, int, etc.) into a JSON string
+            </summary>
+            <param name="json">A Dictionary&lt;string, object&gt; / List&lt;object&gt;</param>
+            <returns>A JSON encoded string, or null if object 'json' is not serializable</returns>
+        </member>
+        <member name="M:SymbolExtensions.IsAwaitableNonDynamic(Microsoft.CodeAnalysis.ISymbol,Microsoft.CodeAnalysis.SemanticModel,System.Int32)">
+            <summary>
+            If the <paramref name="symbol"/> is a method symbol, returns <see langword="true"/> if the method's return type is "awaitable", but not if it's <see langword="dynamic"/>.
+            If the <paramref name="symbol"/> is a type symbol, returns <see langword="true"/> if that type is "awaitable".
+            An "awaitable" is any type that exposes a GetAwaiter method which returns a valid "awaiter". This GetAwaiter method may be an instance method or an extension method.
+            </summary>
+        </member>
+    </members>
+</doc>

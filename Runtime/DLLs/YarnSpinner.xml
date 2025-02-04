@@ -54,10 +54,10 @@
              <item>Use the value in the <see cref="F:Yarn.Line.ID"/> field to look up the
              appropriate user-facing text in the string table. </item>
             
-             <item>Use <see cref="M:Yarn.Dialogue.ExpandSubstitutions(System.String,System.Collections.Generic.IList{System.String})"/> to replace all
+             <item>Use <see cref="!:Dialogue.ExpandSubstitutions"/> to replace all
              substitutions in the user-facing text.</item>
             
-             <item>Use <see cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/> to parse all markup in the
+             <item>Use <see cref="!:Dialogue.ParseMarkup"/> to parse all markup in the
              line.</item>
              </list>
             
@@ -731,58 +731,62 @@
             </summary>
             <param name="context">The Context that performs the analysis</param>
         </member>
-        <member name="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)">
-            <summary>
-            Parses a line of text, and produces a <see
-            cref="T:Yarn.Markup.MarkupParseResult"/> containing the results.
-            </summary>
-            <remarks>
-            The <see cref="T:Yarn.Markup.MarkupParseResult"/>'s <see
-            cref="F:Yarn.Markup.MarkupParseResult.Text"/> will have any <c>select</c>,
-            <c>plural</c> or <c>ordinal</c> markers replaced with the appropriate
-            text, following this <see cref="T:Yarn.Dialogue"/>'s <see
-            cref="!:LanguageCode"/>.
-            </remarks>
-            <param name="line">The line of text to parse.</param>
-            <returns>The results of parsing the markup.</returns>
-        </member>
-        <member name="M:Yarn.Dialogue.ExpandSubstitutions(System.String,System.Collections.Generic.IList{System.String})">
-            <summary>
-            Replaces all substitution markers in a text with the given
-            substitution list.
-            </summary>
-            <remarks>
-            This method replaces substitution markers - for example, <c>{0}</c>
-            - with the corresponding entry in <paramref name="substitutions"/>.
-            If <paramref name="text"/> contains a substitution marker whose
-            index is not present in <paramref name="substitutions"/>, it is
-            ignored.
-            </remarks>
-            <param name="text">The text containing substitution markers.</param>
-            <param name="substitutions">The list of substitutions.</param>
-            <returns><paramref name="text"/>, with the content from <paramref
-            name="substitutions"/> inserted.</returns>
-        </member>
-        <member name="F:Yarn.Dialogue.ValuePlaceholderRegex">
-            <summary>
-            A regex that matches any <c>%</c> as long as it's not preceded by a
-            <c>\</c>.
-            </summary>
-        </member>
-        <member name="M:Yarn.Dialogue.Yarn#Markup#IAttributeMarkerProcessor#ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker,System.String)">
-            <summary>Returns the text that should be used to replace the
-            contents of <paramref name="marker"/>.</summary>
-            <param name="marker">The marker to generate replacement text
-            for.</param>
-            <returns>The replacement text for the marker.</returns>
-            <throws cref="T:System.InvalidOperationException"></throws> <throws
-            cref="T:System.Collections.Generic.KeyNotFoundException"></throws> <throws
-            cref="T:System.ArgumentException">Thrown when the string contains a
-            <c>plural</c> or <c>ordinal</c> marker, but the specified value cannot be
-            parsed as a number.</throws>
-        </member>
         <member name="M:Yarn.Dialogue.TryGetSmartVariable``1(System.String,``0@)">
             <inheritdoc />
+        </member>
+        <member name="M:Yarn.Dialogue.GetSaliencyOptionsForNodeGroup(System.String)">
+            <summary>
+            Queries the <see cref="T:Yarn.Dialogue"/> for what content could possibly
+            run if the node group nodeGroup was run.
+            </summary>
+            <remarks>
+            <para>This method evaluates all nodes in the given node group, and
+            returns a <see cref="T:Yarn.Saliency.ContentSaliencyOption"/> object for
+            each node. This object contains the current number of passing and
+            failing 'when' clauses on the node, as well as the complexity score
+            for that node. This is the same information that's passed to a <see
+            cref="T:Yarn.Saliency.IContentSaliencyStrategy"/> object's <see
+            cref="M:Yarn.Saliency.IContentSaliencyStrategy.QueryBestContent(System.Collections.Generic.IEnumerable{Yarn.Saliency.ContentSaliencyOption})"/>
+            method. This method is read-only, and calling it will not modify any
+            variable state.
+            </para>
+            <para>Note that this method does not filter its output, and may
+            include content options whose <see
+            cref="P:Yarn.Saliency.ContentSaliencyOption.FailingConditionValueCount"/>
+            is greater than zero. It's up to the caller of this function to
+            filter out these options if they're not wanted.</para> 
+            <para>
+            This method can be used to see if <em>any</em> content will appear
+            when a given node group is run. If the collection returned by this
+            method is empty, then running this node group will not result in any
+            content. This can be used, for example, to decide whether to show a
+            'character can be spoken to' indicator. You can also examine the
+            individal <see cref="T:Yarn.Saliency.ContentSaliencyOption"/> objects to
+            see if any content is available that passes a filter, such as
+            whether content might appear that has a user-defined 'plot critical'
+            tag.
+            </para> 
+            </remarks>
+            <param name="nodeGroup">The name of the node group to get available
+            content for.</param>
+            <returns>A collection of <see
+            cref="T:Yarn.Saliency.ContentSaliencyOption"/> objects that may appear if
+            and when the node group <paramref name="nodeGroup"/> is run.
+            </returns>
+            <exception cref="T:System.ArgumentException">Thrown when <paramref
+            name="nodeGroup"/> is not a valid node name.</exception>
+        </member>
+        <member name="M:Yarn.Dialogue.IsNodeGroup(System.String)">
+            <summary>
+            Gets a value indicating whether <paramref name="nodeName"/> is the
+            name of a valid node group in the program.
+            </summary>
+            <param name="nodeName">The name of the node group to check.</param>
+            <returns><see langword="true"/> if <paramref name="nodeName"/> is
+            the name of a node group; <see langword="false"/>
+            otherwise.</returns>
+            <exception cref="T:System.InvalidOperationException">Thrown when <see
+            cref="P:Yarn.Dialogue.Program"/> is null.</exception>
         </member>
         <member name="F:Yarn.Dialogue.StandardLibrary.Random">
             <summary>
@@ -1147,6 +1151,37 @@
         <member name="F:Yarn.Instruction.ReturnFieldNumber">
             <summary>Field number for the "return" field.</summary>
         </member>
+        <member name="F:Yarn.Instruction.AddSaliencyCandidateFieldNumber">
+            <summary>Field number for the "addSaliencyCandidate" field.</summary>
+        </member>
+        <member name="P:Yarn.Instruction.AddSaliencyCandidate">
+            <summary>
+            Pops a boolean from the stack, and adds a saliency candidate to the
+            current list.
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.AddSaliencyCandidateFromNodeFieldNumber">
+            <summary>Field number for the "addSaliencyCandidateFromNode" field.</summary>
+        </member>
+        <member name="P:Yarn.Instruction.AddSaliencyCandidateFromNode">
+            <summary>
+            Add a saliency candidate to the current list, given a node name.
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.SelectSaliencyCandidateFieldNumber">
+            <summary>Field number for the "selectSaliencyCandidate" field.</summary>
+        </member>
+        <member name="P:Yarn.Instruction.SelectSaliencyCandidate">
+             <summary>
+             Attempt to select a single saliency candidate from the current list:
+             - if one is selected, pushes the destination of that candidate and
+               the value 'true'
+             - if none is selected, pushes the value 'false'
+            
+             In all circumstances, clears the saliency candidate list before
+             returning.
+             </summary>
+        </member>
         <member name="T:Yarn.Instruction.InstructionTypeOneofCase">
             <summary>Enum of possible cases for the "InstructionType" oneof.</summary>
         </member>
@@ -1232,7 +1267,7 @@
         </member>
         <member name="P:Yarn.Instruction.Types.AddOptionInstruction.Destination">
             <summary>
-            The instruction number in the current node to jump to, if this option
+            The instruction number in the current node to jump to if this option
             is selected.
             </summary>
         </member>
@@ -1298,6 +1333,48 @@
         <member name="F:Yarn.Instruction.Types.DetourToNodeInstruction.NodeNameFieldNumber">
             <summary>Field number for the "nodeName" field.</summary>
         </member>
+        <member name="F:Yarn.Instruction.Types.AddSaliencyCandidateInstruction.ContentIDFieldNumber">
+            <summary>Field number for the "contentID" field.</summary>
+        </member>
+        <member name="P:Yarn.Instruction.Types.AddSaliencyCandidateInstruction.ContentID">
+            <summary>
+            The unique ID for this piece of content, such as a line ID.
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.AddSaliencyCandidateInstruction.ComplexityScoreFieldNumber">
+            <summary>Field number for the "complexityScore" field.</summary>
+        </member>
+        <member name="P:Yarn.Instruction.Types.AddSaliencyCandidateInstruction.ComplexityScore">
+            <summary>
+            The complexity score of the candidate.
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.AddSaliencyCandidateInstruction.DestinationFieldNumber">
+            <summary>Field number for the "destination" field.</summary>
+        </member>
+        <member name="P:Yarn.Instruction.Types.AddSaliencyCandidateInstruction.Destination">
+            <summary>
+            The instruction number in the current node to jump to if this
+            candidate is selected.
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.AddSaliencyCandidateFromNodeInstruction.NodeNameFieldNumber">
+            <summary>Field number for the "nodeName" field.</summary>
+        </member>
+        <member name="P:Yarn.Instruction.Types.AddSaliencyCandidateFromNodeInstruction.NodeName">
+            <summary>
+            The name of the node to get saliency information from.
+            </summary>
+        </member>
+        <member name="F:Yarn.Instruction.Types.AddSaliencyCandidateFromNodeInstruction.DestinationFieldNumber">
+            <summary>Field number for the "destination" field.</summary>
+        </member>
+        <member name="P:Yarn.Instruction.Types.AddSaliencyCandidateFromNodeInstruction.Destination">
+            <summary>
+            The instruction number in the current node to jump to if this
+            candidate is selected.
+            </summary>
+        </member>
         <member name="T:Yarn.Node">
             <summary>
             A node of Yarn script, contained within a <see cref="T:Yarn.Program"/>, and
@@ -1313,11 +1390,50 @@
             tags are defined, returns an empty collection.
             </summary>
         </member>
+        <member name="F:Yarn.Node.NodeGroupHeader">
+            <summary>
+            The name of the header that indicates which node group a node
+            belongs to.
+            </summary>
+        </member>
         <member name="P:Yarn.Node.TrackingVariableName">
             <summary>
             Gets the name of the variable used for tracking the number of times
             this node has completed, or <see langword="null"/> if this node is
             not tracked.
+            </summary>
+        </member>
+        <member name="P:Yarn.Node.IsNodeGroupHub">
+            <summary>
+            Gets a value indicating whether this node is the 'hub' node for a
+            node group.
+            </summary>
+        </member>
+        <member name="P:Yarn.Node.ContentSaliencyConditionVariables">
+            <summary>
+            Gets an enumerable containing the names of variables that must be
+            evaluated in order to determine whether this node can be selected as
+            a piece of salient content.
+            </summary>
+            <remarks>
+            The list of variables is stored in the header as a
+            semicolon-delimited string.
+            </remarks>
+        </member>
+        <member name="P:Yarn.Node.ContentSaliencyConditionComplexityScore">
+            <summary>
+            Gets the content saliency condition complexity score for this node.
+            </summary>
+            <returns>
+            An integer representing the content saliency condition complexity
+            score if a valid header is found; otherwise, returns -1 if the
+            header is not present or does not contain a valid value.
+            </returns>
+        </member>
+        <member name="P:Yarn.Node.NodeGroup">
+            <summary>
+            Gets the name of the node group that this node is a part of, or <see
+            langword="null"/> if it is not part of a node group.
             </summary>
         </member>
         <member name="F:Yarn.Node.NameFieldNumber">
@@ -1354,12 +1470,6 @@
             content has been seen in the provided <see cref="P:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.VariableStorage"/>.
             </remarks>
         </member>
-        <member name="P:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.VariableStorage">
-            <summary>
-            Gets the variable storage to use for storing information about how
-            often we've seen content.
-            </summary>
-        </member>
         <member name="M:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.#ctor(Yarn.IVariableStorage)">
             <summary>
             Initalises a new instance of the <see
@@ -1367,18 +1477,23 @@
             </summary>
             <param name="storage">The variable storage to use when determining
             which content to show.</param>
-            <exception cref="T:System.ArgumentNullException"></exception>
+            <exception cref="T:System.ArgumentNullException">Thrown when the provided
+            <paramref name="storage"/> argument is null.</exception>
         </member>
-        <member name="M:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.GetViewCountKeyForContent(Yarn.Saliency.IContentSaliencyOption)">
+        <member name="P:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.VariableStorage">
             <summary>
-            Gets a unique variable name that can be used for tracking the view
-            count of a specific piece of content.
+            Gets the variable storage to use for storing information about how
+            often we've seen content.
             </summary>
-            <param name="content">The content to generate a variable name
-            for.</param>
-            <returns>The generated variable name.</returns>
         </member>
-        <member name="M:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.ChooseBestContent``1(System.Collections.Generic.IEnumerable{``0})">
+        <member name="M:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)">
+            <inheritdoc/>
+            <remarks>This method increments the view count for <paramref
+            name="content"/>, so that the next time QueryBestContent is run, it
+            has an updated count of the number of times the content has been
+            viewed.</remarks>
+        </member>
+        <member name="M:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.QueryBestContent(System.Collections.Generic.IEnumerable{Yarn.Saliency.ContentSaliencyOption})">
             <inheritdoc/>
         </member>
         <member name="T:Yarn.Saliency.BestSaliencyStrategy">
@@ -1387,52 +1502,112 @@
             options.
             </summary>
             <remarks>
-            This strategy always returns the single best of the available items,
-            regardless of whether it has been seen before. For a saliency strategy
-            that takes into account how recently content has been seen, see <see
-            cref="T:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy"/>.
+            This strategy always selects the single best of the available items,
+            regardless of how many times it has been seen before. For a saliency
+            strategy that takes into account how recently content has been seen, see
+            <see cref="T:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy"/>.
             </remarks>
         </member>
-        <member name="M:Yarn.Saliency.BestSaliencyStrategy.ChooseBestContent``1(System.Collections.Generic.IEnumerable{``0})">
+        <member name="M:Yarn.Saliency.BestSaliencyStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)">
             <inheritdoc/>
+        </member>
+        <member name="M:Yarn.Saliency.BestSaliencyStrategy.QueryBestContent(System.Collections.Generic.IEnumerable{Yarn.Saliency.ContentSaliencyOption})">
+            <inheritdoc/>
+        </member>
+        <member name="T:Yarn.Saliency.ContentSaliencyContentType">
+            <summary>
+            Indicates what type of content a <see cref="T:Yarn.Saliency.ContentSaliencyOption"/>
+            represents.
+            </summary>
+            <seealso cref="P:Yarn.Saliency.ContentSaliencyOption.ContentType"/>
+        </member>
+        <member name="F:Yarn.Saliency.ContentSaliencyContentType.Node">
+            <summary>
+            The content represents a node in a node group.
+            </summary>
+        </member>
+        <member name="F:Yarn.Saliency.ContentSaliencyContentType.Line">
+            <summary>
+            The content represents a line in a line group.
+            </summary>
+        </member>
+        <member name="T:Yarn.Saliency.ContentSaliencyOption">
+            <summary>
+            Represents a piece of content that may be selected by an <see
+            cref="T:Yarn.Saliency.IContentSaliencyStrategy"/>.
+            </summary>
+        </member>
+        <member name="M:Yarn.Saliency.ContentSaliencyOption.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the ContentSaliencyOption class with
+            the specified content ID.
+            </summary>
+            <param name="id">A string representing the unique identifier for the
+            content.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown when the
+            provided ID is null.</exception>
+        </member>
+        <member name="P:Yarn.Saliency.ContentSaliencyOption.PassingConditionValueCount">
+            <summary>
+            Gets the number of conditions that passed for this piece of content.
+            </summary>
+        </member>
+        <member name="P:Yarn.Saliency.ContentSaliencyOption.FailingConditionValueCount">
+            <summary>
+            Get the number of conditions that failed for this piece of content.
+            </summary>
+        </member>
+        <member name="P:Yarn.Saliency.ContentSaliencyOption.ContentID">
+            <summary>
+            Gets a string that uniquely identifies this content.
+            </summary>
+        </member>
+        <member name="P:Yarn.Saliency.ContentSaliencyOption.ComplexityScore">
+            <summary>
+            Gets the complexity score of this option.
+            </summary>
+        </member>
+        <member name="P:Yarn.Saliency.ContentSaliencyOption.ContentType">
+            <summary>
+            Gets the type of content that this option represents.
+            </summary>
+            <remarks>
+            This information may be used by custom <see
+            cref="T:Yarn.Saliency.IContentSaliencyStrategy"/> classes to allow them to have
+            different behaviour depending on the type of the content.
+            </remarks> 
+        </member>
+        <member name="P:Yarn.Saliency.ContentSaliencyOption.ViewCountKey">
+            <summary>
+            Gets a unique variable name that can be used for tracking the view
+            count of a specific piece of content. This value is <see
+            langword="null"/> if <see cref="P:Yarn.Saliency.ContentSaliencyOption.ContentID"/> is <see
+            langword="null"/> or empty.
+            </summary>
+        </member>
+        <member name="P:Yarn.Saliency.ContentSaliencyOption.Destination">
+            <summary>
+            The destination instruction that the virtual machine will jump to if
+            this option is selected.
+            </summary>
+            <remarks>This property is internal to Yarn Spinner, and is used by
+            the <see cref="T:Yarn.VirtualMachine"/> class.</remarks>
         </member>
         <member name="T:Yarn.Saliency.FirstSaliencyStrategy">
             <summary>
-            A content saliency strategy that always returns the first item in the
-            list of available options.
+            A content saliency strategy that always returns the first non-failing
+            item in the list of available options.
             </summary>
             <remarks>
             This saliency strategy is used when a <see cref="T:Yarn.Dialogue"/> has no
             provided saliency strategy, but is required to make a decision.
             </remarks>
         </member>
-        <member name="M:Yarn.Saliency.FirstSaliencyStrategy.ChooseBestContent``1(System.Collections.Generic.IEnumerable{``0})">
+        <member name="M:Yarn.Saliency.FirstSaliencyStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)">
             <inheritdoc/>
         </member>
-        <member name="T:Yarn.Saliency.IContentSaliencyOption">
-            <summary>
-            Represents a piece of content that may be selected by an <see
-            cref="T:Yarn.Saliency.IContentSaliencyStrategy"/>.
-            </summary>
-        </member>
-        <member name="P:Yarn.Saliency.IContentSaliencyOption.ConditionValueCount">
-            <summary>
-            Gets the number of values present in this item's condition.
-            </summary>
-            <remarks>
-            If <see cref="P:Yarn.Saliency.IContentSaliencyOption.ContentID"/> is <see langword="null"/>, then this
-            property's value is unused.
-            </remarks>
-        </member>
-        <member name="P:Yarn.Saliency.IContentSaliencyOption.ContentID">
-            <summary>
-            Gets a string that uniquely identifies this content. This value may
-            be <see langword="null"/>.
-            </summary>
-            <remarks>
-            This is generally a line ID. A <see langword="null"/> value
-            indicates that no content should be displayed.
-            </remarks>
+        <member name="M:Yarn.Saliency.FirstSaliencyStrategy.QueryBestContent(System.Collections.Generic.IEnumerable{Yarn.Saliency.ContentSaliencyOption})">
+            <inheritdoc/>
         </member>
         <member name="T:Yarn.Saliency.IContentSaliencyStrategy">
             <summary>
@@ -1440,13 +1615,31 @@
             options.
             </summary>
         </member>
-        <member name="M:Yarn.Saliency.IContentSaliencyStrategy.ChooseBestContent``1(System.Collections.Generic.IEnumerable{``0})">
+        <member name="M:Yarn.Saliency.IContentSaliencyStrategy.QueryBestContent(System.Collections.Generic.IEnumerable{Yarn.Saliency.ContentSaliencyOption})">
             <summary>
             Chooses an item from content that is the most appropriate (or
             <i>salient</i>) for the user's current context.
             </summary>
-            <param name="content">A collection of content items.</param>
-            <returns>An item from content that should be displayed to the user.</returns>
+            <remarks>Implementations of this method should not modify any state
+            - that is, they should be 'read-only' operations. If a strategy
+            needs to record information about when a piece of content has been
+            selected, it should do it in the <see cref="M:Yarn.Saliency.IContentSaliencyStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)"/>
+            method.</remarks>
+            <param name="content">A collection of content items. This collection
+            may be empty.</param>
+            <returns>An item from <paramref name="content"/> that is the most
+            appropriate for display, or <see langword="null"/> if no content
+            should be displayed.</returns>
+        </member>
+        <member name="M:Yarn.Saliency.IContentSaliencyStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)">
+            <summary>
+            Called by Yarn Spinner to indicate that a piece of salient content
+            has been selected, and this system should update any state related
+            to how it selects content.
+            </summary>
+            <remarks>If a content saliency strategy does not need to keep track
+            of any state, then this method can be empty.</remarks>
+            <param name="content">The content that has been selected.</param>
         </member>
         <member name="T:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy">
             <summary>
@@ -1458,22 +1651,30 @@
             content has been seen in the provided <see cref="P:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.VariableStorage"/>.
             </remarks>
         </member>
+        <member name="M:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.#ctor(Yarn.IVariableStorage)">
+            <summary>
+            Initializes a new instance of the <see
+            cref="T:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy"/> class.
+            </summary>
+            <param name="storage">The variable storage to use when determining
+            which content to show.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown when the provided
+            <paramref name="storage"/> argument is null.</exception>
+        </member>
         <member name="P:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.VariableStorage">
             <summary>
             Gets the variable storage to use for storing information about how
             often we've seen content.
             </summary>
         </member>
-        <member name="M:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.GetViewCountKeyForContent(Yarn.Saliency.IContentSaliencyOption)">
-            <summary>
-            Gets a unique variable name that can be used for tracking the view
-            count of a specific piece of content.
-            </summary>
-            <param name="content">The content to generate a variable name
-            for.</param>
-            <returns>The generated variable name.</returns>
+        <member name="M:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)">
+            <inheritdoc/>
+            <remarks>This method increments the view count for <paramref
+            name="content"/>, so that the next time QueryBestContent is run, it
+            has an updated count of the number of times the content has been
+            viewed.</remarks>
         </member>
-        <member name="M:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.ChooseBestContent``1(System.Collections.Generic.IEnumerable{``0})">
+        <member name="M:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.QueryBestContent(System.Collections.Generic.IEnumerable{Yarn.Saliency.ContentSaliencyOption})">
             <inheritdoc/>
         </member>
         <member name="T:Yarn.Saliency.EnumerableRandomExtension">
@@ -1532,6 +1733,32 @@
             name="name"/> is null or empty.</exception>
             <exception cref="T:System.InvalidOperationException">Thrown if an error
             occurs during the evaluation of the variable.</exception>
+        </member>
+        <member name="M:Yarn.SmartVariableEvaluationVirtualMachine.GetSaliencyOptionsForNodeGroup(System.String,Yarn.IVariableAccess,Yarn.Library)">
+            <summary>
+            Retrieves a collection of content saliency options available for the
+            specified node group.
+            </summary>
+            <remarks>
+            This method iterates through all nodes in the program to find those
+            that belong to the specified node group. It calculates the
+            complexity score and counts the number of conditions that pass or
+            fail for each node, then creates a saliency option for each
+            qualifying node.
+            </remarks>
+            <param name="nodeGroupName">The name of the node group to search for
+            available content.</param>
+            <param name="variableAccess">The object to use when accessing
+            variables.</param>
+            <param name="library">The library containing function
+            definitions.</param>
+            <returns>An enumerable collection of <see
+            cref="T:Yarn.Saliency.ContentSaliencyOption"/> objects representing
+            available content saliency options for the specified node
+            group.</returns>
+            <exception cref="T:System.ArgumentException">Thrown when the provided
+            <paramref name="nodeGroupName"/> is not a valid node group name in
+            the program.</exception>
         </member>
         <member name="T:Yarn.AnyType">
             <summary>
@@ -2021,6 +2248,12 @@
             A string.
             </summary>
         </member>
+        <member name="P:Yarn.Operand.HasStringValue">
+            <summary>Gets whether the "string_value" field is set</summary>
+        </member>
+        <member name="M:Yarn.Operand.ClearStringValue">
+            <summary> Clears the value of the oneof if it's currently set to "string_value" </summary>
+        </member>
         <member name="F:Yarn.Operand.BoolValueFieldNumber">
             <summary>Field number for the "bool_value" field.</summary>
         </member>
@@ -2029,6 +2262,12 @@
             A boolean (true or false).
             </summary>
         </member>
+        <member name="P:Yarn.Operand.HasBoolValue">
+            <summary>Gets whether the "bool_value" field is set</summary>
+        </member>
+        <member name="M:Yarn.Operand.ClearBoolValue">
+            <summary> Clears the value of the oneof if it's currently set to "bool_value" </summary>
+        </member>
         <member name="F:Yarn.Operand.FloatValueFieldNumber">
             <summary>Field number for the "float_value" field.</summary>
         </member>
@@ -2036,6 +2275,12 @@
             <summary>
             A floating point number.
             </summary>
+        </member>
+        <member name="P:Yarn.Operand.HasFloatValue">
+            <summary>Gets whether the "float_value" field is set</summary>
+        </member>
+        <member name="M:Yarn.Operand.ClearFloatValue">
+            <summary> Clears the value of the oneof if it's currently set to "float_value" </summary>
         </member>
         <member name="T:Yarn.Operand.ValueOneofCase">
             <summary>Enum of possible cases for the "value" oneof.</summary>
@@ -2386,21 +2631,6 @@
             marker.</summary>
             <seealso cref="M:Yarn.Markup.LineParser.RegisterMarkerProcessor(System.String,Yarn.Markup.IAttributeMarkerProcessor)"/>
         </member>
-        <member name="M:Yarn.Markup.IAttributeMarkerProcessor.ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker,System.String)">
-            <summary>
-            Produces the replacement text that should be inserted into a parse
-            result for a given attribute.
-            </summary>
-            <remarks>
-            If the marker is an <i>open</i> marker, the text from the marker's
-            position to its corresponding closing marker is provided as a string
-            property called <c>contents</c>.
-            </remarks>
-            <param name="marker">The marker that should have text
-            inserted.</param>
-            <param name="localeCode">The locale to use when preparing replacement text.</param>
-            <returns>The replacement text to insert.</returns>
-        </member>
         <member name="T:Yarn.Markup.LineParser">
             <summary>
             Parses text and produces markup information.
@@ -2421,7 +2651,7 @@
         <member name="F:Yarn.Markup.LineParser.CharacterAttributeNameProperty">
             <summary>
             The name of the 'name' property, on the implicitly-generated
-            <c>character</c> attriubte.
+            <c>character</c> attribute.
             </summary>
             <seealso cref="F:Yarn.Markup.LineParser.CharacterAttribute"/>
         </member>
@@ -2431,20 +2661,6 @@
             whitespace should be trimmed if a tag had preceding whitespace
             or begins the line. This property must be a bool value.
             </summary>
-        </member>
-        <member name="F:Yarn.Markup.LineParser.EndOfCharacterMarker">
-            <summary>
-            A regular expression that matches a colon followed by optional
-            whitespace.
-            </summary>
-        </member>
-        <member name="F:Yarn.Markup.LineParser.AttributePositionComparison">
-            <summary>
-            A comparison function that sorts <see cref="T:Yarn.Markup.MarkupAttribute"/>s
-            by their source position.
-            </summary>
-            <returns>A value indicating the relative source position of the
-            two attributes.</returns>
         </member>
         <member name="F:Yarn.Markup.LineParser.markerProcessors">
             <summary>
@@ -2463,22 +2679,10 @@
             cref="F:Yarn.Markup.LineParser.input"/>.
             </summary>
         </member>
-        <member name="F:Yarn.Markup.LineParser.position">
-            <summary>
-            The current position of the string reader in the plain text,
-            measured in text elements.
-            </summary>
-        </member>
         <member name="F:Yarn.Markup.LineParser.sourcePosition">
             <summary>
             The current position of the string reader in the plain text,
             measured in characters.
-            </summary>
-        </member>
-        <member name="M:Yarn.Markup.LineParser.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:Yarn.Markup.LineParser"/>
-            class.
             </summary>
         </member>
         <member name="M:Yarn.Markup.LineParser.RegisterMarkerProcessor(System.String,Yarn.Markup.IAttributeMarkerProcessor)">
@@ -2498,153 +2702,22 @@
             <param name="markerProcessor">The object that should be invoked
             when markers with this name are encountered.</param>
         </member>
-        <member name="M:Yarn.Markup.LineParser.ParseMarkup(System.String,System.String)">
-            <summary>Parses a line of text, and produces a
-            <see cref="T:Yarn.Markup.MarkupParseResult"/> containing the processed
-            text.</summary>
-            <param name="input">The text to parse.</param>
-            <returns>The resulting markup information.</returns>
-        </member>
-        <member name="M:Yarn.Markup.LineParser.ProcessReplacementMarker(Yarn.Markup.MarkupAttributeMarker,System.String)">
+        <member name="M:Yarn.Markup.LineParser.ExpandSubstitutions(System.String,System.Collections.Generic.IList{System.String})">
             <summary>
-            Parses a marker and generates replacement text to insert into
-            the plain text.
-            </summary>
-            <param name="marker">The marker to parse.</param>
-            <param name="localeCode">The locale code to use when processing the marker.</param>
-            <returns>The replacement text to insert.</returns>
-        </member>
-        <member name="M:Yarn.Markup.LineParser.ParseRawTextUpToAttributeClose(System.String)">
-            <summary>
-            Parses text up to either a close marker with the given name, or
-            a close-all marker.
+            Replaces all substitution markers in a text with the given
+            substitution list.
             </summary>
             <remarks>
-            The closing marker itself is not included in the returned text.
+            This method replaces substitution markers - for example, <c>{0}</c>
+            - with the corresponding entry in <paramref name="substitutions"/>.
+            If <paramref name="text"/> contains a substitution marker whose
+            index is not present in <paramref name="substitutions"/>, it is
+            ignored.
             </remarks>
-            <param name="name">The name of the close marker to look
-            for.</param>
-            <returns>The text up to the closing marker.</returns>
-        </member>
-        <member name="M:Yarn.Markup.LineParser.BuildAttributesFromMarkers(System.Collections.Generic.List{Yarn.Markup.MarkupAttributeMarker})">
-            <summary>
-            Creates a list of <see cref="T:Yarn.Markup.MarkupAttribute"/>s from loose
-            <see cref="T:Yarn.Markup.MarkupAttributeMarker"/>s.
-            </summary>
-            <param name="markers">The collection of markers.</param>
-            <returns>The list of attributes.</returns>
-            <throws cref="T:Yarn.Markup.MarkupParseException">Thrown when a close marker
-            is encountered, but no corresponding open marker for it
-            exists.</throws>
-        </member>
-        <member name="M:Yarn.Markup.LineParser.ParseAttributeMarker">
-            <summary>
-            Parses an open, close, self-closing, or close-all attribute
-            marker.
-            </summary>
-            <returns>The parsed marker.</returns>
-        </member>
-        <member name="M:Yarn.Markup.LineParser.ParseValue">
-             <summary>
-             Parses a property value.
-             </summary>
-             <remarks>
-             Permitted value types are:
-            
-             <list type="bullet">
-             <item>Integers</item>
-            
-             <item>Floating-point numbers</item>
-            
-             <item>Strings (delimited by double quotes). (Strings may contain
-             escaped quotes with a backslash.)</item>
-            
-             <item>The words <c>true</c> or <c>false</c>
-             </item>
-            
-             <item>Runs of alphanumeric characters, up to but not including a
-             whitespace or the end of a tag; these are interpreted as a string
-             (e.g. <c>[mood=happy]</c> is interpreted the same as
-             <c>[mood="happy"]</c>
-             </item>
-            
-             <item>Expressions (delimited by curly braces), which are processed
-             as inline expressions.
-             </item>
-             </list>
-             </remarks>
-             <returns>The parsed value.</returns>
-        </member>
-        <member name="M:Yarn.Markup.LineParser.Peek(System.Char)">
-            <summary>
-            Peeks ahead in the LineParser's input without consuming any
-            characters.
-            </summary>
-            <remarks>
-            This method returns false if the parser has reached the end of
-            the line.
-            </remarks>
-            <param name="expectedCharacter">The character to look
-            for.</param>
-            <returns>True if the next character is <paramref
-            name="expectedCharacter"/>, false otherwise.</returns>
-        </member>
-        <member name="M:Yarn.Markup.LineParser.PeekWhitespace">
-            <summary>
-            Peeks ahead in the LineParser's input without consuming any
-            characters, looking for whitespace.
-            </summary>
-            <remarks>
-            This method returns false if the parser has reached the end of
-            the line.
-            </remarks>
-            <returns>True if the next character is whitespace, false
-            otherwise.</returns>
-        </member>
-        <member name="M:Yarn.Markup.LineParser.PeekNumeric">
-            <summary>
-            Peeks ahead in the LineParser's input without consuming any
-            characters, looking for numeric characters.
-            </summary>
-            <remarks>
-            This method returns false if the parser has reached the end of
-            the line.
-            </remarks>
-            <returns>True if the next character is numeric, false
-            otherwise.</returns>
-        </member>
-        <member name="M:Yarn.Markup.LineParser.ParseInteger">
-            <summary>
-            Parses an integer from the stream.
-            </summary>
-            <remarks>
-            This method returns false if the parser has reached the end of
-            the line.
-            </remarks>
-            <returns>True if the next character is numeric, false
-            otherwise.</returns>
-        </member>
-        <member name="M:Yarn.Markup.LineParser.AssertNotEndOfInput(System.Int32)">
-            <summary>
-            Throws an exception if <paramref name="value"/> is the
-            end-of-line character.
-            </summary>
-            <param name="value">The character to test, as an
-            integer.</param>
-            <throws cref="T:Yarn.Markup.MarkupParseException">Thrown when <paramref
-            name="value"/> is the end-of-line character.</throws>
-        </member>
-        <member name="M:Yarn.Markup.LineParser.ConsumeWhitespace(System.Boolean)">
-            <summary>
-            Reads and discards whitespace, up to the first non-whitespace
-            character.
-            </summary>
-            <param name="allowEndOfLine">If <see langword="false"/>, a <see
-            cref="T:Yarn.Markup.MarkupParseException"/> will be thrown if the end of the line
-            is reached while reading whitespace.</param>
-            <throws cref="T:Yarn.Markup.MarkupParseException">Thrown when the end of the line
-            is reached, and <paramref name="allowEndOfLine"/> is <see
-            langword="false"/>.</throws>
+            <param name="text">The text containing substitution markers.</param>
+            <param name="substitutions">The list of substitutions.</param>
+            <returns><paramref name="text"/>, with the content from <paramref
+            name="substitutions"/> inserted.</returns>
         </member>
         <member name="T:Yarn.Markup.MarkupParseException">
             <summary>
@@ -2682,7 +2755,7 @@
             You do not create instances of this struct yourself. It is created
             by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
             </remarks>
-            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/>
+            <seealso cref="!:Dialogue.ParseMarkup(string,string)"/>
         </member>
         <member name="F:Yarn.Markup.MarkupParseResult.Text">
             <summary>
@@ -2807,7 +2880,7 @@
             You do not create instances of this struct yourself. It is created
             by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
             </remarks>
-            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/>
+            <seealso cref="!:Dialogue.ParseMarkup(string,string)"/>
         </member>
         <member name="M:Yarn.Markup.MarkupAttribute.#ctor(System.Int32,System.Int32,System.Int32,System.String,System.Collections.Generic.IEnumerable{Yarn.Markup.MarkupProperty})">
             <summary>
@@ -2875,7 +2948,7 @@
             You do not create instances of this struct yourself. It is created
             by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
             </remarks>
-            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/>
+            <seealso cref="!:Dialogue.ParseMarkup(string,string)"/>
         </member>
         <member name="M:Yarn.Markup.MarkupProperty.#ctor(System.String,Yarn.Markup.MarkupValue)">
             <summary>
@@ -2903,7 +2976,7 @@
             You do not create instances of this struct yourself. It is created
             by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
             </remarks>
-            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/>
+            <seealso cref="!:Dialogue.ParseMarkup(string,string)"/>
         </member>
         <member name="P:Yarn.Markup.MarkupValue.IntegerValue">
             <summary>Gets the integer value of this property.</summary>
@@ -2952,7 +3025,7 @@
             You do not create instances of this struct yourself. It is created
             by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
             </remarks>
-            <seealso cref="M:Yarn.Dialogue.ParseMarkup(System.String,System.String)"/>
+            <seealso cref="!:Dialogue.ParseMarkup(string,string)"/>
         </member>
         <member name="M:Yarn.Markup.MarkupAttributeMarker.#ctor(System.String,System.Int32,System.Int32,System.Collections.Generic.List{Yarn.Markup.MarkupProperty},Yarn.Markup.TagType)">
             <summary>
@@ -3024,13 +3097,6 @@
         </member>
         <member name="F:Yarn.Markup.MarkupValueType.Bool">
             <summary>A bool.</summary>
-        </member>
-        <member name="T:Yarn.Markup.NoMarkupTextProcessor">
-            <summary>A markup text processor that implements the <c>[nomarkup]</c>
-            attribute's behaviour.</summary>
-        </member>
-        <member name="M:Yarn.Markup.NoMarkupTextProcessor.ReplacementTextForMarker(Yarn.Markup.MarkupAttributeMarker,System.String)">
-            <inheritdoc/>
         </member>
         <member name="T:Yarn.Markup.TagType">
             <summary>

@@ -2,12 +2,12 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 #nullable enable
 
@@ -64,7 +64,7 @@ namespace Yarn.Unity.ActionAnalyser
         /// <summary>
         /// The method is not a Yarn action.
         /// </summary>
-        
+
         NotAnAction,
     }
 
@@ -112,7 +112,8 @@ namespace Yarn.Unity.ActionAnalyser
 
     public class Action
     {
-        public Action(string name, ActionType type, IMethodSymbol methodSymbol) {
+        public Action(string name, ActionType type, IMethodSymbol methodSymbol)
+        {
             Name = name;
             Type = type;
             MethodSymbol = methodSymbol;
@@ -158,7 +159,7 @@ namespace Yarn.Unity.ActionAnalyser
         /// The fully-qualified name for this method, including the global
         /// prefix.
         /// </summary>
-        public string? MethodName {get;set;}
+        public string? MethodName { get; set; }
 
         /// <summary>
         /// Gets the short form of the method, essentially the easy to read form of <see cref="MethodName"/>.
@@ -198,25 +199,28 @@ namespace Yarn.Unity.ActionAnalyser
                 throw new NotImplementedException("Todo: handle case where action's method is not a MethodDeclaration");
             }
 
-            if (this.Name == null) {
+            if (this.Name == null)
+            {
                 throw new NullReferenceException("Action name is null");
             }
 
-            if (this.MethodSymbol == null) {
+            if (this.MethodSymbol == null)
+            {
                 throw new NullReferenceException($"Method symbol for {Name} is null");
             }
 
             var diagnostics = new List<Microsoft.CodeAnalysis.Diagnostic>();
 
-            if (this.MethodSymbol.DeclaredAccessibility != Accessibility.Public) {
+            if (this.MethodSymbol.DeclaredAccessibility != Accessibility.Public)
+            {
                 // Method is not public
                 diagnostics.Add(Diagnostic.Create(Diagnostics.YS1001ActionMethodsMustBePublic, methodDeclaration.Identifier.GetLocation(), methodDeclaration.Identifier, MethodSymbol.DeclaredAccessibility));
             }
 
-            // This is not a full validation of the naming rules of commands,
-            // but is good enough to catch the most common situations:
-            // whitespace and periods.
-            if (Name.Contains(".") || Name.Any(x => Char.IsWhiteSpace(x))) {
+            // Commands are parsed as whitespace, so spaces in the command name
+            // would render the command un-callable.
+            if (Name.Any(x => Char.IsWhiteSpace(x)))
+            {
                 diagnostics.Add(Diagnostic.Create(Diagnostics.YS1002ActionMethodsMustHaveAValidName, methodDeclaration.Identifier.GetLocation(), this.Name));
             }
 
@@ -305,7 +309,8 @@ namespace Yarn.Unity.ActionAnalyser
 
         private IEnumerable<Diagnostic> ValidateCommand(Compilation compilation)
         {
-            if (MethodSymbol == null) {
+            if (MethodSymbol == null)
+            {
                 throw new NullReferenceException("Method symbol is null");
             }
 
@@ -320,6 +325,8 @@ namespace Yarn.Unity.ActionAnalyser
             List<ITypeSymbol> validTaskTypes = new List<ITypeSymbol?> {
                     compilation.GetTypeByMetadataName("System.Threading.Tasks.Task"),
                     compilation.GetTypeByMetadataName("Cysharp.Threading.Tasks.UniTask"),
+                    compilation.GetTypeByMetadataName("UnityEngine.Awaitable"),
+                    compilation.GetTypeByMetadataName("Yarn.Unity.YarnTask"),
             }.NonNull(throwIfAnyNull: false)
             .ToList();
 
@@ -333,11 +340,11 @@ namespace Yarn.Unity.ActionAnalyser
                 .ToList();
 
             var methodDeclaration = (MethodDeclarationSyntax)this.MethodDeclarationSyntax!;
-            
+
             // Functions must return void, IEnumerator, Coroutine, or an awaitable type
             var returnTypeSymbol = MethodSymbol.ReturnType;
 
-            var typeIsKnownValid = validCommandReturnTypes.Contains(returnTypeSymbol) 
+            var typeIsKnownValid = validCommandReturnTypes.Contains(returnTypeSymbol)
                 || validTaskTypes.Contains(returnTypeSymbol);
             var typeIsKnownInvalid = knownInvalidCommandReturnTypes.Contains(returnTypeSymbol);
 
@@ -354,10 +361,12 @@ namespace Yarn.Unity.ActionAnalyser
 
         public SyntaxNode GetRegistrationSyntax(string dialogueRunnerVariableName = "dialogueRunner")
         {
-            if (MethodSymbol == null) {
+            if (MethodSymbol == null)
+            {
                 throw new NullReferenceException("Method symbol is null");
             }
-            if (Name == null) {
+            if (Name == null)
+            {
                 throw new NullReferenceException("Action name is null");
             }
             string registrationMethodName;
@@ -444,7 +453,8 @@ namespace Yarn.Unity.ActionAnalyser
             return invocationStatement;
         }
 
-        public ExpressionSyntax GetReferenceSyntaxForRegistration() {
+        public ExpressionSyntax GetReferenceSyntaxForRegistration()
+        {
             // Create an expression that refers to the type that contains the
             // method we're registering.
             var containingTypeExpression = SyntaxFactory.ParseName(MethodSymbol.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
@@ -457,12 +467,15 @@ namespace Yarn.Unity.ActionAnalyser
                 SyntaxFactory.IdentifierName(MethodSymbol.Name)
             );
 
-            if (IsStatic) {
-                
+            if (IsStatic)
+            {
+
                 // If the method is static, we can use the reference to the method directly.
                 return methodReference;
 
-            } else {
+            }
+            else
+            {
                 // If the method is not static, we must create a MethodInfo for this method, like this:
                 // typeof(ContainingType)
                 //    .GetMethod(nameof(ContainingType.Method), 
@@ -535,16 +548,16 @@ namespace Yarn.Unity.ActionAnalyser
                 );
 
                 var getMethod = SyntaxFactory.MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression, 
-                    typeOfContainingTypeExpression, 
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    typeOfContainingTypeExpression,
                     SyntaxFactory.IdentifierName(getMethodIdentifier)
                 );
 
                 var getMethodArguments = SyntaxFactory.ArgumentList(
                     SyntaxFactory.SeparatedList(
                         new[] {
-                            SyntaxFactory.Argument(nameOfMethod), 
-                            SyntaxFactory.Argument(arrayOfTypeParameters) 
+                            SyntaxFactory.Argument(nameOfMethod),
+                            SyntaxFactory.Argument(arrayOfTypeParameters)
                         }
                     )
                 );
