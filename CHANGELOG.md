@@ -66,6 +66,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `[b]` will embolden text
   - `[u]` will underline text
   - `[s]` will strike through text
+- `AsyncOptionsView` now supports configuring its fade duration.
 
 ### Changed
 

@@ -60,6 +60,18 @@ namespace Yarn.Unity
         [Space]
         public bool showUnavailableOptions = false;
 
+        [Group("Fade")]
+        [Label("Fade UI")]
+        public bool useFadeEffect = true;
+
+        [Group("Fade")]
+        [ShowIf(nameof(useFadeEffect))]
+        public float fadeUpDuration = 0.25f;
+
+        [Group("Fade")]
+        [ShowIf(nameof(useFadeEffect))]
+        public float fadeDownDuration = 0.1f;
+
         /// <summary>
         /// Called by a <see cref="DialogueRunner"/> to dismiss the options view
         /// when dialogue is complete.
@@ -250,8 +262,11 @@ namespace Yarn.Unity
                 }
             }
 
-            // fade up the UI now
-            await Effects.FadeAlphaAsync(canvasGroup, 0, 1, 1, cancellationToken);
+            if (useFadeEffect)
+            {
+                // fade up the UI now
+                await Effects.FadeAlphaAsync(canvasGroup, 0, 1, fadeUpDuration, cancellationToken);
+            }
 
             // allow interactivity and wait for an option to be selected
             if (canvasGroup != null)
@@ -271,8 +286,11 @@ namespace Yarn.Unity
                 canvasGroup.blocksRaycasts = false;
             }
 
-            // fade down
-            await Effects.FadeAlphaAsync(canvasGroup, 1, 0, 1, cancellationToken);
+            if (useFadeEffect)
+            {
+                // fade down
+                await Effects.FadeAlphaAsync(canvasGroup, 1, 0, fadeDownDuration, cancellationToken);
+            }
 
             // disabling ALL the options views now
             foreach (var optionView in optionViews)
