@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c8f1638574dc4b0a89141d5d1bd2fbc, type: 3}
+  m_Name: FaceExpression-Frowning
+  m_EditorClassIdentifier: 
+  textures:
+    m_keys: 00000000010000000200000003000000040000000500000008000000
+    m_values:
+    - {fileID: 2800000, guid: b2eeca7d7fe21487b9d75b574d253178, type: 3}
+    - {fileID: 2800000, guid: 2fb3a52ea421f4b21a944f96cc390679, type: 3}
+    - {fileID: 2800000, guid: 87db4ec9cdd7c40a09f44af444f1a20e, type: 3}
+    - {fileID: 2800000, guid: 8bb290481ee8a42edb8008f4b724f770, type: 3}
+    - {fileID: 2800000, guid: e0515e80552cd4fd1bf9dc294710a9f9, type: 3}
+    - {fileID: 2800000, guid: 74d3ec6fe5db5411c9833ddcd116c332, type: 3}
+    - {fileID: 2800000, guid: d25490a1200aa4b9db7b117f154b114e, type: 3}

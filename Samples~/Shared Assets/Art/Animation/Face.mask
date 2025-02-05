@@ -24,16 +24,32 @@ AvatarMask:
   - m_Path: PillCharacter/Root/Spine_0/Spine_1/Spine_2/Spine_3
     m_Weight: 0
   - m_Path: PillCharacter/Root/Spine_0/Spine_1/Spine_2/Spine_3/Face
+    m_Weight: 0
+  - m_Path: PillCharacter/Root/Spine_0/Spine_1/Spine_2/Spine_3/Face/MouthBottom.L
     m_Weight: 1
-  - m_Path: PillCharacter/Root/Spine_0/Spine_1/Spine_2/Spine_3/Face/Mouth_1.L
+  - m_Path: PillCharacter/Root/Spine_0/Spine_1/Spine_2/Spine_3/Face/MouthBottom.L/MouthBottom.L_end
     m_Weight: 1
-  - m_Path: PillCharacter/Root/Spine_0/Spine_1/Spine_2/Spine_3/Face/Mouth_1.L/Mouth_2.L
+  - m_Path: PillCharacter/Root/Spine_0/Spine_1/Spine_2/Spine_3/Face/MouthBottom.R
     m_Weight: 1
-  - m_Path: PillCharacter/Root/Spine_0/Spine_1/Spine_2/Spine_3/Face/Mouth_1.R
+  - m_Path: PillCharacter/Root/Spine_0/Spine_1/Spine_2/Spine_3/Face/MouthBottom.R/MouthBottom.R_end
     m_Weight: 1
-  - m_Path: PillCharacter/Root/Spine_0/Spine_1/Spine_2/Spine_3/Face/Mouth_1.R/Mouth_2.R
+  - m_Path: PillCharacter/Root/Spine_0/Spine_1/Spine_2/Spine_3/Face/MouthTop.L
     m_Weight: 1
+  - m_Path: PillCharacter/Root/Spine_0/Spine_1/Spine_2/Spine_3/Face/MouthTop.L/MouthTop.L_end
+    m_Weight: 1
+  - m_Path: PillCharacter/Root/Spine_0/Spine_1/Spine_2/Spine_3/Face/MouthTop.R
+    m_Weight: 1
+  - m_Path: PillCharacter/Root/Spine_0/Spine_1/Spine_2/Spine_3/Face/MouthTop.R/MouthTop.R_end
+    m_Weight: 0
   - m_Path: PillCharacter/Root/Spine_0/Spine_1/Spine_2/Spine_3/Spine_4
     m_Weight: 0
+  - m_Path: PillCharacter/Root/Spine_0/Spine_1/Spine_2/Spine_3/Spine_4/Spine_4_end
+    m_Weight: 0
   - m_Path: PillCharacterMesh
+    m_Weight: 0
+  - m_Path: PillCharacterMesh/Eyes
+    m_Weight: 0
+  - m_Path: PillCharacterMesh/Mouth
+    m_Weight: 0
+  - m_Path: PillCharacterMesh/Mouth Plane
     m_Weight: 0

@@ -85,6 +85,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1c6dc56b73e14c60b0d7ce6725729c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dialogueRunner: {fileID: 0}
   interactionRadius: 1.25
   offset: {x: 0, y: 0, z: 0.81}
   onInteracted:
@@ -182,6 +183,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 341fc1c944fca4131b870669db973867, type: 3}
       propertyPath: m_Name
       value: PillCharacter
+      objectReference: {fileID: 0}
+    - target: {fileID: 5858393832076298521, guid: 341fc1c944fca4131b870669db973867, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: 341fc1c944fca4131b870669db973867, type: 3}
       propertyPath: m_Controller

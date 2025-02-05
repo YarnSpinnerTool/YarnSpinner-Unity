@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c8f1638574dc4b0a89141d5d1bd2fbc, type: 3}
+  m_Name: FaceExpression-Smiling
+  m_EditorClassIdentifier: 
+  textures:
+    m_keys: 00000000010000000200000003000000040000000500000008000000
+    m_values:
+    - {fileID: 2800000, guid: bb960f1b8173840e786c8c2ecff2e27d, type: 3}
+    - {fileID: 2800000, guid: bf9f3915654894f0d83ba9e43ced54e9, type: 3}
+    - {fileID: 2800000, guid: 34b4c35d01ef94a299d3334464b0db55, type: 3}
+    - {fileID: 2800000, guid: 248aeebd9d95946a8876dd7b1833aab6, type: 3}
+    - {fileID: 2800000, guid: 972f62e0da9e2483abf9ba675a206359, type: 3}
+    - {fileID: 2800000, guid: 0d495cf849fec40a09f7d2c658ec9d2a, type: 3}
+    - {fileID: 2800000, guid: a234b1b2c9257406aaa648037b78e1e7, type: 3}
