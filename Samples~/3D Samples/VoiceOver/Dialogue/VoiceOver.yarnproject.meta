@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 55636a520881a41289ff66b8d06e2a3f
+ScriptedImporter:
+  internalIDToNameTable:
+  - first:
+      114: 11400000
+    second: Program
+  - first:
+      41386430: 2186277476908879412
+    second: ImportLogs
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 053561912b1654d80a424bb0696a74ae, type: 3}
+  useAddressableAssets: 0
+  UseUnityLocalisationSystem: 0
+  unityLocalisationStringTableCollection: {instanceID: 0}

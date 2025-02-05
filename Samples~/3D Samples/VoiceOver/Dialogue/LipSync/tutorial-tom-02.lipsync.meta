@@ -1,0 +1,11 @@
+fileFormatVersion: 2
+guid: 7f63174068acf4381a2f0f9b838e156f
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 4305e56eff96e4a6488aaac183bde954, type: 3}
+  audioClip: {fileID: 8300000, guid: a3710c905b2224152b337a2e6a5324b0, type: 3}
