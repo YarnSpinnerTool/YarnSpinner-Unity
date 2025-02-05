@@ -23,7 +23,15 @@ namespace Yarn.Unity.Samples.Editor
     /// GUID, the <see cref="AudioClip"/> referred to by that GUID will be used
     /// for the <see cref="LipSyncedVoiceLine.audioClip"/> reference.</para>
     /// </remarks>
-    [ScriptedImporter(1, "lipsync")]
+
+    // Audio clips have an importer priority of 1100, and scripted importers
+    // have a default importer priority of 1000 (source:
+    // https://discussions.unity.com/t/understanding-import-order-of-native-unity-asset-types/859814/4).
+    // So, we'll offset by 150 to get 1000+150=1150, which is after audio clips.
+    // This means that we'll import after audio, which means that we can
+    // correctly get AudioClip references that may have imported alongside this
+    // asset.
+    [ScriptedImporter(1, "lipsync", importQueueOffset: 150)]
     public class LipSyncDataImporter : ScriptedImporter
     {
         public AudioClip? audioClip;
