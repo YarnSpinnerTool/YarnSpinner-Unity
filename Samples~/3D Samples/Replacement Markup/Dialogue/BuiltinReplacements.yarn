@@ -1,0 +1,18 @@
+﻿title: Anika
+---
+Player: hello, what's your thing?
+Anika: I show off the built in palette that provides some common rich text tags.
+Player: oh cool
+Anika: It lets you do things like make words [b]bold[/b]
+Anika: or maybe you want them [u]underlined[/u]
+Anika: or even [i]italicised[/i].
+Anika: or [b][i]wombo[u]combo[/i] them[/u] together[/b] even.
+Player: that's awesome.
+Anika: you can even define [custom]custom[/custom] markers for [fancy]fancy[/fancy] looks.
+
+Player: Is that all?
+Anika: nope, we also have support for TMP styles.
+Anika: If you have a defined [style=h2]style[/style] in a stylesheet we can pass it through to TMP.
+Player: that is cool.
+Anika: yeah I think so.
+===

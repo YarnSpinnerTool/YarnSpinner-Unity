@@ -1,0 +1,9 @@
+﻿title: Alice
+---
+Alice: Hey there [name]Player[/name].
+Player: Hey there [name]Alice[/name], what up?
+Alice: Just wondering what [name]Bob[/name] is up to.
+Bob: Why are [name=alice]you[/name] wondering what [name=bob]I[/name] am up to?
+Player: I think [name=alice]she's[/name] just being nice [name]Bob[/name]!
+Bob: oh, ok.
+===

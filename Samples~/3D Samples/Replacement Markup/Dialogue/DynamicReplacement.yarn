@@ -1,0 +1,14 @@
+﻿title: Bob
+---
+/// tracks how much of Bobs speech we understand. The more we talk to him the more we learn of how he speaks
+<<declare $obscurity = 0>>
+
+Bob: [obscurity = {$obscurity}]Why hello there, it's nice to meet you friend.[/obscurity]
+
+=> Alice: yeah sorry about Bob, he's hard to understand. <<if $obscurity < 3>>
+    Alice: stick with it, you'll get it though.
+    <<set $obscurity += 1>>
+=> Player: Hey Bob, nice to meet you <<if $obscurity > 2>>
+    Alice: See, practice makes perfect!
+
+===

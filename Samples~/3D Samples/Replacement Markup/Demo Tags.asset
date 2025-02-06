@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 992e2b513670a4d089c2e58d4c48e8c8, type: 3}
+  m_Name: Demo Tags
+  m_EditorClassIdentifier: 
+  BasicMarkers:
+  - Marker: b
+    CustomColor: 0
+    Color: {r: 0, g: 0, b: 0, a: 0}
+    Boldened: 1
+    Italicised: 0
+    Underlined: 0
+    Strikedthrough: 0
+  - Marker: i
+    CustomColor: 0
+    Color: {r: 0, g: 0, b: 0, a: 0}
+    Boldened: 0
+    Italicised: 1
+    Underlined: 0
+    Strikedthrough: 0
+  - Marker: u
+    CustomColor: 0
+    Color: {r: 0, g: 0, b: 0, a: 0}
+    Boldened: 0
+    Italicised: 0
+    Underlined: 1
+    Strikedthrough: 0
+  - Marker: s
+    CustomColor: 0
+    Color: {r: 0, g: 0, b: 0, a: 0}
+    Boldened: 0
+    Italicised: 0
+    Underlined: 0
+    Strikedthrough: 1
+  - Marker: custom
+    CustomColor: 1
+    Color: {r: 0.13172704, g: 0.6886792, b: 0, a: 1}
+    Boldened: 1
+    Italicised: 0
+    Underlined: 1
+    Strikedthrough: 0
+  CustomMarkers:
+  - Marker: fancy
+    Start: <color=#ffff00><size=2em>[
+    End: ']</size></color>'
+    MarkerOffset: 1
