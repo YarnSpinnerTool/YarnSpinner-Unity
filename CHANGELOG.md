@@ -67,6 +67,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `[u]` will underline text
   - `[s]` will strike through text
 - `AsyncOptionsView` now supports configuring its fade duration.
+- `MarkupPalette` and the associated `PaletteMarkerProcessor` now support custom TMP rich text tags beyond what the more basic markers allow.
 
 ### Changed
 
@@ -85,6 +86,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Renamed `AttributeMarkerProcessor` to `ReplacementMarkupHandler`
 - When using Unity Localization, Yarn Projects now populate the string table collection using a post-processor, rather that in the middle of import. This should fix errors that would occasionally cause string tables to not correctly update when a Yarn file changes.
 - Fixed an issue where the System.Threading.Tasks implementation of YarnTask.WaitUntil did not return early when the CancellationToken was cancelled ([@dogboydog](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/pull/304))
+- Renamed `FormatForMarker` to `PaletteForMarker` in `MarkupPalette`.
 
 ### Removed
 

@@ -12,46 +12,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 992e2b513670a4d089c2e58d4c48e8c8, type: 3}
   m_Name: Common Tags
   m_EditorClassIdentifier: 
-  FormatMarkers:
+  BasicMarkers:
   - Marker: b
     CustomColor: 0
-    Color: {r: 0, g: 0, b: 0, a: 1}
+    Color: {r: 0, g: 0, b: 0, a: 0}
     Boldened: 1
     Italicised: 0
     Underlined: 0
     Strikedthrough: 0
   - Marker: i
     CustomColor: 0
-    Color: {r: 0, g: 0, b: 0, a: 1}
+    Color: {r: 0, g: 0, b: 0, a: 0}
     Boldened: 0
     Italicised: 1
     Underlined: 0
     Strikedthrough: 0
   - Marker: u
     CustomColor: 0
-    Color: {r: 0, g: 0, b: 0, a: 1}
-    Boldened: 0
-    Italicised: 0
-    Underlined: 1
-    Strikedthrough: 0
-  - Marker: underline
-    CustomColor: 0
-    Color: {r: 0, g: 0, b: 0, a: 1}
+    Color: {r: 0, g: 0, b: 0, a: 0}
     Boldened: 0
     Italicised: 0
     Underlined: 1
     Strikedthrough: 0
   - Marker: s
     CustomColor: 0
-    Color: {r: 0, g: 0, b: 0, a: 1}
+    Color: {r: 0, g: 0, b: 0, a: 0}
     Boldened: 0
     Italicised: 0
     Underlined: 0
     Strikedthrough: 1
-  - Marker: strikethrough
-    CustomColor: 0
-    Color: {r: 0, g: 0, b: 0, a: 1}
-    Boldened: 0
-    Italicised: 0
-    Underlined: 1
-    Strikedthrough: 0
+  CustomMarkers: []

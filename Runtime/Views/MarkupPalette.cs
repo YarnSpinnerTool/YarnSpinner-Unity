@@ -21,7 +21,7 @@ namespace Yarn.Unity
         /// a named marker.
         /// </summary>
         [System.Serializable]
-        public struct FormatMarker
+        public struct BasicMarker
         {
             /// <summary>
             /// The name of the marker which can be used in text to indicate
@@ -65,11 +65,21 @@ namespace Yarn.Unity
             public bool Strikedthrough;
         }
 
+        [System.Serializable]
+        public struct CustomMarker
+        {
+            public string Marker;
+            public string Start;
+            public string End;
+            public int MarkerOffset;
+        }
+
         /// <summary>
         /// A list containing all the color markers defined in this palette.
         /// </summary>
         [UnityEngine.Serialization.FormerlySerializedAs("ColourMarkers")]
-        public List<FormatMarker> FormatMarkers = new List<FormatMarker>();
+        public List<BasicMarker> BasicMarkers = new List<BasicMarker>();
+        public List<CustomMarker> CustomMarkers = new List<CustomMarker>();
 
         /// <summary>
         /// Determines the colour for a particular marker inside this palette.
@@ -83,7 +93,7 @@ namespace Yarn.Unity
         /// palette; <see langword="false"/> otherwise.</returns>
         public bool ColorForMarker(string Marker, out Color colour)
         {
-            foreach (var item in FormatMarkers)
+            foreach (var item in BasicMarkers)
             {
                 if (item.Marker == Marker)
                 {
@@ -95,20 +105,61 @@ namespace Yarn.Unity
             return false;
         }
 
-        /// <summary>
-        /// Gets formatting information. for a particular marker inside this
-        /// palette.
-        /// </summary>
-        /// <param name="markerName">The marker you want to get formatting
-        /// information for.</param>
-        /// <param name="palette">The <see cref="FormatMarker"/> for the given
-        /// marker name, or a default format if a marker named <paramref
-        /// name="markerName"/> was not found.</param>
-        /// <returns><see langword="true"/> if the marker exists within this
-        /// palette; <see langword="false"/> otherwise.</returns>
-        public bool FormatForMarker(string markerName, out FormatMarker palette)
+        public bool PaletteForMarker(string markerName, out CustomMarker palette)
         {
-            foreach (var item in FormatMarkers)
+            // we first check if we have a marker of that name in the basic markers
+            foreach (var item in BasicMarkers)
+            {
+                if (item.Marker == markerName)
+                {
+                    System.Text.StringBuilder front = new();
+                    System.Text.StringBuilder back = new();
+
+                    // do we have a custom colour set?
+                    if (item.CustomColor)
+                    {
+                        front.AppendFormat("<color=#{0}>", ColorUtility.ToHtmlStringRGBA(item.Color));
+                        back.Append("</color>");
+                    }
+
+                    // do we need to bold it?
+                    if (item.Boldened)
+                    {
+                        front.Append("<b>");
+                        back.Append("</b>");
+                    }
+                    // do we need to italicise it?
+                    if (item.Italicised)
+                    {
+                        front.Append("<i>");
+                        back.Append("</i>");
+                    }
+                    // do we need to underline it?
+                    if (item.Underlined)
+                    {
+                        front.Append("<u>");
+                        back.Append("</u>");
+                    }
+                    // do we need to strikethrough it?
+                    if (item.Strikedthrough)
+                    {
+                        front.Append("<s>");
+                        back.Append("</s>");
+                    }
+
+                    palette = new CustomMarker()
+                    {
+                        Marker = item.Marker,
+                        Start = front.ToString(),
+                        End = back.ToString(),
+                        MarkerOffset = 0,
+                    };
+                    return true;
+                }
+            }
+            
+            // we now check if we have one in the format markers
+            foreach (var item in CustomMarkers)
             {
                 if (item.Marker == markerName)
                 {
@@ -117,16 +168,9 @@ namespace Yarn.Unity
                 }
             }
 
-            palette = new FormatMarker()
-            {
-                Color = Color.black,
-                Boldened = false,
-                Italicised = false,
-                Strikedthrough = false,
-                Underlined = false,
-                Marker = "undefined",
-            };
-
+            // we don't have anything for this marker
+            // so we return false and a default marker
+            palette = new();
             return false;
         }
     }
