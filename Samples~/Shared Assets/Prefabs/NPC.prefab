@@ -149,7 +149,6 @@ GameObject:
   - component: {fileID: 1256999087083618722}
   - component: {fileID: 4898473320390741855}
   - component: {fileID: 351562230343761875}
-  - component: {fileID: 8432685491040270222}
   m_Layer: 0
   m_Name: Mouth Plane Mesh
   m_TagString: Untagged
@@ -165,13 +164,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2151418070476313756}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.0066662687, y: -0.00000020098045, z: 0.0000020609912, w: 0.99997777}
-  m_LocalPosition: {x: 2.5331473e-10, y: 0.000040999937, z: 0.000027000158}
+  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: -0.0047730003, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 3762277747671410681}
-  m_LocalEulerAnglesHint: {x: 4.702, y: -5.642, z: -0.464}
+  m_Father: {fileID: 6260495749996854994}
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!33 &4898473320390741855
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -225,33 +224,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!1773428102 &8432685491040270222
-ParentConstraint:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2151418070476313756}
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Weight: 1
-  m_TranslationAtRest: {x: 0, y: 0.000041, z: 0.000027}
-  m_RotationAtRest: {x: 0.7636352, y: 0, z: 0.00023603426}
-  m_TranslationOffsets:
-  - {x: 0, y: -0.47729993, z: -0.20410001}
-  m_RotationOffsets:
-  - {x: -89.236115, y: -0.0016112761, z: 0.001846087}
-  m_AffectTranslationX: 1
-  m_AffectTranslationY: 1
-  m_AffectTranslationZ: 1
-  m_AffectRotationX: 1
-  m_AffectRotationY: 1
-  m_AffectRotationZ: 1
-  m_Active: 1
-  m_IsLocked: 1
-  m_Sources:
-  - sourceTransform: {fileID: 5064021923517204490}
-    weight: 1
 --- !u!1 &6940979802782602084
 GameObject:
   m_ObjectHideFlags: 0
@@ -389,7 +361,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 3418101330445271485, guid: 341fc1c944fca4131b870669db973867, type: 3}
+    - targetCorrespondingSourceObject: {fileID: -3623008365177530218, guid: 341fc1c944fca4131b870669db973867, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1256999087083618722}
     m_AddedComponents:
@@ -429,14 +401,9 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 341fc1c944fca4131b870669db973867, type: 3}
   m_PrefabInstance: {fileID: 1970820310025676356}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &3762277747671410681 stripped
+--- !u!4 &6260495749996854994 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 3418101330445271485, guid: 341fc1c944fca4131b870669db973867, type: 3}
-  m_PrefabInstance: {fileID: 1970820310025676356}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &5064021923517204490 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6710020099211537998, guid: 341fc1c944fca4131b870669db973867, type: 3}
+  m_CorrespondingSourceObject: {fileID: -3623008365177530218, guid: 341fc1c944fca4131b870669db973867, type: 3}
   m_PrefabInstance: {fileID: 1970820310025676356}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5062463962539184961
