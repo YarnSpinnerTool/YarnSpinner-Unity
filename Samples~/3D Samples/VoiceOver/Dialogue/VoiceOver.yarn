@@ -25,10 +25,10 @@ title: Start
 // Before we start, wait two seconds to let the player see the environment
 // before starting the dialogue.
 
-<<set-animator-bool Tom Floating true>>
+<<set_animator_bool Tom Floating true>>
 <<expression Tom frowning>>
 <<face Tom eyebrows-out>>
-
+ 
 <<set_fade_color 1>>
 
 <<wait 2>>
@@ -37,18 +37,18 @@ title: Start
 
 <<wait 1>>
 
-<<play-anim Tom Gesture LookAround wait>>
+<<play_animation Tom Gesture LookAround wait>>
 
 // The start of our conversation!
 Tom: Uh.. hello? #line:tutorial-tom-01 // tentative 
 <<turn Tom 0.5 0.5>>
-<<tilt-forward Tom -0.5 0.5>>
+<<tilt_forward Tom -0.5 0.5>>
 Tom: Is anyone there? #line:tutorial-tom-02
 
 <<turn Tom -0.5 0.25>>
 Anne: Hi there! #line:tutorial-anne-01 // chirpy 
 <<turn Tom 0 1>>
-<<tilt-forward Tom 0 1>>
+<<tilt_forward Tom 0 1>>
 
 
 // Present a choice to the player: they can either say 'who are you', or
@@ -56,9 +56,9 @@ Anne: Hi there! #line:tutorial-anne-01 // chirpy
 // the person they're speaking to.
 
 -> Tom: Who are you? #line:tutorial-tom-03 // surprised, emphasis on "you" 
-    <<tilt-side Tom -0.5 0.5>>
+    <<tilt_side Tom -0.5 0.5>>
     Tom: And where are you? #line:tutorial-tom-04 // emphasis on "where" 
-    <<tilt-forward Tom -0.2 0.25>>
+    <<tilt_forward Tom -0.2 0.25>>
     Anne: I'm Anne! I'm right here! #line:tutorial-anne-02 // trying to be helpful 
     // Set the variable $knows_anne_name to 'true'. This is the variable we
     // declared above. We'll use this value later in this file.
@@ -68,13 +68,13 @@ Anne: Hi there! #line:tutorial-anne-01 // chirpy
     // which means the player hasn't learned Anne's name.
     <<set $knows_anne_name to true>>
 -> Tom: Where am I? #line:tutorial-tom-05 // a little panicked 
-    <<tilt-forward Tom -0.5 0.5>>
+    <<tilt_forward Tom -0.5 0.5>>
     Anne: You're floating in a featureless void! #line:tutorial-anne-03 // as though this is a perfectly reasonable explanation 
-    <<tilt-side Tom 0.2 0.25>>
+    <<tilt_side Tom 0.2 0.25>>
     Tom: I can see that.. #line:tutorial-tom-06 // dubious 
 
-<<tilt-side Tom 0 1>>
-<<tilt-forward Tom 0 1>>
+<<tilt_side Tom 0 1>>
+<<tilt_forward Tom 0 1>>
 Tom: How did I get here? #line:tutorial-tom-07
 Anne: Oh, a writer put you here. This is a test conversation for Yarn Spinner! #line:tutorial-anne-04
 

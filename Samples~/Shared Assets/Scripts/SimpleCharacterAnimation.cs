@@ -106,7 +106,7 @@ namespace Yarn.Unity.Samples
             action(1);
         }
 
-        [YarnCommand("tilt-forward")]
+        [YarnCommand("tilt_forward")]
         public YarnTask TiltForward(float destination, float time = 0f, bool wait = false)
         {
             // Cancel any existing animation
@@ -123,7 +123,7 @@ namespace Yarn.Unity.Samples
             return wait ? task : YarnTask.CompletedTask;
         }
 
-        [YarnCommand("tilt-side")]
+        [YarnCommand("tilt_side")]
         public YarnTask TiltSide(float destination, float time = 0f, bool wait = false)
         {
             // Cancel any existing animation
@@ -157,7 +157,7 @@ namespace Yarn.Unity.Samples
             return wait ? task : YarnTask.CompletedTask;
         }
 
-        [YarnCommand("set-animator-bool")]
+        [YarnCommand("set_animator_bool")]
         public void SetAnimatorBool(string parameterName, bool value)
         {
             if (animator == null)
@@ -168,7 +168,7 @@ namespace Yarn.Unity.Samples
             animator.SetBool(parameterName, value);
         }
 
-        [YarnCommand("play-anim")]
+        [YarnCommand("play_animation")]
         public YarnTask PlayAnimation(string layerName, string stateName, bool wait = false)
         {
             if (animator == null)
