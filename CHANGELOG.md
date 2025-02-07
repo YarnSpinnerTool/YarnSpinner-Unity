@@ -70,6 +70,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `AsyncOptionsView` now supports configuring its fade duration.
 - `MarkupPalette` and the associated `PaletteMarkerProcessor` now support custom TMP rich text tags beyond what the more basic markers allow.
 - `LineMetadata` now has public API methods for constructing and manually adding elements.
+- `DialogueRunner.SetProject` now sets the `Program` of its internal `Dialogue` object. Previously, this didn't happen until `StartDialogue()`.
 
 ### Changed
 
