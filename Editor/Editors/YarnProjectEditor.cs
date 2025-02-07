@@ -7,6 +7,8 @@ using UnityEditor.AssetImporters;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
+#nullable enable
+
 namespace Yarn.Unity.Editor
 {
     [CustomEditor(typeof(YarnProject))]
@@ -16,7 +18,13 @@ namespace Yarn.Unity.Editor
         {
             var assetPath = AssetDatabase.GetAssetPath(target);
             var importer = AssetImporter.GetAtPath(assetPath) as YarnProjectImporter;
-            var importData = importer.ImportData;
+
+            ProjectImportData? importData = null;
+            if (importer != null)
+            {
+                // No importer found for this asset. Possibly it's not an asset on disk?
+                return new Label("Yarn Project has no importer");
+            }
 
             var ui = new VisualElement();
 
