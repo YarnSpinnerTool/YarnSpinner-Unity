@@ -8,7 +8,7 @@ namespace Yarn.Unity.Samples
     [ExecuteAlways]
     public class AttachToGameObjects : MonoBehaviour
     {
-        [SerializeField] List<Transform> targets = new List<Transform>();
+        [SerializeField] List<Transform?> targets = new List<Transform?>();
 
         public void LateUpdate()
         {
@@ -18,13 +18,20 @@ namespace Yarn.Unity.Samples
             }
 
             var position = Vector3.zero;
+            var count = 0;
             foreach (var item in targets)
             {
-                position += item.position;
+                if (item != null)
+                {
+                    position += item.position;
+                    count += 1;
+                }
             }
 
-            position /= targets.Count;
-
+            if (count > 0)
+            {
+                position /= count;
+            }
 
             this.transform.position = position;
         }
