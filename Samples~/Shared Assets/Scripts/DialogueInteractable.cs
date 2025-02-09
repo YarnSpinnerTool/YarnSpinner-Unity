@@ -139,7 +139,14 @@ namespace Yarn.Unity.Samples
                 character.lookTarget = interactor.transform;
             }
 
+            var destroyCancellation = destroyCancellationToken;
+
             await dialogueRunner.DialogueTask;
+
+            if (destroyCancellation.IsCancellationRequested)
+            {
+                return;
+            }
 
             if (turnsToInteractor && TryGetComponent<SimpleCharacter>(out character))
             {

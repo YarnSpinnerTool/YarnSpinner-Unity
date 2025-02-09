@@ -479,7 +479,7 @@ namespace Yarn.Unity.Samples
 
             if (Input.GetButtonDown("Jump") && currentInteractable != null)
             {
-                async YarnTask RunInteraction(Interactable interactable)
+                async YarnTask RunInteraction(Interactable interactable, CancellationToken cancellationToken)
                 {
                     var previousMode = Mode;
                     Mode = CharacterMode.Interact;
@@ -495,6 +495,11 @@ namespace Yarn.Unity.Samples
                     onInteracting?.Invoke(interactable);
                     await interactable.Interact(gameObject);
 
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
                     if (interactable.InteractorShouldTurnToFaceWhenInteracted)
                     {
                         lookTarget = null;
@@ -503,7 +508,7 @@ namespace Yarn.Unity.Samples
                     Mode = previousMode;
                 }
 
-                RunInteraction(currentInteractable).Forget();
+                RunInteraction(currentInteractable, this.destroyCancellationToken).Forget();
             }
         }
 
