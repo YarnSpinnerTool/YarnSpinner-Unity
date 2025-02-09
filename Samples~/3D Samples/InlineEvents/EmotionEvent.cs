@@ -7,7 +7,7 @@ using Yarn.Unity;
 
 public class EmotionEvent : ActionMarkupHandler
 {
-    private Yarn.Unity.Samples.SimpleCharacterAnimation target;
+    private Yarn.Unity.Samples.SimpleCharacter target;
     Dictionary<int, string> emotions;
 
     public override void OnLineDisplayComplete()
@@ -43,7 +43,7 @@ public class EmotionEvent : ActionMarkupHandler
             return;
         }
 
-        target = emoter.GetComponent<Yarn.Unity.Samples.SimpleCharacterAnimation>();
+        target = emoter.GetComponent<Yarn.Unity.Samples.SimpleCharacter>();
         if (target == null)
         {
             Debug.Log($"{name.StringValue} is not a SimpleCharacterAnimation");

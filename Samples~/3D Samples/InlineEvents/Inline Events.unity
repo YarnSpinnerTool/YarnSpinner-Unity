@@ -567,11 +567,11 @@ PrefabInstance:
     - target: {fileID: 8309902628685535410, guid: 52571f68872914e24837210513edea1d, type: 3}
       propertyPath: onDialogueStart.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1124150636}
+      objectReference: {fileID: 0}
     - target: {fileID: 8309902628685535410, guid: 52571f68872914e24837210513edea1d, type: 3}
       propertyPath: onDialogueStart.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
-      objectReference: {fileID: 1504319947}
+      objectReference: {fileID: 0}
     - target: {fileID: 8309902628685535410, guid: 52571f68872914e24837210513edea1d, type: 3}
       propertyPath: onDialogueComplete.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
       value: 6
@@ -583,11 +583,11 @@ PrefabInstance:
     - target: {fileID: 8309902628685535410, guid: 52571f68872914e24837210513edea1d, type: 3}
       propertyPath: onDialogueComplete.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1124150636}
+      objectReference: {fileID: 0}
     - target: {fileID: 8309902628685535410, guid: 52571f68872914e24837210513edea1d, type: 3}
       propertyPath: onDialogueComplete.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
-      objectReference: {fileID: 1504319947}
+      objectReference: {fileID: 0}
     - target: {fileID: 8309902628685535410, guid: 52571f68872914e24837210513edea1d, type: 3}
       propertyPath: onDialogueStart.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -808,7 +808,39 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1384599776165114325, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.41
+      objectReference: {fileID: 0}
+    - target: {fileID: 1384599776165114325, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.45
+      objectReference: {fileID: 0}
+    - target: {fileID: 1384599776165114325, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.5245184
+      objectReference: {fileID: 0}
+    - target: {fileID: 1384599776165114325, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1384599776165114325, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.8513991
+      objectReference: {fileID: 0}
+    - target: {fileID: 1384599776165114325, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1384599776165114325, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -116.728
+      objectReference: {fileID: 0}
     - target: {fileID: 1604627835431571621, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
+      propertyPath: m_Name
+      value: Alice
+      objectReference: {fileID: 0}
+    - target: {fileID: 2588666571959726885, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
       propertyPath: m_Name
       value: Alice
       objectReference: {fileID: 0}
@@ -978,10 +1010,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 8293565063414365391, guid: dc0328aa4eabf475099ce6e5a6e6d5c1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8293565063414365391, guid: dc0328aa4eabf475099ce6e5a6e6d5c1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8293565063414365391, guid: dc0328aa4eabf475099ce6e5a6e6d5c1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
     - target: {fileID: 8984043620185290498, guid: dc0328aa4eabf475099ce6e5a6e6d5c1, type: 3}
       propertyPath: animator
       value: 
-      objectReference: {fileID: 1124150633}
+      objectReference: {fileID: 0}
     - target: {fileID: 8984043620185290498, guid: dc0328aa4eabf475099ce6e5a6e6d5c1, type: 3}
       propertyPath: speedParameter
       value: Speed
@@ -991,27 +1035,22 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dc0328aa4eabf475099ce6e5a6e6d5c1, type: 3}
---- !u!4 &1124150632 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4200085467507121753, guid: dc0328aa4eabf475099ce6e5a6e6d5c1, type: 3}
-  m_PrefabInstance: {fileID: 1124150631}
-  m_PrefabAsset: {fileID: 0}
---- !u!95 &1124150633 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 3034555723342878415, guid: dc0328aa4eabf475099ce6e5a6e6d5c1, type: 3}
-  m_PrefabInstance: {fileID: 1124150631}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1124150636 stripped
+--- !u!114 &1124150632 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8984043620185290498, guid: dc0328aa4eabf475099ce6e5a6e6d5c1, type: 3}
+  m_CorrespondingSourceObject: {fileID: 8103124613189164483, guid: dc0328aa4eabf475099ce6e5a6e6d5c1, type: 3}
   m_PrefabInstance: {fileID: 1124150631}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49dad699c2d424535ab13b9056e3c23f, type: 3}
+  m_Script: {fileID: 11500000, guid: fe07c1a9ea2c345ed8d0302ef875858d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!4 &1124150633 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8293565063414365391, guid: dc0328aa4eabf475099ce6e5a6e6d5c1, type: 3}
+  m_PrefabInstance: {fileID: 1124150631}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1309409769
 GameObject:
   m_ObjectHideFlags: 0
@@ -1052,17 +1091,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4bec29c0a230741bdac901dba8da47ee, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1504319947 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5645275872182163600, guid: dc0328aa4eabf475099ce6e5a6e6d5c1, type: 3}
-  m_PrefabInstance: {fileID: 1124150631}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b1c6dc56b73e14c60b0d7ce6725729c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &1559867122 stripped
@@ -1145,7 +1173,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db64840ec0c36401f873b24dff0af213, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerCharacter: {fileID: 1124150636}
+  playerCharacter: {fileID: 1124150632}
 --- !u!1001 &1925003189
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1156,7 +1184,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2320615341757515126, guid: c4cf44df3f9694ef997b7592e1bb280f, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.11
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2320615341757515126, guid: c4cf44df3f9694ef997b7592e1bb280f, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1164,7 +1192,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2320615341757515126, guid: c4cf44df3f9694ef997b7592e1bb280f, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -5.29
+      value: -2.4000003
       objectReference: {fileID: 0}
     - target: {fileID: 2320615341757515126, guid: c4cf44df3f9694ef997b7592e1bb280f, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1201,7 +1229,7 @@ PrefabInstance:
     - target: {fileID: 7159025902397486062, guid: c4cf44df3f9694ef997b7592e1bb280f, type: 3}
       propertyPath: target
       value: 
-      objectReference: {fileID: 1124150632}
+      objectReference: {fileID: 1124150633}
     - target: {fileID: 7928252232698226379, guid: c4cf44df3f9694ef997b7592e1bb280f, type: 3}
       propertyPath: m_LocalRotation.x
       value: 0.22091691
