@@ -12,11 +12,14 @@ namespace Yarn.Unity.Samples
     {
         public enum CharacterMode
         {
-            Move,
+            PlayerControlledMovement,
+            PathMovement,
             Interact,
         }
 
         public CharacterMode Mode { get; private set; }
+
+        public bool CanInteract => Mode == CharacterMode.PlayerControlledMovement;
 
         [SerializeField] bool isPlayerControlled;
 
@@ -42,6 +45,7 @@ namespace Yarn.Unity.Samples
 
         private float lastFrameSpeed = 0f;
         private float lastFrameSpeedChange = 0f;
+        private Vector3 lastFrameWorldPosition;
         private Vector2 lastInput = Vector2.zero;
 
         private CharacterController? characterController;
@@ -300,6 +304,7 @@ namespace Yarn.Unity.Samples
         private void SetupMovement()
         {
             targetRotation = transform.rotation;
+            lastFrameWorldPosition = transform.position;
         }
 
         protected void UpdateMovement()
@@ -313,7 +318,7 @@ namespace Yarn.Unity.Samples
                 currentLookDirection = Quaternion.LookRotation(lookDirectionOnSameY);
             }
 
-            if (isPlayerControlled && Mode == CharacterMode.Move)
+            if (isPlayerControlled && Mode == CharacterMode.PlayerControlledMovement)
             {
                 Vector2 input = new(
                     Input.GetAxisRaw("Horizontal"),
@@ -361,6 +366,11 @@ namespace Yarn.Unity.Samples
 
                 CurrentSpeedFactor = Mathf.Clamp01(dampedSpeed / speed);
             }
+            else if (Mode == CharacterMode.PathMovement)
+            {
+                var currentSpeed = (lastFrameWorldPosition - transform.position).magnitude / Time.deltaTime;
+                CurrentSpeedFactor = Mathf.Clamp01(currentSpeed / speed);
+            }
             else
             {
                 CurrentSpeedFactor = 0;
@@ -372,6 +382,8 @@ namespace Yarn.Unity.Samples
                 currentLookDirection,
                 turnSpeed * Time.deltaTime
             );
+
+            lastFrameWorldPosition = transform.position;
         }
 
         public async YarnTask MoveTo(Vector3 position, CancellationToken cancellationToken)
@@ -381,9 +393,17 @@ namespace Yarn.Unity.Samples
                 // We're already at the position; nothing to do
                 return;
             }
+            // Look in the direction we're moving, not at any look target
             var lookDirection = position - transform.position;
             lookDirection.y = 0;
             targetRotation = Quaternion.LookRotation(lookDirection);
+
+            var previousLookTarget = lookTarget;
+            lookTarget = null;
+
+            var previousMode = Mode;
+
+            Mode = CharacterMode.PathMovement;
 
             do
             {
@@ -393,6 +413,10 @@ namespace Yarn.Unity.Samples
                 await YarnTask.Yield();
 
             } while (Vector3.Distance(transform.position, position) > 0.05f && !cancellationToken.IsCancellationRequested);
+
+            lookTarget = previousLookTarget;
+
+            Mode = previousMode;
 
             this.CurrentSpeedFactor = 0;
         }
@@ -415,7 +439,7 @@ namespace Yarn.Unity.Samples
                 return;
             }
 
-            if (Mode != CharacterMode.Move)
+            if (!CanInteract)
             {
                 // We can only interact if we're allowed to move around.
                 return;
@@ -491,7 +515,7 @@ namespace Yarn.Unity.Samples
 
         protected void Awake()
         {
-            Mode = CharacterMode.Move;
+            Mode = CharacterMode.PlayerControlledMovement;
 
             SetupMovement();
             SetupAnimation();
