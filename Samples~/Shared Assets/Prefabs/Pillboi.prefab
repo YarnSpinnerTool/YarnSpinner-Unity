@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 607656681821476753}
   - component: {fileID: 8993842369040041100}
   - component: {fileID: 793312023099668125}
+  - component: {fileID: 1677158904836476663}
   m_Layer: 0
   m_Name: Pillboi
   m_TagString: Untagged
@@ -104,6 +105,22 @@ MonoBehaviour:
   onInteracting:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1677158904836476663
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4086181210850776417}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39bc61f7676bf44b3878d791900f5347, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  appearanceMode: 1
+  renderer: {fileID: 5151350692569875361}
+  fadeColor: {r: 0.40392157, g: 0.5803922, b: 0.8509804, a: 1}
+  baseColor: {r: 0.34117648, g: 0.3372549, b: 0.7411765, a: 1}
 --- !u!1 &8301985204686994583
 GameObject:
   m_ObjectHideFlags: 0
@@ -238,6 +255,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -3888594990679166489, guid: 341fc1c944fca4131b870669db973867, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: -876546973899608171, guid: 5567eed9a7faf420e9c55bf53168c140, type: 3}
     - target: {fileID: 919132149155446097, guid: 341fc1c944fca4131b870669db973867, type: 3}
       propertyPath: m_Name
       value: PillCharacter
@@ -266,6 +287,11 @@ Transform:
 --- !u!4 &4669621804127513296 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -3623008365177530218, guid: 341fc1c944fca4131b870669db973867, type: 3}
+  m_PrefabInstance: {fileID: 969867507792048710}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &5151350692569875361 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -3888594990679166489, guid: 341fc1c944fca4131b870669db973867, type: 3}
   m_PrefabInstance: {fileID: 969867507792048710}
   m_PrefabAsset: {fileID: 0}
 --- !u!95 &6638091402538635223 stripped
