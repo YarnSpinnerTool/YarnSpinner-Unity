@@ -89,6 +89,9 @@ namespace Yarn.Unity.Samples
         [Group("Animation Parameters", true)]
         [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Trigger)]
         [SerializeField] string blinkTriggerName = "Blink";
+        [Group("Animation Parameters", true)]
+        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
+        [SerializeField] string cycleOffsetParameter = "Cycle Offset";
 
         private float timeUntilNextBlink = 0f;
         private Dictionary<int, CancellationTokenSource> activeAnimationLerps = new();
@@ -248,6 +251,10 @@ namespace Yarn.Unity.Samples
             if (animator != null)
             {
                 facialExpressionsLayerID = animator.GetLayerIndex(facialExpressionsLayer);
+
+                // Randomly offset the cycle for the base pose so that
+                // characters don't sync up
+                animator.SetFloat(cycleOffsetParameter, Random.value);
             }
 
             timeUntilNextBlink = GetNextBlinkTime();
