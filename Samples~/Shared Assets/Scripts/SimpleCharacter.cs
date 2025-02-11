@@ -321,20 +321,21 @@ namespace Yarn.Unity.Samples
 
         private void SetupMovement()
         {
+            // Remember our initial facing rotation
             targetRotation = transform.rotation;
+
+            // Start facing our look target, if any
+            if (lookTarget != null)
+            {
+                transform.rotation = GetCurrentLookDirection();
+            }
+
             lastFrameWorldPosition = transform.position;
+            lastGroundedPosition = transform.position;
         }
 
         protected void UpdateMovement()
         {
-            var currentLookDirection = targetRotation;
-
-            if (lookTarget != null)
-            {
-                var lookDirectionOnSameY = lookTarget.position - transform.position;
-                lookDirectionOnSameY.y = 0;
-                currentLookDirection = Quaternion.LookRotation(lookDirectionOnSameY);
-            }
 
             if (isPlayerControlled && Mode == CharacterMode.PlayerControlledMovement)
             {
@@ -415,11 +416,23 @@ namespace Yarn.Unity.Samples
             // Rotate towards our current look direction
             transform.rotation = Quaternion.RotateTowards(
                 Quaternion.LookRotation(transform.forward),
-                currentLookDirection,
+                GetCurrentLookDirection(),
                 turnSpeed * Time.deltaTime
             );
 
             lastFrameWorldPosition = transform.position;
+        }
+
+        private Quaternion GetCurrentLookDirection()
+        {
+            Quaternion direction = this.targetRotation;
+            if (lookTarget != null)
+            {
+                var lookDirectionOnSameY = lookTarget.position - transform.position;
+                lookDirectionOnSameY.y = 0;
+                direction = Quaternion.LookRotation(lookDirectionOnSameY);
+            }
+            return direction;
         }
 
         public async YarnTask MoveTo(Vector3 position, CancellationToken cancellationToken)
