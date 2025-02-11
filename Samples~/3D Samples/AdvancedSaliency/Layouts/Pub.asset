@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28ac61d30669641099946bb87442d3a3, type: 3}
+  m_Name: Pub
+  m_EditorClassIdentifier: 
+  primary:
+    position: {x: -0.21982849, y: 0, z: 2.9117756}
+    rotation: {x: 0, y: 0.9801682, z: 0, w: -0.19816743}
+  secondary:
+    position: {x: 1.1176751, y: 0, z: 0.83835864}
+    rotation: {x: 0, y: -0.4711207, z: 0, w: 0.8820688}
+  props:
+  - gameObjectName: desk
+    position: {x: -0.274, y: 0, z: 1.934}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+  - gameObjectName: cup1
+    position: {x: -0.098, y: 0.572, z: 1.7}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+  - gameObjectName: cup2
+    position: {x: 0.474, y: 0.572, z: 1.7}
+    rotation: {x: 0, y: 0.70710677, z: 0, w: 0.70710677}
+  - gameObjectName: darts
+    position: {x: -1.79, y: 0, z: 0.049227223}
+    rotation: {x: 0, y: 0, z: 0, w: 1}

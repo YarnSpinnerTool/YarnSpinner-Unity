@@ -1,0 +1,79 @@
+﻿title: Primary
+when: $scenario == .Explore
+when: $scenario_state == .NotStarted
+---
+Player: ok time to wander around aimlessly looking for stuff
+{$primary}: Great idea
+Player: ok, any idea where to look?
+{$primary}: I think {$secondary} had some ideas
+Player: gotcha
+
+<<set $scenario_state = .Started>>
+===
+
+title: Primary
+when: $scenario == .Explore
+when: $scenario_state == .Started
+when: $speak_to_secondary == true
+---
+{$primary}: How's the exploration go?
+Player: I spoke to {$secondary}
+{$primary}: oh?
+Player: Yeah, they said there is nothing to find here.
+{$primary}: oh, that's a bit of a bummer
+Player: yeah it is.
+{$primary}: sigh
+
+<<set $scenario_state = .Complete>>
+===
+title: Primary
+when: $scenario == .Explore
+when: $scenario_state == .Started
+when: $speak_to_secondary == true
+---
+{$primary}: Asked {$secondary} if they have any ideas yet?
+Player: getting to it
+{$primary}: ok, keep me in the loop please.
+Player: will do.
+===
+
+title: Primary
+when: $scenario == .Explore
+when: $scenario_state == .Complete
+---
+{$primary}: I think it's sad there's this whole place and nothing to explore in it
+Player: yeah
+===
+
+
+title: Secondary
+when: $scenario == .Explore
+when: $scenario_state == .NotStarted
+---
+{$secondary}: Oh hey, we are exploring a {$Room}.
+===
+
+title: Secondary
+when: $scenario == .Explore
+when: $scenario_state == .Started
+when: $speak_to_secondary == false
+---
+Player: so {$primary} said you had some ideas about exploring?
+{$secondary}: totally
+Player: care to share them?
+{$secondary}: yeah so because we are in a {$Room} I reckon there is nothing to find.
+Player: Oh
+{$secondary}: yeah, should prolly let {$primary} know
+
+<<set $speak_to_secondary = true>>
+===
+
+title: Secondary
+when: $scenario == .Explore
+when: $scenario_state == .Started
+when: $speak_to_secondary == true
+---
+{$secondary}: Have you told {$primary} there is nothing to do here?
+Player: I am getting to it.
+{$secondary}: righto
+===

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 68108cc818f1a402fa0a0ebc6bd72743
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 053561912b1654d80a424bb0696a74ae, type: 3}
+  generateVariablesSourceFile: 1
+  variablesClassName: TheRoomVariableStorage
+  variablesClassNamespace: Yarn.Unity.Samples
+  variablesClassParent: Yarn.Unity.InMemoryVariableStorage
+  useAddressableAssets: 0

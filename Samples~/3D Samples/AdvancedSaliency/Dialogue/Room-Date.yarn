@@ -1,0 +1,112 @@
+﻿title: Primary
+when: $scenario == .Date
+when: $scenario_state == .NotStarted
+---
+{$primary}: date time!
+Player: Date Time!
+{$secondary}: DATE TIME!
+{$primary}: why are you here?!
+
+<<set $scenario_state = .Started>>
+===
+
+title: Secondary
+when: $scenario == .Date
+when: $scenario_state == .NotStarted
+---
+Player: oh hey didn't expect to see you here
+{$secondary}: yes, I bet you didn't
+Player: ok...
+===
+
+
+
+
+
+
+title: Primary
+when: $scenario == .Date
+when: $scenario_state == .Started
+when: $speak_to_primary == false
+when: $speak_to_secondary == false
+---
+{$primary}: So I think the date is going well...
+Player: well mostly
+{$primary}: ...other than {$secondary} being here
+{$secondary}: I don't think it's that bad
+{$primary}: NO ONE INVITED YOU!
+
+<<set $speak_to_primary = true>>
+===
+
+title: Secondary
+when: $scenario == .Date
+when: $scenario_state == .Started
+when: $speak_to_primary == false
+---
+{$secondary}: I am having such a great time
+Player: ok...
+===
+
+title: Secondary
+when: $scenario == .Date
+when: $scenario_state == .Started
+when: $speak_to_primary == true
+when: $speak_to_secondary == false
+---
+Player: Hey so...
+{$secondary}: hmm?
+Player: I know you are having a great time
+{$secondary}: just the best
+Player: But {$primary} and I think it's weird you are here
+{$secondary}: I disagree
+Player: So i'm gonna talk it over with {$primary} and I think we will go
+{$secondary}: nooooo
+
+<<set $speak_to_secondary = true>>
+===
+
+title: Primary
+when: $scenario == .Date
+when: $scenario_state == .Started
+when: $speak_to_primary == true
+when: $speak_to_secondary == false
+---
+{$primary}: Please talk to {$secondary}.
+Player: on it
+===
+
+title: Primary
+when: $scenario == .Date
+when: $scenario_state == .Started
+when: $speak_to_primary == true
+when: $speak_to_secondary == true
+---
+{$primary}: I think we should leave
+Player: yeah this is weird
+{$secondary}: Oh cmon stay
+Player: no this is weird
+
+<<set $scenario_state = .Complete>>
+===
+
+
+
+
+
+
+
+title: Primary
+when: $scenario == .Date
+when: $scenario_state == .Complete
+---
+Player: I thought we were leaving
+{$primary}: Yeah just give me a second.
+===
+title: Secondary
+when: $scenario == .Date
+when: $scenario_state == .Complete
+---
+{$secondary}: I can't believe yous are just gonna leave me here
+Player: It is weird you being here
+===

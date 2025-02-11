@@ -1,0 +1,111 @@
+﻿title: Primary
+when: $scenario == .Explore
+when: $Room == .Mansion
+when: $primary == .Alice || $primary == .Liz
+when: $secondary == .Alice || $secondary == .Liz
+when: $scenario_state == .NotStarted
+---
+Player: hey
+{$primary}: Can't talk, I am too busy uncovering the Bone Secrets.
+Player: that sounds cool
+{$primary}: it will be, yes.
+<<set $scenario_state = .Started>>
+===
+
+title: Secondary
+when: $scenario == .Explore
+when: $Room == .Mansion
+when: $primary == .Alice || $primary == .Liz
+when: $secondary == .Alice || $secondary == .Liz
+when: $scenario_state == .NotStarted
+---
+Player: hey
+{$secondary}: this place is so cool, I wonder what exploring it with {$primary} is gonna be like.
+Player: who can say.
+===
+
+
+title: Primary
+when: $scenario == .Explore
+when: $Room == .Mansion
+when: $primary == .Alice || $primary == .Liz
+when: $secondary == .Alice || $secondary == .Liz
+when: $scenario_state == .Started
+when: $speak_to_secondary == false
+---
+Player: hello, how goes the exploration?
+{$primary}: Terrible, weird bone constructs keep killing people
+Player: wow that sucks
+{$primary}: I know, it's the worst
+Player: I will see what {$secondary} knows then.
+{$primary}: She won't know anything
+===
+
+title: Secondary
+when: $scenario == .Explore
+when: $Room == .Mansion
+when: $primary == .Alice || $primary == .Liz
+when: $secondary == .Alice || $secondary == .Liz
+when: $scenario_state == .Started
+when: $speak_to_secondary == false
+---
+Player: hello, how goes the exploration?
+{$secondary}: sorry all I do is glare and look cool
+Player: why?
+{$secondary}: {$primary} is my boss, she says I can't talk
+Player: isn't this talking?
+{$secondary}: whoops
+
+<<set $speak_to_secondary = true>>
+===
+
+title: Primary
+when: $scenario == .Explore
+when: $Room == .Mansion
+when: $primary == .Alice || $primary == .Liz
+when: $secondary == .Alice || $secondary == .Liz
+when: $scenario_state == .Started
+when: $speak_to_secondary == true
+---
+Player: turns out {$secondary} didn't know anything and said you said she can't speak
+{$primary}: Correct
+Player: well how are things on your end.
+{$primary}: I think I have it worked out actually
+<<set $scenario_state = .Complete>>
+===
+
+title: Secondary
+when: $scenario == .Explore
+when: $Room == .Mansion
+when: $primary == .Alice || $primary == .Liz
+when: $secondary == .Alice || $secondary == .Liz
+when: $scenario_state == .Started
+when: $speak_to_secondary == true
+---
+Player: hello, how goes the exploration?
+{$secondary}: *cool silence*
+===
+
+
+title: Primary
+when: $scenario == .Explore
+when: $Room == .Mansion
+when: $primary == .Alice || $primary == .Liz
+when: $secondary == .Alice || $secondary == .Liz
+when: $scenario_state == .Complete
+---
+{$primary}: that was a lot of murders for a haunted mansion exploration
+Player: yeah a lot of deaths, including poor {$secondary}
+{$primary}: yeah that did suck.
+===
+title: Secondary
+when: $scenario == .Explore
+when: $Room == .Mansion
+when: $primary == .Alice || $primary == .Liz
+when: $secondary == .Alice || $secondary == .Liz
+when: $scenario_state == .Complete
+---
+{$secondary}: Alas I am now dead
+Player: wow that sucks
+{$secondary}: Tell me about it
+===

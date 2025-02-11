@@ -1,0 +1,120 @@
+﻿title: RoomSetup
+---
+<<enum Character>>
+    <<case Alice = "Alice">>
+    <<case Barry = "Barry">>
+    <<case George = "George">>
+    <<case Liz = "Liz">>
+<<endenum>>
+
+<<enum Scenario>>
+    <<case Interogation = "Interrogation">>
+    <<case Explore = "Explore">>
+    <<case Rescue = "Rescue">>
+    <<case Date = "Date">>
+<<endenum>>
+
+<<enum Room>>
+    <<case Office = "Office">>
+    <<case Pub = "Pub">>
+    <<case Church = "Church">>
+    <<case Mansion = "Mansion">>
+<<endenum>>
+
+<<enum ScenarioState>>
+    <<case NotStarted>>
+    <<case Started>>
+    <<case Complete>>
+<<endenum>>
+
+<<declare $primary = Character.Alice>>
+<<declare $secondary = Character.Barry>>
+<<declare $scenario = Scenario.Interogation>>
+<<declare $Room = Room.Office>>
+
+// the transient state variables we need to reset each run
+<<declare $speak_to_primary = false>>
+<<declare $speak_to_secondary = false>>
+<<declare $scenario_state = .NotStarted>>
+
+<<once>>
+    Explainer: Hello and welcome to the Advanced Saliency demo.
+    Explainer: This shows off how you can use storylets and saliency to create vignettes that are configured based on world state.
+<<endonce>>
+
+Explainer: Do you want to see your current configuration?
+
+-> Yes
+    Explainer: The primary role is played by "{$primary}".
+    Explainer: The secondary role is played by "{$secondary}".
+    Explainer: It is set inside a "{$Room}".
+    Explainer: And will play out a "{$scenario}" scene.
+-> No
+-> Play the scenario <<if $primary != $secondary>>
+    Explainer: righto.
+    <<jump ResetAndPlay>>
+
+=> Explainer: You cannot start the scenario with the same person in both roles. <<if $primary == $secondary>>
+    Explainer: Please change the roles and talk to me again to play the scene.
+=> Explainer: Are you ready to play the scene? <<if $primary != $secondary>>
+    -> Yes
+        <<jump ResetAndPlay>>
+    -> No
+        Explainer: talk to me again to play the scene.
+===
+
+title: ResetAndPlay
+---
+<<set $speak_to_secondary = false>>
+<<set $speak_to_primary = false>>
+<<set $scenario_state = .NotStarted>>
+<<start_level>>
+===
+
+// Because the Dialogue Interactor is only really designed to respond to a single node we need these bouncer nodes to let you jump into the right storylets.
+// An arguably better way to do this would be to have the level god set the primary and secondary characters to respond to those storylets instead,
+// but because this is more an example of using storylets and saliency rather than writing custom code I haven't gone done this approach
+// So the bouncer nodes approach it is!
+title: Alice
+when: $primary == .Alice
+---
+<<jump Primary>>
+===
+title: Alice
+when: $secondary == .Alice
+---
+<<jump Secondary>>
+===
+
+title: Barry
+when: $primary == .Barry
+---
+<<jump Primary>>
+===
+title: Barry
+when: $secondary == .Barry
+---
+<<jump Secondary>>
+===
+
+title: George
+when: $primary == .George
+---
+<<jump Primary>>
+===
+title: George
+when: $secondary == .George
+---
+<<jump Secondary>>
+===
+
+title: Liz
+when: $primary == .Liz
+---
+<<jump Primary>>
+===
+title: Liz
+when: $secondary == .Liz
+---
+<<jump Secondary>>
+===

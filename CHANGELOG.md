@@ -69,6 +69,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `[s]` will strike through text
 - `AsyncOptionsView` now supports configuring its fade duration.
 - `MarkupPalette` and the associated `PaletteMarkerProcessor` now support custom TMP rich text tags beyond what the more basic markers allow.
+- Added a sample (Advanced Saliency) making use of templated nodes and built in saliency to show off creating storylet vignettes.
 
 ### Changed
 
