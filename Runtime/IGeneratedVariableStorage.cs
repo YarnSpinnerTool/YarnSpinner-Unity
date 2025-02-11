@@ -77,16 +77,16 @@ namespace Yarn.Unity
                 return default;
             }
 
-            uint caseValue;
+            int caseValue;
 
             if (result.GetType() == typeof(string))
             {
                 // Convert the string value to a hash
-                caseValue = CRC32.GetChecksum((string)result);
+                caseValue = (int)CRC32.GetChecksum((string)result);
             }
             else
             {
-                caseValue = (uint)result;
+                caseValue = (int)result;
             }
 
             if (Enum.IsDefined(typeof(T), caseValue))
