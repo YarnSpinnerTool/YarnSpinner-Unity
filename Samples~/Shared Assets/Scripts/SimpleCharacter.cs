@@ -74,7 +74,7 @@ namespace Yarn.Unity.Samples
         [Group("Animation")]
         [SerializeField] float blinkTimeVariance = 0.5f;
 
-        [Group("Animation Parameters")]
+        [Group("Animation Parameters", true)]
         [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
         [SerializeField] private string speedParameter = "Speed";
         [Group("Animation Parameters", true)]
