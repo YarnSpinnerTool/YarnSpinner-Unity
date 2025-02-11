@@ -91,6 +91,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed an issue where the System.Threading.Tasks implementation of YarnTask.WaitUntil did not return early when the CancellationToken was cancelled ([@dogboydog](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/pull/304))
 - If a `VoiceOverView` is configured to automatically advance at the end of audio playback, when a line that has no `AudioClip` is delivered, the `VoiceOverView` will now advance the line immediately after logging an error.
 - Renamed `FormatForMarker` to `PaletteForMarker` in `MarkupPalette`.
+- Generated variable storage code now represents string values as signed integers, not unsigned integers. (Unity doesn't correctly serialize enum values over the signed integer maximum.)
 
 ### Removed
 
