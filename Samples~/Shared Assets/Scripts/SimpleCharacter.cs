@@ -58,10 +58,6 @@ namespace Yarn.Unity.Samples
         [Group("Animation")]
         [SerializeField] private Animator? animator;
         [Group("Animation")]
-        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
-        [SerializeField] private string speedParameter = "Speed";
-
-        [Group("Animation")]
         [SerializeField] SerializableDictionary<string, string> facialExpressions = new();
         [Group("Animation")]
         [SerializeField] string defaultFace = "";
@@ -69,16 +65,7 @@ namespace Yarn.Unity.Samples
         [SerializeField] string facialExpressionsLayer = "Face";
         private int facialExpressionsLayerID = 0;
 
-        [Group("Animation")]
-        [Header("Body Tilt")]
-        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
-        [SerializeField] string sideTiltParameter = "Side Tilt";
-        [Group("Animation")]
-        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
-        [SerializeField] string forwardTiltParameter = "Forward Tilt";
-        [Group("Animation")]
-        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
-        [SerializeField] string turnParameter = "Turn";
+
 
 
         [Group("Animation")]
@@ -86,7 +73,20 @@ namespace Yarn.Unity.Samples
         [SerializeField] float meanBlinkTime = 2f;
         [Group("Animation")]
         [SerializeField] float blinkTimeVariance = 0.5f;
-        [Group("Animation")]
+
+        [Group("Animation Parameters")]
+        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
+        [SerializeField] private string speedParameter = "Speed";
+        [Group("Animation Parameters", true)]
+        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
+        [SerializeField] string sideTiltParameter = "Side Tilt";
+        [Group("Animation Parameters", true)]
+        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
+        [SerializeField] string forwardTiltParameter = "Forward Tilt";
+        [Group("Animation Parameters", true)]
+        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
+        [SerializeField] string turnParameter = "Turn";
+        [Group("Animation Parameters", true)]
         [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Trigger)]
         [SerializeField] string blinkTriggerName = "Blink";
 
@@ -136,6 +136,13 @@ namespace Yarn.Unity.Samples
         public YarnTask TurnCharacter(float destination, float time = 0f, bool wait = false)
         {
             var task = TweenAnimationParameter(turnParameter, destination, time, EasingFunctions.InOutQuad, destroyCancellationToken);
+            return wait ? task : YarnTask.CompletedTask;
+        }
+
+        [YarnCommand("tween_animation_parameter")]
+        public YarnTask TweenParameter(string parameter, float destination, float time, bool wait = false)
+        {
+            var task = TweenAnimationParameter(parameter, destination, time, EasingFunctions.InOutQuad, destroyCancellationToken);
             return wait ? task : YarnTask.CompletedTask;
         }
 
@@ -299,7 +306,6 @@ namespace Yarn.Unity.Samples
         #endregion
 
         #region Movement Logic
-
 
         private void SetupMovement()
         {

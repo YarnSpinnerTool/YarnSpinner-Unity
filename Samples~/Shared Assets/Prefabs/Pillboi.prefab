@@ -79,7 +79,6 @@ MonoBehaviour:
   deceleration: 0.1
   lookTarget: {fileID: 0}
   animator: {fileID: 6638091402538635223}
-  speedParameter: Speed
   facialExpressions:
     m_keys:
     - eyebrows-in
@@ -93,11 +92,12 @@ MonoBehaviour:
     - Eyebrows-Neutral
   defaultFace: 
   facialExpressionsLayer: Face
+  meanBlinkTime: 2
+  blinkTimeVariance: 0.5
+  speedParameter: Speed
   sideTiltParameter: Side Tilt
   forwardTiltParameter: Forward Tilt
   turnParameter: Turn
-  meanBlinkTime: 2
-  blinkTimeVariance: 0.5
   blinkTriggerName: Blink
   interactionRadius: 1
   offset: {x: 0, y: 0, z: 0.3}
