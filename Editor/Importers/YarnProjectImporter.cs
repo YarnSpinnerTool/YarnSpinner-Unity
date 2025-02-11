@@ -616,16 +616,9 @@ namespace Yarn.Unity.Editor
 
                 WriteGeneratedCodeAttribute();
 
-                if (type.RawType == Types.String)
-                {
-                    // String-backed enums are represented as CRC32 hashes of
-                    // the raw value, which we store as uints
-                    WriteLine($"public enum {type.Name} : uint {{");
-                }
-                else
-                {
-                    WriteLine($"public enum {type.Name} {{");
-                }
+                // Enums are always stored as integers; strings are represented
+                // as CRC32 hashes of the raw value
+                WriteLine($"public enum {type.Name} {{");
 
                 indentLevel += 1;
 
@@ -655,7 +648,11 @@ namespace Yarn.Unity.Editor
                         WriteLine($"/// </remarks>");
                         var stringValue = (string)enumCase.Value.Value;
                         WriteComment($"\"{stringValue}\"");
-                        WriteLine($"{enumCase.Key} = {CRC32.GetChecksum(stringValue)},");
+                        // Get the hash of the string, and convert it to a
+                        // signed integer. (Unity doesn't correctly handle enums
+                        // whose backing value is a uint (values over signed
+                        // integer max are clamped to zero), so we'll cast it here.)
+                        WriteLine($"{enumCase.Key} = {(int)CRC32.GetChecksum(stringValue)},");
                     }
                     else
                     {

@@ -25,7 +25,7 @@ namespace Yarn.Unity
         /// <summary>
         /// The name of the dialogue node in the project.
         /// </summary>
-        [YarnNode(nameof(project))]
+        [YarnNode(nameof(project), requiresYarnProject: false)]
         public string nodeName;
 
         /// <summary>

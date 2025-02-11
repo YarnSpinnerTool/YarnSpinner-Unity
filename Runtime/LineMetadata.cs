@@ -44,6 +44,13 @@ namespace Yarn.Unity
             }
         }
 
+        public LineMetadata() { }
+
+        public void AddMetadata(string lineID, IEnumerable<string> metadata)
+        {
+            _lineMetadata.Add(lineID, string.Join(" ", metadata));
+        }
+
         /// <summary>
         /// Gets the line IDs that contain metadata.
         /// </summary>

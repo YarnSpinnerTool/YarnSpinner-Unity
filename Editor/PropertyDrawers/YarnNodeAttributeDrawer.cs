@@ -86,8 +86,9 @@ namespace Yarn.Unity
             // -- Node name drop down
 
             // If we want to edit this nodes name as a text field, or if we have
-            // multiple values, show a text field and not a dropdown.
-            if (editNodeAsText || projectProp.hasMultipleDifferentValues)
+            // multiple values, or if we have no project and we don't need one,
+            // show a text field and not a dropdown.
+            if ((project == null && attribute.requiresYarnProject == false) || editNodeAsText || projectProp.hasMultipleDifferentValues)
             {
                 var controlName = NodeTextControlNamePrefix + controlId;
 

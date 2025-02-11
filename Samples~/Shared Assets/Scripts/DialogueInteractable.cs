@@ -23,7 +23,7 @@ namespace Yarn.Unity.Samples
             }
         }
 
-        public abstract void Interact(SimpleCharacterInteraction interactor);
+        public abstract YarnTask Interact(GameObject interactor);
 
         public virtual bool InteractorShouldTurnToFaceWhenInteracted => false;
     }
@@ -37,10 +37,6 @@ namespace Yarn.Unity.Samples
         [SerializeField] float turnSpeed = 300f;
 
         public override bool InteractorShouldTurnToFaceWhenInteracted => turnsToInteractor;
-
-        private Quaternion originalRotation;
-        private Transform? lookTarget;
-
 
         public void OnValidate()
         {
@@ -110,33 +106,9 @@ namespace Yarn.Unity.Samples
         protected void Awake()
         {
             IsCurrent = false;
-            originalRotation = transform.rotation;
         }
 
-        protected void Update()
-        {
-            if (turnsToInteractor == false)
-            {
-                return;
-            }
-
-            Quaternion desiredOrientation;
-            if (lookTarget == null)
-            {
-                desiredOrientation = originalRotation;
-            }
-            else
-            {
-                var positionAtSameY = lookTarget.position;
-                positionAtSameY.y = transform.position.y;
-                var lookDirection = positionAtSameY - transform.position;
-                desiredOrientation = Quaternion.LookRotation(lookDirection);
-            }
-
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, desiredOrientation, this.turnSpeed * Time.deltaTime);
-        }
-
-        public override void Interact(SimpleCharacterInteraction interactor)
+        public override async YarnTask Interact(GameObject interactor)
         {
             if (dialogue == null)
             {
@@ -162,20 +134,24 @@ namespace Yarn.Unity.Samples
 
             dialogueRunner.StartDialogue(dialogue);
 
-            async YarnTask LookAtTargetUntilDialogueComplete()
+            if (turnsToInteractor && TryGetComponent<SimpleCharacter>(out var character))
             {
-                if (dialogueRunner == null)
-                {
-                    return;
-                }
-
-                lookTarget = interactor.transform;
-                await dialogueRunner.DialogueTask;
-                lookTarget = null;
-                onInteractionEnded?.Invoke();
+                character.lookTarget = interactor.transform;
             }
 
-            LookAtTargetUntilDialogueComplete().Forget();
+            var destroyCancellation = destroyCancellationToken;
+
+            await dialogueRunner.DialogueTask;
+
+            if (destroyCancellation.IsCancellationRequested)
+            {
+                return;
+            }
+
+            if (turnsToInteractor && TryGetComponent<SimpleCharacter>(out character))
+            {
+                character.lookTarget = null;
+            }
         }
     }
 }

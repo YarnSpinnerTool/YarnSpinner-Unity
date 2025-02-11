@@ -9,14 +9,14 @@ namespace Yarn.Unity.Samples
     public class MoveEvent : ActionMarkupHandler
     {
         private Dictionary<int, Vector3> movements = new();
-        
+
         // basically when we hit the specific point I will make the dude walk
         public override void OnLineDisplayComplete()
         {
             movements.Clear();
         }
 
-        public SimpleCharacterMovement playerCharacter;
+        public SimpleCharacter playerCharacter;
 
         void Start()
         {
@@ -58,7 +58,7 @@ namespace Yarn.Unity.Samples
 
         // later make this a YarnTask when the bug is fixed
         public async Awaitable MoveCharacter(string endMarker)
-        {        
+        {
             var position = GameObject.Find(endMarker);
             if (position == null)
             {

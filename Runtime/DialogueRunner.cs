@@ -833,6 +833,15 @@ namespace Yarn.Unity
                 throw new InvalidOperationException("Can't set project, because dialogue is currently running.");
             }
             this.yarnProject = project;
+
+            if (project != null)
+            {
+                Dialogue.SetProgram(project.Program);
+            }
+            else
+            {
+                Dialogue.SetProgram(null);
+            }
         }
 
         /// <summary>
