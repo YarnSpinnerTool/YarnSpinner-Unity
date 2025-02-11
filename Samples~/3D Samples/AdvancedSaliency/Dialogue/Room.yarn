@@ -1,4 +1,7 @@
-﻿title: RoomSetup
+﻿// this node is run when you want to start the scenario
+// it resets any transient variables and tells the level god to load the level
+// actual scenario is handled by the other nodes in the project
+title: RoomSetup
 ---
 <<enum Character>>
     <<case Alice = "Alice">>

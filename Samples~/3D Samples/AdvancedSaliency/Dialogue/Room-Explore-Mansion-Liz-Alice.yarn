@@ -1,4 +1,14 @@
-﻿title: Primary
+﻿// this is an alternate take on the exploration scenario
+// this shows off using more when clauses to make the scenario highly specific if you want that
+// in particular this requires:
+// the room to be a mansion
+// alice to be the primary and liz to be the secondary
+// or liz to be the primary and alice to be the secondary
+
+
+// to start the scenario you need to talk to primary
+// talking to secondary doesn't do anything
+title: Primary
 when: $scenario == .Explore
 when: $Room == .Mansion
 when: $primary == .Alice || $primary == .Liz
@@ -24,6 +34,12 @@ Player: hey
 Player: who can say.
 ===
 
+
+
+
+
+
+// to advance the scenario you will need to speak to primary and then secondary and then primary again
 
 title: Primary
 when: $scenario == .Explore
@@ -74,6 +90,8 @@ Player: well how are things on your end.
 <<set $scenario_state = .Complete>>
 ===
 
+// if you have spoken to secondary you learnt she's not allowed to speak
+// so she says nothing
 title: Secondary
 when: $scenario == .Explore
 when: $Room == .Mansion
@@ -83,9 +101,11 @@ when: $scenario_state == .Started
 when: $speak_to_secondary == true
 ---
 Player: hello, how goes the exploration?
-{$secondary}: *cool silence*
+{$secondary}: [i]cool silence[/i]
 ===
 
+
+// scenario ends
 
 title: Primary
 when: $scenario == .Explore

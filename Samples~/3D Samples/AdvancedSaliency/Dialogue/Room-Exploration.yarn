@@ -1,4 +1,7 @@
-﻿title: Primary
+﻿// the exploration scenario
+// in this scenario primary and secondary are working together to explore the room
+
+title: Primary
 when: $scenario == .Explore
 when: $scenario_state == .NotStarted
 ---
@@ -11,6 +14,15 @@ Player: gotcha
 <<set $scenario_state = .Started>>
 ===
 
+title: Secondary
+when: $scenario == .Explore
+when: $scenario_state == .NotStarted
+---
+{$secondary}: Oh hey, we are exploring a {$Room}.
+===
+
+
+// once started you will need to speak to secondary and then primary in that order to complete the scenario
 title: Primary
 when: $scenario == .Explore
 when: $scenario_state == .Started
@@ -26,31 +38,17 @@ Player: yeah it is.
 
 <<set $scenario_state = .Complete>>
 ===
+
+// catches the situation where you just keep talking to primary
 title: Primary
 when: $scenario == .Explore
 when: $scenario_state == .Started
-when: $speak_to_secondary == true
+when: $speak_to_secondary == false
 ---
 {$primary}: Asked {$secondary} if they have any ideas yet?
 Player: getting to it
 {$primary}: ok, keep me in the loop please.
 Player: will do.
-===
-
-title: Primary
-when: $scenario == .Explore
-when: $scenario_state == .Complete
----
-{$primary}: I think it's sad there's this whole place and nothing to explore in it
-Player: yeah
-===
-
-
-title: Secondary
-when: $scenario == .Explore
-when: $scenario_state == .NotStarted
----
-{$secondary}: Oh hey, we are exploring a {$Room}.
 ===
 
 title: Secondary
@@ -68,6 +66,7 @@ Player: Oh
 <<set $speak_to_secondary = true>>
 ===
 
+// catches the situation where you just keep talking to secondary
 title: Secondary
 when: $scenario == .Explore
 when: $scenario_state == .Started
@@ -76,4 +75,34 @@ when: $speak_to_secondary == true
 {$secondary}: Have you told {$primary} there is nothing to do here?
 Player: I am getting to it.
 {$secondary}: righto
+===
+
+
+
+
+// the scenario complete infinite lines
+
+title: Primary
+when: $scenario == .Explore
+when: $scenario_state == .Complete
+---
+{$primary}: I think it's sad there's this whole place and nothing to explore in it
+Player: yeah
+===
+title: Secondary
+when: $scenario == .Explore
+when: $scenario_state == .Complete
+---
+// showing off some linegroup based variance
+
+=> {$secondary}: I can't believe there wasn't any butler murderings going on <<if $Room == .Mansion>>
+=> {$secondary}: This place has genuine 19th century furniture <<if $Room == .Mansion>>
+=> {$secondary}: not even a single secret cult message <<if $Room == .Church>>
+=> {$secondary}: damn nice edifice though <<if $Room == .Church>>
+=> {$secondary}: in hindsight a Pub has few secrets <<if $Room == .Pub>>
+=> {$secondary}: at least we can grab a pint <<if $Room == .Pub>>
+=> {$secondary}: honestly I don't even know why you'd explore an office <<if $Room == .Office>>
+=> {$secondary}: I wonder if there are any paperclips, my maximiser is asking for more <<if $Room == .Office>>
+
+Player: so wise
 ===

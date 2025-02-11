@@ -1,4 +1,7 @@
-﻿title: Primary
+﻿// these nodes control the date scenario, with the core story being the player and primary are on a date and secondary has also shown up uninvited.
+
+// the scenario is started by talking to primary
+title: Primary
 when: $scenario == .Date
 when: $scenario_state == .NotStarted
 ---
@@ -24,6 +27,9 @@ Player: ok...
 
 
 
+// once started to continue the scenario you will need to speak first to primary and then to secondary
+// once both are spoken to in that order the scenario will advance
+
 title: Primary
 when: $scenario == .Date
 when: $scenario_state == .Started
@@ -48,6 +54,7 @@ when: $speak_to_primary == false
 Player: ok...
 ===
 
+// confronting secondary about being here
 title: Secondary
 when: $scenario == .Date
 when: $scenario_state == .Started
@@ -94,7 +101,7 @@ Player: no this is weird
 
 
 
-
+// the scenario is over, these nodes can be run infinitely
 
 title: Primary
 when: $scenario == .Date

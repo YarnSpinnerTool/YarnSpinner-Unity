@@ -1,4 +1,7 @@
-﻿title: Primary
+﻿// the Interogation scenario nodes
+// this tells the story of primary and the player working together to interrogate secondary
+
+title: Primary
 when: $scenario == .Interogation
 when: $scenario_state == .NotStarted
 ---
@@ -8,6 +11,7 @@ Player: yep
 <<set $scenario_state = .Started>>
 ===
 
+// in the specific situation where alice is the primary we have her give a little speach before the rest of the normal flow takes over
 title: Alice
 when: $primary == .Alice
 when: $scenario == .Interogation
@@ -21,6 +25,7 @@ Player: oh cool
 Alice: agreed, anyways, talk to me again please and we'll discuss strategy.
 ===
 
+// secondary has little to play in this scenario so we have a very generic fallback node here
 title: Secondary
 when: $scenario == .Interogation
 ---
@@ -32,7 +37,8 @@ when: $scenario == .Interogation
 
 
 
-
+// once the scenario has started it plays out the same
+// the players brilliant interrogation technique the scenario ends
 title: Primary
 when: $scenario == .Interogation
 when: $scenario_state == .Started
@@ -40,6 +46,7 @@ when: $scenario_state == .Started
 {$primary}: you are in real trouble now
 {$secondary}: Oh am I now!?
 
+// quick demonstration here of using linegroups to inject even more variance into the story without also needing to make entire new storylets
 => Player: it's weird we're in a mansion for this right? <<if $Room == .Mansion>>
 => Player: anyone fancy a pint? <<if $Room == .Pub>>
 => Player: this feels like the right place for this <<if $Room == .Office>>
@@ -62,6 +69,7 @@ Player: anyone fancy an icecream?, I could go pick us some up.
 
 
 
+// post scenario chatter
 title: Primary
 when: $scenario == .Interogation
 when: $scenario_state == .Complete
@@ -74,6 +82,7 @@ title: Secondary
 when: $scenario == .Interogation
 when: $scenario_state == .Complete
 ---
+// again line groups to inject more variance into the story
 => {$secondary}: I promise I'll be good, please don't Henry the Train me.
 => {$secondary}: I'm done hiding the corpses of my masters victims. <<if $Room == .Mansion>>
 => {$secondary}: I'm all Jesused up now, I swear. <<if $Room == .Church>>

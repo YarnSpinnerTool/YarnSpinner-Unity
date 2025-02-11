@@ -1,4 +1,8 @@
-﻿title: Primary
+﻿// the rescue scenario
+// here primary has kidnapped secondary and the player needs to rescue them
+
+// speaking to either primary or secondary starts the scenario
+title: Primary
 when: $scenario == .Rescue
 when: $scenario_state == .NotStarted
 ---
@@ -24,6 +28,7 @@ Player: Don't worry {$secondary}, I'll save you!
 
 
 
+// once started you will need to talk to Primary before you can rescue secondary
 
 title: Secondary
 when: $scenario == .Rescue
@@ -64,6 +69,7 @@ Player: look I am just gonna go release {$secondary}.
 <<set $speak_to_primary = true>>
 ===
 
+// if you have already spoken to primary AFTER starting the scenario they will refuse to talk to you anymore
 title: Primary
 when: $scenario == .Rescue
 when: $scenario_state == .Started
@@ -76,7 +82,7 @@ when: $speak_to_primary == true
 
 
 
-
+// having now rescued secondary the scenario is complete
 title: Primary
 when: $scenario == .Rescue
 when: $scenario_state == .Complete
