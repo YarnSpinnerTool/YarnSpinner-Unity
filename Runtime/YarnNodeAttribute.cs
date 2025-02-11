@@ -29,14 +29,17 @@ namespace Yarn.Unity
         /// </summary>
         public readonly string yarnProjectAttribute;
 
+        public readonly bool requiresYarnProject;
+
         /// <summary>
         /// Initialises a new instance of <see cref="YarnNodeAttribute"/>.
         /// </summary>
         /// <param name="yarnProjectAttribute"><inheritdoc
         /// cref="yarnProjectAttribute" path="/summary/node()"/></param>
-        public YarnNodeAttribute(string yarnProjectAttribute)
+        public YarnNodeAttribute(string yarnProjectAttribute, bool requiresYarnProject = true)
         {
             this.yarnProjectAttribute = yarnProjectAttribute;
+            this.requiresYarnProject = requiresYarnProject;
         }
     }
 }
