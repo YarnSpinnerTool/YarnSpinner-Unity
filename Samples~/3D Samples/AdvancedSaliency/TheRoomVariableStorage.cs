@@ -9,7 +9,7 @@ namespace Yarn.Unity.Samples {
     /// Automatically generated from Yarn project at Assets/Samples/3D Samples/AdvancedSaliency/AdvancedSaliency.yarnproject.
     /// </remarks>
     [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
-    public enum Character : uint {
+    public enum Character {
 
         /// <summary>
         /// Alice
@@ -18,7 +18,7 @@ namespace Yarn.Unity.Samples {
         /// Backing value: "Alice"
         /// </remarks>
         // "Alice"
-        Alice = 3863974723,
+        Alice = -430992573,
 
         /// <summary>
         /// Barry
@@ -36,7 +36,7 @@ namespace Yarn.Unity.Samples {
         /// Backing value: "George"
         /// </remarks>
         // "George"
-        George = 3508097174,
+        George = -786870122,
 
         /// <summary>
         /// Liz
@@ -45,7 +45,7 @@ namespace Yarn.Unity.Samples {
         /// Backing value: "Liz"
         /// </remarks>
         // "Liz"
-        Liz = 2184111482,
+        Liz = -2110855814,
     }
 
     /// <summary>
@@ -55,7 +55,7 @@ namespace Yarn.Unity.Samples {
     /// Automatically generated from Yarn project at Assets/Samples/3D Samples/AdvancedSaliency/AdvancedSaliency.yarnproject.
     /// </remarks>
     [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
-    public enum Scenario : uint {
+    public enum Scenario {
 
         /// <summary>
         /// Interogation
@@ -64,7 +64,7 @@ namespace Yarn.Unity.Samples {
         /// Backing value: "Interrogation"
         /// </remarks>
         // "Interrogation"
-        Interogation = 2591248492,
+        Interogation = -1703718804,
 
         /// <summary>
         /// Explore
@@ -73,7 +73,7 @@ namespace Yarn.Unity.Samples {
         /// Backing value: "Explore"
         /// </remarks>
         // "Explore"
-        Explore = 2270601414,
+        Explore = -2024365882,
 
         /// <summary>
         /// Rescue
@@ -82,7 +82,7 @@ namespace Yarn.Unity.Samples {
         /// Backing value: "Rescue"
         /// </remarks>
         // "Rescue"
-        Rescue = 4259156493,
+        Rescue = -35810803,
 
         /// <summary>
         /// Date
@@ -101,7 +101,7 @@ namespace Yarn.Unity.Samples {
     /// Automatically generated from Yarn project at Assets/Samples/3D Samples/AdvancedSaliency/AdvancedSaliency.yarnproject.
     /// </remarks>
     [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
-    public enum Room : uint {
+    public enum Room {
 
         /// <summary>
         /// Office
@@ -128,7 +128,7 @@ namespace Yarn.Unity.Samples {
         /// Backing value: "Church"
         /// </remarks>
         // "Church"
-        Church = 2539772019,
+        Church = -1755195277,
 
         /// <summary>
         /// Mansion
