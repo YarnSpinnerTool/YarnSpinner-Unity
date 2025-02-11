@@ -79,6 +79,7 @@ MonoBehaviour:
   acceleration: 0.2
   deceleration: 0.1
   lookTarget: {fileID: 0}
+  falloutYPosition: -5
   animator: {fileID: 6638091402538635223}
   facialExpressions:
     m_keys:

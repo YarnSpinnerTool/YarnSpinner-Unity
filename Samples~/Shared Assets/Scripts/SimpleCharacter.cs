@@ -38,6 +38,9 @@ namespace Yarn.Unity.Samples
         [SerializeField] float deceleration = 0.1f;
         [Group("Movement")]
         public Transform? lookTarget;
+        [Group("Movement")]
+        [ShowIf(nameof(isPlayerControlled))]
+        [SerializeField] float outOfBoundsYPosition = -5;
 
         private Quaternion targetRotation;
 
@@ -49,6 +52,8 @@ namespace Yarn.Unity.Samples
         private Vector2 lastInput = Vector2.zero;
 
         private CharacterController? characterController;
+
+        private Vector3 lastGroundedPosition;
 
 
         #endregion
@@ -387,6 +392,24 @@ namespace Yarn.Unity.Samples
             else
             {
                 CurrentSpeedFactor = 0;
+            }
+
+            // If the player falls out of bounds, warp them to the last point
+            // they were on the ground
+            if (isPlayerControlled && Mode == CharacterMode.PlayerControlledMovement)
+            {
+                if (transform.position.y < outOfBoundsYPosition)
+                {
+                    if (characterController != null)
+                    {
+                        transform.position = lastGroundedPosition;
+                    }
+                }
+
+                if (characterController != null && characterController.isGrounded)
+                {
+                    lastGroundedPosition = transform.position;
+                }
             }
 
             // Rotate towards our current look direction
