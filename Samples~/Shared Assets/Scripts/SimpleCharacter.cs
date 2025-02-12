@@ -13,6 +13,7 @@ namespace Yarn.Unity.Samples
         public enum CharacterMode
         {
             PlayerControlledMovement,
+            ExternallyControlledMovement,
             PathMovement,
             Interact,
         }
@@ -20,6 +21,7 @@ namespace Yarn.Unity.Samples
         public CharacterMode Mode { get; private set; }
 
         public bool CanInteract => Mode == CharacterMode.PlayerControlledMovement;
+        public bool HasPath => followPath != null;
 
         [SerializeField] bool isPlayerControlled;
 
@@ -42,6 +44,15 @@ namespace Yarn.Unity.Samples
         [ShowIf(nameof(isPlayerControlled))]
         [SerializeField] float outOfBoundsYPosition = -5;
 
+        [HideIf(nameof(isPlayerControlled))]
+        [SerializeField] SimplePath? followPath;
+        [HideIf(nameof(isPlayerControlled))]
+        [SerializeField] float pathDestinationTolerance = 0.1f;
+
+        private int currentDestinationPathIndex = -1;
+        private float remainingPathWaitTime = 0f;
+
+
         private Quaternion targetRotation;
 
         public float CurrentSpeedFactor { get; private set; } = 0f;
@@ -49,7 +60,6 @@ namespace Yarn.Unity.Samples
         private float lastFrameSpeed = 0f;
         private float lastFrameSpeedChange = 0f;
         private Vector3 lastFrameWorldPosition;
-        private Vector2 lastInput = Vector2.zero;
 
         private CharacterController? characterController;
 
@@ -317,12 +327,49 @@ namespace Yarn.Unity.Samples
         }
         #endregion
 
+        #region Movement Commands
+        [YarnCommand("pause_path_movement")]
+        public void StopFollowingPath()
+        {
+            if (!HasPath)
+            {
+                Debug.LogError($"{name} is not currently following a path");
+                return;
+            }
+            this.Mode = CharacterMode.ExternallyControlledMovement;
+        }
+        [YarnCommand("resume_path_movement")]
+        public void ResumeFollowingPath()
+        {
+            if (!HasPath)
+            {
+                Debug.LogError($"{name} is not currently following a path");
+                return;
+            }
+            this.Mode = CharacterMode.PathMovement;
+        }
+
+        #endregion
+
         #region Movement Logic
 
         private void SetupMovement()
         {
             // Remember our initial facing rotation
             targetRotation = transform.rotation;
+
+            if (!isPlayerControlled && followPath != null && followPath.Count >= 2)
+            {
+                // If we have a follow path, start there, and look at the 
+                var startPoint = followPath.GetWorldPosition(0);
+                var nextPoint = followPath.GetWorldPosition(1);
+                transform.position = startPoint;
+                targetRotation = Quaternion.LookRotation(nextPoint - startPoint);
+                transform.rotation = GetCurrentLookDirection();
+
+                currentDestinationPathIndex = 0;
+                Mode = CharacterMode.PathMovement;
+            }
 
             // Start facing our look target, if any
             if (lookTarget != null)
@@ -344,51 +391,43 @@ namespace Yarn.Unity.Samples
                     Input.GetAxisRaw("Vertical")
                 );
 
-                float rawSpeed;
-
-                if (input.magnitude < 0.001)
+                ApplyMovement(input);
+            }
+            else if (Mode == CharacterMode.ExternallyControlledMovement)
+            {
+                // Our movement is externally controlled; update our animator
+                // based how quickly we're moving
+                var currentSpeed = (lastFrameWorldPosition - transform.position).magnitude / Time.deltaTime;
+                CurrentSpeedFactor = Mathf.Clamp01(currentSpeed / speed);
+            }
+            else if (Mode == CharacterMode.PathMovement && followPath != null)
+            {
+                if (currentDestinationPathIndex == -1 || followPath.Count < 1)
                 {
-                    input = lastInput;
-                    rawSpeed = 0f;
+                    // No current path location.
+                    CurrentSpeedFactor = 0;
+                }
+                else if (remainingPathWaitTime > 0)
+                {
+                    CurrentSpeedFactor = 0;
+                    remainingPathWaitTime -= Time.deltaTime;
                 }
                 else
                 {
-                    rawSpeed = Mathf.Clamp01(input.magnitude) * speed;
-                    lastInput = input;
+                    // Move towards current path node
+                    // var nextPath = followPath.GetPositionData(currentDestinationPathIndex);
+
+                    var offset = followPath.GetWorldPosition(currentDestinationPathIndex) - transform.position;
+                    var input = new Vector2(offset.x, offset.z).normalized;
+                    ApplyMovement(input);
+
+                    if (offset.magnitude <= pathDestinationTolerance)
+                    {
+                        // We've reached the destination
+                        currentDestinationPathIndex = (currentDestinationPathIndex + 1) % followPath.Count;
+                        remainingPathWaitTime = followPath.GetDelay(currentDestinationPathIndex);
+                    }
                 }
-
-                var dampingTime = (rawSpeed > lastFrameSpeed) ? acceleration : deceleration;
-
-                var dampedSpeed = Mathf.SmoothDamp(lastFrameSpeed, rawSpeed, ref lastFrameSpeedChange, dampingTime);
-                lastFrameSpeed = dampedSpeed;
-
-                var movement = new Vector3(
-                    input.x,
-                    0,
-                    input.y
-                );
-
-                if (movement.magnitude > 0)
-                {
-                    // If we're moving, update the direction we want to be looking
-                    // at when we have no look target
-                    targetRotation = Quaternion.LookRotation(movement.normalized);
-                }
-
-                movement = movement.normalized * dampedSpeed;
-                movement.y = -gravity;
-
-                if (characterController != null)
-                {
-                    characterController.Move(movement * Time.deltaTime);
-                }
-
-                CurrentSpeedFactor = Mathf.Clamp01(dampedSpeed / speed);
-            }
-            else if (Mode == CharacterMode.PathMovement)
-            {
-                var currentSpeed = (lastFrameWorldPosition - transform.position).magnitude / Time.deltaTime;
-                CurrentSpeedFactor = Mathf.Clamp01(currentSpeed / speed);
             }
             else
             {
@@ -421,6 +460,39 @@ namespace Yarn.Unity.Samples
             );
 
             lastFrameWorldPosition = transform.position;
+
+            void ApplyMovement(Vector2 input)
+            {
+                float rawSpeed = input.magnitude < 0.001 ? 0f : Mathf.Clamp01(input.magnitude) * speed;
+
+                var dampingTime = (rawSpeed > lastFrameSpeed) ? acceleration : deceleration;
+
+                var dampedSpeed = Mathf.SmoothDamp(lastFrameSpeed, rawSpeed, ref lastFrameSpeedChange, dampingTime);
+                lastFrameSpeed = dampedSpeed;
+
+                var movement = new Vector3(
+                    input.x,
+                    0,
+                    input.y
+                );
+
+                if (movement.magnitude > 0)
+                {
+                    // If we're moving, update the direction we want to be looking
+                    // at when we have no look target
+                    targetRotation = Quaternion.LookRotation(movement.normalized);
+                }
+
+                movement = movement.normalized * dampedSpeed;
+                movement.y = -gravity;
+
+                if (characterController != null)
+                {
+                    characterController.Move(movement * Time.deltaTime);
+                }
+
+                CurrentSpeedFactor = Mathf.Clamp01(dampedSpeed / speed);
+            }
         }
 
         private Quaternion GetCurrentLookDirection()
@@ -452,7 +524,7 @@ namespace Yarn.Unity.Samples
 
             var previousMode = Mode;
 
-            Mode = CharacterMode.PathMovement;
+            Mode = CharacterMode.ExternallyControlledMovement;
 
             do
             {

@@ -7,7 +7,9 @@ title: RoamingCharacter
 ===
 title: RoamingCharacterTalkTo
 ---
+<<pause_path_movement Wanderer>>
 => Wanderer: Can't stop! Gotta check out the market!
 => Wanderer: Have you seen all these amazing stalls?
 => Wanderer: I'm going to get some fish! I hear it's fresh!
+<<resume_path_movement Wanderer>>
 ===
