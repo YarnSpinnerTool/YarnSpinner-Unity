@@ -42,6 +42,14 @@ namespace Yarn.Unity
             }
         }
 
+        new public bool IsHighlighted
+        {
+            get
+            {
+                return EventSystem.current.currentSelectedGameObject == this.gameObject;
+            }
+        }
+
         // If we receive a submit or click event, invoke our "we just selected this option" handler.
         public void OnSubmit(BaseEventData eventData)
         {
