@@ -184,8 +184,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   dialogue:
-    project: {fileID: 7545569452688597077, guid: f8f29dc92f07e4ac39b2f7f4fe74392a, type: 3}
-    nodeName: Larry
+    project: {fileID: 0}
+    nodeName: 
   dialogueRunner: {fileID: 0}
   turnsToInteractor: 1
   turnSpeed: 300
