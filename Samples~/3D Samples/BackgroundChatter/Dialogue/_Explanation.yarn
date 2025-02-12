@@ -1,0 +1,246 @@
+﻿title: Explanation_BackgroundConversation
+tags:
+---
+<<once if $explanations_heard == 0>>
+    Capsley: Welcome to the background conversations demo! #line:bg_convs_welcome
+<<endonce>>
+
+Capsley: This is a background conversation!
+Capsley: These two characters are having a conversation, but it doesn't interrupt gameplay.
+Capsley: To make this work, there's a separate DialogueRunner for their conversation.
+Capsley: Rather than sending lines to the usual line view and option view, the Dialogue Runner has a special dialogue view that shows lines floating above their heads.
+Capsley: Because background conversations don't have any player participation, the dialogue view doesn't need to handle any options.
+Capsley: The conversations are triggered by a special manager class that periodically starts a background conversation based on how close the player is to the characters
+Capsley: It also stops those conversations if the player walks too far away.
+Capsley: Take a look at ChatterGroupManager.cs and ChatterGroup.cs to learn more!
+
+<<once>>
+    <<set $explanations_heard += 1>>
+<<endonce>>
+
+<<detour Demo_PostExplanation>>
+===
+title: Demo_BackgroundConversation
+---
+BackgroundChatterA: Hey, I'm talking to you in the background!
+BackgroundChatterB: Whoa! So am I!
+BackgroundChatterA: Who needs the player to come talk to us when we can do it on our own!
+BackgroundChatterB: Yeah!!
+===
+title: Explanation_CallAndResponse
+---
+<<detour Demo_PreExplanation>>
+
+Capsley: This background conversation uses Line Groups to randomly generate a 'conversation' between two characters.
+Capsley: When the first character speaks, a line group is run that selects one of several possible lines. The same thing then happens for the second character.
+Capsley: The content of the two line groups is written so that no matter what line gets run first, the second line will always make sense.
+
+<<once>>
+    <<set $explanations_heard += 1>>
+<<endonce>>
+
+<<detour Demo_PostExplanation>>
+===
+title: Demo_CallAndResponse
+---
+=> CallAndResponseA: When's lunch?
+=> CallAndResponseA: When do we need to take the bins out?
+=> CallAndResponseA: Did Capsley update our scripts?
+=> CallAndResponseA: Is it background conversations demo day yet?
+=> CallAndResponseA: Where did Capsley get that shiny badge?
+    CallAndResponseA: I want one.
+=> CallAndResponseA: Do you think they're having fun over in the demo castle?
+
+=> CallAndResponseB: Dunno. Go check for yourself.
+=> CallAndResponseB: Not sure.
+=> CallAndResponseB: Stop asking me.
+=> CallAndResponseB: You keep asking this.
+=> CallAndResponseB: I can go check, if you like.
+=> CallAndResponseB: Why are you asking me?
+=> CallAndResponseB: I already told you.
+===
+
+title: Explanation_Interruption
+---
+<<detour Demo_PreExplanation>>
+
+Capsley: This background conversation can be interrupted by you walking up and talking to either of the characters.
+Capsley: The conversation is set up so that dialogue is cancelled when the primary dialogue runner starts. (That's the runner that we're using right now!)
+Capsley: This means that you won't see background lines pop up in the middle of your conversation with them, which would look strange.
+Capsley: Finally, the characters are set up so that you can walk up to them and talk to them, just like you did when you started talking to me.
+Capsley: This starts a conversation on the primary runner, which stops the background runner.
+Capsley: When the primary dialogue runner finishes, the background conversation resumes running.
+
+<<once>>
+    <<set $explanations_heard += 1>>
+<<endonce>>
+
+<<detour Demo_PostExplanation>>
+===
+title: Demo_Interruption
+---
+InterruptionA: So I says to them, I says--
+InterruptionB: Whaddya say?
+InterruptionA: I'm gettin' to it! I says to them, why I oughta--
+InterruptionB: You oughta what?
+InterruptionA: You gotta let me finish!
+InterruptionB: I am lettin' you finish!
+===
+
+title: Demo_Interruption_TalkTo
+---
+InterruptionA: This is a private conversation!
+InterruptionB: Yeah! I wanna hear the end of this story!
+===
+
+title: Explanation_WalkAway
+---
+<<detour Demo_PreExplanation>>
+
+Capsley: Not all background conversations happen between NPCs - this one involves the player!
+Capsley: Just like the other characters in this scene, the player is set up to be able to show background lines.
+Capsley: This lets the player character participate in conversations, without taking control away from the human playing the game.
+Capsley: Because this conversation directly involves the player, it's set up to play as soon as the character walks in range, rather than on a timer like the ones in the other rooms.
+Capsley: Additionally, this conversation is set up so that if you walk away in the middle of the conversation, the dialogue is cancelled and a new dialogue is run.
+Capsley: Try walking up to this character and then immediately walking away!
+
+<<once>>
+    <<set $explanations_heard += 1>>
+<<endonce>>
+
+<<detour Demo_PostExplanation>>
+===
+
+title: Demo_WalkAway
+---
+WalkAway: Hey! What's your whole deal?
+Player: Who, me?
+WalkAway: Yeah! What are you about?
+Player: I'm not used to being asked that question.
+Player: I'm a protagonist.
+WalkAway: Oooh, we got a fancy-pants [b]player character[/b] over here.
+===
+title: Demo_WalkAway_Interrupt
+---
+=> Player: Gotta run!
+=> Player: I gotta go!
+=> Player: Talk more later!
+===
+
+title: Explanation_Ongoing
+---
+<<detour Demo_PreExplanation>>
+
+Capsley: Background conversations have access to the same features as any other conversation. They can trigger commands, get and set variables, and anything else you'd do.
+Capsley: This conversation updates a counter every time it starts, and plays the next part of the conversation each time.
+Capsley: This can be used for giving background conversations that evolve over time that don't need the player to participate directly.
+Capsley: There are a few things that need to be kept in mind for things like this. First, because the player doesn't directly start it, they may not notice that it's running, so essential information shouldn't be used.
+Capsley: Secondly, the conversation should only play when the player is nearby, and not on a timer. Otherwise, you run the risk of the player missing out on a piece of the content.
+
+// working around an issue where everything up to the word "do:" gets counted as
+// the character name; instead, manually specify the character name
+[character name="Capsley"/] Thirdly, if the player accidentally moves out of range, they'll cancel the dialogue. To avoid the player accidentally skipping content, there's a few things you can do: make the cancellation radius very large, and only update the counter after they've heard all of the dialogue.
+Capsley: Try walking up to these characters a few times to hear the entire dialogue!
+
+<<once>>
+    <<set $explanations_heard += 1>>
+<<endonce>>
+
+<<detour Demo_PostExplanation>>
+===
+
+title: Demo_Ongoing
+when: $ongoing_counter == 0
+---
+<<declare $ongoing_counter = 0>>
+
+OngoingA: I hear that today's the big demo day.
+OngoingB: Oh! For the background conversations!
+OngoingA: Yeah!
+
+<<set $ongoing_counter += 1>>
+===
+title: Demo_Ongoing
+when: $ongoing_counter == 1
+---
+
+OngoingB: I'm a bit worried!
+OngoingA: Hmm?
+OngoingB: I haven't gotten ready for the demo!
+OngoingB: What if a player comes by to hear our background conversations?
+OngoingA: Relax. We've got plenty of time.
+
+<<set $ongoing_counter += 1>>
+===
+title: Demo_Ongoing
+when: $ongoing_counter == 2
+---
+
+OngoingA: Listen. If a player comes by, you just gotta act natural.
+OngoingB: Like this?
+OngoingA: Yes. Exactly.
+OngoingB: Ok. Ok. I got this.
+OngoingA: We got this.
+
+<<set $ongoing_counter += 1>>
+===
+title: Demo_Ongoing
+when: always
+---
+<<once>>
+    OngoingB: Ooh, ooh! Here's one now! *ahem*
+<<endonce>>
+
+OngoingB: Why hello there. I am talking to you the background.
+OngoingA: Yes. This is us, having a background conversation.
+OngoingB: What would you like to talk about, in the background?
+OngoingA: Anything at all.
+
+<<once>>
+    <<wait 1>>
+    OngoingB: Nailed it!
+    OngoingA: Very well done.
+<<endonce>>
+===
+
+title: Explanation_EndOfDemo
+---
+Capsley: And here we are - the end of the demos!
+=> Capsley: And, I guess, the start of the demos, since you haven't spoken to me yet. <<once if $explanations_heard == 0>>
+=> Capsley: I mean, you skipped most of my explanations, but that's okay! <<once if $explanations_heard > 0 && $explanations_heard <= 2>>
+Capsley: The area after here is an example of how background conversations can be used in something closer to actual gameplay.
+Capsley: Walk around and interact with the characters, and see if you can notice the techniques from the previous demos!
+
+<<once>>
+    <<set $explanations_heard += 1>>
+<<endonce>>
+
+<<detour Demo_PostExplanation>>
+===
+
+title: Demo_Variables
+---
+<<declare $explanations_heard = 0 as number>>
+===
+title: Demo_PostExplanation
+when: $explanations_heard == 2
+when: once
+---
+Player: Weren't you just in the other room?
+Capsley: No.
+===
+title: Demo_PreExplanation
+when: $explanations_heard == 0
+when: once
+---
+Capsley: Welcome to the background conversations demo! #shadow:bg_convs_welcome
+Capsley: I suggest you visit the first room before the others, so that you learn what's going on.
+===
+title: Demo_PostExplanation
+when: $explanations_heard == 4
+when: once
+---
+Player: So what do you do?
+Capsley: I explain Yarn.
+Capsley: I feel like this was pretty self-evident?
+===
