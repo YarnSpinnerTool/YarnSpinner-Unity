@@ -502,6 +502,12 @@ namespace Yarn.Unity.Samples
             {
                 var interactable = interactables[i];
 
+                if (!interactable.isActiveAndEnabled)
+                {
+                    // We can't interact if the component or its gameobject isn't enabled
+                    continue;
+                }
+
                 if (interactable.gameObject == gameObject)
                 {
                     // We can't interact with ourselves
