@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.Callbacks;
 using UnityEngine;
 using Yarn.Unity;
 
@@ -705,6 +706,48 @@ namespace Yarn.Unity.Editor
 
             // Finally, import the assets we've touched.
             AssetDatabase.Refresh();
+        }
+
+        [OnOpenAsset(OnOpenAssetAttributeMode.Execute)]
+        public static bool OnOpenAsset(int instanceID)
+        {
+            var path = AssetDatabase.GetAssetPath(instanceID);
+            var project = AssetDatabase.LoadAssetAtPath<YarnProject>(path);
+
+            if (project == null)
+            {
+                return false;
+            }
+
+            var importer = AssetImporter.GetAtPath(path) as Yarn.Unity.Editor.YarnProjectImporter;
+            if (importer == null)
+            {
+                return false;
+            }
+
+            var yp = Yarn.Compiler.Project.LoadFromFile(path);
+            var files = yp.SourceFiles;
+
+            if (files.Any())
+            {
+                UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(System.IO.Path.GetDirectoryName(files.First()), 0);
+            }
+
+            return true;
+        }
+
+        [OnOpenAsset(OnOpenAssetAttributeMode.Validate)]
+        public static bool OnValidateAsset(int instanceID)
+        {
+            var path = AssetDatabase.GetAssetPath(instanceID);
+            var project = AssetDatabase.LoadAssetAtPath<YarnProject>(path);
+
+            if (project == null)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }
