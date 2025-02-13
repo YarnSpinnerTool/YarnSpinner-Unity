@@ -1,0 +1,44 @@
+﻿title: FallbackExample
+---
+Alice: This is the fallback timeout sample
+
+-> Option 1?
+    Alice: option 1 was selected
+-> Option 2?
+    Alice: option 2 was selected
+-> Option 3? #fallback
+    Alice: option 3 was selected
+===
+
+title: DefaultExample
+---
+Alice: This is the default timeout sample
+
+-> Option 1? #default
+    Alice: option 1 was selected
+-> Option 2?
+    Alice: option 2 was selected
+===
+
+title: LastHighlightExample
+---
+Alice: This is the highlight timeout sample
+
+<<auto_opt>>
+-> Option 1?
+    Alice: option 1 was selected
+-> Option 2?
+    Alice: option 2 was selected
+===
+
+title: Alice
+---
+Alice: what do you want to see?
+
+-> Fallback?
+    <<jump FallbackExample>>
+-> Default?
+    <<jump DefaultExample>>
+-> Last highlight?
+    <<jump LastHighlightExample>>
+===
