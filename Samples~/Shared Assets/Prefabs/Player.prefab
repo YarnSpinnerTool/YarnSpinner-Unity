@@ -56,14 +56,34 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 3a625d7b2c5b043a7a3ea75e20b3d143, type: 2}
+    - target: {fileID: 1677158904836476663, guid: 8ee6a05cc2c944cb2a5c63c42fe1f9f0, type: 3}
+      propertyPath: baseColor.b
+      value: 0.4117647
+      objectReference: {fileID: 0}
+    - target: {fileID: 1677158904836476663, guid: 8ee6a05cc2c944cb2a5c63c42fe1f9f0, type: 3}
+      propertyPath: baseColor.g
+      value: 0.5176471
+      objectReference: {fileID: 0}
+    - target: {fileID: 1677158904836476663, guid: 8ee6a05cc2c944cb2a5c63c42fe1f9f0, type: 3}
+      propertyPath: baseColor.r
+      value: 0.105882354
+      objectReference: {fileID: 0}
+    - target: {fileID: 1677158904836476663, guid: 8ee6a05cc2c944cb2a5c63c42fe1f9f0, type: 3}
+      propertyPath: fadeColor.b
+      value: 0.5372549
+      objectReference: {fileID: 0}
+    - target: {fileID: 1677158904836476663, guid: 8ee6a05cc2c944cb2a5c63c42fe1f9f0, type: 3}
+      propertyPath: fadeColor.g
+      value: 0.78431374
+      objectReference: {fileID: 0}
+    - target: {fileID: 1677158904836476663, guid: 8ee6a05cc2c944cb2a5c63c42fe1f9f0, type: 3}
+      propertyPath: fadeColor.r
+      value: 0.36862746
+      objectReference: {fileID: 0}
     - target: {fileID: 4086181210850776417, guid: 8ee6a05cc2c944cb2a5c63c42fe1f9f0, type: 3}
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 5151350692569875361, guid: 8ee6a05cc2c944cb2a5c63c42fe1f9f0, type: 3}
-      propertyPath: 'm_Materials.Array.data[0]'
-      value: 
-      objectReference: {fileID: 2100000, guid: 3a625d7b2c5b043a7a3ea75e20b3d143, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

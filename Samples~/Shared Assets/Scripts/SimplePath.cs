@@ -18,5 +18,28 @@ namespace Yarn.Unity.Samples
         }
 
         public List<Position> pathElements = new();
+
+        public int Count => pathElements.Count;
+
+        public Position GetPositionData(int i)
+        {
+
+            if (i < 0 || i > pathElements.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(i));
+            }
+            return pathElements[i];
+        }
+
+        public Vector3 GetWorldPosition(int i)
+        {
+            return transform.TransformPoint(GetPositionData(i).position);
+        }
+
+        public float GetDelay(int i)
+        {
+            return GetPositionData(i).delay;
+        }
+
     }
 }

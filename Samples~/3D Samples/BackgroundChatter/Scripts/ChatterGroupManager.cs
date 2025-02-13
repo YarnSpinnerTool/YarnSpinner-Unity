@@ -66,9 +66,10 @@ namespace Yarn.Unity.Samples
                         await YarnTask.Delay(TimeSpan.FromSeconds(delay), destroyedToken);
                     }
 
-                    if (primaryDialogueRunner != null && primaryDialogueRunner.IsDialogueRunning)
+                    if (primaryDialogueRunner != null && primaryDialogueRunner.IsDialogueRunning && chatterGroup.interruptedByPrimaryConversation)
                     {
-                        // Primary dialogue is running - don't start a
+                        // Primary dialogue is running, and this group should
+                        // not run during a primary conversation - don't start a
                         // background conversation.
                         continue;
                     }
@@ -139,7 +140,10 @@ namespace Yarn.Unity.Samples
             // The player has started a conversation; stop all background chatters
             foreach (var chatterGroup in chatterGroups)
             {
-                chatterGroup.Interrupt();
+                if (chatterGroup.interruptedByPrimaryConversation)
+                {
+                    chatterGroup.Interrupt();
+                }
             }
         }
     }

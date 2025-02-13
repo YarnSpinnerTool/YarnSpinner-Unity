@@ -13,6 +13,7 @@ namespace Yarn.Unity.Samples
         public enum CharacterMode
         {
             PlayerControlledMovement,
+            ExternallyControlledMovement,
             PathMovement,
             Interact,
         }
@@ -20,6 +21,7 @@ namespace Yarn.Unity.Samples
         public CharacterMode Mode { get; private set; }
 
         public bool CanInteract => Mode == CharacterMode.PlayerControlledMovement;
+        public bool HasPath => followPath != null;
 
         [SerializeField] bool isPlayerControlled;
 
@@ -38,6 +40,18 @@ namespace Yarn.Unity.Samples
         [SerializeField] float deceleration = 0.1f;
         [Group("Movement")]
         public Transform? lookTarget;
+        [Group("Movement")]
+        [ShowIf(nameof(isPlayerControlled))]
+        [SerializeField] float outOfBoundsYPosition = -5;
+
+        [HideIf(nameof(isPlayerControlled))]
+        [SerializeField] SimplePath? followPath;
+        [HideIf(nameof(isPlayerControlled))]
+        [SerializeField] float pathDestinationTolerance = 0.1f;
+
+        private int currentDestinationPathIndex = -1;
+        private float remainingPathWaitTime = 0f;
+
 
         private Quaternion targetRotation;
 
@@ -46,9 +60,10 @@ namespace Yarn.Unity.Samples
         private float lastFrameSpeed = 0f;
         private float lastFrameSpeedChange = 0f;
         private Vector3 lastFrameWorldPosition;
-        private Vector2 lastInput = Vector2.zero;
 
         private CharacterController? characterController;
+
+        private Vector3 lastGroundedPosition;
 
 
         #endregion
@@ -58,10 +73,6 @@ namespace Yarn.Unity.Samples
         [Group("Animation")]
         [SerializeField] private Animator? animator;
         [Group("Animation")]
-        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
-        [SerializeField] private string speedParameter = "Speed";
-
-        [Group("Animation")]
         [SerializeField] SerializableDictionary<string, string> facialExpressions = new();
         [Group("Animation")]
         [SerializeField] string defaultFace = "";
@@ -69,16 +80,7 @@ namespace Yarn.Unity.Samples
         [SerializeField] string facialExpressionsLayer = "Face";
         private int facialExpressionsLayerID = 0;
 
-        [Group("Animation")]
-        [Header("Body Tilt")]
-        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
-        [SerializeField] string sideTiltParameter = "Side Tilt";
-        [Group("Animation")]
-        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
-        [SerializeField] string forwardTiltParameter = "Forward Tilt";
-        [Group("Animation")]
-        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
-        [SerializeField] string turnParameter = "Turn";
+
 
 
         [Group("Animation")]
@@ -86,9 +88,25 @@ namespace Yarn.Unity.Samples
         [SerializeField] float meanBlinkTime = 2f;
         [Group("Animation")]
         [SerializeField] float blinkTimeVariance = 0.5f;
-        [Group("Animation")]
+
+        [Group("Animation Parameters", true)]
+        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
+        [SerializeField] private string speedParameter = "Speed";
+        [Group("Animation Parameters", true)]
+        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
+        [SerializeField] string sideTiltParameter = "Side Tilt";
+        [Group("Animation Parameters", true)]
+        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
+        [SerializeField] string forwardTiltParameter = "Forward Tilt";
+        [Group("Animation Parameters", true)]
+        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
+        [SerializeField] string turnParameter = "Turn";
+        [Group("Animation Parameters", true)]
         [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Trigger)]
         [SerializeField] string blinkTriggerName = "Blink";
+        [Group("Animation Parameters", true)]
+        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
+        [SerializeField] string cycleOffsetParameter = "Cycle Offset";
 
         private float timeUntilNextBlink = 0f;
         private Dictionary<int, CancellationTokenSource> activeAnimationLerps = new();
@@ -136,6 +154,13 @@ namespace Yarn.Unity.Samples
         public YarnTask TurnCharacter(float destination, float time = 0f, bool wait = false)
         {
             var task = TweenAnimationParameter(turnParameter, destination, time, EasingFunctions.InOutQuad, destroyCancellationToken);
+            return wait ? task : YarnTask.CompletedTask;
+        }
+
+        [YarnCommand("tween_animation_parameter")]
+        public YarnTask TweenParameter(string parameter, float destination, float time, bool wait = false)
+        {
+            var task = TweenAnimationParameter(parameter, destination, time, EasingFunctions.InOutQuad, destroyCancellationToken);
             return wait ? task : YarnTask.CompletedTask;
         }
 
@@ -241,6 +266,10 @@ namespace Yarn.Unity.Samples
             if (animator != null)
             {
                 facialExpressionsLayerID = animator.GetLayerIndex(facialExpressionsLayer);
+
+                // Randomly offset the cycle for the base pose so that
+                // characters don't sync up
+                animator.SetFloat(cycleOffsetParameter, Random.value);
             }
 
             timeUntilNextBlink = GetNextBlinkTime();
@@ -298,25 +327,62 @@ namespace Yarn.Unity.Samples
         }
         #endregion
 
-        #region Movement Logic
+        #region Movement Commands
+        [YarnCommand("pause_path_movement")]
+        public void StopFollowingPath()
+        {
+            if (!HasPath)
+            {
+                Debug.LogError($"{name} is not currently following a path");
+                return;
+            }
+            this.Mode = CharacterMode.ExternallyControlledMovement;
+        }
+        [YarnCommand("resume_path_movement")]
+        public void ResumeFollowingPath()
+        {
+            if (!HasPath)
+            {
+                Debug.LogError($"{name} is not currently following a path");
+                return;
+            }
+            this.Mode = CharacterMode.PathMovement;
+        }
 
+        #endregion
+
+        #region Movement Logic
 
         private void SetupMovement()
         {
+            // Remember our initial facing rotation
             targetRotation = transform.rotation;
+
+            if (!isPlayerControlled && followPath != null && followPath.Count >= 2)
+            {
+                // If we have a follow path, start there, and look at the 
+                var startPoint = followPath.GetWorldPosition(0);
+                var nextPoint = followPath.GetWorldPosition(1);
+                transform.position = startPoint;
+                targetRotation = Quaternion.LookRotation(nextPoint - startPoint);
+                transform.rotation = GetCurrentLookDirection();
+
+                currentDestinationPathIndex = 0;
+                Mode = CharacterMode.PathMovement;
+            }
+
+            // Start facing our look target, if any
+            if (lookTarget != null)
+            {
+                transform.rotation = GetCurrentLookDirection();
+            }
+
             lastFrameWorldPosition = transform.position;
+            lastGroundedPosition = transform.position;
         }
 
         protected void UpdateMovement()
         {
-            var currentLookDirection = targetRotation;
-
-            if (lookTarget != null)
-            {
-                var lookDirectionOnSameY = lookTarget.position - transform.position;
-                lookDirectionOnSameY.y = 0;
-                currentLookDirection = Quaternion.LookRotation(lookDirectionOnSameY);
-            }
 
             if (isPlayerControlled && Mode == CharacterMode.PlayerControlledMovement)
             {
@@ -325,18 +391,79 @@ namespace Yarn.Unity.Samples
                     Input.GetAxisRaw("Vertical")
                 );
 
-                float rawSpeed;
-
-                if (input.magnitude < 0.001)
+                ApplyMovement(input);
+            }
+            else if (Mode == CharacterMode.ExternallyControlledMovement)
+            {
+                // Our movement is externally controlled; update our animator
+                // based how quickly we're moving
+                var currentSpeed = (lastFrameWorldPosition - transform.position).magnitude / Time.deltaTime;
+                CurrentSpeedFactor = Mathf.Clamp01(currentSpeed / speed);
+            }
+            else if (Mode == CharacterMode.PathMovement && followPath != null)
+            {
+                if (currentDestinationPathIndex == -1 || followPath.Count < 1)
                 {
-                    input = lastInput;
-                    rawSpeed = 0f;
+                    // No current path location.
+                    CurrentSpeedFactor = 0;
+                }
+                else if (remainingPathWaitTime > 0)
+                {
+                    CurrentSpeedFactor = 0;
+                    remainingPathWaitTime -= Time.deltaTime;
                 }
                 else
                 {
-                    rawSpeed = Mathf.Clamp01(input.magnitude) * speed;
-                    lastInput = input;
+                    // Move towards current path node
+                    // var nextPath = followPath.GetPositionData(currentDestinationPathIndex);
+
+                    var offset = followPath.GetWorldPosition(currentDestinationPathIndex) - transform.position;
+                    var input = new Vector2(offset.x, offset.z).normalized;
+                    ApplyMovement(input);
+
+                    if (offset.magnitude <= pathDestinationTolerance)
+                    {
+                        // We've reached the destination
+                        currentDestinationPathIndex = (currentDestinationPathIndex + 1) % followPath.Count;
+                        remainingPathWaitTime = followPath.GetDelay(currentDestinationPathIndex);
+                    }
                 }
+            }
+            else
+            {
+                CurrentSpeedFactor = 0;
+            }
+
+            // If the player falls out of bounds, warp them to the last point
+            // they were on the ground
+            if (isPlayerControlled && Mode == CharacterMode.PlayerControlledMovement)
+            {
+                if (transform.position.y < outOfBoundsYPosition)
+                {
+                    if (characterController != null)
+                    {
+                        transform.position = lastGroundedPosition;
+                    }
+                }
+
+                if (characterController != null && characterController.isGrounded)
+                {
+                    lastGroundedPosition = transform.position;
+                }
+            }
+
+            // Rotate towards our current look direction
+            transform.rotation = Quaternion.RotateTowards(
+                Quaternion.LookRotation(transform.forward),
+                GetCurrentLookDirection(),
+                turnSpeed * Time.deltaTime
+            );
+
+            lastFrameWorldPosition = transform.position;
+
+            void ApplyMovement(Vector2 input)
+            {
+                float rawSpeed = input.magnitude < 0.001 ? 0f : Mathf.Clamp01(input.magnitude) * speed;
 
                 var dampingTime = (rawSpeed > lastFrameSpeed) ? acceleration : deceleration;
 
@@ -366,24 +493,18 @@ namespace Yarn.Unity.Samples
 
                 CurrentSpeedFactor = Mathf.Clamp01(dampedSpeed / speed);
             }
-            else if (Mode == CharacterMode.PathMovement)
-            {
-                var currentSpeed = (lastFrameWorldPosition - transform.position).magnitude / Time.deltaTime;
-                CurrentSpeedFactor = Mathf.Clamp01(currentSpeed / speed);
-            }
-            else
-            {
-                CurrentSpeedFactor = 0;
-            }
+        }
 
-            // Rotate towards our current look direction
-            transform.rotation = Quaternion.RotateTowards(
-                Quaternion.LookRotation(transform.forward),
-                currentLookDirection,
-                turnSpeed * Time.deltaTime
-            );
-
-            lastFrameWorldPosition = transform.position;
+        private Quaternion GetCurrentLookDirection()
+        {
+            Quaternion direction = this.targetRotation;
+            if (lookTarget != null)
+            {
+                var lookDirectionOnSameY = lookTarget.position - transform.position;
+                lookDirectionOnSameY.y = 0;
+                direction = Quaternion.LookRotation(lookDirectionOnSameY);
+            }
+            return direction;
         }
 
         public async YarnTask MoveTo(Vector3 position, CancellationToken cancellationToken)
@@ -403,7 +524,7 @@ namespace Yarn.Unity.Samples
 
             var previousMode = Mode;
 
-            Mode = CharacterMode.PathMovement;
+            Mode = CharacterMode.ExternallyControlledMovement;
 
             do
             {
@@ -452,6 +573,12 @@ namespace Yarn.Unity.Samples
             for (int i = 0; i < interactables.Count; i++)
             {
                 var interactable = interactables[i];
+
+                if (!interactable.isActiveAndEnabled)
+                {
+                    // We can't interact if the component or its gameobject isn't enabled
+                    continue;
+                }
 
                 if (interactable.gameObject == gameObject)
                 {

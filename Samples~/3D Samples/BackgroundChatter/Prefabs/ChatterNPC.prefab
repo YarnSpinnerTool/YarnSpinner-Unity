@@ -29,7 +29,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1510181811365383404}
+  m_Father: {fileID: 4147901041558932131}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &3073522217913416566
 PrefabInstance:
@@ -42,6 +42,14 @@ PrefabInstance:
     - target: {fileID: 1604627835431571621, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
       propertyPath: m_Name
       value: Townsperson1 Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 2588666571959726885, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
+      propertyPath: m_Name
+      value: ChatterNPC
+      objectReference: {fileID: 0}
+    - target: {fileID: 3255585012628313904, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3255585012628313904, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
       propertyPath: dialogue.project
@@ -94,35 +102,34 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 4490764441529317274, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 1384599776165114325, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1031324393084317696}
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1604627835431571621, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 2588666571959726885, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5565313489849796680}
+      addedObject: {fileID: 4145806269569033743}
   m_SourcePrefab: {fileID: 100100000, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
---- !u!4 &1510181811365383404 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4490764441529317274, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
-  m_PrefabInstance: {fileID: 3073522217913416566}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &4387509547450084307 stripped
+--- !u!1 &669790204284471379 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 1604627835431571621, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
+  m_CorrespondingSourceObject: {fileID: 2588666571959726885, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
   m_PrefabInstance: {fileID: 3073522217913416566}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &5565313489849796680
+--- !u!114 &4145806269569033743
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4387509547450084307}
+  m_GameObject: {fileID: 669790204284471379}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 84b5ae92bbeb44bddb16f6c2f64296f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NPCName: Townsperson1
   backgroundChatterPoint: {fileID: 1031324393084317696}
+--- !u!4 &4147901041558932131 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1384599776165114325, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
+  m_PrefabInstance: {fileID: 3073522217913416566}
+  m_PrefabAsset: {fileID: 0}

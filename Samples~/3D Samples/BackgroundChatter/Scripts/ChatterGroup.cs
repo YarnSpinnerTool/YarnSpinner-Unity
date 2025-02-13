@@ -63,6 +63,8 @@ namespace Yarn.Unity.Samples
         [Tooltip("The node to run when dialogue is running and the user walks away. Only used when " + nameof(outOfRangeBehaviour) + " is " + nameof(OutOfRangeBehaviour.StopAndRunNode) + ".")]
         [SerializeField] DialogueReference? outOfRangeDialogue;
 
+        public bool interruptedByPrimaryConversation = true;
+
         public void Awake()
         {
             if (dialogueRunner == null)
