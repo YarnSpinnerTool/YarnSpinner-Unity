@@ -332,7 +332,8 @@ namespace Yarn.Unity.Editor
                 return;
             }
 
-            importData.sourceFilePaths.AddRange(project.SourceFilePatterns);
+            importData.sourceFilePatterns = new();
+            importData.sourceFilePatterns.AddRange(project.SourceFilePatterns);
 
             importData.baseLanguageName = project.BaseLanguage;
 
