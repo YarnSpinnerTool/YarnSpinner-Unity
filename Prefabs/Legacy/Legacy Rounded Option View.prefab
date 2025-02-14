@@ -247,7 +247,7 @@ GameObject:
   - component: {fileID: 2787584472240442132}
   - component: {fileID: 8663024722304666580}
   m_Layer: 5
-  m_Name: Rounded Option View
+  m_Name: Legacy Rounded Option View
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -11,10 +11,9 @@ using TMPro;
 using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
-using YarnCompletionSource = System.Threading.Tasks.TaskCompletionSource<Yarn.Unity.DialogueOption>;
-
-namespace Yarn.Unity
+namespace Yarn.Unity.Legacy
 {
+    [Obsolete]
     public class OptionView : UnityEngine.UI.Selectable, ISubmitHandler, IPointerClickHandler, IPointerEnterHandler
     {
         [SerializeField] TextMeshProUGUI text;

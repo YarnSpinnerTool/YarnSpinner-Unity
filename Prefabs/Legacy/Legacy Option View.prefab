@@ -89,7 +89,7 @@ GameObject:
   - component: {fileID: 5665317717604146022}
   - component: {fileID: 7306900526976280635}
   m_Layer: 5
-  m_Name: Option View
+  m_Name: Legacy Option View
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

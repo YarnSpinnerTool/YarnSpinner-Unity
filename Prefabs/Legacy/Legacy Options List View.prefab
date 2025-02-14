@@ -111,7 +111,7 @@ GameObject:
   - component: {fileID: 6323935187928403878}
   - component: {fileID: 6323935187928403896}
   m_Layer: 5
-  m_Name: Options List View
+  m_Name: Legacy Options List View
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

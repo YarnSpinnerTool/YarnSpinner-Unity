@@ -8,7 +8,7 @@ using UnityEngine;
 
 #nullable enable
 
-namespace Yarn.Unity
+namespace Yarn.Unity.Legacy
 {
     /// <summary>
     /// Implements the Yarn Spinner 2 callback-based API for dialogue views

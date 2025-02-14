@@ -14,7 +14,7 @@ using TMPro;
 using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
-namespace Yarn.Unity
+namespace Yarn.Unity.Legacy
 {
     /// <summary>
     /// A Dialogue View that presents lines of dialogue, using Unity UI

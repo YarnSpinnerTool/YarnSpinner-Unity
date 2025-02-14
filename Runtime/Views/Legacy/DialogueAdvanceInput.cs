@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 #endif
 
-namespace Yarn.Unity
+namespace Yarn.Unity.Legacy
 {
     /// <summary>
     /// A component that listens for user input, and uses it to notify a

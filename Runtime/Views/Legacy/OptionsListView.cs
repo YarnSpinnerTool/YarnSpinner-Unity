@@ -12,7 +12,7 @@ using TMPro;
 using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
-namespace Yarn.Unity
+namespace Yarn.Unity.Legacy
 {
     [Obsolete]
     public class OptionsListView : DialogueViewBase

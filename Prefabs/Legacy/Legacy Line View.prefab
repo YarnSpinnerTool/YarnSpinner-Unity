@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4935123090281167012}
   - component: {fileID: 4935123090281167015}
   m_Layer: 5
-  m_Name: Line View
+  m_Name: Legacy Line View
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

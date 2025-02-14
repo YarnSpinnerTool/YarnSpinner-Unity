@@ -4,6 +4,7 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 #if USE_TMP
 using UnityEditor;
+using Yarn.Unity.Legacy;
 
 namespace Yarn.Unity.Editor
 {
