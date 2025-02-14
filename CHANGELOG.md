@@ -97,6 +97,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `sourceFilePaths` on `ProjectImportData` renamed to be `sourceFilePatterns` because that is what it actually is.
 - Fixed a crash in project import when externally declared invalid functions had no associated file with the error
 - When an error that `YarnProjectImportEditor` needs to show has no file associated with it the editor no longer draws an empty TextAsset field.
+- Heavily reworked the structure of the project folders.
 
 ### Removed
 
