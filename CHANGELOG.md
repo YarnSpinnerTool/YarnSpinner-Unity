@@ -102,6 +102,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - `YarnProject.GetHeaders` is now deprecated, in favour of `DialogueRunner.Dialogue.GetHeaders`.
 - `TypewriterHandler`, this behaviour is now intrinsic to the `AsyncLineView`.
+- Removed the `tags` header from the template new yarn file as it is no longer the best way to add metadata headers into a node.
 
 ## [3.0.0-beta1] 2024-11-30
 
