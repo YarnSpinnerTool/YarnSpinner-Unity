@@ -342,7 +342,13 @@ namespace Yarn.Unity.Editor
                     });
                     messagesField.style.marginLeft = 30;
 
-                    errorContainer.Add(objectField);
+                    // if an error isn't able to be linked to a yarn file specifically
+                    // such as an error in the library defining an invalid external function
+                    // we don't want to show an empty text asset
+                    if (error.yarnFile != null)
+                    {
+                        errorContainer.Add(objectField);
+                    }
                     errorContainer.Add(messagesField);
 
                     errorsContainer.Add(errorContainer);
@@ -362,7 +368,7 @@ namespace Yarn.Unity.Editor
             sourceFilesContainer.Add(sourceFilesHeader);
             sourceFilesContainer.Add(sourceFileEntriesContainer);
 
-            foreach (var path in importData.sourceFilePaths)
+            foreach (var path in importData.sourceFilePatterns)
             {
                 var locElement = CreateSourceFileEntryElement(path);
                 sourceFileEntriesContainer.Add(locElement);

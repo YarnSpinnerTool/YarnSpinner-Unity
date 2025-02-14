@@ -446,27 +446,51 @@ namespace Yarn.Unity.Editor
                             continue;
                         }
 
-                        var relativePath = GetRelativePath(errorGroup.Key);
-
-                        var asset = AssetDatabase.LoadAssetAtPath<Object>(relativePath);
-
-                        foreach (var error in errorGroup)
+                        // the compiler currently returns (unknown) for situations where an error is defined in a file that the compiler can't access
+                        // this is not ideal and something to fix, but for now we will handle it by reporting the issue in a different way
+                        if (errorGroup.Key == "(unknown)")
                         {
-                            var relativeErrorFileName = GetRelativePath(error.FileName);
-                            ctx.LogImportError($"Error compiling <a href=\"{relativeErrorFileName}\">{relativeErrorFileName}</a> line {error.Range.Start.Line + 1}: {error.Message}", asset);
+                            foreach (var error in errorGroup)
+                            {
+                                ctx.LogImportError($"Error compiling the project: {error.Message}");
+                            }
+                            var errorMessages = errorGroup.Select(e => e.ToString());
+                            importData.diagnostics.Add(new ProjectImportData.DiagnosticEntry
+                            {
+                                yarnFile = null,
+                                errorMessages = errorMessages.ToList(),
+                            });
+                            continue;
                         }
 
-                        var fileWithErrors = AssetDatabase.LoadAssetAtPath<TextAsset>(relativePath);
-
-                        // TODO: Associate this compile error to the
-                        // corresponding script
-
-                        var errorMessages = errorGroup.Select(e => e.ToString());
-                        importData.diagnostics.Add(new ProjectImportData.DiagnosticEntry
+                        try
                         {
-                            yarnFile = fileWithErrors,
-                            errorMessages = errorMessages.ToList(),
-                        });
+                            var relativePath = GetRelativePath(errorGroup.Key);
+
+                            var asset = AssetDatabase.LoadAssetAtPath<Object>(relativePath);
+
+                            foreach (var error in errorGroup)
+                            {
+                                var relativeErrorFileName = GetRelativePath(error.FileName);
+                                ctx.LogImportError($"Error compiling <a href=\"{relativeErrorFileName}\">{relativeErrorFileName}</a> line {error.Range.Start.Line + 1}: {error.Message}", asset);
+                            }
+
+                            var fileWithErrors = AssetDatabase.LoadAssetAtPath<TextAsset>(relativePath);
+
+                            // TODO: Associate this compile error to the
+                            // corresponding script
+
+                            var errorMessages = errorGroup.Select(e => e.ToString());
+                            importData.diagnostics.Add(new ProjectImportData.DiagnosticEntry
+                            {
+                                yarnFile = fileWithErrors,
+                                errorMessages = errorMessages.ToList(),
+                            });
+                        }
+                        catch (System.Exception ex)
+                        {
+                            ctx.LogImportError($"Import failed with an unhandled exception: {ex.Message}");
+                        }
                     }
                     importData.ImportStatus = ProjectImportData.ImportStatusCode.CompilationFailed;
                     return;
