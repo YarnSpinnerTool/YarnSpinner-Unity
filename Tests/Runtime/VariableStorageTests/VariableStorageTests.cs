@@ -11,6 +11,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 using Yarn.Unity;
+using Yarn.Unity.Legacy;
 
 #nullable enable
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
