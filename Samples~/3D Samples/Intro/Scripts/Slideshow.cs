@@ -6,7 +6,7 @@ using Yarn.Unity;
 
 #nullable enable
 
-public class Slideshow : Yarn.Unity.AsyncDialogueViewBase
+public class Slideshow : DialoguePresenterBase
 {
     [SerializeField] TMPro.TMP_Text? headerText;
     [SerializeField] TMPro.TMP_Text? bodyText;
@@ -16,7 +16,7 @@ public class Slideshow : Yarn.Unity.AsyncDialogueViewBase
     [SerializeField] float delayBeforeShowingNewSlide = 0.5f;
 
 
-    [SerializeField] List<AsyncDialogueViewBase> overrideDialogueViews = new();
+    [SerializeField] List<DialoguePresenterBase> overrideDialogueViews = new();
 
     [SerializeField] bool startOff = true;
 

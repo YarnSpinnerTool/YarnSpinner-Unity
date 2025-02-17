@@ -9,7 +9,7 @@ using System;
 
 // public class ChatBubbleDictionary : SerializableDictionary<string, ChatDialogueViewBubble?> {}
 
-public class ChatDialogueView : AsyncDialogueViewBase
+public class ChatDialogueView : DialoguePresenterBase
 {
     // [System.Serializable]
     // public struct BubbleCharacter

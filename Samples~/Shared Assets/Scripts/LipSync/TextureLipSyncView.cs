@@ -8,12 +8,12 @@ using Yarn.Unity;
 
 namespace Yarn.Unity.Samples
 {
-    public class TextureLipSyncView : AsyncDialogueViewBase
+    public class TextureLipSyncView : DialoguePresenterBase
     {
         [SerializeField] string? characterName;
 
         [SerializeField] new Renderer? renderer;
-        [SerializeField] VoiceOverView? voiceOverView;
+        [SerializeField] VoiceOverPresenter? voiceOverView;
         [SerializeField] TMPro.TMP_Text? debugView;
 
         private MaterialPropertyBlock? propertyBlock;

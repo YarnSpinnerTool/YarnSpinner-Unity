@@ -8,18 +8,18 @@ using Yarn.Unity.Attributes;
 
 namespace Yarn.Unity.Samples
 {
-    public class TimeoutOptionsView : AsyncDialogueViewBase
+    public class TimeoutOptionsView : DialoguePresenterBase
     {
         [SerializeField] CanvasGroup? canvasGroup;
 
         [MustNotBeNull]
-        [SerializeField] AsyncOptionItem? optionViewPrefab;
+        [SerializeField] OptionItem? optionViewPrefab;
 
         [MustNotBeNull]
         [SerializeField] TimeoutBar timedBar;
 
         // A cached pool of OptionView objects so that we can reuse them
-        List<AsyncOptionItem> optionViews = new List<AsyncOptionItem>();
+        List<OptionItem> optionViews = new List<OptionItem>();
 
         [Space]
         public float autoSelectDuration = 10f;
@@ -133,7 +133,7 @@ namespace Yarn.Unity.Samples
         // find the one that is highlighted
         // and use that
         // if none are highlighted then it returns the first one
-        internal async YarnTask BeginLastSelectedOptionTimeout(YarnTaskCompletionSource<DialogueOption?> selectedOptionCompletionSource, List<AsyncOptionItem> options, CancellationToken cancellationToken)
+        internal async YarnTask BeginLastSelectedOptionTimeout(YarnTaskCompletionSource<DialogueOption?> selectedOptionCompletionSource, List<OptionItem> options, CancellationToken cancellationToken)
         {
             timedBar.cancellationToken = cancellationToken;
             timedBar.duration = autoSelectDuration;
@@ -445,7 +445,7 @@ namespace Yarn.Unity.Samples
             return completedTask;
         }
 
-        private AsyncOptionItem CreateNewOptionView()
+        private OptionItem CreateNewOptionView()
         {
             var optionView = Instantiate(optionViewPrefab);
 

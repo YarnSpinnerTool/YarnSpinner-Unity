@@ -14,11 +14,11 @@ using Yarn.Unity.Attributes;
 namespace Yarn.Unity
 {
     /// <summary>
-    /// A subclass of <see cref="AsyncDialogueViewBase"/> that plays voice-over
+    /// A subclass of <see cref="DialoguePresenterBase"/> that plays voice-over
     /// <see cref="AudioClip"/>s for lines of dialogue.
     /// </summary>
     /// <seealso cref="DialogueViewBase"/>
-    public class VoiceOverView : AsyncDialogueViewBase
+    public class VoiceOverPresenter : DialoguePresenterBase
     {
 
         /// <summary>
@@ -105,9 +105,9 @@ namespace Yarn.Unity
         /// your code. Instead, the <see cref="DialogueRunner"/> class will call
         /// it at the appropriate time.</para>
         /// </remarks>
-        /// <inheritdoc cref="AsyncDialogueViewBase.RunLineAsync(LocalizedLine,
+        /// <inheritdoc cref="DialoguePresenterBase.RunLineAsync(LocalizedLine,
         /// LineCancellationToken)" path="/param"/>
-        /// <seealso cref="AsyncDialogueViewBase.RunLineAsync(LocalizedLine,
+        /// <seealso cref="DialoguePresenterBase.RunLineAsync(LocalizedLine,
         /// LineCancellationToken)"/>
         public override async YarnTask RunLineAsync(LocalizedLine dialogueLine, LineCancellationToken lineCancellationToken)
         {

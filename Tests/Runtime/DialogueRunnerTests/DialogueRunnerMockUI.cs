@@ -14,7 +14,7 @@ using System.Threading;
 
 namespace Yarn.Unity.Tests
 {
-    public class DialogueRunnerMockUI : Yarn.Unity.AsyncDialogueViewBase
+    public class DialogueRunnerMockUI : Yarn.Unity.DialoguePresenterBase
     {
         private static DialogueRunnerMockUI instance;
         private bool readyToAdvance;

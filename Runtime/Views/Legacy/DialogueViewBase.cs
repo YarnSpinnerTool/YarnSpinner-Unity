@@ -17,11 +17,11 @@ namespace Yarn.Unity.Legacy
     /// <remarks>
     /// You should not use this class in new code. It exists to provide a
     /// compatibility layer for existing Yarn Spinner dialogue views. New
-    /// dialogue views should subclass <see cref="AsyncDialogueViewBase"/>
+    /// dialogue views should subclass <see cref="DialoguePresenterBase"/>
     /// directly.
     /// </remarks>
-    [Obsolete("Use " + nameof(AsyncDialogueViewBase))]
-    public abstract class DialogueViewBase : AsyncDialogueViewBase
+    [Obsolete("Use " + nameof(DialoguePresenterBase))]
+    public abstract class DialogueViewBase : DialoguePresenterBase
     {
         /// <summary>
         /// Represents the method that should be called when this view wants the

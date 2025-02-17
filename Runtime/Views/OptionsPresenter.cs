@@ -16,19 +16,19 @@ namespace Yarn.Unity
 {
     /// <summary>
     /// Receives options from a <see cref="DialogueRunner"/>, and displays and
-    /// manages a collection of <see cref="AsyncOptionItem"/> views for the user
+    /// manages a collection of <see cref="OptionItem"/> views for the user
     /// to choose from.
     /// </summary>
     [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-view/options-list-view")]
-    public class AsyncOptionsView : AsyncDialogueViewBase
+    public class OptionsPresenter : DialoguePresenterBase
     {
         [SerializeField] CanvasGroup? canvasGroup;
 
         [MustNotBeNull]
-        [SerializeField] AsyncOptionItem? optionViewPrefab;
+        [SerializeField] OptionItem? optionViewPrefab;
 
         // A cached pool of OptionView objects so that we can reuse them
-        List<AsyncOptionItem> optionViews = new List<AsyncOptionItem>();
+        List<OptionItem> optionViews = new List<OptionItem>();
 
         [Space]
         [SerializeField] bool showsLastLine;
@@ -136,7 +136,7 @@ namespace Yarn.Unity
         /// <remarks>This view does not display lines directly, but instead
         /// stores lines so that when options are run, the last line that ran
         /// before the options appeared can be shown.</remarks>
-        /// <inheritdoc cref="AsyncDialogueViewBase.RunLineAsync"
+        /// <inheritdoc cref="DialoguePresenterBase.RunLineAsync"
         /// path="/param"/>
         /// <returns>A completed task.</returns>
         public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
@@ -152,9 +152,9 @@ namespace Yarn.Unity
         /// Called by a <see cref="DialogueRunner"/> to display a collection of
         /// options to the user. 
         /// </summary>
-        /// <inheritdoc cref="AsyncDialogueViewBase.RunOptionsAsync"
+        /// <inheritdoc cref="DialoguePresenterBase.RunOptionsAsync"
         /// path="/param"/>
-        /// <inheritdoc cref="AsyncDialogueViewBase.RunOptionsAsync"
+        /// <inheritdoc cref="DialoguePresenterBase.RunOptionsAsync"
         /// path="/returns"/>
         public override async YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
@@ -309,7 +309,7 @@ namespace Yarn.Unity
             return completedTask;
         }
 
-        private AsyncOptionItem CreateNewOptionView()
+        private OptionItem CreateNewOptionView()
         {
             var optionView = Instantiate(optionViewPrefab);
 

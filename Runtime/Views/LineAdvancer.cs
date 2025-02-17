@@ -14,7 +14,7 @@ namespace Yarn.Unity
     /// either by asking a dialogue runner to hurry up its delivery, advance to
     /// the next line, or cancel the entire dialogue session.
     /// </summary>
-    public class LineAdvancer : AsyncDialogueViewBase
+    public class LineAdvancer : DialoguePresenterBase
     {
         [MustNotBeNull]
         [Tooltip("The dialogue runner that will receive requests to advance or cancel content.")]
@@ -292,7 +292,7 @@ namespace Yarn.Unity
         /// <summary>
         /// Called by a dialogue view to signal that a line is running.
         /// </summary>
-        /// <inheritdoc cref="AsyncLineView.RunLineAsync" path="/param"/>
+        /// <inheritdoc cref="LinePresenter.RunLineAsync" path="/param"/>
         /// <returns>A completed task.</returns>
         public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
         {
@@ -315,7 +315,7 @@ namespace Yarn.Unity
         /// <summary>
         /// Called by a dialogue view to signal that options are running.
         /// </summary>
-        /// <inheritdoc cref="AsyncLineView.RunOptionsAsync" path="/param"/>
+        /// <inheritdoc cref="LinePresenter.RunOptionsAsync" path="/param"/>
         /// <returns>A completed task indicating that no option was selected by
         /// this view.</returns>
         public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)

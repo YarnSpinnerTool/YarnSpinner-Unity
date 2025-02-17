@@ -20,7 +20,7 @@ namespace Yarn.Unity
     /// elements.
     /// </summary>
     [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-view/line-view")]
-    public sealed class AsyncLineView : AsyncDialogueViewBase
+    public sealed class LinePresenter : DialoguePresenterBase
     {
         [MustNotBeNullWhen(nameof(continueButton), "A " + nameof(DialogueRunner) + " must be provided when a continue button is set.")]
         [SerializeField] DialogueRunner? dialogueRunner;
@@ -270,14 +270,14 @@ namespace Yarn.Unity
                 dialogueRunner = FindAnyObjectByType<DialogueRunner>();
                 if (dialogueRunner == null)
                 {
-                    Debug.LogWarning($"{nameof(AsyncLineView)} failed to find a dialogue runner! Please ensure that a {nameof(DialogueRunner)} is present, or set the {nameof(dialogueRunner)} property in the Inspector.", this);
+                    Debug.LogWarning($"{nameof(LinePresenter)} failed to find a dialogue runner! Please ensure that a {nameof(DialogueRunner)} is present, or set the {nameof(dialogueRunner)} property in the Inspector.", this);
                 }
             }
         }
 
         /// <summary>Presents a line using the configured text view.</summary>
-        /// <inheritdoc cref="AsyncDialogueViewBase.RunLineAsync(LocalizedLine, LineCancellationToken)" path="/param"/>
-        /// <inheritdoc cref="AsyncDialogueViewBase.RunLineAsync(LocalizedLine, LineCancellationToken)" path="/returns"/>
+        /// <inheritdoc cref="DialoguePresenterBase.RunLineAsync(LocalizedLine, LineCancellationToken)" path="/param"/>
+        /// <inheritdoc cref="DialoguePresenterBase.RunLineAsync(LocalizedLine, LineCancellationToken)" path="/returns"/>
         public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
         {
             if (lineText == null)
@@ -432,9 +432,9 @@ namespace Yarn.Unity
             }
         }
 
-        /// <inheritdoc cref="AsyncDialogueViewBase.RunOptionsAsync(DialogueOption[], CancellationToken)" path="/summary"/> 
-        /// <inheritdoc cref="AsyncDialogueViewBase.RunOptionsAsync(DialogueOption[], CancellationToken)" path="/param"/> 
-        /// <inheritdoc cref="AsyncDialogueViewBase.RunOptionsAsync(DialogueOption[], CancellationToken)" path="/returns"/> 
+        /// <inheritdoc cref="DialoguePresenterBase.RunOptionsAsync(DialogueOption[], CancellationToken)" path="/summary"/> 
+        /// <inheritdoc cref="DialoguePresenterBase.RunOptionsAsync(DialogueOption[], CancellationToken)" path="/param"/> 
+        /// <inheritdoc cref="DialoguePresenterBase.RunOptionsAsync(DialogueOption[], CancellationToken)" path="/returns"/> 
         /// <remarks>
         /// This dialogue view does not handle any options.
         /// </remarks>

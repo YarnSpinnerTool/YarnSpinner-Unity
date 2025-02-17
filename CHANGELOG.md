@@ -98,6 +98,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed a crash in project import when externally declared invalid functions had no associated file with the error
 - When an error that `YarnProjectImportEditor` needs to show has no file associated with it the editor no longer draws an empty TextAsset field.
 - Heavily reworked the structure of the project folders.
+- Renamed `AsyncDialogueViewBase` to be `DialoguePresenter`
+  - Renamed `AsyncLineView` to be `LinePresenter`
+  - Renamed `AsyncOptionItem` to be `OptionItem`
+  - Renamed `AsyncOptionsView` to be `OptionsPresenter`
+  - Renamed `VoiceOverView` to be `VoiceOverPresenter`
+
 
 ### Removed
 

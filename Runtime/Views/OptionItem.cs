@@ -15,7 +15,7 @@ using TMPro;
 
 namespace Yarn.Unity
 {
-    public class AsyncOptionItem : UnityEngine.UI.Selectable, ISubmitHandler, IPointerClickHandler, IPointerEnterHandler
+    public class OptionItem : UnityEngine.UI.Selectable, ISubmitHandler, IPointerClickHandler, IPointerEnterHandler
     {
         [SerializeField] TextMeshProUGUI text;
 

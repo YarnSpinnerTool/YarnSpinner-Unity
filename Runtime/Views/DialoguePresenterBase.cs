@@ -36,7 +36,7 @@ namespace Yarn.Unity
     /// </remarks>
     /// <seealso cref="LineProviderBehaviour"/>
     /// <seealso cref="DialogueRunner.dialogueViews"/>
-    public abstract class AsyncDialogueViewBase : MonoBehaviour
+    public abstract class DialoguePresenterBase : MonoBehaviour
     {
         /// <summary>
         /// Called by the <see cref="DialogueRunner"/> to signal that a line

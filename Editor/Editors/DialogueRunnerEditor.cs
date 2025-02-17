@@ -722,24 +722,24 @@ namespace Yarn.Unity.Editor
     }
 
     /// <summary>
-    /// The editor for <see cref="VoiceOverView"/> objects.
+    /// The editor for <see cref="VoiceOverPresenter"/> objects.
     /// </summary>
     [CanEditMultipleObjects]
-    [CustomEditor(typeof(VoiceOverView))]
+    [CustomEditor(typeof(VoiceOverPresenter))]
     public class VoiceOverViewEditor : YarnEditor { }
 
     /// <summary>
     /// The editor for <see cref="AsyncLineViewEditor"/> objects.
     /// </summary>
     [CanEditMultipleObjects]
-    [CustomEditor(typeof(AsyncLineView))]
+    [CustomEditor(typeof(LinePresenter))]
     public class AsyncLineViewEditor : YarnEditor { }
 
     /// <summary>
     /// The editor for <see cref="AsyncOptionsViewEditor"/> objects.
     /// </summary>
     [CanEditMultipleObjects]
-    [CustomEditor(typeof(AsyncOptionsView))]
+    [CustomEditor(typeof(OptionsPresenter))]
     public class AsyncOptionsViewEditor : YarnEditor { }
 
     /// <summary>

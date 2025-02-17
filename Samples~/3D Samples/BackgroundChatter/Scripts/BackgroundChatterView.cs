@@ -11,7 +11,7 @@ namespace Yarn.Unity.Samples
     using System;
 
 
-    public class BackgroundChatterView : AsyncDialogueViewBase
+    public class BackgroundChatterView : DialoguePresenterBase
     {
         [SerializeField] TMPro.TMP_Text? text;
 

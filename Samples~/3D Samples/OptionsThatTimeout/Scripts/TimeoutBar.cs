@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Threading;
 using UnityEngine;
 using Yarn.Unity;
@@ -37,5 +38,5 @@ namespace Yarn.Unity.Samples
         {
             bar.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, originalSize);
         }
-}
+    }
 }

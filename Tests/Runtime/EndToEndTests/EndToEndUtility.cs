@@ -66,6 +66,8 @@ namespace Yarn.Unity.Tests
 
         public static async YarnTask WaitForLineAsync(string lineText, int timeoutMilliseconds = 3000)
         {
+            bool buttonIsActive = false;
+            string finalText = string.Empty;
             async YarnTask LineWait(CancellationToken token)
             {
                 LineView? view = GameObject.FindAnyObjectByType<LineView>();
@@ -75,6 +77,8 @@ namespace Yarn.Unity.Tests
                 }
                 while (token.IsCancellationRequested == false)
                 {
+                    finalText = view.lineText.text;
+                    buttonIsActive = view.continueButton.activeInHierarchy;
                     if (view.lineText.text == lineText && view.continueButton.activeInHierarchy)
                     {
                         // Continue to the next piece of content
@@ -90,7 +94,7 @@ namespace Yarn.Unity.Tests
 
             await LineWait(cts.Token)
                 .WithTimeout(
-                    failureMessage: $"Failed to see line \"{lineText}\" within {timeoutMilliseconds}ms",
+                    failureMessage: $"Failed to see line \"{lineText}\" within {timeoutMilliseconds}ms + \"{finalText}\" + {buttonIsActive}",
                     timeoutMilliseconds
                 );
 

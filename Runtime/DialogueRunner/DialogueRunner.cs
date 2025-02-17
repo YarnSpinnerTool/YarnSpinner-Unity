@@ -22,7 +22,7 @@ namespace Yarn.Unity
     /// </summary>
     /// <remarks>
     /// <para>Dialogue views receive Line Cancellation Tokens as a parameter to
-    /// <see cref="AsyncDialogueViewBase.RunLineAsync"/>. Line Cancellation
+    /// <see cref="DialoguePresenterBase.RunLineAsync"/>. Line Cancellation
     /// Tokens indicate whether the user has requested that the line's delivery
     /// should be hurried up, and whether the dialogue view should stop showing
     /// the current line.</para>
@@ -199,7 +199,7 @@ namespace Yarn.Unity
         /// to.
         /// </summary>
         [Space]
-        [SerializeField] List<AsyncDialogueViewBase?> dialogueViews = new List<AsyncDialogueViewBase?>();
+        [SerializeField] List<DialoguePresenterBase?> dialogueViews = new List<DialoguePresenterBase?>();
 
         /// <summary>
         /// Gets a value that indicates if the dialogue is actively
@@ -311,7 +311,7 @@ namespace Yarn.Unity
         /// Gets or sets the collection of dialogue views attached to this
         /// dialogue runner.
         /// </summary>
-        public IEnumerable<AsyncDialogueViewBase?> DialogueViews
+        public IEnumerable<DialoguePresenterBase?> DialogueViews
         {
             get => dialogueViews;
             set => dialogueViews = value.ToList();
@@ -322,7 +322,7 @@ namespace Yarn.Unity
         /// contains a <see langword="null"/> value.
         /// </summary>
         /// <remarks>Dialogue views can return this value from their <see
-        /// cref="AsyncDialogueViewBase.RunOptionsAsync(DialogueOption[],
+        /// cref="DialoguePresenterBase.RunOptionsAsync(DialogueOption[],
         /// CancellationToken)" method to indicate that no option was selected.
         /// />
         public static YarnTask<DialogueOption?> NoOptionSelected
@@ -658,7 +658,7 @@ namespace Yarn.Unity
                 // Tell all of our views to run this line, and give them a
                 // cancellation token they can use to interrupt the line if needed.
 
-                async YarnTask RunLineAndInvokeCompletion(AsyncDialogueViewBase view, LocalizedLine line, LineCancellationToken token)
+                async YarnTask RunLineAndInvokeCompletion(DialoguePresenterBase view, LocalizedLine line, LineCancellationToken token)
                 {
                     try
                     {
@@ -731,7 +731,7 @@ namespace Yarn.Unity
 
             var dialogueSelectionTCS = new YarnTaskCompletionSource<DialogueOption?>();
 
-            async YarnTask WaitForOptionsView(AsyncDialogueViewBase? view)
+            async YarnTask WaitForOptionsView(DialoguePresenterBase? view)
             {
                 if (view == null)
                 {

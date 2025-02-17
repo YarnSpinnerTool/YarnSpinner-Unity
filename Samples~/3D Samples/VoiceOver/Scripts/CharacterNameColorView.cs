@@ -6,7 +6,7 @@ using Yarn.Unity;
 
 #nullable enable
 
-public class CharacterNameColorView : AsyncDialogueViewBase
+public class CharacterNameColorView : DialoguePresenterBase
 {
     [SerializeField] SerializableDictionary<string, Color> characterColors = new();
     [SerializeField] Color defaultColor = Color.white;
