@@ -18,6 +18,16 @@
             "name": "com.unity.inputsystem",
             "expression": "1.0.0",
             "define": "USE_INPUTSYSTEM"
+        },
+        {
+            "name": "com.unity.ugui",
+            "expression": "2.0.0",
+            "define": "USE_TMP"
+        },
+        {
+            "name": "com.unity.textmeshpro",
+            "expression": "1.0.0",
+            "define": "USE_TMP"
         }
     ],
     "noEngineReferences": false

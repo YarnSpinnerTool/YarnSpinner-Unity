@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 #nullable enable
 
 namespace Yarn.Unity.Samples

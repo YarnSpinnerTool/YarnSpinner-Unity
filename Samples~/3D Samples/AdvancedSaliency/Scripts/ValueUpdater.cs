@@ -1,6 +1,15 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 using System;
 using UnityEngine;
+
+#if USE_TMP
 using TMPro;
+#else
+using TMP_Text = Yarn.Unity.TMPShim;
+#endif
 
 namespace Yarn.Unity.Samples
 {

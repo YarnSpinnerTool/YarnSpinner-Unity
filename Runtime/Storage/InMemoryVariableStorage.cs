@@ -6,6 +6,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+#if USE_TMP
+using TMPro;
+#else
+using TMP_Text = Yarn.Unity.TMPShim;
+#endif
+
 namespace Yarn.Unity
 {
     /// <summary>
@@ -45,7 +51,7 @@ namespace Yarn.Unity
         /// of all variables in-game. Optional.
         /// </summary>
         [SerializeField, Tooltip("(optional) output list of variables and values to Text UI in-game")]
-        internal TMPro.TMP_Text debugTextView = null;
+        internal TMP_Text debugTextView = null;
 
         internal void Update()
         {

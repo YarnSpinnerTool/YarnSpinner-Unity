@@ -1,8 +1,18 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 using System.Threading;
 using System.Collections.Generic;
 using UnityEngine;
 using Yarn;
 using Yarn.Unity;
+
+#if USE_TMP
+using TMPro;
+#else
+using TMP_Text = Yarn.Unity.TMPShim;
+#endif
 
 #nullable enable
 
@@ -14,7 +24,7 @@ namespace Yarn.Unity.Samples
 
         [SerializeField] new Renderer? renderer;
         [SerializeField] VoiceOverPresenter? voiceOverView;
-        [SerializeField] TMPro.TMP_Text? debugView;
+        [SerializeField] TMP_Text? debugView;
 
         private MaterialPropertyBlock? propertyBlock;
 

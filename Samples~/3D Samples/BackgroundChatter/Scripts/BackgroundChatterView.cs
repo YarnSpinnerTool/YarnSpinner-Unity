@@ -1,4 +1,8 @@
-﻿#nullable enable
+﻿/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
+#nullable enable
 
 namespace Yarn.Unity.Samples
 {
@@ -10,10 +14,16 @@ namespace Yarn.Unity.Samples
     using Yarn.Unity;
     using System;
 
+    #if USE_TMP
+    using TMPro;
+    #else
+    using TMP_Text = Yarn.Unity.TMPShim;
+    #endif
+
 
     public class BackgroundChatterView : DialoguePresenterBase
     {
-        [SerializeField] TMPro.TMP_Text? text;
+        [SerializeField] TMP_Text? text;
 
         [Header("Timing")]
         [SerializeField] int millisecondsPerCharacter = 75;

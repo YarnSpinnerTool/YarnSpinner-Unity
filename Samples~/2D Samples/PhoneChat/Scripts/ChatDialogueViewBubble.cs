@@ -1,40 +1,50 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 using UnityEngine;
-using TMPro;
 using UnityEngine.UI;
+
+#if USE_TMP
+using TMPro;
+#else
+using TMP_Text = Yarn.Unity.TMPShim;
+#endif
 
 #nullable enable
 
-public class ChatDialogueViewBubble : MonoBehaviour
+namespace Yarn.Unity.Samples
 {
-    [SerializeField] GameObject? typingIndicator;
-    private TMP_Text? TextView => GetComponentInChildren<TMP_Text>();
-
-    public bool HasIndicator => typingIndicator != null;
-
-    public void SetTyping(bool typing)
+    public class ChatDialogueViewBubble : MonoBehaviour
     {
-        if (typingIndicator != null)
+        [SerializeField] GameObject? typingIndicator;
+        private TMP_Text? TextView => GetComponentInChildren<TMP_Text>();
+
+        public bool HasIndicator => typingIndicator != null;
+
+        public void SetTyping(bool typing)
         {
-            typingIndicator.SetActive(typing);
+            if (typingIndicator != null)
+            {
+                typingIndicator.SetActive(typing);
+            }
+            if (TextView != null)
+            {
+                TextView.text = string.Empty;
+            }
         }
-        if (TextView != null)
+
+
+        public void SetText(string text)
         {
-            TextView.text = string.Empty;
+            if (typingIndicator != null)
+            {
+                typingIndicator.SetActive(false);
+            }
+            if (TextView != null)
+            {
+                TextView.text = text;
+            }
         }
     }
-
-
-    public void SetText(string text)
-    {
-        if (typingIndicator != null)
-        {
-            typingIndicator.SetActive(false);
-        }
-        if (TextView != null)
-        {
-            TextView.text = text;
-        }
-    }
-
-
 }

@@ -27,11 +27,11 @@ namespace Yarn.Unity
         public TextInfo textInfo;
         void OnEnable()
         {
-#if UNITY_2023_2_OR_NEWER
+    #if UNITY_2023_2_OR_NEWER
             Debug.LogWarning("Yarn Spinner requires requires uGUI 2.0.0 or above (com.unity.ugui) be installed in the Package Manager.");
-#else
+    #else
             Debug.LogWarning("Yarn Spinner requires TextMeshPro (com.unity.textmeshpro) be installed in the Package Manager.");
-#endif
+    #endif
         }
 
         public struct TextInfo

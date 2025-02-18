@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -34,104 +38,107 @@ using Yarn.Unity;
 /// But if <b>$some_number</b> is not five then <b>line 1</b> chance goes up to 66%.
 /// </para>
 /// </remarks>
-public class WeightedSaliencySelector : MonoBehaviour, IContentSaliencyStrategy
+namespace Yarn.Unity.Samples
 {
-    public DialogueRunner runner;
-
-    const string WeightKey = "weight";
-
-    void Start()
+    public class WeightedSaliencySelector : MonoBehaviour, IContentSaliencyStrategy
     {
-        // assigning ourself to be the saliency strategy
-        // this is only for the demo
-        if (runner == null)
+        public DialogueRunner runner;
+
+        const string WeightKey = "weight";
+
+        void Start()
         {
-            runner = FindAnyObjectByType<Yarn.Unity.DialogueRunner>();
+            // assigning ourself to be the saliency strategy
+            // this is only for the demo
+            if (runner == null)
+            {
+                runner = FindAnyObjectByType<Yarn.Unity.DialogueRunner>();
+            }
+            runner.Dialogue.ContentSaliencyStrategy = this;
         }
-        runner.Dialogue.ContentSaliencyStrategy = this;
-    }
-    
-    // with this saliency selector we don't need to mutate any state so we can ignore this method
-    public void ContentWasSelected(ContentSaliencyOption content)
-    {
-        return;
-    }
-
-    public ContentSaliencyOption QueryBestContent(IEnumerable<ContentSaliencyOption> content)
-    {   
-        // keeps the range for each option
-        List<(ContentSaliencyOption option, int min, int max)> ranges = new();
         
-        // determines the size of the dice
-        int diceSize = 0;
-
-        // we run through every piece of salient content and work out it's weighting
-        foreach (var element in content)
+        // with this saliency selector we don't need to mutate any state so we can ignore this method
+        public void ContentWasSelected(ContentSaliencyOption content)
         {
-            // if the content has failed any of it's conditions we drop it
-            if (element.FailingConditionValueCount > 0)
-            {
-                continue;
-            }
+            return;
+        }
 
-            string weightString = null;
+        public ContentSaliencyOption QueryBestContent(IEnumerable<ContentSaliencyOption> content)
+        {   
+            // keeps the range for each option
+            List<(ContentSaliencyOption option, int min, int max)> ranges = new();
+            
+            // determines the size of the dice
+            int diceSize = 0;
 
-            if (element.ContentType == ContentSaliencyContentType.Node)
+            // we run through every piece of salient content and work out it's weighting
+            foreach (var element in content)
             {
-                // if we are a node group we get the weight from the headers on the node
-                // if there is no weight header that is fine, this will be null and it will be given an implict weight of 1
-                weightString = runner.Dialogue.GetHeaderValue(element.ContentID, WeightKey);
-            }
-            else
-            {
-                // if we are a line group we get the weight from the line metadata
-                var lineKey = WeightKey + ':';
-                foreach (var metadata in runner.YarnProject.lineMetadata.GetMetadata(element.ContentID))
+                // if the content has failed any of it's conditions we drop it
+                if (element.FailingConditionValueCount > 0)
                 {
-                    if (metadata.StartsWith(lineKey))
+                    continue;
+                }
+
+                string weightString = null;
+
+                if (element.ContentType == ContentSaliencyContentType.Node)
+                {
+                    // if we are a node group we get the weight from the headers on the node
+                    // if there is no weight header that is fine, this will be null and it will be given an implict weight of 1
+                    weightString = runner.Dialogue.GetHeaderValue(element.ContentID, WeightKey);
+                }
+                else
+                {
+                    // if we are a line group we get the weight from the line metadata
+                    var lineKey = WeightKey + ':';
+                    foreach (var metadata in runner.YarnProject.lineMetadata.GetMetadata(element.ContentID))
                     {
-                        weightString = metadata.Substring(lineKey.Length).Trim();
-                        break;
+                        if (metadata.StartsWith(lineKey))
+                        {
+                            weightString = metadata.Substring(lineKey.Length).Trim();
+                            break;
+                        }
                     }
                 }
+
+                // we attempt to convert the value into an int
+                if (Int32.TryParse(weightString, out int weight))
+                {
+                    // if the weight is 0 or less we force it to be 1
+                    if (weight < 1)
+                    {
+                        weight = 1;
+                    }
+                    ranges.Add((element, diceSize, diceSize + weight - 1));
+                    diceSize += weight;
+                }
+                else
+                {
+                    // we have no weight explictly set so we implicitly give it a weight of 1
+                    ranges.Add((element, diceSize, diceSize));
+                    diceSize += 1;
+                }
+            }
+            
+            // if we have no ranges it means there is no valid content
+            // so we return null to indicate nothing should be run
+            if (ranges.Count == 0)
+            {
+                return null;
             }
 
-            // we attempt to convert the value into an int
-            if (Int32.TryParse(weightString, out int weight))
+            // we roll a dice now and pick the option whos range contains that roll
+            int roll = UnityEngine.Random.Range(0, diceSize);
+            foreach (var (option, min, max) in ranges)
             {
-                // if the weight is 0 or less we force it to be 1
-                if (weight < 1)
+                if (roll <= max && roll >= min)
                 {
-                    weight = 1;
+                    return option;
                 }
-                ranges.Add((element, diceSize, diceSize + weight - 1));
-                diceSize += weight;
             }
-            else
-            {
-                // we have no weight explictly set so we implicitly give it a weight of 1
-                ranges.Add((element, diceSize, diceSize));
-                diceSize += 1;
-            }
-        }
-        
-        // if we have no ranges it means there is no valid content
-        // so we return null to indicate nothing should be run
-        if (ranges.Count == 0)
-        {
+
             return null;
         }
-
-        // we roll a dice now and pick the option whos range contains that roll
-        int roll = UnityEngine.Random.Range(0, diceSize);
-        foreach (var (option, min, max) in ranges)
-        {
-            if (roll <= max && roll >= min)
-            {
-                return option;
-            }
-        }
-
-        return null;
     }
 }

@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 using UnityEngine;
 using Yarn.Markup;
 using System.Threading;
@@ -5,7 +9,7 @@ using System.Threading;
 #if USE_TMP
 using TMPro;
 #else
-using TextMeshProUGUI = Yarn.Unity.TMPShim;
+using TMP_Text = Yarn.Unity.TMPShim;
 #endif
 
 namespace Yarn.Unity
