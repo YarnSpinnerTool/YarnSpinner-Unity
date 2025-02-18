@@ -6,7 +6,7 @@ namespace Yarn.Unity.Samples {
     /// Character
     /// </summary>
     /// <remarks>
-    /// Automatically generated from Yarn project at Assets/Samples/3D Samples/AdvancedSaliency/AdvancedSaliency.yarnproject.
+    /// Automatically generated from Yarn project at Assets/Samples/AdvancedSaliency/AdvancedSaliency.yarnproject.
     /// </remarks>
     [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
     public enum Character {
@@ -52,7 +52,7 @@ namespace Yarn.Unity.Samples {
     /// Scenario
     /// </summary>
     /// <remarks>
-    /// Automatically generated from Yarn project at Assets/Samples/3D Samples/AdvancedSaliency/AdvancedSaliency.yarnproject.
+    /// Automatically generated from Yarn project at Assets/Samples/AdvancedSaliency/AdvancedSaliency.yarnproject.
     /// </remarks>
     [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
     public enum Scenario {
@@ -98,7 +98,7 @@ namespace Yarn.Unity.Samples {
     /// Room
     /// </summary>
     /// <remarks>
-    /// Automatically generated from Yarn project at Assets/Samples/3D Samples/AdvancedSaliency/AdvancedSaliency.yarnproject.
+    /// Automatically generated from Yarn project at Assets/Samples/AdvancedSaliency/AdvancedSaliency.yarnproject.
     /// </remarks>
     [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
     public enum Room {
@@ -144,7 +144,7 @@ namespace Yarn.Unity.Samples {
     /// ScenarioState
     /// </summary>
     /// <remarks>
-    /// Automatically generated from Yarn project at Assets/Samples/3D Samples/AdvancedSaliency/AdvancedSaliency.yarnproject.
+    /// Automatically generated from Yarn project at Assets/Samples/AdvancedSaliency/AdvancedSaliency.yarnproject.
     /// </remarks>
     [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
     public enum ScenarioState {

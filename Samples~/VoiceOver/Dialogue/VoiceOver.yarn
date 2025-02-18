@@ -37,7 +37,7 @@ title: Start
 
 <<wait 1>>
 
-// <<play_animation Tom Gesture LookAround wait>>
+<<play_animation Tom Gesture LookAround wait>>
 
 // The start of our conversation!
 Tom: Uh.. hello? #line:tutorial-tom-01 // tentative 

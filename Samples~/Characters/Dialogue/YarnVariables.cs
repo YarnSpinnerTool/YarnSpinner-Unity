@@ -6,7 +6,7 @@ namespace MyGame {
     /// SwitchState
     /// </summary>
     /// <remarks>
-    /// Automatically generated from Yarn project at Assets/Samples/3D Samples/Characters/Dialogue/CharacterSample.yarnproject.
+    /// Automatically generated from Yarn project at Assets/Samples/Characters/Dialogue/CharacterSample.yarnproject.
     /// </remarks>
     [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
     public enum SwitchState {
