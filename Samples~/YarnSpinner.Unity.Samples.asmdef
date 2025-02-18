@@ -4,7 +4,8 @@
     "references": [
         "YarnSpinner.Unity",
         "Unity.TextMeshPro",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Unity.Localization"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -18,6 +19,11 @@
             "name": "com.unity.inputsystem",
             "expression": "1.0.0",
             "define": "USE_INPUTSYSTEM"
+        },
+        {
+            "name": "com.unity.localization",
+            "expression": "1.0.0",
+            "define": "USE_UNITY_LOCALIZATION"
         }
     ],
     "noEngineReferences": false
