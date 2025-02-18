@@ -1,4 +1,4 @@
-﻿/*
+/*
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
@@ -484,11 +484,13 @@ namespace Yarn.Unity.Editor
                 if (evt.newValue != null && AssetDatabase.TryGetGUIDAndLocalFileIdentifier(evt.newValue, out string guid, out long _))
                 {
                     unityLocalisationTableCollectionGUIDProperty.stringValue = guid;
+                    unityLocalisationTableCollectionGUIDProperty.serializedObject.ApplyModifiedProperties();
                 }
                 else
                 {
                     // The object is null, or a GUID for it can't be found.
                     unityLocalisationTableCollectionGUIDProperty.stringValue = string.Empty;
+                    unityLocalisationTableCollectionGUIDProperty.serializedObject.ApplyModifiedProperties();
                 }
 
                 // Flag that we've changed our importer's settings.
