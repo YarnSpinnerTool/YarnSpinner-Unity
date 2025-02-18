@@ -19,7 +19,7 @@ namespace Yarn.Unity
     using UnityEngine;
 
     [ExecuteInEditMode]
-    public class TMPShim : MonoBehaviour
+    public sealed class TMPShim : MonoBehaviour
     {
         public Color color;
         public string text;

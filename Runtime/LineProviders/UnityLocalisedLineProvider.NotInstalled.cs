@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 #if !USE_UNITY_LOCALIZATION
 using System.Collections.Generic;
 using System.Threading;
@@ -5,7 +9,6 @@ using UnityEngine;
 
 namespace Yarn.Unity.UnityLocalization
 {
-
     /// <summary>
     /// A line provider that uses the Unity Localization system to get localized
     /// content for Yarn lines.

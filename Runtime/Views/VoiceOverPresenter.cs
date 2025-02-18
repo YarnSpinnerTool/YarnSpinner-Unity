@@ -18,7 +18,7 @@ namespace Yarn.Unity
     /// <see cref="AudioClip"/>s for lines of dialogue.
     /// </summary>
     /// <seealso cref="DialogueViewBase"/>
-    public class VoiceOverPresenter : DialoguePresenterBase
+    public sealed class VoiceOverPresenter : DialoguePresenterBase
     {
 
         /// <summary>

@@ -15,7 +15,7 @@ namespace Yarn.Unity
     /// scenes.
     /// </remarks>
     [ExecuteInEditMode]
-    public class SampleRenderDetector : MonoBehaviour
+    public sealed class SampleRenderDetector : MonoBehaviour
     {
         void Awake()
         {

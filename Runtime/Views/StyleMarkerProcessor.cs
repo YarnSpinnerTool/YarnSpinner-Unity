@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -11,7 +15,7 @@ namespace Yarn.Unity
     /// An attribute marker processor that inserts TextMeshPro style tags where
     /// Yarn Spinner <c>[style]</c> tags appear in a line.
     /// </summary>
-    public class StyleMarkerProcessor : ReplacementMarkupHandler
+    public sealed class StyleMarkerProcessor : ReplacementMarkupHandler
     {
         [SerializeField]
         public LineProviderBehaviour? lineProvider;

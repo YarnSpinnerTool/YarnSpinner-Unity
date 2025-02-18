@@ -38,7 +38,7 @@ namespace Yarn.Unity
         }
 
         [System.Serializable]
-        public class LocalizationTableEntry
+        public sealed class LocalizationTableEntry
         {
             public string? localizedString;
             public UnityEngine.Object? localizedAsset;

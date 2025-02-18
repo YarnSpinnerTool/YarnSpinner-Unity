@@ -1,5 +1,8 @@
-#nullable enable
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
 
+#nullable enable
 
 using System.Collections.Generic;
 using System.Threading;
@@ -8,8 +11,7 @@ using Yarn.Unity.Attributes;
 
 namespace Yarn.Unity
 {
-
-    public class BuiltinLocalisedLineProvider : LineProviderBehaviour, ILineProvider
+    public sealed class BuiltinLocalisedLineProvider : LineProviderBehaviour, ILineProvider
     {
         public override string LocaleCode
         {

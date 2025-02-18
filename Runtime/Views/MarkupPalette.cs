@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,9 +16,8 @@ namespace Yarn.Unity
     /// This is intended to be used with the LineView, and also be a sample of
     /// using the markup system.
     /// </remarks>
-
     [CreateAssetMenu(fileName = "NewPalette", menuName = "Yarn Spinner/Markup Palette", order = 102)]
-    public class MarkupPalette : ScriptableObject
+    public sealed class MarkupPalette : ScriptableObject
     {
         /// <summary>
         /// Contains information describing the formatting style of text within

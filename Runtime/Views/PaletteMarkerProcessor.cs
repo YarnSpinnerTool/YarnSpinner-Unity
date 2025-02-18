@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -14,7 +18,7 @@ using Yarn.Unity;
 /// example, if the palette defines a style named "happy", this marker processor
 /// will process tags in a Yarn line named <c>[happy]</c> by inserting the
 /// appropriate TextMeshProp style tags defined for the "happy" style.</remarks>
-public class PaletteMarkerProcessor : Yarn.Unity.ReplacementMarkupHandler
+public sealed class PaletteMarkerProcessor : Yarn.Unity.ReplacementMarkupHandler
 {
     /// <summary>
     /// The <see cref="MarkupPalette"/> to use when applying styles.

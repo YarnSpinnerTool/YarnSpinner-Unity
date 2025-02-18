@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity.Attributes;
@@ -20,7 +24,7 @@ namespace Yarn.Unity
     /// to choose from.
     /// </summary>
     [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-view/options-list-view")]
-    public class OptionsPresenter : DialoguePresenterBase
+    public sealed class OptionsPresenter : DialoguePresenterBase
     {
         [SerializeField] CanvasGroup? canvasGroup;
 

@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 #if USE_UNITY_LOCALIZATION
 
 using System.Collections.Generic;
@@ -27,8 +31,8 @@ namespace Yarn.Unity.UnityLocalization
 
         /// <summary>
         /// The <c>#hashtags</c> present on the line.
-        /// </summary>
         public string[] tags = System.Array.Empty<string>();
+        /// </summary>
     }
 
     /// <summary>

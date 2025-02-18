@@ -91,7 +91,7 @@ namespace Yarn.Unity
     public class UnityEventString : UnityEvent<string> { }
 
     [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-runner")]
-    public partial class DialogueRunner : MonoBehaviour
+    public sealed partial class DialogueRunner : MonoBehaviour
     {
         private Dialogue? dialogue;
 

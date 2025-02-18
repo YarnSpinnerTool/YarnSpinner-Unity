@@ -1,9 +1,12 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 using System;
 using Yarn.Utility;
 
 namespace Yarn.Unity
 {
-
     /// <summary>
     /// An interface that works with <see
     /// cref="GeneratedVariableStorageExtensions"/> to add helper methods used
@@ -22,7 +25,6 @@ namespace Yarn.Unity
 
     public static class GeneratedVariableStorageExtensions
     {
-
         /// <summary>
         /// Gets a value for the variable <paramref name="variableName"/> from
         /// <paramref name="storage"/>, or else returns the default value of

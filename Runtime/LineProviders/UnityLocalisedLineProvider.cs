@@ -12,6 +12,6 @@ namespace Yarn.Unity.UnityLocalization
     // UnityLocalisedLineProvider is found in either
     // UnityLocalisedLineProvider.Installed.cs (if Unity Localization is
     // installed), or UnityLocalisedLineProvider.NotInstalled.cs (if not).
-    public partial class UnityLocalisedLineProvider : LineProviderBehaviour { }
+    public sealed partial class UnityLocalisedLineProvider : LineProviderBehaviour { }
 }
 

@@ -16,7 +16,7 @@ namespace Yarn.Unity
     /// in the specified project.
     /// </remarks>
     [Serializable]
-    public class DialogueReference
+    public sealed class DialogueReference
     {
         /// <summary>
         /// The Yarn Project asset containing the dialogue node.

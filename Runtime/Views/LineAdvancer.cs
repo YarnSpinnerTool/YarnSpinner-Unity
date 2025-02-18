@@ -1,7 +1,10 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using Yarn.Unity;
 using Yarn.Unity.Attributes;
 
 #nullable enable
@@ -14,7 +17,7 @@ namespace Yarn.Unity
     /// either by asking a dialogue runner to hurry up its delivery, advance to
     /// the next line, or cancel the entire dialogue session.
     /// </summary>
-    public class LineAdvancer : DialoguePresenterBase
+    public sealed class LineAdvancer : DialoguePresenterBase
     {
         [MustNotBeNull]
         [Tooltip("The dialogue runner that will receive requests to advance or cancel content.")]

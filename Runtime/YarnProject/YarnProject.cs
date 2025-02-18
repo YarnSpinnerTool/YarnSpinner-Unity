@@ -4,7 +4,6 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 
 #nullable enable
@@ -12,7 +11,7 @@ using UnityEngine;
 namespace Yarn.Unity
 {
     [HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
-    public class YarnProject : ScriptableObject
+    public sealed class YarnProject : ScriptableObject
     {
         [SerializeField]
         [HideInInspector]

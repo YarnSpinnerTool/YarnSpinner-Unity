@@ -179,6 +179,5 @@ namespace Yarn.Unity
 
             return new ChangeListenerDisposable(list, onChange);
         }
-
     }
 }
