@@ -4,7 +4,7 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 using UnityEngine;
 
-namespace Yarn.Unity
+namespace Yarn.Unity.Attributes
 {
     public class LanguageAttribute : PropertyAttribute
     {

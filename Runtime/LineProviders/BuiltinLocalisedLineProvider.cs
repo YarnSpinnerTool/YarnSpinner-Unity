@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
-using Yarn;
+using Yarn.Unity.Attributes;
 
 namespace Yarn.Unity
 {

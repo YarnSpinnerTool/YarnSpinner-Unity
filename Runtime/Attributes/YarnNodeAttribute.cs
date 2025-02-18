@@ -5,8 +5,7 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 using System;
 using UnityEngine;
 
-
-namespace Yarn.Unity
+namespace Yarn.Unity.Attributes
 {
     /// <summary>
     /// Specifies that a field represents a reference to a named Yarn node that

@@ -103,6 +103,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Renamed `AsyncOptionItem` to be `OptionItem`
   - Renamed `AsyncOptionsView` to be `OptionsPresenter`
   - Renamed `VoiceOverView` to be `VoiceOverPresenter`
+- `LanguageAttribute` and `YarnNodeAttribute` are now in the `Yarn.Unity.Attributes` namespace.
 
 
 ### Removed
