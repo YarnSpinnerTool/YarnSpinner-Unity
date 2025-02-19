@@ -145,13 +145,14 @@ namespace Yarn.Unity.Editor
 
         internal static string UnityProjectRootPath => Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
 
-#if USE_UNITY_LOCALIZATION
-        public bool UseUnityLocalisationSystem = false;
-
         // Scripted importers can't have direct references to scriptable
         // objects, so we'll store the reference as a string containing the
-        // GUID.
+        // GUID. This is also used to store a reference to a string table if
+        // Unity Localisation is not installed.
         public string? unityLocalisationStringTableCollectionGUID;
+
+        public bool UseUnityLocalisationSystem = false;
+#if USE_UNITY_LOCALIZATION
 
         private StringTableCollection? _cachedStringTableCollection;
 

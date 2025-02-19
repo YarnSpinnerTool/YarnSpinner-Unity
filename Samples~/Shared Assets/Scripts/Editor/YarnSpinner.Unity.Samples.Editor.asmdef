@@ -1,0 +1,29 @@
+{
+    "name": "Yarn.Unity.Samples.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:3a299c53e4c683b4eb4a04c9ad9e648f",
+        "GUID:4dbf81285c68749d682c46500dcb04f2",
+        "GUID:2e77701fe0ceda44fb763f03ee704c37",
+        "GUID:eec0964c48f6f4e40bc3ec2257ccf8c5",
+        "GUID:9e24947de15b9834991c9d8411ea37cf",
+        "GUID:69448af7b92c7f342b298e06a37122aa"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.localization",
+            "expression": "1.0",
+            "define": "USE_UNITY_LOCALIZATION"
+        }
+    ],
+    "noEngineReferences": false
+}

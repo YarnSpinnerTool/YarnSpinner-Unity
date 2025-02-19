@@ -15,6 +15,27 @@ namespace Yarn.Unity.UnityLocalization
     /// </summary>
     public partial class UnityLocalisedLineProvider : LineProviderBehaviour
     {
+        // When Unity Localization is not installed, types like TableReference
+        // no longer exist, and can't be deserialized into. This causes a loss
+        // of data. To get around this, we declare a new type with the same
+        // shape as TableReference to keep the data in. If and when Unity
+        // Localization is added to the project, the data stored in these fields
+        // is deserialized into actual TableReferences.
+        [System.Serializable]
+        public struct PlaceholderTableReference
+        {
+            [System.Serializable]
+            public struct PlaceholderTableIdentifier
+            {
+                [SerializeField] private string m_TableCollectionName;
+            }
+
+            [SerializeField] private PlaceholderTableIdentifier m_TableReference;
+        }
+
+        [SerializeField] internal PlaceholderTableReference stringsTable;
+        [SerializeField] internal PlaceholderTableReference assetTable;
+
         /// <inheritdoc/>
         public override string LocaleCode { get => "error"; set { } }
 
@@ -58,6 +79,18 @@ namespace Yarn.Unity.UnityLocalization
             Debug.LogWarning($"Unable to remove a marker processor for {attributeName}, as the Unity Localization package is not installed in this project");
         }
     }
+
+#if UNITY_EDITOR
+    namespace Editor {
+        using UnityEditor;
+        [CustomEditor(typeof(UnityLocalisedLineProvider))]
+        public class UnityLocalisedLineProviderPlaceholderEditor : Editor {
+            public override void OnInspectorGUI() {
+                EditorGUILayout.HelpBox("Unity Localization is not installed.", MessageType.Warning);
+            }
+        }
+    }
+#endif
 
 }
 #endif

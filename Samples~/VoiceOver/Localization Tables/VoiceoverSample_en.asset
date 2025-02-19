@@ -1,0 +1,92 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: VoiceoverSample_en
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: 8e286ec56529f405ebb1933199177e8e, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 5812364763136
+    m_Localized: 'Tom: Uh.. hello?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5812394123264
+    m_Localized: 'Tom: Is anyone there?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5812394123265
+    m_Localized: 'Anne: Hi there!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5812394123266
+    m_Localized: 'Tom: Who are you?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5812398317568
+    m_Localized: 'Tom: And where are you?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5812398317569
+    m_Localized: 'Anne: I''m Anne! I''m right here!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5812398317570
+    m_Localized: 'Tom: Where am I?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5812398317571
+    m_Localized: 'Anne: You''re floating in a featureless void!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5812398317572
+    m_Localized: 'Tom: I can see that..'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5812398317573
+    m_Localized: 'Tom: How did I get here?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5812398317574
+    m_Localized: 'Anne: Oh, a writer put you here. This is a test conversation for
+      Yarn Spinner!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5812398317575
+    m_Localized: 'Tom: What''s Yarn Spinner?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5812398317576
+    m_Localized: 'Anne: Don''t worry about it!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5812398317577
+    m_Localized: 'Tom: This is weird, Anne.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5812398317578
+    m_Localized: 'Tom: This is really confusing.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5812398317579
+    m_Localized: 'Anne: That''s ok! This will all go away in a moment.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5812398317580
+    m_Localized: 'Tom: What?!'
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

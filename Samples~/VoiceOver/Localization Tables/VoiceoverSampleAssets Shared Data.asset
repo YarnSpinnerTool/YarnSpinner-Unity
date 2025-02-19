@@ -1,0 +1,154 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: VoiceoverSampleAssets Shared Data
+  m_EditorClassIdentifier: 
+  m_TableCollectionName: VoiceoverSampleAssets
+  m_TableCollectionNameGuidString: 64bbf71c048364f9e8706925bb5ae463
+  m_Entries:
+  - m_Id: 450840485888
+    m_Key: line:tutorial-anne-01
+    m_Metadata:
+      m_Items: []
+  - m_Id: 450869846016
+    m_Key: line:tutorial-anne-02
+    m_Metadata:
+      m_Items: []
+  - m_Id: 450874040320
+    m_Key: line:tutorial-anne-03
+    m_Metadata:
+      m_Items: []
+  - m_Id: 450874040321
+    m_Key: line:tutorial-anne-04
+    m_Metadata:
+      m_Items: []
+  - m_Id: 450874040322
+    m_Key: line:tutorial-anne-05
+    m_Metadata:
+      m_Items: []
+  - m_Id: 450874040323
+    m_Key: line:tutorial-anne-06
+    m_Metadata:
+      m_Items: []
+  - m_Id: 450878234624
+    m_Key: line:tutorial-tom-01
+    m_Metadata:
+      m_Items: []
+  - m_Id: 450878234625
+    m_Key: line:tutorial-tom-02
+    m_Metadata:
+      m_Items: []
+  - m_Id: 450878234626
+    m_Key: line:tutorial-tom-03
+    m_Metadata:
+      m_Items: []
+  - m_Id: 450878234627
+    m_Key: line:tutorial-tom-04
+    m_Metadata:
+      m_Items: []
+  - m_Id: 450878234628
+    m_Key: line:tutorial-tom-05
+    m_Metadata:
+      m_Items: []
+  - m_Id: 450878234629
+    m_Key: line:tutorial-tom-06
+    m_Metadata:
+      m_Items: []
+  - m_Id: 450878234630
+    m_Key: line:tutorial-tom-07
+    m_Metadata:
+      m_Items: []
+  - m_Id: 450878234631
+    m_Key: line:tutorial-tom-08
+    m_Metadata:
+      m_Items: []
+  - m_Id: 450878234632
+    m_Key: line:tutorial-tom-09
+    m_Metadata:
+      m_Items: []
+  - m_Id: 450878234633
+    m_Key: line:tutorial-tom-10
+    m_Metadata:
+      m_Items: []
+  - m_Id: 450878234634
+    m_Key: line:tutorial-tom-11
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items:
+    - rid: 1087239287372775504
+  m_KeyGenerator:
+    rid: 1087239200848216288
+  references:
+    version: 2
+    RefIds:
+    - rid: 1087239200848216288
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1739510089438
+    - rid: 1087239287372775504
+      type: {class: AssetTypeMetadata, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_Entries:
+        - m_KeyId: 450840485888
+          m_TableCodes:
+          - en
+        - m_KeyId: 450869846016
+          m_TableCodes:
+          - en
+        - m_KeyId: 450874040320
+          m_TableCodes:
+          - en
+        - m_KeyId: 450874040321
+          m_TableCodes:
+          - en
+        - m_KeyId: 450874040322
+          m_TableCodes:
+          - en
+        - m_KeyId: 450874040323
+          m_TableCodes:
+          - en
+        - m_KeyId: 450878234624
+          m_TableCodes:
+          - en
+        - m_KeyId: 450878234625
+          m_TableCodes:
+          - en
+        - m_KeyId: 450878234626
+          m_TableCodes:
+          - en
+        - m_KeyId: 450878234627
+          m_TableCodes:
+          - en
+        - m_KeyId: 450878234628
+          m_TableCodes:
+          - en
+        - m_KeyId: 450878234629
+          m_TableCodes:
+          - en
+        - m_KeyId: 450878234630
+          m_TableCodes:
+          - en
+        - m_KeyId: 450878234631
+          m_TableCodes:
+          - en
+        - m_KeyId: 450878234632
+          m_TableCodes:
+          - en
+        - m_KeyId: 450878234633
+          m_TableCodes:
+          - en
+        - m_KeyId: 450878234634
+          m_TableCodes:
+          - en
+        m_TypeString: Yarn.Unity.Samples.LipSyncedVoiceLine, YarnSpinner.Unity.Samples,
+          Version=3.0.0.0, Culture=neutral, PublicKeyToken=null
