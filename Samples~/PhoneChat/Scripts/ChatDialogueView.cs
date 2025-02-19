@@ -34,7 +34,7 @@ namespace Yarn.Unity.Samples
         [SerializeField] bool showTypingIndicators = true;
 
 
-        public override async YarnTask OnDialogueStartedAsync()
+        public override YarnTask OnDialogueStartedAsync()
         {
             // Called by the Dialogue Runner to signal that dialogue has just
             // started up.
@@ -44,14 +44,16 @@ namespace Yarn.Unity.Samples
             //
             // The Dialogue Runner will wait until every Dialogue View returns from
             // this method before delivering any content.
+            return YarnTask.CompletedTask;
         }
 
-        public override async YarnTask OnDialogueCompleteAsync()
+        public override YarnTask OnDialogueCompleteAsync()
         {
             // Called by the Dialogue Runner to signal that dialogue has ended.
             //
             // You can use this method to clean up after running dialogue, like
             // changing the camera back, fading away on-screen UI, or other tasks.
+            return YarnTask.CompletedTask;
         }
 
         public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)

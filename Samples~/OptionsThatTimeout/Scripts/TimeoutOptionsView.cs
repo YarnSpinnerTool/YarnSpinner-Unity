@@ -20,7 +20,7 @@ namespace Yarn.Unity.Samples
         [SerializeField] OptionItem? optionViewPrefab;
 
         [MustNotBeNull]
-        [SerializeField] TimeoutBar timedBar;
+        [SerializeField] TimeoutBar? timedBar;
 
         // A cached pool of OptionView objects so that we can reuse them
         List<OptionItem> optionViews = new List<OptionItem>();
@@ -120,8 +120,13 @@ namespace Yarn.Unity.Samples
         // this handles the two option specific situations of either the invisible fallback or the visible default
         // if the timer reaches the end of its run without being cancelled it will return the supplied option
         // which the tun option method will then use as the selected option for the group
-        internal async YarnTask BeginDefaultSelectTimeout(YarnTaskCompletionSource<DialogueOption?> selectedOptionCompletionSource, DialogueOption option, CancellationToken cancellationToken)
+        internal async YarnTask BeginDefaultSelectTimeout(YarnTaskCompletionSource<DialogueOption?> selectedOptionCompletionSource, DialogueOption? option, CancellationToken cancellationToken)
         {
+            if (timedBar == null)
+            {
+                return;
+            }
+
             timedBar.cancellationToken = cancellationToken;
             timedBar.duration = autoSelectDuration;
             await timedBar.Shrink();
@@ -139,6 +144,10 @@ namespace Yarn.Unity.Samples
         // if none are highlighted then it returns the first one
         internal async YarnTask BeginLastSelectedOptionTimeout(YarnTaskCompletionSource<DialogueOption?> selectedOptionCompletionSource, List<OptionItem> options, CancellationToken cancellationToken)
         {
+            if (timedBar == null)
+            {
+                return;
+            }
             timedBar.cancellationToken = cancellationToken;
             timedBar.duration = autoSelectDuration;
             await timedBar.Shrink();
@@ -191,7 +200,7 @@ namespace Yarn.Unity.Samples
 
             int hasDefault = 0;
             TimeOutOptionType defaultOptionType = TimeOutOptionType.None;
-            DialogueOption defaultOption = null;
+            DialogueOption? defaultOption = null;
 
             // we run through all the options quickly to see if there are any that are configured for timeouts
             foreach (var option in dialogueOptions)
@@ -353,7 +362,7 @@ namespace Yarn.Unity.Samples
                 // if we are set to have a hidden fallback option
                 // and that option is THIS option we are configuring the view for
                 // we want to skip over it
-                if (defaultOptionType == TimeOutOptionType.HiddenFallback && option.DialogueOptionID == defaultOption.DialogueOptionID)
+                if (defaultOptionType == TimeOutOptionType.HiddenFallback && defaultOption != null && option.DialogueOptionID == defaultOption.DialogueOptionID)
                 {
                     continue;
                 }
@@ -375,14 +384,20 @@ namespace Yarn.Unity.Samples
             // now we add in the timer bar if necessary or turn it off if it isn't needed
             if (defaultOptionType == TimeOutOptionType.None)
             {
-                timedBar.gameObject.SetActive(false);
+                if (timedBar != null)
+                {
+                    timedBar.gameObject.SetActive(false);
+                }
             }
             else
             {
                 // we always want it at the bottom regardless of how many option item views there are
-                timedBar.gameObject.SetActive(true);
-                timedBar.ResetBar();
-                timedBar.transform.parent.SetAsLastSibling();
+                if (timedBar != null)
+                {
+                    timedBar.gameObject.SetActive(true);
+                    timedBar.ResetBar();
+                    timedBar.transform.parent.SetAsLastSibling();
+                }
             }
 
             // fade up the UI now

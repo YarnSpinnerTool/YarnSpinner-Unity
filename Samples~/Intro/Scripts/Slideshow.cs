@@ -61,14 +61,14 @@ namespace Yarn.Unity.Samples
         }
 
         [YarnCommand("start_slide")]
-        public static async YarnTask StartSlide()
+        public static YarnTask StartSlide()
         {
             var slideshow = FindAnyObjectByType<Slideshow>(FindObjectsInactive.Include);
 
             if (slideshow == null)
             {
                 Debug.LogError($"Can't start building slide: no {typeof(Slideshow)} present in the scene!");
-                return;
+                return YarnTask.CompletedTask;
             }
 
             if (slideshow.isRunningSlideshow)
@@ -94,6 +94,8 @@ namespace Yarn.Unity.Samples
             }
 
             slideshow.isRunningSlideshow = true;
+
+            return YarnTask.CompletedTask;
         }
 
         [YarnCommand("end_slide")]

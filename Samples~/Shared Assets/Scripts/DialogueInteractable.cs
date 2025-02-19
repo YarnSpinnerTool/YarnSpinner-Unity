@@ -34,7 +34,6 @@ namespace Yarn.Unity.Samples
         [SerializeField] DialogueRunner? dialogueRunner;
 
         [SerializeField] bool turnsToInteractor = true;
-        [SerializeField] float turnSpeed = 300f;
 
         public override bool InteractorShouldTurnToFaceWhenInteracted => turnsToInteractor;
 

@@ -7,6 +7,8 @@ using System.Text;
 using UnityEngine;
 using Yarn.Markup;
 
+#nullable enable
+
 namespace Yarn.Unity.Samples
 {
     public class SpriteReplacmentMarkerProcessor: ReplacementMarkupHandler

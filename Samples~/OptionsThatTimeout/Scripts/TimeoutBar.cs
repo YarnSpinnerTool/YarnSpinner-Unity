@@ -14,18 +14,26 @@ namespace Yarn.Unity.Samples
 {
     public class TimeoutBar : MonoBehaviour
     {
-        public RectTransform bar;
         public CancellationToken cancellationToken;
         public float duration = 1f;
+        [SerializeField] RectTransform? bar;
 
         private float originalSize = 0f;
         public void Start()
         {
-            originalSize = bar.sizeDelta.x;
+            if (bar != null)
+            {
+                originalSize = bar.sizeDelta.x;
+            }
         }
 
         public async YarnTask Shrink()
         {
+            if (bar == null)
+            {
+                return;
+            }
+
             float accumulator = 0;
             var currentSize = bar.sizeDelta.x;
 
@@ -40,7 +48,10 @@ namespace Yarn.Unity.Samples
         }
         public void ResetBar()
         {
-            bar.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, originalSize);
+            if (bar != null)
+            {
+                bar.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, originalSize);
+            }
         }
     }
 }
