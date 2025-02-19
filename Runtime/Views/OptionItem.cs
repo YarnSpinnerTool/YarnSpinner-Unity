@@ -4,6 +4,7 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Yarn.Unity.Attributes;
 
 #if USE_TMP
 using TMPro;
@@ -15,9 +16,23 @@ using TMPro;
 
 namespace Yarn.Unity
 {
+    [System.Serializable]
+    internal struct InternalAppearance
+    {
+        [SerializeField] internal Sprite sprite;
+        [SerializeField] internal Color colour;
+    }
+
     public sealed class OptionItem : UnityEngine.UI.Selectable, ISubmitHandler, IPointerClickHandler, IPointerEnterHandler
     {
-        [SerializeField] TextMeshProUGUI text;
+        [MustNotBeNull] [SerializeField] TextMeshProUGUI text;
+        [SerializeField] UnityEngine.UI.Image selectionImage;
+
+        [Group("Appearance")] [SerializeField] InternalAppearance normal;
+        [Group("Appearance")] [SerializeField] InternalAppearance selected;
+        [Group("Appearance")] [SerializeField] InternalAppearance disabled;
+
+        [Group("Appearance")] [SerializeField] bool disabledStrikeThrough = true;
 
         public YarnTaskCompletionSource<DialogueOption?>? OnOptionSelected;
         public System.Threading.CancellationToken completionToken;
@@ -37,9 +52,55 @@ namespace Yarn.Unity
 
                 // When we're given an Option, use its text and update our
                 // interactibility.
-                text.text = value.Line.TextWithoutCharacterName.Text;
+                string line = value.Line.TextWithoutCharacterName.Text;
+                if (disabledStrikeThrough && !value.IsAvailable)
+                {
+                    line = $"<s>{value.Line.TextWithoutCharacterName.Text}</s>";
+                }
+                text.text = line;
                 interactable = value.IsAvailable;
             }
+        }
+
+        private void ApplyStyle(InternalAppearance style)
+        {
+            Color newColour = style.colour;
+            Sprite newSprite = style.sprite;
+            if (!Option.IsAvailable)
+            {
+                newColour = disabled.colour;
+                newSprite = disabled.sprite;
+            }
+
+            text.color = newColour;
+
+            if (selectionImage != null)
+            {
+                selectionImage.color = newColour;
+                if (newSprite != null)
+                {
+                    selectionImage.sprite = newSprite;
+                    selectionImage.gameObject.SetActive(true);
+                }
+                else
+                {
+                    selectionImage.gameObject.SetActive(false);
+                }
+            }
+        }
+
+        public override void OnSelect(BaseEventData eventData)
+        {
+            base.OnSelect(eventData);
+
+            ApplyStyle(selected);
+        }
+
+        public override void OnDeselect(BaseEventData eventData)
+        {
+            base.OnDeselect(eventData);
+
+            ApplyStyle(normal);
         }
 
         new public bool IsHighlighted

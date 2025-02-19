@@ -76,6 +76,8 @@ namespace Yarn.Unity
         [ShowIf(nameof(useFadeEffect))]
         public float fadeDownDuration = 0.1f;
 
+        private const string TruncateLastLineMarkupName = "lastline";
+
         /// <summary>
         /// Called by a <see cref="DialogueRunner"/> to dismiss the options view
         /// when dialogue is complete.
@@ -218,6 +220,7 @@ namespace Yarn.Unity
                 // The first available option is selected by default
                 if (optionViewsCreated == 0)
                 {
+                    Debug.Log("selected");
                     optionView.Select();
                 }
                 optionViewsCreated += 1;
@@ -253,9 +256,19 @@ namespace Yarn.Unity
                         line = lastSeenLine.TextWithoutCharacterName;
                     }
 
+                    var lineText = line.Text;
+                    // if the line was tagged with the TruncateLastLineMarkupName marker we want to clean that up before display
+                    if (line.TryGetAttributeWithName(TruncateLastLineMarkupName, out var markup))
+                    {
+                        // we get the substring of 0 -> markup position
+                        // and replace that range with ...
+                        var end = lineText.Substring(markup.Position);
+                        lineText = "..." + end;
+                    }
+
                     if (lastLineText != null)
                     {
-                        lastLineText.text = line.Text;
+                        lastLineText.text = lineText;
                     }
 
                     lastLineContainer.SetActive(true);
