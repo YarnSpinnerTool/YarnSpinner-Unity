@@ -27,7 +27,7 @@ title: Start
 
 <<set_animator_bool Tom Floating true>>
 <<expression Tom frowning>>
-<<face Tom eyebrows-out>>
+<<face Tom surprised>>
  
 <<set_fade_color 1>>
 
@@ -78,13 +78,13 @@ Anne: Hi there! #line:tutorial-anne-01 // chirpy
 Tom: How did I get here? #line:tutorial-tom-07
 Anne: Oh, a writer put you here. This is a test conversation for Yarn Spinner! #line:tutorial-anne-04
 
-<<face Tom eyebrows-single 0.25>>
+<<face Tom sus 0.25>>
 Tom: What's Yarn Spinner? #line:tutorial-tom-08
 
-<<face Tom eyebrows-neutral 0.25>>
+<<face Tom neutral 0.25>>
 Anne: Don't worry about it! #line:tutorial-anne-05 // breezy 
 
-<<face Tom eyebrows-in 0.25>>
+<<face Tom angry 0.25>>
 
 // Check to see if the variable was set. The line that Tom says changes
 // depending on whether he knows Anne's name.
@@ -96,7 +96,7 @@ Anne: Don't worry about it! #line:tutorial-anne-05 // breezy
 
 Anne: That's ok! This will all go away in a moment. #line:tutorial-anne-06 // reassuring 
 
-<<face Tom eyebrows-out 0.1>>
+<<face Tom surprised 0.1>>
 Tom: What?! #line:tutorial-tom-11 // surprised, confused 
 
 // The game suddenly quits. The 'quit' command is custom-defined by a

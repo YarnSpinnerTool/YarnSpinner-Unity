@@ -79,14 +79,16 @@ MonoBehaviour:
   acceleration: 0.2
   deceleration: 0.1
   lookTarget: {fileID: 0}
-  falloutYPosition: -5
+  outOfBoundsYPosition: -5
+  followPath: {fileID: 0}
+  pathDestinationTolerance: 0.1
   animator: {fileID: 6638091402538635223}
   facialExpressions:
     m_keys:
-    - eyebrows-in
-    - eyebrows-out
-    - eyebrows-single
-    - eyebrows-neutral
+    - angry
+    - surprised
+    - sus
+    - neutral
     m_values:
     - Eyebrows-In
     - Eyebrows-Out

@@ -65,8 +65,7 @@ namespace Yarn.Unity.Samples
             }
         }
 
-        // later make this a YarnTask when the bug is fixed
-        public async Awaitable MoveCharacter(string endMarker)
+        public async YarnTask MoveCharacter(string endMarker)
         {
             var position = GameObject.Find(endMarker);
             if (position == null)

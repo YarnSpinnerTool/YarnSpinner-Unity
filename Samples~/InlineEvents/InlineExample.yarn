@@ -15,7 +15,7 @@ Player: is it just for movement?
 
 Alice: nope you can use it for practically any...
 Player: like changing emotions?!
-Alice: Yes... which I would have shown [emotion="frown" /] had [b]you[/b] not interrupted me.
+Alice: Yes... which I would have shown [emotion="angry" /] had [b]you[/b] not interrupted me.
 Player: oh sorry
 Alice: [i]sigh[/i][emotion="neutral" /]  it's ok.
 Alice: Checkout out the [b]Event Handlers[/b] in this scene to see how they work.

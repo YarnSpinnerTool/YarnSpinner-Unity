@@ -18,7 +18,7 @@ namespace Yarn.Unity.Samples
 {
     public class EmotionEvent : ActionMarkupHandler
     {
-        private Yarn.Unity.Samples.SimpleCharacter target;
+        private SimpleCharacter target;
         Dictionary<int, string> emotions;
 
         public override void OnLineDisplayComplete()
@@ -54,14 +54,12 @@ namespace Yarn.Unity.Samples
                 return;
             }
 
-            target = emoter.GetComponent<Yarn.Unity.Samples.SimpleCharacter>();
+            target = emoter.GetComponent<SimpleCharacter>();
             if (target == null)
             {
                 Debug.Log($"{name.StringValue} is not a SimpleCharacterAnimation");
                 return;
             }
-
-            Debug.Log($"found a valid target, {name.StringValue}");
 
             emotions = new();
 
