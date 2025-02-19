@@ -3,8 +3,9 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
 using UnityEngine;
+using UnityEditor;
 
-namespace Yarn.Unity
+namespace Yarn.Unity.Samples
 {
     /// <summary>
     /// Detects if the render pipeline is different from the one the samples
@@ -13,6 +14,7 @@ namespace Yarn.Unity
     /// <remarks>
     /// This component only exists to be added into the Yarn Spinner sample
     /// scenes.
+    /// You are safe to delete this.
     /// </remarks>
     [ExecuteInEditMode]
     public sealed class SampleRenderDetector : MonoBehaviour
@@ -25,9 +27,25 @@ namespace Yarn.Unity
             //
             // There are some edge cases this won't detect, but will work well
             // enough.
-            if (UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline)
+            if (UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline == null)
             {
-                Debug.LogWarning("These samples were created using the built in render pipeline, things will not appear correctly. You should upgrade the materials to be compatible.");
+                Debug.LogWarning("The samples were created using the Universal Render Pipeline, things will not appear correctly. You will need to convert the materials to be compatible.");
+            }
+        }
+    }
+
+    [CustomEditor(typeof(SampleRenderDetector))]
+    public class SampleRenderDetectorEditor : UnityEditor.Editor
+    {
+        public override void OnInspectorGUI()
+        {
+            if (UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline == null)
+            {
+                EditorGUILayout.HelpBox("The samples were created using the Universal Render Pipeline, things will not appear correctly.\nYou are safe to delete this game object.", MessageType.Error);
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("This object detects if samples were created using the URP.\nYou are safe to delete this game object.", MessageType.Info);
             }
         }
     }
