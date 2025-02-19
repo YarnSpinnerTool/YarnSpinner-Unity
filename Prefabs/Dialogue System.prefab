@@ -853,7 +853,7 @@ MonoBehaviour:
   runner: {fileID: 8309902628685535410}
   multiAdvanceIsCancel: 0
   advanceRequestsBeforeCancellingLine: 2
-  inputMode: 0
+  inputMode: 1
   hurryUpLineAction: {fileID: 0}
   nextLineAction: {fileID: 0}
   cancelDialogueAction: {fileID: 0}
