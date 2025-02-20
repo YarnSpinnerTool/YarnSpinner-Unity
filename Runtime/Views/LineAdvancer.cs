@@ -398,7 +398,7 @@ namespace Yarn.Unity
         /// cref="inputMode"/>, the <see cref="LineAdvancer"/> should take
         /// action.
         /// </summary>
-        protected void Update()
+        private void Update()
         {
             switch (inputMode)
             {

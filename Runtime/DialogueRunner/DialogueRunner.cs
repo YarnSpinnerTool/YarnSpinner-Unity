@@ -371,7 +371,7 @@ namespace Yarn.Unity
         /// <summary>
         /// Called by Unity to set up the object.
         /// </summary>
-        protected void Awake()
+        private void Awake()
         {
             if (this.VariableStorage != null && this.YarnProject != null)
             {
@@ -388,7 +388,7 @@ namespace Yarn.Unity
         /// Called by Unity to start running dialogue if <see cref="autoStart"/>
         /// is enabled.
         /// </summary>
-        protected void Start()
+        private void Start()
         {
             if (autoStart)
             {
@@ -409,7 +409,7 @@ namespace Yarn.Unity
         /// Called by Unity to cancel the current dialogue when the Dialogue
         /// Runner is destroyed.
         /// </summary>
-        protected void OnDestroy()
+        private void OnDestroy()
         {
             CancelDialogue();
         }

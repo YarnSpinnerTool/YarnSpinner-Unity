@@ -342,7 +342,10 @@ namespace Yarn.Unity.Editor
             {
                 ProjectImportData.LocalizationEntry locInfo;
 
-                if (string.IsNullOrEmpty(loc.Value.Strings) == false && loc.Value.Strings.StartsWith("unity:"))
+                // am force unwrapping the strings due to a bug
+                // the IsNullOrEmpty check on this version of dotnet doesn't propogate it's understanding that the value isn't null
+                // in a future version this will go away as a concern.
+                if (string.IsNullOrEmpty(loc.Value.Strings) == false && loc.Value.Strings!.StartsWith("unity:"))
                 {
                     // This is an external Localization asset.
                     locInfo = new ProjectImportData.LocalizationEntry
@@ -1093,7 +1096,7 @@ namespace Yarn.Unity.Editor
                 }
 
                 projectAsset.baseLocalization = developmentLocalization;
-                projectAsset.localizations.Add(importData.baseLanguageName, projectAsset.baseLocalization);
+                projectAsset.localizations.Add(importData.baseLanguageName ?? developmentLocalization.name, projectAsset.baseLocalization);
                 ctx.AddObjectToAsset("default-language", developmentLocalization);
 
                 // Since this is the default language, also populate the line metadata.
@@ -1500,7 +1503,10 @@ namespace Yarn.Unity.Editor
             var projectFolderRelative = Path.GetDirectoryName(project.Path);
             var projectFolderAbsolute = Path.GetFullPath(Path.Combine(YarnProjectImporter.UnityProjectRootPath, projectFolderRelative));
 
-            var expandedPath = info.Strings.Replace(YarnProjectImporter.UnityProjectRootVariable, YarnProjectImporter.UnityProjectRootPath);
+            // am force unwrapping the strings due to a bug
+            // the IsNullOrEmpty check on this version of dotnet doesn't propogate it's understanding that the value isn't null
+            // in a future version this will go away as a concern.
+            var expandedPath = info.Strings!.Replace(YarnProjectImporter.UnityProjectRootVariable, YarnProjectImporter.UnityProjectRootPath);
 
             if (Path.IsPathRooted(expandedPath) == false)
             {
@@ -1541,7 +1547,10 @@ namespace Yarn.Unity.Editor
             var projectFolderRelative = Path.GetDirectoryName(project.Path);
             var projectFolderAbsolute = Path.GetFullPath(Path.Combine(YarnProjectImporter.UnityProjectRootPath, projectFolderRelative));
 
-            var expandedPath = info.Assets.Replace(YarnProjectImporter.UnityProjectRootVariable, YarnProjectImporter.UnityProjectRootPath);
+            // am force unwrapping the strings due to a bug
+            // the IsNullOrEmpty check on this version of dotnet doesn't propogate it's understanding that the value isn't null
+            // in a future version this will go away as a concern.
+            var expandedPath = info.Assets!.Replace(YarnProjectImporter.UnityProjectRootVariable, YarnProjectImporter.UnityProjectRootPath);
 
             if (Path.IsPathRooted(expandedPath) == false)
             {

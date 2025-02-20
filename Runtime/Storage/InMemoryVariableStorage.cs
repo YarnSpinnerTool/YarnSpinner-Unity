@@ -185,18 +185,6 @@ namespace Yarn.Unity
                     result = default;
                     return false;
             }
-
-            var resultObject = variables[variableName];
-
-            if (typeof(T).IsAssignableFrom(resultObject.GetType()))
-            {
-                result = (T)resultObject;
-                return true;
-            }
-            else
-            {
-                throw new System.InvalidCastException($"Variable {variableName} exists, but is the wrong type (expected {typeof(T)}, got {resultObject.GetType()}");
-            }
         }
 
         /// <summary>

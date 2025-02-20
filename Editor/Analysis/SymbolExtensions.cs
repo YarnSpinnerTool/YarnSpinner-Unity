@@ -5,6 +5,8 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 using Microsoft.CodeAnalysis;
 using System.Linq;
 
+#nullable enable
+
 static class SymbolExtensions
 {
 

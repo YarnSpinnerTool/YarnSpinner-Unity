@@ -75,7 +75,7 @@ public sealed class PaletteMarkerProcessor : Yarn.Unity.ReplacementMarkupHandler
     /// Called by Unity when this script is enabled to register itself with <see
     /// cref="lineProvider"/>.
     /// </summary>
-    protected void Start()
+    private void Start()
     {
         if (palette == null)
         {

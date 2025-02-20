@@ -7,6 +7,8 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     public class ProjectImportData : ScriptableObject
@@ -23,8 +25,8 @@ namespace Yarn.Unity
         public struct LocalizationEntry
         {
             public string languageID;
-            public DefaultAsset assetsFolder;
-            public TextAsset stringsFile;
+            public DefaultAsset? assetsFolder;
+            public TextAsset? stringsFile;
             public bool isExternal;
             public Localization? externalLocalization;
         }
@@ -32,7 +34,7 @@ namespace Yarn.Unity
         [System.Serializable]
         public struct DiagnosticEntry
         {
-            public TextAsset yarnFile;
+            public TextAsset? yarnFile;
             public List<string> errorMessages;
         }
 
@@ -52,7 +54,7 @@ namespace Yarn.Unity
 
         public List<LocalizationEntry> localizations = new List<LocalizationEntry>();
 
-        public string baseLanguageName;
+        public string? baseLanguageName;
 
         public LocalizationEntry BaseLocalizationEntry
         {

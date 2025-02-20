@@ -98,7 +98,7 @@ namespace Yarn.Unity
         /// <summary>
         /// Called by Unity to set up the object.
         /// </summary>
-        protected void Start()
+        private void Start()
         {
             if (canvasGroup != null)
             {

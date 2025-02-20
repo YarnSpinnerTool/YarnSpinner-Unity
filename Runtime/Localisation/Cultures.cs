@@ -104,7 +104,9 @@ namespace Yarn.Unity
                 {
                     current = current.Parent;
                 }
-                return GetCulture(current.Name); ;
+                
+                TryGetCulture(current.Name, out var culture);
+                return culture;
             }
         }
     }

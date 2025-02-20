@@ -235,7 +235,7 @@ namespace Yarn.Unity
         /// <summary>
         /// Called by Unity on first frame.
         /// </summary>
-        protected void Awake()
+        private void Awake()
         {
             if (useTypewriterEffect)
             {
@@ -252,7 +252,7 @@ namespace Yarn.Unity
             }
         }
 
-        protected void Start()
+        private void Start()
         {
             // we add all the monobehaviour handlers into the shared list
             temporalProcessors.AddRange(actionMarkupHandlers);

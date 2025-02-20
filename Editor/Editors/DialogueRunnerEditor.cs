@@ -435,7 +435,6 @@ namespace Yarn.Unity.Editor
     public abstract class YarnEditor : UnityEditor.Editor
     {
         internal const string ScriptPropertyName = "m_Script";
-        private static bool ShowCallbacks = false;
 
         private string? currentGroup;
 

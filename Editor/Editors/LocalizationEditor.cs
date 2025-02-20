@@ -71,10 +71,10 @@ namespace Yarn.Unity.Editor
     [CanEditMultipleObjects]
     public class LocalizationEditor : UnityEditor.Editor
     {
-        private SerializedProperty entriesProperty;
-        private SerializedProperty usesUnityAddressablesProperty;
+        private SerializedProperty? entriesProperty;
+        private SerializedProperty? usesUnityAddressablesProperty;
         private AudioClip? lastPreviewed;
-        private List<Culture> cultures;
+        private List<Culture>? cultures;
         private int currentPickerWindow;
 
         private void OnEnable()
@@ -83,7 +83,6 @@ namespace Yarn.Unity.Editor
             usesUnityAddressablesProperty = serializedObject.FindProperty(nameof(Localization._usesAddressableAssets));
             lastPreviewed = null;
             cultures = Cultures.GetCultures().ToList();
-
         }
 
         public override void OnInspectorGUI()
@@ -112,7 +111,7 @@ namespace Yarn.Unity.Editor
                     EditorGUILayout.PropertyField(usesUnityAddressablesProperty);
                     EditorGUILayout.Space();
 #else
-                    if (usesUnityAddressablesProperty.boolValue)
+                    if (usesUnityAddressablesProperty != null && usesUnityAddressablesProperty.boolValue)
                     {
                         EditorGUILayout.HelpBox("This Localization uses Unity Addressables, but the package is not installed.", MessageType.Warning);
                         EditorGUILayout.Space();
