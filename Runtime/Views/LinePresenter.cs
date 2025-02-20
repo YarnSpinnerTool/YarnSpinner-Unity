@@ -26,9 +26,6 @@ namespace Yarn.Unity
     [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-view/line-view")]
     public sealed class LinePresenter : DialoguePresenterBase
     {
-        [MustNotBeNullWhen(nameof(continueButton), "A " + nameof(DialogueRunner) + " must be provided when a continue button is set.")]
-        [SerializeField] DialogueRunner? dialogueRunner;
-
         /// <summary>
         /// The canvas group that contains the UI elements used by this Line
         /// View.
@@ -49,21 +46,6 @@ namespace Yarn.Unity
         /// </summary>
         [MustNotBeNull]
         public TMP_Text? lineText;
-
-        /// <summary>
-        /// The <see cref="Button"/> that represents an on-screen button that
-        /// the user can click to continue to the next piece of dialogue.
-        /// </summary>
-        /// <remarks>
-        /// <para>This button's game object will be made inactive when a line
-        /// begins appearing, and active when the line has finished
-        /// appearing.</para>
-        /// <para>When the button is clicked, <see cref="dialogueRunner"/>'s
-        /// <see cref="DialogueRunner.RequestNextLine"/> will be called to
-        /// signal that the current line should finish up.</para>
-        /// </remarks>
-        /// <seealso cref="autoAdvance"/>
-        public Button? continueButton;
 
         /// <summary>
         /// Controls whether the <see cref="lineText"/> object will show the
@@ -227,7 +209,8 @@ namespace Yarn.Unity
         [Group("Typewriter")]
         [ShowIf(nameof(useTypewriterEffect))]
         [Label("Event Processors")]
-        public List<ActionMarkupHandler> temporalProcessors = new List<ActionMarkupHandler>();
+        [SerializeField] List<ActionMarkupHandler> actionMarkupHandlers = new List<ActionMarkupHandler>();
+        public List<IActionMarkupHandler> temporalProcessors = new List<IActionMarkupHandler>();
 
         /// <inheritdoc/>
         public override YarnTask OnDialogueCompleteAsync()
@@ -259,7 +242,7 @@ namespace Yarn.Unity
                 // need to add a pause handler also
                 // and add it to the front of the list
                 // that way it always happens first
-                var pauser = gameObject.AddComponent<PauseEventProcessor>();
+                var pauser = new PauseEventProcessor();
                 temporalProcessors.Insert(0, pauser);
             }
 
@@ -267,16 +250,12 @@ namespace Yarn.Unity
             {
                 characterNameContainer = characterNameText.gameObject;
             }
+        }
 
-            if (dialogueRunner == null)
-            {
-                // If we weren't provided with a dialogue runner at design time, try to find one now
-                dialogueRunner = FindAnyObjectByType<DialogueRunner>();
-                if (dialogueRunner == null)
-                {
-                    Debug.LogWarning($"{nameof(LinePresenter)} failed to find a dialogue runner! Please ensure that a {nameof(DialogueRunner)} is present, or set the {nameof(dialogueRunner)} property in the Inspector.", this);
-                }
-            }
+        protected void Start()
+        {
+            // we add all the monobehaviour handlers into the shared list
+            temporalProcessors.AddRange(actionMarkupHandlers);
         }
 
         /// <summary>Presents a line using the configured text view.</summary>
@@ -321,22 +300,6 @@ namespace Yarn.Unity
                 text = line.TextWithoutCharacterName;
             }
             lineText.text = text.Text;
-
-            // note to self: this can be removed and made it's own view
-            // setting the continue button up to let us advance dialogue
-            if (continueButton != null)
-            {
-                continueButton.onClick.AddListener(() =>
-                {
-                    if (dialogueRunner == null)
-                    {
-                        Debug.LogWarning($"Continue button was clicked, but {nameof(dialogueRunner)} is null!", this);
-                        return;
-                    }
-
-                    dialogueRunner.RequestNextLine();
-                });
-            }
 
             // the typewriter requires all characters to be hidden at the start so they can be shown one at a time
             if (useTypewriterEffect)
@@ -416,6 +379,12 @@ namespace Yarn.Unity
                 await YarnTask.WaitUntilCanceled(token.NextLineToken).SuppressCancellationThrow();
             }
 
+            // we tell all action processors that the line is finished and is about to go away
+            foreach (var processor in temporalProcessors)
+            {
+                processor.OnLineWillDismiss();
+            }
+
             if (canvasGroup != null)
             {
                 // we fade down the UI
@@ -427,12 +396,6 @@ namespace Yarn.Unity
                 {
                     canvasGroup.alpha = 0;
                 }
-            }
-
-            // the final bit of clean up is to remove the cancel listener from the button
-            if (continueButton != null)
-            {
-                continueButton.onClick.RemoveAllListeners();
             }
         }
 

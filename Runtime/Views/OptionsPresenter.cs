@@ -198,8 +198,6 @@ namespace Yarn.Unity
             // Start waiting 
             CancelSourceWhenDialogueCancelled().Forget();
 
-            // tracks the options views created so we can use it to configure the interaction correctly
-            int optionViewsCreated = 0;
             for (int i = 0; i < dialogueOptions.Length; i++)
             {
                 var optionView = optionViews[i];
@@ -216,14 +214,41 @@ namespace Yarn.Unity
 
                 optionView.OnOptionSelected = selectedOptionCompletionSource;
                 optionView.completionToken = completionCancellationSource.Token;
-
-                // The first available option is selected by default
-                if (optionViewsCreated == 0)
+            }
+            
+            // There is a bug that can happen where in-between option items being configured one can be selected
+            // and because the items are still being configured the others don't get the deselect message
+            // which means visually two items are selected.
+            // So instead now after configuring them we find if any are highlighted, and if so select that one
+            // otherwise select the first non-deactivated one
+            // because at this point now all of them are configured they will all get the select/deselect message
+            int optionIndexToSelect = -1;
+            for (int i = 0; i < optionViews.Count; i++)
+            {
+                var view = optionViews[i];
+                if (!view.isActiveAndEnabled)
                 {
-                    Debug.Log("selected");
-                    optionView.Select();
+                    continue;
                 }
-                optionViewsCreated += 1;
+
+                if (view.IsHighlighted)
+                {
+                    optionIndexToSelect = i;
+                    break;
+                }
+
+                // ok at this point the view is enabled
+                // but not highlighted
+                // so if we haven't already decreed we have found one to select
+                // we select this one
+                if (optionIndexToSelect == -1)
+                {
+                    optionIndexToSelect = i;
+                }
+            }
+            if (optionIndexToSelect > -1)
+            {
+                optionViews[optionIndexToSelect].Select();
             }
 
             // Update the last line, if one is configured

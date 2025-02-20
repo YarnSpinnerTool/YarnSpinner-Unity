@@ -92,5 +92,10 @@ namespace Yarn.Unity.Samples
 
             return YarnTask.CompletedTask;
         }
+
+        public override void OnLineWillDismiss()
+        {
+            return;
+        }
     }
 }

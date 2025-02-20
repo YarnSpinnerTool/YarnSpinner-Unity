@@ -74,5 +74,10 @@ namespace Yarn.Unity.Samples
             }
             await playerCharacter.MoveTo(position.transform.position, CancellationToken.None);
         }
+
+        public override void OnLineWillDismiss()
+        {
+            return;
+        }
     }
 }

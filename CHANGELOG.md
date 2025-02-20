@@ -72,6 +72,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `LineMetadata` now has public API methods for constructing and manually adding elements.
 - `DialogueRunner.SetProject` now sets the `Program` of its internal `Dialogue` object. Previously, this didn't happen until `StartDialogue()`.
 - Added a sample (Advanced Saliency) making use of templated nodes and built in saliency to show off creating storylet vignettes.
+- `IActionMarkupHandler` interface which the `ActionMarkupHandler` monobehaviour now conforms to
+- Action markup handlers now has a `OnLineWillDismiss` method which is called right before the line view fades itself away.
+- `LinePresenterButtonHandler` is a new `ActionMarkupHandler` subclass that manages the continue button on the line view.
 
 ### Changed
 
@@ -106,6 +109,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `LanguageAttribute` and `YarnNodeAttribute` are now in the `Yarn.Unity.Attributes` namespace.
 - Facial expressions on the NPCs now have more common names.
 - `MoveEvent.cs` now uses YarnTasks instead of `Awaitable`
+- `ActionMarkupHandler` now conforms to the `IActionMarkupHandler` interface
+- `LinePresenter` now has a public list of `IActionMarkupHandler` for non-monobehaviour based markup handling.
+- `PauseEventProcessor` is now just an `IActionMarkupHandler` and no longer a monobehaviour.
+- Fixed a bug that could cause multiple option items to be selected at once.
 
 
 ### Removed
@@ -113,6 +120,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `YarnProject.GetHeaders` is now deprecated, in favour of `DialogueRunner.Dialogue.GetHeaders`.
 - `TypewriterHandler`, this behaviour is now intrinsic to the `AsyncLineView`.
 - Removed the `tags` header from the template new yarn file as it is no longer the best way to add metadata headers into a node.
+- Removed Continue Button support from the `LinePresenter`
 
 ## [3.0.0-beta1] 2024-11-30
 

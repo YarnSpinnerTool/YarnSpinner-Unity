@@ -10,7 +10,7 @@ using Yarn.Markup;
 #if USE_TMP
 using TMPro;
 #else
-using TextMeshProUGUI = Yarn.Unity.TMPShim;
+using TMP_Text = Yarn.Unity.TMPShim;
 #endif
 
 namespace Yarn.Unity
@@ -18,15 +18,15 @@ namespace Yarn.Unity
     /// <summary>
     /// Allows pausing the current typewrite through [pause/] markers.
     /// </summary>
-    public sealed class PauseEventProcessor : ActionMarkupHandler
+    public sealed class PauseEventProcessor : IActionMarkupHandler
     {
         private Dictionary<int, float> pauses = new();
-        public override void OnLineDisplayComplete()
+        public void OnLineDisplayComplete()
         {
             pauses.Clear();
         }
 
-        public override void OnLineDisplayBegin(MarkupParseResult line, TMP_Text text)
+        public void OnLineDisplayBegin(MarkupParseResult line, TMP_Text text)
         {
             pauses = new();
             // grabbing out any pauses inside the line
@@ -65,17 +65,22 @@ namespace Yarn.Unity
             }
         }
 
-        public override void OnPrepareForLine(MarkupParseResult line, TMP_Text text)
+        public void OnPrepareForLine(MarkupParseResult line, TMP_Text text)
         {
             return;
         }
 
-        public override async YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line, CancellationToken cancellationToken)
+        public async YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line, CancellationToken cancellationToken)
         {
             if (pauses.TryGetValue(currentCharacterIndex, out var duration))
             {
                 await YarnTask.Delay(System.TimeSpan.FromMilliseconds(duration), cancellationToken).SuppressCancellationThrow();
             }
+        }
+
+        public void OnLineWillDismiss()
+        {
+            return;
         }
     }
 }

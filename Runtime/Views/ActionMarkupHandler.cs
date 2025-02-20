@@ -14,6 +14,15 @@ using TMP_Text = Yarn.Unity.TMPShim;
 
 namespace Yarn.Unity
 {
+    public interface IActionMarkupHandler
+    {
+        public void OnPrepareForLine(MarkupParseResult line, TMP_Text text);
+        public void OnLineDisplayBegin(MarkupParseResult line, TMP_Text text);
+        public YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line, CancellationToken cancellationToken);
+        public void OnLineDisplayComplete();
+        public void OnLineWillDismiss();
+    }
+
     /// <summary>
     /// A <see cref="ActionMarkupHandler"/> is an object that reacts to the
     /// delivery of a line of dialogue, and can optionally control the timing of
@@ -33,7 +42,7 @@ namespace Yarn.Unity
     /// of the line).
     /// </para>
     /// </remarks>
-    public abstract class ActionMarkupHandler : MonoBehaviour
+    public abstract class ActionMarkupHandler : MonoBehaviour, IActionMarkupHandler
     {
         /// <summary>
         /// Called when the line view receives the line, to prepare for showing
@@ -84,5 +93,10 @@ namespace Yarn.Unity
         /// cref="ActionMarkupHandler"/> to finalise its presentation after
         /// all of the characters in the line have been presented.</remarks>
         public abstract void OnLineDisplayComplete();
+
+        /// <summary>
+        /// Called right before the line will dismiss itself.
+        /// </summary>
+        public abstract void OnLineWillDismiss();
     }
 }
