@@ -75,8 +75,6 @@ namespace Yarn.Unity.Samples
         [Group("Animation")]
         [SerializeField] SerializableDictionary<string, string> facialExpressions = new();
         [Group("Animation")]
-        [SerializeField] string defaultFace = "";
-        [Group("Animation")]
         [SerializeField] string facialExpressionsLayer = "Face";
         private int facialExpressionsLayerID = 0;
 

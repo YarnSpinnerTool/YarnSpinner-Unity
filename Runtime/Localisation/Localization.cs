@@ -172,6 +172,7 @@ namespace Yarn.Unity
 
         #region Localised Objects
 
+#if USE_ADDRESSABLES
         public async YarnTask<T?> GetLocalizedObjectAsync<T>(string key) where T : UnityEngine.Object
         {
             if (!entries.TryGetValue(key, out var entry))
@@ -179,7 +180,6 @@ namespace Yarn.Unity
                 return null;
             }
 
-#if USE_ADDRESSABLES
             if (_usesAddressableAssets)
             {
                 if (entry.localizedAssetReference == null || entry.localizedAssetReference.RuntimeKeyIsValid() == false) { return null; }
@@ -187,11 +187,25 @@ namespace Yarn.Unity
                 // Try to fetch the referenced asset
                 return await UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(entry.localizedAssetReference).Task;
             }
-#endif
 
             if (entry.localizedAsset is T resultAsTargetObject)
             {
                 return resultAsTargetObject;
+            }
+
+            return null;
+        }
+#endif
+        public YarnTask<T?> GetLocalizedObjectAsync<T>(string key) where T : UnityEngine.Object
+        {
+            if (!entries.TryGetValue(key, out var entry))
+            {
+                return YarnTask<T?>.FromResult(null);
+            }
+
+            if (entry.localizedAsset is T resultAsTargetObject)
+            {
+                return YarnTask.FromResult<T?>(resultAsTargetObject);
             }
 
             return null;
