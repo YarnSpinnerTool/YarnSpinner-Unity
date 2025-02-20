@@ -121,10 +121,10 @@ PrefabInstance:
     - target: {fileID: 3255585012628313904, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
       propertyPath: dialogue.project
       value: 
-      objectReference: {fileID: 7545569452688597077, guid: 1b9504c31066f40478ba95ad5cd842dc, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 3255585012628313904, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
       propertyPath: dialogue.nodeName
-      value: Start
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4490764441529317274, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
       propertyPath: m_LocalPosition.x
