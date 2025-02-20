@@ -5,7 +5,8 @@
         "YarnSpinner.Unity",
         "Unity.TextMeshPro",
         "Unity.InputSystem",
-        "Unity.Localization"
+        "Unity.Localization",
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -113,6 +113,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `LinePresenter` now has a public list of `IActionMarkupHandler` for non-monobehaviour based markup handling.
 - `PauseEventProcessor` is now just an `IActionMarkupHandler` and no longer a monobehaviour.
 - Fixed a bug that could cause multiple option items to be selected at once.
+- The awaitable version of `YarnTask.Delay` no longer throws.
 
 
 ### Removed

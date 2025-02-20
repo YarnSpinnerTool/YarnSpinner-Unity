@@ -114,8 +114,16 @@ namespace Yarn.Unity
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static partial YarnTask Delay(TimeSpan timeSpan, CancellationToken token)
         {
-            return Awaitable.WaitForSecondsAsync((float)timeSpan.TotalSeconds, token);
+            try
+            {
+                return Awaitable.WaitForSecondsAsync((float)timeSpan.TotalSeconds, token);
+            }
+            catch (OperationCanceledException)
+            {
+                return YarnTask.CompletedTask;
+            }
         }
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async static partial YarnTask WaitUntil(System.Func<bool> predicate, System.Threading.CancellationToken token)
