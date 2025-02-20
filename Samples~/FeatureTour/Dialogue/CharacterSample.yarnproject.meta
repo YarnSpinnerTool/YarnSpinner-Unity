@@ -8,8 +8,10 @@ ScriptedImporter:
   assetBundleName: 
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 053561912b1654d80a424bb0696a74ae, type: 3}
-  generateVariablesSourceFile: 1
+  generateVariablesSourceFile: 0
   variablesClassName: YarnVariables
   variablesClassNamespace: MyGame
   variablesClassParent: Yarn.Unity.InMemoryVariableStorage
   useAddressableAssets: 0
+  unityLocalisationStringTableCollectionGUID: 
+  UseUnityLocalisationSystem: 0
