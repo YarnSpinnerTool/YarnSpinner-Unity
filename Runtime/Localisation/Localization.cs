@@ -195,7 +195,7 @@ namespace Yarn.Unity
 
             return null;
         }
-#endif
+#else
         public YarnTask<T?> GetLocalizedObjectAsync<T>(string key) where T : UnityEngine.Object
         {
             if (!entries.TryGetValue(key, out var entry))
@@ -210,6 +210,7 @@ namespace Yarn.Unity
 
             return null;
         }
+#endif
 
 #if UNITY_EDITOR
         internal T? GetLocalizedObjectSync<T>(string key) where T : UnityEngine.Object
@@ -277,7 +278,7 @@ namespace Yarn.Unity
             entry.localizedAsset = value;
         }
 #endif
-        #endregion
+#endregion
 
         public virtual void Clear()
         {

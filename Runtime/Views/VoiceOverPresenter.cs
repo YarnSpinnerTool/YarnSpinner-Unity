@@ -109,7 +109,7 @@ namespace Yarn.Unity
         /// LineCancellationToken)" path="/param"/>
         /// <seealso cref="DialoguePresenterBase.RunLineAsync(LocalizedLine,
         /// LineCancellationToken)"/>
-        public override async YarnTask RunLineAsync(LocalizedLine dialogueLine, LineCancellationToken lineCancellationToken)
+        public override async YarnTask RunLineAsync(DialogueRunner runner, LocalizedLine dialogueLine, LineCancellationToken lineCancellationToken)
         {
             // Get the localized voice over audio clip
             AudioClip? voiceOverClip = null;
@@ -240,7 +240,7 @@ namespace Yarn.Unity
         }
 
         /// <inheritdoc/>
-        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueRunner runner, DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             return DialogueRunner.NoOptionSelected;
         }

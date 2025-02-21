@@ -245,7 +245,7 @@ namespace Yarn.Unity.Legacy
         }
 
         /// <inheritdoc/>
-        public override void DismissLine(Action onDismissalComplete)
+        public override void DismissLine(DialogueRunner runner, Action onDismissalComplete)
         {
             currentLine = null;
 
@@ -278,7 +278,7 @@ namespace Yarn.Unity.Legacy
         }
 
         /// <inheritdoc/>
-        public override void InterruptLine(LocalizedLine dialogueLine, Action onInterruptLineFinished)
+        public override void InterruptLine(DialogueRunner runner, LocalizedLine dialogueLine, Action onInterruptLineFinished)
         {
             if (this == null)
             {
@@ -333,7 +333,7 @@ namespace Yarn.Unity.Legacy
         }
 
         /// <inheritdoc/>
-        public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
+        public override void RunLine(DialogueRunner runner, LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
             // Stop any coroutines currently running on this line view (for
             // example, any other RunLine that might be running)

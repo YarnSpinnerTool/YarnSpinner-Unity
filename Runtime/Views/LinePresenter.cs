@@ -261,7 +261,7 @@ namespace Yarn.Unity
         /// <summary>Presents a line using the configured text view.</summary>
         /// <inheritdoc cref="DialoguePresenterBase.RunLineAsync(LocalizedLine, LineCancellationToken)" path="/param"/>
         /// <inheritdoc cref="DialoguePresenterBase.RunLineAsync(LocalizedLine, LineCancellationToken)" path="/returns"/>
-        public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
+        public override async YarnTask RunLineAsync(DialogueRunner runner, LocalizedLine line, LineCancellationToken token)
         {
             if (lineText == null)
             {
@@ -405,7 +405,7 @@ namespace Yarn.Unity
         /// <remarks>
         /// This dialogue view does not handle any options.
         /// </remarks>
-        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueRunner runner, DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             return YarnTask<DialogueOption?>.FromResult(null);
         }

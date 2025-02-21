@@ -78,7 +78,7 @@ namespace Yarn.Unity
         /// showing the line to the user.</returns>
         /// <seealso cref="RunOptionsAsync(DialogueOption[],
         /// CancellationToken)"/>
-        public abstract YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token);
+        public abstract YarnTask RunLineAsync(DialogueRunner runner, LocalizedLine line, LineCancellationToken token);
 
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Yarn.Unity
         /// <returns>A task that indicates which option was selected, or that this dialogue view did not select an option.</returns>
         /// <seealso cref="RunLineAsync(LocalizedLine, LineCancellationToken)"/>
         /// <seealso cref="YarnAsync.NoOptionSelected"/> 
-        public abstract YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken);
+        public abstract YarnTask<DialogueOption?> RunOptionsAsync(DialogueRunner runner, DialogueOption[] dialogueOptions, CancellationToken cancellationToken);
 
         /// <summary>Called by the <see cref="DialogueRunner"/> to signal that
         /// dialogue has started.</summary>
