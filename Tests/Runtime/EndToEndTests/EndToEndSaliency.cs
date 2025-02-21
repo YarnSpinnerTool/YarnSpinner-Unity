@@ -44,10 +44,10 @@ namespace Yarn.Unity.Tests
                     instance.saliency = new BestSaliencyStrategy();
                     break;
                 case "best-least-recent":
-                    instance.saliency = new BestLeastRecentlyViewedSalienceStrategy(storage);
+                    instance.saliency = new BestLeastRecentlyViewedSaliencyStrategy(storage);
                     break;
                 case "random-best-least-recent":
-                    instance.saliency = new RandomBestLeastRecentlyViewedSalienceStrategy(storage);
+                    instance.saliency = new RandomBestLeastRecentlyViewedSaliencyStrategy(storage);
                     break;
                 default:
                     Debug.LogError("Unknown saliency strategy " + saliencyType);

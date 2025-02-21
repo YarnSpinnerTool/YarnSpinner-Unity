@@ -84,10 +84,10 @@ namespace Yarn.Unity.Samples
                     strategy = new RandomSaliencyStrategy();
                     break;
                 case SaliencyType.RandomBestLeastRecentlyViewed:
-                    strategy = new RandomBestLeastRecentlyViewedSalienceStrategy(dialogueRunner.VariableStorage);
+                    strategy = new RandomBestLeastRecentlyViewedSaliencyStrategy(dialogueRunner.VariableStorage);
                     break;
                 case SaliencyType.BestLeastRecentlyViewed:
-                    strategy = new BestLeastRecentlyViewedSalienceStrategy(dialogueRunner.VariableStorage);
+                    strategy = new BestLeastRecentlyViewedSaliencyStrategy(dialogueRunner.VariableStorage);
                     break;
                 case SaliencyType.Best:
                     strategy = new BestSaliencyStrategy();
