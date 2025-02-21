@@ -45,9 +45,9 @@ namespace Yarn.Unity.Samples
             {
                 if (attribute.Name == "move")
                 {
-                    if (attribute.TryGetProperty("name", out var namedPos))
+                    if (attribute.TryGetProperty("name", out string namedPos))
                     {
-                        var position = GameObject.Find(namedPos.StringValue);
+                        var position = GameObject.Find(namedPos);
                         if (position != null)
                         {
                             movements[attribute.Position] = position.transform.position;

@@ -29,17 +29,10 @@ namespace Yarn.Unity.Samples
         private char[] replacementChars = { '?', '^', ';', '*', '&', '#', '!', '@', '<', '_' };
         public override List<LineParser.MarkupDiagnostic> ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, string localeCode)
         {
-            // making sure we have an obscurity property
-            if (!marker.TryGetProperty("obscurity", out var value))
+            // making sure we have an obscurity integer property
+            if (!marker.TryGetProperty("obscurity", out int value))
             {
                 var diagnostic = new LineParser.MarkupDiagnostic("Missing the obscurity property, we cannot continue without it.");
-                return new List<LineParser.MarkupDiagnostic>() {diagnostic};
-            }
-
-            // and it is an integer
-            if (value.Type != MarkupValueType.Integer)
-            {
-                var diagnostic = new LineParser.MarkupDiagnostic("The obscurity property is not an integer, we cannot continue without it being an integer.");
                 return new List<LineParser.MarkupDiagnostic>() {diagnostic};
             }
 
@@ -48,7 +41,7 @@ namespace Yarn.Unity.Samples
             // 1 is 66% obscured
             // 2 is 25% obscured
             // all other values is not obscured at all
-            switch (value.IntegerValue)
+            switch (value)
             {
                 case 0:
                 {

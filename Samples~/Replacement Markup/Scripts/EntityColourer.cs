@@ -28,14 +28,14 @@ namespace Yarn.Unity.Samples
             // otherwise read the contents of the text within the marker
 
             string nameText = string.Empty;
-            if (marker.TryGetProperty("name", out var value))
+            if (marker.TryGetProperty("name", out string value))
             {
-                if (value.Type != MarkupValueType.String)
-                {
-                    var diagnostic = new LineParser.MarkupDiagnostic("We have a name property but it is not a string.");
-                    return new List<LineParser.MarkupDiagnostic>() {diagnostic};
-                }
-                nameText = value.StringValue.ToLower();
+                nameText = value.ToLower();
+            }
+            else
+            {
+                var diagnostic = new LineParser.MarkupDiagnostic("We do not have a string \"name\" property.");
+                return new List<LineParser.MarkupDiagnostic>() {diagnostic};
             }
 
             if (nameText == string.Empty)

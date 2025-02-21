@@ -25,7 +25,7 @@ namespace Yarn.Unity
         {
             // ok so we check if we have a property called style
             // if not give up
-            if (!marker.TryGetProperty("style", out var property))
+            if (!marker.TryGetProperty("style", out string? property))
             {
                 var error = new List<LineParser.MarkupDiagnostic>
                 {
@@ -34,7 +34,7 @@ namespace Yarn.Unity
                 return error;
             }
 
-            childBuilder.Insert(0, $"<style=\"{property.StringValue}\">");
+            childBuilder.Insert(0, $"<style=\"{property}\">");
             childBuilder.Append("</style>");
 
             // at this point we have no errors

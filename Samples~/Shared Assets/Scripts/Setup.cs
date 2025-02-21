@@ -19,7 +19,7 @@ namespace Yarn.Unity.Samples
                 return;
             }
 
-            dialogueRunner.Dialogue.ContentSaliencyStrategy = new Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy(dialogueRunner.VariableStorage);
+            dialogueRunner.Dialogue.ContentSaliencyStrategy = new Yarn.Saliency.RandomBestLeastRecentlyViewedSaliencyStrategy(dialogueRunner.VariableStorage);
         }
     }
 }

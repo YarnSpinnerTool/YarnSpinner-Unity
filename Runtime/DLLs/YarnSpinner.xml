@@ -805,6 +805,13 @@
             <exception cref="T:System.ArgumentException">Thrown when <paramref
             name="nodeGroup"/> is not a valid node name.</exception>
         </member>
+        <member name="M:Yarn.Dialogue.HasSalientContent(System.String)">
+            <summary>
+            Returns if the node group has any potential nodes to be run based on the current salient selector.
+            </summary>
+            <param name="nodeGroup">The name of the node group.</param>
+            <returns>True if there is any salient content for the requested node group</returns>
+        </member>
         <member name="M:Yarn.Dialogue.IsNodeGroup(System.String)">
             <summary>
             Gets a value indicating whether <paramref name="nodeName"/> is the
@@ -1489,40 +1496,40 @@
             The headers present on this node.
             </summary>
         </member>
-        <member name="T:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy">
+        <member name="T:Yarn.Saliency.BestLeastRecentlyViewedSaliencyStrategy">
             <summary>
             A content saliency strategy that returns the first of the best,
             least-recently seen choices from the provided options.
             </summary>
             <remarks>
             This strategy stores information about the number of times each piece of
-            content has been seen in the provided <see cref="P:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.VariableStorage"/>.
+            content has been seen in the provided <see cref="P:Yarn.Saliency.BestLeastRecentlyViewedSaliencyStrategy.VariableStorage"/>.
             </remarks>
         </member>
-        <member name="M:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.#ctor(Yarn.IVariableStorage)">
+        <member name="M:Yarn.Saliency.BestLeastRecentlyViewedSaliencyStrategy.#ctor(Yarn.IVariableStorage)">
             <summary>
             Initalises a new instance of the <see
-            cref="T:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy"/> class.
+            cref="T:Yarn.Saliency.BestLeastRecentlyViewedSaliencyStrategy"/> class.
             </summary>
             <param name="storage">The variable storage to use when determining
             which content to show.</param>
             <exception cref="T:System.ArgumentNullException">Thrown when the provided
             <paramref name="storage"/> argument is null.</exception>
         </member>
-        <member name="P:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.VariableStorage">
+        <member name="P:Yarn.Saliency.BestLeastRecentlyViewedSaliencyStrategy.VariableStorage">
             <summary>
             Gets the variable storage to use for storing information about how
             often we've seen content.
             </summary>
         </member>
-        <member name="M:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)">
+        <member name="M:Yarn.Saliency.BestLeastRecentlyViewedSaliencyStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)">
             <inheritdoc/>
             <remarks>This method increments the view count for <paramref
             name="content"/>, so that the next time QueryBestContent is run, it
             has an updated count of the number of times the content has been
             viewed.</remarks>
         </member>
-        <member name="M:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy.QueryBestContent(System.Collections.Generic.IEnumerable{Yarn.Saliency.ContentSaliencyOption})">
+        <member name="M:Yarn.Saliency.BestLeastRecentlyViewedSaliencyStrategy.QueryBestContent(System.Collections.Generic.IEnumerable{Yarn.Saliency.ContentSaliencyOption})">
             <inheritdoc/>
         </member>
         <member name="T:Yarn.Saliency.BestSaliencyStrategy">
@@ -1534,7 +1541,7 @@
             This strategy always selects the single best of the available items,
             regardless of how many times it has been seen before. For a saliency
             strategy that takes into account how recently content has been seen, see
-            <see cref="T:Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy"/>.
+            <see cref="T:Yarn.Saliency.BestLeastRecentlyViewedSaliencyStrategy"/>.
             </remarks>
         </member>
         <member name="M:Yarn.Saliency.BestSaliencyStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)">
@@ -1670,40 +1677,40 @@
             of any state, then this method can be empty.</remarks>
             <param name="content">The content that has been selected.</param>
         </member>
-        <member name="T:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy">
+        <member name="T:Yarn.Saliency.RandomBestLeastRecentlyViewedSaliencyStrategy">
             <summary>
             A content saliency strategy that returns a random choice of the best,
             least-recently seen choices from the provided options.
             </summary>
             <remarks>
             This strategy stores information about the number of times each piece of
-            content has been seen in the provided <see cref="P:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.VariableStorage"/>.
+            content has been seen in the provided <see cref="P:Yarn.Saliency.RandomBestLeastRecentlyViewedSaliencyStrategy.VariableStorage"/>.
             </remarks>
         </member>
-        <member name="M:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.#ctor(Yarn.IVariableStorage)">
+        <member name="M:Yarn.Saliency.RandomBestLeastRecentlyViewedSaliencyStrategy.#ctor(Yarn.IVariableStorage)">
             <summary>
             Initializes a new instance of the <see
-            cref="T:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy"/> class.
+            cref="T:Yarn.Saliency.RandomBestLeastRecentlyViewedSaliencyStrategy"/> class.
             </summary>
             <param name="storage">The variable storage to use when determining
             which content to show.</param>
             <exception cref="T:System.ArgumentNullException">Thrown when the provided
             <paramref name="storage"/> argument is null.</exception>
         </member>
-        <member name="P:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.VariableStorage">
+        <member name="P:Yarn.Saliency.RandomBestLeastRecentlyViewedSaliencyStrategy.VariableStorage">
             <summary>
             Gets the variable storage to use for storing information about how
             often we've seen content.
             </summary>
         </member>
-        <member name="M:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)">
+        <member name="M:Yarn.Saliency.RandomBestLeastRecentlyViewedSaliencyStrategy.ContentWasSelected(Yarn.Saliency.ContentSaliencyOption)">
             <inheritdoc/>
             <remarks>This method increments the view count for <paramref
             name="content"/>, so that the next time QueryBestContent is run, it
             has an updated count of the number of times the content has been
             viewed.</remarks>
         </member>
-        <member name="M:Yarn.Saliency.RandomBestLeastRecentlyViewedSalienceStrategy.QueryBestContent(System.Collections.Generic.IEnumerable{Yarn.Saliency.ContentSaliencyOption})">
+        <member name="M:Yarn.Saliency.RandomBestLeastRecentlyViewedSaliencyStrategy.QueryBestContent(System.Collections.Generic.IEnumerable{Yarn.Saliency.ContentSaliencyOption})">
             <inheritdoc/>
         </member>
         <member name="T:Yarn.Saliency.EnumerableRandomExtension">

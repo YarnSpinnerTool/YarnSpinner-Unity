@@ -70,11 +70,11 @@ namespace Yarn.Unity.Samples
                     continue;
                 }
 
-                if (!attribute.TryGetProperty("emotion", out var emotionKey))
+                if (!attribute.TryGetProperty("emotion", out string emotionKey))
                 {
                     continue;
                 }
-                emotions[attribute.Position] = emotionKey.StringValue;
+                emotions[attribute.Position] = emotionKey;
             }
         }
 
