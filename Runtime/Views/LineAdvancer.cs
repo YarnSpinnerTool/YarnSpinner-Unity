@@ -297,7 +297,7 @@ namespace Yarn.Unity
         /// </summary>
         /// <inheritdoc cref="LinePresenter.RunLineAsync" path="/param"/>
         /// <returns>A completed task.</returns>
-        public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
+        public override YarnTask RunLineAsync(DialogueRunner runner, LocalizedLine line, LineCancellationToken token)
         {
             // A new line has come in, so reset the number of times we've seen a
             // request to skip.

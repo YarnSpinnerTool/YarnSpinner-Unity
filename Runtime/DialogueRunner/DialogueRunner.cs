@@ -663,7 +663,7 @@ namespace Yarn.Unity
                     try
                     {
                         // Run the line and wait for it to finish
-                        await view.RunLineAsync(localisedLine, token);
+                        await view.RunLineAsync(this, localisedLine, token);
                     }
                     catch (System.Exception e)
                     {

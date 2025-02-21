@@ -55,7 +55,7 @@ namespace Yarn.Unity.Legacy
             canvasGroup = GetComponentInParent<CanvasGroup>();
         }
 
-        public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
+        public override void RunLine(DialogueRunner runner, LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
             // Don't do anything with this line except note it and immediately
             // indicate that we're finished with it. RunOptions will use it to

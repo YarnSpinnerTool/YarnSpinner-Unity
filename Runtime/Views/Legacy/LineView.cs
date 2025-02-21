@@ -333,7 +333,7 @@ namespace Yarn.Unity.Legacy
         }
 
         /// <inheritdoc/>
-        public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
+        public override void RunLine(DialogueRunner runner, LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
             // Stop any coroutines currently running on this line view (for
             // example, any other RunLine that might be running)

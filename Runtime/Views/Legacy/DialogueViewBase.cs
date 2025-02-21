@@ -119,7 +119,7 @@ namespace Yarn.Unity.Legacy
         /// <seealso cref="InterruptLine(LocalizedLine, Action)"/>
         /// <seealso cref="DismissLine(Action)"/>
         /// <seealso cref="RunOptions(DialogueOption[], Action{int})"/>
-        public virtual void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
+        public virtual void RunLine(DialogueRunner runner, LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
             // The default implementation does nothing, and immediately calls
             // onDialogueLineFinished.
@@ -367,7 +367,7 @@ namespace Yarn.Unity.Legacy
         // This method implements the v3 async pattern for dialogue views on top
         // of the v2 API.
         /// <inheritdoc/>
-        public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
+        public override async YarnTask RunLineAsync(DialogueRunner runner, LocalizedLine line, LineCancellationToken token)
         {
             // phaseComplete is a flag that represents whether the current
             // 'phase' of a v2-style dialogue view (Run, Interrupt, Dismiss) is
@@ -376,7 +376,7 @@ namespace Yarn.Unity.Legacy
             void PhaseComplete() => phaseComplete = true;
 
             // Run the line, and make phaseComplete become true when it's done.
-            this.RunLine(line, PhaseComplete);
+            this.RunLine(runner, line, PhaseComplete);
 
             // Wait for one of the following things to happen:
             // 1. RunLine completes successfully and calls PhaseComplete.

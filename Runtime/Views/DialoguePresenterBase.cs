@@ -78,7 +78,7 @@ namespace Yarn.Unity
         /// showing the line to the user.</returns>
         /// <seealso cref="RunOptionsAsync(DialogueOption[],
         /// CancellationToken)"/>
-        public abstract YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token);
+        public abstract YarnTask RunLineAsync(DialogueRunner runner, LocalizedLine line, LineCancellationToken token);
 
 
         /// <summary>

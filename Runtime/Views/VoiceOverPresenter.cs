@@ -109,7 +109,7 @@ namespace Yarn.Unity
         /// LineCancellationToken)" path="/param"/>
         /// <seealso cref="DialoguePresenterBase.RunLineAsync(LocalizedLine,
         /// LineCancellationToken)"/>
-        public override async YarnTask RunLineAsync(LocalizedLine dialogueLine, LineCancellationToken lineCancellationToken)
+        public override async YarnTask RunLineAsync(DialogueRunner runner, LocalizedLine dialogueLine, LineCancellationToken lineCancellationToken)
         {
             // Get the localized voice over audio clip
             AudioClip? voiceOverClip = null;

@@ -145,7 +145,7 @@ namespace Yarn.Unity
         /// <inheritdoc cref="DialoguePresenterBase.RunLineAsync"
         /// path="/param"/>
         /// <returns>A completed task.</returns>
-        public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
+        public override YarnTask RunLineAsync(DialogueRunner runner, LocalizedLine line, LineCancellationToken token)
         {
             if (showsLastLine)
             {

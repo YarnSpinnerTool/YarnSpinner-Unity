@@ -1291,7 +1291,7 @@ namespace Yarn.Unity.Editor
             return Enumerable.Empty<string>();
         }
 
-        internal IEnumerable<StringTableEntry>? GenerateStringsTable()
+        public IEnumerable<StringTableEntry>? GenerateStringsTable()
         {
             var job = GetCompilationJob();
             job.CompilationType = CompilationJob.Type.StringsOnly;
