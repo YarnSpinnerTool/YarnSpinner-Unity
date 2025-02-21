@@ -135,7 +135,7 @@ namespace Yarn.Unity.Tests
             // in this exact order every time.
 
             var runner = GameObject.FindAnyObjectByType<DialogueRunner>();
-            runner.Dialogue.ContentSaliencyStrategy = new Yarn.Saliency.BestLeastRecentlyViewedSalienceStrategy(runner.VariableStorage);
+            runner.Dialogue.ContentSaliencyStrategy = new Yarn.Saliency.BestLeastRecentlyViewedSaliencyStrategy(runner.VariableStorage);
 
             await StartDialogue("LineGroups", async () => { await WaitForLineAsync("I've got to stay alert!"); });
             await StartDialogue("LineGroups", async () => { await WaitForLineAsync("Halt!"); });
