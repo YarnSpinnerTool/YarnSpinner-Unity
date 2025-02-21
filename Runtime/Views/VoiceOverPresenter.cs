@@ -240,7 +240,7 @@ namespace Yarn.Unity
         }
 
         /// <inheritdoc/>
-        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueRunner runner, DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             return DialogueRunner.NoOptionSelected;
         }

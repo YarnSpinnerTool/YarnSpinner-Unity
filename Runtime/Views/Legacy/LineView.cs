@@ -245,7 +245,7 @@ namespace Yarn.Unity.Legacy
         }
 
         /// <inheritdoc/>
-        public override void DismissLine(Action onDismissalComplete)
+        public override void DismissLine(DialogueRunner runner, Action onDismissalComplete)
         {
             currentLine = null;
 
@@ -278,7 +278,7 @@ namespace Yarn.Unity.Legacy
         }
 
         /// <inheritdoc/>
-        public override void InterruptLine(LocalizedLine dialogueLine, Action onInterruptLineFinished)
+        public override void InterruptLine(DialogueRunner runner, LocalizedLine dialogueLine, Action onInterruptLineFinished)
         {
             if (this == null)
             {

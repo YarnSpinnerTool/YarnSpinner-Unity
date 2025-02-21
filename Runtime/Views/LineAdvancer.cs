@@ -321,7 +321,7 @@ namespace Yarn.Unity
         /// <inheritdoc cref="LinePresenter.RunOptionsAsync" path="/param"/>
         /// <returns>A completed task indicating that no option was selected by
         /// this view.</returns>
-        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueRunner runner, DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             // This line view doesn't take any actions when options are
             // presented.

@@ -405,7 +405,7 @@ namespace Yarn.Unity
         /// <remarks>
         /// This dialogue view does not handle any options.
         /// </remarks>
-        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueRunner runner, DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             return YarnTask<DialogueOption?>.FromResult(null);
         }

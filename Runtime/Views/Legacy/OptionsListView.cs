@@ -63,7 +63,7 @@ namespace Yarn.Unity.Legacy
             lastSeenLine = dialogueLine;
             onDialogueLineFinished();
         }
-        public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
+        public override void RunOptions(DialogueRunner runner, DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
         {
             // If we don't already have enough option views, create more
             while (dialogueOptions.Length > optionViews.Count)

@@ -162,7 +162,7 @@ namespace Yarn.Unity
         /// path="/param"/>
         /// <inheritdoc cref="DialoguePresenterBase.RunOptionsAsync"
         /// path="/returns"/>
-        public override async YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override async YarnTask<DialogueOption?> RunOptionsAsync(DialogueRunner runner, DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             // If we don't already have enough option views, create more
             while (dialogueOptions.Length > optionViews.Count)

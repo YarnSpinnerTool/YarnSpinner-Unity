@@ -174,7 +174,7 @@ namespace Yarn.Unity.Legacy
         /// called after the line has finished being presented.</param>
         /// <seealso cref="RunLine(LocalizedLine, Action)"/>
         /// <seealso cref="DismissLine(Action)"/>
-        public virtual void InterruptLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
+        public virtual void InterruptLine(DialogueRunner runner, LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
             // the default implementation does nothing
             onDialogueLineFinished?.Invoke();
@@ -217,7 +217,7 @@ namespace Yarn.Unity.Legacy
         /// </remarks>
         /// <param name="onDismissalComplete">The method that should be called
         /// when the view has finished dismissing the line.</param>
-        public virtual void DismissLine(Action onDismissalComplete)
+        public virtual void DismissLine(DialogueRunner runner, Action onDismissalComplete)
         {
             // The default implementation does nothing, and immediately calls
             // onDialogueLineFinished.
@@ -272,7 +272,7 @@ namespace Yarn.Unity.Legacy
         /// displayed to the user.</param>
         /// <param name="onOptionSelected">A method that should be called when
         /// the user has made a selection.</param>
-        public virtual void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
+        public virtual void RunOptions(DialogueRunner runner, DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
         {
             // The default implementation does nothing.
         }
@@ -394,7 +394,7 @@ namespace Yarn.Unity.Legacy
             if (token.IsNextLineRequested)
             {
                 phaseComplete = false;
-                this.InterruptLine(line, PhaseComplete);
+                this.InterruptLine(runner, line, PhaseComplete);
                 while (phaseComplete == false
                   && Application.exitCancellationToken.IsCancellationRequested == false)
                 {
@@ -405,7 +405,7 @@ namespace Yarn.Unity.Legacy
             // Finally, signal that the line should be dismissed, and wait for
             // the dismissal to complete.
             phaseComplete = false;
-            this.DismissLine(PhaseComplete);
+            this.DismissLine(runner, PhaseComplete);
 
             while (phaseComplete == false
                   && Application.exitCancellationToken.IsCancellationRequested == false)
@@ -417,13 +417,13 @@ namespace Yarn.Unity.Legacy
         // This method implements the v3 async pattern for dialogue views on top
         // of the v2 API.
         /// <inheritdoc/>
-        public override async YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override async YarnTask<DialogueOption?> RunOptionsAsync(DialogueRunner runner, DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             int selectedOptionID = -1;
 
             // Run the options, and wait for either a selection to be made, or
             // for this view to be cancelled.
-            this.RunOptions(dialogueOptions, (selectedID) =>
+            this.RunOptions(runner, dialogueOptions, (selectedID) =>
             {
                 selectedOptionID = selectedID;
             });

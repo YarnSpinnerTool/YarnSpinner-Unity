@@ -737,7 +737,7 @@ namespace Yarn.Unity
                 {
                     return;
                 }
-                var result = await view.RunOptionsAsync(localisedOptions, optionCancellationSource.Token);
+                var result = await view.RunOptionsAsync(this, localisedOptions, optionCancellationSource.Token);
                 if (result != null)
                 {
                     // We no longer need the other views, so tell them to stop
