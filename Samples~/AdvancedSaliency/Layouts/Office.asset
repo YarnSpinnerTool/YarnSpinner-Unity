@@ -13,12 +13,9 @@ MonoBehaviour:
   m_Name: Office
   m_EditorClassIdentifier: 
   primary:
-    position: {x: -1.1741053, y: 0, z: 0.2090162}
+    position: {x: -0.6, y: 0, z: -0.4}
     rotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   secondary:
-    position: {x: 0.60482115, y: 0, z: 0.1264698}
-    rotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  props:
-  - gameObjectName: desk
-    position: {x: 0.24, y: 0, z: 0.49}
-    rotation: {x: 0, y: 0.70710677, z: 0, w: 0.70710677}
+    position: {x: 1, y: 0, z: -0.4}
+    rotation: {x: -0.00000012213216, y: 0.70710677, z: 0.00000012213216, w: -0.70710677}
+  environmentPrefab: {fileID: 3487542914444166706, guid: 7fecda17ae81d42689156f9e28fb984c, type: 3}

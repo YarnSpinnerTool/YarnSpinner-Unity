@@ -13,12 +13,9 @@ MonoBehaviour:
   m_Name: Mansion
   m_EditorClassIdentifier: 
   primary:
-    position: {x: -2.4285588, y: 1.0977823, z: -0.12104404}
-    rotation: {x: 0, y: 0.63662463, z: 0, w: 0.77117383}
+    position: {x: 0.9261987, y: 0, z: -1.2851386}
+    rotation: {x: 0, y: 0.8832799, z: 0, w: 0.468846}
   secondary:
-    position: {x: 2.0507536, y: 0, z: 2.2737412}
-    rotation: {x: 0, y: 0.99034816, z: 0, w: 0.1386022}
-  props:
-  - gameObjectName: mezzanine
-    position: {x: -1.417, y: 0, z: 0.077}
-    rotation: {x: 0, y: 0, z: 0, w: 0}
+    position: {x: 2.1581337, y: 0, z: -1.9187634}
+    rotation: {x: 0, y: 0.5070416, z: 0, w: -0.8619216}
+  environmentPrefab: {fileID: 7773477940150582246, guid: 52adf7e48604f43b796ea3c4e918d857, type: 3}

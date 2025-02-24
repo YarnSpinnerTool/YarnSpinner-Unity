@@ -2,27 +2,33 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
+using System;
 using UnityEngine;
+using Yarn.Unity.Attributes;
+
+#nullable enable
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor
 
 namespace Yarn.Unity.Samples
 {
     public class LevelGod : MonoBehaviour
     {
+        [MustNotBeNull]
         public TheRoomVariableStorage variableStorage;
-        public DialogueRunner runner;
-        public SpawnPointData[] spawns;
+        public DialogueRunner? runner;
+        public SpawnPointData[] spawns = Array.Empty<SpawnPointData>();
+
+        private GameObject? currentEnvironment;
         public void SpawnLevel()
         {
-            // we always start every level by making sure there is nothing in the room itself
-            // so we do a bulk return for everything
-            var returners = GameObject.FindObjectsByType<VoidReturner>(FindObjectsSortMode.None);
-            foreach (var returner in returners)
+            if (currentEnvironment != null)
             {
-                Debug.Log($"returning {returner.name}");
-                returner.ReturnToTheVoid();
+                Destroy(currentEnvironment);
+                currentEnvironment = null;
             }
 
-            RoomLayout config = null;
+            RoomLayout? config = null;
+
             foreach (var spawn in spawns)
             {
                 if (spawn.name == variableStorage.Room)
@@ -40,27 +46,30 @@ namespace Yarn.Unity.Samples
 
             var primary = GameObject.Find(variableStorage.Primary.GetBackingValue());
             var secondary = GameObject.Find(variableStorage.Secondary.GetBackingValue());
-            if (primary == null || secondary == null)
+
+            if (config.primary != null)
             {
-                Debug.Log("failed to find one (or both) of the characters");
-                return;
+                primary.transform.SetPositionAndRotation(config.primary.position, config.primary.rotation);
+
+                if (primary.TryGetComponent<SimpleCharacter>(out var character))
+                {
+                    character.SetLookDirection(config.primary.rotation, immediate: true);
+                }
             }
 
-            primary.transform.position = config.primary.position;
-            primary.transform.rotation = config.primary.rotation;
-            secondary.transform.position = config.secondary.position;
-            secondary.transform.rotation = config.secondary.rotation;
-
-            foreach (var prop in config.props)
+            if (config.secondary != null)
             {
-                var model = GameObject.Find(prop.gameObjectName);
-                if (model == null)
+                secondary.transform.SetPositionAndRotation(config.secondary.position, config.secondary.rotation);
+
+                if (secondary.TryGetComponent<SimpleCharacter>(out var character))
                 {
-                    Debug.Log($"failed to find the {prop.gameObjectName} prop");
-                    continue;
+                    character.SetLookDirection(config.secondary.rotation, immediate: true);
                 }
-                model.transform.position = prop.position;
-                model.transform.rotation = prop.rotation;
+            }
+
+            if (config.environmentPrefab != null)
+            {
+                currentEnvironment = Instantiate(config.environmentPrefab);
             }
         }
 

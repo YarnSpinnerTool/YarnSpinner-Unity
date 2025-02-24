@@ -13,15 +13,9 @@ MonoBehaviour:
   m_Name: Church
   m_EditorClassIdentifier: 
   primary:
-    position: {x: -0.089508526, y: 0, z: 2.5906923}
-    rotation: {x: 0, y: 0.9999079, z: 0, w: -0.013571605}
+    position: {x: 0.8074927, y: 0.5, z: -0.5240355}
+    rotation: {x: 0, y: 0.9895821, z: 0, w: -0.14396968}
   secondary:
-    position: {x: -1.7621622, y: 0, z: 0.3450218}
+    position: {x: -2.2, y: 0, z: -1.9}
     rotation: {x: 0, y: 0.22722135, z: 0, w: 0.97384316}
-  props:
-  - gameObjectName: crucifix
-    position: {x: 0.445, y: 0.311, z: 2.383}
-    rotation: {x: 0, y: 0, z: 0, w: 0}
-  - gameObjectName: desk
-    position: {x: -0.025, y: 0, z: 1.196}
-    rotation: {x: 0, y: 0, z: 0, w: 0}
+  environmentPrefab: {fileID: 1665525382886712945, guid: f740bfbb73f684700a6248c762092729, type: 3}
