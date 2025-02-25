@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FaceExpression-Smiling
   m_EditorClassIdentifier: 
   textures:
-    m_keys: 00000000010000000200000003000000040000000500000008000000
+    m_keys: 00000000010000000200000003000000040000000500000007000000080000000600000009000000
     m_values:
     - {fileID: 2800000, guid: bb960f1b8173840e786c8c2ecff2e27d, type: 3}
     - {fileID: 2800000, guid: bf9f3915654894f0d83ba9e43ced54e9, type: 3}
@@ -21,4 +21,7 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 248aeebd9d95946a8876dd7b1833aab6, type: 3}
     - {fileID: 2800000, guid: 972f62e0da9e2483abf9ba675a206359, type: 3}
     - {fileID: 2800000, guid: 0d495cf849fec40a09f7d2c658ec9d2a, type: 3}
+    - {fileID: 2800000, guid: ee586f983cdb9415fb426b88da2b8dad, type: 3}
+    - {fileID: 2800000, guid: 793940ae2a6314c2dbe08808b075246f, type: 3}
+    - {fileID: 2800000, guid: 821596d027a69454bb30c7c38f8f1034, type: 3}
     - {fileID: 2800000, guid: a234b1b2c9257406aaa648037b78e1e7, type: 3}

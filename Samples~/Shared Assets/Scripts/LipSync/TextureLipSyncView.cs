@@ -171,6 +171,9 @@ namespace Yarn.Unity.Samples
                 await YarnTask.Yield();
             }
 
+            // Reset to the rest shape
+            SetMouthShape(LipSyncedVoiceLine.MouthShape.X);
+
             if (debugView != null)
             {
                 debugView.gameObject.SetActive(false);

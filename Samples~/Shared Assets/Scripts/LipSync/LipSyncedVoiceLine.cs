@@ -27,7 +27,9 @@ namespace Yarn.Unity.Samples
             G,
             // alveolar: "l"
             H,
-            // mouth closed, silent
+            // dental: "th"
+            TH,
+            // mouth closed, silence
             X
         }
 
@@ -36,6 +38,7 @@ namespace Yarn.Unity.Samples
         {
             public MouthShape mouthShape;
             public float time;
+            public string? comment;
         }
 
         public AudioClip? audioClip;
