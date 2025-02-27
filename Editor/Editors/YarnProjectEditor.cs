@@ -20,7 +20,7 @@ namespace Yarn.Unity.Editor
             var importer = AssetImporter.GetAtPath(assetPath) as YarnProjectImporter;
 
             ProjectImportData? importData = null;
-            if (importer != null)
+            if (importer == null)
             {
                 // No importer found for this asset. Possibly it's not an asset on disk?
                 return new Label("Yarn Project has no importer");
