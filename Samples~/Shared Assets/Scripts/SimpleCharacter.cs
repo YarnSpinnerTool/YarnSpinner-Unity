@@ -539,6 +539,16 @@ namespace Yarn.Unity.Samples
 
             this.CurrentSpeedFactor = 0;
         }
+
+        public void SetLookDirection(Quaternion rotation, bool immediate = false)
+        {
+            targetRotation = rotation;
+
+            if (immediate)
+            {
+                transform.rotation = rotation;
+            }
+        }
         #endregion
 
         #region Interaction Logic
