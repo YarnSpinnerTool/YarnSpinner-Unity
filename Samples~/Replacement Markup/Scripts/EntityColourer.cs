@@ -32,11 +32,6 @@ namespace Yarn.Unity.Samples
             {
                 nameText = value.ToLower();
             }
-            else
-            {
-                var diagnostic = new LineParser.MarkupDiagnostic("We do not have a string \"name\" property.");
-                return new List<LineParser.MarkupDiagnostic>() {diagnostic};
-            }
 
             if (nameText == string.Empty)
             {

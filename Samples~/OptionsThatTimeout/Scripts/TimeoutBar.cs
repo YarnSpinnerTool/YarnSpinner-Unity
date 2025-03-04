@@ -2,8 +2,6 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using System;
-using System.Collections;
 using System.Threading;
 using UnityEngine;
 using Yarn.Unity;
@@ -14,7 +12,6 @@ namespace Yarn.Unity.Samples
 {
     public class TimeoutBar : MonoBehaviour
     {
-        public CancellationToken cancellationToken;
         public float duration = 1f;
         [SerializeField] RectTransform? bar;
 
@@ -27,7 +24,7 @@ namespace Yarn.Unity.Samples
             }
         }
 
-        public async YarnTask Shrink()
+        public async YarnTask Shrink(CancellationToken cancellationToken)
         {
             if (bar == null)
             {

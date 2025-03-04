@@ -127,9 +127,8 @@ namespace Yarn.Unity.Samples
                 return;
             }
 
-            timedBar.cancellationToken = cancellationToken;
             timedBar.duration = autoSelectDuration;
-            await timedBar.Shrink();
+            await timedBar.Shrink(cancellationToken);
 
             if (!cancellationToken.IsCancellationRequested)
             {
@@ -148,9 +147,8 @@ namespace Yarn.Unity.Samples
             {
                 return;
             }
-            timedBar.cancellationToken = cancellationToken;
             timedBar.duration = autoSelectDuration;
-            await timedBar.Shrink();
+            await timedBar.Shrink(cancellationToken);
 
             bool foundIt = false;
 
@@ -190,14 +188,6 @@ namespace Yarn.Unity.Samples
         /// path="/returns"/>
         public override async YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
-            // A completion source that represents the selected option.
-            YarnTaskCompletionSource<DialogueOption?> selectedOptionCompletionSource = new YarnTaskCompletionSource<DialogueOption?>();
-
-            // A cancellation token source that becomes cancelled when any
-            // option item is selected, or when this entire option view is
-            // cancelled
-            var completionCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
             int hasDefault = 0;
             TimeOutOptionType defaultOptionType = TimeOutOptionType.None;
             DialogueOption? defaultOption = null;
@@ -316,16 +306,13 @@ namespace Yarn.Unity.Samples
                 }
             }
 
-            // adding in any additional option item views if necessary
-            if (optionViews.Count < dialogueOptions.Length)
-            {
-                var newViews = dialogueOptions.Length - optionViews.Count;
-                for (int i = 0; i < newViews; i++)
-                {
-                    var option = CreateNewOptionView();
-                    optionViews.Add(option);
-                }
-            }
+            // A completion source that represents the selected option.
+            YarnTaskCompletionSource<DialogueOption?> selectedOptionCompletionSource = new YarnTaskCompletionSource<DialogueOption?>();
+
+            // A cancellation token source that becomes cancelled when any
+            // option item is selected, or when this entire option view is
+            // cancelled
+            var completionCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
             async YarnTask CancelSourceWhenDialogueCancelled()
             {
@@ -345,6 +332,17 @@ namespace Yarn.Unity.Samples
 
             // Start waiting 
             CancelSourceWhenDialogueCancelled().Forget();
+
+            // adding in any additional option item views if necessary
+            if (optionViews.Count < dialogueOptions.Length)
+            {
+                var newViews = dialogueOptions.Length - optionViews.Count;
+                for (int i = 0; i < newViews; i++)
+                {
+                    var option = CreateNewOptionView();
+                    optionViews.Add(option);
+                }
+            }
 
             // configuring all the dialogue items
             int optionViewsCreated = 0;
@@ -481,5 +479,5 @@ namespace Yarn.Unity.Samples
 
             return optionView;
         }
-}
+    }
 }

@@ -6,7 +6,7 @@ using Yarn.Unity;
 
 #nullable enable
 
-public class #SCRIPTNAME# : AsyncDialogueViewBase
+public class #SCRIPTNAME# : DialoguePresenterBase
 {
     public override async YarnTask OnDialogueStartedAsync()
     {
