@@ -27,7 +27,9 @@ namespace Yarn.Unity.Samples
             G,
             // alveolar: "l"
             H,
-            // mouth closed, silent
+            // dental: "th"
+            TH,
+            // mouth closed, silence
             X
         }
 
@@ -36,6 +38,7 @@ namespace Yarn.Unity.Samples
         {
             public MouthShape mouthShape;
             public float time;
+            public string? comment;
         }
 
         public AudioClip? audioClip;
@@ -54,34 +57,37 @@ namespace Yarn.Unity.Samples
             }
         }
 
-        public MouthShape Evaluate(float time)
+        public MouthShapeFrame Evaluate(float time)
         {
+            MouthShapeFrame defaultFrame = new MouthShapeFrame { time = time, mouthShape = MouthShape.X };
             if (frames == null || frames.Count == 0)
             {
                 // We have no frames; return the closed mouth shape.
-                return MouthShape.X;
+                return defaultFrame;
             }
 
             if (time <= 0)
             {
                 // We were asked for the start (or a negative time); return the
-                // first mouth shape.
-                return frames[0].mouthShape;
+                // first frame.
+                return frames[0];
             }
 
             // Walk through the frames and find the first one starts that after our time
             // index
+            MouthShapeFrame current = new MouthShapeFrame { time = 0, mouthShape = MouthShape.X }; ;
             for (int i = 0; i < frames.Count; i++)
             {
                 var frame = frames[i];
                 if (time < frame.time)
                 {
-                    return frame.mouthShape;
+                    return current;
                 }
+                current = frame;
             }
 
             // We fell off the list; return the last shape
-            return frames[^1].mouthShape;
+            return frames[^1];
         }
 
         public bool TryGetAsset<T>([NotNullWhen(true)] out T? result) where T : UnityEngine.Object

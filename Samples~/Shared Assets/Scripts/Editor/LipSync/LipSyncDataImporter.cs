@@ -79,7 +79,7 @@ namespace Yarn.Unity.Samples.Editor
 
                     var lineData = line.Split('\t');
 
-                    if (lineData.Length != 2)
+                    if (lineData.Length < 2)
                     {
                         continue;
                     }
@@ -92,6 +92,11 @@ namespace Yarn.Unity.Samples.Editor
                         time = time,
                         mouthShape = mouthShape
                     };
+
+                    if (lineData.Length >= 3)
+                    {
+                        frame.comment = lineData[2];
+                    }
 
                     data.frames.Add(frame);
                 }

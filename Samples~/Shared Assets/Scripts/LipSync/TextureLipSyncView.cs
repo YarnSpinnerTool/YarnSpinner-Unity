@@ -62,10 +62,10 @@ namespace Yarn.Unity.Samples
             {
                 debugView.gameObject.SetActive(false);
             }
-            SetFrame(LipSyncedVoiceLine.MouthShape.X);
+            SetMouthShape(LipSyncedVoiceLine.MouthShape.X);
         }
 
-        public void SetFrame(LipSyncedVoiceLine.MouthShape mouthShape)
+        public void SetMouthShape(LipSyncedVoiceLine.MouthShape mouthShape)
         {
             if (renderer == null)
             {
@@ -93,13 +93,6 @@ namespace Yarn.Unity.Samples
             {
                 Debug.LogWarning($"No mouth shape {mouthShape}", this);
             }
-
-            if (debugView != null)
-            {
-                debugView.gameObject.SetActive(true);
-                debugView.text = $"{mouthShape} ({MouthShapeToPrestonBlair(mouthShape)})";
-            }
-
         }
 
         public static string MouthShapeToPrestonBlair(LipSyncedVoiceLine.MouthShape mouthShape)
@@ -141,7 +134,7 @@ namespace Yarn.Unity.Samples
 
             var delayBeforeStart = (voiceOverView != null) ? voiceOverView.waitTimeBeforeLineStart : 0f;
 
-            SetFrame(LipSyncedVoiceLine.MouthShape.X);
+            SetMouthShape(LipSyncedVoiceLine.MouthShape.X);
 
             if (delayBeforeStart > 0)
             {
@@ -156,12 +149,30 @@ namespace Yarn.Unity.Samples
             while (Time.time < endTime && !token.IsHurryUpRequested)
             {
                 var elapsed = Time.time - startTime;
-                var shape = data.Evaluate(elapsed);
+                var frame = data.Evaluate(elapsed);
 
-                SetFrame(shape);
+                SetMouthShape(frame.mouthShape);
+
+                if (debugView != null)
+                {
+                    debugView.gameObject.SetActive(true);
+                    string debugText;
+                    if (!string.IsNullOrEmpty(frame.comment))
+                    {
+                        debugText = $"{frame.mouthShape} ({frame.comment})";
+                    }
+                    else
+                    {
+                        debugText = $"{frame.mouthShape}";
+                    }
+                    debugView.text = debugText;
+                }
 
                 await YarnTask.Yield();
             }
+
+            // Reset to the rest shape
+            SetMouthShape(LipSyncedVoiceLine.MouthShape.X);
 
             if (debugView != null)
             {
