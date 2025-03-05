@@ -150,7 +150,7 @@ namespace Yarn.Unity
             {
                 await YarnTask.Delay(
                     TimeSpan.FromSeconds(waitTimeBeforeLineStart),
-                    lineCancellationToken.NextLineToken);
+                    lineCancellationToken.NextLineToken).SuppressCancellationThrow();
             }
 
             // Start playing the audio.

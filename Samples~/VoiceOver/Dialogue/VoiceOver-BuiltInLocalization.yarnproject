@@ -6,10 +6,20 @@
   "excludeFiles": [],
   "localisation": {
     "en": {
-      "assets": "LipSync"
+      "assets": "en-assets/LipSync-en"
     },
     "es": {
+      "assets": "es-assets/LipSync-es",
       "strings": "VoiceOver - es.csv"
+    },
+    "zh-Hans": {
+      "strings": "VoiceOver - zh_Hans.csv"
+    },
+    "pt-BR": {
+      "strings": "VoiceOver - pt_BR.csv"
+    },
+    "de": {
+      "strings": "VoiceOver - de.csv"
     }
   },
   "baseLanguage": "en",
