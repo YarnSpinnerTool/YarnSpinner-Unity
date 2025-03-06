@@ -8,8 +8,8 @@ on:
   push:
     branches:
       - main
-      - development/v3
       - "feature/**"
+      - "release/**"
     paths:
       - "Editor/**"
       - "Runtime/**"
