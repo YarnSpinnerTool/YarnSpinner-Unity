@@ -43,7 +43,7 @@ jobs:
       # appropriate
       - name: Execute GitVersion
         id: version # step id used as reference for output values
-        run: ./YarnSpinner/get-version.sh
+        run: ./get-version.sh
         working-directory: ./YarnSpinner
 
       - name: Restore dependencies
