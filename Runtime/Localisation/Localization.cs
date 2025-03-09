@@ -208,7 +208,7 @@ namespace Yarn.Unity
                 return YarnTask.FromResult<T?>(resultAsTargetObject);
             }
 
-            return null;
+            return YarnTask<T?>.FromResult(null);
         }
 #endif
 
