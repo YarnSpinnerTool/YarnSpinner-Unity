@@ -28,6 +28,8 @@ namespace Yarn.Unity.Editor
 
             var ui = new VisualElement();
 
+            importData = importer.ImportData;
+
             if (importData == null)
             {
                 return new Label("Project failed to import, or needs upgrading.");

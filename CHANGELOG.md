@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Fixed an error that caused the YarnProject asset editor to incorrectly report a compile error when there wasn't one.
+
 ### Removed
 
 ## [3.0.0-beta2] 2025-04-09
