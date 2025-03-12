@@ -536,13 +536,13 @@ namespace Yarn.Unity
                     await dispatchResult.Task;
                     break;
                 case CommandDispatchResult.StatusType.NoTargetFound:
-                    Debug.LogError($"Can't call command {commandName}: failed to find a game object named {parts.ElementAtOrDefault(1)}", this);
+                    Debug.LogError($"Can't call command <<{command.Text}>>: failed to find a game object named {parts.ElementAtOrDefault(1)}", this);
                     break;
                 case CommandDispatchResult.StatusType.TargetMissingComponent:
-                    Debug.LogError($"Can't call command {commandName}, because {parts.ElementAtOrDefault(1)} doesn't have the correct component");
+                    Debug.LogError($"Can't call command <<{command.Text}>>, because {parts.ElementAtOrDefault(1)} doesn't have the correct component");
                     break;
                 case CommandDispatchResult.StatusType.InvalidParameterCount:
-                    Debug.LogError($"Can't call command {commandName}: incorrect number of parameters");
+                    Debug.LogError($"Can't call command <<{command.Text}>>: incorrect number of parameters");
                     break;
                 case CommandDispatchResult.StatusType.CommandUnknown:
                     // Attempt a last-ditch dispatch by invoking our 'onCommand'

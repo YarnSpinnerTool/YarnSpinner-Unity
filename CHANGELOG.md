@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Fixed an error that caused the YarnProject asset editor to incorrectly report a compile error when there wasn't one.
+- Certain errors thrown when a command can't be run now show the full text of the command, not just the command name.
 
 ### Removed
 
