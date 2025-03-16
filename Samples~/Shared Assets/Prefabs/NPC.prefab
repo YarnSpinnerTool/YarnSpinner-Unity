@@ -121,6 +121,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 793312023099668125, guid: 8ee6a05cc2c944cb2a5c63c42fe1f9f0, type: 3}
+      propertyPath: deathMouthTexture
+      value: 
+      objectReference: {fileID: 2800000, guid: d25490a1200aa4b9db7b117f154b114e, type: 3}
     - target: {fileID: 1671993865347793199, guid: 8ee6a05cc2c944cb2a5c63c42fe1f9f0, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -188,4 +192,3 @@ MonoBehaviour:
     nodeName: 
   dialogueRunner: {fileID: 0}
   turnsToInteractor: 1
-  turnSpeed: 300

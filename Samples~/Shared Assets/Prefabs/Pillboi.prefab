@@ -95,8 +95,8 @@ MonoBehaviour:
     - Eyebrows-Out
     - Eyebrows-Single
     - Eyebrows-Neutral
-  defaultFace: 
   facialExpressionsLayer: Face
+  deathMouthTexture: {fileID: 0}
   meanBlinkTime: 2
   blinkTimeVariance: 0.5
   speedParameter: Speed
@@ -105,6 +105,8 @@ MonoBehaviour:
   turnParameter: Turn
   blinkTriggerName: Blink
   cycleOffsetParameter: Cycle Offset
+  aliveParameter: Alive
+  baseLayer: Base Layer
   interactionRadius: 1
   offset: {x: 0, y: 0, z: 0.3}
   onInteracting:

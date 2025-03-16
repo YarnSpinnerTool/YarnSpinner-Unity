@@ -7,6 +7,7 @@ namespace Yarn.Unity.Samples
     using Yarn.Unity.Attributes;
     using System.Collections.Generic;
     using UnityEngine.Events;
+    using System.Threading.Tasks;
 
     public class SimpleCharacter : MonoBehaviour
     {
@@ -24,6 +25,8 @@ namespace Yarn.Unity.Samples
         public bool HasPath => followPath != null;
 
         [SerializeField] bool isPlayerControlled;
+
+        public bool IsAlive { get; private set; } = true;
 
         #region Movement Variables
 
@@ -65,7 +68,6 @@ namespace Yarn.Unity.Samples
 
         private Vector3 lastGroundedPosition;
 
-
         #endregion
 
 
@@ -78,8 +80,7 @@ namespace Yarn.Unity.Samples
         [SerializeField] string facialExpressionsLayer = "Face";
         private int facialExpressionsLayerID = 0;
 
-
-
+        [SerializeField] Texture2D? deathMouthTexture;
 
         [Group("Animation")]
         [Header("Blinking")]
@@ -105,6 +106,13 @@ namespace Yarn.Unity.Samples
         [Group("Animation Parameters", true)]
         [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Float)]
         [SerializeField] string cycleOffsetParameter = "Cycle Offset";
+        [Group("Animation Parameters", true)]
+        [AnimationParameter(nameof(animator), AnimatorControllerParameterType.Bool)]
+        [SerializeField] string aliveParameter = "Alive";
+
+        [Group("Animation Parameters")]
+        [AnimationLayer(nameof(animator))]
+        [SerializeField] string baseLayer = "Base Layer";
 
         private float timeUntilNextBlink = 0f;
         private Dictionary<int, CancellationTokenSource> activeAnimationLerps = new();
@@ -250,6 +258,42 @@ namespace Yarn.Unity.Samples
             else
             {
                 animator.CrossFadeInFixedTime(stateName, crossfadeTime, facialExpressionsLayerID);
+            }
+        }
+
+        [YarnCommand("set_alive")]
+        public void SetAlive(bool alive, bool immediate = false)
+        {
+            this.IsAlive = alive;
+            if (animator != null)
+            {
+                animator.SetBool(aliveParameter, alive);
+                if (immediate)
+                {
+                    async YarnTask RunAnimationAtHighSpeed(Animator animator)
+                    {
+                        var previousSpeed = animator.speed;
+                        animator.speed = 10000;
+                        await YarnTask.Yield();
+                        animator.speed = previousSpeed;
+                    }
+                    RunAnimationAtHighSpeed(animator).Forget();
+                }
+            }
+            if (this.TryGetComponent<MouthView>(out var mouthView))
+            {
+                if (alive)
+                {
+                    mouthView.ClearOverride();
+                }
+                else if (deathMouthTexture != null)
+                {
+                    mouthView.SetOverride(deathMouthTexture);
+                }
+            }
+            if (this.characterController != null)
+            {
+                this.characterController.enabled = IsAlive;
             }
         }
 
@@ -450,12 +494,15 @@ namespace Yarn.Unity.Samples
                 }
             }
 
-            // Rotate towards our current look direction
-            transform.rotation = Quaternion.RotateTowards(
-                Quaternion.LookRotation(transform.forward),
-                GetCurrentLookDirection(),
-                turnSpeed * Time.deltaTime
-            );
+            if (this.IsAlive)
+            {
+                // Rotate towards our current look direction if we're alive
+                transform.rotation = Quaternion.RotateTowards(
+                    Quaternion.LookRotation(transform.forward),
+                    GetCurrentLookDirection(),
+                    turnSpeed * Time.deltaTime
+                );
+            }
 
             lastFrameWorldPosition = transform.position;
 
@@ -584,13 +631,20 @@ namespace Yarn.Unity.Samples
 
                 if (!interactable.isActiveAndEnabled)
                 {
-                    // We can't interact if the component or its gameobject isn't enabled
+                    // We can't interact if the component or its gameobject
+                    // isn't enabled
                     continue;
                 }
 
                 if (interactable.gameObject == gameObject)
                 {
                     // We can't interact with ourselves
+                    continue;
+                }
+
+                if (interactable.gameObject.TryGetComponent<SimpleCharacter>(out var character) && !character.IsAlive)
+                {
+                    // We can't interact with characters that aren't alive
                     continue;
                 }
 
