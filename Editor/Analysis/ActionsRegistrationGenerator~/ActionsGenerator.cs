@@ -2,17 +2,17 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
-using System.Text;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
+using Microsoft.CodeAnalysis.Text;
 using Yarn.Unity.ActionAnalyser;
 using YarnAction = Yarn.Unity.ActionAnalyser.Action;
-using System.IO;
 
 #nullable enable
 
@@ -27,6 +27,15 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
 
     public static string? GetProjectRoot(GeneratorExecutionContext context)
     {
+        // We need to know if the settings are configured to not perform codegen
+        // to link attributed methods. This is kinda annoying because the path
+        // root of the project settings and the root path of this process are
+        // *very* different. So, what we do is we use the included Compilation
+        // Assembly additional file that Unity gives us. This file, if opened,
+        // has the path of the Unity project, which we can then use to get the
+        // settings. If any stage of this fails, then we bail out and assume
+        // that codegen is desired.
+
         // Try and find any additional files passed to the context
         if (!context.AdditionalFiles.Any())
         {
@@ -82,55 +91,33 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
 
         output.WriteLine(DateTime.Now);
 
-        // We need to know if the settings are configured to not perform codegen
-        // to link attributed methods. This is kinda annoying because the path
-        // root of the project settings and the root path of this process are
-        // *very* different. So, what we do is we use the included Compilation
-        // Assembly additional file that Unity gives us. This file, if opened,
-        // has the path of the Unity project, which we can then use to get the
-        // settings. If any stage of this fails, then we bail out and assume
-        // that codegen is desired.
-        string? projectPath = null;
-        Yarn.Unity.Editor.YarnSpinnerProjectSettings? settings = null;
-        if (context.AdditionalFiles.Any())
-        {
-            var relevants = context.AdditionalFiles.Where(i => i.Path.Contains($"{context.Compilation.AssemblyName}.AdditionalFile.txt"));
-            if (relevants.Any())
-            {
-                var arsgacsaf = relevants.First();
-                if (File.Exists(arsgacsaf.Path))
-                {
-                    try
-                    {
-                        projectPath = File.ReadAllText(arsgacsaf.Path);
-                        var fullPath = Path.Combine(projectPath, Yarn.Unity.Editor.YarnSpinnerProjectSettings.YarnSpinnerProjectSettingsPath);
-                        output.WriteLine($"Attempting to read settings file at {fullPath}");
 
-                        settings = Yarn.Unity.Editor.YarnSpinnerProjectSettings.GetOrCreateSettings(projectPath, output);
-                        if (!settings.automaticallyLinkAttributedYarnCommandsAndFunctions)
-                        {
-                            output.WriteLine("Skipping codegen due to settings.");
-                            return;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        output.WriteLine($"Unable to determine Yarn settings, settings values will be ignored and codegen will occur: {e.Message}");
-                    }
-                }
-                else
+        Yarn.Unity.Editor.YarnSpinnerProjectSettings? settings = null;
+        var projectPath = GetProjectRoot(context);
+
+
+        if (projectPath != null)
+        {
+            try
+            {
+                var fullPath = Path.Combine(projectPath, Yarn.Unity.Editor.YarnSpinnerProjectSettings.YarnSpinnerProjectSettingsPath);
+                output.WriteLine($"Attempting to read settings file at {fullPath}");
+
+                settings = Yarn.Unity.Editor.YarnSpinnerProjectSettings.GetOrCreateSettings(projectPath, output);
+                if (!settings.automaticallyLinkAttributedYarnCommandsAndFunctions)
                 {
-                    output.WriteLine($"The project settings path metadata file does not exist at: {arsgacsaf.Path}. Settings values will be ignored and codegen will occur");
+                    output.WriteLine("Skipping codegen due to settings.");
+                    return;
                 }
             }
-            else
+            catch (Exception e)
             {
-                output.WriteLine("Unable to determine Yarn settings path, no file containing the project path metadata was included. Settings values will be ignored and codegen will occur.");
+                output.WriteLine($"Unable to determine Yarn settings, settings values will be ignored and codegen will occur: {e.Message}");
             }
         }
         else
         {
-            output.WriteLine("Unable to determine Yarn settings path as no additional files were included. Settings values will be ignored and codegen will occur.");
+            output.WriteLine($"Unable to determine project location on disk. Settings values will be ignored and codegen will occur");
         }
 
         try
@@ -358,12 +345,12 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
     SyntaxFactory.PredefinedType(
         SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
     SyntaxFactory.Identifier(methodName))
-.WithModifiers(
+    .WithModifiers(
     SyntaxFactory.TokenList(
         new[]{
             SyntaxFactory.Token(SyntaxKind.PublicKeyword),
             SyntaxFactory.Token(SyntaxKind.StaticKeyword)}))
-.WithBody(
+    .WithBody(
     SyntaxFactory.Block(
         SyntaxFactory.LocalDeclarationStatement(
             SyntaxFactory.VariableDeclaration(
@@ -468,8 +455,8 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
             )
         )
     )
-)
-.NormalizeWhitespace();
+    )
+    .NormalizeWhitespace();
     }
 
     public static MethodDeclarationSyntax GenerateSingleLogMethod(string methodName, string text, string prefix)
