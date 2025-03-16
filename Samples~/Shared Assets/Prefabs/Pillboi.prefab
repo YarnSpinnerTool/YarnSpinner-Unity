@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8993842369040041100}
   - component: {fileID: 793312023099668125}
   - component: {fileID: 1677158904836476663}
+  - component: {fileID: 6334120097600566691}
   m_Layer: 0
   m_Name: Pillboi
   m_TagString: Untagged
@@ -125,6 +126,28 @@ MonoBehaviour:
   renderer: {fileID: 5151350692569875361}
   fadeColor: {r: 0.40392157, g: 0.5803922, b: 0.8509804, a: 1}
   baseColor: {r: 0.34117648, g: 0.3372549, b: 0.7411765, a: 1}
+--- !u!114 &6334120097600566691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4086181210850776417}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2b2db1ed06644a5daacee3187e85588, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  characterName: 
+  renderer: {fileID: 741903079362195631}
+  facialExpressions:
+    m_keys:
+    - smiling
+    - frowning
+    m_values:
+    - {fileID: 11400000, guid: 28bebbf7f1bd34705b31f392395aab76, type: 2}
+    - {fileID: 11400000, guid: dd5ea21dafd074fc8895eea6f206ce96, type: 2}
+  defaultFacialExpression: {fileID: 11400000, guid: 28bebbf7f1bd34705b31f392395aab76, type: 2}
 --- !u!1 &8301985204686994583
 GameObject:
   m_ObjectHideFlags: 0

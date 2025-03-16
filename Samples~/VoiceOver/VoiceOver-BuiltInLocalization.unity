@@ -195,25 +195,9 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3622337160965683275, guid: 4fd40e5fce9ee45f1954f5df6b80473b, type: 3}
-      propertyPath: yarnProject
-      value: 
-      objectReference: {fileID: 7545569452688597077, guid: 244da74c181c44eb485a57e4facd23ce, type: 3}
-    - target: {fileID: 3622337160965683275, guid: 4fd40e5fce9ee45f1954f5df6b80473b, type: 3}
-      propertyPath: lineProvider
-      value: 
-      objectReference: {fileID: 3177205150263320869}
     - target: {fileID: 4340290314238734085, guid: 4fd40e5fce9ee45f1954f5df6b80473b, type: 3}
       propertyPath: m_Name
       value: Scene
-      objectReference: {fileID: 0}
-    - target: {fileID: 5285731288181092015, guid: 4fd40e5fce9ee45f1954f5df6b80473b, type: 3}
-      propertyPath: _textLocaleCode
-      value: es
-      objectReference: {fileID: 0}
-    - target: {fileID: 5285731288181092015, guid: 4fd40e5fce9ee45f1954f5df6b80473b, type: 3}
-      propertyPath: _assetLocaleCode
-      value: es
       objectReference: {fileID: 0}
     - target: {fileID: 7501387972862659610, guid: 4fd40e5fce9ee45f1954f5df6b80473b, type: 3}
       propertyPath: m_SizeDelta.y
@@ -257,17 +241,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4fd40e5fce9ee45f1954f5df6b80473b, type: 3}
---- !u!114 &3177205150263320869 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5285731288181092015, guid: 4fd40e5fce9ee45f1954f5df6b80473b, type: 3}
-  m_PrefabInstance: {fileID: 3177205150263320868}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b6798449caec4a32a5ad27badb06624, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

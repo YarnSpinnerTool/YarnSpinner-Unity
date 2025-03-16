@@ -440,10 +440,57 @@ Transform:
   - {fileID: 1561120527391953809}
   - {fileID: 3442308520422474312}
   - {fileID: 8387649256473135004}
+  - {fileID: 3336199920207847841}
   - {fileID: 2730666272188706403}
   - {fileID: 6080827645499417224}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7051536670591804141
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3336199920207847841}
+  - component: {fileID: 5100436074333775144}
+  m_Layer: 0
+  m_Name: Lip Sync View
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3336199920207847841
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7051536670591804141}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.22801848, y: 1.4381082, z: -3.0508015}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1430035536108578656}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5100436074333775144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7051536670591804141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07771dc0eec184e63bafaa2d0c714b29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  voiceOverView: {fileID: 5743518715458245209}
+  debugView: {fileID: 5063400916329600058}
 --- !u!1 &7618885354157635298
 GameObject:
   m_ObjectHideFlags: 0
@@ -823,6 +870,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5530017964122723303, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
+      propertyPath: defaultFacialExpression
+      value: 
+      objectReference: {fileID: 11400000, guid: dd5ea21dafd074fc8895eea6f206ce96, type: 2}
     - target: {fileID: 6940979802782602084, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -833,10 +884,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 110609686485900306, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1210698475467951226}
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2588666571959726885, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 7543184778758959357}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
 --- !u!4 &510549550119337558 stripped
 Transform:
@@ -848,38 +896,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1384599776165114325, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
   m_PrefabInstance: {fileID: 476573351283565124}
   m_PrefabAsset: {fileID: 0}
---- !u!23 &1697618165128688815 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 1230052563929421547, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
-  m_PrefabInstance: {fileID: 476573351283565124}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &2698195453009908065 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2588666571959726885, guid: 0b3eff3c7e4554fa9beeeed968894f36, type: 3}
-  m_PrefabInstance: {fileID: 476573351283565124}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &7543184778758959357
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2698195453009908065}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 07771dc0eec184e63bafaa2d0c714b29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  characterName: Tom
-  renderer: {fileID: 1697618165128688815}
-  voiceOverView: {fileID: 5743518715458245209}
-  debugView: {fileID: 5063400916329600058}
-  facialExpressions:
-    m_keys:
-    - frowning
-    m_values:
-    - {fileID: 11400000, guid: dd5ea21dafd074fc8895eea6f206ce96, type: 2}
-  defaultFacialExpression: {fileID: 11400000, guid: dd5ea21dafd074fc8895eea6f206ce96, type: 2}
 --- !u!1001 &1677584969286986641
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1468,11 +1484,11 @@ PrefabInstance:
     - target: {fileID: 8309902628685535410, guid: 52571f68872914e24837210513edea1d, type: 3}
       propertyPath: yarnProject
       value: 
-      objectReference: {fileID: 7545569452688597077, guid: 55636a520881a41289ff66b8d06e2a3f, type: 3}
+      objectReference: {fileID: 7545569452688597077, guid: 244da74c181c44eb485a57e4facd23ce, type: 3}
     - target: {fileID: 8309902628685535410, guid: 52571f68872914e24837210513edea1d, type: 3}
       propertyPath: lineProvider
       value: 
-      objectReference: {fileID: 858286245259094807}
+      objectReference: {fileID: 5285731288181092015}
     - target: {fileID: 8309902628685535410, guid: 52571f68872914e24837210513edea1d, type: 3}
       propertyPath: runSelectedOptionAsLine
       value: 1
@@ -1488,7 +1504,7 @@ PrefabInstance:
     - target: {fileID: 8309902628685535410, guid: 52571f68872914e24837210513edea1d, type: 3}
       propertyPath: 'dialogueViews.Array.data[4]'
       value: 
-      objectReference: {fileID: 7543184778758959357}
+      objectReference: {fileID: 5100436074333775144}
     - target: {fileID: 8309902628685535410, guid: 52571f68872914e24837210513edea1d, type: 3}
       propertyPath: 'dialogueViews.Array.data[5]'
       value: 

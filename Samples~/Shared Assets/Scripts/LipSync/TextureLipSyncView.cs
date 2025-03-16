@@ -20,30 +20,26 @@ namespace Yarn.Unity.Samples
 {
     public class TextureLipSyncView : DialoguePresenterBase
     {
-        [SerializeField] string? characterName;
 
-        [SerializeField] new Renderer? renderer;
         [SerializeField] VoiceOverPresenter? voiceOverView;
         [SerializeField] TMP_Text? debugView;
 
-        private MaterialPropertyBlock? propertyBlock;
 
-        LipSyncTextureGroup? currentFacialExpression;
-
-        [SerializeField] SerializableDictionary<string, LipSyncTextureGroup> facialExpressions = new();
-        [SerializeField] LipSyncTextureGroup? defaultFacialExpression;
-
-        [YarnCommand("expression")]
-        public void SetFacialExpression(string expression)
-        {
-            if (!facialExpressions.TryGetValue(expression, out currentFacialExpression))
-            {
-                Debug.LogError($"Unknown facial expression {expression}; expected {string.Join(", ", facialExpressions.Keys)}", this);
-            }
-        }
+        private readonly Dictionary<string, MouthView?> _cachedMouthViews = new();
 
         public override YarnTask OnDialogueStartedAsync()
         {
+            var keys = new List<string>(_cachedMouthViews.Keys);
+
+            foreach (var k in keys)
+            {
+                var v = _cachedMouthViews[k];
+                if (v == null)
+                {
+                    _cachedMouthViews.Remove(k);
+                }
+            }
+
             return YarnTask.CompletedTask;
         }
 
@@ -54,44 +50,40 @@ namespace Yarn.Unity.Samples
 
         public void Awake()
         {
-            propertyBlock = new();
-
-            currentFacialExpression = defaultFacialExpression;
-
             if (debugView != null)
             {
                 debugView.gameObject.SetActive(false);
             }
-            SetMouthShape(LipSyncedVoiceLine.MouthShape.X);
+
         }
 
-        public void SetMouthShape(LipSyncedVoiceLine.MouthShape mouthShape)
+        public MouthView? FindMouthView(string characterName)
         {
-            if (renderer == null)
+            if (_cachedMouthViews.TryGetValue(characterName, out var mouthView))
             {
-                return;
-            }
-
-            if (currentFacialExpression == null)
-            {
-                Debug.LogWarning($"No facial expression set", this);
-                return;
-            }
-
-            if (currentFacialExpression.TryGetTexture(mouthShape, out var texture))
-            {
-                if (propertyBlock == null)
+                if (mouthView != null)
                 {
-                    propertyBlock = new MaterialPropertyBlock();
+                    return mouthView;
                 }
-
-                propertyBlock.SetTexture("_Texture", texture);
-
-                renderer.SetPropertyBlock(propertyBlock);
+                else
+                {
+                    _cachedMouthViews.Remove(characterName);
+                    return null;
+                }
             }
             else
             {
-                Debug.LogWarning($"No mouth shape {mouthShape}", this);
+                var mouthViews = FindObjectsByType<MouthView>(FindObjectsSortMode.None);
+                foreach (var mv in mouthViews)
+                {
+                    var mvName = string.IsNullOrEmpty(mv.CharacterName) ? mv.name : mv.CharacterName;
+                    if (mvName.Equals(characterName, System.StringComparison.InvariantCulture))
+                    {
+                        _cachedMouthViews[characterName] = mv;
+                        return mv;
+                    }
+                }
+                return null;
             }
         }
 
@@ -114,27 +106,30 @@ namespace Yarn.Unity.Samples
 
         public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
         {
-            if (line.CharacterName != characterName)
-            {
-                // Not our character; nothing to do.
-                return;
-            }
-
             if (!(line.Asset is IAssetProvider provider && provider.TryGetAsset<LipSyncedVoiceLine>(out var data)))
             {
                 Debug.LogWarning($"No lipsync data for line {line.TextID}", this);
                 return;
             }
 
-            if (renderer == null)
+            if (string.IsNullOrEmpty(line.CharacterName))
             {
-                Debug.LogWarning($"No renderer for lipsync view {this.name}", this);
+                // Line has no character name, so we don't know which mouth view
+                // to use.
+                return;
+            }
+
+            var targetMouthView = FindMouthView(line.CharacterName);
+
+            if (targetMouthView == null)
+            {
+                // No known mouth view for this line's character
                 return;
             }
 
             var delayBeforeStart = (voiceOverView != null) ? voiceOverView.waitTimeBeforeLineStart : 0f;
 
-            SetMouthShape(LipSyncedVoiceLine.MouthShape.X);
+            targetMouthView.SetMouthShape(LipSyncedVoiceLine.MouthShape.X);
 
             if (delayBeforeStart > 0)
             {
@@ -151,7 +146,7 @@ namespace Yarn.Unity.Samples
                 var elapsed = Time.time - startTime;
                 var frame = data.Evaluate(elapsed);
 
-                SetMouthShape(frame.mouthShape);
+                targetMouthView.SetMouthShape(frame.mouthShape);
 
                 if (debugView != null)
                 {
@@ -172,7 +167,7 @@ namespace Yarn.Unity.Samples
             }
 
             // Reset to the rest shape
-            SetMouthShape(LipSyncedVoiceLine.MouthShape.X);
+            targetMouthView.SetMouthShape(LipSyncedVoiceLine.MouthShape.X);
 
             if (debugView != null)
             {
