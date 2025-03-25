@@ -8,7 +8,7 @@ namespace Yarn.Unity.Samples {
     /// <remarks>
     /// Automatically generated from Yarn project at Assets/Samples/BasicSaliency/BasicSaliency.yarnproject.
     /// </remarks>
-    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
+    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.235")]
     public enum Day {
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Yarn.Unity.Samples {
     /// <remarks>
     /// Automatically generated from Yarn project at Assets/Samples/BasicSaliency/BasicSaliency.yarnproject.
     /// </remarks>
-    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
+    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.235")]
     public enum TimeOfDay {
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace Yarn.Unity.Samples {
         Evening = 1,
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
+    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.235")]
     internal static class SimpleSaliencyVariableStorageTypeExtensions {
         internal static int GetBackingValue(this Day enumValue) {
             switch (enumValue) {
@@ -72,7 +72,7 @@ namespace Yarn.Unity.Samples {
             }
         }
     }
-    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
+    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.235")]
     public partial class SimpleSaliencyVariableStorage : Yarn.Unity.InMemoryVariableStorage, Yarn.Unity.IGeneratedVariableStorage {
         // Accessor for Day $day
         public Day Day {
