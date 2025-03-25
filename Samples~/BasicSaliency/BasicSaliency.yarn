@@ -1,0 +1,142 @@
+title: Setup
+---
+<<enum Day>>
+    <<case Monday>>
+    <<case Tuesday>>
+    <<case Wednesday>>
+<<endenum>>
+
+<<enum TimeOfDay>>
+    <<case Morning>>
+    <<case Evening>>
+<<endenum>>
+
+<<declare $day = Day.Monday>>
+<<declare $time = TimeOfDay.Morning>>
+===
+
+title: Alice
+when: $day == .Monday
+---
+Player: Hey
+Alice: Hey, it's Monday
+Player: yep
+Alice: and I only have a single storylet for Monday regardless of the time of day
+Player: cool
+Alice: indeed
+===
+title: Alice
+when: $day == .Tuesday
+when: $time == .Morning
+---
+Player: Hello
+Alice: Hello, what a great Tuesday morning it is!
+===
+title: Alice
+when: $day == .Tuesday
+when: $time == .Evening
+---
+Player: Hello
+Alice: Ah Tuesday evening, always the best time of Tuesday I say
+===
+title: Alice
+when: $day == .Tuesday
+when: $time == .Evening
+---
+Player: Hello
+Alice: Just between you and me I have some plans this evening.
+===
+
+title: Alice
+when: $day == .Wednesday
+when: $time == .Morning
+---
+Player: Hello
+Alice: Humpday, am I right?
+===
+title: Alice
+when: $day == .Wednesday
+when: $time == .Morning
+---
+Player: Hello
+Alice: Ah Wednesday morning, definitely the most morning part of the day.
+===
+
+title: Alice
+when: $day == .Wednesday
+when: $time == .Evening
+when: once
+---
+Player: Hello
+Alice: the week is half over, what a relief.
+===
+title: Alice
+when: $day == .Wednesday
+when: $time == .Evening
+---
+Player: Hello
+Alice: Probably should go to bed, it is Wednesday evening after all.
+===
+
+
+title: Barry
+when: $time == .Morning
+---
+Player: Hi
+Barry: Good morning
+===
+title: Barry
+when: $time == .Morning
+---
+Player: Hi
+Barry: How are you this morning?
+===
+title: Barry
+when: $time == .Morning
+---
+Player: Hi
+Barry: Top of the morning
+===
+
+title: Barry
+when: $time == .Evening
+---
+Player: Hi
+Barry: Good evening
+===
+title: Barry
+when: $time == .Evening
+---
+Player: Hi
+Barry: What a fine evening it is today
+===
+title: Barry
+when: $time == .Evening
+---
+Player: Hi
+Barry: Wait, is is it evening or afternoon?
+===
+
+
+
+title: Liz
+when: once
+when: always
+---
+Liz: I have this node which will only happen once, neato right?
+===
+title: Liz
+when: always
+---
+Liz: Oh hi
+===
+title: Liz
+when: always
+---
+Liz: What up?
+===
+title: Liz
+when: always
+---
+Liz: Talk to anyone interesting lately?
+===
