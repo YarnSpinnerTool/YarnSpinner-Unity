@@ -36,30 +36,15 @@ jobs:
         run: git fetch --unshallow
         working-directory: ./YarnSpinner
 
-      - uses: gittools/actions/gitversion/setup@v0.9.10
-        name: Install GitVersion
-        with:
-          versionSpec: "6.x"
-
       - name: Install dotnet-assembly-alias
         run: dotnet tool install -g Alias
 
       # Update the assembly info for this build of YS, so that the About window is
       # appropriate
-      - uses: gittools/actions/gitversion/execute@v0.9.10
-        name: Execute GitVersion
-        id: gitversion # step id used as reference for output values
-        with:
-          updateAssemblyInfo: true
-          targetPath: ./YarnSpinner
-
-      - name: Print version information
-        run: |
-          echo "Major: ${{ steps.gitversion.outputs.major }}"
-          echo "Minor: ${{ steps.gitversion.outputs.minor }}"
-          echo "Patch: ${{ steps.gitversion.outputs.patch }}"
-          echo "MajorMinorPatch: ${{ steps.gitversion.outputs.majorMinorPatch }}"
-          echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
+      - name: Execute GitVersion
+        id: version # step id used as reference for output values
+        run: ./get-version.sh
+        working-directory: ./YarnSpinner
 
       - name: Restore dependencies
         run: dotnet restore
@@ -106,8 +91,8 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           path: ./YarnSpinner-Unity
-          commit-message: Update Yarn Spinner DLLs to YarnSpinnerTool/YarnSpinner@${{ steps.gitversion.outputs.shortSha }}
-          branch: update-dlls-${{ steps.gitversion.outputs.shortSha }}
-          title: Update Yarn Spinner DLLs to latest (${{ steps.gitversion.outputs.shortSha }})
+          commit-message: Update Yarn Spinner DLLs to YarnSpinnerTool/YarnSpinner@${{ steps.version.outputs.ShortSha }}
+          branch: update-dlls-${{ steps.version.outputs.ShortSha }}
+          title: Update Yarn Spinner DLLs to latest (${{ steps.version.outputs.ShortSha }})
           body: |
-            This is an automated PR made by @${{ github.actor }} that updates the precompiled Yarn Spinner DLLs (and their dependencies) to YarnSpinnerTool/YarnSpinner@${{ steps.gitversion.outputs.shortSha }} (v${{ steps.gitversion.outputs.fullSemVer }}).
+            This is an automated PR made by @${{ github.actor }} that updates the precompiled Yarn Spinner DLLs (and their dependencies) to YarnSpinnerTool/YarnSpinner@${{ steps.version.outputs.ShortSha }} (v${{ steps.version.outputs.SemVer }}).

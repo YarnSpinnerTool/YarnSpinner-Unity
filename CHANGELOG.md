@@ -4,7 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+
 ## [Unreleased]
+
+### Added
+
+### Changed
+
+- Fixed an error that caused the YarnProject asset editor to incorrectly report a compile error when there wasn't one.
+- Certain errors thrown when a command can't be run now show the full text of the command, not just the command name.
+
+### Removed
+
+## [3.0.0-beta2] 2025-04-09
 
 ### Added
 
@@ -113,13 +125,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `LinePresenter` now has a public list of `IActionMarkupHandler` for non-monobehaviour based markup handling.
 - `PauseEventProcessor` is now just an `IActionMarkupHandler` and no longer a monobehaviour.
 - Fixed a bug that could cause multiple option items to be selected at once.
-- The awaitable version of `YarnTask.Delay` no longer throws.
+- The awaitable version of `YarnTask.Delay` no longer throws an `OperationCancelledException` when cancelled.
 
 
 ### Removed
 
 - `YarnProject.GetHeaders` is now deprecated, in favour of `DialogueRunner.Dialogue.GetHeaders`.
-- `TypewriterHandler`, this behaviour is now intrinsic to the `AsyncLineView`.
+- Removed `TypewriterHandler`; this behaviour is now intrinsic to the `AsyncLineView`.
 - Removed the `tags` header from the template new yarn file as it is no longer the best way to add metadata headers into a node.
 - Removed Continue Button support from the `LinePresenter`
 
