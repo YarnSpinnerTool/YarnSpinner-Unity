@@ -147,6 +147,16 @@
             <exception cref="T:System.ArgumentException">Thrown when the provided
             type is not a delegate or has invalid components.</exception>
         </member>
+        <member name="M:Yarn.Compiler.FunctionTypeBuilder.WithVariadicParameterType(Yarn.IType)">
+            <summary>
+            Sets the <see cref="P:Yarn.FunctionType.VariadicParameterType"/> of the
+            <see cref="P:Yarn.Compiler.FunctionTypeBuilder.FunctionType"/>.
+            </summary>
+            <param name="variadicParameterType">The variadic parameter type to
+            apply to the function.</param>
+            <returns>The <see cref="T:Yarn.Compiler.FunctionTypeBuilder"/> instance that
+            received this method call.</returns>
+        </member>
         <member name="T:Yarn.Compiler.CompilationJob">
             <summary>
             An object that contains Yarn source code to compile, and instructions on
@@ -232,6 +242,12 @@
             <summary>
             The collection of type declarations that should be imported and made
             available to the compiler, prior to compilation.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.CompilationJob.CancellationToken">
+            <summary>
+            A cancellation token that can be used to signal that the compilation
+            should be cancelled.
             </summary>
         </member>
         <member name="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.Library)">
@@ -4715,7 +4731,7 @@
             <summary>Maps the names of types as they appear in the language
             (string, bool, number) to actual type objects.</summary>
         </member>
-        <member name="M:Yarn.Compiler.TypeCheckerListener.#ctor(System.String,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.List{Yarn.Compiler.Declaration},System.Collections.Generic.List{Yarn.TypeBase},TypeChecker.Substitution,System.Collections.Generic.HashSet{TypeChecker.TypeConstraint})">
+        <member name="M:Yarn.Compiler.TypeCheckerListener.#ctor(System.String,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.List{Yarn.Compiler.Declaration},System.Collections.Generic.List{Yarn.TypeBase},TypeChecker.Substitution,System.Collections.Generic.HashSet{TypeChecker.TypeConstraint},System.Threading.CancellationToken)">
             <summary>
             Initializes a new instance of the <see cref="T:Yarn.Compiler.TypeCheckerListener"/>
             class.
