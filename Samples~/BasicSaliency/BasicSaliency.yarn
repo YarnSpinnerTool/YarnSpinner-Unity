@@ -15,6 +15,7 @@ title: Setup
 <<declare $time = TimeOfDay.Morning>>
 ===
 
+
 title: Alice
 when: $day == .Monday
 ---
@@ -118,7 +119,6 @@ Barry: Wait, is is it evening or afternoon?
 ===
 
 
-
 title: Liz
 when: once
 when: always
@@ -139,4 +139,18 @@ title: Liz
 when: always
 ---
 Liz: Talk to anyone interesting lately?
+===
+
+
+title: George
+---
+=> George: oh hi
+=> George: another Monday, I hate Mondays <<if $day == .Monday>>
+=> George: I suppose I should make breakfast <<if $time == .Morning>>
+=> George: Weird how tomorrow is Monday, right? <<if $day == .Wednesday && $time == .Evening>>
+    Player: did you want the devs to have to write out even more sample content?
+    George: it would be nice, yes
+    Player: well they aren'that gonna do that
+    George: boo
+=> George: I wonder if I am in any other samples
 ===

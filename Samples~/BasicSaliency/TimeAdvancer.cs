@@ -5,7 +5,7 @@ namespace Yarn.Unity.Samples
 {
     public class TimeAdvancer : MonoBehaviour
     {
-        public SimpleSaliencyVariableStorage variableStore;
+        public BasicSaliencyVariableStorage variableStore;
         public TMP_Text label;
 
         private void AdvanceTime()

@@ -48,7 +48,7 @@ namespace Yarn.Unity.Samples {
     }
 
     [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.235")]
-    internal static class SimpleSaliencyVariableStorageTypeExtensions {
+    internal static class BasicSaliencyVariableStorageTypeExtensions {
         internal static int GetBackingValue(this Day enumValue) {
             switch (enumValue) {
                     case Day.Monday:
@@ -73,7 +73,7 @@ namespace Yarn.Unity.Samples {
         }
     }
     [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.235")]
-    public partial class SimpleSaliencyVariableStorage : Yarn.Unity.InMemoryVariableStorage, Yarn.Unity.IGeneratedVariableStorage {
+    public partial class BasicSaliencyVariableStorage : Yarn.Unity.InMemoryVariableStorage, Yarn.Unity.IGeneratedVariableStorage {
         // Accessor for Day $day
         public Day Day {
             get => this.GetEnumValueOrDefault<Day>("$day");

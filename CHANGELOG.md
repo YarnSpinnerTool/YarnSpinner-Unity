@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- A basic saliency sample to show off the basics and how to get started with storylets.
+
 ### Changed
 
 - Fixed an error that caused the YarnProject asset editor to incorrectly report a compile error when there wasn't one.
