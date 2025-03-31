@@ -2,6 +2,9 @@
 
 # Yarn Spinner for Unity
 
+> [!TIP]
+> To get Yarn Spinner, and support the team behind it, buy a copy for Unity from [the Yarn Spinner Itch.io Store](https://yarnspinner.itch.io) or from [the Unity Asset Store](https://assetstore.unity.com/packages/tools/behavior-ai/yarn-spinner-for-unity-267061), or check out the [Yarn Spinner Documentation](https://docs.yarnspinner.dev) to install from Git.
+
 [![openupm](https://img.shields.io/npm/v/dev.yarnspinner.unity?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/dev.yarnspinner.unity/)
 
 [Yarn Spinner](https://yarnspinner.dev) is the friendly tool for writing dialogue in games. It's easy for writers to use, and has powerful features for programmers.
@@ -38,5 +41,5 @@ Yarn Spinner needs your help to be as awesome as it can be! You don't have to be
 
 * Yarn Spinner's development is powered by our wonderful Patreon supporters and Itch.io. [Become a patron](https://patreon.com/secretlab), or [buy Yarn Spinner on Itch.io](https://yarnspinner.itch.io), and help us make Yarn Spinner be amazing.
 * Our [issues page](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues) contains a list of things we'd love your help in improving.
-* Follow [Yarn Spinner on Twitter](http://twitter.com/YarnSpinnerTool).
+* Follow [Yarn Spinner on Bluesky](https://bsky.app/profile/yarnspinner.dev)).
 * If you want to contribute to Yarn Spinner, [go read our contributor's guide!](CONTRIBUTING.md)
