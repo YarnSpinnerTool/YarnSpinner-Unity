@@ -41,10 +41,11 @@ namespace Yarn.Unity.Editor
 
         public override void OnInspectorGUI()
         {
-
             serializedObject.Update();
-            EditorGUILayout.Space();
 
+            // nice header bit with logo and links
+            DialogueRunnerEditor.DrawYarnSpinnerHeader();
+            
             // If there's a parse error in any of the selected objects,
             // show an error. If the selected objects have the same
             // destination program, and there's a compile error in it, show

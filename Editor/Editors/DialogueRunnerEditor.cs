@@ -15,6 +15,7 @@ using System;
 using System.Reflection;
 using Yarn.Unity.UnityLocalization;
 using Yarn.Unity.Attributes;
+using UnityEditor.PackageManager.UI;
 
 namespace Yarn.Unity.Editor
 {
@@ -755,6 +756,115 @@ namespace Yarn.Unity.Editor
     [CustomEditor(typeof(DialogueRunner))]
     public class DialogueRunnerEditor : YarnEditor
     {
+        private const string docsLabel = "Docs";
+        private const string samplesLabel = "Samples";
+        private const string discordLabel = "Discord";
+        private const string tellUsLabel = "Tell us about your game!";
+        private const string docsURL = "https://docs.yarnspinner.dev/unity";
+        private const string discordURL = "https://discord.com/invite/yarnspinner";
+        private const string tellUsURL = "https://yarnspinner.dev/tell-us";
+        private const string yarnspinnerPackage = "dev.yarnspinner.unity";
+        private const int logoMaxWidth = 240; // px, because links line is about 350px wide
+
+        private static GUIStyle? _urlStyle = null;
+        private static GUIStyle UrlStyle 
+        {
+            get 
+            {
+                if (_urlStyle == null)
+                {
+                    _urlStyle = new GUIStyle(GUI.skin.label);
+                    _urlStyle.richText = true;
+                    
+                }
+                return _urlStyle;
+            } 
+        }
+        private static Texture2D? _yarnSpinnerLogo = null;
+        private static Texture2D YarnSpinnerLogo
+        {
+            get
+            {
+                if (_yarnSpinnerLogo == null)
+                {
+                    string? logoPath = AssetDatabase.GUIDToAssetPath("16f8cd23bf0d0480bb8ecc39be853cda");
+                    _yarnSpinnerLogo = AssetDatabase.LoadAssetAtPath<Texture2D>(logoPath);
+                }
+                return _yarnSpinnerLogo;
+            }
+        }
+
+        internal static void DrawYarnSpinnerHeader()
+        {
+            bool MakeLinkButton(string labelText)
+            {
+                string styledText = "<b><color=#4C8962FF><u>" + labelText + "</u></color></b>";
+                return GUILayout.Button(styledText, UrlStyle, GUILayout.ExpandWidth(false));
+            }
+            string? GetYarnSpinnerVersion()
+            {
+                UnityEditor.PackageManager.PackageInfo yarnspinner = AssetDatabase.FindAssets("package")
+                    .Select(AssetDatabase.GUIDToAssetPath)
+                    .Where(x => AssetDatabase.LoadAssetAtPath<TextAsset>(x) != null)
+                    .Select(UnityEditor.PackageManager.PackageInfo.FindForAssetPath)
+                    .Where(x => x != null)
+                    .First(x => x.name == yarnspinnerPackage);
+                if (yarnspinner == null) { return null; }
+                return yarnspinner.version;
+            }
+
+            EditorGUILayout.Space();
+            EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(false));
+            GUILayout.FlexibleSpace(); // centre by padding from left
+
+            // https://discussions.unity.com/t/how-to-display-an-image-logo-in-a-custom-editor/528405/9
+            float imageWidth = Math.Min(EditorGUIUtility.currentViewWidth - 40, logoMaxWidth);
+            float imageHeight = imageWidth * YarnSpinnerLogo.height / YarnSpinnerLogo.width;
+            Rect rect = GUILayoutUtility.GetRect(imageWidth, imageHeight);
+            GUI.DrawTexture(rect, YarnSpinnerLogo, ScaleMode.ScaleToFit);
+
+            GUILayout.FlexibleSpace(); // centre by padding from right
+            EditorGUILayout.EndHorizontal();
+
+            Rect linksLine = EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(false));
+            GUILayout.FlexibleSpace(); // centre by padding from left
+
+            if (MakeLinkButton(docsLabel)) { Application.OpenURL(docsURL); }
+            if (MakeLinkButton(samplesLabel))
+            {
+                var yarnspinnerVersion = GetYarnSpinnerVersion();
+                if (yarnspinnerVersion == null)
+                {
+                    EditorUtility.DisplayDialog("Samples Could Not Be Found", "Please verify that you have installed a valid version of Yarn Spinner via the Unity Package Manager.", "Ok");
+                }
+                else
+                {
+                    Sample samples = Sample.FindByPackage(yarnspinnerPackage, yarnspinnerVersion).First();
+                    if (samples.isImported)
+                    {
+                        EditorUtility.DisplayDialog("Samples Already Imported", $"The selected package samples already exist at {samples.importPath}", "Ok");
+                    }
+                    else if (EditorUtility.DisplayDialog("Install Package Samples?", $"This will install the following samples:\n\n{samples.description}", "Ok", "Cancel"))
+                    {
+                        samples.Import();
+                    }
+                }
+            }
+            if (MakeLinkButton(discordLabel)) { Application.OpenURL(discordURL); }
+            if (MakeLinkButton(tellUsLabel)) { Application.OpenURL(tellUsURL); }
+            GUILayout.FlexibleSpace(); // centre by padding from right
+
+            EditorGUILayout.EndHorizontal();
+            EditorGUIUtility.AddCursorRect(linksLine, MouseCursor.Link);
+            EditorGUILayout.Space();
+        }
+
+        public override void OnInspectorGUI()
+        {
+            DrawYarnSpinnerHeader();
+            base.OnInspectorGUI();
+        }
+
         /// <summary>
         /// Draws the variable storage property in the inspector. If it's null,
         /// shows an info box.

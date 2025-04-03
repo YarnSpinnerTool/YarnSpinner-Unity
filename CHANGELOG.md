@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - A basic saliency sample to show off the basics and how to get started with storylets.
+- Logo and docs/help links to custom editors in Yarn Project (standalone), Yarn Script (standalone), and Dialogue Runner (component when on GameObject).
 
 ### Changed
 
