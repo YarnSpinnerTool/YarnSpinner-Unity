@@ -840,11 +840,12 @@ namespace Yarn.Unity.Editor
                 else
                 {
                     Sample samples = Sample.FindByPackage(yarnspinnerPackage, yarnspinnerVersion).First();
+                    string samplesDescription = System.Text.RegularExpressions.Regex.Replace(samples.description, "<[^>]+>", "");
                     if (samples.isImported)
                     {
                         EditorUtility.DisplayDialog("Samples Already Imported", $"The selected package samples already exist at {samples.importPath}", "Ok");
                     }
-                    else if (EditorUtility.DisplayDialog("Install Package Samples?", $"This will install the following samples:\n\n{samples.description}", "Ok", "Cancel"))
+                    else if (EditorUtility.DisplayDialog("Install Package Samples?", $"This will install the following samples:\n\n{samplesDescription}", "Ok", "Cancel"))
                     {
                         samples.Import();
                     }
