@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Yarn.Unity
 {
-    [HelpURL("https://yarnspinner.dev/docs/unity/components/yarn-programs/")]
+    [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/importing-yarn-files/yarn-projects")]
     public sealed class YarnProject : ScriptableObject
     {
         [SerializeField]

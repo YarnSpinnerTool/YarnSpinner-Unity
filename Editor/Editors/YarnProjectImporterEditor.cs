@@ -256,6 +256,10 @@ namespace Yarn.Unity.Editor
 
             ui.styleSheets.Add(yarnProjectStyleSheet);
 
+            // nice header bit with logo and links
+            var yarnspinnerHeader = new IMGUIContainer(DialogueRunnerEditor.DrawYarnSpinnerHeader);
+            ui.Add(yarnspinnerHeader);
+
             // if the import data is null it means import has crashed
             // we need to let the user know and perhaps ask them to file an issue
             if (importData == null)

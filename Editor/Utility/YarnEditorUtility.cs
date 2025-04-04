@@ -24,7 +24,7 @@ namespace Yarn.Unity.Editor
         const string ProjectIconTextureGUID = "f6a533d9225cd40ea9ded31d4f686e3b";
         const string LocalizationIconTextureGUID = "2cbba4ddd142149b0a38697070990deb";
         const string YarnScriptTemplateFileGUID = "4f4ca4a46020a454f80e2ac78eda5aa1";
-        const string DialogueViewTemplateFileGUID = "4a168359cda6140c0bddcd5955a326e4";
+        const string DialoguePresenterTemplateFileGUID = "4a168359cda6140c0bddcd5955a326e4";
 
         /// <summary>
         /// Returns a <see cref="Texture2D"/> that can be used to represent
@@ -91,9 +91,9 @@ namespace Yarn.Unity.Editor
         /// creating new C# Dialogue View.</returns>
         /// <throws cref="FileNotFoundException">Thrown if the template
         /// text file cannot be found.</throws>
-        public static string GetTemplateDialogueViewPath()
+        public static string GetTemplateDialoguePresenterPath()
         {
-            var path = AssetDatabase.GUIDToAssetPath(DialogueViewTemplateFileGUID);
+            var path = AssetDatabase.GUIDToAssetPath(DialoguePresenterTemplateFileGUID);
             if (string.IsNullOrEmpty(path))
             {
                 throw new System.IO.FileNotFoundException($"Template file for Dialogue View scripts couldn't be found. Have the .meta files for Yarn Spinner been modified or deleted? Try re-importing the Yarn Spinner package to fix this error.");
@@ -143,9 +143,9 @@ namespace Yarn.Unity.Editor
         /// Creates a new C# script asset containing a template Dialogue View in
         /// the current folder, and begins interactively renaming it.
         /// </summary>
-        [MenuItem("Assets/Create/Yarn Spinner/Dialogue View Script", false, 111)]
-        [MenuItem("Assets/Create/Scripting/Yarn Spinner/Dialogue View Script", false, 101)]
-        public static void CreateDialogueViewScript()
+        [MenuItem("Assets/Create/Yarn Spinner/Dialogue Presenter Script", false, 111)]
+        [MenuItem("Assets/Create/Scripting/Yarn Spinner/Dialogue Presenter Script", false, 101)]
+        public static void CreateDialoguePresenterScript()
         {
             // This method call is undocumented, but public. It's defined
             // in ProjectWindowUtil, and used by other parts of the editor
@@ -153,9 +153,9 @@ namespace Yarn.Unity.Editor
             ProjectWindowUtil.StartNameEditingIfProjectWindowExists(
                 0,
                 ScriptableObject.CreateInstance<DoCreateYarnScriptAsset>(),
-                "NewDialogueView.cs",
+                "NewDialoguePresenter.cs",
                 null,
-                GetTemplateDialogueViewPath());
+                GetTemplateDialoguePresenterPath());
         }
 
         /// <summary>

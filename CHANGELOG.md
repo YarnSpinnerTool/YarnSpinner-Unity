@@ -10,11 +10,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - A basic saliency sample to show off the basics and how to get started with storylets.
+- Logo and docs/help links to custom editors in Yarn Project (standalone), Yarn Script (standalone), and Dialogue Runner (component when on GameObject).
+- Description of package samples which summarises Samples therein.
+- Updated a few out-of-date HelpUrl values which referenced v1 docs.
 
 ### Changed
 
 - Fixed an error that caused the YarnProject asset editor to incorrectly report a compile error when there wasn't one.
 - Certain errors thrown when a command can't be run now show the full text of the command, not just the command name.
+- The default Yarn Spinner Script template is now no longer an empty node.
+- Renamed 'Dialogue View Script' menu item to 'Dialogue Presenter Script'.
 
 ### Removed
 

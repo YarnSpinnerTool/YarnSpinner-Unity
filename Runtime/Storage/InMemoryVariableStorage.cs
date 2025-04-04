@@ -34,7 +34,7 @@ namespace Yarn.Unity
     /// }
     /// </code>
     /// </remarks>
-    [HelpURL("https://yarnspinner.dev/docs/unity/components/variable-storage/")]
+    [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/variable-storage")]
     public class InMemoryVariableStorage : VariableStorageBehaviour, IEnumerable<KeyValuePair<string, object>>
     {
         /// <summary>
