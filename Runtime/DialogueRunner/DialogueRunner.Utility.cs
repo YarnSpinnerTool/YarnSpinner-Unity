@@ -12,58 +12,6 @@ namespace Yarn.Unity
     public partial class DialogueRunner
     {
         /// <summary>
-        /// Loads all variables from the <see cref="PlayerPrefs"/> object into
-        /// the Dialogue Runner's variable storage.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// This method loads a string containing JSON from the <see
-        /// cref="PlayerPrefs"/> object under the key <see cref="SaveKey"/>,
-        /// deserializes that JSON, and then uses the resulting object to set
-        /// all variables in <see cref="VariableStorage"/>.
-        /// </para>
-        /// <para>
-        /// The loaded information can be stored via the <see
-        /// cref="SaveStateToPlayerPrefs(string)"/> method.
-        /// </para>
-        /// </remarks>
-        /// <param name="SaveKey">The key to use when storing the
-        /// variables.</param>
-        /// <returns><see langword="true"/> if the variables were successfully
-        /// loaded from the player preferences; <see langword="false"/>
-        /// otherwise.</returns>
-        /// <seealso
-        /// cref="VariableStorageBehaviour.SetAllVariables(Dictionary{string,
-        /// float}, Dictionary{string, string}, Dictionary{string, bool},
-        /// bool)"/>
-        [Obsolete("LoadStateFromPlayerPrefs is deprecated, please use LoadStateFromPersistentStorage instead.", true)]
-        public bool LoadStateFromPlayerPrefs(string SaveKey = "YarnBasicSave")
-        {
-            if (PlayerPrefs.HasKey(SaveKey))
-            {
-                var saveData = PlayerPrefs.GetString(SaveKey);
-
-                try
-                {
-                    var dictionaries = DeserializeAllVariablesFromJSON(saveData);
-                    this.variableStorage.SetAllVariables(dictionaries.Item1, dictionaries.Item2, dictionaries.Item3);
-
-                    return true;
-                }
-                catch (ArgumentException e)
-                {
-                    Debug.LogWarning($"Unable to load saved data: {e.Message}");
-                    return false;
-                }
-            }
-            else
-            {
-                Debug.LogWarning("Attempted to load the runner previous state but found none saved");
-                return false;
-            }
-        }
-
-        /// <summary>
         /// Loads all variables from the requested file in persistent storage
         /// into the Dialogue Runner's variable storage.
         /// </summary>
@@ -100,33 +48,6 @@ namespace Yarn.Unity
             }
 
             return true;
-        }
-
-        /// <summary>
-        /// Saves all variables in the Dialogue Runner's variable storage into
-        /// the <see cref="PlayerPrefs"/> object.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// This method serializes all variables in <see
-        /// cref="VariableStorage"/> into a string containing JSON, and then
-        /// stores that string in the <see cref="PlayerPrefs"/> object under the
-        /// key <paramref name="SaveKey"/>.
-        /// </para>
-        /// <para>
-        /// The stored information can be restored via the <see
-        /// cref="LoadStateFromPlayerPrefs(string)"/> method.
-        /// </para>
-        /// </remarks>
-        /// <param name="SaveKey">The key to use when storing the
-        /// variables.</param>
-        /// <seealso cref="VariableStorageBehaviour.GetAllVariables"/>
-        [Obsolete("SaveStateToPlayerPrefs is deprecated, please use SaveStateToPersistentStorage instead.", true)]
-        public void SaveStateToPlayerPrefs(string SaveKey = "YarnBasicSave")
-        {
-            var data = SerializeAllVariablesToJSON();
-            PlayerPrefs.SetString(SaveKey, data);
-            PlayerPrefs.Save();
         }
 
         /// <summary>
