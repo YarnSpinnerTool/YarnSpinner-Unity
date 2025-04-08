@@ -25,7 +25,7 @@ namespace Yarn.Unity.Samples
             set { if (TextView != null) { TextView.text = value; } }
         }
 
-        public Func<bool>? OnClick { get; internal set; }
+        public Action? OnClick { get; internal set; }
         public void OnClicked()
         {
             OnClick?.Invoke();
