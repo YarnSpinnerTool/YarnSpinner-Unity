@@ -313,9 +313,9 @@ namespace Yarn.Unity.Tests
         public IEnumerator HandleLine_OnViewsArrayContainingNullElement_SendCorrectLinesToUI()
         {
             // Insert a null element into the dialogue views array
-            var viewArrayWithNullElement = runner.DialogueViews.ToList();
+            var viewArrayWithNullElement = runner.DialoguePresenters.ToList();
             viewArrayWithNullElement.Add(null);
-            runner.DialogueViews = viewArrayWithNullElement.ToArray();
+            runner.DialoguePresenters = viewArrayWithNullElement.ToArray();
 
             runner.StartDialogue(runner.startNode);
             yield return null;
