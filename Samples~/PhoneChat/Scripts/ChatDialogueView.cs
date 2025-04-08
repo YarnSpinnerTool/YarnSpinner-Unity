@@ -1,4 +1,4 @@
-﻿/*
+/*
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
@@ -66,9 +66,9 @@ namespace Yarn.Unity.Samples
 
             var prefab = defaultBubblePrefab;
 
-            if (line.CharacterName != null)
+            if (line.CharacterName != null && characters.TryGetValue(line.CharacterName, out var characterBubble))
             {
-                characters.TryGetValue(line.CharacterName, out prefab);
+                prefab = characterBubble;
             }
 
             if (prefab == null)
