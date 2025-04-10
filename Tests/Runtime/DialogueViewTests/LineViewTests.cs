@@ -61,8 +61,8 @@ namespace Yarn.Unity.Tests
             lineView.Should().NotBeNull();
             optionsView.Should().NotBeNull();
 
-            dialogueRunner.DialogueViews.Should().Contain(lineView);
-            dialogueRunner.DialogueViews.Should().Contain(optionsView);
+            dialogueRunner.DialoguePresenters.Should().Contain(lineView);
+            dialogueRunner.DialoguePresenters.Should().Contain(optionsView);
             dialogueRunner.YarnProject!.Should().NotBeNull();
 
             // Tests may need to control which node runs, so automatically
