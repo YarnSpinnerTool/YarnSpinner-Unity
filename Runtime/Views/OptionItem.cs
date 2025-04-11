@@ -59,6 +59,9 @@ namespace Yarn.Unity
                 }
                 text.text = line;
                 interactable = value.IsAvailable;
+
+                // we want to apply the default styling to the option item when they are given an option
+                ApplyStyle(normal);
             }
         }
 

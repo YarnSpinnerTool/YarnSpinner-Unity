@@ -6,40 +6,41 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Saliency;
-using Yarn.Unity;
 
-/// <summary>
-/// Provides a weighted random saliency selection strategy.
-/// Allowing for the writers to decide how likely each option is to be selected.
-/// </summary>
-/// <remarks>
-/// <para>
-/// This strategy works by rolling a large dice where the number of sides of the dice is equal to the combined weight of all the options.
-/// Each options given weight provides the range of values that that option occupy on the dice.
-/// The dice roll is compared to the ranges of each option and the range the dice value falls between is the selected option.
-/// </para>
-/// <para>
-/// Nodes are given their weight by adding a <b>weight</b> header.
-/// For example <b>weight: 3</b> as a header will give that node three times as many chances to be selected if it had no weight set.
-/// Line groups are given their weight by adding a <b>weight</b> metadata.
-/// For example <b>#weight: 3</b> will give that line group option three times as many chances to be selected if it had no weighting.
-/// If no weight is set then the salient content is given an implicit weight of 1.
-/// Weights cannot be zero or negative, if they are set to this then it is assumed they are weight of 1.
-/// </para>
-/// <para>
-/// Due to failing content being eliminated the specific chance of any piece of content being selected will not be the same through each run through.
-/// For example if you have the following salient content:
-/// <code>
-/// => line 1 #weight:2
-/// => line 2
-/// => line 3 &lt;&lt;if $some_number == 5>>
-/// </code>
-/// Assuming that <b>$some_number</b> equals five then the chance of <b>line 1</b> being selected is 50%.
-/// But if <b>$some_number</b> is not five then <b>line 1</b> chance goes up to 66%.
-/// </para>
-/// </remarks>
 namespace Yarn.Unity.Samples
 {
+    /// <summary>
+    /// Provides a weighted random saliency selection strategy.
+    /// Allowing for the writers to decide how likely each option is to be selected.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This strategy works by rolling a large dice where the number of sides of the dice is equal to the combined weight of all the options.
+    /// Each options given weight provides the range of values that that option occupy on the dice.
+    /// The dice roll is compared to the ranges of each option and the range the dice value falls between is the selected option.
+    /// </para>
+    /// <para>
+    /// Nodes are given their weight by adding a <b>weight</b> header.
+    /// For example <b>weight: 3</b> as a header will give that node three times as many chances to be selected if it had no weight set.
+    /// Line groups are given their weight by adding a <b>weight</b> metadata.
+    /// For example <b>#weight: 3</b> will give that line group option three times as many chances to be selected if it had no weighting.
+    /// If no weight is set then the salient content is given an implicit weight of 1.
+    /// Weights cannot be zero or negative, if they are set to this then it is assumed they are weight of 1.
+    /// </para>
+    /// <para>
+    /// Due to failing content being eliminated the specific chance of any piece of content being selected will not be the same through each run through.
+    /// For example if you have the following salient content:
+    /// <code>
+    /// <![CDATA[
+    /// => line 1 #weight:2
+    /// => line 2
+    /// => line 3 <<if $some_number == 5>>
+    /// ]]>
+    /// </code>
+    /// Assuming that <b>$some_number</b> equals five then the chance of <b>line 1</b> being selected is 50%.
+    /// But if <b>$some_number</b> is not five then <b>line 1</b> chance goes up to 66%.
+    /// </para>
+    /// </remarks>
     public class WeightedSaliencySelector : MonoBehaviour, IContentSaliencyStrategy
     {
         public DialogueRunner runner;

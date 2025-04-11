@@ -12,7 +12,6 @@ namespace Yarn.Unity.Samples
 {
     public class TimeoutBar : MonoBehaviour
     {
-        public float duration = 1f;
         [SerializeField] RectTransform? bar;
 
         private float originalSize = 0f;
@@ -24,7 +23,7 @@ namespace Yarn.Unity.Samples
             }
         }
 
-        public async YarnTask Shrink(CancellationToken cancellationToken)
+        public async YarnTask Shrink(float duration, CancellationToken cancellationToken)
         {
             if (bar == null)
             {

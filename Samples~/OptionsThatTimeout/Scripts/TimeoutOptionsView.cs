@@ -5,7 +5,6 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 using System.Threading;
 using System.Collections.Generic;
 using UnityEngine;
-using Yarn.Unity;
 using Yarn.Unity.Attributes;
 
 #nullable enable
@@ -81,7 +80,7 @@ namespace Yarn.Unity.Samples
             }
 
             var runner = FindAnyObjectByType<DialogueRunner>();
-            runner.AddCommandHandler<float>("auto_opt", SetSelectedOptionsToAutoComplete);
+            runner.AddCommandHandler("auto_opt", SetSelectedOptionsToAutoComplete);
         }
 
         /// <summary>
@@ -127,8 +126,7 @@ namespace Yarn.Unity.Samples
                 return;
             }
 
-            timedBar.duration = autoSelectDuration;
-            await timedBar.Shrink(cancellationToken);
+            await timedBar.Shrink(autoSelectDuration, cancellationToken);
 
             if (!cancellationToken.IsCancellationRequested)
             {
@@ -147,8 +145,7 @@ namespace Yarn.Unity.Samples
             {
                 return;
             }
-            timedBar.duration = autoSelectDuration;
-            await timedBar.Shrink(cancellationToken);
+            await timedBar.Shrink(autoSelectDuration, cancellationToken);
 
             bool foundIt = false;
 
@@ -172,9 +169,8 @@ namespace Yarn.Unity.Samples
         }
 
         // command to set the last highlighted option is selected after duration ends flag to be true
-        public void SetSelectedOptionsToAutoComplete(float duration = 3f)
+        public void SetSelectedOptionsToAutoComplete()
         {
-            autoSelectDuration = duration;
             LastHighlightedOptionIsSelectedAfterDuration = true;
         }
 
@@ -195,7 +191,6 @@ namespace Yarn.Unity.Samples
             // we run through all the options quickly to see if there are any that are configured for timeouts
             foreach (var option in dialogueOptions)
             {
-                int currentDefaults = hasDefault;
                 foreach (var metadata in option.Line.Metadata)
                 {
                     if (metadata == HiddenFallback)
@@ -345,7 +340,6 @@ namespace Yarn.Unity.Samples
             }
 
             // configuring all the dialogue items
-            int optionViewsCreated = 0;
             for (int i = 0; i < dialogueOptions.Length; i++)
             {
                 var optionView = optionViews[i];
@@ -370,13 +364,41 @@ namespace Yarn.Unity.Samples
 
                 optionView.OnOptionSelected = selectedOptionCompletionSource;
                 optionView.completionToken = completionCancellationSource.Token;
+            }
 
-                // The first available option is selected by default
-                if (optionViewsCreated == 0)
+            // There is a bug that can happen where in-between option items being configured one can be selected
+            // and because the items are still being configured the others don't get the deselect message
+            // which means visually two items are selected.
+            // So instead now after configuring them we find if any are highlighted, and if so select that one
+            // otherwise select the first non-deactivated one
+            // because at this point now all of them are configured they will all get the select/deselect message
+            int optionIndexToSelect = -1;
+            for (int i = 0; i < optionViews.Count; i++)
+            {
+                var view = optionViews[i];
+                if (!view.isActiveAndEnabled)
                 {
-                    optionView.Select();
+                    continue;
                 }
-                optionViewsCreated += 1;
+
+                if (view.IsHighlighted)
+                {
+                    optionIndexToSelect = i;
+                    break;
+                }
+
+                // ok at this point the view is enabled
+                // but not highlighted
+                // so if we haven't already decreed we have found one to select
+                // we select this one
+                if (optionIndexToSelect == -1)
+                {
+                    optionIndexToSelect = i;
+                }
+            }
+            if (optionIndexToSelect > -1)
+            {
+                optionViews[optionIndexToSelect].Select();
             }
             
             // now we add in the timer bar if necessary or turn it off if it isn't needed
