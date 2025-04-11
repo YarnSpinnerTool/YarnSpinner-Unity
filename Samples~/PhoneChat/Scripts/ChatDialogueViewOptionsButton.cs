@@ -15,17 +15,34 @@ using TMP_Text = Yarn.Unity.TMPShim;
 
 namespace Yarn.Unity.Samples
 {
+    /// <summary>
+    /// A button that displays a dialogue option in the Phone Chat sample.
+    /// </summary>
     public class ChatDialogueViewOptionsButton : MonoBehaviour
     {
+        /// <summary>
+        /// The text view that shows the text of the option.
+        /// </summary>
         private TMP_Text? TextView => GetComponentInChildren<TMP_Text>();
 
+        /// <summary>
+        /// Gets or sets the text shown in the option button.
+        /// </summary>
         public string Text
         {
             get => (TextView != null) ? TextView.text : string.Empty;
             set { if (TextView != null) { TextView.text = value; } }
         }
 
-        public Func<bool>? OnClick { get; internal set; }
+        /// <summary>
+        /// The delegate to run when the button is clicked.
+        /// </summary>
+        public Action? OnClick { get; internal set; }
+
+        /// <summary>
+        /// Called by the <see cref="UnityEngine.UI.Button"/> component when
+        /// clicked. 
+        /// </summary>
         public void OnClicked()
         {
             OnClick?.Invoke();

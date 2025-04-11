@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Certain errors thrown when a command can't be run now show the full text of the command, not just the command name.
 - The default Yarn Spinner Script template is now no longer an empty node.
 - Renamed 'Dialogue View Script' menu item to 'Dialogue Presenter Script'.
+- Added `DialogueRunner.DialoguePresenters` (and marked `DialogueRunner.DialogueViews` as obsolete.)
 
 ### Removed
 

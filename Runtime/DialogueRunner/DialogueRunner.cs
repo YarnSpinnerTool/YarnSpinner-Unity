@@ -199,7 +199,8 @@ namespace Yarn.Unity
         /// to.
         /// </summary>
         [Space]
-        [SerializeField] List<DialoguePresenterBase?> dialogueViews = new List<DialoguePresenterBase?>();
+        [UnityEngine.Serialization.FormerlySerializedAs("dialogueViews")]
+        [SerializeField] List<DialoguePresenterBase?> dialoguePresenters = new List<DialoguePresenterBase?>();
 
         /// <summary>
         /// Gets a value that indicates if the dialogue is actively
@@ -308,13 +309,26 @@ namespace Yarn.Unity
         public UnityEventString? onUnhandledCommand;
 
         /// <summary>
-        /// Gets or sets the collection of dialogue views attached to this
+        /// Gets or sets the collection of dialogue presenters attached to this
         /// dialogue runner.
         /// </summary>
+        /// <remarks>This property is deprecated. Use <see
+        /// cref="DialoguePresenters"/> instead.</remarks>
+        [Obsolete("Use " + nameof(DialoguePresenters))]
         public IEnumerable<DialoguePresenterBase?> DialogueViews
         {
-            get => dialogueViews;
-            set => dialogueViews = value.ToList();
+            get => DialoguePresenters;
+            set => DialoguePresenters = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the collection of dialogue presenters attached to this
+        /// dialogue runner.
+        /// </summary>
+        public IEnumerable<DialoguePresenterBase?> DialoguePresenters
+        {
+            get => dialoguePresenters;
+            set => dialoguePresenters = value.ToList();
         }
 
         /// <summary>
@@ -474,7 +488,7 @@ namespace Yarn.Unity
             currentLineHurryUpSource = null;
 
             var pendingTasks = new HashSet<YarnTask>();
-            foreach (var view in this.dialogueViews)
+            foreach (var view in this.dialoguePresenters)
             {
                 if (view == null)
                 {
@@ -631,7 +645,7 @@ namespace Yarn.Unity
 
             var pendingTasks = new HashSet<YarnTask>();
 
-            foreach (var view in this.dialogueViews)
+            foreach (var view in this.dialoguePresenters)
             {
                 if (view == null)
                 {
@@ -748,7 +762,7 @@ namespace Yarn.Unity
             }
 
             var pendingTasks = new List<YarnTask>();
-            foreach (var view in this.dialogueViews)
+            foreach (var view in this.dialoguePresenters)
             {
                 pendingTasks.Add(WaitForOptionsView(view));
             }
@@ -884,7 +898,7 @@ namespace Yarn.Unity
             async YarnTask StartDialogueAsync()
             {
                 var tasks = new List<YarnTask>();
-                foreach (var view in DialogueViews)
+                foreach (var view in DialoguePresenters)
                 {
                     if (view == null)
                     {
