@@ -1,44 +1,210 @@
 ﻿title: Start
-tags:
 ---
-// Capsley: Whoa hey cool this is a line
-
-// Capsley: Let's get this up on the board
+Capsley: Hello and welcome to the Yarn Spinner for Unity samples
 
 <<start_slide>>
-SlideHeader: Yes That's Right
-SlideBullet: i implemented
-SlideBullet: slideshows
-SlideBullet: in Yarn Spinner
-// SlideHeader: Wow a header
-// SlideBullet: wow item 1
-// SlideBullet: wow item 2
+SlideHeader: Agenda
+SlideBullet: Yarn Spinner
+SlideBullet: Why it's so great
+SlideBullet: The list of samples
 <<end_slide>>
 
-Capsley: whoaaa
+Capsley: Let's get cracking!
 
 <<clear_slide>>
 <<start_slide>>
 SlideImage: code-1
 <<end_slide>>
 
-// Capsley: let's add another bullet
+Capsley: In case you haven't seen it, this is what Yarn looks like
+Capsley: For a full syntax guide please see the website
 
-// <<start_slide>>
-// SlideBullet: another bullet
-// <<end_slide>>
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Why is Yarn Spinner Great?
+SlideBullet: it just is
+SlideBullet: Trust us on that
+<<end_slide>>
 
-// Capsley: Nice. Next slide, please
+Capsley: I feel like this is obvious enough, let's move onto the samples
 
-// <<clear_slide>>
+<<jump SampleSelection>>
+===
 
-// <<start_slide>>
-// SlideHeader: Slide Two
-// SlideBullet: whoa
-// SlideBullet: amazing
-// SlideBullet: incredible
-// <<end_slide>>
+title: SampleSelection
+---
+Capsely: Is there anything people are interested in?
 
-// Capsley: the end!
+-> Tell us about the basic samples
+    <<detour BasicSamples>>
+-> Tell us about the custom presentation samples
+    <<detour PresenterSamples>>
+-> Tell us about extending Yarn Spinner samples
+    <<detour ExtendingSamples>>
+-> Tell us about the advanced samples
+    <<detour AdvancedSamples>>
+-> Nah
+    <<jump End>>
 
+<<jump SampleSelection>>
+===
+
+title: End
+---
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Thanks
+<<end_slide>>
+
+Capsley: Thanks for coming to my talk
+Capsley: Enjoy the Yarn Spinner samples
+Capsley: and please give us money
+===
+
+title: BasicSamples
+---
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Introductory Samples
+SlideBullet: Welcome
+SlideBullet: Feature Tour
+SlideBullet: Basic Saliency and Storylets
+<<end_slide>>
+
+Capsley: We have three introductory samples
+
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Welcome
+SlideImage: welcome
+<<end_slide>>
+
+Capsley: Welcome is this this sample you are in right now.
+Capsley: it doesn't show off any features
+Capsley: it's a launching point for the entire samples package
+
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Feature Tour
+SlideImage: INVALID
+<<end_slide>>
+
+Capsley: The feature tour shows off a wide range of Yarn Spinner features
+Capsley: If you want to get a quick look at what Yarn Spinner can do, check it out
+
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Basic Saliency and Storylets
+SlideImage: basic-saliency
+<<end_slide>>
+
+Capsley: Basic Saliency and Storylets show off the basics of using storylets
+Capsley: If you aren't used to salient content in narrative, it's your best starting point
+===
+
+title: PresenterSamples
+---
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Presenter Samples
+SlideBullet: Theming Default Views
+SlideBullet: Making a Phone Chat
+SlideBullet: Making Options that Timeout
+<<end_slide>>
+
+Capsley: We have three samples on making and customising views.
+
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Theming Default Views
+SlideImage: rethemed
+<<end_slide>>
+
+Capsley: This sample shows off how with no code you can theme the existing dialogue system
+Capsley: is it really spelled "theming"?
+
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Making a Phone Chat
+SlideImage: phone
+<<end_slide>>
+
+Capsley: The phone chat shows off making an entirely new dialogue presenter from scratch
+
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Making Options that Timeout
+SlideImage: timeout
+<<end_slide>>
+
+Capsley: The time out options shows off how you can make timed player selection
+Capsley: Where after a period of time an option is automatically selected
+===
+
+title: ExtendingSamples
+---
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Extending Yarn Spinner
+SlideBullet: Voiceover and Localisation
+SlideBullet: Background Chatter
+SlideBullet: Inline Events
+SlideBullet: Replacement Markup
+<<end_slide>>
+
+Capsley: We have four samples on extending Yarn Spinner to create specific looks and feels
+
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Voiceover and Localisation
+SlideImage: voiceover
+<<end_slide>>
+
+Capsley: The voiceover and localisation sample shows off how to add in support for localisation and audio assets in your games
+
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Background Chatter
+SlideImage: background
+<<end_slide>>
+
+Capsley: The Background Chatter sample demonstrates a variety of barks and background conversations
+Capsley: Letting you create worlds that have conversations beyond that of just the player
+
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Inline Events
+SlideImage: inline
+<<end_slide>>
+
+Capsley: Inline Events covers the new action markup and how it can be used to make actions occur in the middle of a line!
+
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Replacement Markup
+SlideImage: replacement-markers
+<<end_slide>>
+
+Capsley: Replacement Markup shows off using the markup system to rethem and adjust partial elements of a line
+===
+
+title: AdvancedSamples
+---
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Custom Saliency Strategies
+SlideImage: custom-saliency
+<<end_slide>>
+
+Capsley: This sample shows off how to make and use a custom saliency strategy
+Capsley: giving you full control over how dynamic content selection occurs
+
+<<clear_slide>>
+<<start_slide>>
+SlideHeader: Advanced Saliency
+SlideImage: advanced-saliency
+<<end_slide>>
+
+Capsley: The Advanced Saliency sample demonstrates how you can use storylets and variables together to make dynamic content
+Capsley: Where the characters, world, and scenario change depending on player selections
 ===
