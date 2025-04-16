@@ -13,7 +13,7 @@ namespace Yarn.Unity
     /// </summary>
     /// <seealso cref="DispatchCommandToGameObject(Command, Action)"/>
     /// <seealso cref="DispatchCommandToRegisteredHandlers(Command, Action)"/>
-    internal struct CommandDispatchResult
+    public struct CommandDispatchResult
     {
 
         internal enum ParameterParseStatusType
