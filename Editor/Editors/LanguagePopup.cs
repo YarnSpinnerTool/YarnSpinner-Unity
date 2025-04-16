@@ -12,13 +12,8 @@ using UnityEngine.UIElements;
 
 namespace Yarn.Unity.Editor
 {
-
     public class LanguageField : BaseField<string>
     {
-        new class UxmlFactory : UxmlFactory<LanguageField, UxmlTraits> { }
-
-        new class UxmlTraits : BaseField<string>.UxmlTraits { }
-
         PopupField<string?> m_Popup;
         TextField m_TextField;
 
