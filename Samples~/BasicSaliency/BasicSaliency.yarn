@@ -11,8 +11,13 @@ title: Setup
     <<case Evening>>
 <<endenum>>
 
+/// the current day
 <<declare $day = Day.Monday>>
+/// the current time
 <<declare $time = TimeOfDay.Morning>>
+
+/// the number of gold coins the player has
+<<declare $gold = 0>>
 ===
 
 
