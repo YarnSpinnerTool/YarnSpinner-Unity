@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Logo and docs/help links to custom editors in Yarn Project (standalone), Yarn Script (standalone), and Dialogue Runner (component when on GameObject).
 - Description of package samples which summarises Samples therein.
 - Updated a few out-of-date HelpUrl values which referenced v1 docs.
+- Default Yarn Project exlude patterns updated to ignore the standard samples folders
 
 ### Changed
 

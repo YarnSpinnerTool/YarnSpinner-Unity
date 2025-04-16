@@ -72,7 +72,8 @@ namespace Yarn.Unity.Editor
 
             // Follow Unity's behaviour - exclude any content in a folder whose
             // name ends with a tilde
-            newProject.ExcludeFilePatterns = new[] { "**/*~/*" };
+            // and also ignoring anything that is inside a sample folder
+            newProject.ExcludeFilePatterns = new[] { "**/*~/*", "./Samples/Yarn Spinner*/*" };
 
             return newProject;
         }
