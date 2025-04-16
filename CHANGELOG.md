@@ -21,11 +21,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - The default Yarn Spinner Script template is now no longer an empty node.
 - Renamed 'Dialogue View Script' menu item to 'Dialogue Presenter Script'.
 - Added `DialogueRunner.DialoguePresenters` (and marked `DialogueRunner.DialogueViews` as obsolete.)
+- Fixed a lot of missing null checks
 
 ### Removed
 
 - SaveStateToPlayerPrefs method
 - LoadStateFromPlayerPrefs method
+- `LinesAvailable` property from line providers, it no longer makes sense in an async world
+- `baseLayer` property on Simple Character as it was no longer used
+
 
 ## [3.0.0-beta2] 2025-04-09
 

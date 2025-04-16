@@ -5,6 +5,7 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using System.Diagnostics.CodeAnalysis;
 
 #nullable enable
 
@@ -15,11 +16,14 @@ namespace Yarn.Unity
     {
         [SerializeField]
         [HideInInspector]
-        public byte[] compiledYarnProgram;
+        public byte[]? compiledYarnProgram;
 
         [SerializeField]
         [HideInInspector]
+        [NotNull]
+        #pragma warning disable CS8618
         public Localization baseLocalization;
+        #pragma warning restore CS8618
 
         [SerializeField]
         [HideInInspector]

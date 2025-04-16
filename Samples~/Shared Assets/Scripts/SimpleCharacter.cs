@@ -112,7 +112,6 @@ namespace Yarn.Unity.Samples
 
         [Group("Animation Parameters")]
         [AnimationLayer(nameof(animator))]
-        [SerializeField] string baseLayer = "Base Layer";
 
         private float timeUntilNextBlink = 0f;
         private Dictionary<int, CancellationTokenSource> activeAnimationLerps = new();

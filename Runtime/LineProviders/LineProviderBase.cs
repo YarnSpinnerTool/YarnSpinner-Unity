@@ -114,9 +114,6 @@ namespace Yarn.Unity
         }
 
         /// <inheritdoc/>
-        public virtual bool LinesAvailable => true;
-
-        /// <inheritdoc/>
         public abstract string LocaleCode { get; set; }
 
         /// <summary>

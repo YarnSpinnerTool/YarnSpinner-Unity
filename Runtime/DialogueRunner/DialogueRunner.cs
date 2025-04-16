@@ -847,14 +847,7 @@ namespace Yarn.Unity
             }
             this.yarnProject = project;
 
-            if (project != null)
-            {
-                Dialogue.SetProgram(project.Program);
-            }
-            else
-            {
-                Dialogue.SetProgram(null);
-            }
+            Dialogue.SetProgram(project.Program);
         }
 
         /// <summary>
