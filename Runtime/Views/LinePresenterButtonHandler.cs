@@ -25,19 +25,29 @@ namespace Yarn.Unity
 {
     public class LinePresenterButtonHandler : ActionMarkupHandler
     {
-        [MustNotBeNull] [SerializeField] Button continueButton;
+        [MustNotBeNull] [SerializeField] Button? continueButton;
 
         [MustNotBeNullWhen(nameof(continueButton), "A " + nameof(DialogueRunner) + " must be provided for the continue button to work.")]
         [SerializeField] DialogueRunner? dialogueRunner;
 
         void Start()
         {
+            if (continueButton == null)
+            {
+                Debug.LogWarning($"The {nameof(continueButton)} is null, is it not connected in the inspector?", this);
+                return;
+            }
             continueButton.interactable = false;
             continueButton.enabled = false;
         }
 
         public override void OnPrepareForLine(MarkupParseResult line, TMP_Text text)
         {
+            if (continueButton == null)
+            {
+                Debug.LogWarning($"The {nameof(continueButton)} is null, is it not connected in the inspector?", this);
+                return;
+            }
             // enable the button
             continueButton.interactable = true;
             continueButton.enabled = true;
@@ -71,6 +81,10 @@ namespace Yarn.Unity
 
         public override void OnLineWillDismiss()
         {
+            if (continueButton == null)
+            {
+                return;
+            }
             // disable interaction
             continueButton.onClick.RemoveAllListeners();
             continueButton.interactable = false;

@@ -45,7 +45,7 @@ namespace Yarn.Unity.Legacy
         /// next line of dialogue.
         /// </para>
         /// </remarks>
-        public Action requestInterrupt;
+        public Action? requestInterrupt;
 
         /// <summary>Called by the <see cref="DialogueRunner"/> to signal that
         /// dialogue has started.</summary>

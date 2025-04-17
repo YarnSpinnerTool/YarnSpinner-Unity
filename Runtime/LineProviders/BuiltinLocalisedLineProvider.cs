@@ -28,10 +28,6 @@ namespace Yarn.Unity
             set => _assetLocaleCode = value;
         }
 
-        private YarnTask? prepareForLinesTask = null;
-
-        public override bool LinesAvailable => prepareForLinesTask?.IsCompletedSuccessfully() ?? false;
-
         private Markup.LineParser lineParser = new Markup.LineParser();
         private Markup.BuiltInMarkupReplacer builtInReplacer = new Markup.BuiltInMarkupReplacer();
 
@@ -117,7 +113,6 @@ namespace Yarn.Unity
             {
                 // We don't have a Yarn Project, so there's no preparation we
                 // can do. do.
-                prepareForLinesTask = YarnTask.CompletedTask;
                 return;
             }
 
@@ -135,12 +130,7 @@ namespace Yarn.Unity
                     tasks.Add(task);
                 }
 
-                async YarnTask WaitForAllLoads()
-                {
-                    await YarnTask.WhenAll(tasks);
-                }
-
-                prepareForLinesTask = WaitForAllLoads();
+                await YarnTask.WhenAll(tasks);
             }
             else
             {

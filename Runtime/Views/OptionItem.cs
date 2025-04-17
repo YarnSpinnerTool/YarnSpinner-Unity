@@ -25,8 +25,8 @@ namespace Yarn.Unity
 
     public sealed class OptionItem : UnityEngine.UI.Selectable, ISubmitHandler, IPointerClickHandler, IPointerEnterHandler
     {
-        [MustNotBeNull] [SerializeField] TextMeshProUGUI text;
-        [SerializeField] UnityEngine.UI.Image selectionImage;
+        [MustNotBeNull] [SerializeField] TextMeshProUGUI? text;
+        [SerializeField] UnityEngine.UI.Image? selectionImage;
 
         [Group("Appearance")] [SerializeField] InternalAppearance normal;
         [Group("Appearance")] [SerializeField] InternalAppearance selected;
@@ -39,10 +39,17 @@ namespace Yarn.Unity
 
         private bool hasSubmittedOptionSelection = false;
 
-        private DialogueOption _option;
+        private DialogueOption? _option;
         public DialogueOption Option
         {
-            get => _option;
+            get
+            {
+                if (_option == null)
+                {
+                    throw new System.NullReferenceException("Option has not been set on the option item");
+                }
+                return _option;
+            }
 
             set
             {
@@ -57,6 +64,13 @@ namespace Yarn.Unity
                 {
                     line = $"<s>{value.Line.TextWithoutCharacterName.Text}</s>";
                 }
+
+                if (text == null)
+                {
+                    Debug.LogWarning($"The {nameof(text)} is null, is it not connected in the inspector?", this);
+                    return;
+                }
+
                 text.text = line;
                 interactable = value.IsAvailable;
 
@@ -73,6 +87,12 @@ namespace Yarn.Unity
             {
                 newColour = disabled.colour;
                 newSprite = disabled.sprite;
+            }
+
+            if (text == null)
+            {
+                Debug.LogWarning($"The {nameof(text)} is null, is it not connected in the inspector?", this);
+                return;
             }
 
             text.color = newColour;

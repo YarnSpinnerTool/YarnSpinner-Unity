@@ -75,15 +75,30 @@ namespace Yarn.Unity.Samples {
     [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.235")]
     public partial class BasicSaliencyVariableStorage : Yarn.Unity.InMemoryVariableStorage, Yarn.Unity.IGeneratedVariableStorage {
         // Accessor for Day $day
+        /// <summary>
+        /// the current day
+        /// </summary>
         public Day Day {
             get => this.GetEnumValueOrDefault<Day>("$day");
             set => this.SetValue("$day", value.GetBackingValue());
         }
 
         // Accessor for TimeOfDay $time
+        /// <summary>
+        /// the current time
+        /// </summary>
         public TimeOfDay Time {
             get => this.GetEnumValueOrDefault<TimeOfDay>("$time");
             set => this.SetValue("$time", value.GetBackingValue());
+        }
+
+        // Accessor for Number $gold
+        /// <summary>
+        /// the number of gold coins the player has
+        /// </summary>
+        public float Gold {
+            get => this.GetValueOrDefault<float>("$gold");
+            set => this.SetValue<float>("$gold", value);
         }
 
     }

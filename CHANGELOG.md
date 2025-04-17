@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Logo and docs/help links to custom editors in Yarn Project (standalone), Yarn Script (standalone), and Dialogue Runner (component when on GameObject).
 - Description of package samples which summarises Samples therein.
 - Updated a few out-of-date HelpUrl values which referenced v1 docs.
+- Default Yarn Project exlude patterns updated to ignore the standard samples folders
 
 ### Changed
 
@@ -21,11 +22,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - The default Yarn Spinner Script template is now no longer an empty node.
 - Renamed 'Dialogue View Script' menu item to 'Dialogue Presenter Script'.
 - Added `DialogueRunner.DialoguePresenters` (and marked `DialogueRunner.DialogueViews` as obsolete.)
+- Fixed a lot of missing null checks
 
 ### Removed
 
 - SaveStateToPlayerPrefs method
 - LoadStateFromPlayerPrefs method
+- `LinesAvailable` property from line providers, it no longer makes sense in an async world
+- `baseLayer` property on Simple Character as it was no longer used
+- Obsolete uxml elements on `LanguagePopup.cs`
+
 
 ## [3.0.0-beta2] 2025-04-09
 

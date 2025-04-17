@@ -67,7 +67,11 @@ namespace Yarn.Unity
         /// cref="AudioSource"/> will be added at runtime.</remarks>
         [SerializeField]
         [NotNull]
+        // for some reason Unity doesn't seem to respect the [NotNull] attribute
+        // presumably this will be fixed in a future version of Unity
+        #pragma warning disable CS8618
         public AudioSource audioSource;
+        #pragma warning restore CS8618
 
         void Awake()
         {
