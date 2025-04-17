@@ -11,6 +11,7 @@
   <<case Sludge>>
 <<endenum>>
 <<declare $player_meal = Meal.None>>
+<<declare $player_can_afford_bribe = $player_gold >= 6>>
 
 Capsley: Hi! Welcome to Yarn Spinner!
 Capsley: This is the Feature Tour!
@@ -207,91 +208,19 @@ Beryl: But you can also make your own, to get information out of Unity Scripts.
 Beryl: Anyway, bye.
 ===
 
-
-title: NPC1
+title: Room6_SmartVariables_1
 ---
-// Sally: Did you know that can also be Smart?
-// Sally: When they're Smart, we call them Smart Variables.
-// Sally: We're proud of our evocative naming choices.
-
-
-Reginald: Hi, I'm Reginald.
-Reginald: I'm a friendly NPC.
-Reginald: Do you want to talk about shapes?
-    -> Yes, I love shapes!
-        Reginald: Good. Let's talk about shapes.
-        Reginald: What's your favorite shape?
-            -> Circle
-                Reginald: That's a great choice.
-            -> Square
-                Reginald: That's a fine choice.
-            -> Triangle
-                Reginald: That's a terrible choice.
-    -> No, shapes bore me.
-        Reginald: That's too bad.
-        Reginald: Shapes are the best.
-        Reginald: You should reconsider.
-            -> Is that a threat?
-                Reginald: No, it's a suggestion.
-            -> I'll think about it.
-                Reginald: Good. I hope you change your mind.
-===
-
-title: NPC2
----
-Regonald: Hi, I'm Regonald.
-Regonald: I'm a friendly NPC.
-    -> Do you like shapes?
-        Regonald: No. Don't be disgusting.
-        Regonald: Shapes are the worst.
-        Regonald: I hate shapes.
-            -> Why do you hate shapes?
-                Regonald: I don't know.
-                Regonald: I just do.
-            -> What's wrong with shapes?
-                Regonald: Everything.
-                Regonald: Shapes are the worst.
-            -> Are you okay?
-                Regonald: No, I'm not okay.
-                Regonald: I'm having a bad day.
-                Regonald: I don't want to talk about it.
-                    -> Are you sure?
-                        Regonald: Yes, I'm sure.
-                        Regonald: I don't want to talk about it.
-                    -> Okay, I'll leave you alone.
-                        Regonald: Thank you.
-                        Regonald: I appreciate it.
-                            -> Bye, then.
-                                Regonald: Don't even want to chat?
-                                Regonald: Fine, be that way.
-    -> Great.
-        Regonald: I'm glad you think so.
-        Regonald: I like you.
-        Regonald: You're a good person.
-            -> Thanks.
-                Regonald: You're welcome.
-            -> I try.
-                Regonald: You're doing great.
-            -> I'm not.
-                Regonald: Don't be so hard on yourself.
-                Regonald: You're doing fine.
-===
-
-title: Explainer3
----
-Capsley: This guy right here...
-Capsley: He's a real piece of work.
-Capsley: The node that controls his dialogue uses the once condition to make sure he only talks to you once.
-Capsley: If you try to talk to him again, he'll just ignore you.
-Capsley: It's a neat trick, right?
-Capsley: I thought so... 
-===
-
-title: NPC3
-when: once
----
-Reginold: Hi, I'm Reginold.
-Reginold: I'm a friendly NPC.
-Reginold: But I never want to talk to you again.
-Reginold: Goodbye.
+Reginald: Did you know that Variables can also be Smart?
+Reginald: When they're Smart, we call them Smart Variables
+Reginald: We're proud of our evocative naming choices.
+<<if $player_can_afford_bribe>>
+    Reginald: Anyway.
+    Reginald: I know you can afford to bribe me because you have enough gold.
+    <<set $player_gold = $player_gold - 6>>
+    Reginald: And I know this because there's a Smart Variable that is set to true if the variable that tracks how much gold you have is greater than or equal to a certain value.
+    Reginald: Smart Variables let you simplify if-statements, and clarify depdendencies between your variables.
+<<else>>
+    Reginald: Thanks to a Smart Variable, I know you cannot afford to bribe me. Alas.
+<<endif>>
+Reginald: Farewell!
 ===
