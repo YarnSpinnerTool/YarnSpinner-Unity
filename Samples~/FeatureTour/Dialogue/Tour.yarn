@@ -172,6 +172,20 @@ Ruby: That's right! It's the different meals I have for you! Or no meal.
 Ruby: Bye bye!
 ===
 
+title: Room5_Once_1
+---
+<<once>>
+    Norb: Hi, I'm Norb.
+    Norb: I'm only ever going to talk to you ONCE!
+    Norb: Once and no more. 
+    Norb: Next time you speak to me I won't greet you.
+    Norb: That's because my greeting lines are inside a Once Statement.
+    Norb: Which.. well you can guess what it does.
+    Norb: Once statements can also be added to options, which means they can only be chosen once.
+    Norb: You can even put conditions on Once statements.
+<<endonce>>
+===
+
 title: Room6_Commands_1
 ---
 Derek: YOU!
