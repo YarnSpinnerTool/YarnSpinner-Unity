@@ -251,3 +251,46 @@ Sven: It lets you add some variety.
 Sven: You can even add conditions to lines in a line group.
 Sven: It's pretty great!
 ===
+
+title: Room7_NodeGroups_1
+when: once 
+when: !visited("Room7_NodeGroups_1")
+---
+Dr Node: Hi, I'm Doctor Node.
+Dr Node: I'm here to show you how Node Groups work.
+Dr Node: Node Groups let you create a collection of Nodes that share the same name.
+Dr Node: Each Node that's part of the group has a when condition in its header... and that when condition dictates when it's shown.
+Dr Node: You're seeing these lines because this node in the Node Group has its when condition set to once.
+Dr Node: Which means you'll see it once.
+Dr Node: Try speaking to me again.
+===
+
+title: Room7_NodeGroups_1
+when: !$player_can_afford_bribe
+---
+Dr Node: Hi. You're seeing this because this node has a when condition that evaluates to true if you cannot afford a bribe.
+Dr Node: Neat, right?
+===
+
+title: Room7_NodeGroups_1
+when: $player_meal == .None
+---
+Dr Node: Hi. 
+Dr Node: You havne't got a meal. Alas.
+Dr Node: I know this because of my when clause, thanks Node Groups!
+===
+
+title: Room7_NodeGroups_1
+when: $player_meal == .Ramen
+---
+Dr Node: Hi. 
+Dr Node: You have RAMEN! How exciting.
+Dr Node: I know this because of my when clause, thanks Node Groups!
+===
+
+title: Room7_NodeGroups_1
+when: always
+---
+Dr Node: Hi. This node in the node group has its when clause set to always.
+Dr Node: So it's kind of like a fallback.
+===
