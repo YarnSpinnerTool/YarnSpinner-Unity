@@ -3,7 +3,6 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
 using UnityEngine;
-using UnityEditor;
 
 namespace Yarn.Unity.Samples
 {
@@ -27,26 +26,34 @@ namespace Yarn.Unity.Samples
             //
             // There are some edge cases this won't detect, but will work well
             // enough.
-            if (UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline == null)
+            if (Application.isEditor && UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline == null)
             {
                 Debug.LogWarning("The samples were created using the Universal Render Pipeline, things will not appear correctly. You will need to convert the materials to be compatible.");
             }
         }
     }
 
-    [CustomEditor(typeof(SampleRenderDetector))]
-    public class SampleRenderDetectorEditor : UnityEditor.Editor
+#if UNITY_EDITOR
+    namespace Editor
     {
-        public override void OnInspectorGUI()
+        using UnityEditor;
+
+
+        [CustomEditor(typeof(SampleRenderDetector))]
+        public class SampleRenderDetectorEditor : UnityEditor.Editor
         {
-            if (UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline == null)
+            public override void OnInspectorGUI()
             {
-                EditorGUILayout.HelpBox("The samples were created using the Universal Render Pipeline, things will not appear correctly.\nYou are safe to delete this game object.", MessageType.Error);
-            }
-            else
-            {
-                EditorGUILayout.HelpBox("This object detects if samples were created using the URP.\nYou are safe to delete this game object.", MessageType.Info);
+                if (UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline == null)
+                {
+                    EditorGUILayout.HelpBox("The samples were created using the Universal Render Pipeline, things will not appear correctly.\nYou are safe to delete this game object.", MessageType.Error);
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox("This object detects if samples were created using the URP.\nYou are safe to delete this game object.", MessageType.Info);
+                }
             }
         }
     }
+#endif
 }
