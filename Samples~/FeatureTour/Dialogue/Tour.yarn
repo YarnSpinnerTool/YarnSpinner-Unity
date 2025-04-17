@@ -26,6 +26,7 @@ Capsley: Have a lovely day!
 ===
 
 title: Room2_Nodes_and_Lines
+group: room_two
 ---
 Bob: Hello. I'm Bob.
 Bob: I'm talking to you from my very own node.
@@ -237,4 +238,16 @@ Reginald: We're proud of our evocative naming choices.
     Reginald: Thanks to a Smart Variable, I know you cannot afford to bribe me. Alas.
 <<endif>>
 Reginald: Farewell!
+===
+
+title: Room7_LineGroups_1
+---
+=> Sven: HI FRIEND!
+=> Sven: Hi there! I'm Sven.
+=> Sven: Welcome! I'm so excited!
+Sven: You'll get a different greeting from me depending on which one of my Line Group lines is selected.
+Sven: Yarn Spinner will choose one of the lines in a Line Group for you.
+Sven: It lets you add some variety.
+Sven: You can even add conditions to lines in a line group.
+Sven: It's pretty great!
 ===
