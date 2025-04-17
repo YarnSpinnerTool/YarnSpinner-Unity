@@ -1,4 +1,5 @@
 ﻿title: Capsley_Welcome
+position: -297,-523
 ---
 <<declare $NPC_Variables_Name = "Ogbert">>
 <<declare $player_gold = 10>>
@@ -26,7 +27,8 @@ Capsley: Have a lovely day!
 ===
 
 title: Room2_Nodes_and_Lines
-group: room_two
+group: Room2
+position: -305,-245
 ---
 Bob: Hello. I'm Bob.
 Bob: I'm talking to you from my very own node.
@@ -37,6 +39,8 @@ Bob: Neat, huh?
 ===
 
 title: Room2_Options_and_Jumps_1
+group: Room2
+position: -42,-248
 ---
 Bill: Hello. I'm Bill.
     -> Hi, I'm The Player.
@@ -52,12 +56,16 @@ Bill: They let you create lines in your nodes that offer players, like you, a ch
 ===
 
 title: Room2_Options_and_Jumps_2
+group: Room2
+position: -247,-26
 ---
 Bill: It's easy to move between nodes with Jump Commands.
 Bill: So easy, in fact, that we just did it without you even noticing.
 Bill: It's very neat!
 ===
 title: Room2_Options_and_Jumps_3
+group: Room2
+position: 273,-142
 ---
 Bill: You could be more enthusiastic.
 Bill: Either way, we're in another node now.
@@ -66,6 +74,8 @@ Bill: Jump Commands let you move the dialogue betwee nodes.
 ===
 
 title: Room3_Detours_1
+group: Room3
+position: -299,292
 ---
 Bruce: I'm Bruce. My single purpose in life...
 Bruce: My raison d'être. 
@@ -81,6 +91,8 @@ Bruce: I'm always here.
 ===
 
 title: Room3_Detours_2
+group: Room3
+position: -244,538
 ---
 Bruce: This is a detour. Right now. We just detoured to a whole different node.
 Bruce: Amazing right?
@@ -88,6 +100,8 @@ Bruce: And when we're done here...
 ===
 
 title: Room4_Variables_1
+group: Room4
+position: 168,589
 ---
 {$NPC_Variables_Name}: Hi. I'm {$NPC_Variables_Name}. Or I can be someone else if you prefer?
     -> You're Arnold.
@@ -106,6 +120,8 @@ title: Room4_Variables_1
 ===
 
 title: Room4_Variables_2
+group: Room4
+position: 153,407
 ---
 Sally: Did you speak to {$NPC_Variables_Name}?
 Sally: They left out the best bit of Variables!
@@ -119,6 +135,8 @@ Sally: Bye now!
 ===
 
 title: Room5_IfStatements_1
+group: Room5
+position: 646,107
 ---
 <<if $player_spoke_to_sally>>
     Mary: I know you spoke to Sally about Variables.
@@ -137,6 +155,8 @@ title: Room5_IfStatements_1
 ===
 
 title: Room5_ConditionalOptions_1
+group: Room5
+position: 662,262
 ---
 Thor: Hi. 
     -> Hi, Thor.
@@ -150,6 +170,8 @@ Thor: Toodles! Have a nice day.
 ===
 
 title: Room5_Enums_1
+group: Room5
+position: 668,438
 ---
 Ruby: Would you like a meal? Ramen, Pizza, Nutritional Sludge(tm), or Meat Product?
     -> Sure, Ramen please.
@@ -174,6 +196,8 @@ Ruby: Bye bye!
 ===
 
 title: Room5_Once_1
+group: Room5
+position: 647,611
 ---
 <<once>>
     Norb: Hi, I'm Norb.
@@ -188,6 +212,8 @@ title: Room5_Once_1
 ===
 
 title: Room6_Commands_1
+group: Room6
+position: 99,903
 ---
 Derek: YOU!
     -> Me?
@@ -203,6 +229,8 @@ Derek: Anyway, bye!
 ===
 
 title: Room6_Functions_1
+group: Room6
+position: 343,902
 ---
 Beryl: Psst...
     -> Yes?
@@ -224,6 +252,8 @@ Beryl: Anyway, bye.
 ===
 
 title: Room6_SmartVariables_1
+group: Room6
+position: -147,906
 ---
 Reginald: Did you know that Variables can also be Smart?
 Reginald: When they're Smart, we call them Smart Variables
@@ -241,6 +271,8 @@ Reginald: Farewell!
 ===
 
 title: Room7_LineGroups_1
+group: Room7
+position: 947,-227
 ---
 => Sven: HI FRIEND!
 => Sven: Hi there! I'm Sven.
@@ -253,6 +285,7 @@ Sven: It's pretty great!
 ===
 
 title: Room7_NodeGroups_1
+group: Room7
 when: once 
 when: !visited("Room7_NodeGroups_1")
 ---
@@ -266,6 +299,7 @@ Dr Node: Try speaking to me again.
 ===
 
 title: Room7_NodeGroups_1
+group: Room7
 when: !$player_can_afford_bribe
 ---
 Dr Node: Hi. You're seeing this because this node has a when condition that evaluates to true if you cannot afford a bribe.
@@ -273,6 +307,7 @@ Dr Node: Neat, right?
 ===
 
 title: Room7_NodeGroups_1
+group: Room7
 when: $player_meal == .None
 ---
 Dr Node: Hi. 
@@ -281,6 +316,7 @@ Dr Node: I know this because of my when clause, thanks Node Groups!
 ===
 
 title: Room7_NodeGroups_1
+group: Room7
 when: $player_meal == .Ramen
 ---
 Dr Node: Hi. 
@@ -289,6 +325,7 @@ Dr Node: I know this because of my when clause, thanks Node Groups!
 ===
 
 title: Room7_NodeGroups_1
+group: Room7
 when: always
 ---
 Dr Node: Hi. This node in the node group has its when clause set to always.
