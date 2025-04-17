@@ -8,7 +8,7 @@ namespace Yarn.Unity.Samples {
     /// <remarks>
     /// Automatically generated from Yarn project at Assets/Samples/AdvancedSaliency/AdvancedSaliency.yarnproject.
     /// </remarks>
-    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
+    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.235")]
     public enum Character {
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Yarn.Unity.Samples {
     /// <remarks>
     /// Automatically generated from Yarn project at Assets/Samples/AdvancedSaliency/AdvancedSaliency.yarnproject.
     /// </remarks>
-    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
+    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.235")]
     public enum Scenario {
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace Yarn.Unity.Samples {
     /// <remarks>
     /// Automatically generated from Yarn project at Assets/Samples/AdvancedSaliency/AdvancedSaliency.yarnproject.
     /// </remarks>
-    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
+    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.235")]
     public enum Room {
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace Yarn.Unity.Samples {
     /// <remarks>
     /// Automatically generated from Yarn project at Assets/Samples/AdvancedSaliency/AdvancedSaliency.yarnproject.
     /// </remarks>
-    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
+    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.235")]
     public enum ScenarioState {
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace Yarn.Unity.Samples {
         Complete = 2,
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
+    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.235")]
     internal static class TheRoomVariableStorageTypeExtensions {
         internal static string GetBackingValue(this Character enumValue) {
             switch (enumValue) {
@@ -222,7 +222,7 @@ namespace Yarn.Unity.Samples {
             }
         }
     }
-    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.0")]
+    [System.CodeDom.Compiler.GeneratedCode("YarnSpinner", "3.0.0.235")]
     public partial class TheRoomVariableStorage : Yarn.Unity.InMemoryVariableStorage, Yarn.Unity.IGeneratedVariableStorage {
         // Accessor for Character $primary
         public Character Primary {

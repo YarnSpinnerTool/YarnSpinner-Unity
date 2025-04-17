@@ -1,0 +1,297 @@
+﻿title: Capsley_Welcome
+---
+<<declare $NPC_Variables_Name = "Ogbert">>
+<<declare $player_gold = 10>>
+<<declare $player_spoke_to_sally = false>>
+<<enum Meal>>
+  <<case None>>
+  <<case Ramen>>
+  <<case Pizza>>
+  <<case MeatProduct>>
+  <<case Sludge>>
+<<endenum>>
+<<declare $player_meal = Meal.None>>
+
+Capsley: Hi! Welcome to Yarn Spinner!
+Capsley: This is the Feature Tour!
+Capsley: Walk through these rooms to learn about the major features of Yarn Spinner.
+Capsley: You can find me in each one.
+Capsley: I'll tell you what you're seeing in the room.
+Capsley: Or you can just be confused..
+Capsley: And wander alone.
+Capsley: Just like the real world.
+Capsley: Anyway...
+Capsley: Have a lovely day!
+===
+
+title: Room2_Nodes_and_Lines
+---
+Bob: Hello. I'm Bob.
+Bob: I'm talking to you from my very own node.
+Bob: Each each of these lines...
+Bob: ... is a line!
+Bob: Yarn Spinner scripts made up of Nodes and Lines.
+Bob: Neat, huh?
+===
+
+title: Room2_Options_and_Jumps_1
+---
+Bill: Hello. I'm Bill.
+    -> Hi, I'm The Player.
+    -> Hello, Bill.
+Bill: See those choices you just had? 
+Bill: Those are called Options.
+Bill: They let you create lines in your nodes that offer players, like you, a choice.
+    -> That's pretty neat!
+        Bill: It is neat!
+        <<jump Room2_Options_and_Jumps_2>>
+    -> OK...
+        <<jump Room2_Options_and_Jumps_3>>
+===
+
+title: Room2_Options_and_Jumps_2
+---
+Bill: It's easy to move between nodes with Jump Commands.
+Bill: So easy, in fact, that we just did it without you even noticing.
+Bill: It's very neat!
+===
+title: Room2_Options_and_Jumps_3
+---
+Bill: You could be more enthusiastic.
+Bill: Either way, we're in another node now.
+Bill: We got here with a Jump Command.
+Bill: Jump Commands let you move the dialogue betwee nodes.
+===
+
+title: Room3_Detours_1
+---
+Bruce: I'm Bruce. My single purpose in life...
+Bruce: My raison d'être. 
+Bruce: My whole reason to get up in the morning...
+Bruce: .. is to tell you about detours.
+<<detour Room3_Detours_2>>
+Bruce: You'll end up back in the original node.
+Bruce: Like you are right now. SURPRISE!
+Bruce: Detours. Amazing. 
+Bruce: They work like Jump Commands, but bring you back at the end.
+Bruce: I don't actually get up in the morning, by the way.
+Bruce: I'm always here. 
+===
+
+title: Room3_Detours_2
+---
+Bruce: This is a detour. Right now. We just detoured to a whole different node.
+Bruce: Amazing right?
+Bruce: And when we're done here...
+===
+
+title: Room4_Variables_1
+---
+{$NPC_Variables_Name}: Hi. I'm {$NPC_Variables_Name}. Or I can be someone else if you prefer?
+    -> You're Arnold.
+        <<set $NPC_Variables_Name = "Arnold">>
+    -> Hmm.. You're Terrence.
+        <<set $NPC_Variables_Name = "Terrence">>
+    -> Studly. 
+        <<set $NPC_Variables_Name = "Studley">>
+{$NPC_Variables_Name}: Easy done!
+{$NPC_Variables_Name}: That happened because of a Variable.
+{$NPC_Variables_Name}: My whole name is just a Variable. And it's set when you tell me who I am.
+{$NPC_Variables_Name}: You can update them or check them any time.
+{$NPC_Variables_Name}: Or use them in lines, like this...
+{$NPC_Variables_Name}: My name is {$NPC_Variables_Name}, and will always be {$NPC_Variables_Name}, until you change it.
+{$NPC_Variables_Name}: How cool is that?
+===
+
+title: Room4_Variables_2
+---
+Sally: Did you speak to {$NPC_Variables_Name}?
+Sally: They left out the best bit of Variables!
+Sally: They don't have to be strings of text.
+Sally: They can also be numbers.
+Sally: For example, you have {$player_gold} pieces of gold.
+Sally: I know that because there's a Variable that tracks it.
+Sally: I'm also setting a variable that indicates you've spoken to me.
+<<set $player_spoke_to_sally = true>>
+Sally: Bye now!
+===
+
+title: Room5_IfStatements_1
+---
+<<if $player_spoke_to_sally>>
+    Mary: I know you spoke to Sally about Variables.
+    Mary: I know because we're inside an if-statement that checks if that variable is true.
+    Mary: AND IT IS TRUE! I KNOW!
+    Mary: Also I was watching you.
+<<else>>
+    Mary: You should try speaking to Sally in the previous room.
+    Mary: I say this to everyone who hasn't spoken to her...
+    Mary: Because.. well.. these lines are inside the if and else statements.
+    Mary: And you'll only see them if the condition on the if statement is not true.
+    Mary: What's the condition, you ask?
+    Mary: I'm not saying. Just go speak to Sally in the previous room.
+    Mary: Then come back to me. And maybe you'll figure it out.
+<<endif>>
+===
+
+title: Room5_ConditionalOptions_1
+---
+Thor: Hi. 
+    -> Hi, Thor.
+        Thor: Hi.
+    -> Hi, Thor. Do you know Sally? <<if $player_spoke_to_sally>>
+        Thor: Oh, yeah. I do.
+        Thor: And you could only ask me that because that was a Conditional Option.
+        Thor: A Conditional Option is like a regular Option... but it has a little if-statement attached to the end of its line.
+        Thor: And that little if-statement... if it evaluates to true... then you get to see the option, and potentially choose it.
+Thor: Toodles! Have a nice day.
+===
+
+title: Room5_Enums_1
+---
+Ruby: Would you like a meal? Ramen, Pizza, Nutritional Sludge(tm), or Meat Product?
+    -> Sure, Ramen please.
+        <<set $player_meal = .Ramen>>
+    -> Pizza.
+        <<set $player_meal = .Pizza>>    
+    -> Nutritional Sludge(tm) is my favourite! That one.
+        <<set $player_meal = .Sludge>>
+    -> ... Meat Product, I guess.
+        <<set $player_meal = .Sludge>>   
+Ruby: Neat! I just set an Enum to the meal you chose.
+Ruby: Enums are a special kind of variables, whose value is constrained to a predefined list of things.
+Ruby: Can you guess what the list of things might be?
+Ruby: That's right! It's the different meals I have for you! Or no meal.
+<<if $player_meal == .Ramen>>
+    Ruby: Anyway... You got Ramen.
+    Ruby: That one is my favourite.
+    Ruby: And I'm telling you that because I used an if-statement to check which value of the Meal Enum is stored in the variable I'm using to track the player's meal.
+    Ruby: Works well, right?
+<<endif>>
+Ruby: Bye bye!
+===
+
+title: Room6_Commands_1
+---
+Derek: YOU!
+    -> Me?
+Derek: Yes, you!
+<<wait 2>>
+Derek: Dramatic pause, right?
+Derek: I did that with a Command! The Wait Command!
+Derek: You can make your own Commands to let Yarn Spinner Scripts control Unity Scripts.
+Derek: So you can use them to make things happen in the game world, from Yarn Spinner.
+Derek: The Wait Command comes with Yarn Spinner though.
+Derek: Think of Commands like stage directions.
+Derek: Anyway, bye!
+===
+
+title: Room6_Functions_1
+---
+Beryl: Psst...
+    -> Yes?
+Beryl: Wanna learn about Functions?
+    -> ... sure.
+Beryl: Functions are things that provide a value to your Yarn Spinner Scripts.
+Beryl: For example... I can roll a dice, because Yarn Spinner provides a dice Function.
+<<if dice(6) == 6>>
+    Beryl: I rolled a six!
+<<else>>
+    Beryl: Well, I didn't roll a six. Alas.
+<<endif>>
+Beryl: My favourite number, right at this moment, is {random_range(1,10)}!
+Beryl: But next time you ask me, it might be different. That's because I used the random_range function to get my favourite number.
+Beryl: I'm fickle as heck.
+Beryl: Anyway, Yarn Spinner has lots of built-in Functions.
+Beryl: But you can also make your own, to get information out of Unity Scripts.
+Beryl: Anyway, bye.
+===
+
+
+title: NPC1
+---
+// Sally: Did you know that can also be Smart?
+// Sally: When they're Smart, we call them Smart Variables.
+// Sally: We're proud of our evocative naming choices.
+
+
+Reginald: Hi, I'm Reginald.
+Reginald: I'm a friendly NPC.
+Reginald: Do you want to talk about shapes?
+    -> Yes, I love shapes!
+        Reginald: Good. Let's talk about shapes.
+        Reginald: What's your favorite shape?
+            -> Circle
+                Reginald: That's a great choice.
+            -> Square
+                Reginald: That's a fine choice.
+            -> Triangle
+                Reginald: That's a terrible choice.
+    -> No, shapes bore me.
+        Reginald: That's too bad.
+        Reginald: Shapes are the best.
+        Reginald: You should reconsider.
+            -> Is that a threat?
+                Reginald: No, it's a suggestion.
+            -> I'll think about it.
+                Reginald: Good. I hope you change your mind.
+===
+
+title: NPC2
+---
+Regonald: Hi, I'm Regonald.
+Regonald: I'm a friendly NPC.
+    -> Do you like shapes?
+        Regonald: No. Don't be disgusting.
+        Regonald: Shapes are the worst.
+        Regonald: I hate shapes.
+            -> Why do you hate shapes?
+                Regonald: I don't know.
+                Regonald: I just do.
+            -> What's wrong with shapes?
+                Regonald: Everything.
+                Regonald: Shapes are the worst.
+            -> Are you okay?
+                Regonald: No, I'm not okay.
+                Regonald: I'm having a bad day.
+                Regonald: I don't want to talk about it.
+                    -> Are you sure?
+                        Regonald: Yes, I'm sure.
+                        Regonald: I don't want to talk about it.
+                    -> Okay, I'll leave you alone.
+                        Regonald: Thank you.
+                        Regonald: I appreciate it.
+                            -> Bye, then.
+                                Regonald: Don't even want to chat?
+                                Regonald: Fine, be that way.
+    -> Great.
+        Regonald: I'm glad you think so.
+        Regonald: I like you.
+        Regonald: You're a good person.
+            -> Thanks.
+                Regonald: You're welcome.
+            -> I try.
+                Regonald: You're doing great.
+            -> I'm not.
+                Regonald: Don't be so hard on yourself.
+                Regonald: You're doing fine.
+===
+
+title: Explainer3
+---
+Capsley: This guy right here...
+Capsley: He's a real piece of work.
+Capsley: The node that controls his dialogue uses the once condition to make sure he only talks to you once.
+Capsley: If you try to talk to him again, he'll just ignore you.
+Capsley: It's a neat trick, right?
+Capsley: I thought so... 
+===
+
+title: NPC3
+when: once
+---
+Reginold: Hi, I'm Reginold.
+Reginold: I'm a friendly NPC.
+Reginold: But I never want to talk to you again.
+Reginold: Goodbye.
+===
