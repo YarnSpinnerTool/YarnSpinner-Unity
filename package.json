@@ -17,12 +17,5 @@
     "url": "https://yarnspinner.dev"
   },
   "hideInEditor": false,
-  "type": "tool",
-  "samples": [
-    {
-      "displayName": "Samples",
-      "description": "\u25AA <b>Intro:</b> a welcome to Yarn Spinner scene\n\u25AA <b>FeatureTour:</b> basic functionality of Yarn Spinner\n\u25AA <b>BackgroundChatter:</b> simultaneous conversations \n\u25AA <b>Replacement Markup:</b> styling or modifying line text\n\u25AA <b>Inline Events:</b> triggering events during line delivery\n\u25AA Samples demonstrating localization + audio integrations\n\u25AA Samples demonstrating dynamic/storylet content\n\u25AA Samples demonstrating custom UI or dialogue behaviours",
-      "path": "Samples~/"
-    }
-  ]
+  "type": "tool"
 }

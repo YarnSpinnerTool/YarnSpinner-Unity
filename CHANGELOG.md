@@ -31,6 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `LinesAvailable` property from line providers, it no longer makes sense in an async world
 - `baseLayer` property on Simple Character as it was no longer used
 - Obsolete uxml elements on `LanguagePopup.cs`
+- All samples, they now live in their own repository
 
 
 ## [3.0.0-beta2] 2025-04-09
