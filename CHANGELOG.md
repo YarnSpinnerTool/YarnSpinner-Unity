@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Renamed 'Dialogue View Script' menu item to 'Dialogue Presenter Script'.
 - Added `DialogueRunner.DialoguePresenters` (and marked `DialogueRunner.DialogueViews` as obsolete.)
 - Fixed a lot of missing null checks
+- Fixed a bug in SampleRenderDetector that caused build errors.
 
 ### Removed
 
