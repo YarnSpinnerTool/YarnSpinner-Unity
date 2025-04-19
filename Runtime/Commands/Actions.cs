@@ -786,67 +786,12 @@ namespace Yarn.Unity
             ActionRegistrationMethods.Add(registerActions);
         }
 
-        public static Yarn.Library GetLibrary()
-        {
-            var library = new Yarn.Library();
-
-            var proxy = new LibraryRegistrationProxy(library);
-
-            foreach (var registrationMethod in ActionRegistrationMethods)
-            {
-                registrationMethod.Invoke(proxy, RegistrationType.Compilation);
-            }
-
-            return library;
-        }
-
         public void AddCommandHandler(string commandName, Func<object> handler)
         {
             this.AddCommandHandler(commandName, (Delegate)handler);
         }
 
-        /// <summary>
-        /// A helper class that registers functions into a <see
-        /// cref="Yarn.Library"/>.
-        /// </summary>
-        private class LibraryRegistrationProxy : IActionRegistration
-        {
-            private Library library;
+        public void RegisterFunctionDeclaration(string name, Type returnType, Type[] parameterTypes) { /* no-op */ }
 
-            public LibraryRegistrationProxy(Library library)
-            {
-                this.library = library;
-            }
-
-            public void AddCommandHandler(string commandName, Delegate handler)
-            {
-                // No action; this class does not handle commands, only
-                // functions.
-                return;
-            }
-
-            public void AddCommandHandler(string commandName, MethodInfo methodInfo)
-            {
-                // No action; this class does not handle commands, only
-                // functions.
-                return;
-            }
-
-            public void AddFunction(string name, Delegate implementation)
-            {
-                // Check to see if the function already exists in our Library,
-                // and error out if it does
-                if (library.FunctionExists(name))
-                {
-                    throw new ArgumentException($"Cannot register function {name}: a function with this name already exists");
-                }
-                // Register this function in the library
-                library.RegisterFunction(name, implementation);
-            }
-
-            public void RemoveCommandHandler(string commandName) => throw new InvalidOperationException("This class does not support removing actions.");
-
-            public void RemoveFunction(string name) => throw new InvalidOperationException("This class does not support removing actions.");
-        }
     }
 }

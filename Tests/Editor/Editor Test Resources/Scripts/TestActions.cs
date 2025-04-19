@@ -3,8 +3,14 @@ using Yarn.Unity;
 
 namespace Yarn.Unity
 {
+    public struct OtherType
+    {
+        public const string ConstNameInOtherType = "other_type_constant";
+    }
     public class TestActions : MonoBehaviour
     {
+        public const string ConstantFunctionName = "constant_name";
+
         public void Awake()
         {
             var runner = FindAnyObjectByType<DialogueRunner>();
@@ -31,6 +37,13 @@ namespace Yarn.Unity
                 runner.AddFunction("direct_register_method_no_params", DirectRegisterMethodNoParams);
                 runner.AddFunction<int, int, int>("direct_register_method_fixed_params", DirectRegisterMethodFixedParams);
                 runner.AddFunction<int[], int>("direct_register_method_variadic_params", DirectRegisterMethodVariadicParams);
+
+
+                const string LocalConstantFunctionName = "local_constant_name";
+
+                runner.AddFunction(LocalConstantFunctionName, () => true);
+                runner.AddFunction(ConstantFunctionName, () => true);
+                runner.AddFunction(OtherType.ConstNameInOtherType, () => true);
             }
         }
 

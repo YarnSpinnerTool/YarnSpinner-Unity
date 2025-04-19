@@ -432,8 +432,6 @@ namespace Yarn.Unity.Editor
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 #endif
 
-            var library = Actions.GetLibrary();
-
             var allExistingTags = new List<string>();
             var projectImplicitTags = new List<string>();
 
@@ -445,7 +443,6 @@ namespace Yarn.Unity.Editor
                 var project = tuple.Item1;
                 var compilationJob = Yarn.Compiler.CompilationJob.CreateFromFiles(project.SourceFiles);
                 compilationJob.CompilationType = Yarn.Compiler.CompilationJob.Type.StringsOnly;
-                compilationJob.Library = library;
 
                 var result = Yarn.Compiler.Compiler.Compile(compilationJob);
                 bool containsErrors = result.Diagnostics.Any(d => d.Severity == Compiler.Diagnostic.DiagnosticSeverity.Error);
@@ -618,52 +615,6 @@ namespace Yarn.Unity.Editor
             File.WriteAllText(destination, outputCSV);
 
             return true;
-        }
-
-        internal static void ConvertImplicitVariableDeclarationsToExplicit(YarnProjectImporter yarnProjectImporter)
-        {
-            var allFilePaths = yarnProjectImporter.ImportData.yarnFiles.Select(textAsset => AssetDatabase.GetAssetPath(textAsset));
-
-            var library = Actions.GetLibrary();
-
-            var explicitDeclarationsCompilerJob = Compiler.CompilationJob.CreateFromFiles(AssetDatabase.GetAssetPath(yarnProjectImporter));
-            explicitDeclarationsCompilerJob.Library = library;
-
-            Compiler.CompilationResult explicitResult;
-
-            try
-            {
-                explicitResult = Compiler.Compiler.Compile(explicitDeclarationsCompilerJob);
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Compile error: {e}");
-                return;
-            }
-
-            var implicitDeclarationsCompilerJob = Compiler.CompilationJob.CreateFromFiles(allFilePaths, library);
-            implicitDeclarationsCompilerJob.CompilationType = Compiler.CompilationJob.Type.TypeCheck;
-            implicitDeclarationsCompilerJob.VariableDeclarations = explicitResult.Declarations;
-
-            Compiler.CompilationResult implicitResult;
-
-            try
-            {
-                implicitResult = Compiler.Compiler.Compile(implicitDeclarationsCompilerJob);
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Compile error: {e}");
-                return;
-            }
-
-            var implicitDeclarations = implicitResult.Declarations.Where(d => !(d.Type is Yarn.FunctionType) && d.IsImplicit);
-
-            var output = Yarn.Compiler.Utility.GenerateYarnFileWithDeclarations(explicitResult.Declarations.Concat(implicitDeclarations), "Program");
-
-            File.WriteAllText(yarnProjectImporter.assetPath, output, System.Text.Encoding.UTF8);
-            AssetDatabase.ImportAsset(yarnProjectImporter.assetPath);
-
         }
 
         /// <summary>

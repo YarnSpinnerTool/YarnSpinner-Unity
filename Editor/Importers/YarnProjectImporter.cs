@@ -5,6 +5,7 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEditor;
@@ -12,8 +13,6 @@ using UnityEditor.AssetImporters;
 using UnityEngine;
 using Yarn.Compiler;
 using Yarn.Utility;
-
-
 
 #if USE_UNITY_LOCALIZATION
 using UnityEditor.Localization;
@@ -101,6 +100,71 @@ namespace Yarn.Unity.Editor
 
                 sourceYarnAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(sourceScriptPath);
             }
+        }
+
+        private class FunctionDeclarationReceiver : IActionRegistration
+        {
+            public List<Declaration> FunctionDeclarations = new();
+
+            public void AddCommandHandler(string commandName, System.Delegate handler) { }
+
+            public void AddCommandHandler(string commandName, MethodInfo methodInfo) { }
+
+            public void AddFunction(string name, System.Delegate implementation) { }
+
+            public void RegisterFunctionDeclaration(string name, System.Type returnType, System.Type[] parameterTypes)
+            {
+                if (Types.TypeMappings.TryGetValue(returnType, out var returnYarnType) == false)
+                {
+                    Debug.LogError($"Can't register function {name}: can't convert return type {returnType} to a Yarn type");
+                    return;
+                }
+
+                var typeBuilder = new FunctionTypeBuilder().WithReturnType(returnYarnType);
+
+
+                for (int i = 0; i < parameterTypes.Length; i++)
+                {
+                    System.Type? parameter = parameterTypes[i];
+
+                    bool isParamsArray = false;
+
+                    if (i == parameterTypes.Length - 1 && parameter.IsArray)
+                    {
+                        // If this is the last parameter and it is an array,
+                        // treat it as though it were a params array and use the
+                        // type of the array
+                        parameter = parameter.GetElementType();
+                        isParamsArray = true;
+                    }
+
+                    if (Types.TypeMappings.TryGetValue(parameter, out var parameterYarnType) == false)
+                    {
+                        Debug.LogError($"Can't register function {name}: can't convert parameter {i} type {parameterYarnType} to a Yarn type");
+                        return;
+                    }
+
+                    if (isParamsArray)
+                    {
+                        typeBuilder = typeBuilder.WithVariadicParameterType(parameterYarnType);
+                    }
+                    else
+                    {
+                        typeBuilder = typeBuilder.WithParameter(parameterYarnType);
+                    }
+                }
+
+                var decl = new DeclarationBuilder()
+                    .WithName(name)
+                    .WithType(typeBuilder.FunctionType)
+                    .Declaration;
+
+                this.FunctionDeclarations.Add(decl);
+            }
+
+            public void RemoveCommandHandler(string commandName) { }
+
+            public void RemoveFunction(string name) { }
         }
 
         /// <summary>
@@ -395,16 +459,20 @@ namespace Yarn.Unity.Editor
                     ctx.DependsOnSourceAsset(scriptPath);
 
                     importData.yarnFiles.Add(AssetDatabase.LoadAssetAtPath<TextAsset>(scriptPath));
-
                 }
 
-                var library = Actions.GetLibrary();
+                // Get all function declarations found in the Unity project
+                var functionDeclarationReceiver = new FunctionDeclarationReceiver();
+
+                foreach (var registrationAction in Actions.ActionRegistrationMethods)
+                {
+                    registrationAction(functionDeclarationReceiver, RegistrationType.Compilation);
+                }
 
                 // Now to compile the scripts associated with this project.
                 var job = CompilationJob.CreateFromFiles(project.SourceFiles);
                 job.LanguageVersion = project.FileVersion;
-
-                job.Library = library;
+                job.VariableDeclarations = functionDeclarationReceiver.FunctionDeclarations;
 
                 try
                 {

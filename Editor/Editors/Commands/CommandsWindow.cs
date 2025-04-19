@@ -65,6 +65,11 @@ namespace Yarn.Unity.Editor
         {
             // No-op
         }
+
+        public void RegisterFunctionDeclaration(string name, Type returnType, Type[] parameterTypes)
+        {
+            /* TODO: Implement */
+        }
     }
 
     public class CommandsWindow : EditorWindow
