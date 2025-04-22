@@ -15,7 +15,6 @@ using System;
 using System.Reflection;
 using Yarn.Unity.UnityLocalization;
 using Yarn.Unity.Attributes;
-using UnityEditor.PackageManager.UI;
 
 namespace Yarn.Unity.Editor
 {
@@ -763,7 +762,7 @@ namespace Yarn.Unity.Editor
         private const string docsURL = "https://docs.yarnspinner.dev/unity";
         private const string discordURL = "https://discord.com/invite/yarnspinner";
         private const string tellUsURL = "https://yarnspinner.dev/tell-us";
-        private const string yarnspinnerPackage = "dev.yarnspinner.unity";
+
         private const int logoMaxWidth = 240; // px, because links line is about 350px wide
 
         private static GUIStyle? _urlStyle = null;
@@ -801,16 +800,18 @@ namespace Yarn.Unity.Editor
                 string styledText = "<b><color=#4C8962FF><u>" + labelText + "</u></color></b>";
                 return GUILayout.Button(styledText, UrlStyle, GUILayout.ExpandWidth(false));
             }
-            string? GetYarnSpinnerVersion()
+            void InstallSamples()
             {
-                UnityEditor.PackageManager.PackageInfo yarnspinner = AssetDatabase.FindAssets("package")
-                    .Select(AssetDatabase.GUIDToAssetPath)
-                    .Where(x => AssetDatabase.LoadAssetAtPath<TextAsset>(x) != null)
-                    .Select(UnityEditor.PackageManager.PackageInfo.FindForAssetPath)
-                    .Where(x => x != null)
-                    .First(x => x.name == yarnspinnerPackage);
-                if (yarnspinner == null) { return null; }
-                return yarnspinner.version;
+                try 
+                {
+                    // YarnPackageImporter.InstallSamplesPackage(true);
+                    // var samples = YarnPackageImporter.GetSamplesPackageSamples();
+                    // TODO offer list to user
+                }
+                catch
+                {
+                    // TODO show error dialogue
+                }
             }
 
             EditorGUILayout.Space();
@@ -830,27 +831,7 @@ namespace Yarn.Unity.Editor
             GUILayout.FlexibleSpace(); // centre by padding from left
 
             if (MakeLinkButton(docsLabel)) { Application.OpenURL(docsURL); }
-            if (MakeLinkButton(samplesLabel))
-            {
-                var yarnspinnerVersion = GetYarnSpinnerVersion();
-                if (yarnspinnerVersion == null)
-                {
-                    EditorUtility.DisplayDialog("Samples Could Not Be Found", "Please verify that you have installed a valid version of Yarn Spinner via the Unity Package Manager.", "Ok");
-                }
-                else
-                {
-                    Sample samples = Sample.FindByPackage(yarnspinnerPackage, yarnspinnerVersion).First();
-                    string samplesDescription = System.Text.RegularExpressions.Regex.Replace(samples.description, "<[^>]+>", "");
-                    if (samples.isImported)
-                    {
-                        EditorUtility.DisplayDialog("Samples Already Imported", $"The selected package samples already exist at {samples.importPath}", "Ok");
-                    }
-                    else if (EditorUtility.DisplayDialog("Install Package Samples?", $"This will install the following samples:\n\n{samplesDescription}", "Ok", "Cancel"))
-                    {
-                        samples.Import();
-                    }
-                }
-            }
+            if (MakeLinkButton(samplesLabel)) { InstallSamples(); }
             if (MakeLinkButton(discordLabel)) { Application.OpenURL(discordURL); }
             if (MakeLinkButton(tellUsLabel)) { Application.OpenURL(tellUsURL); }
             GUILayout.FlexibleSpace(); // centre by padding from right
