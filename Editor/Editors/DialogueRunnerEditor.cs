@@ -762,6 +762,8 @@ namespace Yarn.Unity.Editor
         private const string docsURL = "https://docs.yarnspinner.dev/unity";
         private const string discordURL = "https://discord.com/invite/yarnspinner";
         private const string tellUsURL = "https://yarnspinner.dev/tell-us";
+        
+        private static UnityEditor.PackageManager.Requests.AddRequest? installationRequest;
 
         private const int logoMaxWidth = 240; // px, because links line is about 350px wide
 
@@ -793,6 +795,27 @@ namespace Yarn.Unity.Editor
             }
         }
 
+        private static void MonitorInstallation()
+        {
+            if (installationRequest == null)
+            {
+                return;
+            }
+
+            if (!installationRequest.IsCompleted)
+            {
+                return;
+            }
+
+            if (installationRequest.Status == UnityEditor.PackageManager.StatusCode.Failure)
+            {
+                // it failed, throw up an error
+                Debug.LogError(installationRequest.Error);
+            }
+            EditorApplication.update -= MonitorInstallation;
+            installationRequest = null;
+        }
+
         internal static void DrawYarnSpinnerHeader()
         {
             bool MakeLinkButton(string labelText)
@@ -804,13 +827,67 @@ namespace Yarn.Unity.Editor
             {
                 try 
                 {
-                    // YarnPackageImporter.InstallSamplesPackage(true);
-                    // var samples = YarnPackageImporter.GetSamplesPackageSamples();
-                    // TODO offer list to user
+                    // if we have the samples already installed we can just use them
+                    // we don't really care HOW they got them at this point
+                    // for now just open the package manager, later Mars wanted to add in a wizard here
+                    if (YarnPackageImporter.IsSamplesPackageInstalled)
+                    {
+                        YarnPackageImporter.OpenSamplesUI();
+                    }
+                    else
+                    {
+                        // we don't have the samples installed
+                        // we need to do different things now depending on WHERE we installed YS from
+                        // this is currently duplicating work inside the package importer class
+                        // later merge these
+                        switch (YarnPackageImporter.installation)
+                        {
+                            // we have the YS package manually installed
+                            case YarnPackageImporter.InstallApproach.Manual:
+                            {
+                                // there are two variants of manually installed
+                                // manually installed as a package (so OpenUPM or from git url)
+                                // or manually installed by dragging the folder into Unity
+
+                                // if it was installed as a package
+                                // we can just install the samples directly from git and otherwise carry on
+                                if (YarnPackageImporter.IsYarnSpinnerPackageInstalled)
+                                {
+                                    // there is already a running request
+                                    // ignore this then
+                                    if (installationRequest != null)
+                                    {
+                                        return;
+                                    }
+
+                                    installationRequest = YarnPackageImporter.InstallSamplesPackage();
+                                    if (installationRequest != null)
+                                    {
+                                        EditorApplication.update += MonitorInstallation;
+                                    }
+                                }
+                                else
+                                {
+                                    // it was installed fully manually, it isn't a package
+                                    // this means we need them to also manually install the package
+                                    // so we open up the browser to the docs site to guide them through that
+                                    Application.OpenURL(YarnPackageImporter.manualInstallURL);
+                                }
+                                break;
+                            }
+                            default:
+                            {
+                                YarnPackageImporter.QuickInstallSamples();
+                                break;
+                            }
+                        }
+                    }
                 }
-                catch
+                catch (YarnPackageImporterException ex)
                 {
                     // TODO show error dialogue
+                    // for now just log it
+                    Debug.LogException(ex);
                 }
             }
 
@@ -831,7 +908,19 @@ namespace Yarn.Unity.Editor
             GUILayout.FlexibleSpace(); // centre by padding from left
 
             if (MakeLinkButton(docsLabel)) { Application.OpenURL(docsURL); }
+
+            // we default to assuming most of the time we don't need to change the visuals of the button
+            // but if there is an installation request and it isn't yet complete
+            // we set the button to be disabled
+            var isActive = true;
+            if (installationRequest != null && !installationRequest.IsCompleted)
+            {
+                isActive = false;
+            }
+
+            GUI.enabled = isActive;
             if (MakeLinkButton(samplesLabel)) { InstallSamples(); }
+            GUI.enabled = true;
             if (MakeLinkButton(discordLabel)) { Application.OpenURL(discordURL); }
             if (MakeLinkButton(tellUsLabel)) { Application.OpenURL(tellUsURL); }
             GUILayout.FlexibleSpace(); // centre by padding from right

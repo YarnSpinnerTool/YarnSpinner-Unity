@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Description of package samples which summarises Samples therein.
 - Updated a few out-of-date HelpUrl values which referenced v1 docs.
 - Default Yarn Project exlude patterns updated to ignore the standard samples folders
+- YarnPackageImporter now has an install samples menu item in `Window -> Yarn Spinner -> Install Samples`
 
 ### Changed
 
@@ -24,6 +25,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added `DialogueRunner.DialoguePresenters` (and marked `DialogueRunner.DialogueViews` as obsolete.)
 - Fixed a lot of missing null checks
 - Fixed a bug in SampleRenderDetector that caused build errors.
+- Menu for creating a prefab dialogue system now says "Dialogue System" instead of "Dialogue Runner"
+- YarnPackageImporter now returns installation requests, this is intended to be temporary
 
 ### Removed
 

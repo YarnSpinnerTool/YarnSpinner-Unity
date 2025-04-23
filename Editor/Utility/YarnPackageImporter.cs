@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEditor.PackageManager;
+using UnityEditor.PackageManager.Requests;
 using UnityEditor.PackageManager.UI;
 
 #nullable enable
@@ -26,13 +27,23 @@ namespace Yarn.Unity.Editor
     {
         private const string yarnSpinnerPackageName = "dev.yarnspinner.unity";
         private const string samplesPackageName = "dev.yarnspinner.unity.samples";
+        private const string samplesPackageURL = "https://github.com/YarnSpinnerTool/YarnSpinner-Unity-Samples.git";
+
+        internal const string manualInstallURL = "https://docs.yarnspinner.dev/next/yarn-spinner-for-game-engines/unity/installation-and-setup#installing-the-samples";
+        internal const string assetStoreURL = "https://assetstore.unity.com/packages/tools/behavior-ai/yarn-spinner-for-unity-267061";
+        internal const string itchURL = "https://yarnspinner.itch.io/yarn-spinner";
+        internal enum InstallApproach
+        {
+            Itch, AssetStore, Manual
+        }
+        internal static InstallApproach installation = InstallApproach.Manual;
 
         static PackageInfo? GetInstalledPackageInfo(string packageName)
         {
             return PackageInfo.FindForPackageName(packageName);
         }
 
-        private static void InstallPackage(string packageName, string? packageVersion=null)
+        private static AddRequest? InstallPackage(string packageName, string? packageVersion=null)
         {
             PackageInfo? installed = GetInstalledPackageInfo(packageName);
             if (installed != null)
@@ -41,15 +52,10 @@ namespace Yarn.Unity.Editor
                 { 
                     throw new YarnPackageImporterException($"{packageName} package already installed with incompatible version: {installed.version}"); 
                 }
-                return;
             }
             string version = (packageVersion == null) ? "" : $"@{packageVersion}";
             var packageRequest = Client.Add($"{packageName}{version}");
-            while (!packageRequest.IsCompleted){}
-            if (packageRequest.Error != null)
-            {
-                throw new YarnPackageImporterException(packageRequest.Error.message);
-            }
+            return packageRequest;
         }
 
         static IEnumerable<Sample> GetSamplesForInstalledPackage(PackageInfo package)
@@ -62,11 +68,7 @@ namespace Yarn.Unity.Editor
             PackageInfo? packageInfo = GetInstalledPackageInfo(packageName);
             if (packageInfo == null)
             {
-                InstallPackage(packageName);
-                packageInfo = GetInstalledPackageInfo(packageName);
-                // should not be able to be null here 
-                // because if install failed then it should have
-                // thrown error out of this function by now
+                throw new YarnPackageImporterException($"{packageName} is not installed, unable to install samples without it being installed.");
             }
             InstallPackageSamples(packageInfo);
         }
@@ -97,22 +99,25 @@ namespace Yarn.Unity.Editor
 
         public static PackageInfo? YarnSpinnerPackageInfo
         {
-            get {
+            get
+            {
                 return GetInstalledPackageInfo(yarnSpinnerPackageName);
             } 
         }
 
         public static string? YarnSpinnerPackageVersion
         {
-            get {
+            get
+            {
                 PackageInfo? yarnspinnerPackage = YarnSpinnerPackageInfo;
-                return (yarnspinnerPackage == null) ? null : yarnspinnerPackage.version;
+                return yarnspinnerPackage?.version;
             }
         }
 
         public static bool IsYarnSpinnerPackageInstalled
         {
-            get {
+            get
+            {
                 return YarnSpinnerPackageInfo != null;
             }
         }
@@ -121,34 +126,66 @@ namespace Yarn.Unity.Editor
 
         public static PackageInfo? SamplesPackageInfo
         {
-            get {
+            get
+            {
                 return GetInstalledPackageInfo(samplesPackageName);
             } 
         }
 
         public static string? SamplesPackageVersion
         {
-            get {
+            get
+            {
                 PackageInfo? samplesPackage = SamplesPackageInfo;
-                return (samplesPackage == null) ? null : samplesPackage.version;
+                return samplesPackage?.version;
             }
         }
 
         public static bool IsSamplesPackageInstalled
         {
-            get {
+            get
+            {
                 return SamplesPackageInfo != null;
             }
         }
 
-        public static void InstallSamplesPackage()
+        [UnityEditor.MenuItem("Window/Yarn Spinner/Install Samples Package", true)]
+        public static bool InstallSamplesPackageValidation()
         {
-            if (!IsSamplesPackageInstalled)
+            return !IsSamplesPackageInstalled;
+        }
+
+        [UnityEditor.MenuItem("Window/Yarn Spinner/Install Samples Package", false)]
+        internal static void QuickInstallSamples()
+        {
+            switch (installation)
             {
-                // if YarnSpinner is not installed, the version
-                // will be null and latest will be installed
-                InstallPackage(samplesPackageName, YarnSpinnerPackageVersion);
+                case InstallApproach.Itch:
+                {
+                    UnityEngine.Application.OpenURL(YarnPackageImporter.itchURL);
+                    break;
+                }
+                case InstallApproach.AssetStore:
+                {
+                    UnityEngine.Application.OpenURL(YarnPackageImporter.assetStoreURL);
+                    break;
+                }
+                case InstallApproach.Manual:
+                {
+                    InstallSamplesPackage();
+                    break;
+                }
             }
+        }
+
+        public static AddRequest? InstallSamplesPackage()
+        {
+            if (IsSamplesPackageInstalled)
+            {
+                return null;
+            }
+
+            return InstallPackage(samplesPackageURL);
         }
 
         public static IEnumerable<Sample> GetSamplesPackageSamples()
@@ -164,9 +201,19 @@ namespace Yarn.Unity.Editor
         {
             if (!IsSamplesPackageInstalled)
             {
-                InstallSamplesPackage();
+                return;
             }
+
             InstallPackageSamples(samplesPackageName);
+        }
+
+        public static void OpenSamplesUI()
+        {
+            if (!IsSamplesPackageInstalled)
+            {
+                return;
+            }
+            Window.Open("dev.yarnspinner.unity.samples");
         }
     }
 }
