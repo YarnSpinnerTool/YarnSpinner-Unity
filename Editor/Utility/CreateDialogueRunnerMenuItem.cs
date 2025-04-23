@@ -25,7 +25,7 @@ namespace Yarn.Unity.Editor
         /// <exception cref="System.InvalidOperationException">Thrown when the
         /// Dialogue System prefab cannot be found in the Yarn Spinner
         /// package.</exception>
-        [MenuItem("GameObject/Yarn Spinner/Dialogue Runner", priority = 11)]
+        [MenuItem("GameObject/Yarn Spinner/Dialogue System", priority = 11)]
         public static DialogueRunner CreateDialogueRunner()
         {
 
@@ -35,7 +35,7 @@ namespace Yarn.Unity.Editor
             if (prefabAsset == null)
             {
                 throw new System.InvalidOperationException(
-                    $"Can't create a new Dialogue Runner: Can't find the prefab to create a Dialogue Runner from."
+                    $"Can't create a new Dialogue System: Can't find the prefab to create a Dialogue System from."
                 );
             }
 
