@@ -27,5 +27,7 @@ namespace Yarn.Unity
 
         /// <inheritdoc />
         public void RemoveFunction(string name) => CommandDispatcher.RemoveFunction(name);
+
+        public void RegisterFunctionDeclaration(string name, Type returnType, Type[] parameterTypes) { /* no-op */ }
     }
 }

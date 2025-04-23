@@ -63,4 +63,13 @@ public static class Diagnostics
                         isEnabledByDefault: true,
                         helpLinkUri: "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/creating-commands-functions");
 
+    public static readonly DiagnosticDescriptor YS1007ActionsMustBeInPublicTypes = new DiagnosticDescriptor(
+                        "YS1006",
+                        title: $"Yarn action methods must be in a public type",
+                        messageFormat: "Yarn actions must be in a publicly accessible type. {0}'s containing type, {1}, is {2}.",
+                        category: "Yarn Spinner",
+                        defaultSeverity: DiagnosticSeverity.Warning,
+                        isEnabledByDefault: true,
+                        helpLinkUri: "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/creating-commands-functions");
+
 }

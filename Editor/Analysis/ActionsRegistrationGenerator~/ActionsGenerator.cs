@@ -205,7 +205,7 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
             var actions = new List<YarnAction>();
             foreach (var tree in compilation.SyntaxTrees)
             {
-                actions.AddRange(Analyser.GetActions(compilation, tree, output).Where(a => a.DeclarationType == DeclarationType.Attribute));
+                actions.AddRange(Analyser.GetActions(compilation, tree, output));
             }
 
             if (actions.Any() == false)

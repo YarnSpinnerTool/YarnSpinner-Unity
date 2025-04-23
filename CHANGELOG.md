@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Description of package samples which summarises Samples therein.
 - Updated a few out-of-date HelpUrl values which referenced v1 docs.
 - Default Yarn Project exlude patterns updated to ignore the standard samples folders
+- Functions that are registered using the `AddFunction` method are now supported by the Yarn Spinner compiler.
 - YarnPackageImporter now has an install samples menu item in `Window -> Yarn Spinner -> Install Samples`
 
 ### Changed

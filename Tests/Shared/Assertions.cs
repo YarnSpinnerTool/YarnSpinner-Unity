@@ -883,6 +883,17 @@ namespace Yarn.Unity.Tests
         {
             Contain(substring, StringComparison.InvariantCulture, message);
         }
+
+        public void Match(System.Text.RegularExpressions.Regex regex, string? message = null)
+        {
+            NullCheck(Subject, message);
+            NullCheck(regex, message);
+
+            if (regex.IsMatch(this.Subject) == false)
+            {
+                throw new AssertionException($"Expected string \"{Subject}\" to match regex substring \"{regex}\"", message);
+            }
+        }
     }
 
 

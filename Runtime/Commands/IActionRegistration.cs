@@ -90,6 +90,14 @@ namespace Yarn.Unity
         /// <param name="name">The name of the function to remove.</param>
         /// <seealso cref="AddFunction(string, Delegate)"/>
         void RemoveFunction(string name);
+
+        /// <summary>
+        /// Registers a function as existing, without supplying an implementation.
+        /// </summary>
+        /// <param name="name">The name of the function.</param>
+        /// <param name="returnType">The return type of the function.</param>
+        /// <param name="parameterTypes">The types of the function's parameters.</param>
+        void RegisterFunctionDeclaration(string name, Type returnType, Type[] parameterTypes);
     }
 
     /// <summary>
