@@ -40,7 +40,7 @@ namespace Yarn.Unity.Editor
             var importDataSO = new SerializedObject(importData);
 
             var yarnScriptsProperty = importDataSO.FindProperty(nameof(ProjectImportData.yarnFiles));
-            var yarnScriptsField = new PropertyField(yarnScriptsProperty);
+            var yarnScriptsField = new PropertyField(yarnScriptsProperty, "Yarn Scripts");
             yarnScriptsField.Bind(importDataSO);
             ui.Add(yarnScriptsField);
             foldout = yarnScriptsField.Q<Foldout>();

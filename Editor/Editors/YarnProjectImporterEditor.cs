@@ -38,7 +38,7 @@ namespace Yarn.Unity.Editor
 
         internal const string ProjectUpgradeHelpURL = "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/importing-yarn-files/yarn-projects#upgrading-yarn-projects";
         internal const string CreateNewIssueURL = "https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=Project Import Error";
-        internal const string AddStringTagsButtonLabel = "Add Line Tags to Scripts";
+        internal const string AddStringTagsButtonLabel = "Add Line Tags to Yarn Scripts";
         internal const string GenerateStringsFileButtonLabel = "Export Strings and Metadata as CSV";
         internal const string UpdateExistingStringsFilesButtonLabel = "Update Existing Strings Files";
 
@@ -170,7 +170,6 @@ namespace Yarn.Unity.Editor
                     var stringFile = locField.value.stringsFile;
                     var assetFolder = locField.value.assetsFolder;
 
-
                     if (stringFile != null)
                     {
                         string stringFilePath = AssetDatabase.GetAssetPath(stringFile);
@@ -182,9 +181,6 @@ namespace Yarn.Unity.Editor
                         locInfo.Assets = Path.GetRelativePath(importerFolder, assetFolderPath);
                     }
                 }
-
-
-
 
                 data.Localisation[locField.value.languageID] = locInfo;
                 locField.ClearModified();
@@ -367,7 +363,7 @@ namespace Yarn.Unity.Editor
 
             ui.Add(sourceFilesContainer);
             var sourceFilesHeader = new Label();
-            sourceFilesHeader.text = "Source Files";
+            sourceFilesHeader.text = "Source Yarn Scripts";
             sourceFilesHeader.style.unityFontStyleAndWeight = FontStyle.Bold;
             sourceFilesContainer.Add(sourceFilesHeader);
             sourceFilesContainer.Add(sourceFileEntriesContainer);
