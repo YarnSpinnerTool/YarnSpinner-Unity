@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Default Yarn Project exlude patterns updated to ignore the standard samples folders
 - Functions that are registered using the `AddFunction` method are now supported by the Yarn Spinner compiler.
 - YarnPackageImporter now has an install samples menu item in `Window -> Yarn Spinner -> Install Samples`
+- 'Incorrect number of parameters' error messages when running commands will now show more detailed error messages if available.
 
 ### Changed
 

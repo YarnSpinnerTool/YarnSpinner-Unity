@@ -556,7 +556,7 @@ namespace Yarn.Unity
                     Debug.LogError($"Can't call command <<{command.Text}>>, because {parts.ElementAtOrDefault(1)} doesn't have the correct component");
                     break;
                 case CommandDispatchResult.StatusType.InvalidParameterCount:
-                    Debug.LogError($"Can't call command <<{command.Text}>>: incorrect number of parameters");
+                    Debug.LogError($"Can't call command <<{command.Text}>>: {dispatchResult.Message ?? "incorrect number of parameters"}");
                     break;
                 case CommandDispatchResult.StatusType.CommandUnknown:
                     // Attempt a last-ditch dispatch by invoking our 'onCommand'
