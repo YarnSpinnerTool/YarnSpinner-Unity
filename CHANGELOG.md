@@ -28,7 +28,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed a lot of missing null checks
 - Fixed a bug in SampleRenderDetector that caused build errors.
 - Menu for creating a prefab dialogue system now says "Dialogue System" instead of "Dialogue Runner"
-- YarnPackageImporter now returns installation requests, this is intended to be temporary
+- Line Advancer will now advance to the next line if the line presenter is finished presentation and is awaiting input and the player sends the hurry up action
+  - this only happens when the default line presenter is the one presenting the line
+  - other presenters don't really have an obvious "I am done showing, but not done presenting" concept as the line presenter does
+  - adopting this behaviour into other presenters is not difficult, just not something that can be done automatically
 
 ### Removed
 
