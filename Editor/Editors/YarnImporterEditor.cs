@@ -90,10 +90,35 @@ namespace Yarn.Unity.Editor
                     YarnProjectUtility.CreateYarnProject(target as YarnImporter);
 
                     UpdateDestinationProjects();
-
                 }
             }
 
+            var settings = YarnSpinnerProjectSettings.GetOrCreateSettings();
+            if (settings.enableDirectLinkToVSCode)
+            {
+                if (GUILayout.Button("Open in VS Code"))
+                {
+                    // https://code.visualstudio.com/docs/configure/command-line#_opening-vs-code-with-urls
+                    // this implies we should be able to open directly to the line and column
+                    // which would be great for errors
+                    // or if we show what nodes are inside this file we could jump to them directly
+                    // something to explore later
+
+                    // as both the dataPath and assetPath include the Assets folder we need to strip that off before we combine these
+                    var absolutePathToYarnFile = Path.Combine(Path.GetDirectoryName(Application.dataPath), (target as YarnImporter).assetPath);
+
+                    // This approach is bit weird to look at but it gets around a difference of what a URL is between VSCode and C#
+                    // The initial thought is "why not use System.Uri.EscapeDataString?"
+                    // it encodes "/" as "%2F" and "\" as "%5C" which is technically correct
+                    // but vscode doesn't want that it just needs the spaces replaced
+                    // so instead we just manually replace all the spaces with "%20"
+                    // not the best but it works... for now...
+                    absolutePathToYarnFile = absolutePathToYarnFile.Replace(" ", $"%20");
+
+                    var vscodeURL = $"vscode://file{absolutePathToYarnFile}";
+                    Application.OpenURL(vscodeURL);
+                }
+            }
 
             EditorGUILayout.Space();
 

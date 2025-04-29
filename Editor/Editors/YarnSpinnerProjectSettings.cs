@@ -25,6 +25,7 @@ namespace Yarn.Unity.Editor
         public bool autoRefreshLocalisedAssets = true;
         public bool automaticallyLinkAttributedYarnCommandsAndFunctions = true;
         public bool generateYSLSFile = false;
+        public bool enableDirectLinkToVSCode = false;
 
         // need to make it os the output can be passed in also so it can log
         internal static YarnSpinnerProjectSettings GetOrCreateSettings(string path = null, Yarn.Unity.ILogger iLogger = null)
@@ -91,10 +92,12 @@ namespace Yarn.Unity.Editor
             bool automaticallyLinkAttributedYarnCommandsAndFunctions = GetValueOrDefault("automaticallyLinkAttributedYarnCommandsAndFunctions", true);
             bool autoRefreshLocalisedAssets = GetValueOrDefault("autoRefreshLocalisedAssets", true);
             bool generateYSLSFile = GetValueOrDefault("generateYSLSFile", false);
+            bool enableDirectLinkToVSCode = GetValueOrDefault("enableDirectLinkToVSCode", false);
 
             settings.automaticallyLinkAttributedYarnCommandsAndFunctions = automaticallyLinkAttributedYarnCommandsAndFunctions;
             settings.autoRefreshLocalisedAssets = autoRefreshLocalisedAssets;
             settings.generateYSLSFile = generateYSLSFile;
+            settings.enableDirectLinkToVSCode = enableDirectLinkToVSCode;
 
             return settings;
         }
@@ -114,6 +117,7 @@ namespace Yarn.Unity.Editor
             dictForm["automaticallyLinkAttributedYarnCommandsAndFunctions"] = this.automaticallyLinkAttributedYarnCommandsAndFunctions;
             dictForm["autoRefreshLocalisedAssets"] = this.autoRefreshLocalisedAssets;
             dictForm["generateYSLSFile"] = this.generateYSLSFile;
+            dictForm["enableDirectLinkToVSCode"] = this.enableDirectLinkToVSCode;
 
             var jsonValue = Json.Serialize(dictForm);
 

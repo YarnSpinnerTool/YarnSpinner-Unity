@@ -31,21 +31,27 @@ namespace Yarn.Unity.Editor
             EditorGUILayout.LabelField("Automatic Recompilation and Asset Association");
             using (var changeCheck = new EditorGUI.ChangeCheckScope())
             {
+                var settingWidth = 320;
                 using (new EditorGUI.IndentLevelScope())
                 {
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField("Update Localised Assets", GUILayout.Width(290), GUILayout.ExpandWidth(false));
+                    EditorGUILayout.LabelField("Update Localised Assets", GUILayout.Width(settingWidth), GUILayout.ExpandWidth(false));
                     var localisedAssetUpdate = EditorGUILayout.Toggle(unsavedSettings.autoRefreshLocalisedAssets, GUILayout.ExpandWidth(false));
                     EditorGUILayout.EndHorizontal();
 
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField("Generate linkings for Functions and Commands", GUILayout.Width(290), GUILayout.ExpandWidth(false));
+                    EditorGUILayout.LabelField("Generate linkings for Functions and Commands", GUILayout.Width(settingWidth), GUILayout.ExpandWidth(false));
                     var linkingAttributedFuncs = EditorGUILayout.Toggle(unsavedSettings.automaticallyLinkAttributedYarnCommandsAndFunctions, GUILayout.ExpandWidth(false));
                     EditorGUILayout.EndHorizontal();
 
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField("Generate YSLS file for attributed methods", GUILayout.Width(290), GUILayout.ExpandWidth(false));
+                    EditorGUILayout.LabelField("Generate YSLS file for attributed methods", GUILayout.Width(settingWidth), GUILayout.ExpandWidth(false));
                     var generateYSLS = EditorGUILayout.Toggle(unsavedSettings.generateYSLSFile, GUILayout.ExpandWidth(false));
+                    EditorGUILayout.EndHorizontal();
+
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField("Enable direct connection to VS Code for Yarn Scripts", GUILayout.Width(settingWidth), GUILayout.ExpandWidth(false));
+                    var enableDirectLinkToVSCode = EditorGUILayout.Toggle(unsavedSettings.enableDirectLinkToVSCode, GUILayout.ExpandWidth(false));
                     EditorGUILayout.EndHorizontal();
 
                     if (changeCheck.changed)
@@ -53,6 +59,7 @@ namespace Yarn.Unity.Editor
                         unsavedSettings.autoRefreshLocalisedAssets = localisedAssetUpdate;
                         unsavedSettings.automaticallyLinkAttributedYarnCommandsAndFunctions = linkingAttributedFuncs;
                         unsavedSettings.generateYSLSFile = generateYSLS;
+                        unsavedSettings.enableDirectLinkToVSCode = enableDirectLinkToVSCode;
                     }
 
                     bool disabledReimportButton = true;
@@ -60,7 +67,8 @@ namespace Yarn.Unity.Editor
                     (
                         unsavedSettings.automaticallyLinkAttributedYarnCommandsAndFunctions != baseSettings.automaticallyLinkAttributedYarnCommandsAndFunctions ||
                         unsavedSettings.autoRefreshLocalisedAssets != baseSettings.autoRefreshLocalisedAssets ||
-                        unsavedSettings.generateYSLSFile != baseSettings.generateYSLSFile
+                        unsavedSettings.generateYSLSFile != baseSettings.generateYSLSFile ||
+                        unsavedSettings.enableDirectLinkToVSCode != baseSettings.enableDirectLinkToVSCode
                     )
                     {
                         disabledReimportButton = false;
@@ -95,6 +103,7 @@ namespace Yarn.Unity.Editor
                             baseSettings.autoRefreshLocalisedAssets = unsavedSettings.autoRefreshLocalisedAssets;
                             baseSettings.automaticallyLinkAttributedYarnCommandsAndFunctions = unsavedSettings.automaticallyLinkAttributedYarnCommandsAndFunctions;
                             baseSettings.generateYSLSFile = unsavedSettings.generateYSLSFile;
+                            baseSettings.enableDirectLinkToVSCode = unsavedSettings.enableDirectLinkToVSCode;
                             baseSettings.WriteSettings();
 
                             // now we can reimport
