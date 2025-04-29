@@ -18,6 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - YarnPackageImporter now has an install samples menu item in `Window -> Yarn Spinner -> Install Samples`
 - 'Incorrect number of parameters' error messages when running commands will now show more detailed error messages if available.
 - Yarn scripts can now directly link to vscode for situations where you want to use that as your Yarn editor but have another editor as your C# editor.
+- `UnityLocalisedLineProvider` now supports [fallback locales](https://docs.unity3d.com/Packages/com.unity.localization@1.5/manual/Locale.html#fallbacks).
+- `UnityLocalisedLineProvider` now supports shadow lines.
 
 ### Changed
 

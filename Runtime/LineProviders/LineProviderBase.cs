@@ -28,13 +28,8 @@ namespace Yarn.Unity
         public YarnProject? YarnProject { get; set; }
 
         /// <summary>
-        /// Gets the user's current locale identifier, as a BCP-47 code.
+        /// Gets the line provider's current locale identifier, as a BCP-47 code.
         /// </summary>
-        /// <remarks>
-        /// This value is used to control how certain replacement markers behave
-        /// (for example, the <c>[plural]</c> marker, which behaves differently
-        /// depending on the user's locale.)
-        /// </remarks>
         public string LocaleCode { get; }
 
         /// <summary>

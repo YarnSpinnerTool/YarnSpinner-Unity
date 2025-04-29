@@ -31,8 +31,31 @@ namespace Yarn.Unity.UnityLocalization
 
         /// <summary>
         /// The <c>#hashtags</c> present on the line.
-        public string[] tags = System.Array.Empty<string>();
         /// </summary>
+        public string[] tags = System.Array.Empty<string>();
+
+        /// <summary>
+        /// Gets the line ID indicated by any shadow tag contained in this
+        /// metadata, if present.
+        /// </summary>
+        public string? ShadowLineSource
+        {
+            get
+            {
+                foreach (var metadataEntry in tags)
+                {
+                    if (metadataEntry.StartsWith("shadow:") != false)
+                    {
+                        // This is a shadow line. Return the line ID that it's
+                        // shadowing.
+                        return "line:" + metadataEntry.Substring("shadow:".Length);
+                    }
+                }
+
+                // The line had metadata, but it wasn't a shadow line.
+                return null;
+            }
+        }
     }
 
     /// <summary>
@@ -49,10 +72,7 @@ namespace Yarn.Unity.UnityLocalization
         /// <inheritdoc/>
         public override string LocaleCode
         {
-            get
-            {
-                return LocalizationSettings.SelectedLocale.Identifier.Code;
-            }
+            get => LocalizationSettings.SelectedLocale.Identifier.Code;
             set
             {
                 Locale? locale = LocalizationSettings.AvailableLocales.GetLocale(value);
@@ -67,25 +87,11 @@ namespace Yarn.Unity.UnityLocalization
         private LineParser lineParser = new LineParser();
         private BuiltInMarkupReplacer builtInReplacer = new BuiltInMarkupReplacer();
 
-        private Dictionary<string, Object> currentlyLoadedAssets = new Dictionary<string, Object>();
-
-        private StringTable? currentStringTable;
-        private AssetTable? currentAssetTable;
-
         void Awake()
         {
             lineParser.RegisterMarkerProcessor("select", builtInReplacer);
             lineParser.RegisterMarkerProcessor("plural", builtInReplacer);
             lineParser.RegisterMarkerProcessor("ordinal", builtInReplacer);
-        }
-
-        /// <inheritdoc/>
-        public override void Start()
-        {
-            // When the strings table changes (for example, due to the user
-            // changing locale), update our local references.
-            stringsTable.TableChanged += (table) => this.currentStringTable = table;
-            assetTable.TableChanged += (table) => this.currentAssetTable = table;
         }
 
         /// <inheritdoc/>
@@ -96,22 +102,47 @@ namespace Yarn.Unity.UnityLocalization
                 throw new System.InvalidOperationException($"Tried to get localised line for {line.ID}, but no string table has been set.");
             }
 
-            // Ensure that our string tables are loaded before attempting to
-            // fetch anything out of them.
-            await EnsureStringsTableLoaded(cancellationToken);
-            await EnsureAssetTableLoaded(cancellationToken);
+            var getStringOp = LocalizationSettings.StringDatabase.GetTableEntryAsync(stringsTable.TableReference, line.ID, null, FallbackBehavior.UseFallback);
+            var entry = await YarnTask.WaitForAsyncOperation(getStringOp, cancellationToken);
 
-            if (currentStringTable == null)
+            // Attempt to fetch metadata tags for this line from the string
+            // table
+            var metadata = entry.Entry?.SharedEntry.Metadata.GetMetadata<LineMetadata>();
+
+            // Get the text from the entry
+            var text = entry.Entry?.LocalizedValue
+                ?? $"!! Error: Missing localisation for line {line.ID} in string table {entry.Table.LocaleIdentifier}";
+
+            string? shadowLineID = metadata?.ShadowLineSource;
+
+            if (shadowLineID != null)
             {
-                throw new System.InvalidOperationException($"Tried to get localised line for {line.ID}, but the string table failed to load.");
+                // This line actually shadows another line. Fetch that line, and
+                // use its text (but not its metadata)
+                var getShadowLineOp = LocalizationSettings.StringDatabase.GetTableEntryAsync(stringsTable.TableReference, shadowLineID, null, FallbackBehavior.UseFallback);
+                var shadowEntry = await YarnTask.WaitForAsyncOperation(getShadowLineOp, cancellationToken);
+                if (shadowEntry.Entry == null)
+                {
+                    Debug.LogWarning($"Line {line.ID} shadows line {shadowLineID}, but no such entry was found in the string table {stringsTable.TableReference}");
+                }
+                else
+                {
+                    text = shadowEntry.Entry.LocalizedValue;
+                }
             }
 
-
-            // Fetch the localised text and metadata from the string table.
-            var text = line.ID;
-            text = currentStringTable[line.ID]?.LocalizedValue ?? $"!! Error: Missing localisation for line {line.ID} in string table {currentStringTable.LocaleIdentifier}";
-
+            // We now have our text; parse it as markup
             var markup = lineParser.ParseString(LineParser.ExpandSubstitutions(text, line.Substitutions), this.LocaleCode);
+
+            // Lastly, attempt to fetch an asset for this line
+            Object? asset = null;
+
+            if (this.assetTable != null)
+            {
+                // Fetch the asset for this line, if one is available.
+                var loadOp = LocalizationSettings.AssetDatabase.GetLocalizedAssetAsync<Object>(assetTable.TableReference, shadowLineID ?? line.ID, null, FallbackBehavior.UseFallback);
+                asset = await YarnTask.WaitForAsyncOperation(loadOp, cancellationToken);
+            }
 
             // Construct the localized line
             LocalizedLine localizedLine = new LocalizedLine()
@@ -120,30 +151,9 @@ namespace Yarn.Unity.UnityLocalization
                 TextID = line.ID,
                 Substitutions = line.Substitutions,
                 RawText = text,
+                Metadata = metadata?.tags ?? System.Array.Empty<string>(),
+                Asset = asset,
             };
-
-            // Attempt to fetch metadata tags for this line from the string
-            // table
-            var metadata = currentStringTable[line.ID]?.SharedEntry.Metadata.GetMetadata<LineMetadata>();
-
-            if (metadata != null)
-            {
-                localizedLine.Metadata = metadata.tags;
-            }
-
-            if (this.currentAssetTable != null)
-            {
-                try
-                {
-                    // Fetch the asset for this line, if one is available.
-                    localizedLine.Asset = await YarnTask.WaitForAsyncOperation(this.currentAssetTable.GetAssetAsync<Object>(line.ID), cancellationToken);
-                }
-                catch (System.Exception e)
-                {
-                    // Failed to fetch an asset.
-                    Debug.LogWarning($"Failed to fetch an asset for {line.ID}: " + e);
-                }
-            }
 
             return localizedLine;
         }
@@ -161,40 +171,12 @@ namespace Yarn.Unity.UnityLocalization
         }
 
         /// <inheritdoc/>
-        async YarnTask EnsureStringsTableLoaded(CancellationToken cancellationToken)
+        public override YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken)
         {
-            if (currentStringTable == null && stringsTable.IsEmpty == false)
-            {
-                // We haven't loaded our table yet. Wait for the table to load.
-                this.currentStringTable = await YarnTask.WaitForAsyncOperation(stringsTable.GetTableAsync(), cancellationToken);
-            }
-        }
-
-        async YarnTask EnsureAssetTableLoaded(CancellationToken cancellationToken)
-        {
-            if (currentAssetTable == null && assetTable.IsEmpty == false)
-            {
-                // We haven't loaded our table yet. Wait for the table to load.
-                this.currentAssetTable = await YarnTask.WaitForAsyncOperation(assetTable.GetTableAsync(), cancellationToken);
-            }
-            if (currentAssetTable != null)
-            {
-                // We now have an asset table. Ensure that it's finished preloading.
-                await YarnTask.WaitForAsyncOperation(this.currentAssetTable.PreloadOperation, cancellationToken);
-            }
-        }
-
-        /// <inheritdoc/>
-        public override async YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken)
-        {
-            // Asynchronously ensure that all tables are loaded, and that the
-            // asset table has finished preloading.
-
-            // Wait for both of the tables to be ready.
-            await YarnTask.WhenAll(new[] {
-                EnsureStringsTableLoaded(cancellationToken),
-                EnsureAssetTableLoaded(cancellationToken)
-            });
+            // Nothing to do. If a user wants to ensure ahead of time that
+            // localized content is already in memory, they should use the Unity
+            // Localization preload support.
+            return YarnTask.CompletedTask;
         }
     }
 }
