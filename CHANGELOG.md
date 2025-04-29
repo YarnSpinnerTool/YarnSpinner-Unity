@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Functions that are registered using the `AddFunction` method are now supported by the Yarn Spinner compiler.
 - YarnPackageImporter now has an install samples menu item in `Window -> Yarn Spinner -> Install Samples`
 - 'Incorrect number of parameters' error messages when running commands will now show more detailed error messages if available.
+- Yarn scripts can now directly link to vscode for situations where you want to use that as your Yarn editor but have another editor as your C# editor.
 
 ### Changed
 
