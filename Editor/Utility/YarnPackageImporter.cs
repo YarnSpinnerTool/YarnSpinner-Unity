@@ -5,7 +5,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEditor.PackageManager;
-using UnityEditor.PackageManager.Requests;
 using UnityEditor.PackageManager.UI;
 
 #nullable enable
@@ -25,52 +24,98 @@ namespace Yarn.Unity.Editor
 
     public static class YarnPackageImporter
     {
+        public enum SamplesPackageStatus
+        {
+            Installed, NotInstalled, Installing, FailedToInstall
+        }
+
         private const string yarnSpinnerPackageName = "dev.yarnspinner.unity";
         private const string samplesPackageName = "dev.yarnspinner.unity.samples";
-        private const string samplesPackageURL = "https://github.com/YarnSpinnerTool/YarnSpinner-Unity-Samples.git";
-
-        internal const string manualInstallURL = "https://docs.yarnspinner.dev/next/yarn-spinner-for-game-engines/unity/installation-and-setup#installing-the-samples";
-        internal const string assetStoreURL = "https://assetstore.unity.com/packages/tools/behavior-ai/yarn-spinner-for-unity-267061";
-        internal const string itchURL = "https://yarnspinner.itch.io/yarn-spinner";
-        internal enum InstallApproach
+        
+        private enum InstallApproach
         {
             Itch, AssetStore, Manual
         }
-        internal static InstallApproach installation = InstallApproach.Manual;
+
+        // what install approach do we follow?
+        private static InstallApproach installApproach = InstallApproach.Manual;
+
+        // What is the status of the samples package?
+        public static SamplesPackageStatus Status
+        {
+            get
+            {
+                // if we have the samples we don't really care about HOW, so just return that
+                if (IsSamplesPackageInstalled)
+                {
+                    return SamplesPackageStatus.Installed;
+                }
+
+                // each approach has their own approach for this, at this stage only UPM can really do anything
+                // so in that case we bounce out to it, and for all others they are not installed
+                // later on this will ideally change
+                switch (installApproach)
+                {
+                    case InstallApproach.Manual:
+                    {
+                        return UPMSamplesInstaller.Status;
+                    }
+                }
+                return SamplesPackageStatus.NotInstalled;
+            }
+        }
+        
+        // install the samples package if not installed
+        [UnityEditor.MenuItem("Window/Yarn Spinner/Install Samples Package", false)]
+        internal static void InstallSamples()
+        {
+            switch (installApproach)
+            {
+                // there are two variants here
+                case InstallApproach.Manual:
+                {
+                    if (IsYarnSpinnerPackageInstalled)
+                    {
+                        // if the yarn spinner package is installed as a package we want to also install the samples this way
+                        UPMSamplesInstaller.InstallSamples();
+                    }
+                    else
+                    {
+                        // otherwise it's a fully manually vendored version of YS
+                        ManualSamplesInstaller.InstallSamples();
+                    }
+                    break;
+                }
+                case InstallApproach.Itch:
+                {
+                    ItchSamplesInstaller.InstallSamples();
+                    break;
+                }
+                case InstallApproach.AssetStore:
+                {
+                    AssetStoreSamplesInstaller.InstallSamples();
+                    break;
+                }
+            }
+        }
+
+        // open the samples up if they are installed
+        private static void ShowSamples()
+        {
+            if (IsSamplesPackageInstalled)
+            {
+                Window.Open(samplesPackageName);
+            }
+        }
 
         static PackageInfo? GetInstalledPackageInfo(string packageName)
         {
             return PackageInfo.FindForPackageName(packageName);
         }
 
-        private static AddRequest? InstallPackage(string packageName, string? packageVersion=null)
-        {
-            PackageInfo? installed = GetInstalledPackageInfo(packageName);
-            if (installed != null)
-            {
-                if (packageVersion != null && packageVersion != installed.version)
-                { 
-                    throw new YarnPackageImporterException($"{packageName} package already installed with incompatible version: {installed.version}"); 
-                }
-            }
-            string version = (packageVersion == null) ? "" : $"@{packageVersion}";
-            var packageRequest = Client.Add($"{packageName}{version}");
-            return packageRequest;
-        }
-
         static IEnumerable<Sample> GetSamplesForInstalledPackage(PackageInfo package)
         {
             return Sample.FindByPackage(package.name, package.version);
-        }
-
-        private static void InstallPackageSamples(string packageName)
-        {
-            PackageInfo? packageInfo = GetInstalledPackageInfo(packageName);
-            if (packageInfo == null)
-            {
-                throw new YarnPackageImporterException($"{packageName} is not installed, unable to install samples without it being installed.");
-            }
-            InstallPackageSamples(packageInfo);
         }
 
         private static void InstallPackageSamples(PackageInfo package)
@@ -155,39 +200,6 @@ namespace Yarn.Unity.Editor
             return !IsSamplesPackageInstalled;
         }
 
-        [UnityEditor.MenuItem("Window/Yarn Spinner/Install Samples Package", false)]
-        internal static void QuickInstallSamples()
-        {
-            switch (installation)
-            {
-                case InstallApproach.Itch:
-                {
-                    UnityEngine.Application.OpenURL(YarnPackageImporter.itchURL);
-                    break;
-                }
-                case InstallApproach.AssetStore:
-                {
-                    UnityEngine.Application.OpenURL(YarnPackageImporter.assetStoreURL);
-                    break;
-                }
-                case InstallApproach.Manual:
-                {
-                    InstallSamplesPackage();
-                    break;
-                }
-            }
-        }
-
-        public static AddRequest? InstallSamplesPackage()
-        {
-            if (IsSamplesPackageInstalled)
-            {
-                return null;
-            }
-
-            return InstallPackage(samplesPackageURL);
-        }
-
         public static IEnumerable<Sample> GetSamplesPackageSamples()
         {
             if (SamplesPackageInfo != null)
@@ -197,23 +209,13 @@ namespace Yarn.Unity.Editor
             return new List<Sample>();
         }
 
-        public static void InstallSamplesPackageSamples()
-        {
-            if (!IsSamplesPackageInstalled)
-            {
-                return;
-            }
-
-            InstallPackageSamples(samplesPackageName);
-        }
-
         public static void OpenSamplesUI()
         {
             if (!IsSamplesPackageInstalled)
             {
                 return;
             }
-            Window.Open("dev.yarnspinner.unity.samples");
+            ShowSamples();
         }
     }
 }
