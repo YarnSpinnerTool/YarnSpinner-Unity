@@ -474,9 +474,6 @@ namespace Yarn.Unity
 
         private void OnDialogueCompleted()
         {
-            dialogueCompletionSource?.TrySetResult();
-
-            onDialogueComplete?.Invoke();
             OnDialogueCompleteAsync().Forget();
         }
         private async YarnTask OnDialogueCompleteAsync()
@@ -516,6 +513,10 @@ namespace Yarn.Unity
 
             // Wait for all views to finish doing their clean up
             await YarnTask.WhenAll(pendingTasks);
+
+            // Finally, notify that dialogue is complete.
+            dialogueCompletionSource?.TrySetResult();
+            onDialogueComplete?.Invoke();
         }
 
         private void OnNodeCompleted(string completedNodeName)

@@ -21,6 +21,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `UnityLocalisedLineProvider` now supports [fallback locales](https://docs.unity3d.com/Packages/com.unity.localization@1.5/manual/Locale.html#fallbacks).
 - `UnityLocalisedLineProvider` now supports shadow lines.
 - `BuiltinLocalisedLineProvider` now supports falling back to different locale.
+- `DialogueRunner.DialogueTask` now completes after all dialogue presenters finish their `OnDialogueComplete` method call, rather than before.
+- The `DialogueRunner.onDialogueComplete` event is now invoked after all dialogue presenters finish their `OnDialogueComplete` method call, rather than before.
 
 ### Changed
 
