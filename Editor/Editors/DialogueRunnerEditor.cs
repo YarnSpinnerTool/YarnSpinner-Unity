@@ -749,6 +749,13 @@ namespace Yarn.Unity.Editor
     public class LineAdvancerEditor : YarnEditor { }
 
     /// <summary>
+    /// The editor for <see cref="BuiltinLocalisedLineProvider"/> objects.
+    /// </summary>
+    [CanEditMultipleObjects]
+    [CustomEditor(typeof(BuiltinLocalisedLineProvider))]
+    public class BuiltinLocalisedLineProviderEditor : YarnEditor { }
+
+    /// <summary>
     /// The editor for <see cref="DialogueRunner"/> objects.
     /// </summary>
     [CanEditMultipleObjects]

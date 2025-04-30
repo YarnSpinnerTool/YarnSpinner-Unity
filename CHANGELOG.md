@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Yarn scripts can now directly link to vscode for situations where you want to use that as your Yarn editor but have another editor as your C# editor.
 - `UnityLocalisedLineProvider` now supports [fallback locales](https://docs.unity3d.com/Packages/com.unity.localization@1.5/manual/Locale.html#fallbacks).
 - `UnityLocalisedLineProvider` now supports shadow lines.
+- `BuiltinLocalisedLineProvider` now supports falling back to different locale.
 
 ### Changed
 

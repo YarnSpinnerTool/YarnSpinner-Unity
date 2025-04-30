@@ -22,6 +22,11 @@ namespace Yarn.Unity
         [SerializeField, Language] private string _textLocaleCode = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
         [SerializeField, Language] private string _assetLocaleCode = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
 
+        [SerializeField] private bool _useFallback = false;
+
+        [ShowIf(nameof(_useFallback))]
+        [SerializeField, Language] private string _fallbackLocaleCode = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+
         public string AssetLocaleCode
         {
             get => _assetLocaleCode;
@@ -49,8 +54,6 @@ namespace Yarn.Unity
 
         public override async YarnTask<LocalizedLine> GetLocalizedLineAsync(Line line, CancellationToken cancellationToken)
         {
-            Localization loc = CurrentLocalization;
-
             string sourceLineID = line.ID;
 
             string[] metadata = System.Array.Empty<string>();
@@ -69,33 +72,17 @@ namespace Yarn.Unity
                 }
             }
 
-            string? text = loc.GetLocalizedString(sourceLineID);
+            string? text = GetLocalizedString(sourceLineID);
+            Object? asset = await GetLocalizedAssetAsync(sourceLineID);
 
             if (text == null)
             {
                 // No line available.
-                Debug.LogWarning($"Localization {loc} does not contain an entry for line {line.ID}", this);
+                Debug.LogWarning($"Localization {LocaleCode} does not contain an entry for line {line.ID}", this);
                 return LocalizedLine.InvalidLine;
             }
 
-            var parseResult = lineParser.ParseString(Markup.LineParser.ExpandSubstitutions(text, line.Substitutions), this.LocaleCode);
-
-            Object? asset = null;
-
-            if (YarnProject != null)
-            {
-                var assetLocalization = YarnProject.GetLocalization(AssetLocaleCode);
-
-                if (assetLocalization != null)
-                {
-                    asset = await assetLocalization.GetLocalizedObjectAsync<Object>(sourceLineID);
-                }
-                else
-                {
-                    // Project has no localisation for locale AssetLocale
-                    asset = null;
-                }
-            }
+            var parseResult = lineParser.ParseString(Markup.LineParser.ExpandSubstitutions(text, line.Substitutions), LocaleCode);
 
             return new LocalizedLine
             {
@@ -105,6 +92,63 @@ namespace Yarn.Unity
                 Asset = asset,
                 Metadata = metadata,
             };
+        }
+
+        private Localization GetLocalization(string locale)
+        {
+            if (YarnProject == null)
+            {
+                throw new System.InvalidOperationException($"Can't get localized line: no Yarn Project set");
+            }
+
+            Localization loc = YarnProject.GetLocalization(locale);
+
+            if (loc == null)
+            {
+                throw new System.InvalidOperationException($"Can't get localized line: Yarn Project has no localisation for {locale}");
+            }
+
+            return loc;
+        }
+
+        private string? GetLocalizedString(string sourceLineID)
+        {
+
+            var baseLoc = GetLocalization(_textLocaleCode);
+            string? text = baseLoc.GetLocalizedString(sourceLineID);
+
+            if (text != null)
+            {
+                return text;
+            }
+
+            if (_useFallback)
+            {
+                var fallbackLoc = GetLocalization(_fallbackLocaleCode);
+                return fallbackLoc.GetLocalizedString(sourceLineID);
+            }
+
+            return null;
+        }
+
+        private async YarnTask<Object?> GetLocalizedAssetAsync(string sourceLineID)
+        {
+
+            var baseLoc = GetLocalization(sourceLineID);
+            Object? result = await baseLoc.GetLocalizedObjectAsync<Object>(sourceLineID);
+
+            if (result != null)
+            {
+                return result;
+            }
+
+            if (_useFallback)
+            {
+                var fallbackLoc = GetLocalization(_fallbackLocaleCode);
+                return await fallbackLoc.GetLocalizedObjectAsync<Object>(sourceLineID);
+            }
+
+            return null;
         }
 
         public async override YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken)
@@ -137,21 +181,6 @@ namespace Yarn.Unity
                 // The localization uses direct references. No need to pre-load
                 // the assets - they were loaded with the scene.
                 return;
-            }
-        }
-
-        private Localization CurrentLocalization
-        {
-            get
-            {
-                if (YarnProject != null)
-                {
-                    return YarnProject.GetLocalization(LocaleCode);
-                }
-                else
-                {
-                    throw new System.InvalidOperationException($"Can't get a localised line because {nameof(YarnProject)} is not set!");
-                }
             }
         }
     }
