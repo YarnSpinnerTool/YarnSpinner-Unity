@@ -394,10 +394,35 @@ namespace Yarn.Unity.ActionAnalyser
                 .NonNull(throwIfAnyNull: true)
                 .ToList();
 
-            var methodDeclaration = (MethodDeclarationSyntax)this.MethodDeclarationSyntax!;
-
             // Functions must return void, IEnumerator, Coroutine, or an awaitable type
             var returnTypeSymbol = MethodSymbol.ReturnType;
+
+            Location returnTypeLocation;
+            string identifier;
+            string returnTypeName;
+            if (this.MethodDeclarationSyntax is MethodDeclarationSyntax methodDeclaration)
+            {
+                returnTypeLocation = methodDeclaration.ReturnType.GetLocation();
+                identifier = methodDeclaration.Identifier.ToString();
+                returnTypeName = methodDeclaration.ReturnType.ToString();
+            }
+            else if (this.MethodDeclarationSyntax is LocalFunctionStatementSyntax localFunctionStatement)
+            {
+                returnTypeLocation = localFunctionStatement.ReturnType.GetLocation();
+                identifier = localFunctionStatement.Identifier.ToString();
+                returnTypeName = localFunctionStatement.ReturnType.ToString();
+            }
+            else if (this.MethodDeclarationSyntax is LambdaExpressionSyntax lambdaExpression)
+            {
+                returnTypeLocation = lambdaExpression.GetLocation();
+                identifier = "(lambda expression)";
+                returnTypeName = returnTypeSymbol.Name;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Expected decl for {this.Name} ({this.SourceFileName}) was of unexpected type {this.MethodDeclarationSyntax?.GetType().Name ?? "null"}");
+            }
+
 
             var typeIsKnownValid = validCommandReturnTypes.Contains(returnTypeSymbol)
                 || validTaskTypes.Contains(returnTypeSymbol);
@@ -408,9 +433,9 @@ namespace Yarn.Unity.ActionAnalyser
             if (returnTypeIsValid == false)
             {
                 yield return Diagnostic.Create(Diagnostics.YS1003CommandMethodsMustHaveAValidReturnType,
-                                               methodDeclaration.ReturnType.GetLocation(),
-                                               methodDeclaration.Identifier.ToString(),
-                                               methodDeclaration.ReturnType.ToString());
+                                               returnTypeLocation,
+                                               identifier,
+                                               returnTypeName);
             }
         }
 
