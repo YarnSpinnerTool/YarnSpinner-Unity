@@ -421,13 +421,11 @@ namespace Yarn.Unity.Tests
         /// collection.</param>
         /// <param name="message">An optional message to include if the
         /// assertion fails.</param>
-        public void Contain(TItem match, string? message = null)
+        public ObjectAssertions<TItem> Contain(TItem match, string? message = null)
         {
             var comparer = EqualityComparer<TItem>.Default;
-            Contain((TItem item) => comparer.Equals(item, match), message);
+            return Contain((TItem item) => comparer.Equals(item, match), message);
         }
-
-
 
         /// <summary>
         /// Asserts that the colection contains exactly the specified items.
