@@ -13,6 +13,8 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using Yarn.Unity.Editor;
 
+#nullable enable
+
 namespace Yarn.Unity.Tests
 {
     public class DialogueReferenceTests
@@ -24,9 +26,15 @@ namespace Yarn.Unity.Tests
             get
             {
                 string assetPath = AssetDatabase.GUIDToAssetPath(TestYarnProjectGUID);
-                Assert.NotNull(assetPath);
+                assetPath.Should().NotBeNull();
                 YarnProject yarnProject = AssetDatabase.LoadAssetAtPath<YarnProject>(assetPath);
-                Assert.NotNull(yarnProject);
+                yarnProject.Should().NotBeNull();
+
+                var importer = AssetImporter.GetAtPath(assetPath) as YarnProjectImporter;
+                importer.Should().NotBeNull();
+                importer!.ImportData.Should().NotBeNull();
+                importer.ImportData!.HasCompileErrors.Should().BeFalse();
+
                 return yarnProject;
             }
         }
