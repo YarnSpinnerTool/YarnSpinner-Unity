@@ -4,7 +4,7 @@ namespace Yarn.Unity.Editor
 {
     internal static class AssetStoreSamplesInstaller
     {
-        internal const string assetStoreURL = "https://assetstore.unity.com/packages/tools/behavior-ai/yarn-spinner-for-unity-267061";
+        internal const string assetStoreURL = "https://assetstore.unity.com/packages/slug/319418";
         internal static void InstallSamples()
         {
             if (YarnPackageImporter.IsSamplesPackageInstalled)
