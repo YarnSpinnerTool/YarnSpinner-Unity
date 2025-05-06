@@ -9,8 +9,8 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UIElements;
-using Yarn.Unity.Legacy;
 using Yarn.Unity.Attributes;
+using Yarn.Unity.Legacy;
 
 #nullable enable
 

@@ -24,9 +24,9 @@ namespace Yarn.Unity.Editor
 
             if (installationRequest.Status == StatusCode.Failure)
             {
-                // it failed, log the error
-                // but don't clean up the installation request
-                // as we need the error it has for determining the status
+                // it failed, log the error but don't clean up the installation
+                // request as we need the error it has for determining the
+                // status
                 UnityEngine.Debug.LogError(installationRequest.Error);
             }
             else
@@ -43,29 +43,29 @@ namespace Yarn.Unity.Editor
             switch (Status)
             {
                 case YarnPackageImporter.SamplesPackageStatus.Installed:
-                {
-                    // we already have it, ignoring this
-                    break;
-                }
+                    {
+                        // we already have it, ignoring this
+                        break;
+                    }
                 case YarnPackageImporter.SamplesPackageStatus.NotInstalled:
-                {
-                    // it's not installed so we need to request it
-                    installationRequest = Client.Add(samplesPackageURL);
-                    UnityEditor.EditorApplication.update += MonitorInstallation;
-                    break;
-                }
+                    {
+                        // it's not installed so we need to request it
+                        installationRequest = Client.Add(samplesPackageURL);
+                        UnityEditor.EditorApplication.update += MonitorInstallation;
+                        break;
+                    }
                 case YarnPackageImporter.SamplesPackageStatus.Installing:
-                {
-                    // its in progress so just wait, jeez
-                    break;
-                }
+                    {
+                        // its in progress so just wait, jeez
+                        break;
+                    }
                 case YarnPackageImporter.SamplesPackageStatus.FailedToInstall:
-                {
-                    // it failed but that's fine, we can just go again!
-                    installationRequest = Client.Add(samplesPackageURL);
-                    UnityEditor.EditorApplication.update += MonitorInstallation;
-                    break;
-                }
+                    {
+                        // it failed but that's fine, we can just go again!
+                        installationRequest = Client.Add(samplesPackageURL);
+                        UnityEditor.EditorApplication.update += MonitorInstallation;
+                        break;
+                    }
             }
         }
 
@@ -73,7 +73,8 @@ namespace Yarn.Unity.Editor
         {
             get
             {
-                // ok so first things first if the package is installed we can say that
+                // ok so first things first if the package is installed we can
+                // say that
                 if (YarnPackageImporter.IsSamplesPackageInstalled)
                 {
                     return YarnPackageImporter.SamplesPackageStatus.Installed;
@@ -91,7 +92,8 @@ namespace Yarn.Unity.Editor
                         return YarnPackageImporter.SamplesPackageStatus.Installing;
                     }
 
-                    // at this point we must have had a failure, so we report that
+                    // at this point we must have had a failure, so we report
+                    // that
                     if (installationRequest.Status == StatusCode.Failure)
                     {
                         return YarnPackageImporter.SamplesPackageStatus.FailedToInstall;

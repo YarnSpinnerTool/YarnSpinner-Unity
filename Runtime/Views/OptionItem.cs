@@ -25,14 +25,14 @@ namespace Yarn.Unity
 
     public sealed class OptionItem : UnityEngine.UI.Selectable, ISubmitHandler, IPointerClickHandler, IPointerEnterHandler
     {
-        [MustNotBeNull] [SerializeField] TextMeshProUGUI? text;
+        [MustNotBeNull, SerializeField] TextMeshProUGUI? text;
         [SerializeField] UnityEngine.UI.Image? selectionImage;
 
-        [Group("Appearance")] [SerializeField] InternalAppearance normal;
-        [Group("Appearance")] [SerializeField] InternalAppearance selected;
-        [Group("Appearance")] [SerializeField] InternalAppearance disabled;
+        [Group("Appearance"), SerializeField] InternalAppearance normal;
+        [Group("Appearance"), SerializeField] InternalAppearance selected;
+        [Group("Appearance"), SerializeField] InternalAppearance disabled;
 
-        [Group("Appearance")] [SerializeField] bool disabledStrikeThrough = true;
+        [Group("Appearance"), SerializeField] bool disabledStrikeThrough = true;
 
         public YarnTaskCompletionSource<DialogueOption?>? OnOptionSelected;
         public System.Threading.CancellationToken completionToken;

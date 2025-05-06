@@ -81,11 +81,14 @@ namespace Yarn.Unity.UnityLocalization
     }
 
 #if UNITY_EDITOR
-    namespace Editor {
+    namespace Editor
+    {
         using UnityEditor;
         [CustomEditor(typeof(UnityLocalisedLineProvider))]
-        public class UnityLocalisedLineProviderPlaceholderEditor : Editor {
-            public override void OnInspectorGUI() {
+        public class UnityLocalisedLineProviderPlaceholderEditor : Editor
+        {
+            public override void OnInspectorGUI()
+            {
                 EditorGUILayout.HelpBox("Unity Localization is not installed.", MessageType.Warning);
             }
         }

@@ -6,6 +6,7 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 namespace Yarn.Unity.Editor
 {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.IO;
@@ -15,7 +16,6 @@ namespace Yarn.Unity.Editor
     using UnityEditorInternal;
     using UnityEngine;
     using Yarn.Compiler;
-    using System;
 
 #if USE_UNITY_LOCALIZATION
     using UnityEditor.Localization;

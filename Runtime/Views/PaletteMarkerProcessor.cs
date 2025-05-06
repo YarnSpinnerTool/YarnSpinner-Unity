@@ -66,7 +66,7 @@ public sealed class PaletteMarkerProcessor : Yarn.Unity.ReplacementMarkupHandler
 
             return ReplacementMarkupHandler.NoDiagnostics;
         }
-        
+
         var diagnostic = new LineParser.MarkupDiagnostic($"was unable to find a matching sprite for {marker.Name}");
         return new List<LineParser.MarkupDiagnostic>() { diagnostic };
     }

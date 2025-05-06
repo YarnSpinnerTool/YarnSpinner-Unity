@@ -160,7 +160,7 @@ namespace Yarn.Unity
                     return true;
                 }
             }
-            
+
             // we now check if we have one in the format markers
             foreach (var item in CustomMarkers)
             {

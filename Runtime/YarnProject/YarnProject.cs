@@ -3,9 +3,9 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using UnityEngine;
-using System.Diagnostics.CodeAnalysis;
 
 #nullable enable
 
@@ -14,26 +14,21 @@ namespace Yarn.Unity
     [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/importing-yarn-files/yarn-projects")]
     public sealed class YarnProject : ScriptableObject
     {
-        [SerializeField]
         [HideInInspector]
         public byte[]? compiledYarnProgram;
 
-        [SerializeField]
         [HideInInspector]
         [NotNull]
-        #pragma warning disable CS8618
+#pragma warning disable CS8618
         public Localization baseLocalization;
-        #pragma warning restore CS8618
+#pragma warning restore CS8618
 
         [SerializeField]
         [HideInInspector]
         public SerializableDictionary<string, Localization> localizations = new SerializableDictionary<string, Localization>();
 
-        [SerializeField]
-        // [HideInInspector]
         public LineMetadata? lineMetadata;
 
-        [SerializeField]
         [HideInInspector]
         public LocalizationType localizationType;
 

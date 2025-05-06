@@ -773,18 +773,17 @@ namespace Yarn.Unity.Editor
         private const int logoMaxWidth = 240; // px, because links line is about 350px wide
 
         private static GUIStyle? _urlStyle = null;
-        private static GUIStyle UrlStyle 
+        private static GUIStyle UrlStyle
         {
-            get 
+            get
             {
                 if (_urlStyle == null)
                 {
                     _urlStyle = new GUIStyle(GUI.skin.label);
                     _urlStyle.richText = true;
-                    
                 }
                 return _urlStyle;
-            } 
+            }
         }
         private static Texture2D? _yarnSpinnerLogo = null;
         private static Texture2D YarnSpinnerLogo
@@ -809,7 +808,7 @@ namespace Yarn.Unity.Editor
             }
             void InstallSamples()
             {
-                try 
+                try
                 {
                     // if we have the samples already installed we can just use them
                     // we don't really care HOW they got them at this point

@@ -25,7 +25,7 @@ namespace Yarn.Unity
 {
     public class LinePresenterButtonHandler : ActionMarkupHandler
     {
-        [MustNotBeNull] [SerializeField] Button? continueButton;
+        [MustNotBeNull, SerializeField] Button? continueButton;
 
         [MustNotBeNullWhen(nameof(continueButton), "A " + nameof(DialogueRunner) + " must be provided for the continue button to work.")]
         [SerializeField] DialogueRunner? dialogueRunner;

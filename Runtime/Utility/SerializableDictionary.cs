@@ -269,12 +269,11 @@ namespace Yarn.Unity
 namespace Yarn.Unity.Editor
 {
 
-    using System.Collections;
-    using System.Collections.Generic;
-    using UnityEngine;
-    using UnityEditor;
-    using System.Reflection;
     using System;
+    using System.Collections.Generic;
+    using System.Reflection;
+    using UnityEditor;
+    using UnityEngine;
 
     [CustomPropertyDrawer(typeof(SerializableDictionaryBase), true)]
     public class SerializableDictionaryPropertyDrawer : PropertyDrawer

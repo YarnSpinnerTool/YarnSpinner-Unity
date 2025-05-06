@@ -215,7 +215,7 @@ namespace Yarn.Unity
                 optionView.OnOptionSelected = selectedOptionCompletionSource;
                 optionView.completionToken = completionCancellationSource.Token;
             }
-            
+
             // There is a bug that can happen where in-between option items being configured one can be selected
             // and because the items are still being configured the others don't get the deselect message
             // which means visually two items are selected.
