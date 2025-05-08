@@ -11,6 +11,8 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Yarn.Compiler.Upgrader;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     public class YarnSpinnerEditorWindow : EditorWindow
@@ -34,10 +36,10 @@ namespace Yarn.Unity
         private const string PatreonURL = "https://www.patreon.com/bePatron?u=11132340";
 
         // The request object, used to fetch supportersText
-        static UnityWebRequest supportersRequest;
+        static UnityWebRequest? supportersRequest;
 
         // The dynamically fetched text to show in the About page.
-        static string supportersText = null;
+        static string? supportersText = null;
 
         // Unity requires all directory separators to be forward slashes, on all
         // platforms.
@@ -146,9 +148,9 @@ namespace Yarn.Unity
 
         SelectedMode selectedMode = 0;
 
-        private string YarnSpinnerCoreVersion;
-        private string YarnSpinnerCompilerVersion;
-        private string YarnSpinnerUnityVersion;
+        private string? YarnSpinnerCoreVersion;
+        private string? YarnSpinnerCompilerVersion;
+        private string? YarnSpinnerUnityVersion;
 
         void OnGUI()
         {
@@ -367,7 +369,7 @@ namespace Yarn.Unity
     internal class Icons
     {
 
-        private static Texture GetTexture(string textureName)
+        private static Texture? GetTexture(string textureName)
         {
             var guids = AssetDatabase.FindAssets(string.Format("{0} t:texture", textureName));
             if (guids.Length == 0)
@@ -377,8 +379,8 @@ namespace Yarn.Unity
             return AssetDatabase.LoadAssetAtPath<Texture>(path);
         }
 
-        static Texture _successIcon;
-        public static Texture SuccessIcon
+        static Texture? _successIcon;
+        public static Texture? SuccessIcon
         {
             get
             {
@@ -390,8 +392,8 @@ namespace Yarn.Unity
             }
         }
 
-        static Texture _failedIcon;
-        public static Texture FailedIcon
+        static Texture? _failedIcon;
+        public static Texture? FailedIcon
         {
             get
             {
@@ -403,8 +405,8 @@ namespace Yarn.Unity
             }
         }
 
-        static Texture _notTestedIcon;
-        public static Texture NotTestedIcon
+        static Texture? _notTestedIcon;
+        public static Texture? NotTestedIcon
         {
             get
             {
@@ -416,8 +418,8 @@ namespace Yarn.Unity
             }
         }
 
-        static Texture _windowIcon;
-        public static Texture WindowIcon
+        static Texture? _windowIcon;
+        public static Texture? WindowIcon
         {
             get
             {
@@ -429,8 +431,8 @@ namespace Yarn.Unity
             }
         }
 
-        static Texture _logo;
-        public static Texture Logo
+        static Texture? _logo;
+        public static Texture? Logo
         {
             get
             {

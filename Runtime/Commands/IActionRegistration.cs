@@ -7,6 +7,8 @@ using System.Collections;
 using System.Reflection;
 using UnityEngine;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     /// <summary>

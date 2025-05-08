@@ -4,6 +4,7 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
 #if USE_TMP
@@ -11,6 +12,8 @@ using TMPro;
 #else
 using TMP_Text = Yarn.Unity.TMPShim;
 #endif
+
+#nullable enable
 
 namespace Yarn.Unity
 {
@@ -51,7 +54,7 @@ namespace Yarn.Unity
         /// of all variables in-game. Optional.
         /// </summary>
         [SerializeField, Tooltip("(optional) output list of variables and values to Text UI in-game")]
-        internal TMP_Text debugTextView = null;
+        internal TMP_Text? debugTextView = null;
 
         internal void Update()
         {
@@ -124,7 +127,7 @@ namespace Yarn.Unity
             NotifyVariableChanged(variableName, boolValue);
         }
 
-        private static bool TryGetAsType<T>(Dictionary<string, object> dictionary, string key, out T result)
+        private static bool TryGetAsType<T>(Dictionary<string, object> dictionary, string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out T result)
         {
 
             if (dictionary.TryGetValue(key, out var objectResult) == true
@@ -134,23 +137,13 @@ namespace Yarn.Unity
                 return true;
             }
 
-            result = default;
+            result = default!;
             return false;
         }
 
-        /// <summary>
-        /// Retrieves a <see cref="Value"/> by name.
-        /// </summary>
-        /// <param name="variableName">The name of the variable to retrieve the
-        /// value of. Don't forget to include the "$" at the beginning!</param>
-        /// <returns>The <see cref="Value"/>. If a variable by the name of
-        /// <paramref name="variableName"/> is not present, returns a value
-        /// representing `null`.</returns>
-        /// <exception cref="System.ArgumentException">Thrown when variableName
-        /// is not a valid variable name.</exception>
-        public override bool TryGetValue<T>(string variableName, out T result)
+        /// <inheritdoc/>
+        public override bool TryGetValue<T>(string variableName, [NotNullWhen(true)] out T result)
         {
-
             // Ensure that the variable name is valid.
             ValidateVariableName(variableName);
 
@@ -169,6 +162,10 @@ namespace Yarn.Unity
                     }
                     else
                     {
+                        if (this.Program is null)
+                        {
+                            throw new System.InvalidOperationException($"Can't get initial value for variable {variableName}, because {nameof(Program)} is not set");
+                        }
                         return this.Program.TryGetInitialValue<T>(variableName, out result);
                     }
                 case VariableKind.Smart:
@@ -178,11 +175,17 @@ namespace Yarn.Unity
 
                     // Update the VM's settings, since ours might have changed
                     // since we created the VM.
+
+                    if (this.SmartVariableEvaluator is null)
+                    {
+                        throw new System.InvalidOperationException($"Can't get value for smart variable {variableName}, because {nameof(SmartVariableEvaluator)} is not set");
+                    }
+
                     return this.SmartVariableEvaluator.TryGetSmartVariable(variableName, out result);
                 case VariableKind.Unknown:
                 default:
                     // The variable is not known.
-                    result = default;
+                    result = default!;
                     return false;
             }
         }

@@ -4,14 +4,16 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 using System.Linq;
 
+#nullable enable
+
 namespace Yarn.Unity.Editor
 {
     [System.Serializable]
     public class FunctionInfo
     {
-        public string Name;
-        public string ReturnType;
-        public string[] Parameters;
+        public string Name = "unknown";
+        public string ReturnType = "unknown";
+        public string[] Parameters = System.Array.Empty<string>();
 
         public static FunctionInfo CreateFunctionInfoFromMethodGroup(System.Reflection.MethodInfo method)
         {

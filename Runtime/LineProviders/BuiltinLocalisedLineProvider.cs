@@ -9,6 +9,8 @@ using System.Threading;
 using UnityEngine;
 using Yarn.Unity.Attributes;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     public sealed class BuiltinLocalisedLineProvider : LineProviderBehaviour, ILineProvider

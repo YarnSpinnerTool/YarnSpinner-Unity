@@ -9,6 +9,8 @@ using UnityEngine;
 using Yarn.Markup;
 using Yarn.Unity;
 
+#nullable enable
+
 /// <summary>
 /// An attribute marker processor that uses a <see cref="MarkupPalette"/> to
 /// apply TextMeshPro styling tags to a line.
@@ -24,13 +26,13 @@ public sealed class PaletteMarkerProcessor : Yarn.Unity.ReplacementMarkupHandler
     /// The <see cref="MarkupPalette"/> to use when applying styles.
     /// </summary>
     [Tooltip("The MarkupPalette to use when applying styles.")]
-    public MarkupPalette palette;
+    public MarkupPalette? palette;
 
     /// <summary>
     /// The line provider to register this markup processor with.
     /// </summary>
     [Tooltip("The LineProviderBehaviour to register this markup processor with.")]
-    public LineProviderBehaviour lineProvider;
+    public LineProviderBehaviour? lineProvider;
 
     /// <inheritdoc/>
     /// <summary>
@@ -45,6 +47,13 @@ public sealed class PaletteMarkerProcessor : Yarn.Unity.ReplacementMarkupHandler
     /// <returns>A list of markup diagnostics if there are any errors, otherwise an empty list.</returns>
     public override List<LineParser.MarkupDiagnostic> ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, string localeCode)
     {
+        if (palette == null)
+        {
+            return new List<LineParser.MarkupDiagnostic>() {
+                new LineParser.MarkupDiagnostic($"can't apply palette for marker {marker.Name}, because palette was not set")
+            };
+        }
+
         if (palette.PaletteForMarker(marker.Name, out var format))
         {
             childBuilder.Insert(0, format.Start);

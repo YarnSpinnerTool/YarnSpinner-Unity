@@ -16,7 +16,7 @@ namespace Yarn.Unity.Tests
 {
     public class DialogueRunnerMockUI : Yarn.Unity.DialoguePresenterBase
     {
-        private static DialogueRunnerMockUI instance;
+        private static DialogueRunnerMockUI? instance;
         private bool readyToAdvance;
 
         public static DialogueRunnerMockUI? GetInstance(string name)

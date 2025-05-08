@@ -14,11 +14,6 @@ using TMPro;
 using TMP_Text = Yarn.Unity.TMPShim;
 #endif
 
-/*
-Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
-*/
-
-
 #nullable enable
 
 namespace Yarn.Unity

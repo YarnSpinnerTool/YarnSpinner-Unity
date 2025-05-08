@@ -15,6 +15,8 @@ using TextMeshProUGUI = Yarn.Unity.TMPShim;
 
 using System.Threading;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     /// <summary>
@@ -99,7 +101,7 @@ namespace Yarn.Unity
         /// to 1.</param>
         /// <param name="stopToken">A <see cref="CoroutineInterruptToken"/> that
         /// can be used to interrupt the coroutine.</param>
-        public static IEnumerator FadeAlpha(CanvasGroup canvasGroup, float from, float to, float fadeTime, CoroutineInterruptToken stopToken = null)
+        public static IEnumerator FadeAlpha(CanvasGroup canvasGroup, float from, float to, float fadeTime, CoroutineInterruptToken? stopToken = null)
         {
             stopToken?.Start();
 
@@ -194,7 +196,7 @@ namespace Yarn.Unity
         /// be called for each character that was revealed.</param>
         /// <param name="stopToken">A <see cref="CoroutineInterruptToken"/> that
         /// can be used to interrupt the coroutine.</param>
-        public static IEnumerator Typewriter(TextMeshProUGUI text, float lettersPerSecond, Action onCharacterTyped, CoroutineInterruptToken stopToken = null)
+        public static IEnumerator Typewriter(TextMeshProUGUI text, float lettersPerSecond, Action onCharacterTyped, CoroutineInterruptToken? stopToken = null)
         {
             yield return PausableTypewriter(
                 text,
@@ -216,7 +218,7 @@ namespace Yarn.Unity
         /// </remarks>
         /// <param name="duration">The length of the pause</param>
         /// <param name="stopToken">An interrupt token for this wait</param>
-        private static IEnumerator InterruptableWait(float duration, CoroutineInterruptToken stopToken = null)
+        private static IEnumerator InterruptableWait(float duration, CoroutineInterruptToken? stopToken = null)
         {
             float accumulator = 0;
             while (accumulator < duration)
@@ -267,7 +269,7 @@ namespace Yarn.Unity
         /// cref="LineView.GetPauseDurationsInsideLine"/></param>
         /// <param name="stopToken">A <see cref="CoroutineInterruptToken"/> that
         /// can be used to interrupt the coroutine.</param>
-        public static IEnumerator PausableTypewriter(TextMeshProUGUI text, float lettersPerSecond, Action onCharacterTyped, Action onPauseStarted, Action onPauseEnded, Stack<(int position, float duration)> pausePositions, CoroutineInterruptToken stopToken = null)
+        public static IEnumerator PausableTypewriter(TextMeshProUGUI text, float lettersPerSecond, Action? onCharacterTyped, Action? onPauseStarted, Action? onPauseEnded, Stack<(int position, float duration)>? pausePositions, CoroutineInterruptToken? stopToken = null)
         {
             stopToken?.Start();
 

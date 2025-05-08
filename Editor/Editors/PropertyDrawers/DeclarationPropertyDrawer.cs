@@ -6,6 +6,8 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
+#nullable enable
+
 namespace Yarn.Unity.Editor
 {
     [CustomPropertyDrawer(typeof(YarnProjectImporter.SerializedDeclaration))]
@@ -22,7 +24,7 @@ namespace Yarn.Unity.Editor
         /// for.</param>
         /// <param name="readOnly">Whether the property is read-only or
         /// not.</param>
-        private void DrawPropertyField(Rect position, SerializedProperty property, bool readOnly, string label = null)
+        private void DrawPropertyField(Rect position, SerializedProperty property, bool readOnly, string? label = null)
         {
             if (label == null)
             {
@@ -147,7 +149,7 @@ namespace Yarn.Unity.Editor
                     }
                 }
 
-                SerializedProperty defaultValueProperty;
+                SerializedProperty? defaultValueProperty;
 
                 var type = YarnProjectImporter.SerializedDeclaration.BuiltInTypesList.FirstOrDefault(t => t.Name == typeProperty.stringValue);
 

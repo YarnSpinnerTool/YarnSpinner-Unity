@@ -11,22 +11,24 @@ using TMPro;
 using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
+#nullable enable
+
 namespace Yarn.Unity.Legacy
 {
     [Obsolete]
     public class OptionView : UnityEngine.UI.Selectable, ISubmitHandler, IPointerClickHandler, IPointerEnterHandler
     {
-        [SerializeField] TextMeshProUGUI text;
+        [SerializeField] TextMeshProUGUI? text;
         [SerializeField] bool showCharacterName = false;
 
-        public Action<DialogueOption> OnOptionSelected;
-        public MarkupPalette palette;
+        public Action<DialogueOption>? OnOptionSelected;
+        public MarkupPalette? palette;
 
-        DialogueOption _option;
+        DialogueOption? _option;
 
         bool hasSubmittedOptionSelection = false;
 
-        public DialogueOption Option
+        public DialogueOption? Option
         {
             get => _option;
 
@@ -35,6 +37,15 @@ namespace Yarn.Unity.Legacy
                 _option = value;
 
                 hasSubmittedOptionSelection = false;
+
+                if (value == null)
+                {
+                    if (text != null)
+                    {
+                        text.text = "";
+                    }
+                    return;
+                }
 
                 // When we're given an Option, use its text and update our
                 // interactibility.
@@ -48,13 +59,16 @@ namespace Yarn.Unity.Legacy
                     line = value.Line.TextWithoutCharacterName;
                 }
 
-                if (palette != null)
+                if (text != null)
                 {
-                    text.text = LineView.PaletteMarkedUpText(line, palette, false);
-                }
-                else
-                {
-                    text.text = line.Text;
+                    if (palette != null)
+                    {
+                        text.text = LineView.PaletteMarkedUpText(line, palette, false);
+                    }
+                    else
+                    {
+                        text.text = line.Text;
+                    }
                 }
 
                 interactable = value.IsAvailable;
@@ -78,6 +92,11 @@ namespace Yarn.Unity.Legacy
                 return;
             }
 
+            if (Option == null)
+            {
+                return;
+            }
+
             // We only want to invoke this once, because it's an error to submit
             // an option when the Dialogue Runner isn't expecting it. To prevent
             // this, we'll only invoke this if the flag hasn't been cleared
@@ -85,7 +104,7 @@ namespace Yarn.Unity.Legacy
             if (hasSubmittedOptionSelection == false)
             {
                 hasSubmittedOptionSelection = true;
-                OnOptionSelected.Invoke(Option);
+                OnOptionSelected?.Invoke(Option);
             }
         }
 

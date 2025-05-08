@@ -15,6 +15,8 @@ using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 #endif
 
+#nullable enable
+
 namespace Yarn.Unity.Editor
 {
     /// <summary>
@@ -110,13 +112,25 @@ namespace Yarn.Unity.Editor
 
             var importData = yarnProjectImporter.ImportData;
 
+            if (importData == null)
+            {
+                Debug.LogError($"Can't update localization CSVs for Yarn Project \"{yarnProjectImporter.name}\" because it failed to compile.");
+                return;
+            }
+
             var job = yarnProjectImporter.GetCompilationJob();
             job.CompilationType = Compiler.CompilationJob.Type.StringsOnly;
             var result = Compiler.Compiler.Compile(job);
 
             var baseLocalizationStrings = yarnProjectImporter.GenerateStringsTable(result);
 
-            var localizations = yarnProjectImporter.ImportData.localizations;
+            if (baseLocalizationStrings == null)
+            {
+                Debug.LogError($"Can't update localization CSVs for Yarn Project \"{yarnProjectImporter.name}\" because it failed to compile.");
+                return;
+            }
+
+            var localizations = importData.localizations;
 
             var modifiedFiles = new List<TextAsset>();
 
@@ -162,37 +176,6 @@ namespace Yarn.Unity.Editor
             }
         }
 
-        /// <summary>
-        /// Returns an <see cref="IEnumerable{StringTableEntry}"/> containing
-        /// the string table entries for the base language for the specified
-        /// Yarn script.
-        /// </summary>
-        /// <param name="serializedObject">A serialized object that represents a
-        /// Yarn script asset.</param>
-        /// <returns>The string table entries.</returns>
-        private static IEnumerable<StringTableEntry> GetBaseLanguageStringsForSelectedObject(SerializedObject serializedObject)
-        {
-            var baseLanguageProperty = serializedObject.FindProperty("baseLanguage");
-
-            // Get the TextAsset that contains the base string table CSV
-            TextAsset textAsset = baseLanguageProperty.objectReferenceValue as TextAsset;
-
-            if (textAsset == null)
-            {
-                throw new System.NullReferenceException(
-                    $"The base language table asset for {serializedObject.targetObject.name} is either " +
-                    "null or not a TextAsset. Did the script fail to compile?");
-
-            }
-
-            var baseLanguageTableText = textAsset.text;
-
-            // Parse this CSV into StringTableEntry structs
-            return StringTableEntry.ParseFromCSV(baseLanguageTableText)
-                                .OrderBy(entry => entry.File)
-                                .ThenBy(entry => int.Parse(entry.LineNumber));
-        }
-
         internal static void UpdateAssetAddresses(YarnProjectImporter importer)
         {
 #if USE_ADDRESSABLES
@@ -201,6 +184,11 @@ namespace Yarn.Unity.Editor
             var result = Compiler.Compiler.Compile(job);
 
             var lineIDs = importer.GenerateStringsTable(result).Select(s => s.ID);
+
+            if (importer.ImportData == null)
+            {
+                throw new System.InvalidOperationException($"Can't update asset addresses: importer has no {nameof(importer.ImportData)}");
+            }
 
             // Get a map of language IDs to (lineID, asset path) pairs
             var languageToAssets = importer
@@ -403,7 +391,7 @@ namespace Yarn.Unity.Editor
             return true;
         }
 
-        private static (List<string>, List<string>) ExtantLineTags(YarnProjectImporter importer)
+        private static (List<string> AllExistingTags, List<string> ProjectImplicitTags) ExtantLineTags(YarnProjectImporter importer)
         {
             // First, gather all existing line tags across ALL yarn projects, so
             // that we don't accidentally overwrite an existing one. Do this by
@@ -424,9 +412,9 @@ namespace Yarn.Unity.Editor
                 .Where(i => i.ImportData != null)
                 // get the project out, and also flag if it is the project for
                 // THIS importer
-                .Select(i => (i.GetProject(), i == importer))
+                .Select(i => (Project: i.GetProject()!, IsThisImporter: i == importer))
                 // remove any nulls just in case any are found
-                .Where(p => p.Item1 != null);
+                .Where(p => p.Project != null);
 
 #if YARNSPINNER_DEBUG
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -438,9 +426,9 @@ namespace Yarn.Unity.Editor
             // Compile all of these, and get whatever existing string tags they
             // had. Do each in isolation so that we can continue even if a
             // project contains a parse error.
-            foreach (var tuple in allYarnProjects)
+            foreach (var (Project, IsThisImporter) in allYarnProjects)
             {
-                var project = tuple.Item1;
+                var project = Project;
                 var compilationJob = Yarn.Compiler.CompilationJob.CreateFromFiles(project.SourceFiles);
                 compilationJob.CompilationType = Yarn.Compiler.CompilationJob.Type.StringsOnly;
 
@@ -454,7 +442,7 @@ namespace Yarn.Unity.Editor
                 allExistingTags.AddRange(result.StringTable.Where(i => i.Value.isImplicitTag == false).Select(i => i.Key));
 
                 // we add the implicit lines IDs only for this project
-                if (tuple.Item2)
+                if (IsThisImporter)
                 {
                     projectImplicitTags.AddRange(result.StringTable.Where(i => i.Value.isImplicitTag == true).Select(i => i.Key));
                 }
@@ -469,20 +457,25 @@ namespace Yarn.Unity.Editor
 
         internal static void AddLineTagsToFilesInYarnProject(YarnProjectImporter importer)
         {
-            var extantTags = YarnProjectUtility.ExtantLineTags(importer);
-            var allExistingTags = extantTags.Item1;
+            var (AllExistingTags, ProjectImplicitTags) = YarnProjectUtility.ExtantLineTags(importer);
 
 #if USE_UNITY_LOCALIZATION
             // if we are using Unity localisation we need to first remove the
             // implicit tags for this project from the strings table
             if (importer.UseUnityLocalisationSystem && importer.UnityLocalisationStringTableCollection != null)
             {
-                foreach (var implicitTag in extantTags.Item2)
+                foreach (var implicitTag in ProjectImplicitTags)
                 {
                     importer.UnityLocalisationStringTableCollection.RemoveEntry(implicitTag);
                 }
             }
 #endif
+
+            if (importer.ImportData == null)
+            {
+                Debug.LogError($"Can't add line tags to {importer.assetPath}, because it failed to compile.");
+                return;
+            }
 
             var modifiedFiles = new List<string>();
             try
@@ -496,7 +489,7 @@ namespace Yarn.Unity.Editor
 
                     // Produce a version of this file that contains line tags
                     // added where they're needed.
-                    var tagged = Yarn.Compiler.Utility.TagLines(contents, allExistingTags);
+                    var tagged = Yarn.Compiler.Utility.TagLines(contents, AllExistingTags ?? new List<string>());
                     var taggedVersion = tagged.Item1;
 
                     // if the file has an error it returns null we want to bail
@@ -515,7 +508,7 @@ namespace Yarn.Unity.Editor
                         File.WriteAllText(assetPath, taggedVersion, System.Text.Encoding.UTF8);
                         AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.Default);
 
-                        allExistingTags = tagged.Item2 as List<string>;
+                        AllExistingTags = tagged.Item2 as List<string>;
                     }
                 }
             }

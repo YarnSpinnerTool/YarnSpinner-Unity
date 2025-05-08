@@ -8,6 +8,8 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
+#nullable enable
+
 namespace Yarn.Unity.Editor
 {
     /// <summary>
@@ -300,11 +302,11 @@ namespace Yarn.Unity.Editor
         /// <param name="filterQuery">Asset query (see <see cref="AssetDatabase.FindAssets(string)"/> documentation for formatting).</param>
         /// <param name="converter">Custom type caster.</param>
         /// <returns>Enumerable of all assets of a given type.</returns>
-        public static IEnumerable<T> GetAllAssetsOf<T>(string filterQuery, System.Func<AssetImporter, T> converter = null) where T : class
+        public static IEnumerable<T> GetAllAssetsOf<T>(string filterQuery, System.Func<AssetImporter, T>? converter = null) where T : class
             => AssetDatabase.FindAssets(filterQuery)
                 .Select(AssetDatabase.GUIDToAssetPath)
                 .Select(AssetImporter.GetAtPath)
                 .Select(importer => converter?.Invoke(importer) ?? importer as T)
-                .Where(source => source != null);
+                .Where(source => source != null)!;
     }
 }

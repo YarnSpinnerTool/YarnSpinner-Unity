@@ -11,6 +11,8 @@ namespace Yarn.Unity.Editor
     using UnityEngine;
 #endif
 
+#nullable enable
+
     /// <summary>
     /// Basic data class of unity settings that impact Yarn Spinner.
     /// </summary>
@@ -28,7 +30,7 @@ namespace Yarn.Unity.Editor
         public bool enableDirectLinkToVSCode = false;
 
         // need to make it os the output can be passed in also so it can log
-        internal static YarnSpinnerProjectSettings GetOrCreateSettings(string path = null, Yarn.Unity.ILogger iLogger = null)
+        internal static YarnSpinnerProjectSettings GetOrCreateSettings(string? path = null, Yarn.Unity.ILogger? iLogger = null)
         {
             var settingsPath = YarnSpinnerProjectSettingsPath;
             if (path != null)
@@ -65,7 +67,7 @@ namespace Yarn.Unity.Editor
             return settings;
         }
 
-        private static YarnSpinnerProjectSettings FromJson(string jsonString, Yarn.Unity.ILogger iLogger = null)
+        private static YarnSpinnerProjectSettings FromJson(string jsonString, Yarn.Unity.ILogger? iLogger = null)
         {
             var logger = ValidLogger(iLogger);
 
@@ -102,7 +104,7 @@ namespace Yarn.Unity.Editor
             return settings;
         }
 
-        internal void WriteSettings(string path = null, Yarn.Unity.ILogger iLogger = null)
+        internal void WriteSettings(string? path = null, Yarn.Unity.ILogger? iLogger = null)
         {
             var logger = ValidLogger(iLogger);
 
@@ -139,7 +141,7 @@ namespace Yarn.Unity.Editor
 
         // if the provided logger is valid just return it
         // otherwise return the default logger
-        private static Yarn.Unity.ILogger ValidLogger(Yarn.Unity.ILogger iLogger)
+        private static Yarn.Unity.ILogger ValidLogger(Yarn.Unity.ILogger? iLogger)
         {
             var logger = iLogger;
             if (logger == null)

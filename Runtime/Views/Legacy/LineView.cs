@@ -13,6 +13,8 @@ using TMPro;
 using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
+#nullable enable
+
 namespace Yarn.Unity.Legacy
 {
     /// <summary>
@@ -32,7 +34,7 @@ namespace Yarn.Unity.Legacy
         /// and dismissal.
         /// </remarks>
         /// <seealso cref="useFadeEffect"/>
-        public CanvasGroup canvasGroup;
+        public CanvasGroup? canvasGroup;
 
         /// <summary>
         /// Controls whether the line view should fade in when lines appear, and
@@ -73,7 +75,7 @@ namespace Yarn.Unity.Legacy
         /// The <see cref="TextMeshProUGUI"/> object that displays the text of
         /// dialogue lines.
         /// </summary>
-        public TextMeshProUGUI lineText = null;
+        public TextMeshProUGUI? lineText = null;
 
         /// <summary>
         /// Controls whether the <see cref="lineText"/> object will show the
@@ -99,7 +101,7 @@ namespace Yarn.Unity.Legacy
         /// If the <see cref="LineView"/> receives a line that does not contain
         /// a character name, this object will be left blank.
         /// </remarks>
-        public TextMeshProUGUI characterNameText = null;
+        public TextMeshProUGUI? characterNameText = null;
 
         /// <summary>
         /// The gameobject that holds the <see cref="characterNameText"/>
@@ -110,7 +112,7 @@ namespace Yarn.Unity.Legacy
         /// within an entirely different game object. Most of the time this will
         /// just be the same gameobject as <see cref="characterNameText"/>.
         /// </remarks>
-        public GameObject characterNameContainer = null;
+        public GameObject? characterNameContainer = null;
 
         /// <summary>
         /// Controls whether the text of <see cref="lineText"/> should be
@@ -143,7 +145,7 @@ namespace Yarn.Unity.Legacy
         /// <see langword="true"/>.
         /// </remarks>
         /// <seealso cref="useTypewriterEffect"/>
-        public UnityEngine.Events.UnityEvent onCharacterTyped;
+        public UnityEngine.Events.UnityEvent? onCharacterTyped;
 
         /// <summary>
         /// A Unity Event that is called when a pause inside of the typewriter
@@ -154,7 +156,7 @@ namespace Yarn.Unity.Legacy
         /// <see langword="true"/>.
         /// </remarks>
         /// <seealso cref="useTypewriterEffect"/>
-        public UnityEngine.Events.UnityEvent onPauseStarted;
+        public UnityEngine.Events.UnityEvent? onPauseStarted;
         /// <summary>
         /// A Unity Event that is called when a pause inside of the typewriter
         /// effect finishes and the typewriter has started once again.
@@ -164,7 +166,7 @@ namespace Yarn.Unity.Legacy
         /// <see langword="true"/>.
         /// </remarks>
         /// <seealso cref="useTypewriterEffect"/>
-        public UnityEngine.Events.UnityEvent onPauseEnded;
+        public UnityEngine.Events.UnityEvent? onPauseEnded;
 
         /// <summary>
         /// The number of characters per second that should appear during a
@@ -188,7 +190,7 @@ namespace Yarn.Unity.Legacy
         /// UI needs, you can provide any object you need.</para>
         /// </remarks>
         /// <seealso cref="autoAdvance"/>
-        public GameObject continueButton = null;
+        public GameObject? continueButton = null;
 
         /// <summary>
         /// The amount of time to wait after any line
@@ -220,13 +222,13 @@ namespace Yarn.Unity.Legacy
         /// </remarks>
         public bool autoAdvance = false;
 
-        public MarkupPalette palette;
+        public MarkupPalette? palette;
 
         /// <summary>
         /// The current <see cref="LocalizedLine"/> that this line view is
         /// displaying.
         /// </summary>
-        LocalizedLine currentLine = null;
+        LocalizedLine? currentLine = null;
 
         /// <summary>
         /// A stop token that is used to interrupt the current animation.
@@ -235,8 +237,11 @@ namespace Yarn.Unity.Legacy
 
         private void Awake()
         {
-            canvasGroup.alpha = 0;
-            canvasGroup.blocksRaycasts = false;
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 0;
+                canvasGroup.blocksRaycasts = false;
+            }
         }
 
         private void Reset()
@@ -252,29 +257,30 @@ namespace Yarn.Unity.Legacy
             StartCoroutine(DismissLineInternal(onDismissalComplete));
         }
 
-        private IEnumerator DismissLineInternal(Action onDismissalComplete)
+        private IEnumerator DismissLineInternal(Action? onDismissalComplete)
         {
             // disabling interaction temporarily while dismissing the line we
             // don't want people to interrupt a dismissal
-            var interactable = canvasGroup.interactable;
-            canvasGroup.interactable = false;
 
-            // If we're using a fade effect, run it, and wait for it to finish.
-            if (useFadeEffect)
+            if (canvasGroup != null)
             {
-                yield return StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeOutTime, currentStopToken));
-                currentStopToken.Complete();
+                var interactable = canvasGroup.interactable;
+                canvasGroup.interactable = false;
+
+                // If we're using a fade effect, run it, and wait for it to finish.
+                if (useFadeEffect)
+                {
+                    yield return StartCoroutine(Effects.FadeAlpha(canvasGroup, 1, 0, fadeOutTime, currentStopToken));
+                    currentStopToken.Complete();
+                }
+
+                canvasGroup.alpha = 0;
+                canvasGroup.blocksRaycasts = false;
+                // turning interaction back on, if it needs it
+                canvasGroup.interactable = interactable;
             }
 
-            canvasGroup.alpha = 0;
-            canvasGroup.blocksRaycasts = false;
-            // turning interaction back on, if it needs it
-            canvasGroup.interactable = interactable;
-
-            if (onDismissalComplete != null)
-            {
-                onDismissalComplete();
-            }
+            onDismissalComplete?.Invoke();
         }
 
         /// <inheritdoc/>
@@ -295,39 +301,50 @@ namespace Yarn.Unity.Legacy
 
             // for now we are going to just immediately show everything
             // later we will make it fade in
-            lineText.gameObject.SetActive(true);
-            canvasGroup.gameObject.SetActive(true);
 
-            int length;
-
-            if (characterNameText == null)
+            if (canvasGroup != null)
             {
-                if (showCharacterNameInLineView)
+                canvasGroup.gameObject.SetActive(true);
+            }
+
+            if (lineText != null)
+            {
+                lineText.gameObject.SetActive(true);
+
+                int length;
+
+                if (characterNameText == null)
                 {
-                    lineText.text = dialogueLine.Text.Text;
-                    length = dialogueLine.Text.Text.Length;
+                    if (showCharacterNameInLineView)
+                    {
+                        lineText.text = dialogueLine.Text.Text;
+                        length = dialogueLine.Text.Text.Length;
+                    }
+                    else
+                    {
+                        lineText.text = dialogueLine.TextWithoutCharacterName.Text;
+                        length = dialogueLine.TextWithoutCharacterName.Text.Length;
+                    }
                 }
                 else
                 {
+                    characterNameText.text = dialogueLine.CharacterName;
                     lineText.text = dialogueLine.TextWithoutCharacterName.Text;
                     length = dialogueLine.TextWithoutCharacterName.Text.Length;
                 }
+
+                // Show the entire line's text immediately.
+                lineText.maxVisibleCharacters = length;
             }
-            else
+
+            if (canvasGroup != null)
             {
-                characterNameText.text = dialogueLine.CharacterName;
-                lineText.text = dialogueLine.TextWithoutCharacterName.Text;
-                length = dialogueLine.TextWithoutCharacterName.Text.Length;
+                // Make the canvas group fully visible immediately, too.
+                canvasGroup.alpha = 1;
+
+                canvasGroup.interactable = true;
+                canvasGroup.blocksRaycasts = true;
             }
-
-            // Show the entire line's text immediately.
-            lineText.maxVisibleCharacters = length;
-
-            // Make the canvas group fully visible immediately, too.
-            canvasGroup.alpha = 1;
-
-            canvasGroup.interactable = true;
-            canvasGroup.blocksRaycasts = true;
 
             onInterruptLineFinished();
         }
@@ -347,8 +364,15 @@ namespace Yarn.Unity.Legacy
         {
             IEnumerator PresentLine()
             {
-                lineText.gameObject.SetActive(true);
-                canvasGroup.gameObject.SetActive(true);
+                if (lineText != null)
+                {
+                    lineText.gameObject.SetActive(true);
+                }
+
+                if (canvasGroup != null)
+                {
+                    canvasGroup.gameObject.SetActive(true);
+                }
 
                 // Hide the continue button until presentation is complete (if
                 // we have one).
@@ -387,32 +411,36 @@ namespace Yarn.Unity.Legacy
 
                 // if we have a palette file need to add those colours into the
                 // text
-                if (palette != null)
+                if (lineText != null)
                 {
-                    lineText.text = LineView.PaletteMarkedUpText(text, palette);
-                }
-                else
-                {
-                    lineText.text = LineView.AddLineBreaks(text);
-                }
 
-                if (useTypewriterEffect)
-                {
-                    // If we're using the typewriter effect, hide all of the
-                    // text before we begin any possible fade (so we don't fade
-                    // in on visible text).
-                    lineText.maxVisibleCharacters = 0;
-                }
-                else
-                {
-                    // Ensure that the max visible characters is effectively
-                    // unlimited.
-                    lineText.maxVisibleCharacters = int.MaxValue;
+                    if (palette != null)
+                    {
+                        lineText.text = LineView.PaletteMarkedUpText(text, palette);
+                    }
+                    else
+                    {
+                        lineText.text = LineView.AddLineBreaks(text);
+                    }
+
+                    if (useTypewriterEffect)
+                    {
+                        // If we're using the typewriter effect, hide all of the
+                        // text before we begin any possible fade (so we don't fade
+                        // in on visible text).
+                        lineText.maxVisibleCharacters = 0;
+                    }
+                    else
+                    {
+                        // Ensure that the max visible characters is effectively
+                        // unlimited.
+                        lineText.maxVisibleCharacters = int.MaxValue;
+                    }
                 }
 
                 // If we're using the fade effect, start it, and wait for it to
                 // finish.
-                if (useFadeEffect)
+                if (useFadeEffect && canvasGroup != null)
                 {
                     yield return StartCoroutine(Effects.FadeAlpha(canvasGroup, 0, 1, fadeInTime, currentStopToken));
                     if (currentStopToken.WasInterrupted)
@@ -425,22 +453,25 @@ namespace Yarn.Unity.Legacy
 
                 // If we're using the typewriter effect, start it, and wait for
                 // it to finish.
-                if (useTypewriterEffect)
+                if (useTypewriterEffect && lineText != null)
                 {
                     var pauses = DialogueRunner.GetPauseDurationsInsideLine(text);
 
-                    // setting the canvas all back to its defaults because if we
-                    // didn't also fade we don't have anything visible
-                    canvasGroup.alpha = 1f;
-                    canvasGroup.interactable = true;
-                    canvasGroup.blocksRaycasts = true;
+                    if (canvasGroup != null)
+                    {
+                        // setting the canvas all back to its defaults because
+                        // if we didn't also fade we don't have anything visible
+                        canvasGroup.alpha = 1f;
+                        canvasGroup.interactable = true;
+                        canvasGroup.blocksRaycasts = true;
+                    }
 
                     yield return StartCoroutine(Effects.PausableTypewriter(
                         lineText,
                         typewriterEffectSpeed,
-                        () => onCharacterTyped.Invoke(),
-                        () => onPauseStarted.Invoke(),
-                        () => onPauseEnded.Invoke(),
+                        () => onCharacterTyped?.Invoke(),
+                        () => onPauseStarted?.Invoke(),
+                        () => onPauseEnded?.Invoke(),
                         pauses,
                         currentStopToken
                     ));
@@ -462,12 +493,18 @@ namespace Yarn.Unity.Legacy
 
             currentStopToken.Complete();
 
-            // All of our text should now be visible.
-            lineText.maxVisibleCharacters = int.MaxValue;
+            if (lineText != null)
+            {
+                // All of our text should now be visible.
+                lineText.maxVisibleCharacters = int.MaxValue;
+            }
 
-            // Our view should at be at full opacity.
-            canvasGroup.alpha = 1f;
-            canvasGroup.blocksRaycasts = true;
+            if (canvasGroup != null)
+            {
+                // Our view should at be at full opacity.
+                canvasGroup.alpha = 1f;
+                canvasGroup.blocksRaycasts = true;
+            }
 
             // Show the continue button, if we have one.
             if (continueButton != null)

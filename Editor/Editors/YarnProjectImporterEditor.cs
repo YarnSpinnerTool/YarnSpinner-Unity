@@ -13,6 +13,8 @@ using UnityEditorInternal;
 using System.Collections;
 using System.Reflection;
 
+#nullable enable
+
 #if USE_ADDRESSABLES
 using UnityEditor.AddressableAssets;
 #endif
@@ -34,7 +36,7 @@ namespace Yarn.Unity.Editor
     {
         // A runtime-only field that stores the defaultLanguage of the
         // YarnProjectImporter. Used during Inspector GUI drawing.
-        internal static SerializedProperty CurrentProjectDefaultLanguageProperty;
+        internal static SerializedProperty? CurrentProjectDefaultLanguageProperty;
 
         internal const string ProjectUpgradeHelpURL = "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/importing-yarn-files/yarn-projects#upgrading-yarn-projects";
         internal const string CreateNewIssueURL = "https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=Project Import Error";
@@ -42,32 +44,32 @@ namespace Yarn.Unity.Editor
         internal const string GenerateStringsFileButtonLabel = "Export Strings and Metadata as CSV";
         internal const string UpdateExistingStringsFilesButtonLabel = "Update Existing Strings Files";
 
-        private SerializedProperty useAddressableAssetsProperty;
+        private SerializedProperty? useAddressableAssetsProperty;
 
 
-        public VisualTreeAsset editorUI;
-        public VisualTreeAsset localizationUIAsset;
-        public VisualTreeAsset sourceFileUIAsset;
-        public StyleSheet yarnProjectStyleSheet;
+        public VisualTreeAsset? editorUI;
+        public VisualTreeAsset? localizationUIAsset;
+        public VisualTreeAsset? sourceFileUIAsset;
+        public StyleSheet? yarnProjectStyleSheet;
 
-        private VisualElement uiRoot;
+        private VisualElement? uiRoot;
 
-        private string baseLanguage = null;
+        private string? baseLanguage = null;
         private List<LocalizationEntryElement> localizationEntryFields = new List<LocalizationEntryElement>();
         private List<SourceFileEntryElement> sourceEntryFields = new List<SourceFileEntryElement>();
 
-        private VisualElement localisationFieldsContainer;
-        private VisualElement sourceFileEntriesContainer;
-        private VisualElement variableStorageSettingsContainer;
+        private VisualElement? localisationFieldsContainer;
+        private VisualElement? sourceFileEntriesContainer;
+        private VisualElement? variableStorageSettingsContainer;
 
-        private SerializedProperty generateVariablesSourceFileProperty;
-        private SerializedProperty variablesClassNameProperty;
-        private SerializedProperty variablesClassNamespaceProperty;
-        private SerializedProperty variablesClassParentProperty;
+        private SerializedProperty? generateVariablesSourceFileProperty;
+        private SerializedProperty? variablesClassNameProperty;
+        private SerializedProperty? variablesClassNamespaceProperty;
+        private SerializedProperty? variablesClassParentProperty;
 
 #if USE_UNITY_LOCALIZATION
-        private SerializedProperty useUnityLocalisationSystemProperty;
-        private SerializedProperty unityLocalisationTableCollectionGUIDProperty;
+        private SerializedProperty? useUnityLocalisationSystemProperty;
+        private SerializedProperty? unityLocalisationTableCollectionGUIDProperty;
 #endif
 
         private bool AnyModifications
@@ -127,8 +129,15 @@ namespace Yarn.Unity.Editor
         {
             base.Apply();
 
-            var importer = (this.target as YarnProjectImporter);
-            var data = importer.GetProject();
+
+            if (!(this.target is YarnProjectImporter importer))
+            {
+                throw new InvalidOperationException($"Internal error: importer for {this.target} is not a {nameof(YarnProjectImporter)}!");
+            }
+
+            var data = importer.GetProject()
+                ?? throw new InvalidOperationException($"Failed to open project at {importer.assetPath}. Is it damaged?");
+
             var importerFolder = Path.GetDirectoryName(importer.assetPath);
 
             var removedLocalisations = data.Localisation.Keys.Except(localizationEntryFields.Select(f => f.value.languageID)).ToList();
@@ -186,7 +195,7 @@ namespace Yarn.Unity.Editor
                 locField.ClearModified();
             }
 
-            data.BaseLanguage = this.baseLanguage;
+            data.BaseLanguage = this.baseLanguage ?? "unknown";
 
             if (data.Localisation.TryGetValue(data.BaseLanguage, out var baseLanguageInfo))
             {
@@ -219,10 +228,10 @@ namespace Yarn.Unity.Editor
                 {
                     assetsFolder = null,
                     stringsFile = null,
-                    languageID = baseLanguage,
-                }, baseLanguage);
+                    languageID = baseLanguage ?? "unknown",
+                }, baseLanguage ?? "unknown");
                 localizationEntryFields.Add(newBaseLanguageField);
-                localisationFieldsContainer.Add(newBaseLanguageField);
+                localisationFieldsContainer?.Add(newBaseLanguageField);
             }
         }
 
@@ -236,15 +245,19 @@ namespace Yarn.Unity.Editor
 
             base.DiscardChanges();
 
-            var inspectorRoot = uiRoot.parent;
-            uiRoot.RemoveFromHierarchy();
+            var inspectorRoot = uiRoot?.parent;
+            uiRoot?.RemoveFromHierarchy();
 
-            inspectorRoot.Add(CreateInspectorGUI());
+            inspectorRoot?.Add(CreateInspectorGUI());
         }
 
         public override VisualElement CreateInspectorGUI()
         {
-            YarnProjectImporter yarnProjectImporter = target as YarnProjectImporter;
+            if (!(target is YarnProjectImporter yarnProjectImporter))
+            {
+                throw new InvalidOperationException($"Internal error: importer for {this.target} is not a {nameof(YarnProjectImporter)}!");
+            }
+
             var importData = yarnProjectImporter.ImportData;
 
             var ui = new VisualElement();
@@ -402,7 +415,7 @@ namespace Yarn.Unity.Editor
 
             baseLanguage = importData.baseLanguageName;
 
-            languagePopup.SetValueWithoutNotify(baseLanguage);
+            languagePopup.SetValueWithoutNotify(baseLanguage ?? "unknown");
             languagePopup.RegisterValueChangedCallback(evt =>
             {
                 baseLanguage = evt.newValue;
@@ -423,7 +436,7 @@ namespace Yarn.Unity.Editor
 
             foreach (var localisation in importData.localizations)
             {
-                var locElement = CreateLocalisationEntryElement(localisation, baseLanguage);
+                var locElement = CreateLocalisationEntryElement(localisation, baseLanguage ?? "unknown");
                 localisationFieldsContainer.Add(locElement);
                 localizationEntryFields.Add(locElement);
             }
@@ -434,8 +447,8 @@ namespace Yarn.Unity.Editor
             {
                 var loc = CreateLocalisationEntryElement(new ProjectImportData.LocalizationEntry()
                 {
-                    languageID = importData.baseLanguageName,
-                }, baseLanguage);
+                    languageID = importData.baseLanguageName ?? "unknown",
+                }, baseLanguage ?? "unknown");
                 localizationEntryFields.Add(loc);
                 localisationFieldsContainer.Add(loc);
                 LocalisationsAddedOrRemoved = true;
@@ -458,13 +471,13 @@ namespace Yarn.Unity.Editor
 
             void UpdateLocalizationVisibility()
             {
-                SetElementVisible(unityControls, useUnityLocalisationSystemProperty.boolValue);
-                SetElementVisible(yarnInternalControls, !useUnityLocalisationSystemProperty.boolValue);
+                SetElementVisible(unityControls, useUnityLocalisationSystemProperty?.boolValue ?? false);
+                SetElementVisible(yarnInternalControls, !useUnityLocalisationSystemProperty?.boolValue ?? false);
             }
 
             void UpdateUnityTableCollectionEmptyWarningVisibility()
             {
-                SetElementVisible(emptyTableCollectionWarning, string.IsNullOrEmpty(unityLocalisationTableCollectionGUIDProperty.stringValue));
+                SetElementVisible(emptyTableCollectionWarning, string.IsNullOrEmpty(unityLocalisationTableCollectionGUIDProperty?.stringValue));
             }
 
             UpdateLocalizationVisibility();
@@ -480,6 +493,11 @@ namespace Yarn.Unity.Editor
             {
                 // When the localisation table changes, get the GUID for it and
                 // store it in the property.
+
+                if (unityLocalisationTableCollectionGUIDProperty == null)
+                {
+                    throw new InvalidOperationException($"{nameof(unityLocalisationTableCollectionGUIDProperty)} is null");
+                }
 
                 if (evt.newValue != null && AssetDatabase.TryGetGUIDAndLocalFileIdentifier(evt.newValue, out string guid, out long _))
                 {
@@ -558,12 +576,15 @@ namespace Yarn.Unity.Editor
             var variablesClassParentDropdownField = new DropdownField(
                 "Variables Parent Class",
                 variableStorageClasses,
-                variablesClassParentProperty.stringValue
+                variablesClassParentProperty?.stringValue ?? string.Empty
                 );
 
             variablesClassParentDropdownField.RegisterValueChangedCallback(v =>
             {
-                variablesClassParentProperty.stringValue = v.newValue;
+                if (variablesClassParentProperty != null)
+                {
+                    variablesClassParentProperty.stringValue = v.newValue;
+                }
                 serializedObject.ApplyModifiedProperties();
             });
 
@@ -571,7 +592,7 @@ namespace Yarn.Unity.Editor
             {
                 foreach (var field in new VisualElement[] { variablesClassNameField, variablesClassNamespaceField, variablesClassParentDropdownField })
                 {
-                    SetElementVisible(field, generateVariablesSourceFileProperty.boolValue);
+                    SetElementVisible(field, generateVariablesSourceFileProperty?.boolValue ?? false);
                 }
             }
             UpdateVariableSettingsVisibility();
@@ -609,8 +630,13 @@ namespace Yarn.Unity.Editor
 
         private LocalizationEntryElement CreateLocalisationEntryElement(ProjectImportData.LocalizationEntry localisation, string baseLanguage)
         {
+            if (localizationUIAsset == null)
+            {
+                throw new InvalidOperationException($"Can't create {nameof(LocalizationEntryElement)}: {nameof(localizationUIAsset)} is null");
+            }
+
             var locElement = new LocalizationEntryElement(localizationUIAsset, localisation, baseLanguage);
-            locElement.onDelete += () =>
+            locElement.OnDelete += () =>
             {
                 locElement.RemoveFromHierarchy();
                 localizationEntryFields.Remove(locElement);
@@ -621,8 +647,18 @@ namespace Yarn.Unity.Editor
 
         private SourceFileEntryElement CreateSourceFileEntryElement(string path)
         {
-            var sourceElement = new SourceFileEntryElement(sourceFileUIAsset, path, this.target as YarnProjectImporter);
-            sourceElement.onDelete += () =>
+            if (sourceFileUIAsset == null)
+            {
+                throw new InvalidOperationException($"Can't create {nameof(SourceFileEntryElement)}: {nameof(sourceFileUIAsset)} is null");
+            }
+
+            if (!(this.target is YarnProjectImporter importer))
+            {
+                throw new InvalidOperationException($"Internal error: importer for {this.target} is not a {nameof(YarnProjectImporter)}!");
+            }
+
+            var sourceElement = new SourceFileEntryElement(sourceFileUIAsset, path, importer);
+            sourceElement.OnDelete += () =>
             {
                 sourceElement.RemoveFromHierarchy();
                 sourceEntryFields.Remove(sourceElement);

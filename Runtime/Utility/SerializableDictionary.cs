@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using UnityEngine;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     public abstract class SerializableDictionaryBase
@@ -27,9 +29,9 @@ namespace Yarn.Unity
     {
         Dictionary<TKey, TValue> m_dict;
         [SerializeField]
-        TKey[] m_keys;
+        TKey[]? m_keys;
         [SerializeField]
-        TValueStorage[] m_values;
+        TValueStorage[]? m_values;
 
         public SerializableDictionaryBase()
         {
@@ -223,6 +225,7 @@ namespace Yarn.Unity
     {
         public class Storage<T> : SerializableDictionaryBase.Storage
         {
+            [System.Diagnostics.CodeAnalysis.AllowNull]
             public T data;
         }
     }
@@ -293,8 +296,8 @@ namespace Yarn.Unity.Editor
 
         class ConflictState
         {
-            public object conflictKey = null;
-            public object conflictValue = null;
+            public object? conflictKey = null;
+            public object? conflictValue = null;
             public int conflictIndex = -1;
             public int conflictOtherIndex = -1;
             public bool conflictKeyPropertyExpanded = false;
@@ -356,7 +359,9 @@ namespace Yarn.Unity.Editor
             var labelPosition = position;
             labelPosition.height = EditorGUIUtility.singleLineHeight;
             if (property.isExpanded)
+            {
                 labelPosition.xMax -= s_buttonStyle.CalcSize(s_iconPlus).x;
+            }
 
             EditorGUI.PropertyField(labelPosition, property, label, false);
             // property.isExpanded = EditorGUI.Foldout(labelPosition,
@@ -426,13 +431,17 @@ namespace Yarn.Unity.Editor
             {
                 keyArrayProperty.InsertArrayElementAtIndex(buttonActionIndex);
                 if (valueArrayProperty != null)
+                {
                     valueArrayProperty.InsertArrayElementAtIndex(buttonActionIndex);
+                }
             }
             else if (buttonAction == Action.Remove)
             {
                 DeleteArrayElementAtIndex(keyArrayProperty, buttonActionIndex);
                 if (valueArrayProperty != null)
+                {
                     DeleteArrayElementAtIndex(valueArrayProperty, buttonActionIndex);
+                }
             }
 
             conflictState.conflictKey = null;
@@ -455,7 +464,9 @@ namespace Yarn.Unity.Editor
                     SaveProperty(keyProperty1, valueProperty1, i, -1, conflictState);
                     DeleteArrayElementAtIndex(keyArrayProperty, i);
                     if (valueArrayProperty != null)
+                    {
                         DeleteArrayElementAtIndex(valueArrayProperty, i);
+                    }
 
                     break;
                 }
@@ -473,7 +484,9 @@ namespace Yarn.Unity.Editor
                         SaveProperty(keyProperty2, valueProperty2, j, i, conflictState);
                         DeleteArrayElementAtIndex(keyArrayProperty, j);
                         if (valueArrayProperty != null)
+                        {
                             DeleteArrayElementAtIndex(valueArrayProperty, j);
+                        }
 
                         goto breakLoops;
                     }
@@ -563,7 +576,7 @@ namespace Yarn.Unity.Editor
             return Mathf.Max(keyPropertyHeight, valuePropertyHeight);
         }
 
-        static float DrawKeyLine(SerializedProperty keyProperty, Rect linePosition, string keyLabel)
+        static float DrawKeyLine(SerializedProperty keyProperty, Rect linePosition, string? keyLabel)
         {
             float keyPropertyHeight = EditorGUI.GetPropertyHeight(keyProperty);
             var keyPosition = linePosition;
@@ -589,7 +602,7 @@ namespace Yarn.Unity.Editor
             }
         }
 
-        static void SaveProperty(SerializedProperty keyProperty, SerializedProperty valueProperty, int index, int otherIndex, ConflictState conflictState)
+        static void SaveProperty(SerializedProperty keyProperty, SerializedProperty? valueProperty, int index, int otherIndex, ConflictState conflictState)
         {
             conflictState.conflictKey = GetPropertyValue(keyProperty);
             conflictState.conflictValue = valueProperty != null ? GetPropertyValue(valueProperty) : null;
@@ -714,13 +727,17 @@ namespace Yarn.Unity.Editor
             else
             {
                 if (p.isArray)
+                {
                     return GetPropertyValueArray(p);
+                }
                 else
+                {
                     return GetPropertyValueGeneric(p);
+                }
             }
         }
 
-        static void SetPropertyValue(SerializedProperty p, object v)
+        static void SetPropertyValue(SerializedProperty p, object? v)
         {
             PropertyInfo propertyInfo;
             if (s_serializedPropertyValueAccessorsDict.TryGetValue(p.propertyType, out propertyInfo))
@@ -729,10 +746,14 @@ namespace Yarn.Unity.Editor
             }
             else
             {
-                if (p.isArray)
+                if (p.isArray && v != null)
+                {
                     SetPropertyValueArray(p, v);
+                }
                 else
+                {
                     SetPropertyValueGeneric(p, v);
+                }
             }
         }
 
@@ -775,9 +796,9 @@ namespace Yarn.Unity.Editor
             }
         }
 
-        static void SetPropertyValueGeneric(SerializedProperty property, object v)
+        static void SetPropertyValueGeneric(SerializedProperty property, object? v)
         {
-            Dictionary<string, object> dict = (Dictionary<string, object>)v;
+            Dictionary<string, object>? dict = (Dictionary<string, object>?)v;
             var iterator = property.Copy();
             if (iterator.Next(true))
             {
@@ -785,7 +806,7 @@ namespace Yarn.Unity.Editor
                 do
                 {
                     string name = iterator.name;
-                    SetPropertyValue(iterator, dict[name]);
+                    SetPropertyValue(iterator, dict?[name]);
                 } while (iterator.Next(false) && iterator.propertyPath != end.propertyPath);
             }
         }
@@ -807,7 +828,9 @@ namespace Yarn.Unity.Editor
         static bool CompareDictionaries(Dictionary<string, object> dict1, Dictionary<string, object> dict2)
         {
             if (dict1.Count != dict2.Count)
+            {
                 return false;
+            }
 
             foreach (var kvp1 in dict1)
             {
@@ -816,10 +839,14 @@ namespace Yarn.Unity.Editor
 
                 object value2;
                 if (!dict2.TryGetValue(key1, out value2))
+                {
                     return false;
+                }
 
                 if (!ComparePropertyValues(value1, value2))
+                {
                     return false;
+                }
             }
 
             return true;
@@ -839,8 +866,13 @@ namespace Yarn.Unity.Editor
             }
         }
 
-        static IEnumerable<EnumerationEntry> EnumerateEntries(SerializedProperty keyArrayProperty, SerializedProperty valueArrayProperty, int startIndex = 0)
+        static IEnumerable<EnumerationEntry> EnumerateEntries(SerializedProperty keyArrayProperty, SerializedProperty? valueArrayProperty, int startIndex = 0)
         {
+            if (valueArrayProperty == null)
+            {
+                yield break;
+            }
+
             if (keyArrayProperty.arraySize > startIndex)
             {
                 int index = startIndex;
@@ -850,7 +882,10 @@ namespace Yarn.Unity.Editor
 
                 do
                 {
-                    yield return new EnumerationEntry(keyProperty, valueProperty, index);
+                    if (valueProperty != null)
+                    {
+                        yield return new EnumerationEntry(keyProperty, valueProperty, index);
+                    }
                     index++;
                 } while (keyProperty.Next(false)
                     && (valueProperty != null ? valueProperty.Next(false) : true)

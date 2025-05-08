@@ -7,17 +7,19 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+#nullable enable
+
 namespace Yarn.Unity.Editor
 {
     public class SourceFileEntryElement : VisualElement, INotifyValueChanged<string>
     {
         private readonly TextField sourceFileField;
         private readonly Button deleteButton;
-        public event System.Action onDelete;
+        public event System.Action? OnDelete;
 
         public bool IsModified { get; private set; }
 
-        public string path;
+        public string path = "";
 
         public SourceFileEntryElement(VisualTreeAsset asset, string path, YarnProjectImporter importer)
         {
@@ -33,7 +35,7 @@ namespace Yarn.Unity.Editor
                 this.value = evt.newValue;
             });
 
-            deleteButton.clicked += () => onDelete();
+            deleteButton.clicked += () => OnDelete?.Invoke();
 
             SetValueWithoutNotify(path);
         }

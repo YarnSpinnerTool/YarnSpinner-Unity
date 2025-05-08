@@ -53,8 +53,8 @@ namespace Yarn.Unity.Editor
         }
 
         private Dictionary<string, DefaultAsset?> localesToFolders = new Dictionary<string, DefaultAsset?>();
-        private Type[] allTypes;
-        private GUIContent[] allTypeContents;
+        private Type[] allTypes = Array.Empty<Type>();
+        private GUIContent[] allTypeContents = Array.Empty<GUIContent>();
         System.Collections.ObjectModel.ReadOnlyCollection<UnityEngine.Localization.Locale>? locales = null;
 
         private Dictionary<LocaleIdentifier, LocalizationTable> _cachedTables = new();

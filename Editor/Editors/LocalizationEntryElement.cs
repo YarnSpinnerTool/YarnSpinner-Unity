@@ -7,6 +7,8 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+#nullable enable
+
 namespace Yarn.Unity.Editor
 {
     public class LocalizationEntryElement : VisualElement, INotifyValueChanged<ProjectImportData.LocalizationEntry>
@@ -21,7 +23,7 @@ namespace Yarn.Unity.Editor
         private readonly ObjectField externalLocalisationAssetField;
         private readonly VisualElement externalReferenceFields;
         private readonly VisualElement internallyGeneratedAssetFields;
-        public event System.Action onDelete;
+        public event System.Action? OnDelete;
         ProjectImportData.LocalizationEntry data;
 
         public bool IsModified { get; private set; }
@@ -104,7 +106,7 @@ namespace Yarn.Unity.Editor
                 this.value = newEntry;
             });
 
-            deleteButton.clicked += () => onDelete();
+            deleteButton.clicked += () => OnDelete?.Invoke();
 
             SetValueWithoutNotify(data);
 

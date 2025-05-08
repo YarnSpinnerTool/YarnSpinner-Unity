@@ -472,7 +472,7 @@ namespace Yarn.Unity.Editor
                 // Now to compile the scripts associated with this project.
                 var job = CompilationJob.CreateFromFiles(project.SourceFiles);
                 job.LanguageVersion = project.FileVersion;
-                job.VariableDeclarations = functionDeclarationReceiver.FunctionDeclarations;
+                job.Declarations = functionDeclarationReceiver.FunctionDeclarations;
 
                 try
                 {
@@ -1520,6 +1520,12 @@ namespace Yarn.Unity.Editor
             if (tableCollection == null)
             {
                 Debug.LogError("Unable to generate String Table Entries as the string collection is null", (YarnProjectImporter?)this);
+                return;
+            }
+
+            if (ImportData.baseLanguageName == null)
+            {
+                Debug.LogError($"Unable to generate String Table Entries as the Yarn Project's {nameof(ImportData.baseLanguageName)} is null", (YarnProjectImporter?)this);
                 return;
             }
 
