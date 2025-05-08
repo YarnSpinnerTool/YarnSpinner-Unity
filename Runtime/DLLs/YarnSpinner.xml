@@ -3172,6 +3172,16 @@
             <param name="length">The number of text elements in the plain
             text that this attribute covers.</param>
         </member>
+        <member name="M:Yarn.Markup.MarkupAttribute.Shift(System.Int32)">
+            <summary>
+            Creates a new <see cref="T:Yarn.Markup.MarkupAttribute"/> based on the current
+            instance whose <see cref="P:Yarn.Markup.MarkupAttribute.Position"/> is shifted towards the end of
+            the string by <paramref name="shift"/> characters.
+            </summary>
+            <param name="shift">The number of characters to shift by.</param>
+            <returns>A new <see cref="T:Yarn.Markup.MarkupAttribute"/> with an updated <see
+            cref="P:Yarn.Markup.MarkupAttribute.Position"/>.</returns>
+        </member>
         <member name="P:Yarn.Markup.MarkupAttribute.Position">
             <summary>
             Gets the position in the plain text where
