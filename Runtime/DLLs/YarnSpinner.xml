@@ -51,13 +51,13 @@
              following things to prepare the line for presentation to the user.
              </para>
              <list type="number">
-             <item>Use the value in the <see cref="F:Yarn.Line.ID"/> field to look up the
+             <item>Use the value in the <see cref="P:Yarn.Line.ID"/> field to look up the
              appropriate user-facing text in the string table. </item>
             
-             <item>Use <see cref="!:Dialogue.ExpandSubstitutions"/> to replace all
+             <item>Use <see cref="M:Yarn.Markup.LineParser.ExpandSubstitutions(System.String,System.Collections.Generic.IList{System.String})"/> to replace all
              substitutions in the user-facing text.</item>
             
-             <item>Use <see cref="!:Dialogue.ParseMarkup"/> to parse all markup in the
+             <item>Use <see cref="M:Yarn.Markup.LineParser.ParseString(System.String,System.String,System.Boolean,System.Boolean,System.Boolean)"/> to parse all markup in the
              line.</item>
              </list>
             
@@ -76,12 +76,12 @@
             substituted into the final line.
             </param>
         </member>
-        <member name="F:Yarn.Line.ID">
+        <member name="P:Yarn.Line.ID">
             <summary>
             The string ID for this line.
             </summary>
         </member>
-        <member name="F:Yarn.Line.Substitutions">
+        <member name="P:Yarn.Line.Substitutions">
             <summary>
             The values that should be inserted into the user-facing text before
             delivery.
@@ -307,6 +307,9 @@
         <member name="P:Yarn.MemoryVariableStore.SmartVariableEvaluator">
             <inheritdoc/>
         </member>
+        <member name="M:Yarn.MemoryVariableStore.TryGetValue``1(System.String,``0@)">
+            <inheritdoc/>
+        </member>
         <member name="M:Yarn.MemoryVariableStore.Clear">
             <inheritdoc/>
         </member>
@@ -317,6 +320,9 @@
             <inheritdoc/>
         </member>
         <member name="M:Yarn.MemoryVariableStore.SetValue(System.String,System.Boolean)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.MemoryVariableStore.GetVariableKind(System.String)">
             <inheritdoc/>
         </member>
         <member name="T:Yarn.LineHandler">
@@ -580,8 +586,8 @@
             running a node.
             </summary>
             <param name="startNode">The name of the node that will be run. The
-            node have been loaded by calling <see cref="M:Yarn.Dialogue.SetProgram(Yarn.Program)"/>
-            or <see cref="!:AddProgram(Program)"/>.</param>
+            node have been loaded by calling <see
+            cref="M:Yarn.Dialogue.SetProgram(Yarn.Program)"/>.</param>
             <remarks>
             <para>
             After this method is called, you call <see cref="M:Yarn.Dialogue.Continue"/> to
@@ -670,6 +676,8 @@
             <summary>
             Gets the names of the nodes in the currently loaded Program.
             </summary>
+            <remarks>If no program is currently loaded, an empty collection is
+            returned.</remarks>
         </member>
         <member name="P:Yarn.Dialogue.CurrentNode">
             <summary>
@@ -832,7 +840,8 @@
         </member>
         <member name="T:Yarn.DialogueException">
             <summary>
-            An exception that is thrown by <see cref="T:Yarn.Dialogue"/> when there is an error in executing a <see cref="T:Yarn.Program"/>.
+            An exception that is thrown by <see cref="T:Yarn.Dialogue"/> when there is an
+            error in executing a <see cref="T:Yarn.Program"/>.
             </summary>
         </member>
         <member name="T:Yarn.Library">
@@ -955,6 +964,31 @@
             have a tracking variable created.</param>
             <returns>The new variable name.</returns>
         </member>
+        <member name="M:Yarn.ICodeDumpHelper.GetStringForKey(System.String)">
+            <summary>
+            Gets the user-facing string for a given key from the code dump
+            helper's string table.
+            </summary>
+            <param name="key">The key to fetch a string for.</param>
+            <returns>The found string, or <see langword="null"/> if none was
+            found.</returns>
+        </member>
+        <member name="M:Yarn.ICodeDumpHelper.GetDescriptionForVariable(System.String)">
+            <summary>
+            Gets the description for a given variable, if it exists.
+            </summary>
+            <param name="variableName">The name of the variable.</param>
+            <returns>The description for the variable, or <see langword="null"/>
+            if none was found.</returns>
+        </member>
+        <member name="M:Yarn.ICodeDumpHelper.GetLabelsForNode(System.String)">
+            <summary>
+            Gets the mapping of instruction indices to named labels found in the
+            node.
+            </summary>
+            <param name="node">The name of the node.</param>
+            <returns>The instruction label mapping.</returns>
+        </member>
         <member name="T:Yarn.Program">
             <summary>
             A compiled Yarn program.
@@ -965,10 +999,14 @@
         </member>
         <member name="M:Yarn.Program.LineIDsForNode(System.String)">
             <summary>
-            Identifies and returns a list of all line and option IDs inside the node.
+            Identifies and returns a list of all line and option IDs inside the
+            node.
             </summary>
-            <param name="nodeName">The name of the node whos line IDs you covet.</param>
-            <returns>The line IDs of all lines and options inside the node, or null if <paramref name="nodeName"/> doesn't exist in the program.</returns>
+            <param name="nodeName">The name of the node whos line IDs you
+            covet.</param>
+            <returns>The line IDs of all lines and options inside the node, or
+            <see langword="null"/> if <paramref name="nodeName"/> doesn't exist
+            in the program.</returns>
         </member>
         <member name="P:Yarn.Program.SmartVariableNodes">
             <summary>
@@ -1742,7 +1780,7 @@
             variables.
             </summary>
             <remarks>
-            This class implements a subset of the <see cref="!:Instruction.Opcode"/>
+            This class implements a subset of the <see cref="T:Yarn.Instruction"/>
             operations, and is designed for evaluating smart variable implementation
             nodes.
             </remarks>
@@ -1836,6 +1874,25 @@
             <inheritdoc/>
         </member>
         <member name="P:Yarn.BooleanType.DefaultMethods">
+            <inheritdoc/>
+        </member>
+        <member name="T:Yarn.EnumBase">
+            <summary>
+            The base type for all enumeration types.
+            </summary>
+        </member>
+        <member name="M:Yarn.EnumBase.#ctor">
+            <summary>
+            Initialises a new instance of the <see cref="T:Yarn.EnumBase"/> class.
+            </summary>
+        </member>
+        <member name="P:Yarn.EnumBase.Name">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.EnumBase.Parent">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.EnumBase.Description">
             <inheritdoc/>
         </member>
         <member name="T:Yarn.EnumType">
@@ -1932,8 +1989,25 @@
             is <see langword="null"/>.
             </exception>
         </member>
+        <member name="P:Yarn.FunctionType.VariadicParameterType">
+            <summary>
+            Gets the type of value that this type of function accepts as a
+            variadic parameter.
+            </summary>
+            <remarks>This value is <see langword="null"/> if this type of
+            function does not accept variadic parameters.</remarks>
+        </member>
         <member name="P:Yarn.FunctionType.TypeMembers">
             <inheritdoc/>
+        </member>
+        <member name="M:Yarn.FunctionType.#ctor(Yarn.IType,Yarn.IType[])">
+            <summary>
+            Initialises a new instances of the <see cref="T:Yarn.FunctionType"/> class.
+            </summary>
+            <param name="returnType">The type of the value that this type of
+            function returns.</param>
+            <param name="parameterTypes">The types of the parameters that this
+            type of function accepts.</param>
         </member>
         <member name="M:Yarn.FunctionType.AddParameter(Yarn.IType)">
             <summary>
@@ -1941,6 +2015,12 @@
             </summary>
             <param name="parameterType">The type of parameter to
             add.</param>
+        </member>
+        <member name="M:Yarn.FunctionType.ToString">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.FunctionType.Equals(Yarn.IType)">
+            <inheritdoc/>
         </member>
         <member name="T:Yarn.IType">
             <summary>
@@ -2011,9 +2091,6 @@
             <inheritdoc/>
         </member>
         <member name="P:Yarn.StringType.DefaultValue">
-            <inheritdoc/>
-        </member>
-        <member name="M:Yarn.StringType.ToBridgedType(Yarn.Value)">
             <inheritdoc/>
         </member>
         <member name="M:Yarn.StringType.Equals(System.Object)">
@@ -2131,6 +2208,31 @@
             <param name="otherType">The type to check.</param>
             <returns><see langword="true"/> if this type is convertible to
             <paramref name="otherType"/>.</returns>
+        </member>
+        <member name="M:Yarn.TypeBase.#ctor(System.Collections.Generic.IReadOnlyDictionary{System.String,System.Delegate})">
+            <summary>
+            Initialises a new instance of the <see cref="T:Yarn.TypeBase"/> class with
+            a collection of methods.
+            </summary>
+            <param name="methods">The methods that belong to this type.</param>
+        </member>
+        <member name="M:Yarn.TypeBase.IsAncestorOf(Yarn.TypeBase)">
+            <summary>
+            Gets whether this type is an ancestor of <paramref name="other"/>.
+            </summary>
+            <param name="other">The type to check.</param>
+            <returns><see langword="true"/> if this type is an ancestor of
+            <paramref name="other"/>; <see langword="false"/>
+            otherwise.</returns>
+        </member>
+        <member name="M:Yarn.TypeBase.Equals(Yarn.TypeBase)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.TypeBase.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.TypeBase.GetHashCode">
+            <inheritdoc/>
         </member>
         <member name="T:Yarn.Types">
             <summary>
@@ -2714,6 +2816,12 @@
             or begins the line. This property must be a bool value.
             </summary>
         </member>
+        <member name="F:Yarn.Markup.LineParser.NoMarkupAttribute">
+            <summary>
+            The name of the attribute to use to indicate that no marker
+            processing should occur.
+            </summary>
+        </member>
         <member name="F:Yarn.Markup.LineParser.markerProcessors">
             <summary>
             A dictionary that maps the names of attributes to an object
@@ -2729,12 +2837,6 @@
             <summary>
             A string reader used for reading through the <see
             cref="F:Yarn.Markup.LineParser.input"/>.
-            </summary>
-        </member>
-        <member name="F:Yarn.Markup.LineParser.sourcePosition">
-            <summary>
-            The current position of the string reader in the plain text,
-            measured in characters.
             </summary>
         </member>
         <member name="M:Yarn.Markup.LineParser.RegisterMarkerProcessor(System.String,Yarn.Markup.IAttributeMarkerProcessor)">
@@ -2754,6 +2856,71 @@
             <param name="markerProcessor">The object that should be invoked
             when markers with this name are encountered.</param>
         </member>
+        <member name="M:Yarn.Markup.LineParser.DeregisterMarkerProcessor(System.String)">
+            <summary>
+            Removes any marker processor associated with a given marker name.
+            </summary>
+            <param name="attributeName">The name of the marker.</param>
+        </member>
+        <member name="T:Yarn.Markup.LineParser.MarkupDiagnostic">
+            <summary>
+            Represents a diagnostic message produced during markup parsing.
+            </summary>
+        </member>
+        <member name="P:Yarn.Markup.LineParser.MarkupDiagnostic.Message">
+            <summary>
+            Gets the text of the diagnostic.
+            </summary>
+        </member>
+        <member name="P:Yarn.Markup.LineParser.MarkupDiagnostic.Column">
+            <summary>
+            Gets the zero-based column index of the start of the range at
+            which this diagnostic appears.
+            </summary>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.MarkupDiagnostic.#ctor(System.String,System.Int32)">
+            <summary>
+            Initialises a new instance of the <see cref="T:Yarn.Markup.LineParser.MarkupDiagnostic"/>
+            struct.
+            </summary>
+            <param name="message">The diagnostic text.</param>
+            <param name="column">The zero-based first column of the
+            diagnostic's range.</param>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.MarkupDiagnostic.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.MarkupDiagnostic.GetHashCode">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.MarkupDiagnostic.op_Equality(Yarn.Markup.LineParser.MarkupDiagnostic,Yarn.Markup.LineParser.MarkupDiagnostic)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.MarkupDiagnostic.op_Inequality(Yarn.Markup.LineParser.MarkupDiagnostic,Yarn.Markup.LineParser.MarkupDiagnostic)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.MarkupDiagnostic.Equals(Yarn.Markup.LineParser.MarkupDiagnostic)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.ParseString(System.String,System.String,System.Boolean)">
+            <inheritdoc cref="M:Yarn.Markup.LineParser.ParseString(System.String,System.String,System.Boolean,System.Boolean,System.Boolean)"/>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.ParseString(System.String,System.String,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Parses a string of text and produces a markup parse result.
+            </summary>
+            <param name="input">The text to parse.</param>
+            <param name="localeCode">The locale to use when processing markers,
+            as a BCP-47 locale tag.</param>
+            <param name="squish">If <see langword="false"/>, markers that are
+            split as part of the markup parsing process will not be re-merged
+            before returning the result.</param>
+            <param name="sort">If <see langword="true"/>, markers will be sorted based on their position in the input.å</param>
+            <param name="addImplicitCharacterAttribute">If true, the parser will
+            attempt to detect a character name in the text and add a
+            <c>[character]</c> attribute for it.</param>
+            <returns>A markup parse result.</returns>
+        </member>
         <member name="M:Yarn.Markup.LineParser.ExpandSubstitutions(System.String,System.Collections.Generic.IList{System.String})">
             <summary>
             Replaces all substitution markers in a text with the given
@@ -2770,6 +2937,9 @@
             <param name="substitutions">The list of substitutions.</param>
             <returns><paramref name="text"/>, with the content from <paramref
             name="substitutions"/> inserted.</returns>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.Dispose">
+            <inheritdoc/>
         </member>
         <member name="T:Yarn.Markup.MarkupParseException">
             <summary>
@@ -2807,14 +2977,14 @@
             You do not create instances of this struct yourself. It is created
             by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
             </remarks>
-            <seealso cref="!:Dialogue.ParseMarkup(string,string)"/>
+            <seealso cref="M:Yarn.Markup.LineParser.ParseString(System.String,System.String,System.Boolean,System.Boolean,System.Boolean)"/>
         </member>
-        <member name="F:Yarn.Markup.MarkupParseResult.Text">
+        <member name="P:Yarn.Markup.MarkupParseResult.Text">
             <summary>
             The original text, with all parsed markers removed.
             </summary>
         </member>
-        <member name="F:Yarn.Markup.MarkupParseResult.Attributes">
+        <member name="P:Yarn.Markup.MarkupParseResult.Attributes">
             <summary>
             The list of <see cref="T:Yarn.Markup.MarkupAttribute"/>s in this parse
             result.
@@ -2842,7 +3012,7 @@
         </member>
         <member name="M:Yarn.Markup.MarkupParseResult.TextForAttribute(Yarn.Markup.MarkupAttribute)">
             <summary>
-            Returns the substring of <see cref="F:Yarn.Markup.MarkupParseResult.Text"/> covered by
+            Returns the substring of <see cref="P:Yarn.Markup.MarkupParseResult.Text"/> covered by
             <paramref name="attribute"/> Position and Length properties.
             </summary>
             <remarks>
@@ -2855,7 +3025,7 @@
             name="attribute"/> is an attribute belonging to this
             MarkupParseResult. As a result, if you pass an attribute that
             doesn't belong, it may describe a range of text that does not
-            appear in <see cref="F:Yarn.Markup.MarkupParseResult.Text"/>. If this occurs, an <see
+            appear in <see cref="P:Yarn.Markup.MarkupParseResult.Text"/>. If this occurs, an <see
             cref="T:System.IndexOutOfRangeException"/> will be thrown.
             </para>
             </remarks>
@@ -2865,7 +3035,7 @@
             <throws cref="T:System.IndexOutOfRangeException">Thrown when
             attribute's <see cref="P:Yarn.Markup.MarkupAttribute.Position"/> and <see
             cref="P:Yarn.Markup.MarkupAttribute.Length"/> properties describe a range of
-            text outside the maximum range of <see cref="F:Yarn.Markup.MarkupParseResult.Text"/>.</throws>
+            text outside the maximum range of <see cref="P:Yarn.Markup.MarkupParseResult.Text"/>.</throws>
         </member>
         <member name="M:Yarn.Markup.MarkupParseResult.DeleteRange(Yarn.Markup.MarkupAttribute)">
              <summary>
@@ -2929,10 +3099,10 @@
             Represents a range of text in a marked-up string.
             </summary>
             <remarks>
-            You do not create instances of this struct yourself. It is created
-            by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
+            You do not create instances of this struct yourself. It is created by
+            objects that can parse markup, such as <see cref="T:Yarn.Markup.LineParser"/>.
             </remarks>
-            <seealso cref="!:Dialogue.ParseMarkup(string,string)"/>
+            <seealso cref="M:Yarn.Markup.LineParser.ParseString(System.String,System.String,System.Boolean,System.Boolean,System.Boolean)"/>
         </member>
         <member name="M:Yarn.Markup.MarkupAttribute.#ctor(System.Int32,System.Int32,System.Int32,System.String,System.Collections.Generic.IEnumerable{Yarn.Markup.MarkupProperty})">
             <summary>
@@ -2992,15 +3162,75 @@
         <member name="M:Yarn.Markup.MarkupAttribute.ToString">
             <inheritdoc/>
         </member>
+        <member name="M:Yarn.Markup.MarkupAttribute.TryGetProperty(System.String,Yarn.Markup.MarkupValue@)">
+            <summary>
+            Gets a property named <paramref name="name"/> from this
+            attribute, if present.
+            </summary>
+            <param name="name">The name of the property.</param>
+            <param name="result">On return, the property's value if found, or
+            zero if not.</param>
+            <returns><see langword="true"/> if a property named <paramref
+            name="name"/> was found; <see langword="false"/>
+            otherwise.</returns>
+        </member>
+        <member name="M:Yarn.Markup.MarkupAttribute.TryGetProperty(System.String,System.Single@)">
+            <summary>
+            Gets a float property named <paramref name="name"/> from this
+            attribute, if present.
+            </summary>
+            <param name="name">The name of the property.</param>
+            <param name="result">On return, the property's value if found, or
+            zero if not.</param>
+            <returns><see langword="true"/> if a property named <paramref
+            name="name"/> was found; <see langword="false"/>
+            otherwise.</returns>
+        </member>
+        <member name="M:Yarn.Markup.MarkupAttribute.TryGetProperty(System.String,System.Int32@)">
+            <summary>
+            Gets an integer property named <paramref name="name"/> from this
+            attribute, if present.
+            </summary>
+            <param name="name">The name of the property.</param>
+            <param name="result">On return, the property's value if found, or
+            zero if not.</param>
+            <returns><see langword="true"/> if a property named <paramref
+            name="name"/> was found; <see langword="false"/>
+            otherwise.</returns>
+        </member>
+        <member name="M:Yarn.Markup.MarkupAttribute.TryGetProperty(System.String,System.String@)">
+            <summary>
+            Gets a string property named <paramref name="name"/> from this
+            attribute, if present.
+            </summary>
+            <param name="name">The name of the property.</param>
+            <param name="result">On return, the property's value if found, or
+            <see langword="null"/> if not.</param>
+            <returns><see langword="true"/> if a property named <paramref
+            name="name"/> was found; <see langword="false"/>
+            otherwise.</returns>
+        </member>
+        <member name="M:Yarn.Markup.MarkupAttribute.TryGetProperty(System.String,System.Boolean@)">
+            <summary>
+            Gets a boolean property named <paramref name="name"/> from this
+            attribute, if present.
+            </summary>
+            <param name="name">The name of the property.</param>
+            <param name="result">On return, the property's value if found, or
+            <see langword="false"/> if not.</param>
+            <returns><see langword="true"/> if a property named <paramref
+            name="name"/> was found; <see langword="false"/>
+            otherwise.</returns>
+        </member>
         <member name="T:Yarn.Markup.MarkupProperty">
             <summary>
             A property associated with a <see cref="T:Yarn.Markup.MarkupAttribute"/>.
             </summary>
             <remarks>
-            You do not create instances of this struct yourself. It is created
-            by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
+            You do not create instances of this struct yourself. It is created by
+            objects that can parse markup, such as <see cref="T:Yarn.Markup.LineParser"/>.
             </remarks>
-            <seealso cref="!:Dialogue.ParseMarkup(string,string)"/>
+            <seealso cref="M:Yarn.Markup.LineParser.ParseString(System.String,System.String,System.Boolean,System.Boolean,System.Boolean)"/>
         </member>
         <member name="M:Yarn.Markup.MarkupProperty.#ctor(System.String,Yarn.Markup.MarkupValue)">
             <summary>
@@ -3026,9 +3256,9 @@
             </summary>
             <remarks>
             You do not create instances of this struct yourself. It is created
-            by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
+            by objects that can parse markup, such as <see cref="T:Yarn.Markup.LineParser"/>.
             </remarks>
-            <seealso cref="!:Dialogue.ParseMarkup(string,string)"/>
+            <seealso cref="M:Yarn.Markup.LineParser.ParseString(System.String,System.String,System.Boolean,System.Boolean,System.Boolean)"/>
         </member>
         <member name="P:Yarn.Markup.MarkupValue.IntegerValue">
             <summary>Gets the integer value of this property.</summary>
@@ -3075,9 +3305,9 @@
             </summary>
             <remarks>
             You do not create instances of this struct yourself. It is created
-            by objects that can parse markup, such as <see cref="T:Yarn.Dialogue"/>.
+            by objects that can parse markup, such as <see cref="T:Yarn.Markup.LineParser"/>.
             </remarks>
-            <seealso cref="!:Dialogue.ParseMarkup(string,string)"/>
+            <seealso cref="M:Yarn.Markup.LineParser.ParseString(System.String,System.String,System.Boolean,System.Boolean,System.Boolean)"/>
         </member>
         <member name="M:Yarn.Markup.MarkupAttributeMarker.#ctor(System.String,System.Int32,System.Int32,System.Collections.Generic.List{Yarn.Markup.MarkupProperty},Yarn.Markup.TagType)">
             <summary>
@@ -3174,6 +3404,115 @@
             <summary>
             The close-all marker, <c>[/]</c>.
             </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.AllowNullAttribute">
+            <summary>Specifies that null is allowed as an input even if the corresponding type disallows it.</summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.DisallowNullAttribute">
+            <summary>Specifies that null is disallowed as an input even if the corresponding type allows it.</summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.MaybeNullAttribute">
+            <summary>Specifies that an output may be null even if the corresponding type disallows it.</summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.NotNullAttribute">
+            <summary>Specifies that an output will not be null even if the corresponding type allows it. Specifies that an input argument was not null when the call returns.</summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute">
+            <summary>Specifies that when a method returns <see cref="P:System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.ReturnValue"/>, the parameter may be null even if the corresponding type disallows it.</summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)">
+            <summary>Initializes the attribute with the specified return value condition.</summary>
+            <param name="returnValue">
+            The return value condition. If the method returns this value, the associated parameter may be null.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.ReturnValue">
+            <summary>Gets the return value condition.</summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute">
+            <summary>Specifies that when a method returns <see cref="P:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.ReturnValue"/>, the parameter will not be null even if the corresponding type allows it.</summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.#ctor(System.Boolean)">
+            <summary>Initializes the attribute with the specified return value condition.</summary>
+            <param name="returnValue">
+            The return value condition. If the method returns this value, the associated parameter will not be null.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.ReturnValue">
+            <summary>Gets the return value condition.</summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute">
+            <summary>Specifies that the output will be non-null if the named parameter is non-null.</summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute.#ctor(System.String)">
+            <summary>Initializes the attribute with the associated parameter name.</summary>
+            <param name="parameterName">
+            The associated parameter name.  The output will be non-null if the argument to the parameter specified is non-null.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute.ParameterName">
+            <summary>Gets the associated parameter name.</summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute">
+            <summary>Applied to a method that will never return under any circumstance.</summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute">
+            <summary>Specifies that the method will not return if the associated Boolean parameter is passed the specified value.</summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute.#ctor(System.Boolean)">
+            <summary>Initializes the attribute with the specified parameter value.</summary>
+            <param name="parameterValue">
+            The condition parameter value. Code after the method will be considered unreachable by diagnostics if the argument to
+            the associated parameter matches this value.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute.ParameterValue">
+            <summary>Gets the condition parameter value.</summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.MemberNotNullAttribute">
+            <summary>Specifies that the method or property will ensure that the listed field and property members have not-null values.</summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullAttribute.#ctor(System.String)">
+            <summary>Initializes the attribute with a field or property member.</summary>
+            <param name="member">
+            The field or property member that is promised to be not-null.
+            </param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullAttribute.#ctor(System.String[])">
+            <summary>Initializes the attribute with the list of field and property members.</summary>
+            <param name="members">
+            The list of field and property members that are promised to be not-null.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.MemberNotNullAttribute.Members">
+            <summary>Gets field or property member names.</summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute">
+            <summary>Specifies that the method or property will ensure that the listed field and property members have not-null values when returning with the specified return value condition.</summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.#ctor(System.Boolean,System.String)">
+            <summary>Initializes the attribute with the specified return value condition and a field or property member.</summary>
+            <param name="returnValue">
+            The return value condition. If the method returns this value, the associated parameter will not be null.
+            </param>
+            <param name="member">
+            The field or property member that is promised to be not-null.
+            </param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.#ctor(System.Boolean,System.String[])">
+            <summary>Initializes the attribute with the specified return value condition and list of field and property members.</summary>
+            <param name="returnValue">
+            The return value condition. If the method returns this value, the associated parameter will not be null.
+            </param>
+            <param name="members">
+            The list of field and property members that are promised to be not-null.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.ReturnValue">
+            <summary>Gets the return value condition.</summary>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.Members">
+            <summary>Gets field or property member names.</summary>
         </member>
     </members>
 </doc>

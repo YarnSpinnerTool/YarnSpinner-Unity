@@ -4,6 +4,429 @@
         <name>YarnSpinner.Compiler</name>
     </assembly>
     <members>
+        <member name="T:Yarn.Compiler.BasicBlock">
+            <summary>
+            A basic block is a run of instructions inside a Node. Basic blocks group
+            instructions up into segments such that execution only ever begins at
+            the start of a block (that is, a program never jumps into the middle of
+            a block), and execution only ever leaves at the end of a block.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.LabelName">
+            <summary>
+            Gets the name of the label that this block begins at, or null if this basic block does not begin at a labelled instruction.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.NodeName">
+            <summary>
+            Gets the name of the node that this block is in.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.FirstInstructionIndex">
+            <summary>
+            Gets the index of the first instruction of the node that this block is in.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.BasicBlock.Node">
+            <summary>
+            Gets the Node that this block was extracted from.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.Name">
+            <summary>
+            Gets a descriptive name for the block.
+            </summary>
+            <remarks>
+            If this block begins at a labelled instruction, the name will be <c>[NodeName].[LabelName]</c>. Otherwise, it will be <c>[NodeName].[FirstInstructionIndex]</c>.
+            </remarks>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.ToString">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.ToString(Yarn.Library,Yarn.Compiler.CompilationResult)">
+            <summary>
+            Gets a string containing the textual description of the instructions
+            in this <see cref="T:Yarn.Compiler.BasicBlock"/>.
+            </summary>
+            <param name="library">The <see cref="T:Yarn.Library"/> to use when
+            converting instructions to strings.</param>
+            <param name="compilationResult">The <see cref="T:Yarn.Compiler.CompilationResult"/>
+            that produced <see cref="F:Yarn.Compiler.BasicBlock.Node"/>.</param>
+            <returns>A string containing the text version of the
+            instructions.</returns>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.Ancestors">
+            <summary>
+            Get the ancestors of this block - that is, blocks that may run immediately before this block.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.Destinations">
+            <summary>
+            Gets the destinations of this block - that is, blocks or nodes that
+            may run immediately after this block.
+            </summary>
+            <seealso cref="T:Yarn.Compiler.BasicBlock.Destination"/>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.Instructions">
+            <summary>
+            Gets the Instructions that form this block.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.AddDestination(Yarn.Compiler.BasicBlock,Yarn.Compiler.BasicBlock.Condition)">
+            <summary>
+            Adds a new destination to this block, that points to another block.
+            </summary>
+            <param name="descendant">The new descendant node.</param>
+            <param name="condition">The condition under which <paramref
+            name="descendant"/> will be run.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown when descendant is
+            <see langword="null"/>.</exception>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.AddDestination(System.String,Yarn.Compiler.BasicBlock.Condition)">
+            <summary>
+            Adds a new destination to this block, that points to a node.
+            </summary>
+            <param name="nodeName">The name of the destination node.</param>
+            <param name="condition">The condition under which <paramref
+            name="nodeName"/> will be jumped to.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown when <paramref
+            name="nodeName"/> is <see langword="null"/>.</exception>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.AddDetourDestination(System.String,Yarn.Compiler.BasicBlock.Condition,Yarn.Compiler.BasicBlock)">
+            <summary>
+            Adds a new destination to this block that represents a detour to a
+            node.
+            </summary>
+            <param name="nodeName">The name of the destination node.</param>
+            <param name="condition">The condition under which <paramref
+            name="nodeName"/> will be jumped to.</param>
+            <param name="returnToBlock">The name of the block that will be
+            returned to when the detour returns.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown when <paramref
+            name="nodeName"/> is <see langword="null"/>.</exception>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.AddDestinationToAnywhere(Yarn.Compiler.BasicBlock)">
+            <summary>
+            Adds a new destination to this block that points at any other node
+            in the program.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.AddDestination(Yarn.Compiler.BasicBlock,Yarn.Compiler.BasicBlock.Condition,System.String)">
+            <summary>
+            Adds a new destination to this block that points to a node, with a
+            option's line ID for context.
+            </summary>
+            <param name="descendant">The new descendant node.</param>
+            <param name="condition">The condition under which the node <paramref
+            name="descendant"/> will be run.</param>
+            <param name="lineID">The line ID of the option that must be selected
+            in order for <paramref name="descendant"/> to run.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown when <paramref
+            name="descendant"/> is <see langword="null"/>.</exception>
+        </member>
+        <member name="T:Yarn.Compiler.BasicBlock.Destination">
+            <summary>
+            A destination represents a <see cref="T:Yarn.Compiler.BasicBlock"/> or node that may
+            be run, following the execution of a <see cref="T:Yarn.Compiler.BasicBlock"/>.
+            </summary>
+            <remarks>
+            Destination objects represent links between blocks, or between
+            blocks and nodes.
+            </remarks>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.Destination.#ctor(Yarn.Compiler.BasicBlock.Condition,Yarn.Compiler.BasicBlock)">
+            <summary>
+            Initialises a new instance of the <see cref="T:Yarn.Compiler.BasicBlock.Destination"/>
+            class.
+            </summary>
+            <param name="condition">The condition under which the
+            destination will be run.</param>
+            <param name="returnTo">An optional block that may be returned to
+            later in the program execution.</param>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.Destination.Condition">
+            <summary>
+            The condition that causes this destination to be reached.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.Destination.ReturnTo">
+            <summary>
+            When this destination is taken, if this value is non-null, a VM
+            should push this block onto the call stack. When a Return
+            instruction is reached, pop a block off the call stack and
+            return to it. If the value is null, the VM should clear the call
+            stack.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.Destination.ToString">
+            <inheritdoc/>
+        </member>
+        <member name="T:Yarn.Compiler.BasicBlock.NodeDestination">
+            <summary>
+            A destination that represents a jump or detour to a node.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.NodeDestination.#ctor(System.String,Yarn.Compiler.BasicBlock.Condition,Yarn.Compiler.BasicBlock)">
+            <summary>
+            Initialises a new instance of the <see cref="T:Yarn.Compiler.BasicBlock.NodeDestination"/>
+            class.
+            </summary>
+            <param name="condition">The condition under which the
+            destination will be run.</param>
+            <param name="returnTo">An optional block that may be returned to
+            later in the program execution.</param>
+            <param name="nodeName">The name of the node to jump or detour
+            to.</param>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.NodeDestination.NodeName">
+            <summary>
+            The name of the node that this destination refers to.
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.BasicBlock.AnyNodeDestination">
+            <summary>
+            A destination that represents a jump or detour to any possible node.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.AnyNodeDestination.#ctor(Yarn.Compiler.BasicBlock)">
+            <summary>
+            Initialises a new instance of the <see cref="T:Yarn.Compiler.BasicBlock.AnyNodeDestination"/>
+            class.
+            </summary>
+            <param name="returnTo">An optional block that may be returned to
+            later in the program execution.</param>
+        </member>
+        <member name="T:Yarn.Compiler.BasicBlock.BlockDestination">
+            <summary>
+            A destination that represents a jump to a specific block.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.BlockDestination.Block">
+            <summary>
+            The block that this destination refers to.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.BlockDestination.DestinationInstructionIndex">
+            <summary>
+            Gets the index of the first instruction of the block in its
+            containing node.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.BlockDestination.#ctor(Yarn.Compiler.BasicBlock,Yarn.Compiler.BasicBlock.Condition)">
+            <summary>
+            Initialises a new instance of the <see
+            cref="T:Yarn.Compiler.BasicBlock.BlockDestination"/> class.
+            </summary>
+            <param name="block">The block that is jumped to.</param>
+            <param name="condition">The condition under which the
+            destination is taken.</param>
+        </member>
+        <member name="T:Yarn.Compiler.BasicBlock.OptionDestination">
+            <summary>
+            A destination that represents an option being selected.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.OptionDestination.#ctor(System.String,Yarn.Compiler.BasicBlock)">
+            <summary>
+            Initialises a new instance of the <see
+            cref="T:Yarn.Compiler.BasicBlock.OptionDestination"/> class.
+            </summary>
+            <param name="optionLineID">The ID of the line associated with
+            this option.</param>
+            <param name="block">The block that is jumped to when this option
+            is selected.</param>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.OptionDestination.OptionLineID">
+            <summary>
+            Gets or sets the ID of the line associated with this option.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.OptionDestination.ToString">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.Descendants">
+            <summary>
+            Gets all descendants (that is, destinations, and destinations of
+            those destinations, and so on), recursively.
+            </summary>
+            <remarks>
+            Cycles are detected and avoided.
+            </remarks>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.DescendantsWithPlayerVisibleContent">
+            <summary>
+            Gets all descendants (that is, destinations, and destinations of
+            those destinations, and so on) that have any player-visible content,
+            recursively.
+            </summary>
+            <remarks>
+            Cycles are detected and avoided.
+            </remarks>
+        </member>
+        <member name="T:Yarn.Compiler.BasicBlock.Condition">
+            <summary>
+            The conditions under which a <see cref="T:Yarn.Compiler.BasicBlock.Destination"/> may be
+            reached at the end of a BasicBlock.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.BasicBlock.Condition.Fallthrough">
+            <summary>
+            The Destination is reached because the preceding BasicBlock
+            reached the end of its execution, and the Destination's target
+            is the block immediately following.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.BasicBlock.Condition.DirectJump">
+            <summary>
+            The Destination is reached beacuse of an explicit instruction to
+            go to this block or node.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.BasicBlock.Condition.ExpressionIsTrue">
+            <summary>
+            The Destination is reached because an expression evaluated to
+            true.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.BasicBlock.Condition.ExpressionIsFalse">
+            <summary>
+            The Destination is reached because an expression evaluated to
+            false.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.BasicBlock.Condition.Option">
+            <summary>
+            The Destination is reached because the player made an in-game
+            choice to go to it.
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.BasicBlock.PlayerVisibleContentElement">
+            <summary>
+            An abstract class that represents some content that is shown to the
+            player.
+            </summary>
+            <remarks>
+            This class is used, rather than the runtime classes Yarn.Line or
+            Yarn.OptionSet, because when the program is being analysed, no
+            values for any substitutions are available. Instead, these classes
+            represent the data that is available offline.
+            </remarks>
+        </member>
+        <member name="T:Yarn.Compiler.BasicBlock.LineElement">
+            <summary>
+            A line of dialogue that should be shown to the player.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.BasicBlock.LineElement.LineID">
+            <summary>
+            The string table ID of the line that will be shown to the player.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.LineElement.#ctor(System.String)">
+            <summary>
+            Initialises a new instance of the <see cref="T:Yarn.Compiler.BasicBlock.LineElement"/>
+            class.
+            </summary>
+            <param name="lineID">The ID of the line that this element
+            represents.</param>
+        </member>
+        <member name="T:Yarn.Compiler.BasicBlock.OptionsElement">
+            <summary>
+            A collection of options that should be shown to the player.
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.BasicBlock.OptionsElement.Option">
+            <summary>
+            Represents a single option that may be presented to the player.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.BasicBlock.OptionsElement.Option.LineID">
+            <summary>
+            The string table ID that will be shown to the player.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.BasicBlock.OptionsElement.Option.Destination">
+            <summary>
+            The destination that will be run if this option is selected
+            by the player.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.BasicBlock.OptionsElement.Options">
+            <summary>
+            The collection of options that will be delivered to the player.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.OptionsElement.#ctor(System.Collections.Generic.IEnumerable{Yarn.Compiler.BasicBlock.OptionsElement.Option})">
+            <summary>
+            Initialises a new instance of the <see cref="T:Yarn.Compiler.BasicBlock.OptionsElement"/>
+            class.
+            </summary>
+            <param name="options">The options that will be delivered to the
+            player.</param>
+        </member>
+        <member name="T:Yarn.Compiler.BasicBlock.CommandElement">
+            <summary>
+            A command that will be executed.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.BasicBlock.CommandElement.CommandText">
+            <summary>
+            The text of the command.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.BasicBlock.CommandElement.#ctor(System.String)">
+            <summary>
+            Initialises a new instance of the <see cref="T:Yarn.Compiler.BasicBlock.CommandElement"/>
+            class.
+            </summary>
+            <param name="commandText">The text of the command.</param>
+        </member>
+        <member name="P:Yarn.Compiler.BasicBlock.PlayerVisibleContent">
+            <summary>
+            Gets the collection of player-visible content that will be delivered
+            when this block is run.
+            </summary>
+            <remarks>
+            <para>
+            Player-visible content means lines, options and commands. When this
+            block is run, the entire contents of this collection will be
+            displayed to the player, in the same order as they appear in this
+            collection.
+            </para>
+            <para>
+            If this collection is empty, then the block contains no visible
+            content. This is the case for blocks that only contain logic, and do
+            not contain any lines, options or commands.
+            </para>
+            <example>
+            To tell the difference between the different kinds of content, use
+            the <see langword="is"/> operator to check the type of each item:
+            <code>
+            foreach (var item in block.PlayerVisibleContent) { 
+                if (item is LineElement line) {
+                     // Do something with line 
+                } 
+            }
+            </code>
+            </example>
+            </remarks>
+        </member>
+        <member name="T:Yarn.Compiler.InstructionCollectionExtensions">
+            <summary>
+            Contains extension methods for producing <see cref="T:Yarn.Compiler.BasicBlock"/>
+            objects from a Node.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.InstructionCollectionExtensions.GetBasicBlocks(Yarn.Node,Yarn.Compiler.NodeDebugInfo)">
+            <summary>
+            Produces <see cref="T:Yarn.Compiler.BasicBlock"/> objects from a Node.
+            </summary>
+            <param name="node">The node to get basic blocks from.</param>
+            <param name="info">An object containing debugging information for
+            the node.</param>
+            <returns></returns>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
         <member name="T:Yarn.Compiler.DeclarationBuilder">
             <summary>
             Provides methods for constructing <see
@@ -228,9 +651,14 @@
             The type of compilation to perform.
             </summary>
         </member>
-        <member name="F:Yarn.Compiler.CompilationJob.VariableDeclarations">
+        <member name="P:Yarn.Compiler.CompilationJob.VariableDeclarations">
             <summary>
             The declarations for variables.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.CompilationJob.Declarations">
+            <summary>
+            The declarations for variables and functions.
             </summary>
         </member>
         <member name="P:Yarn.Compiler.CompilationJob.LanguageVersion">
@@ -401,6 +829,15 @@
             Gets a collection of any types that were defined by the user in the
             input (for example, user-defined enum types.)
             </summary>
+        </member>
+        <member name="M:Yarn.Compiler.CompilationResult.GetDescriptionForVariable(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.Compiler.CompilationResult.GetLabelsForNode(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.Compiler.CompilationResult.GetStringForKey(System.String)">
+            <inheritdoc/>
         </member>
         <member name="F:Yarn.Compiler.ContentIdentifierType.Line">
             <summary>
@@ -686,6 +1123,26 @@
         <member name="P:Yarn.Compiler.YarnSpinnerParser.ValueContext.Type">
             <inheritdoc/>
         </member>
+        <member name="T:Yarn.Compiler.YarnSpinnerParser.ValueNumberContext">
+            <summary>
+            A number literal value.
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.YarnSpinnerParser.ValueTrueContext">
+            <summary>
+            A true boolean literal value.
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.YarnSpinnerParser.ValueFalseContext">
+            <summary>
+            A false boolean literal value.
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.YarnSpinnerParser.ValueStringContext">
+            <summary>
+            A string literal value.
+            </summary>
+        </member>
         <member name="T:Yarn.Compiler.YarnSpinnerParser.VariableContext">
             <summary>
             Adds type properties to <see cref="T:Yarn.Compiler.YarnSpinnerParser.VariableContext"/>.
@@ -731,10 +1188,43 @@
             primary clause has been seen before or not.
             </summary>
         </member>
+        <member name="T:Yarn.Compiler.YarnSpinnerParser.ILiteralContext">
+            <summary>
+            Marks that a type represents a <see cref="T:Antlr4.Runtime.ParserRuleContext"/> that
+            represents a literal value.
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.ProjectDebugInfo">
+            <summary>
+            Contains debugging information for compiled Yarn Projects.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.ProjectDebugInfo.Nodes">
+            <summary>
+            The debugging info for the nodes in the project.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.ProjectDebugInfo.GetNodeDebugInfo(System.String)">
+            <summary>
+            Gets the debugging info for a given node, if it exists.
+            </summary>
+            <param name="nodeName">The name of the node to get debugging info
+            for.</param>
+            <returns>The debugging info for the node, or <see langword="null"/>
+            if none is present.</returns>
+        </member>
         <member name="T:Yarn.Compiler.NodeDebugInfo">
             <summary>
             Contains debug information for a node in a Yarn file.
             </summary>
+        </member>
+        <member name="M:Yarn.Compiler.NodeDebugInfo.#ctor(System.String,System.String)">
+            <summary>
+            Initialises a new instance of the NodeDebugInfo class.
+            </summary>
+            <param name="fileName">The file that the node was defined
+            in.</param>
+            <param name="nodeName">The name of the node.</param>
         </member>
         <member name="P:Yarn.Compiler.NodeDebugInfo.FileName">
             <summary>
@@ -752,6 +1242,23 @@
             cref="T:Yarn.Compiler.Position"/> information in the file indicated by <see
             cref="P:Yarn.Compiler.NodeDebugInfo.FileName"/>.
             </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeDebugInfo.Range">
+            <summary>
+            The range in the file in which the node appears.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeDebugInfo.IsImplicit">
+            <summary>
+            Gets or sets a value indicating whether this node was created by the
+            compiler.
+            </summary>
+            <remarks>
+            Nodes that exist in a .yarn file have an <see cref="P:Yarn.Compiler.NodeDebugInfo.IsImplicit"/>
+            value of <see langword="false"/>. Nodes that are generated by the
+            compiler include smart variable implementations, and node group
+            'hub' nodes.
+            </remarks>
         </member>
         <member name="M:Yarn.Compiler.NodeDebugInfo.GetLineInfo(System.Int32)">
             <summary>
@@ -785,9 +1292,8 @@
         </member>
         <member name="F:Yarn.Compiler.NodeDebugInfo.LineInfo.Position">
             <summary>
-            The position in <see cref="F:Yarn.Compiler.NodeDebugInfo.LineInfo.FileName"/> that
-            contains the statement or expression that this line was produced
-            from.
+            The position in <see cref="F:Yarn.Compiler.NodeDebugInfo.LineInfo.FileName"/> that contains the
+            statement or expression that this line was produced from.
             </summary>
         </member>
         <member name="T:Yarn.Compiler.Range">
@@ -4229,6 +4735,8 @@
             variable declarations found during compilation.</param>
             <param name="nodeContexts">The collection of node group parser
             contexts that all belong to this node group.</param>
+            <param name="compiledNodes">The collection of existing compiled
+            nodes in the compilation.</param>
         </member>
         <member name="M:Yarn.Compiler.NodeGroupCompiler.Emit(Antlr4.Runtime.IToken,Yarn.Instruction)">
             <inheritdoc/>
@@ -4296,7 +4804,7 @@
             <remarks>
             This value is not stored when the file is saved, but is instead
             determined when the file is loaded by <see
-            cref="!:LoadFromFile(string)"/>, or provided when the <see
+            cref="M:Yarn.Compiler.Project.LoadFromFile(System.String,System.String)"/>, or provided when the <see
             cref="T:Yarn.Compiler.Project"/> is constructed.
             </remarks>
         </member>
@@ -4751,6 +5259,8 @@
             cref="T:TypeChecker.TypeConstraint"/> objects. During type checking, this
             collection will be added to if a type constraint fails to resolve by
             the end of a file.</param>
+            <param name="cancellationToken">A token used to indicate that type
+            checking should be cancelled.</param>
         </member>
         <member name="M:Yarn.Compiler.TypeCheckerListener.GetKnownDeclaration(System.String)">
             <summary>
@@ -4819,10 +5329,74 @@
             Gets or sets the type of this parse node.
             </summary>
         </member>
+        <member name="T:Yarn.Compiler.Upgrader.UpgradeJob">
+            <summary>
+            An upgrade job.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.Upgrader.UpgradeJob.Files">
+            <summary>
+            The collection of files to upgrade.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.Upgrader.UpgradeJob.UpgradeType">
+            <summary>
+            The type of the upgrade to perform.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.Upgrader.UpgradeJob.#ctor(Yarn.Compiler.Upgrader.UpgradeType,System.Collections.Generic.IEnumerable{Yarn.Compiler.CompilationJob.File})">
+            <summary>
+            Initialises a new instances of the UpgradeJob struct.
+            </summary>
+            <param name="upgradeType">The type of the upgrade.</param>
+            <param name="files">The files to upgrade.</param>
+        </member>
+        <member name="T:Yarn.Compiler.Upgrader.UpgradeResult">
+            <summary>
+            The result of an upgrade.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.Upgrader.UpgradeResult.Files">
+            <summary>
+            The files produced as part of the upgrade.
+            </summary>
+        </member>
         <member name="P:Yarn.Compiler.Upgrader.UpgradeResult.Diagnostics">
             <summary>
             Gets a collection containing all <see cref="T:Yarn.Compiler.Diagnostic"/>
             objects across all of the files in <see cref="F:Yarn.Compiler.Upgrader.UpgradeResult.Files"/>.
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.Upgrader.UpgradeResult.OutputFile">
+            <summary>
+            A file generated as part of an upgrade.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.Upgrader.UpgradeResult.OutputFile.Path">
+            <summary>
+            The path of the file.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.Upgrader.UpgradeResult.OutputFile.Replacements">
+            <summary>
+            The list of replacements needed to be made in order to go from
+            <see cref="F:Yarn.Compiler.Upgrader.UpgradeResult.OutputFile.OriginalSource"/> to <see cref="P:Yarn.Compiler.Upgrader.UpgradeResult.OutputFile.UpgradedSource"/>.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.Upgrader.UpgradeResult.OutputFile.OriginalSource">
+            <summary>
+            The original text of the file, prior to upgrades.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.Upgrader.UpgradeResult.OutputFile.UpgradedSource">
+            <summary>
+            The upgraded text of the file.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.Upgrader.UpgradeResult.OutputFile.Diagnostics">
+            <summary>
+            The diagnostics produced for this file as a result of the
+            upgrade process.
             </summary>
         </member>
         <member name="F:Yarn.Compiler.Upgrader.UpgradeResult.OutputFile.IsNewFile">
@@ -4990,27 +5564,25 @@
         </member>
         <member name="M:Yarn.Compiler.Utility.TagLines(System.String,System.Collections.Generic.ICollection{System.String})">
             <summary>
-            Given Yarn source code, adds line tags to the ends of all lines
-            that need one and do not already have one.
+            Given Yarn source code, adds line tags to the ends of all lines that
+            need one and do not already have one.
             </summary>
             <remarks><para>
-            This method ensures that it does not generate line
-            tags that are already present in the file, or present in the
-            <paramref name="existingLineTags"/> collection.
+            This method ensures that it does not generate line tags that are
+            already present in the file, or present in the <paramref
+            name="existingLineTags"/> collection.
             </para>
             <para>
             Line tags are added to any line of source code that contains
             user-visible text: lines, options, and shortcut options.
             </para>
             </remarks>
-            <param name="contents">The source code to add line tags
-            to.</param>
-            <param name="existingLineTags">The collection of line tags
-            already exist elsewhere in the source code; the newly added
-            line tags will not be duplicates of any in this
-            collection.</param>
-            <returns>Tuple of the modified source code, with line tags
-            added and the list of new line tags generated.
+            <param name="contents">The source code to add line tags to.</param>
+            <param name="existingLineTags">The collection of line tags already
+            exist elsewhere in the source code; the newly added line tags will
+            not be duplicates of any in this collection.</param>
+            <returns>Tuple of the modified source code, with line tags added and
+            an updated list of line IDs.
             </returns>
         </member>
         <member name="M:Yarn.Compiler.Utility.ParseSource(System.String)">
@@ -5078,6 +5650,8 @@
             entered.
             </summary>
             <param name="nodes">The nodes to get string blocks for.</param>
+            <param name="projectDebugInfo">An object containing debugging
+            information for the project.</param>
             <returns>A collection of runs of lines.</returns>
         </member>
         <member name="M:Yarn.Compiler.Utility.DetermineNodeConnections(System.String[])">
@@ -5107,6 +5681,32 @@
             <returns>An <see cref="T:Yarn.IYarnValue"/> representation of <paramref
             name="clrValue"/>.</returns>
         </member>
+        <member name="M:Yarn.Compiler.Utility.TryGetNodeTitle(System.String,Yarn.Compiler.YarnSpinnerParser.NodeContext,System.String@,System.String@,System.String@,System.String@)">
+            <summary>
+            Gets the title for a node as defined in the source code, along with
+            its unique title (which may be different to the source title.)
+            </summary>
+            <param name="sourceFileName">The name of the file in which the node
+            is defined, or <see langword="null"/> if not available.</param>
+            <param name="nodeContext">The parsed node's context.</param>
+            <param name="sourceTitle">On return, contains the title of the node,
+            as it appears in the source code.</param>
+            <param name="uniqueTitle">On return, contains the unique title of
+            the node, as stored in the output program.</param>
+            <param name="subtitle">The sub-title of the node, if present. This
+            value is always <see langword="null"/> if the node is not in a node
+            group.</param>
+            <param name="nodeGroupName">The name of the node group the node is a
+            member of, if any.</param>
+            <returns><see langword="true"/> if the <paramref
+            name="sourceTitle"/> and <paramref name="uniqueTitle"/> could be
+            determined; <see langword="false"/> otherwise.</returns>
+        </member>
+        <member name="T:Yarn.Compiler.GraphingNode">
+            <summary>
+            A node for representation in a visual graph.
+            </summary>
+        </member>
         <member name="F:Yarn.Compiler.GraphingNode.node">
             <summary>
             The name of the node.
@@ -5128,306 +5728,6 @@
             The position of this <see cref="T:Yarn.Compiler.GraphingNode"/>. Only valid when
             <see cref="F:Yarn.Compiler.GraphingNode.hasPositionalInformation"/> is <see langword="true"/>.
             </summary>
-        </member>
-        <member name="T:Yarn.Compiler.InstructionCollectionExtensions">
-            <summary>
-            Contains extension methods for producing <see cref="T:Yarn.Compiler.BasicBlock"/>
-            objects from a Node.
-            </summary>
-        </member>
-        <member name="M:Yarn.Compiler.InstructionCollectionExtensions.GetBasicBlocks(Yarn.Node,Yarn.Compiler.NodeDebugInfo)">
-            <summary>
-            Produces <see cref="T:Yarn.Compiler.BasicBlock"/> objects from a Node.
-            </summary>
-            <param name="node"></param>
-            <returns></returns>
-            <exception cref="T:System.InvalidOperationException"></exception>
-        </member>
-        <member name="T:Yarn.Compiler.BasicBlock">
-            <summary>
-            A basic block is a run of instructions inside a Node. Basic blocks group
-            instructions up into segments such that execution only ever begins at
-            the start of a block (that is, a program never jumps into the middle of
-            a block), and execution only ever leaves at the end of a block.
-            </summary>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.LabelName">
-            <summary>
-            Gets the name of the label that this block begins at, or null if this basic block does not begin at a labelled instruction.
-            </summary>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.NodeName">
-            <summary>
-            Gets the name of the node that this block is in.
-            </summary>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.FirstInstructionIndex">
-            <summary>
-            Gets the index of the first instruction of the node that this block is in.
-            </summary>
-        </member>
-        <member name="F:Yarn.Compiler.BasicBlock.Node">
-            <summary>
-            Gets the Node that this block was extracted from.
-            </summary>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.Name">
-            <summary>
-            Gets a descriptive name for the block.
-            </summary>
-            <remarks>
-            If this block begins at a labelled instruction, the name will be <c>[NodeName].[LabelName]</c>. Otherwise, it will be <c>[NodeName].[FirstInstructionIndex]</c>.
-            </remarks>
-        </member>
-        <member name="M:Yarn.Compiler.BasicBlock.ToString">
-            <inheritdoc/>
-        </member>
-        <member name="M:Yarn.Compiler.BasicBlock.ToString(Yarn.Library,Yarn.Compiler.CompilationResult)">
-            <summary>
-            Gets a string containing the textual description of the instructions
-            in this <see cref="T:Yarn.Compiler.BasicBlock"/>.
-            </summary>
-            <param name="library">The <see cref="T:Yarn.Library"/> to use when
-            converting instructions to strings.</param>
-            <param name="compilationResult">The <see cref="T:Yarn.Compiler.CompilationResult"/>
-            that produced <see cref="F:Yarn.Compiler.BasicBlock.Node"/>.</param>
-            <returns>A string containing the text version of the
-            instructions.</returns>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.Ancestors">
-            <summary>
-            Get the ancestors of this block - that is, blocks that may run immediately before this block.
-            </summary>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.Destinations">
-            <summary>
-            Gets the destinations of this block - that is, blocks or nodes that
-            may run immediately after this block.
-            </summary>
-            <seealso cref="T:Yarn.Compiler.BasicBlock.Destination"/>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.Instructions">
-            <summary>
-            Gets the Instructions that form this block.
-            </summary>
-        </member>
-        <member name="M:Yarn.Compiler.BasicBlock.AddDestination(Yarn.Compiler.BasicBlock,Yarn.Compiler.BasicBlock.Condition)">
-            <summary>
-            Adds a new destination to this block, that points to another block.
-            </summary>
-            <param name="descendant">The new descendant node.</param>
-            <param name="condition">The condition under which <paramref
-            name="descendant"/> will be run.</param>
-            <exception cref="T:System.ArgumentNullException">Thrown when descendant is
-            <see langword="null"/>.</exception>
-        </member>
-        <member name="M:Yarn.Compiler.BasicBlock.AddDestination(System.String,Yarn.Compiler.BasicBlock.Condition)">
-            <summary>
-            Adds a new destination to this block, that points to a node.
-            </summary>
-            <param name="nodeName">The name of the destination node.</param>
-            <param name="condition">The condition under which <paramref
-            name="descendant"/> will be run.</param>
-            <exception cref="T:System.ArgumentNullException">Thrown when <paramref
-            name="nodeName"/> is <see langword="null"/>.</exception>
-        </member>
-        <member name="M:Yarn.Compiler.BasicBlock.AddDestinationToAnywhere(Yarn.Compiler.BasicBlock)">
-            <summary>
-            Adds a new destination to this block that points at any other node
-            in the program.
-            </summary>
-        </member>
-        <member name="M:Yarn.Compiler.BasicBlock.AddDestination(Yarn.Compiler.BasicBlock,Yarn.Compiler.BasicBlock.Condition,System.String)">
-            <summary>
-            Adds a new destination to this block that points to a node, with a
-            option's line ID for context.
-            </summary>
-            <param name="descendant">The new descendant node.</param>
-            <param name="condition">The condition under which the node <paramref
-            name="descendant"/> will be run.</param>
-            <param name="lineID">The line ID of the option that must be selected
-            in order for <paramref name="descendant"/> to run.</param>
-            <exception cref="T:System.ArgumentNullException">Thrown when <paramref
-            name="descendant"/> is <see langword="null"/>.</exception>
-        </member>
-        <member name="T:Yarn.Compiler.BasicBlock.Destination">
-            <summary>
-            A destination represents a <see cref="T:Yarn.Compiler.BasicBlock"/> or node that may
-            be run, following the execution of a <see cref="T:Yarn.Compiler.BasicBlock"/>.
-            </summary>
-            <remarks>
-            Destination objects represent links between blocks, or between
-            blocks and nodes.
-            </remarks>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.Destination.Condition">
-            <summary>
-            The condition that causes this destination to be reached.
-            </summary>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.Destination.ReturnTo">
-            <summary>
-            When this destination is taken, if this value is non-null, a VM
-            should push this block onto the call stack. When a Return
-            instruction is reached, pop a block off the call stack and
-            return to it. If the value is null, the VM should clear the call
-            stack.
-            </summary>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.NodeDestination.NodeName">
-            <summary>
-            The name of the node that this destination refers to.
-            </summary>
-            <remarks>This value is only valid when <see cref="T:System.Type"/> is
-            <see cref="!:DestinationType.Node"/>.</remarks>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.BlockDestination.Block">
-            <summary>
-            The block that this destination refers to.
-            </summary>
-            <remarks>This value is only valid when <see cref="T:System.Type"/> is
-            <see cref="!:DestinationType.Block"/>.</remarks>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.Descendants">
-            <summary>
-            Gets all descendants (that is, destinations, and destinations of
-            those destinations, and so on), recursively.
-            </summary>
-            <remarks>
-            Cycles are detected and avoided.
-            </remarks>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.DescendantsWithPlayerVisibleContent">
-            <summary>
-            Gets all descendants (that is, destinations, and destinations of
-            those destinations, and so on) that have any player-visible content,
-            recursively.
-            </summary>
-            <remarks>
-            Cycles are detected and avoided.
-            </remarks>
-        </member>
-        <member name="T:Yarn.Compiler.BasicBlock.Condition">
-            <summary>
-            The conditions under which a <see cref="T:Yarn.Compiler.BasicBlock.Destination"/> may be
-            reached at the end of a BasicBlock.
-            </summary>
-        </member>
-        <member name="F:Yarn.Compiler.BasicBlock.Condition.Fallthrough">
-            <summary>
-            The Destination is reached because the preceding BasicBlock
-            reached the end of its execution, and the Destination's target
-            is the block immediately following.
-            </summary>
-        </member>
-        <member name="F:Yarn.Compiler.BasicBlock.Condition.DirectJump">
-            <summary>
-            The Destination is reached beacuse of an explicit instruction to
-            go to this block or node.
-            </summary>
-        </member>
-        <member name="F:Yarn.Compiler.BasicBlock.Condition.ExpressionIsTrue">
-            <summary>
-            The Destination is reached because an expression evaluated to
-            true.
-            </summary>
-        </member>
-        <member name="F:Yarn.Compiler.BasicBlock.Condition.ExpressionIsFalse">
-            <summary>
-            The Destination is reached because an expression evaluated to
-            false.
-            </summary>
-        </member>
-        <member name="F:Yarn.Compiler.BasicBlock.Condition.Option">
-            <summary>
-            The Destination is reached because the player made an in-game
-            choice to go to it.
-            </summary>
-        </member>
-        <member name="T:Yarn.Compiler.BasicBlock.PlayerVisibleContentElement">
-            <summary>
-            An abstract class that represents some content that is shown to the
-            player.
-            </summary>
-            <remarks>
-            This class is used, rather than the runtime classes Yarn.Line or
-            Yarn.OptionSet, because when the program is being analysed, no
-            values for any substitutions are available. Instead, these classes
-            represent the data that is available offline.
-            </remarks>
-        </member>
-        <member name="T:Yarn.Compiler.BasicBlock.LineElement">
-            <summary>
-            A line of dialogue that should be shown to the player.
-            </summary>
-        </member>
-        <member name="F:Yarn.Compiler.BasicBlock.LineElement.LineID">
-            <summary>
-            The string table ID of the line that will be shown to the player.
-            </summary>
-        </member>
-        <member name="T:Yarn.Compiler.BasicBlock.OptionsElement">
-            <summary>
-            A collection of options that should be shown to the player.
-            </summary>
-        </member>
-        <member name="T:Yarn.Compiler.BasicBlock.OptionsElement.Option">
-            <summary>
-            Represents a single option that may be presented to the player.
-            </summary>
-        </member>
-        <member name="F:Yarn.Compiler.BasicBlock.OptionsElement.Option.LineID">
-            <summary>
-            The string table ID that will be shown to the player.
-            </summary>
-        </member>
-        <member name="F:Yarn.Compiler.BasicBlock.OptionsElement.Option.Destination">
-            <summary>
-            The destination that will be run if this option is selected
-            by the player.
-            </summary>
-        </member>
-        <member name="F:Yarn.Compiler.BasicBlock.OptionsElement.Options">
-            <summary>
-            The collection of options that will be delivered to the player.
-            </summary>
-        </member>
-        <member name="T:Yarn.Compiler.BasicBlock.CommandElement">
-            <summary>
-            A command that will be executed.
-            </summary>
-        </member>
-        <member name="F:Yarn.Compiler.BasicBlock.CommandElement.CommandText">
-            <summary>
-            The text of the command.
-            </summary>
-        </member>
-        <member name="P:Yarn.Compiler.BasicBlock.PlayerVisibleContent">
-            <summary>
-            Gets the collection of player-visible content that will be delivered
-            when this block is run.
-            </summary>
-            <remarks>
-            <para>
-            Player-visible content means lines, options and commands. When this
-            block is run, the entire contents of this collection will be
-            displayed to the player, in the same order as they appear in this
-            collection.
-            </para>
-            <para>
-            If this collection is empty, then the block contains no visible
-            content. This is the case for blocks that only contain logic, and do
-            not contain any lines, options or commands.
-            </para>
-            <example>
-            To tell the difference between the different kinds of content, use
-            the <see langword="is"/> operator to check the type of each item:
-            <code>
-            foreach (var item in block.PlayerVisibleContent) { if (item is
-            LineElement line) { // Do something with line } }
-            </code>
-            </example>
-            </remarks>
         </member>
         <member name="M:Yarn.Compiler.CodeGenerationVisitor.EvaluateLineCondition(Yarn.Compiler.YarnSpinnerParser.Line_statementContext,System.String@)">
             <summary>
@@ -5532,6 +5832,20 @@
         </member>
         <member name="P:TypeChecker.DisjunctionConstraint.AllVariables">
             <inheritdoc/>
+        </member>
+        <member name="T:TypeChecker.EnumerablesExtension">
+            <summary>
+            Contains extension methods for working with <see cref="T:System.Collections.Generic.IEnumerable`1"/>
+            types.
+            </summary>
+        </member>
+        <member name="M:TypeChecker.EnumerablesExtension.CartesianProduct``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}})">
+            <summary>
+            Gets the Cartesian product of 2 or more sequences.
+            </summary>
+            <typeparam name="T">The type of the values in the sequences.</typeparam>
+            <param name="sequences">The sequences to combine.</param>
+            <returns>The Cartesian product of the sequences.</returns>
         </member>
         <member name="M:TypeChecker.EnumerablesExtension.NotNull``1(System.Collections.Generic.IEnumerable{``0})">
             <summary>
