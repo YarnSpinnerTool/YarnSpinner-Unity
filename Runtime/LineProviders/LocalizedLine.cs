@@ -102,7 +102,7 @@ namespace Yarn.Unity
             RawText = "!! ERROR: Missing line!",
             Substitutions = System.Array.Empty<string>(),
             TextID = "<missing>",
-            Text = new Markup.MarkupParseResult { Text = "!! ERROR: Missing line!", Attributes = new System.Collections.Generic.List<Markup.MarkupAttribute>() }
+            Text = new Markup.MarkupParseResult("!! ERROR: Missing line!", new System.Collections.Generic.List<Markup.MarkupAttribute>())
         };
     }
 
