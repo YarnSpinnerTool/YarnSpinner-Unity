@@ -144,8 +144,8 @@ namespace Yarn.Unity
         /// <para style="note"><para>The <see cref="DialogueRunner"/> will not
         /// proceed to the next piece of content (e.g. the next line, or the
         /// next options) until all Dialogue Views have reported that they have
-        /// finished presenting their lines. If a <see cref="LineView"/> doesn't
-        /// report that it's finished until it receives input, the <see
+        /// finished presenting their lines. If a <see cref="LinePresenter"/>
+        /// doesn't report that it's finished until it receives input, the <see
         /// cref="DialogueRunner"/> will end up pausing.</para>
         /// <para>
         /// This is useful for games in which you want the player to be able to

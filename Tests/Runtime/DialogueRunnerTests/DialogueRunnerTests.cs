@@ -567,12 +567,12 @@ namespace Yarn.Unity.Tests
         {
 
 
-            runner.onDialogueStart.AddListener(() =>
+            runner.onDialogueStart?.AddListener(() =>
             {
                 Debug.Log("Dialogue start");
             });
 
-            runner.onDialogueComplete.AddListener(() =>
+            runner.onDialogueComplete?.AddListener(() =>
             {
                 Debug.Log("Dialogue complete");
             });

@@ -13,10 +13,12 @@ namespace Yarn.Unity.Editor
     using UnityEngine;
     using UnityEngine.UIElements;
 
+#nullable enable
+
     class YarnSpinnerProjectSettingsProvider : SettingsProvider
     {
-        private YarnSpinnerProjectSettings baseSettings;
-        private YarnSpinnerProjectSettings unsavedSettings;
+        private YarnSpinnerProjectSettings? baseSettings;
+        private YarnSpinnerProjectSettings? unsavedSettings;
         private int settingWidth = 320;
 
         public YarnSpinnerProjectSettingsProvider(string path, SettingsScope scope = SettingsScope.Project) : base(path, scope) { }
@@ -29,6 +31,18 @@ namespace Yarn.Unity.Editor
 
         public override void OnGUI(string searchContext)
         {
+            if (unsavedSettings == null)
+            {
+                EditorGUILayout.HelpBox($"Internal error: {nameof(unsavedSettings)} is not set", MessageType.Error);
+                return;
+            }
+
+            if (baseSettings == null)
+            {
+                EditorGUILayout.HelpBox($"Internal error: {nameof(baseSettings)} is not set", MessageType.Error);
+                return;
+            }
+
             EditorGUILayout.LabelField("Automatic Recompilation and Asset Association");
             using (var changeCheck = new EditorGUI.ChangeCheckScope())
             {

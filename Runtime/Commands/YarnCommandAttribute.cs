@@ -6,6 +6,8 @@ using System;
 using System.Collections;
 using UnityEngine;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     #region Class/Interface
@@ -87,7 +89,7 @@ namespace Yarn.Unity
     public class YarnCommandAttribute : YarnActionAttribute
     {
         /// <inheritdoc/>
-        public YarnCommandAttribute(string name = null) => Name = name;
+        public YarnCommandAttribute(string? name = null) => Name = name;
     }
     #endregion
 }

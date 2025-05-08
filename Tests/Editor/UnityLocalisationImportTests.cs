@@ -18,6 +18,8 @@ using NUnit.Framework;
 using Yarn.Unity;
 using Yarn.Unity.Editor;
 
+#nullable enable
+
 namespace Yarn.Unity.Tests
 {
 
@@ -41,7 +43,7 @@ namespace Yarn.Unity.Tests
 
         string[] AllLines => aLines.Concat(bLines).ToArray();
 
-        LocalizationSettings oldSettings;
+        LocalizationSettings? oldSettings;
 
         public void Setup()
         {
@@ -74,11 +76,15 @@ namespace Yarn.Unity.Tests
             var newPaths = YarnTestUtility.SetupYarnProject(nodes, new Compiler.Project(), assetPath, projectName, false, out proj);
             var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(proj)) as YarnProjectImporter;
 
+            importer.Should().NotBeNull();
+
             // setting the path to use *only* the files for this project
-            var a = importer.GetProject();
-            a.SourceFilePatterns = newPaths.Select(p => $"./{Path.GetFileName(p)}");
-            a.BaseLanguage = "en";
-            a.SaveToFile($"{AssetPath}/{projectName}.yarnproject");
+            var project = importer!.GetProject();
+            project.Should().NotBeNull();
+
+            project!.SourceFilePatterns = newPaths.Select(p => $"./{Path.GetFileName(p)}");
+            project.BaseLanguage = "en";
+            project.SaveToFile($"{AssetPath}/{projectName}.yarnproject");
 
             // making it use the tables we made
             importer.UseUnityLocalisationSystem = true;
@@ -105,8 +111,10 @@ namespace Yarn.Unity.Tests
             var projectB = AssetImporter.GetAtPath($"{AssetPath}/ProjectB.yarnproject") as YarnProjectImporter;
             projectB.Should().NotBeNull();
 
+            projectA!.UnityLocalisationStringTableCollection.Should().NotBeNull();
+
             // A and B use the same table so we just grab either of them
-            var table = projectA.UnityLocalisationStringTableCollection.StringTables.First(t => t.LocaleIdentifier == "en");
+            var table = projectA.UnityLocalisationStringTableCollection!.StringTables.First(t => t.LocaleIdentifier == "en");
             // and we need it to not be null
             table.Should().NotBeNull();
 
@@ -134,8 +142,9 @@ namespace Yarn.Unity.Tests
             table.Should().HaveCount(AllLines.Count(), "all lines should be present in the string table");
 
             var projectA = AssetImporter.GetAtPath($"{AssetPath}/ProjectA.yarnproject") as YarnProjectImporter;
+            projectA.Should().NotBeNull();
             // now we tag the yarn
-            YarnProjectUtility.AddLineTagsToFilesInYarnProject(projectA);
+            YarnProjectUtility.AddLineTagsToFilesInYarnProject(projectA!);
 
             // and now we make sure it correctly added and removed the lines
 

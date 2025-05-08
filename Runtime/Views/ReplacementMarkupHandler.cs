@@ -22,7 +22,7 @@ namespace Yarn.Unity
         /// </summary>
         public static readonly List<LineParser.MarkupDiagnostic> NoDiagnostics = new List<LineParser.MarkupDiagnostic>();
 
-        // TODO: Check with Tim about specific details of docs here
+        /// <inheritdoc/>
         public abstract List<LineParser.MarkupDiagnostic> ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, string localeCode);
     }
 }

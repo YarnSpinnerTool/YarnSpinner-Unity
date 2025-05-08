@@ -7,6 +7,8 @@ using UnityEditor;
 using UnityEngine;
 using Yarn.Unity.Attributes;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     /// <summary>
@@ -17,20 +19,24 @@ namespace Yarn.Unity
     {
         private const string NodeTextControlNamePrefix = "DialogueReference.NodeName.";
 
-        private YarnProject lastProject;
-        private string lastNodeName;
+        private YarnProject? lastProject;
+        private string? lastNodeName;
         private bool referenceExists;
         private bool editNodeAsText;
         private bool focusNodeTextField;
 
-        private GUIContent nodenameContent;
+        private GUIContent? nodenameContent;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             // -- Yarn Project asset reference
             SerializedProperty projectProp;
 
-            var attribute = this.attribute as YarnNodeAttribute;
+            if (this.attribute is not YarnNodeAttribute attribute)
+            {
+                throw new System.InvalidOperationException($"Internal error: attribute is not a {nameof(YarnNodeAttribute)}");
+            }
+
             var propertyPathComponents = new System.Collections.Generic.Stack<string>(property.propertyPath.Split('.'));
 
             while (true)

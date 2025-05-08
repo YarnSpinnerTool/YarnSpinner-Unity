@@ -15,6 +15,8 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using Yarn.Unity.Editor;
 
+#nullable enable
+
 namespace Yarn.Unity.Tests
 {
     public class CodeAnalysisTests

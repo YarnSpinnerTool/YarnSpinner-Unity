@@ -2,6 +2,8 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
+#nullable enable
+
 namespace Yarn.Unity.Editor
 {
     using System;
@@ -27,20 +29,17 @@ namespace Yarn.Unity.Editor
                 registrationMethod.Invoke(this, RegistrationType.Compilation);
             }
 
-            yield return new CommandsWindow.HeaderListItem { DisplayName = "Commands" };
+            yield return new CommandsWindow.HeaderListItem("Commands");
 
             foreach (var command in commandRegistrations)
             {
-                yield return new CommandsWindow.CommandListItem { Command = command };
+                yield return new CommandsWindow.CommandListItem(command);
             }
 
             // Add a fake 'stop' command to the list, so that it appears in the
             // window
             System.Action fakeStop = () => { };
-            yield return new CommandsWindow.CommandListItem
-            {
-                Command = new Actions.CommandRegistration("stop", fakeStop)
-            };
+            yield return new CommandsWindow.CommandListItem(new Actions.CommandRegistration("stop", fakeStop));
         }
 
         public void AddCommandHandler(string commandName, Delegate handler)
@@ -79,20 +78,31 @@ namespace Yarn.Unity.Editor
         public class HeaderListItem : IListItem
         {
             public string DisplayName { get; set; }
+
+            public HeaderListItem(string displayName)
+            {
+                DisplayName = displayName;
+            }
         }
 
         public class CommandListItem : IListItem
         {
             internal Actions.CommandRegistration Command;
+
+            internal CommandListItem(Actions.CommandRegistration command)
+            {
+                Command = command;
+            }
+
             public string DisplayName => Command.Name;
         }
 
-        [SerializeField] private VisualTreeAsset uxml;
-        [SerializeField] private VisualTreeAsset listItemUXML;
-        [SerializeField] private StyleSheet stylesheet;
+        [SerializeField] private VisualTreeAsset? uxml;
+        [SerializeField] private VisualTreeAsset? listItemUXML;
+        [SerializeField] private StyleSheet? stylesheet;
 
-        private List<IListItem> listItems;
-        private List<IListItem> filteredListItems;
+        private List<IListItem> listItems = new();
+        private List<IListItem> filteredListItems = new();
 
         [MenuItem("Window/Yarn Spinner/Commands...")]
         static void Summon()
@@ -127,6 +137,11 @@ namespace Yarn.Unity.Editor
             // Set ListView.makeItem to initialize each entry in the list.
             listView.makeItem = () =>
             {
+                if (listItemUXML == null)
+                {
+                    throw new InvalidOperationException($"Can't create new list item: {nameof(listItemUXML)} is null");
+                }
+
                 var result = listItemUXML.CloneTree();
                 result.styleSheets.Add(stylesheet);
                 result.AddToClassList("commandListItem");

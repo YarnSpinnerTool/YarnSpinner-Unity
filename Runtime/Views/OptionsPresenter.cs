@@ -304,7 +304,7 @@ namespace Yarn.Unity
                 }
             }
 
-            if (useFadeEffect)
+            if (useFadeEffect && canvasGroup != null)
             {
                 // fade up the UI now
                 await Effects.FadeAlphaAsync(canvasGroup, 0, 1, fadeUpDuration, cancellationToken);
@@ -328,7 +328,7 @@ namespace Yarn.Unity
                 canvasGroup.blocksRaycasts = false;
             }
 
-            if (useFadeEffect)
+            if (useFadeEffect && canvasGroup != null)
             {
                 // fade down
                 await Effects.FadeAlphaAsync(canvasGroup, 1, 0, fadeDownDuration, cancellationToken);

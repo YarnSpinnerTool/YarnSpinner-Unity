@@ -9,6 +9,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 #endif
 
+#nullable enable
+
 namespace Yarn.Unity.Legacy
 {
     /// <summary>
@@ -104,7 +106,7 @@ namespace Yarn.Unity.Legacy
         /// cref="DialogueViewBase.UserRequestedViewAdvancement"/> method
         /// called.
         /// </remarks>
-        [SerializeField] public DialogueViewBase dialogueView;
+        [SerializeField] public DialogueViewBase? dialogueView;
 
         /// <summary>
         /// The type of input that this component is listening for.
@@ -168,7 +170,7 @@ namespace Yarn.Unity.Legacy
         /// </para>
         /// </remarks>
         [SerializeField]
-        public InputActionReference continueActionReference = null;
+        public InputActionReference? continueActionReference = null;
 
         /// <summary>
         /// The <see cref="InputAction"/> that this component is listening for.
@@ -225,7 +227,7 @@ namespace Yarn.Unity.Legacy
         /// </item>
         /// </list>
         /// </remarks>
-        public InputAction Action
+        public InputAction? Action
         {
             get
             {
@@ -282,7 +284,10 @@ namespace Yarn.Unity.Legacy
 #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
         private void UserPerformedAdvanceAction(InputAction.CallbackContext obj)
         {
-            dialogueView.UserRequestedViewAdvancement();
+            if (dialogueView != null)
+            {
+                dialogueView.UserRequestedViewAdvancement();
+            }
         }
 #endif
 
@@ -314,7 +319,7 @@ namespace Yarn.Unity.Legacy
                 }
             }
 
-            if (advance)
+            if (advance && dialogueView != null)
             {
                 dialogueView.UserRequestedViewAdvancement();
             }

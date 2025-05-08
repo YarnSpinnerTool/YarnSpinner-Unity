@@ -15,6 +15,7 @@ namespace Yarn.Unity.Tests
 
 #nullable enable
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning disable CS0612 // Type or member is obsolete
 
     public class LineViewTests : IPrebuildSetup, IPostBuildCleanup
     {
@@ -83,7 +84,7 @@ namespace Yarn.Unity.Tests
                 new[] { "#metadata" }
             );
 
-            lineView.canvasGroup.alpha.Should().BeEqualTo(0, "The line view is not yet visible");
+            lineView.canvasGroup!.alpha.Should().BeEqualTo(0, "The line view is not yet visible");
 
             var runTask = lineView.RunLineAsync(line, default);
 
@@ -91,8 +92,8 @@ namespace Yarn.Unity.Tests
 
             runTask.IsCompleted().Should().BeFalse("we're still running the line");
 
-            lineView.lineText.text.Should().BeEqualTo("Well, this is great.");
-            lineView.characterNameText.text.Should().BeEqualTo("Mae");
+            lineView.lineText!.text.Should().BeEqualTo("Well, this is great.");
+            lineView.characterNameText!.text.Should().BeEqualTo("Mae");
 
             lineView.canvasGroup.alpha.Should().BeEqualTo(1, "the line is now visible");
         });
@@ -145,13 +146,13 @@ namespace Yarn.Unity.Tests
             YarnTask runTask = lineView.RunLineAsync(line, lineCancellationToken);
 
             runTask.IsCompleted().Should().BeFalse();
-            lineView.lineText.text.Should().BeEqualTo("Line 1");
+            lineView.lineText!.text.Should().BeEqualTo("Line 1");
 
             lineView.UserRequestedViewAdvancement();
 
             await runTask;
 
-            lineView.canvasGroup.alpha.Should().BeEqualTo(0, "The line view should now be dismissed");
+            lineView.canvasGroup!.alpha.Should().BeEqualTo(0, "The line view should now be dismissed");
         });
 
         [UnityTest]
@@ -176,13 +177,13 @@ namespace Yarn.Unity.Tests
 
             YarnTask runTask = lineView.RunLineAsync(line, lineCancellationToken);
 
-            int characterCount = lineView.lineText.textInfo.characterCount;
+            int characterCount = lineView.lineText!.textInfo.characterCount;
             characterCount.Should().BeGreaterThan(0);
             lineView.lineText.maxVisibleCharacters.Should().BeEqualTo(0, "The typewriter effect has not yet begun");
 
             await YarnTask.Delay(TimeSpan.FromSeconds(0.05f));
 
-            lineView.canvasGroup.alpha.Should().BeGreaterThan(0);
+            lineView.canvasGroup!.alpha.Should().BeGreaterThan(0);
             lineView.canvasGroup.alpha.Should().BeLessThan(1);
             lineView.lineText.maxVisibleCharacters.Should().BeEqualTo(0, "The typewriter effect has not yet begun");
 
@@ -198,7 +199,7 @@ namespace Yarn.Unity.Tests
             await YarnTask.Delay(TimeSpan.FromSeconds(2f));
 
             lineView.lineText.maxVisibleCharacters.Should().BeGreaterThanOrEqualTo(characterCount);
-            lineView.continueButton.activeInHierarchy.Should().BeTrue();
+            lineView.continueButton!.activeInHierarchy.Should().BeTrue();
 
             // Dismiss the line
             lineView.UserRequestedViewAdvancement();

@@ -5,6 +5,8 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 using System;
 using Yarn.Unity.Attributes;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     /// <summary>
@@ -21,13 +23,13 @@ namespace Yarn.Unity
         /// <summary>
         /// The Yarn Project asset containing the dialogue node.
         /// </summary>
-        public YarnProject project;
+        public YarnProject? project;
 
         /// <summary>
         /// The name of the dialogue node in the project.
         /// </summary>
         [YarnNode(nameof(project), requiresYarnProject: false)]
-        public string nodeName;
+        public string? nodeName;
 
         /// <summary>
         /// Gets a value indicating that this reference is valid - that is, the
@@ -54,7 +56,7 @@ namespace Yarn.Unity
         }
 
         // DialogueReferences can be implicitly converted to strings
-        public static implicit operator string(DialogueReference reference)
+        public static implicit operator string?(DialogueReference reference)
         {
             return reference.nodeName;
         }

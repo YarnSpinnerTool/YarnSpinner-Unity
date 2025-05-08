@@ -11,6 +11,8 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using Yarn.Unity.Editor;
 
+#nullable enable
+
 namespace Yarn.Unity.Tests
 {
     /// <summary>
@@ -221,6 +223,8 @@ namespace Yarn.Unity.Tests
             string yarnProjectPath = $"{testFolderPath}/{projectName}.yarnproject";
 
             var project = YarnEditorUtility.CreateYarnProject(yarnProjectPath, projectData) as YarnProject;
+            project.Should().NotBeNull();
+
             var yarnProjectImporter = AssetImporter.GetAtPath(yarnProjectPath) as YarnProjectImporter;
 
             foreach (var path in pathsToAdd)
@@ -236,9 +240,12 @@ namespace Yarn.Unity.Tests
 
                     var scriptImporter = AssetImporter.GetAtPath(path) as YarnImporter;
 
+                    scriptImporter.Should().NotBeNull();
+
+
                     // The created script should have the newly-created project
                     // in its destinations list
-                    Assert.True(scriptImporter.DestinationProjects.Contains(project));
+                    scriptImporter!.DestinationProjects.Should().Contain(project!);
                 }
             }
 
@@ -246,12 +253,17 @@ namespace Yarn.Unity.Tests
             {
                 // As a final check, make sure the project is referencing the
                 // right number of scripts
-                Assert.AreEqual(yarnScriptText.Length, yarnProjectImporter.ImportData.yarnFiles.Count);
+
+                yarnProjectImporter.Should().NotBeNull();
+                yarnProjectImporter!.ImportData.Should().NotBeNull();
+
+                yarnProjectImporter.ImportData!.yarnFiles.Should().HaveCount(yarnScriptText.Length);
+
             }
 
             LogAssert.ignoreFailingMessages = wasIgnoringFailingMessages;
 
-            yarnProject = project;
+            yarnProject = project!;
             return pathsToAdd;
         }
     }

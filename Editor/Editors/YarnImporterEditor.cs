@@ -10,15 +10,28 @@ using UnityEditor.AssetImporters;
 using UnityEngine;
 using Yarn.Unity;
 
+#nullable enable
+
 namespace Yarn.Unity.Editor
 {
     [CustomEditor(typeof(YarnImporter))]
     public class YarnImporterEditor : ScriptedImporterEditor
     {
-        public IEnumerable<string> DestinationProjectErrors => destinationYarnProjectImporters.SelectMany(i => i.GetErrorsForScript(assetTarget as TextAsset)) ?? new List<string>();
+        public IEnumerable<string> DestinationProjectErrors
+        {
+            get
+            {
+                if (assetTarget is not TextAsset textAsset)
+                {
+                    throw new System.InvalidOperationException($"Internal error: {nameof(assetTarget)} is not a {nameof(TextAsset)}");
+                }
 
-        private IEnumerable<YarnProject> destinationYarnProjects;
-        private IEnumerable<YarnProjectImporter> destinationYarnProjectImporters;
+                return destinationYarnProjectImporters.SelectMany(i => i.GetErrorsForScript(textAsset)) ?? new List<string>();
+            }
+        }
+
+        private IEnumerable<YarnProject>? destinationYarnProjects;
+        private IEnumerable<YarnProjectImporter>? destinationYarnProjectImporters;
 
         public bool HasErrors => DestinationProjectErrors.Any();
 
@@ -31,11 +44,20 @@ namespace Yarn.Unity.Editor
 
         private void UpdateDestinationProjects()
         {
-            destinationYarnProjects = (target as YarnImporter).DestinationProjects;
+            if (target is not YarnImporter yarnImporter)
+            {
+                throw new System.InvalidOperationException($"Internal error: target is not {nameof(YarnImporter)}");
+            }
+            destinationYarnProjects = yarnImporter.DestinationProjects;
 
             if (destinationYarnProjects != null)
             {
-                destinationYarnProjectImporters = destinationYarnProjects.Select(project => AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter);
+                destinationYarnProjectImporters = destinationYarnProjects
+                    .Select(project => AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)))
+                    .Where(importer => importer != null)
+                    .OfType<YarnProjectImporter>();
+
+
             }
         }
 
@@ -45,6 +67,12 @@ namespace Yarn.Unity.Editor
 
             // nice header bit with logo and links
             DialogueRunnerEditor.DrawYarnSpinnerHeader();
+
+            if (target is not YarnImporter yarnImporter)
+            {
+                EditorGUILayout.HelpBox($"Internal error: target is not a {nameof(YarnImporter)}", MessageType.Error);
+                return;
+            }
 
             // If there's a parse error in any of the selected objects,
             // show an error. If the selected objects have the same
@@ -65,7 +93,7 @@ namespace Yarn.Unity.Editor
                 }
             }
 
-            if (destinationYarnProjects.Any() != false)
+            if (destinationYarnProjects != null && destinationYarnProjects.Any() != false)
             {
                 if (destinationYarnProjects.Count() == 1)
                 {
@@ -87,8 +115,7 @@ namespace Yarn.Unity.Editor
                 EditorGUILayout.HelpBox("This script is not currently part of a Yarn Project, so it can't be compiled or loaded into a Dialogue Runner. Either click Create New Yarn Project, or add this folder to an existing Yarn Project's sources list.", MessageType.Info);
                 if (GUILayout.Button("Create New Yarn Project..."))
                 {
-                    YarnProjectUtility.CreateYarnProject(target as YarnImporter);
-
+                    YarnProjectUtility.CreateYarnProject(yarnImporter);
                     UpdateDestinationProjects();
                 }
             }
@@ -105,7 +132,7 @@ namespace Yarn.Unity.Editor
                     // something to explore later
 
                     // as both the dataPath and assetPath include the Assets folder we need to strip that off before we combine these
-                    var absolutePathToYarnFile = Path.Combine(Path.GetDirectoryName(Application.dataPath), (target as YarnImporter).assetPath);
+                    var absolutePathToYarnFile = Path.Combine(Path.GetDirectoryName(Application.dataPath), yarnImporter.assetPath);
 
                     // This approach is bit weird to look at but it gets around a difference of what a URL is between VSCode and C#
                     // The initial thought is "why not use System.Uri.EscapeDataString?"

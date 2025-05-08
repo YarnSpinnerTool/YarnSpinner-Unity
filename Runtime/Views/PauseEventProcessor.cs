@@ -13,6 +13,8 @@ using TMPro;
 using TMP_Text = Yarn.Unity.TMPShim;
 #endif
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     /// <summary>

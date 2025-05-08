@@ -66,8 +66,8 @@ namespace Yarn.Unity.UnityLocalization
     {
         // the string table asset that has all of our (hopefully) localised
         // strings inside
-        [SerializeField] internal LocalizedStringTable stringsTable;
-        [SerializeField] internal LocalizedAssetTable assetTable;
+        [SerializeField] internal LocalizedStringTable? stringsTable;
+        [SerializeField] internal LocalizedAssetTable? assetTable;
 
         /// <inheritdoc/>
         public override string LocaleCode
@@ -97,7 +97,7 @@ namespace Yarn.Unity.UnityLocalization
         /// <inheritdoc/>
         public override async YarnTask<LocalizedLine> GetLocalizedLineAsync(Line line, CancellationToken cancellationToken)
         {
-            if (stringsTable.IsEmpty)
+            if (stringsTable == null || stringsTable.IsEmpty)
             {
                 throw new System.InvalidOperationException($"Tried to get localised line for {line.ID}, but no string table has been set.");
             }

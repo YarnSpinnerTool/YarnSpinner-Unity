@@ -172,13 +172,6 @@ namespace Yarn.Unity.Editor
 
         }
 
-        private struct LocalizedLineEntry
-        {
-            public string id;
-            public string text;
-            public Object asset;
-        }
-
         /// <summary>
         /// Displays the contents of <paramref name="target"/> as a table.
         /// </summary>

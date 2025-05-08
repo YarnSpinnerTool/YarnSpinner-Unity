@@ -7,6 +7,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     /// <summary>
@@ -34,6 +36,6 @@ namespace Yarn.Unity
     /// </remarks>
     public class YarnFunctionAttribute : YarnActionAttribute
     {
-        public YarnFunctionAttribute(string name = null) => Name = name;
+        public YarnFunctionAttribute(string? name = null) => Name = name;
     }
 }

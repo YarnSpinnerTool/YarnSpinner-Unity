@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     public partial class DialogueRunner
@@ -33,12 +35,19 @@ namespace Yarn.Unity
         /// otherwise.</returns>
         public bool LoadStateFromPersistentStorage(string saveFileName)
         {
+            if (this.variableStorage == null)
+            {
+                Debug.LogWarning($"Can't load state from persistent storage: {nameof(variableStorage)} is not set");
+                return false;
+            }
+
             var path = System.IO.Path.Combine(Application.persistentDataPath, saveFileName);
 
             try
             {
                 var saveData = System.IO.File.ReadAllText(path);
                 var dictionaries = DeserializeAllVariablesFromJSON(saveData);
+
                 this.variableStorage.SetAllVariables(dictionaries.Item1, dictionaries.Item2, dictionaries.Item3);
             }
             catch (Exception e)
@@ -96,15 +105,15 @@ namespace Yarn.Unity
         {
             SaveData data = JsonUtility.FromJson<SaveData>(jsonData);
 
-            if (data.floatKeys == null && data.floatValues == null)
+            if (data.floatKeys == null || data.floatValues == null)
             {
                 throw new ArgumentException("Provided JSON string was not able to extract numeric variables");
             }
-            if (data.stringKeys == null && data.stringValues == null)
+            if (data.stringKeys == null || data.stringValues == null)
             {
                 throw new ArgumentException("Provided JSON string was not able to extract string variables");
             }
-            if (data.boolKeys == null && data.boolValues == null)
+            if (data.boolKeys == null || data.boolValues == null)
             {
                 throw new ArgumentException("Provided JSON string was not able to extract boolean variables");
             }
@@ -142,6 +151,11 @@ namespace Yarn.Unity
         }
         private string SerializeAllVariablesToJSON()
         {
+            if (this.variableStorage == null)
+            {
+                throw new InvalidOperationException("Can't save variables to JSON: {nameof(variableStorage)} is not set");
+            }
+
             (var floats, var strings, var bools) = this.variableStorage.GetAllVariables();
 
             SaveData data = new SaveData();
@@ -158,12 +172,12 @@ namespace Yarn.Unity
         [System.Serializable]
         private struct SaveData
         {
-            public string[] floatKeys;
-            public float[] floatValues;
-            public string[] stringKeys;
-            public string[] stringValues;
-            public string[] boolKeys;
-            public bool[] boolValues;
+            public string[]? floatKeys;
+            public float[]? floatValues;
+            public string[]? stringKeys;
+            public string[]? stringValues;
+            public string[]? boolKeys;
+            public bool[]? boolValues;
         }
 
         /// <summary>

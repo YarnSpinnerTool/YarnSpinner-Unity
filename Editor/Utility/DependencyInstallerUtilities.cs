@@ -8,6 +8,8 @@ using UnityEngine;
 using UnityEngine.Localization;
 #endif
 
+#nullable enable
+
 namespace Yarn.Unity.Editor
 {
     public abstract class PackageSetupStep

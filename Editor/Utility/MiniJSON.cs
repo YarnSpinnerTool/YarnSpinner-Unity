@@ -36,6 +36,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
+// Nullability disabled due to third-party code
+#nullable disable
+
 namespace Yarn.Unity.Editor
 {
     /// <summary>

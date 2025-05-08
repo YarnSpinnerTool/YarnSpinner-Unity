@@ -4,10 +4,13 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using BoolDictionary = System.Collections.Generic.Dictionary<string, bool>;
 using FloatDictionary = System.Collections.Generic.Dictionary<string, float>;
 using StringDictionary = System.Collections.Generic.Dictionary<string, string>;
+
+#nullable enable
 
 namespace Yarn.Unity
 {
@@ -22,12 +25,12 @@ namespace Yarn.Unity
     /// </remarks>
     public abstract class VariableStorageBehaviour : MonoBehaviour, Yarn.IVariableStorage
     {
-        public Program Program { get; set; }
+        public Program? Program { get; set; }
 
-        public ISmartVariableEvaluator SmartVariableEvaluator { get; set; }
+        public ISmartVariableEvaluator? SmartVariableEvaluator { get; set; }
 
         /// <inheritdoc/>
-        public abstract bool TryGetValue<T>(string variableName, out T result);
+        public abstract bool TryGetValue<T>(string variableName, [NotNullWhen(true)] out T? result);
 
         /// <inheritdoc/>
         public abstract void SetValue(string variableName, string stringValue);
@@ -92,9 +95,14 @@ namespace Yarn.Unity
             {
                 return VariableKind.Stored;
             }
-            else
+            else if (this.Program != null)
             {
                 return Program.GetVariableKind(name);
+            }
+            else
+            {
+                Debug.Log($"Unable to determine kind of variable {name}: it is not stored in this variable storage, and {nameof(Program)} is not set");
+                return VariableKind.Unknown;
             }
         }
 

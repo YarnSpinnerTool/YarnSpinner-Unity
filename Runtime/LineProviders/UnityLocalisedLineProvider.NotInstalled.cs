@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
+#nullable enable
+
 namespace Yarn.Unity.UnityLocalization
 {
     /// <summary>
@@ -33,8 +35,8 @@ namespace Yarn.Unity.UnityLocalization
             [SerializeField] private PlaceholderTableIdentifier m_TableReference;
         }
 
-        [SerializeField] internal PlaceholderTableReference stringsTable;
-        [SerializeField] internal PlaceholderTableReference assetTable;
+        [SerializeField] internal PlaceholderTableReference? stringsTable;
+        [SerializeField] internal PlaceholderTableReference? assetTable;
 
         /// <inheritdoc/>
         public override string LocaleCode { get => "error"; set { } }

@@ -6,6 +6,8 @@ using CsvHelper;
 using System.Collections.Generic;
 using System.Linq;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     /// <summary>
@@ -60,7 +62,7 @@ namespace Yarn.Unity
             Metadata = s.Metadata;
         }
 
-        private static CsvHelper.Configuration.Configuration CsvConfiguration;
+        private static CsvHelper.Configuration.Configuration? CsvConfiguration;
 
         private static CsvHelper.Configuration.Configuration GetConfiguration()
         {

@@ -15,6 +15,7 @@ using Yarn.Unity.Legacy;
 
 #nullable enable
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning disable CS0612 // Type or member is obsolete
 
 namespace Yarn.Unity.Tests
 {
@@ -37,7 +38,7 @@ namespace Yarn.Unity.Tests
         DialogueRunner Runner => GameObject.FindAnyObjectByType<DialogueRunner>();
         LineView UI => GameObject.FindAnyObjectByType<LineView>();
         InMemoryVariableStorage VarStorage => GameObject.FindAnyObjectByType<InMemoryVariableStorage>();
-        TMPro.TextMeshProUGUI TextCanvas => UI.lineText;
+        TMPro.TextMeshProUGUI? TextCanvas => UI.lineText;
 
         [UnitySetUp]
         public IEnumerator SetUp()

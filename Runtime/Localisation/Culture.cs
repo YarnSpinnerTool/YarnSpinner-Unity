@@ -4,6 +4,8 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 using System;
 
+#nullable enable
+
 namespace Yarn.Unity
 {
     /// <summary>
@@ -34,7 +36,7 @@ namespace Yarn.Unity
 
         public bool IsNeutralCulture;
 
-        internal System.Globalization.CultureInfo CultureInfo
+        internal System.Globalization.CultureInfo? CultureInfo
         {
             get
             {

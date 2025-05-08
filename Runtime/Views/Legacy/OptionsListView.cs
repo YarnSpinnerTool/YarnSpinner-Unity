@@ -12,42 +12,47 @@ using TMPro;
 using TextMeshProUGUI = Yarn.Unity.TMPShim;
 #endif
 
+#nullable enable
+
 namespace Yarn.Unity.Legacy
 {
     [Obsolete]
     public class OptionsListView : DialogueViewBase
     {
-        [SerializeField] CanvasGroup canvasGroup;
+        [SerializeField] CanvasGroup? canvasGroup;
 
-        [SerializeField] OptionView optionViewPrefab;
+        [SerializeField] OptionView? optionViewPrefab;
 
-        [SerializeField] MarkupPalette palette;
+        [SerializeField] MarkupPalette? palette;
 
         [SerializeField] float fadeTime = 0.1f;
 
         [SerializeField] bool showUnavailableOptions = false;
 
         [Header("Last Line Components")]
-        [SerializeField] TextMeshProUGUI lastLineText;
-        [SerializeField] GameObject lastLineContainer;
+        [SerializeField] TextMeshProUGUI? lastLineText;
+        [SerializeField] GameObject? lastLineContainer;
 
-        [SerializeField] TextMeshProUGUI lastLineCharacterNameText;
-        [SerializeField] GameObject lastLineCharacterNameContainer;
+        [SerializeField] TextMeshProUGUI? lastLineCharacterNameText;
+        [SerializeField] GameObject? lastLineCharacterNameContainer;
 
         // A cached pool of OptionView objects so that we can reuse them
         List<OptionView> optionViews = new List<OptionView>();
 
         // The method we should call when an option has been selected.
-        Action<int> OnOptionSelected;
+        Action<int>? OnOptionSelected;
 
         // The line we saw most recently.
-        LocalizedLine lastSeenLine;
+        LocalizedLine? lastSeenLine;
 
         public void Start()
         {
-            canvasGroup.alpha = 0;
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 0;
+                canvasGroup.interactable = false;
+                canvasGroup.blocksRaycasts = false;
+            }
         }
 
         public void Reset()
@@ -119,17 +124,23 @@ namespace Yarn.Unity.Legacy
                         {
                             line = lastSeenLine.TextWithoutCharacterName;
                             lastLineCharacterNameContainer.SetActive(true);
-                            lastLineCharacterNameText.text = lastSeenLine.CharacterName;
+                            if (lastLineCharacterNameText != null)
+                            {
+                                lastLineCharacterNameText.text = lastSeenLine.CharacterName;
+                            }
                         }
                     }
 
-                    if (palette != null)
+                    if (lastLineText != null)
                     {
-                        lastLineText.text = LineView.PaletteMarkedUpText(line, palette);
-                    }
-                    else
-                    {
-                        lastLineText.text = line.Text;
+                        if (palette != null)
+                        {
+                            lastLineText.text = LineView.PaletteMarkedUpText(line, palette);
+                        }
+                        else
+                        {
+                            lastLineText.text = line.Text;
+                        }
                     }
 
                     lastLineContainer.SetActive(true);
@@ -149,8 +160,11 @@ namespace Yarn.Unity.Legacy
             // this to happen now instead of then
             Relayout();
 
-            // Fade it all in
-            StartCoroutine(Effects.FadeAlpha(canvasGroup, 0, 1, fadeTime));
+            if (canvasGroup != null)
+            {
+                // Fade it all in
+                StartCoroutine(Effects.FadeAlpha(canvasGroup, 0, 1, fadeTime));
+            }
 
             /// <summary>
             /// Creates and configures a new <see cref="OptionView"/>, and adds
@@ -159,6 +173,11 @@ namespace Yarn.Unity.Legacy
             OptionView CreateNewOptionView()
             {
                 var optionView = Instantiate(optionViewPrefab);
+                if (optionView == null)
+                {
+                    throw new NullReferenceException($"Can't create a new option view, because {nameof(optionViewPrefab)} is null");
+                }
+
                 optionView.transform.SetParent(transform, false);
                 optionView.transform.SetAsLastSibling();
 
@@ -177,8 +196,11 @@ namespace Yarn.Unity.Legacy
 
                 IEnumerator OptionViewWasSelectedInternal(DialogueOption selectedOption)
                 {
-                    yield return StartCoroutine(FadeAndDisableOptionViews(canvasGroup, 1, 0, fadeTime));
-                    OnOptionSelected(selectedOption.DialogueOptionID);
+                    if (canvasGroup != null)
+                    {
+                        yield return StartCoroutine(FadeAndDisableOptionViews(canvasGroup, 1, 0, fadeTime));
+                    }
+                    OnOptionSelected?.Invoke(selectedOption.DialogueOptionID);
                 }
             }
         }
@@ -190,7 +212,7 @@ namespace Yarn.Unity.Legacy
         public override void DialogueComplete()
         {
             // do we still have any options being shown?
-            if (canvasGroup.alpha > 0)
+            if (canvasGroup != null && canvasGroup.alpha > 0)
             {
                 StopAllCoroutines();
                 lastSeenLine = null;
