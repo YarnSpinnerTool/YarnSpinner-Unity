@@ -232,6 +232,18 @@ namespace Yarn.Unity
                         {
                             var name = node.Name;
 
+	                        if (!string.IsNullOrEmpty(attribute.filter))
+                            {
+                                var filter = attribute.filter.ToLower().Replace('-', '_');
+
+                                switch (attribute.filterType)
+                                {
+                                    case YarnNodeFilter.Contains: if (!name.ToLower().Contains(filter)) continue; break;
+                                    case YarnNodeFilter.Start: if (!name.ToLower().StartsWith(filter)) continue; break;
+                                    case YarnNodeFilter.End: if (!name.ToLower().EndsWith(filter)) continue; break;
+                                }
+                            }
+
                             menu.AddItem(new GUIContent(name), name == nodeName && !hasMixedNodeValues, () =>
                             {
                                 property.stringValue = name;
