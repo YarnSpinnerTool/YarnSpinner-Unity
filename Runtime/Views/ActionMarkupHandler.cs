@@ -16,17 +16,8 @@ using TMP_Text = Yarn.Unity.TMPShim;
 
 namespace Yarn.Unity
 {
-    public interface IActionMarkupHandler
-    {
-        public void OnPrepareForLine(MarkupParseResult line, TMP_Text text);
-        public void OnLineDisplayBegin(MarkupParseResult line, TMP_Text text);
-        public YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line, CancellationToken cancellationToken);
-        public void OnLineDisplayComplete();
-        public void OnLineWillDismiss();
-    }
-
     /// <summary>
-    /// A <see cref="ActionMarkupHandler"/> is an object that reacts to the
+    /// A <see cref="IActionMarkupHandler"/> is an object that reacts to the
     /// delivery of a line of dialogue, and can optionally control the timing of
     /// that delivery.
     /// </summary>
@@ -38,13 +29,13 @@ namespace Yarn.Unity
     /// each letter appears over time.
     /// </para>
     /// <para>
-    /// Another example of a <see cref="ActionMarkupHandler"/> is an in-line
+    /// Another example of a <see cref="IActionMarkupHandler"/> is an in-line
     /// event or animation, such as causing a character to play an animation
     /// (and waiting for that animation to complete before displaying the rest
     /// of the line).
     /// </para>
     /// </remarks>
-    public abstract class ActionMarkupHandler : MonoBehaviour, IActionMarkupHandler
+    public interface IActionMarkupHandler
     {
         /// <summary>
         /// Called when the line view receives the line, to prepare for showing
@@ -58,8 +49,8 @@ namespace Yarn.Unity
         /// <param name="line">The line being presented.</param>
         /// <param name="text">A <see cref="TMP_Text"/> object that the line is
         /// being displayed in.</param>
-        public abstract void OnPrepareForLine(MarkupParseResult line, TMP_Text text);
-
+        public void OnPrepareForLine(MarkupParseResult line, TMP_Text text);
+        
         /// <summary>
         /// Called immediately before the first character in the line is
         /// presented. 
@@ -67,8 +58,8 @@ namespace Yarn.Unity
         /// <param name="line">The line being presented.</param>
         /// <param name="text">A <see cref="TMP_Text"/> object that the line is
         /// being displayed in.</param>
-        public abstract void OnLineDisplayBegin(MarkupParseResult line, TMP_Text text);
-
+        public void OnLineDisplayBegin(MarkupParseResult line, TMP_Text text);
+        
         /// <summary>
         /// Called repeatedly for each visible character in the line.
         /// </summary>
@@ -85,8 +76,8 @@ namespace Yarn.Unity
         /// cref="ActionMarkupHandler"/> has completed presenting this
         /// character. Dialogue views will wait until this task is complete
         /// before displaying the remainder of the line.</returns>
-        public abstract YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line, CancellationToken cancellationToken);
-
+        public YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line, CancellationToken cancellationToken);
+        
         /// <summary>
         /// Called after the last call to <see cref="PresentCharacter(int,
         /// TMP_Text, CancellationToken)"/>.
@@ -94,11 +85,41 @@ namespace Yarn.Unity
         /// <remarks>This method is an opportunity for a <see
         /// cref="ActionMarkupHandler"/> to finalise its presentation after
         /// all of the characters in the line have been presented.</remarks>
-        public abstract void OnLineDisplayComplete();
-
+        public void OnLineDisplayComplete();
+        
         /// <summary>
         /// Called right before the line will dismiss itself.
         /// </summary>
+        /// <remarks>
+        /// This does not mean that the entirety of the view itself will have been removed, just the <see cref="DialoguePresenterBase"/> has completed displaying everything and is returning control back to the <see cref="DialogueRunner"/> to let more content flow.
+        /// </remarks>
+        public void OnLineWillDismiss();
+    }
+
+    /// <summary>
+    /// This is an abstract monobehaviour that conforms to the <see cref="IActionMarkupHandler"/> interface.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Intended to be used in situations where you require a monobehaviour version of the interfaces.
+    /// This is used by <see cref="LinePresenter"/> to have a list of handlers that can be connected up via the inspector.
+    /// </para>
+    /// </remarks>
+    public abstract class ActionMarkupHandler : MonoBehaviour, IActionMarkupHandler
+    {
+        /// <inheritdoc/>
+        public abstract void OnPrepareForLine(MarkupParseResult line, TMP_Text text);
+
+        /// <inheritdoc/>
+        public abstract void OnLineDisplayBegin(MarkupParseResult line, TMP_Text text);
+
+        /// <inheritdoc/>
+        public abstract YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line, CancellationToken cancellationToken);
+
+        /// <inheritdoc/>
+        public abstract void OnLineDisplayComplete();
+
+        /// <inheritdoc/>
         public abstract void OnLineWillDismiss();
     }
 }

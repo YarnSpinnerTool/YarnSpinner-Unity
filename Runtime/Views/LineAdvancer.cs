@@ -18,7 +18,7 @@ using TextMeshProUGUI = Yarn.Unity.TMPShim;
 namespace Yarn.Unity
 {
     /// <summary>
-    /// A dialogue view that listens for user input and sends requests to a <see
+    /// A dialogue presenter that listens for user input and sends requests to a <see
     /// cref="DialogueRunner"/> to advance the presentation of the current line,
     /// either by asking a dialogue runner to hurry up its delivery, advance to
     /// the next line, or cancel the entire dialogue session.
