@@ -70,6 +70,10 @@ namespace Yarn.Unity
 
         public static implicit operator YarnTask(System.Threading.Tasks.Task task)
         {
+            if (task == null)
+            {
+                throw new ArgumentNullException(nameof(task),"You are attempting to convert a null Task into a YarnTask, did you mean to use YarnTask.CompletedTask?");
+            }
             async Awaitable Awaiter()
             {
                 await task;
@@ -241,6 +245,10 @@ namespace Yarn.Unity
 
         public static implicit operator YarnTask<T>(Awaitable<T> awaitable)
         {
+            if (awaitable == null)
+            {
+                throw new ArgumentNullException(nameof(awaitable),$"You are attempting to convert a null Awaitable<{typeof(T).Name}> into a YarnTask, did you mean to use YarnTask<{typeof(T).Name}>.FromResult(null) instead?");
+            }
             return new YarnTask<T> { Awaitable = awaitable };
         }
 
