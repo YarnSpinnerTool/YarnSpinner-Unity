@@ -856,13 +856,17 @@ But not all of them are.
             sourceLineID.Should().BeEqualTo("line:shadowsource");
 
             // The entry should have its own metadata, distinct from the source
-            var lineMetadata = project.lineMetadata.GetMetadata(sourceLineID!);
-            lineMetadata!.Should().NotBeNull();
+            var sourceLineMetadata = project.lineMetadata.GetMetadata(sourceLineID!);
+            var shadowLineMetadata = project.lineMetadata.GetMetadata(shadowLineID!);
 
-            lineMetadata!.Should().Contain("meta1");
-            lineMetadata!.Should().Contain("meta2");
-            lineMetadata!.Should().NotContain("meta1");
-            lineMetadata!.Should().NotContain("meta2");
+            sourceLineMetadata!.Should().NotBeNull();
+            shadowLineMetadata!.Should().NotBeNull();
+
+            sourceLineMetadata!.Should().Contain("meta1");
+            shadowLineMetadata!.Should().Contain("meta2");
+
+            shadowLineMetadata!.Should().NotContain("meta1");
+            sourceLineMetadata!.Should().NotContain("meta2");
         }
     }
 }
