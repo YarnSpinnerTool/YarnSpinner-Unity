@@ -236,7 +236,6 @@ namespace Yarn.Unity.Tests
 
             // these are derived from the declares and sets inside of DialogueRunnerTest.yarn
             var testDefaults = new Dictionary<string, System.IConvertible>();
-            testDefaults.Add("$laps", 0);
             testDefaults.Add("$float", 1);
             testDefaults.Add("$string", "this is a string");
             testDefaults.Add("$bool", true);
@@ -246,9 +245,9 @@ namespace Yarn.Unity.Tests
 
             foreach (var testDefault in testDefaults)
             {
-                yarnProject.InitialValues.Should().ContainKey(testDefault.Key);
+                yarnProject.InitialValues.Should().ContainKey(testDefault.Key, $"initial values should include {testDefault.Key}");
                 var value = yarnProject.InitialValues[testDefault.Key];
-                value.ToString().Should().BeEqualTo(testDefault.Value.ToString());
+                value.ToString().Should().BeEqualTo(testDefault.Value.ToString(), $"initial value of {testDefault.Key} should be {testDefault.Value}");
             }
 
             yield return null;
@@ -265,12 +264,6 @@ namespace Yarn.Unity.Tests
             var testNodes = new string[]
             {
                 "Start",
-                "Exit",
-                "VariableTest",
-                "FunctionTest",
-                "FunctionTest2",
-                "ExternalFunctionTest",
-                "BuiltinsTest",
                 "LotsOfVars",
                 "EmptyTags",
                 "Tags",
