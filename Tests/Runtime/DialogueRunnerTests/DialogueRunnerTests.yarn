@@ -1,46 +1,3 @@
-title: Start
-tags: 
-colorID: 0
-position: 0,0
----
-Spieler: Kannst du mich hören? {1+1} #line:0e3dc4b
-NPC: Klar und deutlich. #line:0967160
--> Mir reicht es. #line:04e806e
-    <<jump Exit>>
--> Nochmal! #line:0901fb2
-    <<jump Start>>
-===
-title: Exit
-tags: 
-colorID: 0
-position: 0,0
----
-<<stop>>
-===
-title: VariableTest
----
-/// How many laps Jane has walked
-<<declare $laps = 0>>
-Jane: Yes! I've already walked {$laps} laps!
-===
-title: FunctionTest
----
-Jane: Yes! I've already walked {testFnVariable($laps)} laps!
-===
-title: FunctionTest2
----
-Jane: Yes! I've already walked {testFnLiteral("arg! i am a pirate")} laps!
-// actual function unit testing should go in the YarnSpinner core
-===
-title: ExternalFunctionTest
----
-Jane: Here's a function from code that's in another assembly: {testExternalAssemblyFunction()}
-===
-title: BuiltinsTest
----
-Jane: round(3.522) = {round(3.522)}; round_places(3.522, 2) = {round_places(3.522, 2)}; floor(3.522) = {floor(3.522)}; floor(-3.522) = {floor(-3.522)}; ceil(3.522) = {ceil(3.522)}; ceil(-3.522) = {ceil(-3.522)}; inc(3.522) = {inc(3.522)}; inc(4) = {inc(4)}; dec(3.522) = {dec(3.522)}; dec(3) = {dec(3)}; round_places(decimal(3.522),3) = {round_places(decimal(3.522),3)}; int(3.522) = {int(3.522)}; int(-3.522) = {int(-3.522)};
-// actual function unit testing should go in the YarnSpinner core
-===
 title: LotsOfVars
 ---
 <<declare $float = 1>>
@@ -48,5 +5,6 @@ title: LotsOfVars
 <<declare $string = "this is a string">>
 <<set $string = "this is a different string now">>
 <<declare $bool = true>>
+<<declare $true = true>>
 <<set $true = false>>
 ===
