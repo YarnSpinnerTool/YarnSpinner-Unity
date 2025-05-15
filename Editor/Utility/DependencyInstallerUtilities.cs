@@ -108,7 +108,6 @@ namespace Yarn.Unity.Editor
 
                 // setting this new settings object to be the global settings
                 // for the project
-                AssetDatabase.SaveAssets();
                 UnityEditor.Localization.LocalizationEditorSettings.ActiveLocalizationSettings = settings;
             }
 
@@ -123,7 +122,6 @@ namespace Yarn.Unity.Editor
                     // and on disk
                     var locale = Locale.CreateLocale(localeID);
                     AssetDatabase.CreateAsset(locale, DestinationPath + "/Locale " + identifier + ".asset");
-                    AssetDatabase.SaveAssets();
 
                     UnityEditor.Localization.LocalizationEditorSettings.AddLocale(locale);
                 }
@@ -144,6 +142,8 @@ namespace Yarn.Unity.Editor
                 }
                 fallbackMetadata.Locale = toLocale;
             }
+            AssetDatabase.SaveAssets();
+
 
             // Find all table collections, and make sure they (and their
             // contents) are known to the addressable system (which might
@@ -179,6 +179,7 @@ namespace Yarn.Unity.Editor
             }
 
             AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
     }
 #endif
