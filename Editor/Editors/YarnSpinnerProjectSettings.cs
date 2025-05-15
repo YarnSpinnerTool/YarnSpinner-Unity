@@ -54,10 +54,6 @@ namespace Yarn.Unity.Editor
                     logger.WriteLine($"Failed to load Yarn Spinner project settings at {settingsPath}: {e.Message}");
                 }
             }
-            else
-            {
-                logger.WriteLine($"No settings file exists at {settingsPath}, will fallback to default settings");
-            }
 
             settings.autoRefreshLocalisedAssets = true;
             settings.automaticallyLinkAttributedYarnCommandsAndFunctions = true;
