@@ -124,7 +124,6 @@ namespace Yarn.Unity.Editor
                 // Re-import each project.
                 foreach (var importer in missingProjectImporters)
                 {
-                    Debug.Log($"Project {importer.assetPath} needs to be reimported");
                     EditorUtility.SetDirty(importer);
                     importer.SaveAndReimport();
                 }
