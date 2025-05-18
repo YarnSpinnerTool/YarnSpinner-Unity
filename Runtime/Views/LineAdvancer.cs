@@ -324,7 +324,7 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Called by a dialogue view to signal that a line is running.
+        /// Called by a dialogue presenter to signal that a line is running.
         /// </summary>
         /// <inheritdoc cref="LinePresenter.RunLineAsync" path="/param"/>
         /// <returns>A completed task.</returns>
@@ -348,7 +348,7 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Called by a dialogue view to signal that options are running.
+        /// Called by a dialogue presenter to signal that options are running.
         /// </summary>
         /// <inheritdoc cref="LinePresenter.RunOptionsAsync" path="/param"/>
         /// <returns>A completed task indicating that no option was selected by

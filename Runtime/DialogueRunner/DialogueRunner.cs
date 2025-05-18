@@ -18,20 +18,20 @@ namespace Yarn.Unity
 {
     /// <summary>
     /// A Line Cancellation Token stores information about whether a dialogue
-    /// view should stop its delivery.
+    /// presenter should stop its delivery.
     /// </summary>
     /// <remarks>
-    /// <para>Dialogue views receive Line Cancellation Tokens as a parameter to
+    /// <para>Dialogue presenters receive Line Cancellation Tokens as a parameter to
     /// <see cref="DialoguePresenterBase.RunLineAsync"/>. Line Cancellation
     /// Tokens indicate whether the user has requested that the line's delivery
-    /// should be hurried up, and whether the dialogue view should stop showing
+    /// should be hurried up, and whether the dialogue presenter should stop showing
     /// the current line.</para>
     /// </remarks>
     public struct LineCancellationToken
     {
         /// <summary>
         /// A <see cref="CancellationToken"/> that becomes cancelled when a <see
-        /// cref="DialogueRunner"/> wishes all dialogue views to stop running
+        /// cref="DialogueRunner"/> wishes all dialogue presenters to stop running
         /// the current line. For example, on-screen UI should be dismissed, and
         /// any ongoing audio playback should be stopped.
         /// </summary>
@@ -42,7 +42,7 @@ namespace Yarn.Unity
 
         /// <summary>
         /// A <see cref="CancellationToken"/> that becomes cancelled when a <see
-        /// cref="DialogueRunner"/> wishes all dialogue views to speed up their
+        /// cref="DialogueRunner"/> wishes all dialogue presenters to speed up their
         /// delivery of their line, if appropriate. For example, UI animations
         /// should be played faster or skipped.
         /// </summary>
@@ -57,7 +57,7 @@ namespace Yarn.Unity
         /// </summary>
         /// <remarks>
         /// <para>
-        /// If this value is <see langword="true"/>, dialogue views should
+        /// If this value is <see langword="true"/>, dialogue presenters should
         /// presenting the current line, so that the next piece of content can
         /// be shown to the user.
         /// </para>
@@ -71,8 +71,8 @@ namespace Yarn.Unity
         /// Gets a value indicating whether the user has requested that the line
         /// be hurried up.
         /// </summary>
-        /// <remarks><para>If this value is <see langword="true"/>, dialogue
-        /// views should speed up any ongoing delivery of the line, such as
+        /// <remarks><para>If this value is <see langword="true"/>, Dialogue
+        /// presenters should speed up any ongoing delivery of the line, such as
         /// on-screen animations, but are not required to finish delivering the
         /// line entirely (that is, UI elements may remain on screen).</para>
         /// <para>If <see cref="IsNextLineRequested"/> is <see
@@ -195,7 +195,7 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// The list of dialogue views that the dialogue runner delivers content
+        /// The list of dialogue presenters that the dialogue runner delivers content
         /// to.
         /// </summary>
         [Space]
@@ -233,7 +233,7 @@ namespace Yarn.Unity
         /// <summary>
         /// If this value is set, when an option is selected, the line contained
         /// in it (<see cref="OptionSet.Option.Line"/>) will be delivered to the
-        /// dialogue runner's dialogue views as though it had been written as a
+        /// dialogue runner's dialogue presenters as though it had been written as a
         /// separate line.
         /// </summary>
         /// <remarks>
@@ -335,7 +335,7 @@ namespace Yarn.Unity
         /// Gets a completed <see cref="YarnTask{DialogueOption}"/> that
         /// contains a <see langword="null"/> value.
         /// </summary>
-        /// <remarks>Dialogue views can return this value from their <see
+        /// <remarks>Dialogue presenters can return this value from their <see
         /// cref="DialoguePresenterBase.RunOptionsAsync(DialogueOption[],
         /// CancellationToken)" method to indicate that no option was selected.
         /// />
@@ -412,7 +412,7 @@ namespace Yarn.Unity
 
         /// <summary>
         /// Stops the dialogue immediately, and cancels any currently running
-        /// dialogue views.
+        /// dialogue presenters.
         /// </summary>
         public void Stop()
         {
@@ -610,7 +610,7 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Runs a localised line on all dialogue views.
+        /// Runs a localised line on all dialogue presenters.
         /// </summary>
         /// <remarks>
         /// This method can be called from two places: 1. when a line is being run,
@@ -906,14 +906,14 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Requests that all dialogue views stop showing the current line, and
+        /// Requests that all dialogue presenters stop showing the current line, and
         /// prepare to show the next piece of content.
         /// </summary>
         /// <remarks>
         /// <para>
         /// The specific behaviour of what happens when this method is called
         /// depends on the implementation of the Dialogue Runner's current
-        /// dialogue views.
+        /// dialogue presenters.
         /// </para>
         /// <para>
         /// If the dialogue runner is not currently running a line (for example,
@@ -936,14 +936,14 @@ namespace Yarn.Unity
         }
 
         /// <summary>
-        /// Requests that all dialogue views speed up their delivery of the
+        /// Requests that all dialogue presenters speed up their delivery of the
         /// current line.
         /// </summary>
         /// <remarks>
         /// <para>
         /// The specific behaviour of what happens when this method is called
         /// depends on the implementation of the Dialogue Runner's current
-        /// dialogue views.
+        /// dialogue presenters.
         /// </para>
         /// <para>
         /// If the dialogue runner is not currently running a line (for example,
