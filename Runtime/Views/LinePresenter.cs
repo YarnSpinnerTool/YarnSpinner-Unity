@@ -343,9 +343,12 @@ namespace Yarn.Unity
                 {
                     milliSecondsPerLetter = (int)(1000f / typewriterEffectSpeed);
                 }
-
+                
+                // Get the count of visible characters from TextMesh to exclude markup characters
+                var visibleCharacterCount = lineText.GetTextInfo(text.Text).characterCount;
+                
                 // going through each character of the line and letting the processors know about it
-                for (int i = 0; i < text.Text.Length; i++)
+                for (int i = 0; i < visibleCharacterCount; i++)
                 {
                     // telling every processor that it is time to process the current character
                     foreach (var processor in temporalProcessors)
@@ -360,7 +363,7 @@ namespace Yarn.Unity
                     }
                 }
 
-                lineText.maxVisibleCharacters = text.Text.Length;
+                lineText.maxVisibleCharacters = visibleCharacterCount;
 
                 // letting each temporal processor know the line has finished displaying
                 foreach (var processor in temporalProcessors)
