@@ -124,6 +124,15 @@ namespace Yarn.Unity
             }
         }
 
+        enum SaliencyStrategy
+        {
+            RandomBestLeastRecentlyViewed,
+            FirstBestLeastRecentlyViewed,
+            Best,
+            First,
+            Custom
+        }
+
         /// <summary>
         /// The Yarn Project containing the nodes that this Dialogue Runner
         /// runs.
@@ -165,6 +174,8 @@ namespace Yarn.Unity
         }
 
         [SerializeReference] internal LineProviderBehaviour? lineProvider;
+
+        [SerializeField] private SaliencyStrategy saliencyStrategy = SaliencyStrategy.RandomBestLeastRecentlyViewed;
 
         /// <summary>
         ///  Gets the <see cref="ILineProvider"/> that this dialogue runner uses
@@ -396,6 +407,41 @@ namespace Yarn.Unity
             {
                 this.LineProvider.YarnProject = this.YarnProject;
             }
+        }
+
+        /// <summary>
+        /// Sets the saliency strategy based on the value set inside of the Inspector.
+        /// This is called when StartDialogue is run.
+        /// This does no checking and will obliterate any custom strategies if one has been set and you change the value.
+        /// </summary>
+        private void ApplySaliencyStrategy()
+        {
+            // if we don't have any dialogue then we can't apply a saliency strategy
+            if (this.dialogue == null)
+            {
+                return;
+            }
+            // likewise for variable storage
+            if (this.VariableStorage == null)
+            {
+                return;
+            }
+
+            switch (this.saliencyStrategy)
+                {
+                    case SaliencyStrategy.RandomBestLeastRecentlyViewed:
+                        this.dialogue.ContentSaliencyStrategy = new Saliency.RandomBestLeastRecentlyViewedSaliencyStrategy(this.VariableStorage);
+                        return;
+                    case SaliencyStrategy.FirstBestLeastRecentlyViewed:
+                        this.dialogue.ContentSaliencyStrategy = new Yarn.Saliency.BestLeastRecentlyViewedSaliencyStrategy(this.VariableStorage);
+                        return;
+                    case SaliencyStrategy.Best:
+                        this.dialogue.ContentSaliencyStrategy = new Yarn.Saliency.BestSaliencyStrategy();
+                        return;
+                    case SaliencyStrategy.First:
+                        this.dialogue.ContentSaliencyStrategy = new Yarn.Saliency.FirstSaliencyStrategy();
+                        return;
+                }
         }
 
         /// <summary>
@@ -884,6 +930,8 @@ namespace Yarn.Unity
 
             Dialogue.SetProgram(yarnProject.Program);
             Dialogue.SetNode(nodeName);
+
+            ApplySaliencyStrategy();
 
             onDialogueStart?.Invoke();
 
