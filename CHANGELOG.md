@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- The inspector for the Dialogue Runner now has a drop down for selecting the saliency strategy.
+
 ### Changed
 
 ### Removed
