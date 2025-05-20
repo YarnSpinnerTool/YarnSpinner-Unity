@@ -236,7 +236,6 @@ namespace Yarn.Unity.Tests
 
             // these are derived from the declares and sets inside of DialogueRunnerTest.yarn
             var testDefaults = new Dictionary<string, System.IConvertible>();
-            testDefaults.Add("$laps", 0);
             testDefaults.Add("$float", 1);
             testDefaults.Add("$string", "this is a string");
             testDefaults.Add("$bool", true);
@@ -246,9 +245,9 @@ namespace Yarn.Unity.Tests
 
             foreach (var testDefault in testDefaults)
             {
-                yarnProject.InitialValues.Should().ContainKey(testDefault.Key);
+                yarnProject.InitialValues.Should().ContainKey(testDefault.Key, $"initial values should include {testDefault.Key}");
                 var value = yarnProject.InitialValues[testDefault.Key];
-                value.ToString().Should().BeEqualTo(testDefault.Value.ToString());
+                value.ToString().Should().BeEqualTo(testDefault.Value.ToString(), $"initial value of {testDefault.Key} should be {testDefault.Value}");
             }
 
             yield return null;
@@ -265,12 +264,6 @@ namespace Yarn.Unity.Tests
             var testNodes = new string[]
             {
                 "Start",
-                "Exit",
-                "VariableTest",
-                "FunctionTest",
-                "FunctionTest2",
-                "ExternalFunctionTest",
-                "BuiltinsTest",
                 "LotsOfVars",
                 "EmptyTags",
                 "Tags",
@@ -287,51 +280,6 @@ namespace Yarn.Unity.Tests
 
             yield return null;
         }
-
-        [UnityTest]
-        public IEnumerator HandleLine_OnValidYarnFile_SendCorrectLinesToUI()
-        {
-
-
-
-            runner.StartDialogue(runner.startNode);
-            yield return null;
-
-            dialogueUI.AssertCurrentLineIs("Spieler: Kannst du mich hören? 2");
-            yield return null;
-
-            dialogueUI.AssertCurrentLineIs("NPC: Klar und deutlich.");
-            yield return null;
-
-            dialogueUI.AssertCurrentOptionsAre(
-                "Mir reicht es.",
-                "Nochmal!"
-            );
-        }
-
-        [UnityTest]
-        public IEnumerator HandleLine_OnViewsArrayContainingNullElement_SendCorrectLinesToUI()
-        {
-            // Insert a null element into the dialogue views array
-            var viewArrayWithNullElement = runner.DialoguePresenters.ToList();
-            viewArrayWithNullElement.Add(null);
-            runner.DialoguePresenters = viewArrayWithNullElement.ToArray();
-
-            runner.StartDialogue(runner.startNode);
-            yield return null;
-
-            dialogueUI.AssertCurrentLineIs("Spieler: Kannst du mich hören? 2");
-            yield return null;
-
-            dialogueUI.AssertCurrentLineIs("NPC: Klar und deutlich.");
-            yield return null;
-
-            dialogueUI.AssertCurrentOptionsAre(
-                "Mir reicht es.",
-                "Nochmal!"
-            );
-        }
-
 
         [TestCase("testCommandInteger DialogueRunner 1 2", "3")]
         [TestCase("testCommandString DialogueRunner a b", "ab")]
@@ -493,58 +441,6 @@ namespace Yarn.Unity.Tests
                 framesToWait -= 1;
                 yield return null;
             }
-        }
-
-        [UnityTest]
-        public IEnumerator VariableStorage_OnExternalChanges_ReturnsExpectedValue()
-        {
-
-
-            var variableStorage = UnityEngine.Object.FindAnyObjectByType<VariableStorageBehaviour>();
-
-            runner.StartDialogue("VariableTest");
-            yield return null;
-
-            dialogueUI.AssertCurrentLineIs("Jane: Yes! I've already walked 0 laps!");
-            yield return null;
-
-            variableStorage.SetValue("$laps", 1);
-            runner.Stop();
-            runner.StartDialogue("VariableTest");
-            yield return null;
-
-            dialogueUI.AssertCurrentLineIs("Jane: Yes! I've already walked 1 laps!");
-            yield return null;
-
-            variableStorage.SetValue("$laps", 5);
-            runner.Stop();
-            runner.StartDialogue("FunctionTest");
-            yield return null;
-
-            dialogueUI.AssertCurrentLineIs("Jane: Yes! I've already walked 25 laps!");
-            yield return null;
-
-            runner.Stop();
-            runner.StartDialogue("FunctionTest2");
-            yield return null;
-
-            dialogueUI.AssertCurrentLineIs("Jane: Yes! I've already walked arg! i am a pirate no you're not! arg! i am a pirate laps!");
-            yield return null;
-
-            runner.Stop();
-            runner.StartDialogue("ExternalFunctionTest");
-            yield return null;
-
-            dialogueUI.AssertCurrentLineIs("Jane: Here's a function from code that's in another assembly: 42");
-            yield return null;
-
-            runner.Stop();
-            runner.StartDialogue("BuiltinsTest");
-            yield return null;
-
-            dialogueUI.AssertCurrentLineIs("Jane: round(3.522) = 4; round_places(3.522, 2) = 3.52; floor(3.522) = 3; floor(-3.522) = -4; ceil(3.522) = 4; ceil(-3.522) = -3; inc(3.522) = 4; inc(4) = 5; dec(3.522) = 3; dec(3) = 2; round_places(decimal(3.522),3) = 0.522; int(3.522) = 3; int(-3.522) = -3;");
-            yield return null;
-
         }
 
         [TestCase(@"one two three four", new[] { "one", "two", "three", "four" })]

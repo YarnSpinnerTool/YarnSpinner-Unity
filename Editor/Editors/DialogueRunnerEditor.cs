@@ -766,7 +766,7 @@ namespace Yarn.Unity.Editor
         private const string samplesLabel = "Samples";
         private const string discordLabel = "Discord";
         private const string tellUsLabel = "Tell us about your game!";
-        private const string docsURL = "https://docs.yarnspinner.dev/unity";
+        private const string docsURL = "https://docs.yarnspinner.dev/";
         private const string discordURL = "https://discord.com/invite/yarnspinner";
         private const string tellUsURL = "https://yarnspinner.dev/tell-us";
 

@@ -87,10 +87,10 @@ namespace Yarn.Unity.Editor
 
         /// <summary>
         /// Returns the path to a text file that can be used as the basis
-        /// for newly created C# Dialogue View scripts.
+        /// for newly created C# Dialogue Presenter scripts.
         /// </summary>
         /// <returns>A path to a file to use in the Unity editor for
-        /// creating new C# Dialogue View.</returns>
+        /// creating new C# Dialogue Presenter.</returns>
         /// <throws cref="FileNotFoundException">Thrown if the template
         /// text file cannot be found.</throws>
         public static string GetTemplateDialoguePresenterPath()
@@ -142,7 +142,7 @@ namespace Yarn.Unity.Editor
         }
 
         /// <summary>
-        /// Creates a new C# script asset containing a template Dialogue View in
+        /// Creates a new C# script asset containing a template Dialogue Presenter in
         /// the current folder, and begins interactively renaming it.
         /// </summary>
         [MenuItem("Assets/Create/Yarn Spinner/Dialogue Presenter Script", false, 111)]

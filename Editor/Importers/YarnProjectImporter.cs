@@ -1181,6 +1181,13 @@ namespace Yarn.Unity.Editor
 #if USE_UNITY_LOCALIZATION
         private static void AddStringTableEntries(IDictionary<string, StringInfo> stringTable, StringTableCollection unityLocalisationStringTableCollection, string baseLanguage)
         {
+            if (LocalizationEditorSettings.ActiveLocalizationSettings == null)
+            {
+                // No localization settings available. We can't add string table entries.
+                Debug.LogWarning($"Unity Localization is installed, but your project has no Localization Settings.");
+                return;
+            }
+
             // Get the Unity string table corresponding to the Yarn Project's
             // base language. If a table can't be found for the language but can
             // be for the language's parent, use that. Otherwise, return null.

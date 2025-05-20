@@ -50,7 +50,7 @@ namespace Yarn.Unity
         /// <param name="text">A <see cref="TMP_Text"/> object that the line is
         /// being displayed in.</param>
         public void OnPrepareForLine(MarkupParseResult line, TMP_Text text);
-        
+
         /// <summary>
         /// Called immediately before the first character in the line is
         /// presented. 
@@ -59,7 +59,7 @@ namespace Yarn.Unity
         /// <param name="text">A <see cref="TMP_Text"/> object that the line is
         /// being displayed in.</param>
         public void OnLineDisplayBegin(MarkupParseResult line, TMP_Text text);
-        
+
         /// <summary>
         /// Called repeatedly for each visible character in the line.
         /// </summary>
@@ -74,10 +74,10 @@ namespace Yarn.Unity
         /// whether the </param>
         /// <returns>A task that completes when the <see
         /// cref="ActionMarkupHandler"/> has completed presenting this
-        /// character. Dialogue views will wait until this task is complete
+        /// character. Dialogue presenters will wait until this task is complete
         /// before displaying the remainder of the line.</returns>
         public YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line, CancellationToken cancellationToken);
-        
+
         /// <summary>
         /// Called after the last call to <see cref="PresentCharacter(int,
         /// TMP_Text, CancellationToken)"/>.
@@ -86,7 +86,7 @@ namespace Yarn.Unity
         /// cref="ActionMarkupHandler"/> to finalise its presentation after
         /// all of the characters in the line have been presented.</remarks>
         public void OnLineDisplayComplete();
-        
+
         /// <summary>
         /// Called right before the line will dismiss itself.
         /// </summary>

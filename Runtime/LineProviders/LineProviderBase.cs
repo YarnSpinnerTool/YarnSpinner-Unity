@@ -85,12 +85,12 @@ namespace Yarn.Unity
 
     /// <summary>
     /// A <see cref="MonoBehaviour"/> that produces <see
-    /// cref="LocalizedLine"/>s, for use in Dialogue Views.
+    /// cref="LocalizedLine"/>s, for use in Dialogue Presenters.
     /// </summary>
     /// <remarks>
     /// <see cref="DialogueRunner"/>s use a <see cref="LineProviderBehaviour"/>
     /// to get <see cref="LocalizedLine"/>s, which contain the localized
-    /// information that is presented to the player through dialogue views.
+    /// information that is presented to the player through dialogue presenters.
     /// </remarks>
     /// <seealso cref="DialogueViewBase"/>
     public abstract class LineProviderBehaviour : MonoBehaviour, ILineProvider

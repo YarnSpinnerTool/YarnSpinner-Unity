@@ -20,7 +20,7 @@ using TextMeshProUGUI = Yarn.Unity.TMPShim;
 namespace Yarn.Unity
 {
     /// <summary>
-    /// A Dialogue View that presents lines of dialogue, using Unity UI
+    /// A Dialogue Presenter that presents lines of dialogue, using Unity UI
     /// elements.
     /// </summary>
     [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-view/line-view")]
@@ -143,7 +143,7 @@ namespace Yarn.Unity
         /// </para>
         /// <para style="note"><para>The <see cref="DialogueRunner"/> will not
         /// proceed to the next piece of content (e.g. the next line, or the
-        /// next options) until all Dialogue Views have reported that they have
+        /// next options) until all Dialogue Presenters have reported that they have
         /// finished presenting their lines. If a <see cref="LinePresenter"/>
         /// doesn't report that it's finished until it receives input, the <see
         /// cref="DialogueRunner"/> will end up pausing.</para>
@@ -403,7 +403,7 @@ namespace Yarn.Unity
         /// <inheritdoc cref="DialoguePresenterBase.RunOptionsAsync(DialogueOption[], CancellationToken)" path="/param"/> 
         /// <inheritdoc cref="DialoguePresenterBase.RunOptionsAsync(DialogueOption[], CancellationToken)" path="/returns"/> 
         /// <remarks>
-        /// This dialogue view does not handle any options.
+        /// This dialogue presenter does not handle any options.
         /// </remarks>
         public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
