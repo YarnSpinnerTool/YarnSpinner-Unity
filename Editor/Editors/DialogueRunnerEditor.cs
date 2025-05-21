@@ -803,7 +803,12 @@ namespace Yarn.Unity.Editor
         {
             bool MakeLinkButton(string labelText)
             {
+#if UNITY_6000_0_OR_NEWER
                 string styledText = "<b><color=#4C8962FF><u>" + labelText + "</u></color></b>";
+#else
+                // Underlines aren't available in earlier versions of Unity
+                string styledText = "<b><color=#4C8962FF>" + labelText + "</color></b>";
+#endif
                 return GUILayout.Button(styledText, UrlStyle, GUILayout.ExpandWidth(false));
             }
             void InstallSamples()
