@@ -210,7 +210,6 @@ namespace Yarn.Unity
         [ShowIf(nameof(useTypewriterEffect))]
         [Label("Event Processors")]
         [SerializeField] List<ActionMarkupHandler> actionMarkupHandlers = new List<ActionMarkupHandler>();
-        public List<IActionMarkupHandler> temporalProcessors = new List<IActionMarkupHandler>();
 
         /// <inheritdoc/>
         public override YarnTask OnDialogueCompleteAsync()
@@ -243,7 +242,7 @@ namespace Yarn.Unity
                 // and add it to the front of the list
                 // that way it always happens first
                 var pauser = new PauseEventProcessor();
-                temporalProcessors.Insert(0, pauser);
+                ActionMarkupHandlers.Insert(0, pauser);
             }
 
             if (characterNameContainer == null && characterNameText != null)
@@ -255,7 +254,7 @@ namespace Yarn.Unity
         private void Start()
         {
             // we add all the monobehaviour handlers into the shared list
-            temporalProcessors.AddRange(actionMarkupHandlers);
+            ActionMarkupHandlers.AddRange(actionMarkupHandlers);
         }
 
         /// <summary>Presents a line using the configured text view.</summary>
@@ -306,7 +305,7 @@ namespace Yarn.Unity
             {
                 lineText.maxVisibleCharacters = 0;
                 // letting every temporal processor know that fade up (if set) is about to begin
-                foreach (var processor in temporalProcessors)
+                foreach (var processor in ActionMarkupHandlers)
                 {
                     processor.OnPrepareForLine(text, lineText);
                 }
@@ -333,7 +332,7 @@ namespace Yarn.Unity
             if (useTypewriterEffect)
             {
                 // letting every temporal processor know that fading is done and display is about to begin
-                foreach (var processor in temporalProcessors)
+                foreach (var processor in ActionMarkupHandlers)
                 {
                     processor.OnLineDisplayBegin(text, lineText);
                 }
@@ -351,7 +350,7 @@ namespace Yarn.Unity
                 for (int i = 0; i < visibleCharacterCount; i++)
                 {
                     // telling every processor that it is time to process the current character
-                    foreach (var processor in temporalProcessors)
+                    foreach (var processor in ActionMarkupHandlers)
                     {
                         await processor.OnCharacterWillAppear(i, text, token.HurryUpToken).SuppressCancellationThrow();
                     }
@@ -366,7 +365,7 @@ namespace Yarn.Unity
                 lineText.maxVisibleCharacters = visibleCharacterCount;
 
                 // letting each temporal processor know the line has finished displaying
-                foreach (var processor in temporalProcessors)
+                foreach (var processor in ActionMarkupHandlers)
                 {
                     processor.OnLineDisplayComplete();
                 }
@@ -383,7 +382,7 @@ namespace Yarn.Unity
             }
 
             // we tell all action processors that the line is finished and is about to go away
-            foreach (var processor in temporalProcessors)
+            foreach (var processor in ActionMarkupHandlers)
             {
                 processor.OnLineWillDismiss();
             }
