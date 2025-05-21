@@ -331,44 +331,14 @@ namespace Yarn.Unity
 
             if (useTypewriterEffect)
             {
-                // letting every temporal processor know that fading is done and display is about to begin
-                foreach (var processor in ActionMarkupHandlers)
+                var typewriter = new BasicTypewriter()
                 {
-                    processor.OnLineDisplayBegin(text, lineText);
-                }
+                    TemporalProcessors = this.actionMarkupHandlers,
+                    Text = this.lineText,
+                    TypewriterEffectSpeed = this.typewriterEffectSpeed,
+                };
 
-                int milliSecondsPerLetter = 0;
-                if (typewriterEffectSpeed > 0)
-                {
-                    milliSecondsPerLetter = (int)(1000f / typewriterEffectSpeed);
-                }
-                
-                // Get the count of visible characters from TextMesh to exclude markup characters
-                var visibleCharacterCount = lineText.GetTextInfo(text.Text).characterCount;
-                
-                // going through each character of the line and letting the processors know about it
-                for (int i = 0; i < visibleCharacterCount; i++)
-                {
-                    // telling every processor that it is time to process the current character
-                    foreach (var processor in ActionMarkupHandlers)
-                    {
-                        await processor.OnCharacterWillAppear(i, text, token.HurryUpToken).SuppressCancellationThrow();
-                    }
-
-                    lineText.maxVisibleCharacters += 1;
-                    if (milliSecondsPerLetter > 0)
-                    {
-                        await YarnTask.Delay(System.TimeSpan.FromMilliseconds(milliSecondsPerLetter), token.HurryUpToken).SuppressCancellationThrow();
-                    }
-                }
-
-                lineText.maxVisibleCharacters = visibleCharacterCount;
-
-                // letting each temporal processor know the line has finished displaying
-                foreach (var processor in ActionMarkupHandlers)
-                {
-                    processor.OnLineDisplayComplete();
-                }
+                await typewriter.RunTypewriter(text, token.HurryUpToken);
             }
 
             // if we are set to autoadvance how long do we hold for before continuing?

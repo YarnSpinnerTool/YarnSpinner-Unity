@@ -1,59 +1,84 @@
 namespace Yarn.Unity
 {
-    using TMPro;
+    using System;
     using System.Collections.Generic;
     using System.Threading;
-    using System;
+    using TMPro;
+    using UnityEngine;
 
-    #nullable enable
+#nullable enable
 
     public interface IAsyncTypewriter
     {
-        public YarnTask Typewrite(int typewriterEffectSpeed, Markup.MarkupParseResult line, TMP_Text textfield, IEnumerable<IActionMarkupHandler> temporalProcessors, CancellationToken cancellationToken);
+        public YarnTask RunTypewriter(Markup.MarkupParseResult line, CancellationToken cancellationToken);
     }
 
-    public class BasicTypewriter: IAsyncTypewriter
+    public class BasicTypewriter : IAsyncTypewriter
     {
-        public async YarnTask Typewrite(int typewriterEffectSpeed, Markup.MarkupParseResult line, TMP_Text textfield, IEnumerable<IActionMarkupHandler> temporalProcessors, CancellationToken cancellationToken)
+        public TMP_Text? Text { get; set; }
+
+        public IEnumerable<IActionMarkupHandler> TemporalProcessors { get; set; } = Array.Empty<IActionMarkupHandler>();
+
+        public float TypewriterEffectSpeed { get; set; } = 0f;
+
+        public async YarnTask RunTypewriter(Markup.MarkupParseResult line, CancellationToken cancellationToken)
         {
-            textfield.maxVisibleCharacters = 0;
-            textfield.text = line.Text;
-
-            // letting every temporal processor know that fading is done and display is about to begin
-            foreach (var processor in temporalProcessors)
+            if (Text == null)
             {
-                processor.OnLineDisplayBegin(line, textfield);
+                Debug.LogWarning($"Can't show text as typewriter, because {nameof(Text)} was not provided");
             }
-
-            int milliSecondsPerLetter = 0;
-            if (typewriterEffectSpeed > 0)
+            else
             {
-                milliSecondsPerLetter = (int)(1000f / typewriterEffectSpeed);
-            }
+                Text.maxVisibleCharacters = 0;
+                Text.text = line.Text;
 
-            // going through each character of the line and letting the processors know about it
-            for (int i = 0; i < line.Text.Length; i++)
-            {
-                // telling every processor that it is time to process the current character
-                foreach (var processor in temporalProcessors)
+                // Let every temporal processor know that fading is done and
+                // display is about to begin
+                foreach (var processor in TemporalProcessors)
                 {
-                    await processor.OnCharacterWillAppear(i, line, cancellationToken).SuppressCancellationThrow();
+                    processor.OnLineDisplayBegin(line, Text);
                 }
 
-                textfield.maxVisibleCharacters += 1;
-                if (milliSecondsPerLetter > 0)
+                int milliSecondsPerLetter = 0;
+                if (TypewriterEffectSpeed > 0)
                 {
-                    await YarnTask.Delay(TimeSpan.FromMilliseconds(milliSecondsPerLetter), cancellationToken).SuppressCancellationThrow();
+                    milliSecondsPerLetter = (int)(1000f / TypewriterEffectSpeed);
                 }
+
+                // Get the count of visible characters from TextMesh to exclude markup characters
+                var visibleCharacterCount = Text.GetTextInfo(line.Text).characterCount;
+
+                // Go through each character of the line and letting the
+                // processors know about it
+                for (int i = 0; i < visibleCharacterCount; i++)
+                {
+                    // Tell every processor that it is time to process the
+                    // current character
+                    foreach (var processor in TemporalProcessors)
+                    {
+                        await processor
+                            .OnCharacterWillAppear(i, line, cancellationToken)
+                            .SuppressCancellationThrow();
+                    }
+
+                    Text.maxVisibleCharacters += 1;
+                    if (milliSecondsPerLetter > 0)
+                    {
+                        await YarnTask.Delay(
+                            TimeSpan.FromMilliseconds(milliSecondsPerLetter),
+                            cancellationToken
+                        ).SuppressCancellationThrow();
+                    }
+                }
+
+                Text.maxVisibleCharacters = visibleCharacterCount;
             }
 
-            // letting each temporal processor know the line has finished displaying
-            foreach (var processor in temporalProcessors)
+            // Let each temporal processor know the line has finished displaying
+            foreach (var processor in TemporalProcessors)
             {
                 processor.OnLineDisplayComplete();
             }
-
-            textfield.maxVisibleCharacters = line.Text.Length;
         }
     }
 }

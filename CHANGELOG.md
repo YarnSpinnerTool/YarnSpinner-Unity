@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - The Yarn Spinner header in the Inspector no longer shows `<u></u>` markup in versions of Unity prior to Unity 6.
+- `LinePresenter` now implements its typewriter effect with `BasicTypewriter`, an implementation of the `IAsyncTypewriter` interface. 
 
 ### Removed
 
