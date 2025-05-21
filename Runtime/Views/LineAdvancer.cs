@@ -25,9 +25,21 @@ namespace Yarn.Unity
     /// </summary>
     public sealed class LineAdvancer : DialoguePresenterBase, IActionMarkupHandler
     {
-        [MustNotBeNull]
+        [MustNotBeNull("Line Advancer needs to know which Dialogue Runner should be told to tell it to show the next line.")]
         [Tooltip("The dialogue runner that will receive requests to advance or cancel content.")]
         [SerializeField] DialogueRunner? runner;
+
+        /// <summary>
+        /// The <see cref="DialoguePresenterBase"/> that this LineAdvancer
+        /// should subscribe to for notifications that the line is fully
+        /// visible.
+        /// </summary>
+        /// <remarks>When <see cref="RequestLineHurryUp"/> is called, if the
+        /// line is fully visible, the <see cref="runner"/> object will have its
+        /// <see cref="DialogueRunner.RequestNextLine"/> method called (instead
+        /// of its <see cref="DialogueRunner.RequestHurryUpLine"/> method).
+        ///</remarks>
+        [SerializeField] DialoguePresenterBase? presenter;
 
         /// <summary>
         /// If <see langword="true"/>, repeatedly signalling that the line
@@ -271,12 +283,14 @@ namespace Yarn.Unity
 
         void Start()
         {
-            // find the line presenter (if it exists)
-            // and register ourselves as 
-            var linePresenter = FindAnyObjectByType<LinePresenter>();
-            if (linePresenter != null)
+            // If we have a dialogue presenter configured, register ourselves as
+            // a temporal processor, so that we get notified when the line is
+            // fully visible. This is so that when a line is fully visible, the
+            // 'hurry up' action will instead trigger a 'next line' action,
+            // (because there's nothing left to hurry up.)
+            if (presenter != null)
             {
-                linePresenter.temporalProcessors.Add(this);
+                presenter.ActionMarkupHandlers.Add(this);
             }
         }
 
