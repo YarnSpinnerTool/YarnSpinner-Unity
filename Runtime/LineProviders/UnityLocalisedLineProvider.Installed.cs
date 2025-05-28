@@ -137,7 +137,7 @@ namespace Yarn.Unity.UnityLocalization
             // Lastly, attempt to fetch an asset for this line
             Object? asset = null;
 
-            if (this.assetTable != null)
+            if (this.assetTable != null && this.assetTable.IsEmpty == false)
             {
                 // Fetch the asset for this line, if one is available.
                 var loadOp = LocalizationSettings.AssetDatabase.GetLocalizedAssetAsync<Object>(assetTable.TableReference, shadowLineID ?? line.ID, null, FallbackBehavior.UseFallback);
