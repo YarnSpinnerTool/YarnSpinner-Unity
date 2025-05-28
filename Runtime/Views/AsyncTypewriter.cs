@@ -78,19 +78,34 @@ namespace Yarn.Unity
                     markupHandler.OnLineDisplayBegin(line, Text);
                 }
 
-                int milliSecondsPerLetter = 0;
+                double secondsPerCharacter = 0;
                 if (CharactersPerSecond > 0)
                 {
-                    milliSecondsPerLetter = (int)(1000f / CharactersPerSecond);
+                    secondsPerCharacter = 1.0 / CharactersPerSecond;
                 }
 
                 // Get the count of visible characters from TextMesh to exclude markup characters
                 var visibleCharacterCount = Text.GetTextInfo(line.Text).characterCount;
 
+                // Start with a full time budget so that we immediately show the first character
+                double accumulatedDelay = secondsPerCharacter;
+
                 // Go through each character of the line and letting the
                 // processors know about it
                 for (int i = 0; i < visibleCharacterCount; i++)
                 {
+                    // If we don't already have enough accumulated time budget
+                    // for a character, wait until we do (or until we're
+                    // cancelled)
+                    while (!cancellationToken.IsCancellationRequested
+                        && (accumulatedDelay < secondsPerCharacter))
+                    {
+                        var timeBeforeYield = Time.timeAsDouble;
+                        await YarnTask.Yield();
+                        var timeAfterYield = Time.timeAsDouble;
+                        accumulatedDelay += timeAfterYield - timeBeforeYield;
+                    }
+
                     // Tell every markup handler that it is time to process the
                     // current character
                     foreach (var processor in ActionMarkupHandlers)
@@ -101,15 +116,12 @@ namespace Yarn.Unity
                     }
 
                     Text.maxVisibleCharacters += 1;
-                    if (milliSecondsPerLetter > 0)
-                    {
-                        await YarnTask.Delay(
-                            TimeSpan.FromMilliseconds(milliSecondsPerLetter),
-                            cancellationToken
-                        ).SuppressCancellationThrow();
-                    }
+
+                    accumulatedDelay -= secondsPerCharacter;
                 }
 
+                // We've finished showing every character (or we were
+                // cancelled); ensure that everything is now visible.
                 Text.maxVisibleCharacters = visibleCharacterCount;
             }
 
