@@ -333,9 +333,9 @@ namespace Yarn.Unity
             {
                 var typewriter = new BasicTypewriter()
                 {
-                    TemporalProcessors = this.actionMarkupHandlers,
+                    ActionMarkupHandlers = this.actionMarkupHandlers,
                     Text = this.lineText,
-                    TypewriterEffectSpeed = this.typewriterEffectSpeed,
+                    CharactersPerSecond = this.typewriterEffectSpeed,
                 };
 
                 await typewriter.RunTypewriter(text, token.HurryUpToken);

@@ -17,9 +17,9 @@ namespace Yarn.Unity
     {
         public TMP_Text? Text { get; set; }
 
-        public IEnumerable<IActionMarkupHandler> TemporalProcessors { get; set; } = Array.Empty<IActionMarkupHandler>();
+        public IEnumerable<IActionMarkupHandler> ActionMarkupHandlers { get; set; } = Array.Empty<IActionMarkupHandler>();
 
-        public float TypewriterEffectSpeed { get; set; } = 0f;
+        public float CharactersPerSecond { get; set; } = 0f;
 
         public async YarnTask RunTypewriter(Markup.MarkupParseResult line, CancellationToken cancellationToken)
         {
@@ -32,17 +32,16 @@ namespace Yarn.Unity
                 Text.maxVisibleCharacters = 0;
                 Text.text = line.Text;
 
-                // Let every temporal processor know that fading is done and
-                // display is about to begin
-                foreach (var processor in TemporalProcessors)
+                // Let every markup handler know that display is about to begin
+                foreach (var markupHandler in ActionMarkupHandlers)
                 {
-                    processor.OnLineDisplayBegin(line, Text);
+                    markupHandler.OnLineDisplayBegin(line, Text);
                 }
 
                 int milliSecondsPerLetter = 0;
-                if (TypewriterEffectSpeed > 0)
+                if (CharactersPerSecond > 0)
                 {
-                    milliSecondsPerLetter = (int)(1000f / TypewriterEffectSpeed);
+                    milliSecondsPerLetter = (int)(1000f / CharactersPerSecond);
                 }
 
                 // Get the count of visible characters from TextMesh to exclude markup characters
@@ -52,9 +51,9 @@ namespace Yarn.Unity
                 // processors know about it
                 for (int i = 0; i < visibleCharacterCount; i++)
                 {
-                    // Tell every processor that it is time to process the
+                    // Tell every markup handler that it is time to process the
                     // current character
-                    foreach (var processor in TemporalProcessors)
+                    foreach (var processor in ActionMarkupHandlers)
                     {
                         await processor
                             .OnCharacterWillAppear(i, line, cancellationToken)
@@ -74,10 +73,10 @@ namespace Yarn.Unity
                 Text.maxVisibleCharacters = visibleCharacterCount;
             }
 
-            // Let each temporal processor know the line has finished displaying
-            foreach (var processor in TemporalProcessors)
+            // Let each markup handler know the line has finished displaying
+            foreach (var markupHandler in ActionMarkupHandlers)
             {
-                processor.OnLineDisplayComplete();
+                markupHandler.OnLineDisplayComplete();
             }
         }
     }
