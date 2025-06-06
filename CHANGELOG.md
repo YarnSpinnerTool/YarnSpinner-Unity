@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `LinePresenter` now implements its typewriter effect with `BasicTypewriter`, an implementation of the `IAsyncTypewriter` interface. 
 - The typewriter effect in `LinePresenter` is now framerate-independent.
 - Fixed an issue in UnityLocalisedLineProvider where an exception would be thrown if an asset table was not provided.
+- `SerializableDictionary<TKey,TValue>` no longer exposes non-generic `IDictionary` methods; instead, all operations are now correctly type-checked.
 
 ### Removed
 

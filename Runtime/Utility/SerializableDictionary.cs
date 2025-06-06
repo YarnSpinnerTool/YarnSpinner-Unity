@@ -158,24 +158,24 @@ namespace Yarn.Unity
 
         #region IDictionary
 
-        public bool IsFixedSize { get { return ((IDictionary)m_dict).IsFixedSize; } }
+        bool IDictionary.IsFixedSize { get { return ((IDictionary)m_dict).IsFixedSize; } }
         ICollection IDictionary.Keys { get { return ((IDictionary)m_dict).Keys; } }
         ICollection IDictionary.Values { get { return ((IDictionary)m_dict).Values; } }
-        public bool IsSynchronized { get { return ((IDictionary)m_dict).IsSynchronized; } }
-        public object SyncRoot { get { return ((IDictionary)m_dict).SyncRoot; } }
+        bool ICollection.IsSynchronized { get { return ((IDictionary)m_dict).IsSynchronized; } }
+        object ICollection.SyncRoot { get { return ((IDictionary)m_dict).SyncRoot; } }
 
-        public object this[object key]
+        object IDictionary.this[object key]
         {
             get { return ((IDictionary)m_dict)[key]; }
             set { ((IDictionary)m_dict)[key] = value; }
         }
 
-        public void Add(object key, object value)
+        void IDictionary.Add(object key, object value)
         {
             ((IDictionary)m_dict).Add(key, value);
         }
 
-        public bool Contains(object key)
+        bool IDictionary.Contains(object key)
         {
             return ((IDictionary)m_dict).Contains(key);
         }
@@ -185,12 +185,12 @@ namespace Yarn.Unity
             return ((IDictionary)m_dict).GetEnumerator();
         }
 
-        public void Remove(object key)
+        void IDictionary.Remove(object key)
         {
             ((IDictionary)m_dict).Remove(key);
         }
 
-        public void CopyTo(Array array, int index)
+        void ICollection.CopyTo(Array array, int index)
         {
             ((IDictionary)m_dict).CopyTo(array, index);
         }
