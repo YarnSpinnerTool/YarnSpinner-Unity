@@ -58,6 +58,11 @@ namespace Yarn.Unity
                     listener.DynamicInvoke(newValue);
                 }
             }
+
+            foreach (var listener in globalChangeListeners)
+            {
+                listener.DynamicInvoke(variableName, newValue);
+            }
         }
 
         /// <inheritdoc/>
@@ -126,6 +131,7 @@ namespace Yarn.Unity
         }
 
         private Dictionary<string, List<Delegate>> changeListeners = new();
+        private List<Delegate> globalChangeListeners = new();
 
         /// <summary>
         /// Registers a delegate that will be called when the variable <paramref
@@ -186,6 +192,24 @@ namespace Yarn.Unity
             list.Add(onChange);
 
             return new ChangeListenerDisposable(list, onChange);
+        }
+
+
+        /// <summary>
+        /// Registers a delegate that will be called when any variable is modified. 
+        /// </summary>
+        /// <param name="onChange">The delegate to run when the variable changes
+        /// value.</param>
+        /// <returns>An <see cref="IDisposable"/> that removes the registration
+        /// when its <see cref="IDisposable.Dispose"/> method is
+        /// called.</returns>
+        public IDisposable AddChangeListener(System.Action<string, object> onChange)
+        {
+            globalChangeListeners ??= new();
+
+            globalChangeListeners.Add(onChange);
+
+            return new ChangeListenerDisposable(globalChangeListeners, onChange);
         }
     }
 }
