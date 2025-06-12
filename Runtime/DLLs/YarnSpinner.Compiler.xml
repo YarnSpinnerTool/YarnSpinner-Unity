@@ -925,7 +925,7 @@
             <param name="name">The key to search for</param>
             <returns>A collection of header contexts.</returns>
         </member>
-        <member name="M:Yarn.Compiler.Compiler.Emit(Yarn.Node,Yarn.Compiler.NodeDebugInfo,System.Int32,System.Int32,Yarn.Instruction)">
+        <member name="M:Yarn.Compiler.Compiler.Emit(Yarn.Node,Yarn.Compiler.NodeDebugInfo,Yarn.Compiler.Range,Yarn.Instruction)">
             <summary>
             Creates a new instruction, and appends it to a node in the <see
             cref="T:Yarn.Program" />.
@@ -933,10 +933,7 @@
             <param name="node">The node to append instructions to.</param>
             <param name="debugInfo">The <see cref="T:Yarn.Compiler.NodeDebugInfo"/> object to add
             line debugging information to.</param>
-            <param name="sourceLine">The zero-indexed line in the source input
-            corresponding to this instruction.</param>
-            <param name="sourceCharacter">The zero-indexed character in the
-            source input corresponding to this instruction.</param>
+            <param name="range">The range of source code corresponding to this instruction.</param>
             <param name="instruction">The instruction to add.</param>
         </member>
         <member name="M:Yarn.Compiler.Compiler.GetContentIDTag(Yarn.Compiler.ContentIdentifierType,Yarn.Compiler.YarnSpinnerParser.HashtagContext[])">
@@ -1072,11 +1069,11 @@
         </member>
         <member name="M:Yarn.Compiler.YarnSpinnerParser.GetBooleanOperatorCountInExpression(Antlr4.Runtime.ParserRuleContext)">
             <summary>
-            Gets the total number of boolean operations - ands, ors, nots, and
+            Gets the total number of binary boolean operations - ands, ors, and
             xors - present in an expression and its sub-expressions.
             </summary>
             <param name="context">An expression.</param>
-            <returns>The total number of boolean operations in the
+            <returns>The total number of binary boolean operations in the
             expression.</returns>
         </member>
         <member name="T:Yarn.Compiler.YarnSpinnerParser.Line_conditionContext">
@@ -1093,6 +1090,12 @@
         <member name="P:Yarn.Compiler.YarnSpinnerParser.When_headerContext.ComplexityScore">
             <summary>
             Gets the complexity of this line's condition.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.YarnSpinnerParser.Command_statementContext.commandEffect">
+            <summary>
+            The effect that this command should have. If this value is null,
+            then a <c>RunCommand</c> instruction is generated.
             </summary>
         </member>
         <member name="P:Yarn.Compiler.YarnSpinnerParser.Line_statementContext.LineID">
@@ -1236,10 +1239,10 @@
             Gets or sets the node that this DebugInfo was produced from.
             </summary>
         </member>
-        <member name="P:Yarn.Compiler.NodeDebugInfo.LinePositions">
+        <member name="P:Yarn.Compiler.NodeDebugInfo.LineRanges">
             <summary>
             Gets or sets the mapping of instruction numbers to <see
-            cref="T:Yarn.Compiler.Position"/> information in the file indicated by <see
+            cref="P:Yarn.Compiler.NodeDebugInfo.Range"/> information in the file indicated by <see
             cref="P:Yarn.Compiler.NodeDebugInfo.FileName"/>.
             </summary>
         </member>
@@ -1290,9 +1293,9 @@
             from.
             </summary>
         </member>
-        <member name="F:Yarn.Compiler.NodeDebugInfo.LineInfo.Position">
+        <member name="F:Yarn.Compiler.NodeDebugInfo.LineInfo.Range">
             <summary>
-            The position in <see cref="F:Yarn.Compiler.NodeDebugInfo.LineInfo.FileName"/> that contains the
+            The range in <see cref="F:Yarn.Compiler.NodeDebugInfo.LineInfo.FileName"/> that contains the
             statement or expression that this line was produced from.
             </summary>
         </member>
@@ -1320,14 +1323,15 @@
             <param name="endCharacter">The zero-indexed character number of the
             end of the range.</param>
         </member>
-        <member name="M:Yarn.Compiler.Range.#ctor">
+        <member name="M:Yarn.Compiler.Range.#ctor(Yarn.Compiler.Position,Yarn.Compiler.Position)">
             <summary>
-            Initializes a new instance of the <see cref="T:Yarn.Compiler.Range"/> class.
+            Initializes a new instance of the <see cref="T:Yarn.Compiler.Range"/> class, given
+            start and end information.
             </summary>
-            <remarks>
-            The <see cref="P:Yarn.Compiler.Range.Start"/> and <see cref="P:Yarn.Compiler.Range.End"/> positions will both be
-            set to have a line and character index of -1.
-            </remarks>
+            <param name="startPosition">The position at the start of
+            the range.</param>
+            <param name="endPosition">The position at the end of
+            the range.</param>
         </member>
         <member name="P:Yarn.Compiler.Range.Start">
             <summary>
@@ -1378,6 +1382,24 @@
             line and character number.
             </summary>
         </member>
+        <member name="F:Yarn.Compiler.Position.InvalidPosition">
+            <summary>
+            Represents the default value for a Position.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.Position.#ctor(System.Int32,System.Int32)">
+            <summary>
+            Initialises a new instance of the Position class with the specified
+            line and character.
+            </summary>
+            <param name="line">The zero-indexed line number.</param>
+            <param name="character">The zero-index character number.</param>
+        </member>
+        <member name="M:Yarn.Compiler.Position.#ctor">
+            <summary>
+            Initialises a new instance of the Position class.
+            </summary>
+        </member>
         <member name="M:Yarn.Compiler.Position.Equals(System.Object)">
             <inheritdoc/>
         </member>
@@ -1406,6 +1428,14 @@
             <param name="b">The second position.</param>
             <returns>true if a is before or equal to b; false
             otherwise.</returns>
+        </member>
+        <member name="M:Yarn.Compiler.Position.op_Addition(Yarn.Compiler.Position,Yarn.Compiler.Position)">
+            <summary>
+            Adds two positions by component and returns the result.
+            </summary>
+            <param name="a">The first position.</param>
+            <param name="b">The second position.</param>
+            <returns>The resulting combined position.</returns>
         </member>
         <member name="T:Yarn.Compiler.Declaration">
             <summary>
@@ -1730,7 +1760,7 @@
             Initializes a new instance of the <see cref="T:Yarn.Compiler.Compiler"/> class.
             </summary>
         </member>
-        <member name="M:Yarn.Compiler.FileCompiler.Emit(Antlr4.Runtime.IToken,Yarn.Instruction)">
+        <member name="M:Yarn.Compiler.FileCompiler.Emit(Antlr4.Runtime.IToken,Antlr4.Runtime.IToken,Yarn.Instruction)">
             <summary>
             Adds the specified instruction it to the current node in the <see
             cref="T:Yarn.Program"/>, and associates it with the position of <paramref
@@ -1741,6 +1771,9 @@
             walking the parse tree.
             </remarks>
             <param name="startToken">The first token in the expression or
+            statement that was responsible for emitting this
+            instruction.</param>
+            <param name="endToken">The last token in the expression or
             statement that was responsible for emitting this
             instruction.</param>
             <param name="instruction">The instruction to emit.</param>
@@ -4558,7 +4591,7 @@
             <param name="context">The parse tree.</param>
             <return>The visitor result.</return>
         </member>
-        <member name="M:Yarn.Compiler.ICodeEmitter.Emit(Antlr4.Runtime.IToken,Yarn.Instruction)">
+        <member name="M:Yarn.Compiler.ICodeEmitter.Emit(Antlr4.Runtime.IToken,Antlr4.Runtime.IToken,Yarn.Instruction)">
             <summary>
             Creates a new instruction, and appends it to the current node in the
             <see cref="T:Yarn.Program"/>.
@@ -4571,8 +4604,11 @@
             <param name="startToken">The first token in the expression or
             statement that was responsible for emitting this
             instruction.</param>
+            <param name="endToken">The last token in the expression or
+            statement that was responsible for emitting this
+            instruction.</param>
         </member>
-        <member name="M:Yarn.Compiler.ICodeEmitter.Emit(Antlr4.Runtime.IToken,Yarn.Instruction[])">
+        <member name="M:Yarn.Compiler.ICodeEmitter.Emit(Antlr4.Runtime.IToken,Antlr4.Runtime.IToken,Yarn.Instruction[])">
             <summary>
             Adds instructions to the current node in the <see cref="T:Yarn.Program"/>.
             </summary>
@@ -4582,6 +4618,9 @@
             </remarks>
             <param name="instructions">The instructions to add.</param>
             <param name="startToken">The first token in the expression or
+            statement that was responsible for emitting this
+            instruction.</param>
+            <param name="endToken">The last token in the expression or
             statement that was responsible for emitting this
             instruction.</param>
         </member>
@@ -4738,10 +4777,10 @@
             <param name="compiledNodes">The collection of existing compiled
             nodes in the compilation.</param>
         </member>
-        <member name="M:Yarn.Compiler.NodeGroupCompiler.Emit(Antlr4.Runtime.IToken,Yarn.Instruction)">
+        <member name="M:Yarn.Compiler.NodeGroupCompiler.Emit(Antlr4.Runtime.IToken,Antlr4.Runtime.IToken,Yarn.Instruction)">
             <inheritdoc/>
         </member>
-        <member name="M:Yarn.Compiler.NodeGroupCompiler.Emit(Antlr4.Runtime.IToken,Yarn.Instruction[])">
+        <member name="M:Yarn.Compiler.NodeGroupCompiler.Emit(Antlr4.Runtime.IToken,Antlr4.Runtime.IToken,Yarn.Instruction[])">
             <inheritdoc/>
         </member>
         <member name="M:Yarn.Compiler.NodeGroupCompiler.Emit(Yarn.Instruction)">

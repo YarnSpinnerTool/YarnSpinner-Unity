@@ -1534,6 +1534,195 @@
             The headers present on this node.
             </summary>
         </member>
+        <member name="T:Yarn.QuestNodeStateProperty">
+            <summary>
+            The types of properties a node on a quest graph has.
+            </summary>
+        </member>
+        <member name="F:Yarn.QuestNodeStateProperty.Complete">
+            <summary>
+            The quest graph node is complete.
+            </summary>
+        </member>
+        <member name="F:Yarn.QuestNodeStateProperty.Reachable">
+            <summary>
+            The quest graph node is reachable.
+            </summary>
+        </member>
+        <member name="F:Yarn.QuestNodeStateProperty.NoLongerNeeded">
+            <summary>
+            The quest graph node is no longer needed.
+            </summary>
+        </member>
+        <member name="F:Yarn.QuestNodeStateProperty.Active">
+            <summary>
+            The quest graph node is currently active in its quest.
+            </summary>
+        </member>
+        <member name="T:Yarn.QuestGraphExtensions">
+            <summary>
+            Contains methods for working with <see cref="T:Yarn.Dialogue"/> objects and
+            quest graphs.
+            </summary>
+        </member>
+        <member name="M:Yarn.QuestGraphExtensions.AddQuestGraphSupport(Yarn.Dialogue)">
+            <summary>
+            Registers functions for querying the state of quest graph nodes into
+            <paramref name="dialogue"/>'s library.
+            </summary>
+            <param name="dialogue">The dialogue to register functions into.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref
+            name="dialogue"/> is <see langword="null"/>.</exception>
+        </member>
+        <member name="T:Yarn.QuestGraphNodeDescriptor">
+            <summary>
+            Describes a node on a graph.
+            </summary>
+        </member>
+        <member name="T:Yarn.QuestGraphNodeDescriptor.NodePosition">
+            <summary>
+            A 2D position.
+            </summary>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.NodePosition.#ctor(System.Int32,System.Int32)">
+            <summary>
+            Initialises a new instance of the <see cref="T:Yarn.QuestGraphNodeDescriptor.NodePosition"/>
+            struct with an X and Y coordinate.
+            </summary>
+            <param name="x"></param>
+            <param name="y"></param>
+        </member>
+        <member name="P:Yarn.QuestGraphNodeDescriptor.NodePosition.X">
+            <summary>
+            Gets or sets the position's X coordinate.
+            </summary>
+        </member>
+        <member name="P:Yarn.QuestGraphNodeDescriptor.NodePosition.Y">
+            <summary>
+            Gets or sets the position's Y coordinate.
+            </summary>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.NodePosition.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.NodePosition.Equals(Yarn.QuestGraphNodeDescriptor.NodePosition)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.NodePosition.GetHashCode">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.NodePosition.op_Equality(Yarn.QuestGraphNodeDescriptor.NodePosition,Yarn.QuestGraphNodeDescriptor.NodePosition)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.NodePosition.op_Inequality(Yarn.QuestGraphNodeDescriptor.NodePosition,Yarn.QuestGraphNodeDescriptor.NodePosition)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Yarn.QuestGraphNodeDescriptor.NodeType">
+            <summary>
+            The type of a quest node.
+            </summary>
+        </member>
+        <member name="F:Yarn.QuestGraphNodeDescriptor.NodeType.Step">
+            <summary>
+            The node is a step in the quest graph.
+            </summary>
+        </member>
+        <member name="F:Yarn.QuestGraphNodeDescriptor.NodeType.Task">
+            <summary>
+            The node is a task in the quest graph.
+            </summary>
+        </member>
+        <member name="P:Yarn.QuestGraphNodeDescriptor.Name">
+            <summary>
+            The name of the node.
+            </summary>
+        </member>
+        <member name="P:Yarn.QuestGraphNodeDescriptor.Type">
+            <summary>
+            The type of the node.
+            </summary>
+        </member>
+        <member name="P:Yarn.QuestGraphNodeDescriptor.Quest">
+            <summary>
+            The name of the quest that contains the node.
+            </summary>
+        </member>
+        <member name="P:Yarn.QuestGraphNodeDescriptor.Position">
+            <summary>
+            The position of the node in the graph.
+            </summary>
+        </member>
+        <member name="P:Yarn.QuestGraphNodeDescriptor.FullName">
+            <summary>
+            The fully-qualified name of the node.
+            </summary>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.#ctor(System.String,Yarn.QuestGraphNodeDescriptor.NodeType,System.String)">
+            <summary>
+            Initialises a new instance of the <see cref="T:Yarn.QuestGraphNodeDescriptor"/> struct with a name, type and quest.
+            </summary>
+            <param name="name"><inheritdoc cref="P:Yarn.QuestGraphNodeDescriptor.Name" path="/summary"/></param>
+            <param name="type"><inheritdoc cref="P:Yarn.QuestGraphNodeDescriptor.Type" path="/summary"/></param>
+            <param name="quest"><inheritdoc cref="P:Yarn.QuestGraphNodeDescriptor.Quest" path="/summary"/></param>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.CanParse(System.String)">
+            <summary>
+            Gets a value indicating whether <paramref name="input"/> can be
+            parsed into a <see cref="T:Yarn.QuestGraphNodeDescriptor"/>.
+            </summary>
+            <param name="input">The text to test.</param>
+            <returns><see langword="true"/> if <paramref name="input"/> can be
+            parsed as a <see cref="T:Yarn.QuestGraphNodeDescriptor"/>; <see
+            langword="false"/> otherwise.</returns>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.#ctor(System.String)">
+            <summary>
+            Creates a new <see cref="T:Yarn.QuestGraphNodeDescriptor"/> from an input
+            string.
+            </summary>
+            <param name="input">The text to parse.</param>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref
+            name="input"/> cannot be parsed as a quest graph node
+            descriptor.</exception>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.GetSmartVariableForState(Yarn.QuestNodeStateProperty)">
+            <summary>
+            Gets the name of the smart variable that can be used to fetch
+            current value of the specified property of a quest node.
+            </summary>
+            <param name="property">The property to get a smart variable name for.</param>
+            <returns>The name of the smart variable.</returns>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.Equals(Yarn.QuestGraphNodeDescriptor)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.op_Implicit(System.String)~Yarn.QuestGraphNodeDescriptor">
+            <summary>
+            Implicitly converts a string to a descriptor.
+            </summary>
+            <param name="input">The string to convert.</param>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.op_Implicit(Yarn.QuestGraphNodeDescriptor)~System.String">
+            <summary>
+            Implicitly converts the descriptor to a string.
+            </summary>
+            <param name="input">The descriptor to convert.</param>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.ToString">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.GetHashCode">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.op_Equality(Yarn.QuestGraphNodeDescriptor,Yarn.QuestGraphNodeDescriptor)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.QuestGraphNodeDescriptor.op_Inequality(Yarn.QuestGraphNodeDescriptor,Yarn.QuestGraphNodeDescriptor)">
+            <inheritdoc/>
+        </member>
         <member name="T:Yarn.Saliency.BestLeastRecentlyViewedSaliencyStrategy">
             <summary>
             A content saliency strategy that returns the first of the best,
