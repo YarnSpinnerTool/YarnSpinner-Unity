@@ -21,6 +21,7 @@ namespace Yarn.Unity
         /// cref="CancellationToken.IsCancellationRequested"/> becomes true, the
         /// typewriter effect should end early and present the entire contents
         /// of <paramref name="line"/>.</para>
+        /// </remarks>
         /// <param name="line">The line to display.</param>
         /// <param name="cancellationToken">A token that indicates that the
         /// typewriter effect should be cancelled.</param>
