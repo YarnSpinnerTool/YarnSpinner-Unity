@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+### Changed
+
+### Removed
+
+## [3.0.2] 2025-06-13
+
+### Added
+
 - The inspector for the Dialogue Runner now has a drop down for selecting the saliency strategy.
 - `VariableStorageBehaviour` now supports adding a variable change listener for _all_ variables.
 
@@ -17,9 +25,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `LinePresenter` now implements its typewriter effect with `BasicTypewriter`, an implementation of the `IAsyncTypewriter` interface. 
 - The typewriter effect in `LinePresenter` is now framerate-independent.
 - Fixed an issue in UnityLocalisedLineProvider where an exception would be thrown if an asset table was not provided.
-- `SerializableDictionary<TKey,TValue>` no longer exposes non-generic `IDictionary` methods; instead, all operations are now correctly type-checked.
 
 ### Removed
+
+- `SerializableDictionary<TKey,TValue>` no longer exposes non-generic `IDictionary` methods; instead, all operations are now correctly type-checked.
 
 ## [3.0.0] 2025-05-16
 
