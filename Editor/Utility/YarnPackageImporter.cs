@@ -22,7 +22,7 @@ namespace Yarn.Unity.Editor
             : base(message, inner) { }
     }
 
-    public static class YarnPackageImporter
+    public static partial class YarnPackageImporter
     {
         public enum SamplesPackageStatus
         {
@@ -36,9 +36,6 @@ namespace Yarn.Unity.Editor
         {
             Itch, AssetStore, Manual
         }
-
-        // what install approach do we follow?
-        private static InstallApproach installApproach = InstallApproach.Manual;
 
         // What is the status of the samples package?
         public static SamplesPackageStatus Status
