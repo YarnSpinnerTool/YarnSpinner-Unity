@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Fixed a bug where `LinePresenter` would not run all registered action markup handlers during a typewriter effect.
+
 ### Removed
 
 ## [3.0.2] 2025-06-13

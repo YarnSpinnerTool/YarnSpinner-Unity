@@ -333,7 +333,7 @@ namespace Yarn.Unity
             {
                 var typewriter = new BasicTypewriter()
                 {
-                    ActionMarkupHandlers = this.actionMarkupHandlers,
+                    ActionMarkupHandlers = this.ActionMarkupHandlers,
                     Text = this.lineText,
                     CharactersPerSecond = this.typewriterEffectSpeed,
                 };
