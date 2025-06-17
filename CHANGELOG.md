@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - The inspector for the Dialogue Runner now has a drop down for selecting the saliency strategy.
 - `VariableStorageBehaviour` now supports adding a variable change listener for _all_ variables.
+- Added a `[br /]` markup tag into the common markers default markup palette.
+  - This will be translated into a TMP `<br>`
 
 ### Changed
 

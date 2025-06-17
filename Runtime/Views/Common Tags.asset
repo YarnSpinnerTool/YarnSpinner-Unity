@@ -41,4 +41,8 @@ MonoBehaviour:
     Italicised: 0
     Underlined: 0
     Strikedthrough: 1
-  CustomMarkers: []
+  CustomMarkers:
+  - Marker: br
+    Start: 
+    End: <br>
+    MarkerOffset: 0
