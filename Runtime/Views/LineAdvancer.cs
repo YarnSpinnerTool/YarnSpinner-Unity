@@ -17,6 +17,27 @@ using TextMeshProUGUI = Yarn.Unity.TMPShim;
 
 namespace Yarn.Unity
 {
+    internal static class InputSystemAvailability
+    {
+#if USE_INPUTSYSTEM
+        internal const bool inputSystemInstalled = true;
+#else
+        internal const bool inputSystemInstalled = false;
+#endif
+
+#if ENABLE_INPUT_SYSTEM
+        internal const bool enableInputSystem = true;
+#else
+        internal const bool enableInputSystem = false;
+#endif
+
+#if ENABLE_LEGACY_INPUT_MANAGER
+        internal const bool enableLegacyInput = true;
+#else
+        internal const bool enableLegacyInput = false;
+#endif
+    }
+
     /// <summary>
     /// A dialogue presenter that listens for user input and sends requests to a <see
     /// cref="DialogueRunner"/> to advance the presentation of the current line,
@@ -92,7 +113,7 @@ namespace Yarn.Unity
             /// <summary>
             /// The line advancer does not respond to any input.
             /// </summary>
-            /// <remarks>When a line advancer's <see cref="inputMode"/> is set
+            /// <remarks>When a line advancer's <see cref="UsedInputMode"/> is set
             /// to <see cref="None"/>, call the <see
             /// cref="RequestLineHurryUp"/>, <see cref="RequestNextLine"/> and
             /// <see cref="RequestDialogueCancellation"/> methods directly from
@@ -115,6 +136,25 @@ namespace Yarn.Unity
         [MessageBox(sourceMethod: nameof(ValidateInputMode))]
         [SerializeField] InputMode inputMode;
 
+        InputMode UsedInputMode
+        {
+            get
+            {
+                const bool inputSystemAvailable = InputSystemAvailability.enableInputSystem && InputSystemAvailability.inputSystemInstalled;
+
+                if (inputMode == InputMode.InputActions && !inputSystemAvailable)
+                {
+                    // We're configured to use input actions, but the input
+                    // system is not enabled. Fall back to key codes.
+                    return InputMode.KeyCodes;
+                }
+                else
+                {
+                    return inputMode;
+                }
+            }
+        }
+
         /// <summary>
         /// Validates the current value of <see cref="inputMode"/>, and
         /// potentially returns a message box to display.
@@ -122,25 +162,6 @@ namespace Yarn.Unity
         private MessageBoxAttribute.Message ValidateInputMode()
         {
 #pragma warning disable CS0162 // Unreachable code detected
-
-#if USE_INPUTSYSTEM
-            const bool inputSystemInstalled = true;
-#else
-            const bool inputSystemInstalled = false;
-#endif
-
-#if ENABLE_INPUT_SYSTEM
-            const bool enableInputSystem = true;
-#else
-            const bool enableInputSystem = false;
-#endif
-
-#if ENABLE_LEGACY_INPUT_MANAGER
-            const bool enableLegacyInput = true;
-#else
-            const bool enableLegacyInput = false;
-#endif
-
             if (this.inputMode == InputMode.None)
             {
                 return MessageBoxAttribute.Info($"To use this component, call the following methods on it:\n\n" +
@@ -150,20 +171,20 @@ namespace Yarn.Unity
                 );
             }
 
-            if (this.inputMode == InputMode.LegacyInputAxes && !enableLegacyInput)
+            if (this.inputMode == InputMode.LegacyInputAxes && !InputSystemAvailability.enableLegacyInput)
             {
                 return MessageBoxAttribute.Warning("The Input Manager (Old) system is not enabled.\n\nEither change this setting to Input Actions, or enable Input Manager (Old) in Project Settings > Player > Configuration > Active Input Handling.");
             }
 
             if (this.inputMode == InputMode.InputActions)
             {
-                if (inputSystemInstalled == false)
+                if (InputSystemAvailability.inputSystemInstalled == false)
                 {
-                    return MessageBoxAttribute.Warning("Please install the Unity Input System package.");
+                    return MessageBoxAttribute.Warning("Please install the Unity Input System package to use Input Actions.\n\nFalling back to the keyboard in the meantime.");
                 }
-                if (!enableInputSystem)
+                if (!InputSystemAvailability.enableInputSystem)
                 {
-                    return MessageBoxAttribute.Warning("The Input System is not enabled.\n\nEither change this setting, or enable Input System in Project Settings > Player > Configuration > Active Input Handling.");
+                    return MessageBoxAttribute.Warning("The Unity Input System is not enabled.\n\nEither change this setting, or enable Input System in Project Settings > Player > Configuration > Active Input Handling.\n\nFalling back to the keyboard in the meantime.");
                 }
             }
 
@@ -176,7 +197,7 @@ namespace Yarn.Unity
         /// The Input Action that triggers a request to advance to the next
         /// piece of content.
         /// </summary>
-        [ShowIf(nameof(inputMode), InputMode.InputActions)]
+        [ShowIf(nameof(UsedInputMode), InputMode.InputActions)]
         [Indent]
         [SerializeField] UnityEngine.InputSystem.InputActionReference? hurryUpLineAction;
 
@@ -184,7 +205,7 @@ namespace Yarn.Unity
         /// The Input Action that triggers an instruction to cancel the current
         /// line.
         /// </summary>
-        [ShowIf(nameof(inputMode), InputMode.InputActions)]
+        [ShowIf(nameof(UsedInputMode), InputMode.InputActions)]
         [Indent]
         [SerializeField] UnityEngine.InputSystem.InputActionReference? nextLineAction;
 
@@ -192,7 +213,7 @@ namespace Yarn.Unity
         /// The Input Action that triggers an instruction to cancel the entire
         /// dialogue.
         /// </summary>
-        [ShowIf(nameof(inputMode), InputMode.InputActions)]
+        [ShowIf(nameof(UsedInputMode), InputMode.InputActions)]
         [Indent]
         [SerializeField] UnityEngine.InputSystem.InputActionReference? cancelDialogueAction;
 
@@ -203,7 +224,7 @@ namespace Yarn.Unity
         /// line is running.
         /// </summary>
         [Tooltip("If true, the input actions above will be enabled when a line begins.")]
-        [ShowIf(nameof(inputMode), InputMode.InputActions)]
+        [ShowIf(nameof(UsedInputMode), InputMode.InputActions)]
         [Indent]
         [SerializeField] bool enableActions = true;
 #endif
@@ -211,21 +232,21 @@ namespace Yarn.Unity
         /// The legacy Input Axis that triggers a request to advance to the next
         /// piece of content.
         /// </summary>
-        [ShowIf(nameof(inputMode), InputMode.LegacyInputAxes)]
+        [ShowIf(nameof(UsedInputMode), InputMode.LegacyInputAxes)]
         [Indent]
         [SerializeField] string? hurryUpLineAxis = "Jump";
         /// <summary>
         /// The legacy Input Axis that triggers an instruction to cancel the
         /// current line.
         /// </summary>
-        [ShowIf(nameof(inputMode), InputMode.LegacyInputAxes)]
+        [ShowIf(nameof(UsedInputMode), InputMode.LegacyInputAxes)]
         [Indent]
         [SerializeField] string? nextLineAxis = "Cancel";
         /// <summary>
         /// The legacy Input Axis that triggers an instruction to cancel the
         /// entire dialogue.
         /// </summary>
-        [ShowIf(nameof(inputMode), InputMode.LegacyInputAxes)]
+        [ShowIf(nameof(UsedInputMode), InputMode.LegacyInputAxes)]
         [Indent]
         [SerializeField] string? cancelDialogueAxis = "";
 
@@ -233,7 +254,7 @@ namespace Yarn.Unity
         /// The <see cref="KeyCode"/> that triggers a request to advance to the
         /// next piece of content.
         /// </summary>
-        [ShowIf(nameof(inputMode), InputMode.KeyCodes)]
+        [ShowIf(nameof(UsedInputMode), InputMode.KeyCodes)]
         [Indent]
         [SerializeField] KeyCode hurryUpLineKeyCode = KeyCode.Space;
 
@@ -241,7 +262,7 @@ namespace Yarn.Unity
         /// The <see cref="KeyCode"/> that triggers an instruction to cancel the
         /// current line.
         /// </summary>
-        [ShowIf(nameof(inputMode), InputMode.KeyCodes)]
+        [ShowIf(nameof(UsedInputMode), InputMode.KeyCodes)]
         [Indent]
         [SerializeField] KeyCode nextLineKeyCode = KeyCode.Escape;
 
@@ -249,7 +270,7 @@ namespace Yarn.Unity
         /// The <see cref="KeyCode"/> that triggers an instruction to cancel the
         /// entire dialogue.
         /// </summary>
-        [ShowIf(nameof(inputMode), InputMode.KeyCodes)]
+        [ShowIf(nameof(UsedInputMode), InputMode.KeyCodes)]
         [Indent]
         [SerializeField] KeyCode cancelDialogueKeyCode = KeyCode.None;
 
@@ -302,7 +323,7 @@ namespace Yarn.Unity
         public override YarnTask OnDialogueStartedAsync()
         {
 #if USE_INPUTSYSTEM
-            if (inputMode == InputMode.InputActions)
+            if (UsedInputMode == InputMode.InputActions)
             {
                 // If we're using the input system, register callbacks to run
                 // when our actions are performed.
@@ -325,7 +346,7 @@ namespace Yarn.Unity
         {
 #if USE_INPUTSYSTEM
             // If we're using the input system, remove the callbacks.
-            if (inputMode == InputMode.InputActions)
+            if (UsedInputMode == InputMode.InputActions)
             {
                 if (hurryUpLineAction != null) { hurryUpLineAction.action.performed -= OnHurryUpLinePerformed; }
                 if (nextLineAction != null) { nextLineAction.action.performed -= OnNextLinePerformed; }
@@ -458,12 +479,12 @@ namespace Yarn.Unity
 
         /// <summary>
         /// Called by Unity every frame to check to see if, depending on <see
-        /// cref="inputMode"/>, the <see cref="LineAdvancer"/> should take
+        /// cref="UsedInputMode"/>, the <see cref="LineAdvancer"/> should take
         /// action.
         /// </summary>
         private void Update()
         {
-            switch (inputMode)
+            switch (UsedInputMode)
             {
                 case InputMode.KeyCodes:
                     if (Input.GetKeyDown(hurryUpLineKeyCode)) { this.RequestLineHurryUp(); }
