@@ -208,8 +208,9 @@ namespace Yarn.Unity
         /// </summary>
         [Group("Typewriter")]
         [ShowIf(nameof(useTypewriterEffect))]
-        [Label("Event Processors")]
-        [SerializeField] List<ActionMarkupHandler> actionMarkupHandlers = new List<ActionMarkupHandler>();
+        [Label("Event Handler")]
+        [UnityEngine.Serialization.FormerlySerializedAs("actionMarkupHandlers")]
+        [SerializeField] List<ActionMarkupHandler> eventHandlers = new List<ActionMarkupHandler>();
 
         /// <inheritdoc/>
         public override YarnTask OnDialogueCompleteAsync()
@@ -254,7 +255,7 @@ namespace Yarn.Unity
         private void Start()
         {
             // we add all the monobehaviour handlers into the shared list
-            ActionMarkupHandlers.AddRange(actionMarkupHandlers);
+            ActionMarkupHandlers.AddRange(eventHandlers);
         }
 
         /// <summary>Presents a line using the configured text view.</summary>

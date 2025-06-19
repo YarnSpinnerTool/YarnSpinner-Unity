@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed a bug where `LinePresenter` would not run all registered action markup handlers during a typewriter effect.
 - Fixed an issue where the default Dialogue Runner prefab didn't have its `LineAdvancer` component configured correctly.
+- Renamed `actionMarkupHandlers` to be `eventHandlers` on the `LinePresenter`, this fixes an easy to occur typo with the base classes `ActionMarkupHandlers`.
 
 ### Removed
 
