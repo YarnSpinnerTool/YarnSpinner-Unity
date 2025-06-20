@@ -6,6 +6,7 @@ using System.Threading;
 using UnityEngine;
 using Yarn.Markup;
 using Yarn.Unity.Attributes;
+using System.Collections.Generic;
 
 #if USE_TMP
 using TMPro;
@@ -36,6 +37,84 @@ namespace Yarn.Unity
 #else
         internal const bool enableLegacyInput = false;
 #endif
+
+#if !ENABLE_LEGACY_INPUT_MANAGER
+        /// <summary>
+        /// A dictionary mapping legacy keycodes to Input System keys.
+        /// </summary>
+        static System.Lazy<Dictionary<KeyCode, UnityEngine.InputSystem.Key>> lookup = new(() =>
+        {
+            var result = new Dictionary<KeyCode, UnityEngine.InputSystem.Key>();
+            foreach (KeyCode keyCode in System.Enum.GetValues(typeof(KeyCode)))
+            {
+                // Attempt to automatically find the equivalent of keyCode by
+                // assuming that the string representation of a key (e.g. "Tab")
+                // is the same in both enums.
+                if (System.Enum.TryParse<UnityEngine.InputSystem.Key>(keyCode.ToString(), true, out var value))
+                {
+                    result[keyCode] = value;
+                }
+            }
+            // Manually map some remaining keys
+            result[KeyCode.Return] = UnityEngine.InputSystem.Key.Enter;
+            result[KeyCode.KeypadEnter] = UnityEngine.InputSystem.Key.NumpadEnter;
+            return result;
+        });
+#endif
+
+        /// <summary>
+        /// Gets a value indicating whether the key indicated by a <see
+        /// cref="KeyCode"/> was pressed this frame.
+        /// </summary>
+        /// <remarks>
+        /// If the Legacy Input Manager is enabled, this method wraps <see
+        /// cref="Input.GetKeyDown"/>. Otherwise, it attempts to find the <see
+        /// cref="UnityEngine.InputSystem.Key"/> equivalent of <paramref
+        /// name="key"/>, and then checks with <see
+        /// cref="UnityEngine.InputSystem.Keyboard.current"/> to find the key,
+        /// and queries its <see
+        /// cref="UnityEngine.InputSystem.Controls.ButtonControl.wasPressedThisFrame"/>
+        /// property.
+        /// </remarks>
+        /// <param name="key">The <see cref="KeyCode"/> to check for the state
+        /// of.</param>
+        /// <returns>Whether the key was pressed this frame.</returns>
+        internal static bool GetKeyDown(KeyCode key)
+        {
+#if  ENABLE_LEGACY_INPUT_MANAGER
+            // If we're using Legacy Input, read from it directly
+            return Input.GetKeyDown(key);
+#else
+            if (key == KeyCode.None)
+            {
+                // The 'none' key is never pressed
+                return false;
+            }
+
+            if (lookup.Value.TryGetValue(key, out var lookupKey))
+            {
+                try
+                {
+                    return UnityEngine.InputSystem.Keyboard.current[lookup.Value[key]].wasPressedThisFrame;
+
+                }
+                catch (System.ArgumentOutOfRangeException)
+                {
+#if DEBUG
+                    Debug.LogWarning($"Can't check if {key} is down: found Input System mapping {lookupKey}, but this key is not present in the current keyboard");
+#endif
+                    return false;
+                }
+            }
+            else
+            {
+#if DEBUG
+                Debug.LogWarning($"Can't check if {key} is down: can't find a mapping from legacy keycode {key} to Unity Input System");
+#endif
+                return false;
+            }
+#endif
+        }
     }
 
     /// <summary>
@@ -46,6 +125,11 @@ namespace Yarn.Unity
     /// </summary>
     public sealed class LineAdvancer : DialoguePresenterBase, IActionMarkupHandler
     {
+        public void OnValidate()
+        {
+            Debug.Log(nameof(LineAdvancer) + " is validating");
+        }
+
         [MustNotBeNull("Line Advancer needs to know which Dialogue Runner should be told to tell it to show the next line.")]
         [Tooltip("The dialogue runner that will receive requests to advance or cancel content.")]
         [SerializeField] DialogueRunner? runner;
@@ -487,9 +571,9 @@ namespace Yarn.Unity
             switch (UsedInputMode)
             {
                 case InputMode.KeyCodes:
-                    if (Input.GetKeyDown(hurryUpLineKeyCode)) { this.RequestLineHurryUp(); }
-                    if (Input.GetKeyDown(nextLineKeyCode)) { this.RequestNextLine(); }
-                    if (Input.GetKeyDown(cancelDialogueKeyCode)) { this.RequestDialogueCancellation(); }
+                    if (InputSystemAvailability.GetKeyDown(hurryUpLineKeyCode)) { this.RequestLineHurryUp(); }
+                    if (InputSystemAvailability.GetKeyDown(nextLineKeyCode)) { this.RequestNextLine(); }
+                    if (InputSystemAvailability.GetKeyDown(cancelDialogueKeyCode)) { this.RequestDialogueCancellation(); }
                     break;
                 case InputMode.LegacyInputAxes:
                     if (string.IsNullOrEmpty(hurryUpLineAxis) == false && Input.GetButtonDown(hurryUpLineAxis)) { this.RequestLineHurryUp(); }
