@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added a `[br /]` markup tag into the common markers default markup palette.
   - This will be translated into a TMP `<br>`
 - LineAdvancer will now fall back to using key codes if Input Actions are selected, but Unity Input System is not available.
+- The Dialogue System prefab now creates a UI input module that matches your current input system when it's added to the scene, rather than baking in a specific input module.
 
 ### Changed
 
