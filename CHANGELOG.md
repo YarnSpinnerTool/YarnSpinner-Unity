@@ -8,9 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+### Changed
+
+### Removed
+
+## [3.0.3] 2025-06-21
+
+### Added
+
 - Added a `[br /]` markup tag into the common markers default markup palette.
-  - This will be translated into a TMP `<br>`
-- LineAdvancer will now fall back to using key codes if Input Actions are selected, but Unity Input System is not available.
+  - This will be translated into a TextMeshPro `<br>` marker.
+- Line Advancer will now fall back to using key codes if Input Actions are selected, but Unity Input System is not available.
 - The Dialogue System prefab now creates a UI input module that matches your current input system when it's added to the scene, rather than baking in a specific input module.
 
 ### Changed
@@ -19,8 +27,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed an issue where the default Dialogue Runner prefab didn't have its `LineAdvancer` component configured correctly.
 - Renamed `actionMarkupHandlers` to be `eventHandlers` on the `LinePresenter`, this fixes an easy to occur typo with the base classes `ActionMarkupHandlers`.
 - Fixed an issue where Line Advancers set to use Key Codes would not work when the Legacy Input Manager is not available.
-
-### Removed
 
 ## [3.0.2] 2025-06-13
 
