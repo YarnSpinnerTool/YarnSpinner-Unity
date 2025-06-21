@@ -119,7 +119,7 @@ MonoBehaviour:
   autoAdvanceDelay: 1
   useTypewriterEffect: 1
   typewriterEffectSpeed: 60
-  actionMarkupHandlers:
+  eventHandlers:
   - {fileID: 8877867826578261527}
 --- !u!1 &2958262986393358530
 GameObject:
@@ -895,6 +895,7 @@ MonoBehaviour:
   yarnProject: {fileID: 0}
   variableStorage: {fileID: 8635081094713202853}
   lineProvider: {fileID: 0}
+  saliencyStrategy: 0
   dialoguePresenters:
   - {fileID: 2958262985454349548}
   - {fileID: 8020628925107869960}
