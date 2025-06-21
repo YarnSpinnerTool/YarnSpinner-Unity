@@ -125,11 +125,6 @@ namespace Yarn.Unity
     /// </summary>
     public sealed class LineAdvancer : DialoguePresenterBase, IActionMarkupHandler
     {
-        public void OnValidate()
-        {
-            Debug.Log(nameof(LineAdvancer) + " is validating");
-        }
-
         [MustNotBeNull("Line Advancer needs to know which Dialogue Runner should be told to tell it to show the next line.")]
         [Tooltip("The dialogue runner that will receive requests to advance or cancel content.")]
         [SerializeField] DialogueRunner? runner;
