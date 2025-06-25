@@ -44,7 +44,7 @@ namespace Yarn.Unity
                 }
                 UnityEngine.EventSystems.BaseInputModule inputModule;
 
-#if ENABLE_INPUT_SYSTEM
+#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
                 // Create an input module that uses the Legacy Input Manager.
                 inputModule = this.gameObject.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
 #elif ENABLE_LEGACY_INPUT_MANAGER
