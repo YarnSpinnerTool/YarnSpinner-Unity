@@ -2,7 +2,9 @@
 
 namespace Yarn.Unity
 {
+    using System.Collections.Generic;
     using System.Threading;
+    using Yarn.Markup;
 
     /// <summary>
     /// An object that can handle delivery of a line's text over time.
@@ -28,5 +30,31 @@ namespace Yarn.Unity
         /// <returns>A task that completes when the typewriter effect has
         /// finished.</returns>
         public YarnTask RunTypewriter(Markup.MarkupParseResult line, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Indicates to the typewriter that it should prepare for displaying a new line.
+        /// </summary>
+        /// <param name="lineText">The line that will be shown.</param>
+        public void OnPrepareForLine(MarkupParseResult lineText);
+
+        /// <summary>
+        /// Indicates to the typewriter that the user interface elements necessary for
+        /// showing the the line screen have finished appearing.
+        /// </summary>
+        /// <param name="text"></param>
+        public void OnLineDisplayBegin(MarkupParseResult text);
+
+        /// <summary>
+        /// Indicates to the typewriter that the user interface elements
+        /// necessary for showing the line are about to disappear.
+        /// </summary>
+        public void OnLineWillDismiss();
+
+        /// <summary>
+        /// A collection of <see cref="IActionMarkupHandler"/> objects that
+        /// should be invoked as needed during the typewriter's delivery in <see
+        /// cref="RunTypewriter"/>, depending upon the contents of a line.
+        /// </summary>
+        public IEnumerable<IActionMarkupHandler> ActionMarkupHandlers { get; set; }
     }
 }

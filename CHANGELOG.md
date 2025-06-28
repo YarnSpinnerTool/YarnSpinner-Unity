@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Fixed a compiler error that occurred when the Unity Input System was enabled, but not actually installed.
+- Moved control of `IActionMarkupHandler`s out of `LinePresenter` to `IAsyncTypewriter`
 
 ### Removed
 
