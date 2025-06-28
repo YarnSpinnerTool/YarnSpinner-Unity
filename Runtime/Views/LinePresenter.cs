@@ -265,7 +265,7 @@ namespace Yarn.Unity
         {
             if (lineText == null)
             {
-                Debug.LogError($"Line view does not have a text view. Skipping line {line.TextID} (\"{line.RawText}\")");
+                Debug.LogError($"{nameof(LinePresenter)} does not have a text view. Skipping line {line.TextID} (\"{line.RawText}\")");
                 return;
             }
 
@@ -276,7 +276,7 @@ namespace Yarn.Unity
             {
                 if (characterNameText == null)
                 {
-                    Debug.LogWarning($"Line view is configured to show character names, but no character name text view was provided.", this);
+                    Debug.LogWarning($"{nameof(LinePresenter)} is configured to show character names, but no character name text view was provided.", this);
                 }
                 else
                 {
