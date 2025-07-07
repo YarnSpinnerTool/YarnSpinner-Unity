@@ -21,13 +21,16 @@ namespace Yarn.Unity.Tests
 {
     public class CodeAnalysisTests
     {
-        const string testScriptGUID = "32f15ac5211d54a68825dfb9532e93f4";
+        readonly string[] testScriptGUIDs = new string[] {
+            "32f15ac5211d54a68825dfb9532e93f4",
+            "38cc17b47f2af4fb5a9f4837db188e62",
+        };
 
         string OutputFilePath => YarnTestUtility.TestFilesDirectoryPath + "YarnActionRegistration.cs";
 
-        string TestScriptPathSource => AssetDatabase.GUIDToAssetPath(testScriptGUID);
+        IEnumerable<string> TestScriptPathSources => testScriptGUIDs.Select(g => AssetDatabase.GUIDToAssetPath(g));
 
-        string TestScriptPathInProject => YarnTestUtility.TestFilesDirectoryPath + Path.GetFileName(TestScriptPathSource);
+        string TestScriptFolderInProject => YarnTestUtility.TestFilesDirectoryPath;
 
         string TestNamespace => "Yarn.Unity.Generated." + TestContext.CurrentContext.Test.MethodName;
 
@@ -56,6 +59,8 @@ namespace Yarn.Unity.Tests
             "local_constant_name",
             "other_type_constant",
             "constant_name",
+            "direct_register_external_file_function_lambda",
+            "direct_register_external_file_function_method",
             "direct_register_nested_class",
         };
 
@@ -66,7 +71,11 @@ namespace Yarn.Unity.Tests
                 AssetDatabase.CreateFolder("Assets", YarnTestUtility.TestFolderName);
             }
 
-            AssetDatabase.CopyAsset(TestScriptPathSource, TestScriptPathInProject);
+            foreach (var source in TestScriptPathSources)
+            {
+                AssetDatabase.CopyAsset(source, Path.Combine(TestScriptFolderInProject, Path.GetFileName(source)));
+            }
+
         }
         private void TearDownTestActionCode()
         {
@@ -84,7 +93,7 @@ namespace Yarn.Unity.Tests
                 // Generate source code from our test script, save the resulting
                 // source code in the proejct, and validate that everything still
                 // compiles.
-                var analysis = new Yarn.Unity.ActionAnalyser.Analyser(TestScriptPathInProject);
+                var analysis = new Yarn.Unity.ActionAnalyser.Analyser(TestScriptFolderInProject);
                 var actions = analysis.GetActions();
                 var source = Yarn.Unity.ActionAnalyser.Analyser.GenerateRegistrationFileSource(actions, TestNamespace);
 

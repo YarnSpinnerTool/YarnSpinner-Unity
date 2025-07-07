@@ -52,7 +52,15 @@ namespace Yarn.Unity
                 runner.AddFunction(LocalConstantFunctionName, () => true);
                 runner.AddFunction(ConstantFunctionName, () => true);
                 runner.AddFunction(OtherType.ConstNameInOtherType, () => true);
+
+                runner.AddFunction(ConstFunctionNamesInOtherFile.DirectRegisterExternalFileFunctionNameLambda, () => true);
+                runner.AddFunction(ConstFunctionNamesInOtherFile.DirectRegisterExternalFileFunctionNameMethod, FunctionWithExternalName);
             }
+        }
+
+        private bool FunctionWithExternalName()
+        {
+            return true;
         }
 
         private bool DirectRegisterMethodNoParams() => true;
