@@ -56,6 +56,7 @@ namespace Yarn.Unity.Tests
             "local_constant_name",
             "other_type_constant",
             "constant_name",
+            "direct_register_nested_class",
         };
 
         private void SetUpTestActionCode()
@@ -110,7 +111,7 @@ namespace Yarn.Unity.Tests
 
             foreach (var commandName in expectedCommands)
             {
-                commands.Should().Contain(c => c.Name == commandName, $"command {commandName} should be found");
+                commands.Should().ContainSingle(c => c.Name == commandName, $"command {commandName} should be found");
 
                 var matchRegex = new Regex($@"AddCommandHandler(<.*>)?\(""{commandName}""");
                 generatedSource.Should().Match(matchRegex, $"command {commandName} should be registered in the generated source");
@@ -118,7 +119,7 @@ namespace Yarn.Unity.Tests
 
             foreach (var functionName in expectedFunctions)
             {
-                functions.Should().Contain(c => c.Name == functionName, $"function {functionName} should be found");
+                functions.Should().ContainSingle(c => c.Name == functionName, $"function {functionName} should be found");
                 var matchRegex = new Regex($@"RegisterFunctionDeclaration\(""{functionName}""");
                 generatedSource.Should().Match(matchRegex, $"function {functionName} should be registered in the generated source");
             }

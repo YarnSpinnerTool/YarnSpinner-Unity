@@ -11,6 +11,14 @@ namespace Yarn.Unity
     {
         public const string ConstantFunctionName = "constant_name";
 
+        private class NestedClass
+        {
+            public void RegisterActionsInNestedClass(DialogueRunner runner)
+            {
+                runner.AddFunction("direct_register_nested_class", TestActions.DemoFunction1);
+            }
+        }
+
         public void Awake()
         {
             var runner = FindAnyObjectByType<DialogueRunner>();

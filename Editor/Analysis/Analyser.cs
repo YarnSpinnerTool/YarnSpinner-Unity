@@ -15,6 +15,25 @@ using System.Linq;
 namespace Yarn.Unity.ActionAnalyser
 {
 
+    static class EnumerableExtensions
+    {
+        private struct Comparer<TItem, TKey> : IEqualityComparer<TItem>
+        {
+            Func<TItem, TKey> KeyFunc;
+            public Comparer(System.Func<TItem, TKey> keyFunc) => this.KeyFunc = keyFunc;
+
+            public readonly bool Equals(TItem x, TItem y)
+            {
+                var xKey = KeyFunc(x);
+                var yKey = KeyFunc(y);
+                return (xKey == null && yKey == null) || (xKey != null && xKey.Equals(yKey));
+            }
+
+            public readonly int GetHashCode(TItem obj) => KeyFunc(obj)?.GetHashCode() ?? 0;
+        }
+        public static IEnumerable<TItem> DistinctBy<TItem, TKey>(this IEnumerable<TItem> enumerable, Func<TItem, TKey> key) => Enumerable.Distinct(enumerable, new Comparer<TItem, TKey>(key));
+    }
+
     public class Analyser
     {
         const string toolName = "YarnActionAnalyzer";
@@ -495,6 +514,7 @@ namespace Yarn.Unity.ActionAnalyser
                     return (Syntax: i, Symbol: methodSymbol);
                 })
                 .Where(i => i.Symbol != null)
+                .DistinctBy(i => i.Syntax)
                 .ToList();
 
             var dialogueRunnerCalls = methodInvocations
@@ -786,7 +806,7 @@ namespace Yarn.Unity.ActionAnalyser
             {
                 return new[] { sourcePath };
             }
-            throw new System.IO.FileNotFoundException("No file at the provided path was found.", sourcePath);
+            throw new System.IO.FileNotFoundException($"No file or directory at {sourcePath} was found.", sourcePath);
         }
 
         public static Type? GetTypeByName(string name)
