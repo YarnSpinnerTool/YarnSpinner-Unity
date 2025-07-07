@@ -148,5 +148,17 @@ namespace Yarn.Unity
         {
             Debug.Log($"Variadic static function: {required}, ({string.Join(", ", bools)})");
         }
+
+        [YarnFunction(ConstFunctionNamesInOtherFile.StaticExternalFileFunctionName)]
+        public static bool StaticExternalFunctionName()
+        {
+            return true;
+        }
+
+        [YarnCommand(ConstFunctionNamesInOtherFile.StaticExternalFileCommandName)]
+        public static void StaticExternalCommandName()
+        {
+            Debug.Log("Static command with externally-defined name");
+        }
     }
 }

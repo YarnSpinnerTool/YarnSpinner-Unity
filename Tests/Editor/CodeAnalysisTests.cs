@@ -45,6 +45,7 @@ namespace Yarn.Unity.Tests
             "static_demo_action_with_optional_params",
             "instance_variadic",
             "static_variadic",
+            "external_file_command",
         };
 
         readonly string[] expectedFunctions = new string[] {
@@ -62,6 +63,7 @@ namespace Yarn.Unity.Tests
             "direct_register_external_file_function_lambda",
             "direct_register_external_file_function_method",
             "direct_register_nested_class",
+            "external_file_function",
         };
 
         private void SetUpTestActionCode()
