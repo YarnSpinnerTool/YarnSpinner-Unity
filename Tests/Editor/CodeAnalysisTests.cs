@@ -102,26 +102,35 @@ namespace Yarn.Unity.Tests
         [Test]
         public void CodeAnalysis_FindsExpectedActions()
         {
-            var analysis = new Yarn.Unity.ActionAnalyser.Analyser(TestScriptPathSource);
-            var actions = analysis.GetActions();
-            var generatedSource = ActionAnalyser.Analyser.GenerateRegistrationFileSource(actions, TestNamespace);
-
-            var commands = actions.Where(a => a.Type == ActionAnalyser.ActionType.Command);
-            var functions = actions.Where(a => a.Type == ActionAnalyser.ActionType.Function);
-
-            foreach (var commandName in expectedCommands)
+            try
             {
-                commands.Should().ContainSingle(c => c.Name == commandName, $"command {commandName} should be found");
+                SetUpTestActionCode();
 
-                var matchRegex = new Regex($@"AddCommandHandler(<.*>)?\(""{commandName}""");
-                generatedSource.Should().Match(matchRegex, $"command {commandName} should be registered in the generated source");
+                var analysis = new Yarn.Unity.ActionAnalyser.Analyser(TestScriptFolderInProject);
+                var actions = analysis.GetActions();
+                var generatedSource = ActionAnalyser.Analyser.GenerateRegistrationFileSource(actions, TestNamespace);
+
+                var commands = actions.Where(a => a.Type == ActionAnalyser.ActionType.Command);
+                var functions = actions.Where(a => a.Type == ActionAnalyser.ActionType.Function);
+
+                foreach (var commandName in expectedCommands)
+                {
+                    commands.Should().ContainSingle(c => c.Name == commandName, $"command {commandName} should be found");
+
+                    var matchRegex = new Regex($@"AddCommandHandler(<.*>)?\(""{commandName}""");
+                    generatedSource.Should().Match(matchRegex, $"command {commandName} should be registered in the generated source");
+                }
+
+                foreach (var functionName in expectedFunctions)
+                {
+                    functions.Should().ContainSingle(c => c.Name == functionName, $"function {functionName} should be found");
+                    var matchRegex = new Regex($@"RegisterFunctionDeclaration\(""{functionName}""");
+                    generatedSource.Should().Match(matchRegex, $"function {functionName} should be registered in the generated source");
+                }
             }
-
-            foreach (var functionName in expectedFunctions)
+            finally
             {
-                functions.Should().ContainSingle(c => c.Name == functionName, $"function {functionName} should be found");
-                var matchRegex = new Regex($@"RegisterFunctionDeclaration\(""{functionName}""");
-                generatedSource.Should().Match(matchRegex, $"function {functionName} should be registered in the generated source");
+                TearDownTestActionCode();
             }
         }
 
