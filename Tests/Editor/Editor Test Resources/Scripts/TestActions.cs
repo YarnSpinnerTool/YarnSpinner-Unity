@@ -130,15 +130,17 @@ namespace Yarn.Unity
         }
 
         [YarnCommand("instance_variadic")]
-        public void VariadicInstanceFunction(int required, params bool[] bools)
+        public int VariadicInstanceFunction(int required, params bool[] bools)
         {
             Debug.Log($"Variadic instance function: {required}, ({string.Join(", ", bools)})");
+            return 1;
         }
 
         [YarnCommand("static_variadic")]
-        public void VariadicStaticFunction(int required, params bool[] bools)
+        public int VariadicStaticFunction(int required, params bool[] bools)
         {
             Debug.Log($"Variadic static function: {required}, ({string.Join(", ", bools)})");
+            return 1;
         }
     }
 }
