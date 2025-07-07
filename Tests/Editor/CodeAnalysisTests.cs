@@ -149,8 +149,7 @@ namespace Yarn.Unity.Tests
             {
                 // Given: a .cs file containing actions is added to the codebase
                 SetUpTestActionCode();
-                AssetDatabase.Refresh();
-                yield return new RecompileScripts(expectScriptCompilation: false, expectScriptCompilationSuccess: true);
+                yield return new RecompileScripts(expectScriptCompilation: true, expectScriptCompilationSuccess: true);
 
                 var registrationMethods = Actions.ActionRegistrationMethods;
 
