@@ -560,9 +560,13 @@ namespace Yarn.Unity
             // Wait for all views to finish doing their clean up
             await YarnTask.WhenAll(pendingTasks);
 
-            // Finally, notify that dialogue is complete.
+            // Finally, notify that dialogue is complete and tidy up.
             dialogueCompletionSource?.TrySetResult();
             onDialogueComplete?.Invoke();
+
+            dialogueCancellationSource?.Dispose();
+            dialogueCancellationSource = null;
+            dialogueCompletionSource = null;
         }
 
         private void OnNodeCompleted(string completedNodeName)
