@@ -428,20 +428,20 @@ namespace Yarn.Unity
             }
 
             switch (this.saliencyStrategy)
-                {
-                    case SaliencyStrategy.RandomBestLeastRecentlyViewed:
-                        this.dialogue.ContentSaliencyStrategy = new Saliency.RandomBestLeastRecentlyViewedSaliencyStrategy(this.VariableStorage);
-                        return;
-                    case SaliencyStrategy.FirstBestLeastRecentlyViewed:
-                        this.dialogue.ContentSaliencyStrategy = new Yarn.Saliency.BestLeastRecentlyViewedSaliencyStrategy(this.VariableStorage);
-                        return;
-                    case SaliencyStrategy.Best:
-                        this.dialogue.ContentSaliencyStrategy = new Yarn.Saliency.BestSaliencyStrategy();
-                        return;
-                    case SaliencyStrategy.First:
-                        this.dialogue.ContentSaliencyStrategy = new Yarn.Saliency.FirstSaliencyStrategy();
-                        return;
-                }
+            {
+                case SaliencyStrategy.RandomBestLeastRecentlyViewed:
+                    this.dialogue.ContentSaliencyStrategy = new Saliency.RandomBestLeastRecentlyViewedSaliencyStrategy(this.VariableStorage);
+                    return;
+                case SaliencyStrategy.FirstBestLeastRecentlyViewed:
+                    this.dialogue.ContentSaliencyStrategy = new Yarn.Saliency.BestLeastRecentlyViewedSaliencyStrategy(this.VariableStorage);
+                    return;
+                case SaliencyStrategy.Best:
+                    this.dialogue.ContentSaliencyStrategy = new Yarn.Saliency.BestSaliencyStrategy();
+                    return;
+                case SaliencyStrategy.First:
+                    this.dialogue.ContentSaliencyStrategy = new Yarn.Saliency.FirstSaliencyStrategy();
+                    return;
+            }
         }
 
         /// <summary>
