@@ -33,7 +33,7 @@ jobs:
         unityVersion:
           - 2022.3.45f1
           - 2023.2.12f1
-          - 6000.0.24f1
+          - 6000.0.52f1
         unityLocalisation:
           - true
           - false
