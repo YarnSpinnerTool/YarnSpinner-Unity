@@ -34,6 +34,7 @@ jobs:
           - 2022.3.45f1
           - 2023.2.12f1
           - 6000.0.52f1
+          - 6000.1.10f1
         unityLocalisation:
           - true
           - false
