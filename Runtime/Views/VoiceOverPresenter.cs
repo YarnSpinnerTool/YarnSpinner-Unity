@@ -30,17 +30,6 @@ namespace Yarn.Unity
         public bool endLineWhenVoiceoverComplete = true;
 
         /// <summary>
-        /// The dialogue runner to notify of line completion.
-        /// </summary>
-        /// <remarks>This value is only used when <see
-        /// cref="endLineWhenVoiceoverComplete"/> is <see
-        /// langword="true"/>.</remarks>
-        [Group("Line Management")]
-        [ShowIf(nameof(endLineWhenVoiceoverComplete))]
-        [MustNotBeNull("Required when " + nameof(endLineWhenVoiceoverComplete) + " is set")]
-        public DialogueRunner? dialogueRunner;
-
-        /// <summary>
         /// The fade out time when the line is interrupted during playback.
         /// </summary>
         [Group("Timing")]
@@ -90,11 +79,6 @@ namespace Yarn.Unity
 
         void Reset()
         {
-            if (dialogueRunner == null)
-            {
-                dialogueRunner = FindAnyObjectByType<DialogueRunner>();
-            }
-
             if (audioSource == null)
             {
                 audioSource = GetComponentInChildren<AudioSource>();
@@ -113,7 +97,7 @@ namespace Yarn.Unity
         /// LineCancellationToken)" path="/param"/>
         /// <seealso cref="DialoguePresenterBase.RunLineAsync(LocalizedLine,
         /// LineCancellationToken)"/>
-        public override async YarnTask RunLineAsync(LocalizedLine dialogueLine, LineCancellationToken lineCancellationToken)
+        public override async YarnTask RunLineAsync(DialogueRunner dialogueRunner, LocalizedLine dialogueLine, LineCancellationToken lineCancellationToken)
         {
             // Get the localized voice over audio clip
             AudioClip? voiceOverClip = null;
@@ -244,7 +228,7 @@ namespace Yarn.Unity
         }
 
         /// <inheritdoc/>
-        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueRunner dialogueRunner, DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             return DialogueRunner.NoOptionSelected;
         }

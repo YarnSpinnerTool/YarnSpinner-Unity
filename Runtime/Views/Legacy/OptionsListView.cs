@@ -60,7 +60,7 @@ namespace Yarn.Unity.Legacy
             canvasGroup = GetComponentInParent<CanvasGroup>();
         }
 
-        public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
+        public override void RunLine(DialogueRunner dialogueRunner, LocalizedLine dialogueLine, Action onDialogueLineFinished)
         {
             // Don't do anything with this line except note it and immediately
             // indicate that we're finished with it. RunOptions will use it to
@@ -68,7 +68,7 @@ namespace Yarn.Unity.Legacy
             lastSeenLine = dialogueLine;
             onDialogueLineFinished();
         }
-        public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
+        public override void RunOptions(DialogueRunner dialogueRunner, DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
         {
             // If we don't already have enough option views, create more
             while (dialogueOptions.Length > optionViews.Count)

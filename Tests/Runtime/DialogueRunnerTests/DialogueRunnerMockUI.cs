@@ -146,7 +146,7 @@ namespace Yarn.Unity.Tests
             Debug.Log($"Variadic static function: {required}, ({string.Join(", ", bools)})");
         }
 
-        public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
+        public override async YarnTask RunLineAsync(DialogueRunner dialogueRunner, LocalizedLine line, LineCancellationToken token)
         {
             // Store the localised text in our CurrentLine property
             CurrentLine = line.Text.Text;
@@ -159,7 +159,7 @@ namespace Yarn.Unity.Tests
             readyToAdvance = false;
         }
 
-        public override async YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override async YarnTask<DialogueOption?> RunOptionsAsync(DialogueRunner dialogueRunner, DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             CurrentOptions.Clear();
             foreach (var option in dialogueOptions)
