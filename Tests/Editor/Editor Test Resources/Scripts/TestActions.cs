@@ -64,6 +64,13 @@ namespace Yarn.Unity
         }
 
         private bool DirectRegisterMethodNoParams() => true;
+
+        /// <summary>
+        /// A directly-registered method.
+        /// </summary>
+        /// <param name="a">The first parameter.</param>
+        /// <param name="b">The second parameter.</param>
+        /// <returns></returns>
         private int DirectRegisterMethodFixedParams(int a, int b) => a + b;
         private int DirectRegisterMethodVariadicParams(params int[] nums)
         {
@@ -81,6 +88,9 @@ namespace Yarn.Unity
             Debug.Log($"Demo action!");
         }
 
+        /// <summary>
+        /// A demo action that logs a message to the console.
+        /// </summary>
         [YarnCommand("instance_demo_action")]
         public void InstanceDemoAction()
         {
@@ -93,6 +103,11 @@ namespace Yarn.Unity
             Debug.Log($"Demo action: {param}!");
         }
 
+        /// <summary>
+        /// An instance action with two parameters, one of which is optional.
+        /// </summary>
+        /// <param name="param">The first, non-optional parameter.</param>
+        /// <param name="param2">The second, optional parameter.</param>
         [YarnCommand("instance_demo_action_with_optional_params")]
         public void InstanceDemoAction(int param, int param2 = 0)
         {

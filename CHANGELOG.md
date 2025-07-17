@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - `DialogueRunner` will now log warnings if a dialogue presenter throws an `OperationCanceledException` - these usually indicate that a task they were themselves waiting on was cancelled, and that the presenter didn't clean up.
+- The generated `.ysls.json` file now contains more complete command and function information.
 
 ### Changed
 

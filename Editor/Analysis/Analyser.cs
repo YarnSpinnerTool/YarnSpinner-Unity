@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 
 #nullable enable
 
@@ -564,19 +565,45 @@ namespace Yarn.Unity.ActionAnalyser
 
                 var declaringSyntax = targetSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
 
+                TryGetDocumentation(targetSymbol, out XElement? documentationXML, out string? summary);
+
                 yield return new Action(name, methodCall.Type, targetSymbol)
                 {
                     SemanticModel = model,
                     MethodName = targetSymbol.Name,
                     MethodDeclarationSyntax = declaringSyntax,
-                    Declaration = null,
+                    Declaration = declaringSyntax,
+                    Description = summary,
+                    Parameters = new List<Parameter>(GetParameters(targetSymbol, documentationXML)),
                     SourceFileName = root.SyntaxTree.FilePath,
                     DeclarationType = DeclarationType.DirectRegistration,
                 };
             }
         }
 
-        private static IEnumerable<Action> GetAttributeActions(CompilationUnitSyntax root, SemanticModel model, Yarn.Unity.ILogger logger)
+        private static bool TryGetDocumentation(IMethodSymbol targetSymbol, out XElement? documentationXML, out string? summary)
+        {
+            documentationXML = null;
+            summary = null;
+            try
+            {
+                var documentationComments = targetSymbol.GetDocumentationCommentXml();
+                documentationXML = XElement.Parse(documentationComments);
+                var summaryNode = documentationXML.Element("summary");
+                if (summaryNode != null)
+                {
+                    summary = string.Join("", summaryNode.DescendantNodes().OfType<XText>().Select(n => n.ToString())).Trim();
+                }
+                return true;
+            }
+            catch (System.Xml.XmlException)
+            {
+                // XML parse error; no documentation available
+                return false;
+            }
+        }
+
+        private static IEnumerable<Action> GetAttributeActions(CompilationUnitSyntax root, SemanticModel model, ILogger logger)
         {
             var methodInfos = root
                 .DescendantNodes()
@@ -650,6 +677,8 @@ namespace Yarn.Unity.ActionAnalyser
                     continue;
                 }
 
+                TryGetDocumentation(methodSymbol, out XElement? documentationXML, out string? summary);
+
                 var containerName = container?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "<unknown>";
 
                 yield return new Action(actionName, methodInfo.ActionType, methodSymbol)
@@ -662,9 +691,10 @@ namespace Yarn.Unity.ActionAnalyser
                     MethodDeclarationSyntax = methodInfo.MethodDeclaration,
                     IsStatic = methodSymbol.IsStatic,
                     Declaration = methodInfo.MethodDeclaration,
-                    Parameters = new List<Parameter>(GetParameters(methodSymbol)),
+                    Parameters = new List<Parameter>(GetParameters(methodSymbol, documentationXML)),
                     AsyncType = GetAsyncType(methodSymbol),
                     SemanticModel = model,
+                    Description = summary,
                     SourceFileName = root.SyntaxTree.FilePath,
                     DeclarationType = DeclarationType.Attribute,
                 };
@@ -705,15 +735,41 @@ namespace Yarn.Unity.ActionAnalyser
             return default;
         }
 
-        private static IEnumerable<Parameter> GetParameters(IMethodSymbol symbol)
+        private static IEnumerable<Parameter> GetParameters(IMethodSymbol symbol, XElement? documentationXML)
         {
+            var parameterDocumentation = new Dictionary<string, string>();
+
+            if (documentationXML != null)
+            {
+                var parameterNodes = documentationXML.Elements("param");
+                foreach (var parameterNode in parameterNodes)
+                {
+                    var name = parameterNode.Attribute("name");
+                    if (name == null) { continue; }
+                    var text = string.Join(
+                        "",
+                        parameterNode.DescendantNodes().OfType<XText>().Select(v => v.Value)
+                    ).Trim();
+
+                    if (!parameterDocumentation.ContainsKey(name.Value))
+                    {
+                        parameterDocumentation.Add(name.Value, text);
+
+                    }
+                }
+            }
+
             foreach (var param in symbol.Parameters)
             {
+                parameterDocumentation.TryGetValue(param.Name, out var paramDoc);
                 yield return new Parameter
                 {
                     Name = param.Name,
                     IsOptional = param.IsOptional,
                     Type = param.Type,
+                    Description = paramDoc,
+                    IsParamsArray = param.IsParams,
+                    DefaultValueString = param.HasExplicitDefaultValue ? param.ExplicitDefaultValue?.ToString() : null,
                 };
             }
         }
