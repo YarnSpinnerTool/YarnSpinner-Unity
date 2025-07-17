@@ -20,7 +20,7 @@ namespace Yarn.Unity.ActionAnalyser
         private struct Comparer<TItem, TKey> : IEqualityComparer<TItem>
         {
             Func<TItem, TKey> KeyFunc;
-            public Comparer(System.Func<TItem, TKey> keyFunc) => this.KeyFunc = keyFunc;
+            public Comparer(Func<TItem, TKey> keyFunc) => this.KeyFunc = keyFunc;
 
             public readonly bool Equals(TItem x, TItem y)
             {
@@ -113,7 +113,7 @@ namespace Yarn.Unity.ActionAnalyser
                     output.AddRange(GetActions(compilation, tree));
                 }
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 throw new AnalyserException(e.Message, e, diagnostics);
             }
@@ -439,7 +439,7 @@ namespace Yarn.Unity.ActionAnalyser
             }
         }
 
-        public static IEnumerable<Action> GetActions(CSharpCompilation compilation, Microsoft.CodeAnalysis.SyntaxTree tree, Yarn.Unity.ILogger? yLogger = null)
+        public static IEnumerable<Action> GetActions(CSharpCompilation compilation, SyntaxTree tree, ILogger? yLogger = null)
         {
             var logger = yLogger;
             if (logger == null)
@@ -806,7 +806,7 @@ namespace Yarn.Unity.ActionAnalyser
             {
                 return new[] { sourcePath };
             }
-            throw new System.IO.FileNotFoundException($"No file or directory at {sourcePath} was found.", sourcePath);
+            throw new FileNotFoundException($"No file or directory at {sourcePath} was found.", sourcePath);
         }
 
         public static Type? GetTypeByName(string name)
@@ -825,7 +825,7 @@ namespace Yarn.Unity.ActionAnalyser
 
         // these are basically just ripped straight from the LSP
         // should maybe look at making these more accessible, for now the code dupe is fine IMO
-        public static string? GetActionTrivia(MethodDeclarationSyntax method, Yarn.Unity.ILogger logger)
+        public static string? GetActionTrivia(MethodDeclarationSyntax method, ILogger logger)
         {
             // The main string to use as the function's documentation.
             if (method.HasLeadingTrivia)
