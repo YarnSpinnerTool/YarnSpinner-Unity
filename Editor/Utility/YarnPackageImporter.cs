@@ -110,10 +110,17 @@ namespace Yarn.Unity.Editor
             }
         }
 
+#if UNITY_2022_3_33_OR_NEWER
         static PackageInfo? GetInstalledPackageInfo(string packageName)
         {
             return PackageInfo.FindForPackageName(packageName);
         }
+#else
+        static PackageInfo? GetInstalledPackageInfo(string packageName)
+        {
+            return null;
+        }
+#endif
 
         static IEnumerable<Sample> GetSamplesForInstalledPackage(PackageInfo package)
         {

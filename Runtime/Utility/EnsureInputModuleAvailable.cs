@@ -81,7 +81,7 @@ namespace Yarn.Unity
 
         internal static bool IsInPackages(GameObject gameObject)
         {
-            var scene = GameObject.GetScene(gameObject.GetInstanceID());
+            var scene = gameObject.scene;
             bool isInPackages = scene.path.StartsWith("Packages");
             return isInPackages;
         }
@@ -125,7 +125,7 @@ namespace Yarn.Unity
                         {
                             existingInputModule.hideFlags &= ~HideFlags.DontSaveInEditor;
                             UnityEditor.EditorUtility.SetDirty(existingInputModule.gameObject);
-                            var scene = GameObject.GetScene(existingInputModule.gameObject.GetInstanceID());
+                            var scene = existingInputModule.gameObject.scene;
                             UnityEditor.SceneManagement.EditorSceneManager.SaveScene(scene);
                         }
                     }
