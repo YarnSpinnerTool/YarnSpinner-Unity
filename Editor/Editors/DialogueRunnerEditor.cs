@@ -382,6 +382,62 @@ namespace Yarn.Unity.Editor
                 return $@"{e.GetType().Name} thrown when calling ""{methodName}"": {e.Message ?? "(no message)"}";
             }
         }
+        /// <summary>
+        /// Gets information for showing a message box from a
+        /// MessageBoxAttribute on a serialized object.
+        /// </summary>
+        /// <returns>A <see cref="MessageBoxAttribute.Message"/> with the text
+        /// and type of the message box.
+        /// </returns>
+        public static string GetLabel(this LabelFromAttribute messageBoxAttribute, SerializedObject serializedObject)
+        {
+            if (serializedObject == null || serializedObject.targetObject == null)
+            {
+                return "Serialized object is null";
+            }
+            var methodName = messageBoxAttribute.SourceMethod;
+            if (serializedObject.isEditingMultipleObjects)
+            {
+                // If we're editing multiple objects, show only a placeholder
+                return "-";
+            }
+            var target = serializedObject.targetObject;
+            var method = serializedObject.targetObject.GetType().GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            if (method == null)
+            {
+                return $@"Failed to find an instance method ""{methodName}"" on this object";
+            }
+            if (method.ReturnType != typeof(string))
+            {
+                return $@"Method ""{methodName}"" must return a string";
+            }
+            if (method.GetParameters().Length != 0)
+            {
+                return $@"Method ""{methodName}"" must not accept any parameters";
+            }
+            try
+            {
+                var result = method.Invoke(target, Array.Empty<object>());
+                if (result is string message)
+                {
+                    return message;
+                }
+                else
+                {
+                    return $@"Method ""{methodName}"" did not return a valid message";
+                }
+            }
+            catch (TargetInvocationException e)
+            {
+                Debug.LogException(e.InnerException);
+                return $@"Method ""{methodName}"" threw a {e.InnerException.GetType().Name}: {e.InnerException.Message ?? "(no message)"}";
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e, target);
+                return $@"{e.GetType().Name} thrown when calling ""{methodName}"": {e.Message ?? "(no message)"}";
+            }
+        }
     }
 
     /// <summary>
@@ -576,6 +632,10 @@ namespace Yarn.Unity.Editor
                                 _ => MessageType.None
                             }));
                         }
+                        result = true;
+                        break;
+                    case LabelFromAttribute labelFromAttribute:
+                        label = labelFromAttribute.GetLabel(property.serializedProperty.serializedObject);
                         result = true;
                         break;
                     default:
