@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed a compiler error that occurred when the Unity Input System was enabled, but not actually installed.
 - Fixed an error where calls to `DialogueRunner.AddFunction()` in methods that are in nested classes would cause the function to be registered multiple times, leading to compiler failures.
+- Fixed a bug where versions of Unity prior to Unity 2022.3.33 had compilation errors around packages.
+- Fixed a bug where some inspector property fields weren't bound preventing configuring Unity localisation or addressables in Unity 2022.3.
 
 ### Removed
 
