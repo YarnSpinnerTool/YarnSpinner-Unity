@@ -442,7 +442,7 @@ namespace Yarn.Unity
         /// </summary>
         /// <inheritdoc cref="LinePresenter.RunLineAsync" path="/param"/>
         /// <returns>A completed task.</returns>
-        public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
+        public override YarnTask RunLineAsync(DialogueRunner dialogueRunner, LocalizedLine line, LineCancellationToken token)
         {
             // A new line has come in, so reset the number of times we've seen a
             // request to skip.
@@ -467,7 +467,7 @@ namespace Yarn.Unity
         /// <inheritdoc cref="LinePresenter.RunOptionsAsync" path="/param"/>
         /// <returns>A completed task indicating that no option was selected by
         /// this view.</returns>
-        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueRunner dialogueRunner, DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
             // This line view doesn't take any actions when options are
             // presented.

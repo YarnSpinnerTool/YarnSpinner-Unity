@@ -86,7 +86,7 @@ namespace Yarn.Unity.Tests
 
             lineView.canvasGroup!.alpha.Should().BeEqualTo(0, "The line view is not yet visible");
 
-            var runTask = lineView.RunLineAsync(line, default);
+            var runTask = lineView.RunLineAsync(dialogueRunner, line, default);
 
             await YarnTask.Delay(TimeSpan.FromSeconds(0.5f));
 
@@ -143,7 +143,7 @@ namespace Yarn.Unity.Tests
                 NextLineToken = cancellationSource.Token
             };
 
-            YarnTask runTask = lineView.RunLineAsync(line, lineCancellationToken);
+            YarnTask runTask = lineView.RunLineAsync(dialogueRunner, line, lineCancellationToken);
 
             runTask.IsCompleted().Should().BeFalse();
             lineView.lineText!.text.Should().BeEqualTo("Line 1");
@@ -175,7 +175,7 @@ namespace Yarn.Unity.Tests
                 NextLineToken = cancellationSource.Token
             };
 
-            YarnTask runTask = lineView.RunLineAsync(line, lineCancellationToken);
+            YarnTask runTask = lineView.RunLineAsync(dialogueRunner, line, lineCancellationToken);
 
             int characterCount = lineView.lineText!.textInfo.characterCount;
             characterCount.Should().BeGreaterThan(0);
