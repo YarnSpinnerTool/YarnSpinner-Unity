@@ -234,7 +234,7 @@ namespace Yarn.Unity.Editor
                 localisationFieldsContainer?.Add(newBaseLanguageField);
             }
         }
-
+        #if UNITY_2022_2_OR_NEWER
         public override void DiscardChanges()
         {
             localizationEntryFields.Clear();
@@ -250,7 +250,23 @@ namespace Yarn.Unity.Editor
 
             inspectorRoot?.Add(CreateInspectorGUI());
         }
+        #else
+        protected override void ResetValues()
+        {
+            localizationEntryFields.Clear();
+            sourceEntryFields.Clear();
+            LocalisationsAddedOrRemoved = false;
+            BaseLanguageNameModified = false;
+            SourceFilesAddedOrRemoved = false;
 
+            base.ResetValues();
+
+            var inspectorRoot = uiRoot?.parent;
+            uiRoot?.RemoveFromHierarchy();
+
+            inspectorRoot?.Add(CreateInspectorGUI());
+        }
+        #endif
         public override VisualElement CreateInspectorGUI()
         {
             if (!(target is YarnProjectImporter yarnProjectImporter))

@@ -957,7 +957,8 @@ namespace Yarn.Unity
 
             dialogueCompletionSource = new YarnTaskCompletionSource();
 
-            dialogueCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(this.destroyCancellationToken);
+            dialogueCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(this.GetDestroyCancellationToken());
+            
             LineProvider.YarnProject = yarnProject;
 
             EnsureCommandDispatcherReady();
