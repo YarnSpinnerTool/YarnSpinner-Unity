@@ -25,7 +25,7 @@ namespace Yarn.Unity
         [MustNotBeNullWhen(nameof(continueButton), "A " + nameof(DialogueRunner) + " must be provided for the continue button to work.")]
         [SerializeField] DialogueRunner? dialogueRunner;
 
-        void Start()
+        void Awake()
         {
             if (continueButton == null)
             {
