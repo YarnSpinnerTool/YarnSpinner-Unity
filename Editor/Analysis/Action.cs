@@ -533,7 +533,7 @@ namespace Yarn.Unity.ActionAnalyser
             }
         }
 
-        public SyntaxNode GetRegistrationSyntax(string dialogueRunnerVariableName = "dialogueRunner")
+        public StatementSyntax GetRegistrationSyntax(string dialogueRunnerVariableName = "dialogueRunner")
         {
             if (MethodSymbol == null)
             {
@@ -742,7 +742,7 @@ namespace Yarn.Unity.ActionAnalyser
             }
         }
 
-        public SyntaxNode GetFunctionDeclarationSyntax(string dialogueRunnerVariableName = "dialogueRunner")
+        public StatementSyntax GetFunctionDeclarationSyntax(string dialogueRunnerVariableName = "dialogueRunner")
         {
             var typeOfMethodReturn = SyntaxFactory.TypeOfExpression(SyntaxFactory.ParseTypeName(MethodSymbol.ReturnType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
             var typeOfMethodParameters = MethodSymbol.Parameters.Select(p =>

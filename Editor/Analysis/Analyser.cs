@@ -320,7 +320,7 @@ namespace Yarn.Unity.ActionAnalyser
 
             // Create the method body that combines the attribute-registered and
             // (possibly) runtime-registered action registrations.
-            var registrationMethodBody = SyntaxFactory.Block().WithStatements(SyntaxFactory.List(
+            var registrationMethodBody = SyntaxFactory.Block().WithStatements(SyntaxFactory.List<StatementSyntax>(
                 attributeRegistrationStatements.Concat(functionDeclarations)
                 ));
 
@@ -351,7 +351,7 @@ namespace Yarn.Unity.ActionAnalyser
 
             return methodSyntax.NormalizeWhitespace();
 
-            IEnumerable<SyntaxNode> GetRegistrationStatements(IEnumerable<Action> registerableCommands)
+            IEnumerable<StatementSyntax> GetRegistrationStatements(IEnumerable<Action> registerableCommands)
             {
                 return registerableCommands
                     .Where(a => a.MethodSymbol?.MethodKind != MethodKind.AnonymousFunction)
@@ -375,7 +375,7 @@ namespace Yarn.Unity.ActionAnalyser
                 );
             }
 
-            IEnumerable<SyntaxNode> GetFunctionDeclarationStatements(IEnumerable<Action> functions)
+            IEnumerable<StatementSyntax> GetFunctionDeclarationStatements(IEnumerable<Action> functions)
             {
                 return functions
                     .Select((a, i) =>
