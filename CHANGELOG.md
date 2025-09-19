@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed a bug where versions of Unity prior to Unity 2022.3.33 had compilation errors around packages.
 - Fixed a bug where some inspector property fields weren't bound preventing configuring Unity localisation or addressables in Unity 2022.3.
 - Added more specificity to the `Analyser` class's use of the C# code generation API.
+- Moved control of `IActionMarkupHandler`s out of `LinePresenter` to `IAsyncTypewriter`
 
 ### Removed
 

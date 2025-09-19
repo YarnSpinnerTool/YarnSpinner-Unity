@@ -299,22 +299,25 @@ namespace Yarn.Unity
                 }
                 text = line.TextWithoutCharacterName;
             }
-            lineText.text = text.Text;
 
-            // the typewriter requires all characters to be hidden at the start so they can be shown one at a time
+            IAsyncTypewriter typewriter;
             if (useTypewriterEffect)
             {
-                lineText.maxVisibleCharacters = 0;
-                // letting every temporal processor know that fade up (if set) is about to begin
-                foreach (var processor in ActionMarkupHandlers)
+                typewriter = new BasicTypewriter(this.lineText)
                 {
-                    processor.OnPrepareForLine(text, lineText);
-                }
+                    ActionMarkupHandlers = this.ActionMarkupHandlers,
+                    CharactersPerSecond = this.typewriterEffectSpeed,
+                };
             }
             else
             {
-                lineText.maxVisibleCharacters = text.Text.Length;
+                typewriter = new FakeTypewriter(this.lineText)
+                {
+                    ActionMarkupHandlers = this.ActionMarkupHandlers,
+                };
             }
+
+            typewriter.OnPrepareForLine(text);
 
             if (canvasGroup != null)
             {
@@ -330,17 +333,9 @@ namespace Yarn.Unity
                 }
             }
 
-            if (useTypewriterEffect)
-            {
-                var typewriter = new BasicTypewriter()
-                {
-                    ActionMarkupHandlers = this.ActionMarkupHandlers,
-                    Text = this.lineText,
-                    CharactersPerSecond = this.typewriterEffectSpeed,
-                };
+            typewriter.OnLineDisplayBegin(text);
 
-                await typewriter.RunTypewriter(text, token.HurryUpToken);
-            }
+            await typewriter.RunTypewriter(text, token.HurryUpToken);
 
             // if we are set to autoadvance how long do we hold for before continuing?
             if (autoAdvance)
@@ -352,11 +347,7 @@ namespace Yarn.Unity
                 await YarnTask.WaitUntilCanceled(token.NextLineToken).SuppressCancellationThrow();
             }
 
-            // we tell all action processors that the line is finished and is about to go away
-            foreach (var processor in ActionMarkupHandlers)
-            {
-                processor.OnLineWillDismiss();
-            }
+            typewriter.OnLineWillDismiss();
 
             if (canvasGroup != null)
             {
