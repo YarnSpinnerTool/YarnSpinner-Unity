@@ -1283,13 +1283,13 @@
         </member>
         <member name="F:Yarn.Compiler.NodeDebugInfo.LineInfo.FileName">
             <summary>
-            The file name of the source that this intruction was produced
+            The file name of the source that this instruction was produced
             from.
             </summary>
         </member>
         <member name="F:Yarn.Compiler.NodeDebugInfo.LineInfo.NodeName">
             <summary>
-            The node name of the source that this intruction was produced
+            The node name of the source that this instruction was produced
             from.
             </summary>
         </member>

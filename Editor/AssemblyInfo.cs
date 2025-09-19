@@ -5,9 +5,9 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-[assembly: AssemblyVersion("3.0.0.235")]
-[assembly: AssemblyFileVersion("3.0.0.235")]
-[assembly: AssemblyInformationalVersion("3.0.0-beta2.Branch.release/v3.0.0-beta2.Sha.e95b5ff4c7576725366c01ba842f4b0a5e805c76")]
+[assembly: AssemblyVersion("3.0.3.0")]
+[assembly: AssemblyFileVersion("3.0.3.0")]
+[assembly: AssemblyInformationalVersion("3.0.3.Branch.main.Sha.a906ced7bf2221568debb0626f8eee51b6a98b4c")]
 
 [assembly: InternalsVisibleTo("YarnSpinner.Unity.Editor")]
 [assembly: InternalsVisibleTo("YarnSpinner.Editor.Tests")]

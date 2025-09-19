@@ -208,8 +208,9 @@ namespace Yarn.Unity
         /// </summary>
         [Group("Typewriter")]
         [ShowIf(nameof(useTypewriterEffect))]
-        [Label("Event Processors")]
-        [SerializeField] List<ActionMarkupHandler> actionMarkupHandlers = new List<ActionMarkupHandler>();
+        [Label("Event Handler")]
+        [UnityEngine.Serialization.FormerlySerializedAs("actionMarkupHandlers")]
+        [SerializeField] List<ActionMarkupHandler> eventHandlers = new List<ActionMarkupHandler>();
 
         /// <inheritdoc/>
         public override YarnTask OnDialogueCompleteAsync()
@@ -254,7 +255,7 @@ namespace Yarn.Unity
         private void Start()
         {
             // we add all the monobehaviour handlers into the shared list
-            ActionMarkupHandlers.AddRange(actionMarkupHandlers);
+            ActionMarkupHandlers.AddRange(eventHandlers);
         }
 
         /// <summary>Presents a line using the configured text view.</summary>
@@ -264,7 +265,7 @@ namespace Yarn.Unity
         {
             if (lineText == null)
             {
-                Debug.LogError($"Line view does not have a text view. Skipping line {line.TextID} (\"{line.RawText}\")");
+                Debug.LogError($"{nameof(LinePresenter)} does not have a text view. Skipping line {line.TextID} (\"{line.RawText}\")");
                 return;
             }
 
@@ -275,7 +276,7 @@ namespace Yarn.Unity
             {
                 if (characterNameText == null)
                 {
-                    Debug.LogWarning($"Line view is configured to show character names, but no character name text view was provided.", this);
+                    Debug.LogWarning($"{nameof(LinePresenter)} is configured to show character names, but no character name text view was provided.", this);
                 }
                 else
                 {
@@ -333,7 +334,7 @@ namespace Yarn.Unity
             {
                 var typewriter = new BasicTypewriter()
                 {
-                    ActionMarkupHandlers = this.actionMarkupHandlers,
+                    ActionMarkupHandlers = this.ActionMarkupHandlers,
                     Text = this.lineText,
                     CharactersPerSecond = this.typewriterEffectSpeed,
                 };

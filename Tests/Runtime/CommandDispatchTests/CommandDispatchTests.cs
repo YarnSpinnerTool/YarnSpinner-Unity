@@ -24,12 +24,14 @@ namespace Yarn.Unity.Tests
 
 #if UNITY_EDITOR
         string outputFilePath => TestFilesDirectoryPath + "YarnActionRegistration.cs";
-        const string testScriptGUID = "32f15ac5211d54a68825dfb9532e93f4";
+        readonly string[] testScriptGUIDs = new string[] {
+            "32f15ac5211d54a68825dfb9532e93f4",
+            "38cc17b47f2af4fb5a9f4837db188e62",
+        };
 
         string TestFolderName => nameof(CommandDispatchTests);
         string TestFilesDirectoryPath => $"Assets/{TestFolderName}/";
-        string TestScriptPathSource => UnityEditor.AssetDatabase.GUIDToAssetPath(testScriptGUID);
-        string TestScriptPathInProject => TestFilesDirectoryPath + Path.GetFileName(TestScriptPathSource);
+        IEnumerable<string> TestScriptPathSources => testScriptGUIDs.Select(g => UnityEditor.AssetDatabase.GUIDToAssetPath(g));
 #endif
 
         public void Setup()
@@ -37,7 +39,10 @@ namespace Yarn.Unity.Tests
             if (Directory.Exists(TestFilesDirectoryPath) == false)
             {
                 UnityEditor.AssetDatabase.CreateFolder("Assets", TestFolderName);
-                UnityEditor.AssetDatabase.CopyAsset(TestScriptPathSource, TestScriptPathInProject);
+                foreach (var path in TestScriptPathSources)
+                {
+                    UnityEditor.AssetDatabase.CopyAsset(path, Path.Join(TestFilesDirectoryPath, Path.GetFileName(path)));
+                }
             }
 
             UnityEditor.AssetDatabase.Refresh();

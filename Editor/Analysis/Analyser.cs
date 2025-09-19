@@ -9,11 +9,31 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 
 #nullable enable
 
 namespace Yarn.Unity.ActionAnalyser
 {
+
+    static class EnumerableExtensions
+    {
+        private struct Comparer<TItem, TKey> : IEqualityComparer<TItem>
+        {
+            Func<TItem, TKey> KeyFunc;
+            public Comparer(Func<TItem, TKey> keyFunc) => this.KeyFunc = keyFunc;
+
+            public readonly bool Equals(TItem x, TItem y)
+            {
+                var xKey = KeyFunc(x);
+                var yKey = KeyFunc(y);
+                return (xKey == null && yKey == null) || (xKey != null && xKey.Equals(yKey));
+            }
+
+            public readonly int GetHashCode(TItem obj) => KeyFunc(obj)?.GetHashCode() ?? 0;
+        }
+        public static IEnumerable<TItem> DistinctBy<TItem, TKey>(this IEnumerable<TItem> enumerable, Func<TItem, TKey> key) => Enumerable.Distinct(enumerable, new Comparer<TItem, TKey>(key));
+    }
 
     public class Analyser
     {
@@ -94,7 +114,7 @@ namespace Yarn.Unity.ActionAnalyser
                     output.AddRange(GetActions(compilation, tree));
                 }
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 throw new AnalyserException(e.Message, e, diagnostics);
             }
@@ -300,7 +320,7 @@ namespace Yarn.Unity.ActionAnalyser
 
             // Create the method body that combines the attribute-registered and
             // (possibly) runtime-registered action registrations.
-            var registrationMethodBody = SyntaxFactory.Block().WithStatements(SyntaxFactory.List(
+            var registrationMethodBody = SyntaxFactory.Block().WithStatements(SyntaxFactory.List<StatementSyntax>(
                 attributeRegistrationStatements.Concat(functionDeclarations)
                 ));
 
@@ -331,7 +351,7 @@ namespace Yarn.Unity.ActionAnalyser
 
             return methodSyntax.NormalizeWhitespace();
 
-            IEnumerable<SyntaxNode> GetRegistrationStatements(IEnumerable<Action> registerableCommands)
+            IEnumerable<StatementSyntax> GetRegistrationStatements(IEnumerable<Action> registerableCommands)
             {
                 return registerableCommands
                     .Where(a => a.MethodSymbol?.MethodKind != MethodKind.AnonymousFunction)
@@ -355,7 +375,7 @@ namespace Yarn.Unity.ActionAnalyser
                 );
             }
 
-            IEnumerable<SyntaxNode> GetFunctionDeclarationStatements(IEnumerable<Action> functions)
+            IEnumerable<StatementSyntax> GetFunctionDeclarationStatements(IEnumerable<Action> functions)
             {
                 return functions
                     .Select((a, i) =>
@@ -420,7 +440,7 @@ namespace Yarn.Unity.ActionAnalyser
             }
         }
 
-        public static IEnumerable<Action> GetActions(CSharpCompilation compilation, Microsoft.CodeAnalysis.SyntaxTree tree, Yarn.Unity.ILogger? yLogger = null)
+        public static IEnumerable<Action> GetActions(CSharpCompilation compilation, SyntaxTree tree, ILogger? yLogger = null)
         {
             var logger = yLogger;
             if (logger == null)
@@ -495,6 +515,7 @@ namespace Yarn.Unity.ActionAnalyser
                     return (Syntax: i, Symbol: methodSymbol);
                 })
                 .Where(i => i.Symbol != null)
+                .DistinctBy(i => i.Syntax)
                 .ToList();
 
             var dialogueRunnerCalls = methodInvocations
@@ -544,19 +565,45 @@ namespace Yarn.Unity.ActionAnalyser
 
                 var declaringSyntax = targetSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
 
+                TryGetDocumentation(targetSymbol, out XElement? documentationXML, out string? summary);
+
                 yield return new Action(name, methodCall.Type, targetSymbol)
                 {
                     SemanticModel = model,
                     MethodName = targetSymbol.Name,
                     MethodDeclarationSyntax = declaringSyntax,
-                    Declaration = null,
+                    Declaration = declaringSyntax,
+                    Description = summary,
+                    Parameters = new List<Parameter>(GetParameters(targetSymbol, documentationXML)),
                     SourceFileName = root.SyntaxTree.FilePath,
                     DeclarationType = DeclarationType.DirectRegistration,
                 };
             }
         }
 
-        private static IEnumerable<Action> GetAttributeActions(CompilationUnitSyntax root, SemanticModel model, Yarn.Unity.ILogger logger)
+        private static bool TryGetDocumentation(IMethodSymbol targetSymbol, out XElement? documentationXML, out string? summary)
+        {
+            documentationXML = null;
+            summary = null;
+            try
+            {
+                var documentationComments = targetSymbol.GetDocumentationCommentXml();
+                documentationXML = XElement.Parse(documentationComments);
+                var summaryNode = documentationXML.Element("summary");
+                if (summaryNode != null)
+                {
+                    summary = string.Join("", summaryNode.DescendantNodes().OfType<XText>().Select(n => n.ToString())).Trim();
+                }
+                return true;
+            }
+            catch (System.Xml.XmlException)
+            {
+                // XML parse error; no documentation available
+                return false;
+            }
+        }
+
+        private static IEnumerable<Action> GetAttributeActions(CompilationUnitSyntax root, SemanticModel model, ILogger logger)
         {
             var methodInfos = root
                 .DescendantNodes()
@@ -630,6 +677,8 @@ namespace Yarn.Unity.ActionAnalyser
                     continue;
                 }
 
+                TryGetDocumentation(methodSymbol, out XElement? documentationXML, out string? summary);
+
                 var containerName = container?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "<unknown>";
 
                 yield return new Action(actionName, methodInfo.ActionType, methodSymbol)
@@ -642,9 +691,10 @@ namespace Yarn.Unity.ActionAnalyser
                     MethodDeclarationSyntax = methodInfo.MethodDeclaration,
                     IsStatic = methodSymbol.IsStatic,
                     Declaration = methodInfo.MethodDeclaration,
-                    Parameters = new List<Parameter>(GetParameters(methodSymbol)),
+                    Parameters = new List<Parameter>(GetParameters(methodSymbol, documentationXML)),
                     AsyncType = GetAsyncType(methodSymbol),
                     SemanticModel = model,
+                    Description = summary,
                     SourceFileName = root.SyntaxTree.FilePath,
                     DeclarationType = DeclarationType.Attribute,
                 };
@@ -685,15 +735,41 @@ namespace Yarn.Unity.ActionAnalyser
             return default;
         }
 
-        private static IEnumerable<Parameter> GetParameters(IMethodSymbol symbol)
+        private static IEnumerable<Parameter> GetParameters(IMethodSymbol symbol, XElement? documentationXML)
         {
+            var parameterDocumentation = new Dictionary<string, string>();
+
+            if (documentationXML != null)
+            {
+                var parameterNodes = documentationXML.Elements("param");
+                foreach (var parameterNode in parameterNodes)
+                {
+                    var name = parameterNode.Attribute("name");
+                    if (name == null) { continue; }
+                    var text = string.Join(
+                        "",
+                        parameterNode.DescendantNodes().OfType<XText>().Select(v => v.Value)
+                    ).Trim();
+
+                    if (!parameterDocumentation.ContainsKey(name.Value))
+                    {
+                        parameterDocumentation.Add(name.Value, text);
+
+                    }
+                }
+            }
+
             foreach (var param in symbol.Parameters)
             {
+                parameterDocumentation.TryGetValue(param.Name, out var paramDoc);
                 yield return new Parameter
                 {
                     Name = param.Name,
                     IsOptional = param.IsOptional,
                     Type = param.Type,
+                    Description = paramDoc,
+                    IsParamsArray = param.IsParams,
+                    DefaultValueString = param.HasExplicitDefaultValue ? param.ExplicitDefaultValue?.ToString() : null,
                 };
             }
         }
@@ -786,7 +862,7 @@ namespace Yarn.Unity.ActionAnalyser
             {
                 return new[] { sourcePath };
             }
-            throw new System.IO.FileNotFoundException("No file at the provided path was found.", sourcePath);
+            throw new FileNotFoundException($"No file or directory at {sourcePath} was found.", sourcePath);
         }
 
         public static Type? GetTypeByName(string name)
@@ -805,7 +881,7 @@ namespace Yarn.Unity.ActionAnalyser
 
         // these are basically just ripped straight from the LSP
         // should maybe look at making these more accessible, for now the code dupe is fine IMO
-        public static string? GetActionTrivia(MethodDeclarationSyntax method, Yarn.Unity.ILogger logger)
+        public static string? GetActionTrivia(MethodDeclarationSyntax method, ILogger logger)
         {
             // The main string to use as the function's documentation.
             if (method.HasLeadingTrivia)

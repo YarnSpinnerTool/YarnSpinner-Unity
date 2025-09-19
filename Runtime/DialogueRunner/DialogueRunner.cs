@@ -428,20 +428,20 @@ namespace Yarn.Unity
             }
 
             switch (this.saliencyStrategy)
-                {
-                    case SaliencyStrategy.RandomBestLeastRecentlyViewed:
-                        this.dialogue.ContentSaliencyStrategy = new Saliency.RandomBestLeastRecentlyViewedSaliencyStrategy(this.VariableStorage);
-                        return;
-                    case SaliencyStrategy.FirstBestLeastRecentlyViewed:
-                        this.dialogue.ContentSaliencyStrategy = new Yarn.Saliency.BestLeastRecentlyViewedSaliencyStrategy(this.VariableStorage);
-                        return;
-                    case SaliencyStrategy.Best:
-                        this.dialogue.ContentSaliencyStrategy = new Yarn.Saliency.BestSaliencyStrategy();
-                        return;
-                    case SaliencyStrategy.First:
-                        this.dialogue.ContentSaliencyStrategy = new Yarn.Saliency.FirstSaliencyStrategy();
-                        return;
-                }
+            {
+                case SaliencyStrategy.RandomBestLeastRecentlyViewed:
+                    this.dialogue.ContentSaliencyStrategy = new Saliency.RandomBestLeastRecentlyViewedSaliencyStrategy(this.VariableStorage);
+                    return;
+                case SaliencyStrategy.FirstBestLeastRecentlyViewed:
+                    this.dialogue.ContentSaliencyStrategy = new Yarn.Saliency.BestLeastRecentlyViewedSaliencyStrategy(this.VariableStorage);
+                    return;
+                case SaliencyStrategy.Best:
+                    this.dialogue.ContentSaliencyStrategy = new Yarn.Saliency.BestSaliencyStrategy();
+                    return;
+                case SaliencyStrategy.First:
+                    this.dialogue.ContentSaliencyStrategy = new Yarn.Saliency.FirstSaliencyStrategy();
+                    return;
+            }
         }
 
         /// <summary>
@@ -560,9 +560,13 @@ namespace Yarn.Unity
             // Wait for all views to finish doing their clean up
             await YarnTask.WhenAll(pendingTasks);
 
-            // Finally, notify that dialogue is complete.
+            // Finally, notify that dialogue is complete and tidy up.
             dialogueCompletionSource?.TrySetResult();
             onDialogueComplete?.Invoke();
+
+            dialogueCancellationSource?.Dispose();
+            dialogueCancellationSource = null;
+            dialogueCompletionSource = null;
         }
 
         private void OnNodeCompleted(string completedNodeName)
@@ -726,8 +730,19 @@ namespace Yarn.Unity
                         // Run the line and wait for it to finish
                         await view.RunLineAsync(localisedLine, token);
                     }
+                    catch (System.OperationCanceledException)
+                    {
+                        // The line presenter cancelled (rather than returning.)
+                        // This probably wasn't intended - they should clean up
+                        // and return null.
+                        Debug.LogWarning($"Dialogue presenter {view.name} threw an {nameof(System.OperationCanceledException)} when running its {nameof(DialoguePresenterBase.RunLineAsync)} method. Dialogue presenters should not throw this exception; instead, clean up any needed user-facing content, and return.", view);
+                    }
                     catch (System.Exception e)
                     {
+                        // If a dialogue presenter throws an exception, we need
+                        // to return, because the dialogue runner is waiting for
+                        // our task to complete. We'll log the exception so that
+                        // it's not lost, and exit here.
                         Debug.LogException(e, view);
                     }
                 }
@@ -798,13 +813,32 @@ namespace Yarn.Unity
                 {
                     return;
                 }
-                var result = await view.RunOptionsAsync(localisedOptions, optionCancellationSource.Token);
-                if (result != null)
+                try
                 {
-                    // We no longer need the other views, so tell them to stop
-                    // by cancelling the option selection.
-                    optionCancellationSource.Cancel();
-                    dialogueSelectionTCS.TrySetResult(result);
+                    var result = await view.RunOptionsAsync(localisedOptions, optionCancellationSource.Token);
+                    if (result != null)
+                    {
+                        // We no longer need the other views, so tell them to stop
+                        // by cancelling the option selection.
+                        optionCancellationSource.Cancel();
+                        dialogueSelectionTCS.TrySetResult(result);
+                    }
+                }
+                catch (System.OperationCanceledException)
+                {
+                    // The options presenter cancelled (rather than returning
+                    // null.) This probably wasn't intended - they should clean
+                    // up and return null.
+                    Debug.LogWarning($"Dialogue presenter {view.name} threw an {nameof(System.OperationCanceledException)} when running its {nameof(DialoguePresenterBase.RunOptionsAsync)} method. Dialogue presenters should not throw this exception; instead, clean up any needed user-facing content, and return null.", view);
+                }
+                catch (System.Exception ex)
+                {
+                    // If a dialogue presenter throws an exception, we still
+                    // need to return a value, because the dialogue runner is
+                    // waiting for our task to complete. We'll log the exception
+                    // so that it's not lost, and exit here.
+                    Debug.LogException(ex, view);
+                    return;
                 }
             }
 

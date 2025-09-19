@@ -11,6 +11,14 @@ namespace Yarn.Unity
     {
         public const string ConstantFunctionName = "constant_name";
 
+        private class NestedClass
+        {
+            public void RegisterActionsInNestedClass(DialogueRunner runner)
+            {
+                runner.AddFunction("direct_register_nested_class", TestActions.DemoFunction1);
+            }
+        }
+
         public void Awake()
         {
             var runner = FindAnyObjectByType<DialogueRunner>();
@@ -44,10 +52,25 @@ namespace Yarn.Unity
                 runner.AddFunction(LocalConstantFunctionName, () => true);
                 runner.AddFunction(ConstantFunctionName, () => true);
                 runner.AddFunction(OtherType.ConstNameInOtherType, () => true);
+
+                runner.AddFunction(ConstFunctionNamesInOtherFile.DirectRegisterExternalFileFunctionNameLambda, () => true);
+                runner.AddFunction(ConstFunctionNamesInOtherFile.DirectRegisterExternalFileFunctionNameMethod, FunctionWithExternalName);
             }
         }
 
+        private bool FunctionWithExternalName()
+        {
+            return true;
+        }
+
         private bool DirectRegisterMethodNoParams() => true;
+
+        /// <summary>
+        /// A directly-registered method.
+        /// </summary>
+        /// <param name="a">The first parameter.</param>
+        /// <param name="b">The second parameter.</param>
+        /// <returns></returns>
         private int DirectRegisterMethodFixedParams(int a, int b) => a + b;
         private int DirectRegisterMethodVariadicParams(params int[] nums)
         {
@@ -65,6 +88,9 @@ namespace Yarn.Unity
             Debug.Log($"Demo action!");
         }
 
+        /// <summary>
+        /// A demo action that logs a message to the console.
+        /// </summary>
         [YarnCommand("instance_demo_action")]
         public void InstanceDemoAction()
         {
@@ -77,6 +103,11 @@ namespace Yarn.Unity
             Debug.Log($"Demo action: {param}!");
         }
 
+        /// <summary>
+        /// An instance action with two parameters, one of which is optional.
+        /// </summary>
+        /// <param name="param">The first, non-optional parameter.</param>
+        /// <param name="param2">The second, optional parameter.</param>
         [YarnCommand("instance_demo_action_with_optional_params")]
         public void InstanceDemoAction(int param, int param2 = 0)
         {
@@ -131,6 +162,18 @@ namespace Yarn.Unity
         public void VariadicStaticFunction(int required, params bool[] bools)
         {
             Debug.Log($"Variadic static function: {required}, ({string.Join(", ", bools)})");
+        }
+
+        [YarnFunction(ConstFunctionNamesInOtherFile.StaticExternalFileFunctionName)]
+        public static bool StaticExternalFunctionName()
+        {
+            return true;
+        }
+
+        [YarnCommand(ConstFunctionNamesInOtherFile.StaticExternalFileCommandName)]
+        public static void StaticExternalCommandName()
+        {
+            Debug.Log("Static command with externally-defined name");
         }
     }
 }

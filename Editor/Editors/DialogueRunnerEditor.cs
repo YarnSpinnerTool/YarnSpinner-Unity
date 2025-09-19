@@ -157,12 +157,72 @@ namespace Yarn.Unity.Editor
         /// passed.</returns>
         public static AttributeEvaluationResult Evaluate(this VisibilityAttribute visibilityAttribute, SerializedObject target)
         {
+            if (target.targetObject == null)
+            {
+                return "Target object is null";
+            }
             var property = target.FindProperty(visibilityAttribute.Condition);
 
-            if (property == null)
+            SerializedPropertyType propertyType;
+
+            int enumValue = -1;
+            bool booleanValue = false;
+            UnityEngine.Object? objectValue = null;
+
+            if (property != null)
             {
-                // Property is missing
-                return $"{visibilityAttribute.Condition} not found";
+                // Found a serialized property on this object. Is it a type we
+                // can use?
+                propertyType = property.propertyType;
+                switch (property.propertyType)
+                {
+                    case SerializedPropertyType.Boolean:
+                        booleanValue = property.boolValue;
+                        break;
+                    case SerializedPropertyType.ObjectReference:
+                        objectValue = property.objectReferenceValue;
+                        break;
+                    case SerializedPropertyType.Enum:
+                        enumValue = property.intValue;
+                        break;
+                    default:
+                        return $"{visibilityAttribute.Condition} must be an enum value or boolean, not " + property.type;
+                }
+            }
+            else
+            {
+                // Property is missing. Is there maybe a property on it by this name?
+                var prop = target.targetObject.GetType().GetProperty(visibilityAttribute.Condition, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                if (prop != null)
+                {
+                    // There is! Fetch its value, and check to see if it's a
+                    // type we can use.
+                    var propertyValue = prop.GetValue(target.targetObject);
+                    if (propertyValue is bool booleanPropertyValue)
+                    {
+                        propertyType = SerializedPropertyType.Boolean;
+                        booleanValue = booleanPropertyValue;
+                    }
+                    else if (propertyValue is UnityEngine.Object objectPropertyValue)
+                    {
+                        propertyType = SerializedPropertyType.ObjectReference;
+                        objectValue = (UnityEngine.Object)objectPropertyValue;
+                    }
+                    else if (propertyValue is Enum enumPropertyValue)
+                    {
+                        enumValue = Convert.ToInt32(enumPropertyValue);
+                        propertyType = SerializedPropertyType.Enum;
+                    }
+                    else
+                    {
+                        return $"{visibilityAttribute.Condition} must be an object reference, enum value or boolean, not " + prop.PropertyType.Name;
+                    }
+                }
+                else
+                {
+                    // Failed to find a serialized property, or a C# property.
+                    return $"{visibilityAttribute.Condition} not found";
+                }
             }
 
             bool result;
@@ -170,28 +230,29 @@ namespace Yarn.Unity.Editor
             switch (visibilityAttribute.Mode)
             {
                 case VisibilityAttribute.AttributeMode.BooleanCondition:
-                    switch (property.propertyType)
+                    switch (propertyType)
                     {
                         case SerializedPropertyType.ObjectReference:
-                            result = property.objectReferenceValue != null;
+                            result = objectValue != null;
                             break;
                         case SerializedPropertyType.Boolean:
-                            result = property.boolValue;
+                            result = booleanValue;
                             break;
                         default:
                             // Property is an unhandled type
-                            return $"{visibilityAttribute.Condition} must be a boolean or object reference, not {property.propertyType}";
+                            return $"{visibilityAttribute.Condition} must be a boolean or object reference, not {propertyType}";
                     }
                     break;
                 case VisibilityAttribute.AttributeMode.EnumEquality:
-                    if (property.propertyType == SerializedPropertyType.Enum)
+                    if (propertyType == SerializedPropertyType.Enum)
                     {
-                        return property.intValue == visibilityAttribute.EnumValue;
+                        result = enumValue == visibilityAttribute.EnumValue;
                     }
                     else
                     {
-                        return $"{visibilityAttribute.Condition} must be an enum, not a {property.propertyType}";
+                        return $"{visibilityAttribute.Condition} must be an enum, not a {propertyType}";
                     }
+                    break;
                 default:
                     return $"Unhandled visibility attribute mode {visibilityAttribute.Mode}";
             }
@@ -302,6 +363,62 @@ namespace Yarn.Unity.Editor
             {
                 var result = method.Invoke(target, Array.Empty<object>());
                 if (result is MessageBoxAttribute.Message message)
+                {
+                    return message;
+                }
+                else
+                {
+                    return $@"Method ""{methodName}"" did not return a valid message";
+                }
+            }
+            catch (TargetInvocationException e)
+            {
+                Debug.LogException(e.InnerException);
+                return $@"Method ""{methodName}"" threw a {e.InnerException.GetType().Name}: {e.InnerException.Message ?? "(no message)"}";
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e, target);
+                return $@"{e.GetType().Name} thrown when calling ""{methodName}"": {e.Message ?? "(no message)"}";
+            }
+        }
+        /// <summary>
+        /// Gets information for showing a message box from a
+        /// MessageBoxAttribute on a serialized object.
+        /// </summary>
+        /// <returns>A <see cref="MessageBoxAttribute.Message"/> with the text
+        /// and type of the message box.
+        /// </returns>
+        public static string GetLabel(this LabelFromAttribute messageBoxAttribute, SerializedObject serializedObject)
+        {
+            if (serializedObject == null || serializedObject.targetObject == null)
+            {
+                return "Serialized object is null";
+            }
+            var methodName = messageBoxAttribute.SourceMethod;
+            if (serializedObject.isEditingMultipleObjects)
+            {
+                // If we're editing multiple objects, show only a placeholder
+                return "-";
+            }
+            var target = serializedObject.targetObject;
+            var method = serializedObject.targetObject.GetType().GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            if (method == null)
+            {
+                return $@"Failed to find an instance method ""{methodName}"" on this object";
+            }
+            if (method.ReturnType != typeof(string))
+            {
+                return $@"Method ""{methodName}"" must return a string";
+            }
+            if (method.GetParameters().Length != 0)
+            {
+                return $@"Method ""{methodName}"" must not accept any parameters";
+            }
+            try
+            {
+                var result = method.Invoke(target, Array.Empty<object>());
+                if (result is string message)
                 {
                     return message;
                 }
@@ -515,6 +632,10 @@ namespace Yarn.Unity.Editor
                                 _ => MessageType.None
                             }));
                         }
+                        result = true;
+                        break;
+                    case LabelFromAttribute labelFromAttribute:
+                        label = labelFromAttribute.GetLabel(property.serializedProperty.serializedObject);
                         result = true;
                         break;
                     default:

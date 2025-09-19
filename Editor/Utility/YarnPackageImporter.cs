@@ -22,7 +22,7 @@ namespace Yarn.Unity.Editor
             : base(message, inner) { }
     }
 
-    public static class YarnPackageImporter
+    public static partial class YarnPackageImporter
     {
         public enum SamplesPackageStatus
         {
@@ -36,9 +36,6 @@ namespace Yarn.Unity.Editor
         {
             Itch, AssetStore, Manual
         }
-
-        // what install approach do we follow?
-        private static InstallApproach installApproach = InstallApproach.Manual;
 
         // What is the status of the samples package?
         public static SamplesPackageStatus Status
@@ -113,10 +110,33 @@ namespace Yarn.Unity.Editor
             }
         }
 
+#if UNITY_2022_3_33_OR_NEWER
         static PackageInfo? GetInstalledPackageInfo(string packageName)
         {
             return PackageInfo.FindForPackageName(packageName);
         }
+#else
+        // prior to 2022.3.33f1 they didn't have a good way to get a specific selected package
+        // so instead what we do is run through every installed package and see if it has the same name
+        // if it does we return that
+        // otherwise we return null.
+        // In my testing this hasn't caused any issues but I am sure there are gaps I have missed
+        // which I think is an acceptable tradeoff considering the age of <.33
+        // and the failure state is that instead of opening the samples we open the docs
+        // which feels ok to me as a fallback.
+        static PackageInfo? GetInstalledPackageInfo(string packageName)
+        {
+            var allPackages = PackageInfo.GetAllRegisteredPackages();
+            foreach (var package in allPackages)
+            {
+                if (package.name.ToLower() == packageName.ToLower())
+                {
+                    return package;
+                }
+            }
+            return null;
+        }
+#endif
 
         static IEnumerable<Sample> GetSamplesForInstalledPackage(PackageInfo package)
         {

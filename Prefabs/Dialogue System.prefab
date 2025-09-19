@@ -119,7 +119,7 @@ MonoBehaviour:
   autoAdvanceDelay: 1
   useTypewriterEffect: 1
   typewriterEffectSpeed: 60
-  actionMarkupHandlers:
+  eventHandlers:
   - {fileID: 8877867826578261527}
 --- !u!1 &2958262986393358530
 GameObject:
@@ -829,6 +829,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   runner: {fileID: 8309902628685535410}
+  presenter: {fileID: 2958262985454349548}
   multiAdvanceIsCancel: 0
   advanceRequestsBeforeCancellingLine: 2
   inputMode: 1
@@ -894,6 +895,7 @@ MonoBehaviour:
   yarnProject: {fileID: 0}
   variableStorage: {fileID: 8635081094713202853}
   lineProvider: {fileID: 0}
+  saliencyStrategy: 0
   dialoguePresenters:
   - {fileID: 2958262985454349548}
   - {fileID: 8020628925107869960}
@@ -1360,7 +1362,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4747703131446103636}
   - component: {fileID: 3893607377605131395}
-  - component: {fileID: 6877739291720518964}
+  - component: {fileID: 5871538028776184760}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -1398,7 +1400,7 @@ MonoBehaviour:
   m_FirstSelected: {fileID: 0}
   m_sendNavigationEvents: 1
   m_DragThreshold: 10
---- !u!114 &6877739291720518964
+--- !u!114 &5871538028776184760
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1407,14 +1409,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 9078442560890639579}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
+  m_Script: {fileID: 11500000, guid: 1ef056dd5667f4dfaac1bb553498afa2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SendPointerHoverToParent: 1
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
