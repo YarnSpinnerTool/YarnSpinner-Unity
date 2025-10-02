@@ -26,6 +26,11 @@ namespace Yarn.Unity
     [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-view/line-view")]
     public sealed class LinePresenter : DialoguePresenterBase
     {
+        enum TypewriterType
+        {
+            None, ByLetter, ByWord, Custom,
+        }
+
         /// <summary>
         /// The canvas group that contains the UI elements used by this Line
         /// View.
@@ -166,48 +171,36 @@ namespace Yarn.Unity
 
         // typewriter fields
 
-        /// <summary>
-        /// Controls whether the text of <see cref="lineText"/> should be
-        /// gradually revealed over time.
-        /// </summary>
-        /// <remarks><para>If this value is <see langword="true"/>, the <see
-        /// cref="lineText"/> object's <see
-        /// cref="TMP_Text.maxVisibleCharacters"/> property will animate from 0
-        /// to the length of the text, at a rate of <see
-        /// cref="typewriterEffectSpeed"/> letters per second when the line
-        /// appears. <see cref="onCharacterTyped"/> is called for every new
-        /// character that is revealed.</para>
-        /// <para>If this value is <see langword="false"/>, the <see
-        /// cref="lineText"/> will all be revealed at the same time.</para>
-        /// <para style="note">If <see cref="useFadeEffect"/> is <see
-        /// langword="true"/>, the typewriter effect will run after the fade-in
-        /// is complete.</para>
-        /// </remarks>
-        /// <seealso cref="lineText"/>
-        /// <seealso cref="onCharacterTyped"/>
-        /// <seealso cref="typewriterEffectSpeed"/>
         [Group("Typewriter")]
-        public bool useTypewriterEffect = true;
+        [SerializeField] private TypewriterType typewriterStyle = TypewriterType.ByLetter;
 
         /// <summary>
         /// The number of characters per second that should appear during a
         /// typewriter effect.
         /// </summary>
         [Group("Typewriter")]
-        [ShowIf(nameof(useTypewriterEffect))]
+        [ShowIf(nameof(typewriterStyle), TypewriterType.ByLetter)]
         [Label("Letters per second")]
         [Min(0)]
-        public int typewriterEffectSpeed = 60;
+        public int lettersPerSecond = 60;
+
+        [Group("Typewriter")]
+        [ShowIf(nameof(typewriterStyle), TypewriterType.ByWord)]
+        [Label("words per second")]
+        [Min(0)]
+        public int wordsPerSecond = 10;
 
         /// <summary>
         /// A list of <see cref="ActionMarkupHandler"/> objects that will be
         /// used to handle markers in the line.
         /// </summary>
         [Group("Typewriter")]
-        [ShowIf(nameof(useTypewriterEffect))]
+        [HideIf(nameof(typewriterStyle), TypewriterType.None)]
         [Label("Event Handler")]
         [UnityEngine.Serialization.FormerlySerializedAs("actionMarkupHandlers")]
         [SerializeField] List<ActionMarkupHandler> eventHandlers = new List<ActionMarkupHandler>();
+
+        [HideInInspector] public IAsyncTypewriter? typewriter;
 
         /// <inheritdoc/>
         public override YarnTask OnDialogueCompleteAsync()
@@ -234,14 +227,11 @@ namespace Yarn.Unity
         /// </summary>
         private void Awake()
         {
-            if (useTypewriterEffect)
-            {
-                // need to add a pause handler also
-                // and add it to the front of the list
-                // that way it always happens first
-                var pauser = new PauseEventProcessor();
-                ActionMarkupHandlers.Insert(0, pauser);
-            }
+            // need to add a pause handler also
+            // and add it to the front of the list
+            // that way it always happens first
+            var pauser = new PauseEventProcessor();
+            ActionMarkupHandlers.Insert(0, pauser);
 
             if (characterNameContainer == null && characterNameText != null)
             {
@@ -253,6 +243,35 @@ namespace Yarn.Unity
         {
             // we add all the monobehaviour handlers into the shared list
             ActionMarkupHandlers.AddRange(eventHandlers);
+
+            switch (typewriterStyle)
+            {
+                case TypewriterType.None:
+                    typewriter = new NoneTypewriter()
+                    {
+                        ActionMarkupHandlers = this.ActionMarkupHandlers,
+                        Text = this.lineText,
+                    };
+                    break;
+
+                case TypewriterType.ByLetter:
+                    typewriter = new BasicTypewriter()
+                    {
+                        ActionMarkupHandlers = this.ActionMarkupHandlers,
+                        Text = this.lineText,
+                        CharactersPerSecond = this.lettersPerSecond,
+                    };
+                    break;
+
+                case TypewriterType.ByWord:
+                    typewriter = new WordTypewriter()
+                    {
+                        ActionMarkupHandlers = this.ActionMarkupHandlers,
+                        Text = this.lineText,
+                        WordsPerSecond = this.wordsPerSecond,
+                    };
+                    break;
+            }
         }
 
         /// <summary>Presents a line using the configured text view.</summary>
@@ -298,21 +317,14 @@ namespace Yarn.Unity
                     }
                 }
             }
+
+            lineText.maxVisibleCharacters = 0;
             lineText.text = text.Text;
 
-            // the typewriter requires all characters to be hidden at the start so they can be shown one at a time
-            if (useTypewriterEffect)
+            // letting every temporal processor know that fade up (if set) is about to begin
+            foreach (var processor in ActionMarkupHandlers)
             {
-                lineText.maxVisibleCharacters = 0;
-                // letting every temporal processor know that fade up (if set) is about to begin
-                foreach (var processor in ActionMarkupHandlers)
-                {
-                    processor.OnPrepareForLine(text, lineText);
-                }
-            }
-            else
-            {
-                lineText.maxVisibleCharacters = text.Text.Length;
+                processor.OnPrepareForLine(text, lineText);
             }
 
             if (canvasGroup != null)
@@ -329,17 +341,12 @@ namespace Yarn.Unity
                 }
             }
 
-            if (useTypewriterEffect)
+            typewriter ??= new NoneTypewriter()
             {
-                var typewriter = new BasicTypewriter()
-                {
-                    ActionMarkupHandlers = this.ActionMarkupHandlers,
-                    Text = this.lineText,
-                    CharactersPerSecond = this.typewriterEffectSpeed,
-                };
-
-                await typewriter.RunTypewriter(text, token.HurryUpToken);
-            }
+                ActionMarkupHandlers = this.ActionMarkupHandlers,
+                Text = this.lineText,
+            };
+            await typewriter.RunTypewriter(text, token.HurryUpToken);
 
             // if we are set to autoadvance how long do we hold for before continuing?
             if (autoAdvance)
@@ -379,7 +386,7 @@ namespace Yarn.Unity
         /// </remarks>
         public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
-            return YarnTask<DialogueOption?>.FromResult(null);
+            return DialogueRunner.NoOptionSelected;
         }
     }
 }
