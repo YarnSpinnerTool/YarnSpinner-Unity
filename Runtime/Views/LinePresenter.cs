@@ -61,22 +61,20 @@ namespace Yarn.Unity
         /// not be shown in the <see cref="lineText"/> object.</para>
         /// </remarks>
         [Group("Character")]
-        [Label("Shows Name")]
-        public bool showCharacterNameInLineView = true;
+        [Label("Shows Name In Line")]
+        public bool showCharacterNameInLine = true;
 
         /// <summary>
         /// The <see cref="TMP_Text"/> object that displays the character
         /// names found in dialogue lines.
         /// </summary>
         /// <remarks>
-        /// If the <see cref="LineView"/> receives a line that does not contain
+        /// If the <see cref="LinePresenter"/> receives a line that does not contain
         /// a character name, this object will be left blank.
         /// </remarks>
         [Group("Character")]
-        [ShowIf(nameof(showCharacterNameInLineView))]
         [Label("Name field")]
-        [MustNotBeNullWhen(nameof(showCharacterNameInLineView), "A text field must be provided when Shows Name is set")]
-        public TMP_Text? characterNameText;
+        public TMP_Text? characterNameText = null;
 
         /// <summary>
         /// The game object that holds the <see cref="characterNameText"/> text
@@ -88,7 +86,6 @@ namespace Yarn.Unity
         /// just be the same game object as <see cref="characterNameText"/>.
         /// </remarks>
         [Group("Character")]
-        [ShowIf(nameof(showCharacterNameInLineView))]
         public GameObject? characterNameContainer = null;
 
 
@@ -272,32 +269,34 @@ namespace Yarn.Unity
             MarkupParseResult text;
 
             // configuring the text fields
-            if (showCharacterNameInLineView)
+            if (characterNameText == null)
             {
-                if (characterNameText == null)
+                if (showCharacterNameInLine)
                 {
-                    Debug.LogWarning($"{nameof(LinePresenter)} is configured to show character names, but no character name text view was provided.", this);
+                    text = line.Text;
                 }
                 else
                 {
-                    characterNameText.text = line.CharacterName;
-                }
-                text = line.TextWithoutCharacterName;
-
-                if (line.Text.TryGetAttributeWithName("character", out var characterAttribute))
-                {
-                    text.Attributes.Add(characterAttribute);
+                    text = line.TextWithoutCharacterName;
                 }
             }
             else
             {
-                // we don't want to show character names but do have a valid container for showing them
-                // so we should just disable that and continue as if it didn't exist
+                text = line.TextWithoutCharacterName;
+
+                // we are configured to show character names in their own little box, but this line doesn't have one
                 if (characterNameContainer != null)
                 {
-                    characterNameContainer.SetActive(false);
+                    if (string.IsNullOrWhiteSpace(line.CharacterName))
+                    {
+                        characterNameContainer.SetActive(false);
+                    }
+                    else
+                    {
+                        characterNameContainer.SetActive(true);
+                        characterNameText.text = line.CharacterName;
+                    }
                 }
-                text = line.TextWithoutCharacterName;
             }
             lineText.text = text.Text;
 
