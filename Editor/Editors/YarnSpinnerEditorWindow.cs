@@ -32,7 +32,7 @@ namespace Yarn.Unity
         private const string SupportersURL = "https://yarnspinner.dev/supporters.txt";
 
         // URLs to open when buttons on the about page are clicked
-        private const string DocumentationURL = "https://yarnspinner.dev/docs/tutorial";
+        private const string DocumentationURL = "https://docs.yarnspinner.dev/yarn-spinner-for-unity/";
         private const string PatreonURL = "https://www.patreon.com/bePatron?u=11132340";
 
         // The request object, used to fetch supportersText
