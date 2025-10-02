@@ -552,7 +552,7 @@ namespace Yarn.Unity
             // well as the entire dialogue.
             if (runner != null)
             {
-                runner.Stop();
+                runner.Stop().Forget();
             }
         }
 

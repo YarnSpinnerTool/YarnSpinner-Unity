@@ -363,6 +363,7 @@ namespace Yarn.Unity
         private CancellationTokenSource? currentLineCancellationSource;
         private CancellationTokenSource? currentLineHurryUpSource;
         private YarnTaskCompletionSource? dialogueCompletionSource;
+        private YarnTaskCompletionSource? dialogueCancellationCompletion;
 
         internal ICommandDispatcher CommandDispatcher
         {
@@ -448,11 +449,18 @@ namespace Yarn.Unity
         /// Called by Unity to start running dialogue if <see cref="autoStart"/>
         /// is enabled.
         /// </summary>
-        private void Start()
+        private async void Start()
         {
             if (autoStart)
             {
-                StartDialogue(startNode);
+                try
+                {
+                    await StartDialogue(startNode);
+                }
+                catch (System.OperationCanceledException ex)
+                {
+                    Debug.LogException(ex);
+                }
             }
         }
 
@@ -460,9 +468,12 @@ namespace Yarn.Unity
         /// Stops the dialogue immediately, and cancels any currently running
         /// dialogue presenters.
         /// </summary>
-        public void Stop()
+        public async YarnTask Stop()
         {
+            dialogueCancellationCompletion = new YarnTaskCompletionSource();
             CancelDialogue();
+            await dialogueCancellationCompletion.Task;
+            dialogueCancellationCompletion = null;
         }
 
         /// <summary>
@@ -567,6 +578,10 @@ namespace Yarn.Unity
             dialogueCancellationSource?.Dispose();
             dialogueCancellationSource = null;
             dialogueCompletionSource = null;
+
+            // finally we flag the cancellation as done
+            // this lets stop know that all views have been informed as to the cancellation
+            dialogueCancellationCompletion?.TrySetResult();
         }
 
         private void OnNodeCompleted(string completedNodeName)
@@ -937,7 +952,7 @@ namespace Yarn.Unity
         /// <remarks><paramref name="nodeName"/> must be the name of a node in
         /// <see cref="YarnProject"/>.</remarks>
         /// <param name="nodeName">The name of the node to run.</param>
-        public void StartDialogue(string nodeName)
+        public async YarnTask StartDialogue(string nodeName)
         {
             if (yarnProject == null)
             {
@@ -969,22 +984,18 @@ namespace Yarn.Unity
 
             onDialogueStart?.Invoke();
 
-            StartDialogueAsync().Forget();
-
-            async YarnTask StartDialogueAsync()
+            var tasks = new List<YarnTask>();
+            foreach (var view in DialoguePresenters)
             {
-                var tasks = new List<YarnTask>();
-                foreach (var view in DialoguePresenters)
+                if (view == null)
                 {
-                    if (view == null)
-                    {
-                        continue;
-                    }
-                    tasks.Add(view.OnDialogueStartedAsync());
+                    continue;
                 }
-                await YarnTask.WhenAll(tasks);
-                Dialogue.Continue();
+                tasks.Add(view.OnDialogueStartedAsync());
             }
+            await YarnTask.WhenAll(tasks);
+
+            Dialogue.Continue();
         }
 
         /// <summary>
