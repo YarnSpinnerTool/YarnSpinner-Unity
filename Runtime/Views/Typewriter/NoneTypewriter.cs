@@ -7,13 +7,14 @@ namespace Yarn.Unity
     using System.Threading;
     using TMPro;
     using UnityEngine;
+    using Yarn.Markup;
 
     /// <summary>
     /// An implementation of <see cref="IAsyncTypewriter"/> that delivers
     /// all content instantly, and invokes any <see
     /// cref="IActionMarkupHandler"/>s along the way as needed.
     /// </summary>
-    public class NoneTypewriter : IAsyncTypewriter
+    public class InstantTypewriter : IAsyncTypewriter
     {
         /// <summary>
         /// The <see cref="TMP_Text"/> to display the text in.
@@ -73,6 +74,31 @@ namespace Yarn.Unity
             foreach (var markupHandler in ActionMarkupHandlers)
             {
                 markupHandler.OnLineDisplayComplete();
+            }
+        }
+
+        public void PrepareForContent(MarkupParseResult line)
+        {
+            if (Text == null)
+            {
+                return;
+            }
+
+            Text.maxVisibleCharacters = 0;
+            Text.text = line.Text;
+
+            foreach (var processor in ActionMarkupHandlers)
+            {
+                processor.OnPrepareForLine(line, Text);
+            }
+        }
+
+        public void ContentWillDismiss()
+        {
+            // we tell all action processors that the line is finished and is about to go away
+            foreach (var processor in ActionMarkupHandlers)
+            {
+                processor.OnLineWillDismiss();
             }
         }
     }

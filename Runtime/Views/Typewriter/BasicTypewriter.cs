@@ -13,7 +13,7 @@ namespace Yarn.Unity
     /// characters one at a time, and invokes any <see
     /// cref="IActionMarkupHandler"/>s along the way as needed.
     /// </summary>
-    public class BasicTypewriter : IAsyncTypewriter
+    public class LetterTypewriter : IAsyncTypewriter
     {
         /// <summary>
         /// The <see cref="TMP_Text"/> to display the text in.
@@ -104,6 +104,31 @@ namespace Yarn.Unity
             foreach (var markupHandler in ActionMarkupHandlers)
             {
                 markupHandler.OnLineDisplayComplete();
+            }
+        }
+
+        public void PrepareForContent(Markup.MarkupParseResult line)
+        {
+            if (Text == null)
+            {
+                return;
+            }
+
+            Text.maxVisibleCharacters = 0;
+            Text.text = line.Text;
+
+            foreach (var processor in ActionMarkupHandlers)
+            {
+                processor.OnPrepareForLine(line, Text);
+            }
+        }
+
+        public void ContentWillDismiss()
+        {
+            // we tell all action processors that the line is finished and is about to go away
+            foreach (var processor in ActionMarkupHandlers)
+            {
+                processor.OnLineWillDismiss();
             }
         }
     }

@@ -28,5 +28,8 @@ namespace Yarn.Unity
         /// <returns>A task that completes when the typewriter effect has
         /// finished.</returns>
         public YarnTask RunTypewriter(Markup.MarkupParseResult line, CancellationToken cancellationToken);
+
+        public void PrepareForContent(Markup.MarkupParseResult line);
+        public void ContentWillDismiss();
     }
 }

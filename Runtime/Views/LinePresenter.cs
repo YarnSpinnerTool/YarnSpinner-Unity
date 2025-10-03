@@ -28,7 +28,7 @@ namespace Yarn.Unity
     {
         enum TypewriterType
         {
-            None, ByLetter, ByWord, Custom,
+            Instant, ByLetter, ByWord, Custom,
         }
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace Yarn.Unity
         /// used to handle markers in the line.
         /// </summary>
         [Group("Typewriter")]
-        [HideIf(nameof(typewriterStyle), TypewriterType.None)]
+        [HideIf(nameof(typewriterStyle), TypewriterType.Instant)]
         [Label("Event Handler")]
         [UnityEngine.Serialization.FormerlySerializedAs("actionMarkupHandlers")]
         [SerializeField] List<ActionMarkupHandler> eventHandlers = new List<ActionMarkupHandler>();
@@ -246,8 +246,8 @@ namespace Yarn.Unity
 
             switch (typewriterStyle)
             {
-                case TypewriterType.None:
-                    typewriter = new NoneTypewriter()
+                case TypewriterType.Instant:
+                    typewriter = new InstantTypewriter()
                     {
                         ActionMarkupHandlers = this.ActionMarkupHandlers,
                         Text = this.lineText,
@@ -255,7 +255,7 @@ namespace Yarn.Unity
                     break;
 
                 case TypewriterType.ByLetter:
-                    typewriter = new BasicTypewriter()
+                    typewriter = new LetterTypewriter()
                     {
                         ActionMarkupHandlers = this.ActionMarkupHandlers,
                         Text = this.lineText,
@@ -318,21 +318,20 @@ namespace Yarn.Unity
                 }
             }
 
-            lineText.maxVisibleCharacters = 0;
-            lineText.text = text.Text;
-
-            // letting every temporal processor know that fade up (if set) is about to begin
-            foreach (var processor in ActionMarkupHandlers)
+            typewriter ??= new InstantTypewriter()
             {
-                processor.OnPrepareForLine(text, lineText);
-            }
+                ActionMarkupHandlers = this.ActionMarkupHandlers,
+                Text = this.lineText,
+            };
+
+            typewriter.PrepareForContent(text);
 
             if (canvasGroup != null)
             {
                 // fading up the UI
                 if (useFadeEffect)
                 {
-                    await Effects.FadeAlphaAsync(canvasGroup, 0, 1, fadeDownDuration, token.HurryUpToken);
+                    await Effects.FadeAlphaAsync(canvasGroup, 0, 1, fadeUpDuration, token.HurryUpToken);
                 }
                 else
                 {
@@ -341,11 +340,6 @@ namespace Yarn.Unity
                 }
             }
 
-            typewriter ??= new NoneTypewriter()
-            {
-                ActionMarkupHandlers = this.ActionMarkupHandlers,
-                Text = this.lineText,
-            };
             await typewriter.RunTypewriter(text, token.HurryUpToken);
 
             // if we are set to autoadvance how long do we hold for before continuing?
@@ -358,11 +352,7 @@ namespace Yarn.Unity
                 await YarnTask.WaitUntilCanceled(token.NextLineToken).SuppressCancellationThrow();
             }
 
-            // we tell all action processors that the line is finished and is about to go away
-            foreach (var processor in ActionMarkupHandlers)
-            {
-                processor.OnLineWillDismiss();
-            }
+            typewriter.ContentWillDismiss();
 
             if (canvasGroup != null)
             {

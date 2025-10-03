@@ -132,5 +132,30 @@ namespace Yarn.Unity
                 markupHandler.OnLineDisplayComplete();
             }
         }
+
+        public void PrepareForContent(Markup.MarkupParseResult line)
+        {
+            if (Text == null)
+            {
+                return;
+            }
+
+            Text.maxVisibleCharacters = 0;
+            Text.text = line.Text;
+
+            foreach (var processor in ActionMarkupHandlers)
+            {
+                processor.OnPrepareForLine(line, Text);
+            }
+        }
+
+        public void ContentWillDismiss()
+        {
+            // we tell all action processors that the line is finished and is about to go away
+            foreach (var processor in ActionMarkupHandlers)
+            {
+                processor.OnLineWillDismiss();
+            }
+        }
     }
 }
