@@ -470,7 +470,8 @@ namespace Yarn.Unity.Editor
                 }
 
                 // Now to compile the scripts associated with this project.
-                var job = CompilationJob.CreateFromFiles(project.SourceFiles);
+                var job = GetCompilationJob();
+
                 job.LanguageVersion = project.FileVersion;
                 job.Declarations = functionDeclarationReceiver.FunctionDeclarations;
 
@@ -1347,7 +1348,7 @@ namespace Yarn.Unity.Editor
                 return default;
             }
 
-            return CompilationJob.CreateFromFiles(project.SourceFiles);
+            return CompilationJob.CreateFromProject(project);
         }
 
         internal IEnumerable<string> GetErrorsForScript(TextAsset sourceScript)
