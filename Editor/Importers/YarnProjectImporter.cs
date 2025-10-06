@@ -589,14 +589,6 @@ namespace Yarn.Unity.Editor
                     .Where(decl => !(decl.Type is FunctionType))
                     .Select(decl => new SerializedDeclaration(decl)).ToList();
 
-                if (compilationResult.QuestGraphEdges.Count() > 0)
-                {
-                    // The compilation contained a quest graph. Store it as a sub-asset.
-                    var questGraph = QuestGraphs.QuestGraphData.Create(compilationResult.QuestGraphEdges.Select(e => e.EdgeDescriptor));
-                    questGraph.name = "Quest Graph Data";
-                    ctx.AddObjectToAsset("quest-graph", questGraph);
-                }
-
 #if USE_UNITY_LOCALIZATION
                 if (UseUnityLocalisationSystem)
                 {

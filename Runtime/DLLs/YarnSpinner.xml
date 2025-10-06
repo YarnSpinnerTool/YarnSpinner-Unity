@@ -1534,194 +1534,344 @@
             The headers present on this node.
             </summary>
         </member>
-        <member name="T:Yarn.QuestNodeStateProperty">
+        <member name="T:Yarn.QuestGraphs.QuestGraphReflection">
+            <summary>Holder for reflection information generated from quest_graph.proto</summary>
+        </member>
+        <member name="P:Yarn.QuestGraphs.QuestGraphReflection.Descriptor">
+            <summary>File descriptor for quest_graph.proto</summary>
+        </member>
+        <member name="T:Yarn.QuestGraphs.VariableType">
             <summary>
-            The types of properties a node on a quest graph has.
+            The type of a Variable.
             </summary>
         </member>
-        <member name="F:Yarn.QuestNodeStateProperty.Complete">
+        <member name="T:Yarn.QuestGraphs.VariableSourceType">
             <summary>
-            The quest graph node is complete.
+            The source of a Variable.
             </summary>
         </member>
-        <member name="F:Yarn.QuestNodeStateProperty.Reachable">
+        <member name="T:Yarn.QuestGraphs.NodeStateType">
             <summary>
-            The quest graph node is reachable.
+            A state a Node can be in.
             </summary>
         </member>
-        <member name="F:Yarn.QuestNodeStateProperty.NoLongerNeeded">
+        <member name="F:Yarn.QuestGraphs.NodeStateType.Reachable">
             <summary>
-            The quest graph node is no longer needed.
+            The node is currently, or has been previously, available to be completed.
             </summary>
         </member>
-        <member name="F:Yarn.QuestNodeStateProperty.Active">
+        <member name="F:Yarn.QuestGraphs.NodeStateType.Active">
             <summary>
-            The quest graph node is currently active in its quest.
+            The node is currently active. 
             </summary>
         </member>
-        <member name="T:Yarn.QuestGraphExtensions">
+        <member name="F:Yarn.QuestGraphs.NodeStateType.Complete">
             <summary>
-            Contains methods for working with <see cref="T:Yarn.Dialogue"/> objects and
-            quest graphs.
+            The node has been completed. 
             </summary>
         </member>
-        <member name="M:Yarn.QuestGraphExtensions.AddQuestGraphSupport(Yarn.Dialogue)">
+        <member name="F:Yarn.QuestGraphs.NodeStateType.NoLongerNeeded">
             <summary>
-            Registers functions for querying the state of quest graph nodes into
-            <paramref name="dialogue"/>'s library.
-            </summary>
-            <param name="dialogue">The dialogue to register functions into.</param>
-            <exception cref="T:System.ArgumentNullException">Thrown if <paramref
-            name="dialogue"/> is <see langword="null"/>.</exception>
-        </member>
-        <member name="T:Yarn.QuestGraphNodeDescriptor">
-            <summary>
-            Describes a node on a graph.
+            The node was previously active, but is no longer available to be completed.
+            This state is only valid for Task nodes.
             </summary>
         </member>
-        <member name="T:Yarn.QuestGraphNodeDescriptor.NodePosition">
+        <member name="T:Yarn.QuestGraphs.NodeState">
             <summary>
-            A 2D position.
+            Describes a specific node being in a specific state.
             </summary>
         </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.NodePosition.#ctor(System.Int32,System.Int32)">
-            <summary>
-            Initialises a new instance of the <see cref="T:Yarn.QuestGraphNodeDescriptor.NodePosition"/>
-            struct with an X and Y coordinate.
-            </summary>
-            <param name="x"></param>
-            <param name="y"></param>
+        <member name="F:Yarn.QuestGraphs.NodeState.NodeFieldNumber">
+            <summary>Field number for the "node" field.</summary>
         </member>
-        <member name="P:Yarn.QuestGraphNodeDescriptor.NodePosition.X">
+        <member name="P:Yarn.QuestGraphs.NodeState.Node">
             <summary>
-            Gets or sets the position's X coordinate.
+            The ID of the node.
             </summary>
         </member>
-        <member name="P:Yarn.QuestGraphNodeDescriptor.NodePosition.Y">
+        <member name="F:Yarn.QuestGraphs.NodeState.StateFieldNumber">
+            <summary>Field number for the "state" field.</summary>
+        </member>
+        <member name="P:Yarn.QuestGraphs.NodeState.State">
             <summary>
-            Gets or sets the position's Y coordinate.
+            The state of the node.
             </summary>
         </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.NodePosition.Equals(System.Object)">
-            <inheritdoc/>
+        <member name="F:Yarn.QuestGraphs.NAryExpression.ChildrenFieldNumber">
+            <summary>Field number for the "children" field.</summary>
         </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.NodePosition.Equals(Yarn.QuestGraphNodeDescriptor.NodePosition)">
-            <inheritdoc/>
+        <member name="F:Yarn.QuestGraphs.BinaryExpression.FirstFieldNumber">
+            <summary>Field number for the "first" field.</summary>
         </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.NodePosition.GetHashCode">
-            <inheritdoc/>
+        <member name="F:Yarn.QuestGraphs.BinaryExpression.SecondFieldNumber">
+            <summary>Field number for the "second" field.</summary>
         </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.NodePosition.op_Equality(Yarn.QuestGraphNodeDescriptor.NodePosition,Yarn.QuestGraphNodeDescriptor.NodePosition)">
-            <inheritdoc/>
+        <member name="F:Yarn.QuestGraphs.UnaryExpression.ExprFieldNumber">
+            <summary>Field number for the "expr" field.</summary>
         </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.NodePosition.op_Inequality(Yarn.QuestGraphNodeDescriptor.NodePosition,Yarn.QuestGraphNodeDescriptor.NodePosition)">
-            <inheritdoc/>
+        <member name="F:Yarn.QuestGraphs.Expression.EmptyFieldNumber">
+            <summary>Field number for the "empty" field.</summary>
         </member>
-        <member name="T:Yarn.QuestGraphNodeDescriptor.NodeType">
+        <member name="F:Yarn.QuestGraphs.Expression.VariableFieldNumber">
+            <summary>Field number for the "variable" field.</summary>
+        </member>
+        <member name="P:Yarn.QuestGraphs.Expression.HasVariable">
+            <summary>Gets whether the "variable" field is set</summary>
+        </member>
+        <member name="M:Yarn.QuestGraphs.Expression.ClearVariable">
+            <summary> Clears the value of the oneof if it's currently set to "variable" </summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Expression.BooleanFieldNumber">
+            <summary>Field number for the "boolean" field.</summary>
+        </member>
+        <member name="P:Yarn.QuestGraphs.Expression.HasBoolean">
+            <summary>Gets whether the "boolean" field is set</summary>
+        </member>
+        <member name="M:Yarn.QuestGraphs.Expression.ClearBoolean">
+            <summary> Clears the value of the oneof if it's currently set to "boolean" </summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Expression.NodeFieldNumber">
+            <summary>Field number for the "node" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Expression.AndFieldNumber">
+            <summary>Field number for the "and" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Expression.OrFieldNumber">
+            <summary>Field number for the "or" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Expression.NotFieldNumber">
+            <summary>Field number for the "not" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Expression.ImpliesFieldNumber">
+            <summary>Field number for the "implies" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Expression.Equals_FieldNumber">
+            <summary>Field number for the "equals" field.</summary>
+        </member>
+        <member name="T:Yarn.QuestGraphs.Expression.TreeNodeOneofCase">
+            <summary>Enum of possible cases for the "treeNode" oneof.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Variable.IdFieldNumber">
+            <summary>Field number for the "id" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Variable.YarnNameFieldNumber">
+            <summary>Field number for the "yarnName" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Variable.NameFieldNumber">
+            <summary>Field number for the "name" field.</summary>
+        </member>
+        <member name="P:Yarn.QuestGraphs.Variable.HasName">
+            <summary>Gets whether the "name" field is set</summary>
+        </member>
+        <member name="M:Yarn.QuestGraphs.Variable.ClearName">
+            <summary>Clears the value of the "name" field</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Variable.DescriptionFieldNumber">
+            <summary>Field number for the "description" field.</summary>
+        </member>
+        <member name="P:Yarn.QuestGraphs.Variable.HasDescription">
+            <summary>Gets whether the "description" field is set</summary>
+        </member>
+        <member name="M:Yarn.QuestGraphs.Variable.ClearDescription">
+            <summary>Clears the value of the "description" field</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Variable.IsPermanentFieldNumber">
+            <summary>Field number for the "isPermanent" field.</summary>
+        </member>
+        <member name="P:Yarn.QuestGraphs.Variable.HasIsPermanent">
+            <summary>Gets whether the "isPermanent" field is set</summary>
+        </member>
+        <member name="M:Yarn.QuestGraphs.Variable.ClearIsPermanent">
+            <summary>Clears the value of the "isPermanent" field</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Variable.DefinitionFieldNumber">
+            <summary>Field number for the "definition" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Variable.TypeFieldNumber">
+            <summary>Field number for the "type" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Variable.SourceFieldNumber">
+            <summary>Field number for the "source" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Quest.IdFieldNumber">
+            <summary>Field number for the "id" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Quest.YarnNameFieldNumber">
+            <summary>Field number for the "yarnName" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Quest.NameFieldNumber">
+            <summary>Field number for the "name" field.</summary>
+        </member>
+        <member name="P:Yarn.QuestGraphs.Quest.HasName">
+            <summary>Gets whether the "name" field is set</summary>
+        </member>
+        <member name="M:Yarn.QuestGraphs.Quest.ClearName">
+            <summary>Clears the value of the "name" field</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Quest.DescriptionFieldNumber">
+            <summary>Field number for the "description" field.</summary>
+        </member>
+        <member name="P:Yarn.QuestGraphs.Quest.HasDescription">
+            <summary>Gets whether the "description" field is set</summary>
+        </member>
+        <member name="M:Yarn.QuestGraphs.Quest.ClearDescription">
+            <summary>Clears the value of the "description" field</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Position.XFieldNumber">
+            <summary>Field number for the "x" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Position.YFieldNumber">
+            <summary>Field number for the "y" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.TaskNodeData.CompletesQuestFieldNumber">
+            <summary>Field number for the "completesQuest" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.TaskNodeData.StaysCompleteForeverFieldNumber">
+            <summary>Field number for the "staysCompleteForever" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.StepNodeData.IsHiddenFieldNumber">
+            <summary>Field number for the "isHidden" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.StepNodeData.CompletionStyleFieldNumber">
+            <summary>Field number for the "completionStyle" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.NodeRequirement.TypeFieldNumber">
+            <summary>Field number for the "type" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Node.IdFieldNumber">
+            <summary>Field number for the "id" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Node.QuestFieldNumber">
+            <summary>Field number for the "quest" field.</summary>
+        </member>
+        <member name="P:Yarn.QuestGraphs.Node.HasQuest">
+            <summary>Gets whether the "quest" field is set</summary>
+        </member>
+        <member name="M:Yarn.QuestGraphs.Node.ClearQuest">
+            <summary>Clears the value of the "quest" field</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Node.YarnNameFieldNumber">
+            <summary>Field number for the "yarnName" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Node.DescriptionFieldNumber">
+            <summary>Field number for the "description" field.</summary>
+        </member>
+        <member name="P:Yarn.QuestGraphs.Node.HasDescription">
+            <summary>Gets whether the "description" field is set</summary>
+        </member>
+        <member name="M:Yarn.QuestGraphs.Node.ClearDescription">
+            <summary>Clears the value of the "description" field</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Node.PositionFieldNumber">
+            <summary>Field number for the "position" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Node.DisplayNameFieldNumber">
+            <summary>Field number for the "displayName" field.</summary>
+        </member>
+        <member name="P:Yarn.QuestGraphs.Node.HasDisplayName">
+            <summary>Gets whether the "displayName" field is set</summary>
+        </member>
+        <member name="M:Yarn.QuestGraphs.Node.ClearDisplayName">
+            <summary>Clears the value of the "displayName" field</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Node.NoteFieldNumber">
+            <summary>Field number for the "note" field.</summary>
+        </member>
+        <member name="P:Yarn.QuestGraphs.Node.HasNote">
+            <summary>Gets whether the "note" field is set</summary>
+        </member>
+        <member name="M:Yarn.QuestGraphs.Node.ClearNote">
+            <summary>Clears the value of the "note" field</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Node.RequirementFieldNumber">
+            <summary>Field number for the "requirement" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Node.TaskFieldNumber">
+            <summary>Field number for the "task" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Node.StepFieldNumber">
+            <summary>Field number for the "step" field.</summary>
+        </member>
+        <member name="T:Yarn.QuestGraphs.Node.TypeOneofCase">
+            <summary>Enum of possible cases for the "type" oneof.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Edge.IdFieldNumber">
+            <summary>Field number for the "id" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Edge.StartFieldNumber">
+            <summary>Field number for the "start" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Edge.EndFieldNumber">
+            <summary>Field number for the "end" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Edge.ConditionFieldNumber">
+            <summary>Field number for the "condition" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Edge.LabelFieldNumber">
+            <summary>Field number for the "label" field.</summary>
+        </member>
+        <member name="P:Yarn.QuestGraphs.Edge.HasLabel">
+            <summary>Gets whether the "label" field is set</summary>
+        </member>
+        <member name="M:Yarn.QuestGraphs.Edge.ClearLabel">
+            <summary>Clears the value of the "label" field</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Note.IdFieldNumber">
+            <summary>Field number for the "id" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Note.PositionFieldNumber">
+            <summary>Field number for the "position" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.Note.ContentsFieldNumber">
+            <summary>Field number for the "contents" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.NamedCondition.IdFieldNumber">
+            <summary>Field number for the "id" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.NamedCondition.DisplayNameFieldNumber">
+            <summary>Field number for the "displayName" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.NamedCondition.DescriptionFieldNumber">
+            <summary>Field number for the "description" field.</summary>
+        </member>
+        <member name="P:Yarn.QuestGraphs.NamedCondition.HasDescription">
+            <summary>Gets whether the "description" field is set</summary>
+        </member>
+        <member name="M:Yarn.QuestGraphs.NamedCondition.ClearDescription">
+            <summary>Clears the value of the "description" field</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.NamedCondition.ConditionFieldNumber">
+            <summary>Field number for the "condition" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.QuestGraph.IdFieldNumber">
+            <summary>Field number for the "id" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.QuestGraph.TitleFieldNumber">
+            <summary>Field number for the "title" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.QuestGraph.VariablesFieldNumber">
+            <summary>Field number for the "variables" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.QuestGraph.QuestsFieldNumber">
+            <summary>Field number for the "quests" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.QuestGraph.NodesFieldNumber">
+            <summary>Field number for the "nodes" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.QuestGraph.EdgesFieldNumber">
+            <summary>Field number for the "edges" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.QuestGraph.NotesFieldNumber">
+            <summary>Field number for the "notes" field.</summary>
+        </member>
+        <member name="F:Yarn.QuestGraphs.QuestGraph.RulesFieldNumber">
+            <summary>Field number for the "rules" field.</summary>
+        </member>
+        <member name="P:Yarn.QuestGraphs.QuestGraph.ContainsCycle">
             <summary>
-            The type of a quest node.
+            Gets a value indicating that the quest graph contains at least one
+            cycle.
             </summary>
-        </member>
-        <member name="F:Yarn.QuestGraphNodeDescriptor.NodeType.Step">
-            <summary>
-            The node is a step in the quest graph.
-            </summary>
-        </member>
-        <member name="F:Yarn.QuestGraphNodeDescriptor.NodeType.Task">
-            <summary>
-            The node is a task in the quest graph.
-            </summary>
-        </member>
-        <member name="P:Yarn.QuestGraphNodeDescriptor.Name">
-            <summary>
-            The name of the node.
-            </summary>
-        </member>
-        <member name="P:Yarn.QuestGraphNodeDescriptor.Type">
-            <summary>
-            The type of the node.
-            </summary>
-        </member>
-        <member name="P:Yarn.QuestGraphNodeDescriptor.Quest">
-            <summary>
-            The name of the quest that contains the node.
-            </summary>
-        </member>
-        <member name="P:Yarn.QuestGraphNodeDescriptor.Position">
-            <summary>
-            The position of the node in the graph.
-            </summary>
-        </member>
-        <member name="P:Yarn.QuestGraphNodeDescriptor.FullName">
-            <summary>
-            The fully-qualified name of the node.
-            </summary>
-        </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.#ctor(System.String,Yarn.QuestGraphNodeDescriptor.NodeType,System.String)">
-            <summary>
-            Initialises a new instance of the <see cref="T:Yarn.QuestGraphNodeDescriptor"/> struct with a name, type and quest.
-            </summary>
-            <param name="name"><inheritdoc cref="P:Yarn.QuestGraphNodeDescriptor.Name" path="/summary"/></param>
-            <param name="type"><inheritdoc cref="P:Yarn.QuestGraphNodeDescriptor.Type" path="/summary"/></param>
-            <param name="quest"><inheritdoc cref="P:Yarn.QuestGraphNodeDescriptor.Quest" path="/summary"/></param>
-        </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.CanParse(System.String)">
-            <summary>
-            Gets a value indicating whether <paramref name="input"/> can be
-            parsed into a <see cref="T:Yarn.QuestGraphNodeDescriptor"/>.
-            </summary>
-            <param name="input">The text to test.</param>
-            <returns><see langword="true"/> if <paramref name="input"/> can be
-            parsed as a <see cref="T:Yarn.QuestGraphNodeDescriptor"/>; <see
-            langword="false"/> otherwise.</returns>
-        </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.#ctor(System.String)">
-            <summary>
-            Creates a new <see cref="T:Yarn.QuestGraphNodeDescriptor"/> from an input
-            string.
-            </summary>
-            <param name="input">The text to parse.</param>
-            <exception cref="T:System.ArgumentException">Thrown if <paramref
-            name="input"/> cannot be parsed as a quest graph node
-            descriptor.</exception>
-        </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.GetSmartVariableForState(Yarn.QuestNodeStateProperty)">
-            <summary>
-            Gets the name of the smart variable that can be used to fetch
-            current value of the specified property of a quest node.
-            </summary>
-            <param name="property">The property to get a smart variable name for.</param>
-            <returns>The name of the smart variable.</returns>
-        </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.Equals(Yarn.QuestGraphNodeDescriptor)">
-            <inheritdoc/>
-        </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.op_Implicit(System.String)~Yarn.QuestGraphNodeDescriptor">
-            <summary>
-            Implicitly converts a string to a descriptor.
-            </summary>
-            <param name="input">The string to convert.</param>
-        </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.op_Implicit(Yarn.QuestGraphNodeDescriptor)~System.String">
-            <summary>
-            Implicitly converts the descriptor to a string.
-            </summary>
-            <param name="input">The descriptor to convert.</param>
-        </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.ToString">
-            <inheritdoc/>
-        </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.GetHashCode">
-            <inheritdoc/>
-        </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.Equals(System.Object)">
-            <inheritdoc/>
-        </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.op_Equality(Yarn.QuestGraphNodeDescriptor,Yarn.QuestGraphNodeDescriptor)">
-            <inheritdoc/>
-        </member>
-        <member name="M:Yarn.QuestGraphNodeDescriptor.op_Inequality(Yarn.QuestGraphNodeDescriptor,Yarn.QuestGraphNodeDescriptor)">
-            <inheritdoc/>
         </member>
         <member name="T:Yarn.Saliency.BestLeastRecentlyViewedSaliencyStrategy">
             <summary>
