@@ -97,7 +97,7 @@ namespace Yarn.Unity
         /// LineCancellationToken)" path="/param"/>
         /// <seealso cref="DialoguePresenterBase.RunLineAsync(LocalizedLine,
         /// LineCancellationToken)"/>
-        public override async YarnTask RunLineAsync(DialogueRunner dialogueRunner, LocalizedLine dialogueLine, LineCancellationToken lineCancellationToken)
+        public override async YarnTask RunLineAsync(LocalizedLine dialogueLine, DialogueRunner? dialogueRunner, LineCancellationToken lineCancellationToken)
         {
             // Get the localized voice over audio clip
             AudioClip? voiceOverClip = null;
@@ -219,7 +219,7 @@ namespace Yarn.Unity
         /// <remarks>
         /// Stops any audio if there is still any playing.
         /// </remarks>
-        public override YarnTask OnDialogueCompleteAsync()
+        public override YarnTask OnDialogueCompleteAsync(DialogueRunner? dialogueRunner)
         {
             // just in case we are still playing audio we want it to stop
             audioSource.Stop();
@@ -228,12 +228,12 @@ namespace Yarn.Unity
         }
 
         /// <inheritdoc/>
-        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueRunner dialogueRunner, DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, DialogueRunner? dialogueRunner, CancellationToken cancellationToken)
         {
             return DialogueRunner.NoOptionSelected;
         }
         /// <inheritdoc/>
-        public override YarnTask OnDialogueStartedAsync()
+        public override YarnTask OnDialogueStartedAsync(DialogueRunner? dialogueRunner)
         {
             return YarnTask.CompletedTask;
         }

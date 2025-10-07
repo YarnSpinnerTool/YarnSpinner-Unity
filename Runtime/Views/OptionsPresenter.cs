@@ -83,7 +83,7 @@ namespace Yarn.Unity
         /// when dialogue is complete.
         /// </summary>
         /// <returns>A completed task.</returns>
-        public override YarnTask OnDialogueCompleteAsync()
+        public override YarnTask OnDialogueCompleteAsync(DialogueRunner? dialogueRunner)
         {
             if (canvasGroup != null)
             {
@@ -122,7 +122,7 @@ namespace Yarn.Unity
         /// when dialogue begins.
         /// </summary>
         /// <returns>A completed task.</returns>
-        public override YarnTask OnDialogueStartedAsync()
+        public override YarnTask OnDialogueStartedAsync(DialogueRunner? dialogueRunner)
         {
             if (canvasGroup != null)
             {
@@ -145,7 +145,7 @@ namespace Yarn.Unity
         /// <inheritdoc cref="DialoguePresenterBase.RunLineAsync"
         /// path="/param"/>
         /// <returns>A completed task.</returns>
-        public override YarnTask RunLineAsync(DialogueRunner dialogueRunner, LocalizedLine line, LineCancellationToken token)
+        public override YarnTask RunLineAsync(LocalizedLine line, DialogueRunner? dialogueRunner, LineCancellationToken token)
         {
             if (showsLastLine)
             {
@@ -162,7 +162,7 @@ namespace Yarn.Unity
         /// path="/param"/>
         /// <inheritdoc cref="DialoguePresenterBase.RunOptionsAsync"
         /// path="/returns"/>
-        public override async YarnTask<DialogueOption?> RunOptionsAsync(DialogueRunner dialogueRunner, DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override async YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, DialogueRunner? dialogueRunner, CancellationToken cancellationToken)
         {
             // If we don't already have enough option views, create more
             while (dialogueOptions.Length > optionViews.Count)

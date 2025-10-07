@@ -10,7 +10,6 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UIElements;
 using Yarn.Unity.Attributes;
-using Yarn.Unity.Legacy;
 
 #nullable enable
 
@@ -544,7 +543,7 @@ namespace Yarn.Unity
                 {
                     try
                     {
-                        await view.OnDialogueCompleteAsync();
+                        await view.OnDialogueCompleteAsync(this);
                     }
                     catch (System.Exception e)
                     {
@@ -710,16 +709,6 @@ namespace Yarn.Unity
                     continue;
                 }
 
-                // Legacy support: if this view is an v2-style DialogueViewBase,
-                // then set its requestInterrupt delegate to be one that stops
-                // the current line.
-#pragma warning disable CS0618 // 'construct' is obsolete
-                if (view is DialogueViewBase dialogueView)
-                {
-                    dialogueView.requestInterrupt = RequestNextLine;
-                }
-#pragma warning restore CS0618 // 'construct' is obsolete
-
                 // Tell all of our views to run this line, and give them a
                 // cancellation token they can use to interrupt the line if needed.
 
@@ -728,7 +717,7 @@ namespace Yarn.Unity
                     try
                     {
                         // Run the line and wait for it to finish
-                        await view.RunLineAsync(this, localisedLine, token);
+                        await view.RunLineAsync(localisedLine, this, token);
                     }
                     catch (System.OperationCanceledException)
                     {
@@ -815,7 +804,7 @@ namespace Yarn.Unity
                 }
                 try
                 {
-                    var result = await view.RunOptionsAsync(this, localisedOptions, optionCancellationSource.Token);
+                    var result = await view.RunOptionsAsync(localisedOptions, this, optionCancellationSource.Token);
                     if (result != null)
                     {
                         // We no longer need the other views, so tell them to stop
@@ -980,7 +969,7 @@ namespace Yarn.Unity
                     {
                         continue;
                     }
-                    tasks.Add(view.OnDialogueStartedAsync());
+                    tasks.Add(view.OnDialogueStartedAsync(this));
                 }
                 await YarnTask.WhenAll(tasks);
                 Dialogue.Continue();
