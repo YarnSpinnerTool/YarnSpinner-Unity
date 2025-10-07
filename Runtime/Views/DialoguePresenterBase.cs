@@ -79,7 +79,7 @@ namespace Yarn.Unity
         /// showing the line to the user.</returns>
         /// <seealso cref="RunOptionsAsync(DialogueOption[],
         /// CancellationToken)"/>
-        public abstract YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token);
+        public abstract YarnTask RunLineAsync(LocalizedLine line, DialogueRunner? dialogueRunner, LineCancellationToken token);
 
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace Yarn.Unity
         /// <returns>A task that indicates which option was selected, or that this dialogue presenter did not select an option.</returns>
         /// <seealso cref="RunLineAsync(LocalizedLine, LineCancellationToken)"/>
         /// <seealso cref="YarnAsync.NoOptionSelected"/> 
-        public abstract YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken);
+        public abstract YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, DialogueRunner? dialogueRunner, CancellationToken cancellationToken);
 
         /// <summary>Called by the <see cref="DialogueRunner"/> to signal that
         /// dialogue has started.</summary>
@@ -135,7 +135,7 @@ namespace Yarn.Unity
         /// nothing.</para>
         /// </remarks>
         /// <returns>A task that represents any work done by this dialogue presenter in order to get ready for dialogue to run.</returns>
-        public abstract YarnTask OnDialogueStartedAsync();
+        public abstract YarnTask OnDialogueStartedAsync(DialogueRunner? dialogueRunner);
 
         /// <summary>
         /// Called by the <see cref="DialogueRunner"/> to signal that the
@@ -153,7 +153,7 @@ namespace Yarn.Unity
         /// </remarks>
         /// <returns>A task that represents any work done by this dialogue presenter
         /// in order to clean up after running dialogue.</returns>
-        public abstract YarnTask OnDialogueCompleteAsync();
+        public abstract YarnTask OnDialogueCompleteAsync(DialogueRunner? dialogueRunner);
 
         /// <summary>
         /// The collection of action markup handlers that the dialogue presenter

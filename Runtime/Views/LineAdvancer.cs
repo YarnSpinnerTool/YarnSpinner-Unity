@@ -399,7 +399,7 @@ namespace Yarn.Unity
         /// handlers for advancing the line.
         /// </summary>
         /// <returns>A completed task.</returns>
-        public override YarnTask OnDialogueStartedAsync()
+        public override YarnTask OnDialogueStartedAsync(DialogueRunner? dialogueRunner)
         {
 #if USE_INPUTSYSTEM
             if (UsedInputMode == InputMode.InputActions)
@@ -421,7 +421,7 @@ namespace Yarn.Unity
         /// action handlers.
         /// </summary>
         /// <returns>A completed task.</returns>
-        public override YarnTask OnDialogueCompleteAsync()
+        public override YarnTask OnDialogueCompleteAsync(DialogueRunner? dialogueRunner)
         {
 #if USE_INPUTSYSTEM
             // If we're using the input system, remove the callbacks.
@@ -442,7 +442,7 @@ namespace Yarn.Unity
         /// </summary>
         /// <inheritdoc cref="LinePresenter.RunLineAsync" path="/param"/>
         /// <returns>A completed task.</returns>
-        public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
+        public override YarnTask RunLineAsync(LocalizedLine line, DialogueRunner? dialogueRunner, LineCancellationToken token)
         {
             // A new line has come in, so reset the number of times we've seen a
             // request to skip.
@@ -467,7 +467,7 @@ namespace Yarn.Unity
         /// <inheritdoc cref="LinePresenter.RunOptionsAsync" path="/param"/>
         /// <returns>A completed task indicating that no option was selected by
         /// this view.</returns>
-        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, DialogueRunner? dialogueRunner, CancellationToken cancellationToken)
         {
             // This line view doesn't take any actions when options are
             // presented.
