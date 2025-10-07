@@ -187,6 +187,29 @@ namespace Yarn.Unity.Attributes
     }
 
     /// <summary>
+    /// Overrides the displayed label of the property in the Unity Inspector by
+    /// getting a label from a named method.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+    public class LabelFromAttribute : YarnEditorAttribute
+    {
+        /// <summary>
+        /// The method to invoke that will return the label to display. The
+        /// method must be an instance method, take no parameters, and return a
+        /// <see cref="string"/>.
+        /// </summary>
+        public string SourceMethod { get; }
+
+        /// <inheritdoc cref="LabelAttribute" path="/summary"/>
+        /// <param name="methodName"><inheritdoc cref="SourceMethod"
+        /// path="/summary/node()"/></param>
+        public LabelFromAttribute(string methodName)
+        {
+            this.SourceMethod = methodName;
+        }
+    }
+
+    /// <summary>
     /// Shows an error message box if this property is null.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]

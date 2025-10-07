@@ -103,11 +103,40 @@ namespace Yarn.Unity.ActionAnalyser
         AsyncCoroutine,
     }
 
+    static class ITypeSymbolExtension
+    {
+        public static string? GetYarnTypeString(this ITypeSymbol typeSymbol)
+        {
+            return typeSymbol.SpecialType switch
+            {
+                SpecialType.System_Boolean => "bool",
+                SpecialType.System_SByte => "number",
+                SpecialType.System_Byte => "number",
+                SpecialType.System_Int16 => "number",
+                SpecialType.System_UInt16 => "number",
+                SpecialType.System_Int32 => "number",
+                SpecialType.System_UInt32 => "number",
+                SpecialType.System_Int64 => "number",
+                SpecialType.System_UInt64 => "number",
+                SpecialType.System_Decimal => "number",
+                SpecialType.System_Single => "number",
+                SpecialType.System_Double => "number",
+                SpecialType.System_String => "string",
+                _ => null
+            };
+        }
+    }
+
     public struct Parameter
     {
         public bool IsOptional;
         public string Name;
         public ITypeSymbol Type;
+        public string? Description;
+        public string? DefaultValueString;
+        public bool IsParamsArray;
+
+        public readonly string? YarnTypeString => Type.GetYarnTypeString();
     }
 
     public class Action
@@ -128,6 +157,8 @@ namespace Yarn.Unity.ActionAnalyser
         /// The method symbol for this action.
         /// </summary>
         public IMethodSymbol MethodSymbol { get; internal set; }
+
+        public string? Description { get; internal set; }
 
         /// <summary>
         /// The declaration of this action's method, if available.
@@ -190,6 +221,69 @@ namespace Yarn.Unity.ActionAnalyser
         /// The list of parameters that this action takes.
         /// </summary>
         public List<Parameter> Parameters = new List<Parameter>();
+
+        public string? YarnReturnTypeString => this.MethodSymbol.ReturnType.GetYarnTypeString();
+
+        public string ToJSON()
+        {
+            var result = new Dictionary<string, object?>();
+
+            result["YarnName"] = this.Name;
+            result["DefinitionName"] = this.MethodName;
+            result["FileName"] = this.SourceFileName;
+            if (!string.IsNullOrEmpty(this.Description))
+            {
+                result["Documentation"] = this.Description;
+            }
+            result["Language"] = "csharp";
+
+            if (this.Declaration != null)
+            {
+                var location = this.Declaration.GetLocation().GetLineSpan();
+
+                var startPosition = new Dictionary<string, int>()
+                {
+                    {"line", location.StartLinePosition.Line},
+                    {"character", location.StartLinePosition.Character},
+                };
+                var endPosition = new Dictionary<string, int>()
+                {
+                    {"line", location.EndLinePosition.Line},
+                    {"character", location.EndLinePosition.Character},
+                };
+                result["Location"] = new Dictionary<string, Dictionary<string, int>>()
+                {
+                    {"start", startPosition},
+                    {"end", endPosition},
+                };
+            }
+
+            result["Parameters"] = new List<Dictionary<string, object?>>(this.Parameters.Select(p =>
+            {
+                var paramObject = new Dictionary<string, object?>();
+
+                paramObject["Name"] = p.Name;
+                if (!string.IsNullOrEmpty(p.Description))
+                {
+                    paramObject["Documentation"] = p.Description;
+                }
+                if (!string.IsNullOrEmpty(p.DefaultValueString))
+                {
+                    paramObject["DefaultValue"] = p.DefaultValueString;
+                }
+                paramObject["IsParamsArray"] = p.IsParamsArray;
+                paramObject["Type"] = p.YarnTypeString;
+
+                return paramObject;
+            }).ToArray());
+
+            if (this.Type == ActionType.Function)
+            {
+                result["ReturnType"] = this.YarnReturnTypeString;
+            }
+
+            return Yarn.Unity.Editor.Json.Serialize(result);
+        }
 
         public List<Microsoft.CodeAnalysis.Diagnostic> Validate(Compilation compilation)
         {
@@ -439,7 +533,7 @@ namespace Yarn.Unity.ActionAnalyser
             }
         }
 
-        public SyntaxNode GetRegistrationSyntax(string dialogueRunnerVariableName = "dialogueRunner")
+        public StatementSyntax GetRegistrationSyntax(string dialogueRunnerVariableName = "dialogueRunner")
         {
             if (MethodSymbol == null)
             {
@@ -648,7 +742,7 @@ namespace Yarn.Unity.ActionAnalyser
             }
         }
 
-        public SyntaxNode GetFunctionDeclarationSyntax(string dialogueRunnerVariableName = "dialogueRunner")
+        public StatementSyntax GetFunctionDeclarationSyntax(string dialogueRunnerVariableName = "dialogueRunner")
         {
             var typeOfMethodReturn = SyntaxFactory.TypeOfExpression(SyntaxFactory.ParseTypeName(MethodSymbol.ReturnType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
             var typeOfMethodParameters = MethodSymbol.Parameters.Select(p =>

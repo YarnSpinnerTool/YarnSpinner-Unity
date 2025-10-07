@@ -310,9 +310,11 @@ namespace Yarn.Unity.Editor
             var unityControls = new VisualElement();
 
             var useAddressableAssetsField = new PropertyField(useAddressableAssetsProperty);
+            useAddressableAssetsField.BindProperty(useAddressableAssetsProperty);
 
 #if USE_UNITY_LOCALIZATION
             var useUnityLocalisationSystemField = new PropertyField(useUnityLocalisationSystemProperty);
+            useUnityLocalisationSystemField.BindProperty(useUnityLocalisationSystemProperty);
 
             // References to string table collections are stored as GUIDs,
             // because ScriptedImporters can't refer to ScriptableObjects
@@ -704,7 +706,6 @@ namespace Yarn.Unity.Editor
             else
             {
                 e.style.display = DisplayStyle.None;
-
             }
         }
 

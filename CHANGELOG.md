@@ -9,11 +9,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - `DialogueRunner` will now log warnings if a dialogue presenter throws an `OperationCanceledException` - these usually indicate that a task they were themselves waiting on was cancelled, and that the presenter didn't clean up.
+- The generated `.ysls.json` file now contains more complete command and function information.
+- Added a new attribute for Yarn Spinner editors: `LabelFrom` allows specifying a dynamic label for a property by invoking a method.
 
 ### Changed
 
 - Fixed a compiler error that occurred when the Unity Input System was enabled, but not actually installed.
 - Fixed an error where calls to `DialogueRunner.AddFunction()` in methods that are in nested classes would cause the function to be registered multiple times, leading to compiler failures.
+- Fixed a bug where versions of Unity prior to Unity 2022.3.33 had compilation errors around packages.
+- Fixed a bug where some inspector property fields weren't bound preventing configuring Unity localisation or addressables in Unity 2022.3.
+- Added more specificity to the `Analyser` class's use of the C# code generation API.
 
 ### Removed
 

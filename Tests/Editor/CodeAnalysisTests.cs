@@ -111,6 +111,47 @@ namespace Yarn.Unity.Tests
         }
 
         [Test]
+        public void CodeAnalysis_GeneratesDescriptionDataForActions()
+        {
+            try
+            {
+                SetUpTestActionCode();
+
+                var analysis = new Yarn.Unity.ActionAnalyser.Analyser(TestScriptFolderInProject);
+                var actions = analysis.GetActions();
+
+                var documentedAttributeAction = actions.Single(a => a.Name == "instance_demo_action_with_optional_params");
+
+                documentedAttributeAction.Description.Should().BeEqualTo("An instance action with two parameters, one of which is optional.");
+
+                documentedAttributeAction.Parameters[0].Name.Should().BeEqualTo("param");
+                documentedAttributeAction.Parameters[0].Description.Should().BeEqualTo("The first, non-optional parameter.");
+                documentedAttributeAction.Parameters[0].IsOptional.Should().BeFalse();
+                documentedAttributeAction.Parameters[0].DefaultValueString.Should().BeNull();
+
+                documentedAttributeAction.Parameters[1].Name.Should().BeEqualTo("param2");
+                documentedAttributeAction.Parameters[1].Description.Should().BeEqualTo("The second, optional parameter.");
+                documentedAttributeAction.Parameters[1].IsOptional.Should().BeTrue();
+                documentedAttributeAction.Parameters[1].DefaultValueString.Should().BeEqualTo("0");
+
+                var documentedDirectAction = actions.Single(a => a.Name == "direct_register_method_fixed_params");
+                documentedDirectAction.Description.Should().BeEqualTo("A directly-registered method.");
+                documentedDirectAction.Parameters[0].Name.Should().BeEqualTo("a");
+                documentedDirectAction.Parameters[0].Description.Should().BeEqualTo("The first parameter.");
+
+                documentedDirectAction.Parameters[1].Name.Should().BeEqualTo("b");
+                documentedDirectAction.Parameters[1].Description.Should().BeEqualTo("The second parameter.");
+
+                var text = documentedAttributeAction.ToJSON();
+                Debug.Log(text);
+            }
+            finally
+            {
+                TearDownTestActionCode();
+            }
+        }
+
+        [Test]
         public void CodeAnalysis_FindsExpectedActions()
         {
             try

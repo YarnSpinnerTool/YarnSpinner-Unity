@@ -455,7 +455,7 @@ namespace Yarn.Unity.Editor
             return (allExistingTags, projectImplicitTags);
         }
 
-        internal static void AddLineTagsToFilesInYarnProject(YarnProjectImporter importer)
+        public static void AddLineTagsToFilesInYarnProject(YarnProjectImporter importer)
         {
             var (AllExistingTags, ProjectImplicitTags) = YarnProjectUtility.ExtantLineTags(importer);
 
