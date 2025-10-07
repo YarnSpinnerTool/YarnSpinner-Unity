@@ -383,7 +383,7 @@ namespace Yarn.Unity.Legacy
             // 2. The line is cancelled.
             while (phaseComplete == false
                    && token.IsNextLineRequested == false
-                   && Application.exitCancellationToken.IsCancellationRequested == false)
+                   && GetExitCancellationToken().IsCancellationRequested == false)
             {
                 await YarnTask.Yield();
             }
@@ -396,7 +396,7 @@ namespace Yarn.Unity.Legacy
                 phaseComplete = false;
                 this.InterruptLine(line, PhaseComplete);
                 while (phaseComplete == false
-                  && Application.exitCancellationToken.IsCancellationRequested == false)
+                  && GetExitCancellationToken().IsCancellationRequested == false)
                 {
                     await YarnTask.Yield();
                 }
@@ -408,7 +408,7 @@ namespace Yarn.Unity.Legacy
             this.DismissLine(PhaseComplete);
 
             while (phaseComplete == false
-                  && Application.exitCancellationToken.IsCancellationRequested == false)
+                  && GetExitCancellationToken().IsCancellationRequested == false)
             {
                 await YarnTask.Yield();
             }
@@ -428,12 +428,12 @@ namespace Yarn.Unity.Legacy
                 selectedOptionID = selectedID;
             });
 
-            while (selectedOptionID == -1 && cancellationToken.IsCancellationRequested == false && Application.exitCancellationToken.IsCancellationRequested == false)
+            while (selectedOptionID == -1 && cancellationToken.IsCancellationRequested == false && GetExitCancellationToken().IsCancellationRequested == false)
             {
                 await YarnTask.Yield();
             }
 
-            if (cancellationToken.IsCancellationRequested || Application.exitCancellationToken.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested || GetExitCancellationToken().IsCancellationRequested)
             {
                 // We were cancelled or are exiting the game. Return null.
                 return null;
@@ -452,6 +452,14 @@ namespace Yarn.Unity.Legacy
             // If we got here, we weren't cancelled, but we also didn't select
             // an option that was valid. Throw an error.
             throw new InvalidOperationException($"Option view selected an invalid option ID ({selectedOptionID})");
+        }
+        
+        private static CancellationToken GetExitCancellationToken()
+        {
+            #if UNITY_2022_2_OR_NEWER
+            return Application.exitCancellationToken;
+            #endif
+            return ApplicationExitCompat.ExitCancellationToken;
         }
     }
 }
