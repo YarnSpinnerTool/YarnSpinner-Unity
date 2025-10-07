@@ -3,6 +3,7 @@
 namespace Yarn.Unity
 {
     using System.Threading;
+    using System.Collections.Generic;
 
     /// <summary>
     /// An object that can handle delivery of a line's text over time.
@@ -29,7 +30,21 @@ namespace Yarn.Unity
         /// finished.</returns>
         public YarnTask RunTypewriter(Markup.MarkupParseResult line, CancellationToken cancellationToken);
 
+        /// <summary>
+        /// Called by the presenter before content has been shown.
+        /// This gives the typewriter it's chance to do any setup before the content is visibly shown.
+        /// </summary>
+        /// <param name="line">The content of the line or option that is about to be shown</param>
         public void PrepareForContent(Markup.MarkupParseResult line);
+
+        /// <summary>
+        /// Called right before the content will be visibly hidden
+        /// </summary>
         public void ContentWillDismiss();
+
+        /// <summary>
+        /// The list of action markup handlers that this typewriter should call out to while typewriting.
+        /// </summary>
+        public List<IActionMarkupHandler> ActionMarkupHandlers { get; }
     }
 }

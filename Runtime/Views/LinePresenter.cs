@@ -5,7 +5,6 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
-using UnityEngine.UI;
 using Yarn.Markup;
 using Yarn.Unity.Attributes;
 
@@ -190,17 +189,69 @@ namespace Yarn.Unity
         [Min(0)]
         public int wordsPerSecond = 10;
 
+        [Group("Typewriter")]
+        [ShowIf(nameof(typewriterStyle), TypewriterType.Custom)]
+        public UnityEngine.Object? CustomTypewriter;
+        private IAsyncTypewriter? typewriter;
+
         /// <summary>
         /// A list of <see cref="ActionMarkupHandler"/> objects that will be
         /// used to handle markers in the line.
         /// </summary>
         [Group("Typewriter")]
-        [HideIf(nameof(typewriterStyle), TypewriterType.Instant)]
         [Label("Event Handler")]
         [UnityEngine.Serialization.FormerlySerializedAs("actionMarkupHandlers")]
         [SerializeField] List<ActionMarkupHandler> eventHandlers = new List<ActionMarkupHandler>();
+        private List<IActionMarkupHandler> ActionMarkupHandlers
+        {
+            get
+            {
+                var pauser = new PauseEventProcessor();
+                List<IActionMarkupHandler> ActionMarkupHandlers = new()
+                {
+                    pauser,
+                };
+                ActionMarkupHandlers.AddRange(eventHandlers);
+                return ActionMarkupHandlers;
+            }
+        }
 
-        [HideInInspector] public IAsyncTypewriter? typewriter;
+        void OnValidate()
+        {
+            if (this.CustomTypewriter != null)
+            {
+                if (this.typewriterStyle != TypewriterType.Custom)
+                {
+                    return;
+                }
+                
+                // if the object is an iasynctypewriter no need to go any further
+                if (this.CustomTypewriter is IAsyncTypewriter)
+                {
+                    this.typewriter = this.CustomTypewriter as IAsyncTypewriter;
+                    return;
+                }
+
+                // let's find the typewriter on it's components then
+                if (this.CustomTypewriter is GameObject gameObject)
+                {
+                    foreach (var component in gameObject.GetComponents<Component>())
+                    {
+                        if (component is IAsyncTypewriter)
+                        {
+                            // I set this directly so that it updates the UI in the inspector
+                            // otherwise it appears as whatever the obejct itselt is (often a prefab) instead of the expected script icon
+                            // probably isn't necessary but whatever, it's not a lot of work
+                            this.CustomTypewriter = component;
+                            this.typewriter = component as IAsyncTypewriter;
+                            return;
+                        }
+                    }
+                }
+            }
+
+            this.CustomTypewriter = null;
+        }
 
         /// <inheritdoc/>
         public override YarnTask OnDialogueCompleteAsync()
@@ -227,12 +278,6 @@ namespace Yarn.Unity
         /// </summary>
         private void Awake()
         {
-            // need to add a pause handler also
-            // and add it to the front of the list
-            // that way it always happens first
-            var pauser = new PauseEventProcessor();
-            ActionMarkupHandlers.Insert(0, pauser);
-
             if (characterNameContainer == null && characterNameText != null)
             {
                 characterNameContainer = characterNameText.gameObject;
@@ -241,15 +286,12 @@ namespace Yarn.Unity
 
         private void Start()
         {
-            // we add all the monobehaviour handlers into the shared list
-            ActionMarkupHandlers.AddRange(eventHandlers);
-
             switch (typewriterStyle)
             {
                 case TypewriterType.Instant:
                     typewriter = new InstantTypewriter()
                     {
-                        ActionMarkupHandlers = this.ActionMarkupHandlers,
+                        ActionMarkupHandlers = ActionMarkupHandlers,
                         Text = this.lineText,
                     };
                     break;
@@ -257,7 +299,7 @@ namespace Yarn.Unity
                 case TypewriterType.ByLetter:
                     typewriter = new LetterTypewriter()
                     {
-                        ActionMarkupHandlers = this.ActionMarkupHandlers,
+                        ActionMarkupHandlers = ActionMarkupHandlers,
                         Text = this.lineText,
                         CharactersPerSecond = this.lettersPerSecond,
                     };
@@ -266,10 +308,15 @@ namespace Yarn.Unity
                 case TypewriterType.ByWord:
                     typewriter = new WordTypewriter()
                     {
-                        ActionMarkupHandlers = this.ActionMarkupHandlers,
+                        ActionMarkupHandlers = ActionMarkupHandlers,
                         Text = this.lineText,
                         WordsPerSecond = this.wordsPerSecond,
                     };
+                    break;
+
+                case TypewriterType.Custom:
+                    OnValidate();
+                    typewriter?.ActionMarkupHandlers.AddRange(ActionMarkupHandlers);
                     break;
             }
         }

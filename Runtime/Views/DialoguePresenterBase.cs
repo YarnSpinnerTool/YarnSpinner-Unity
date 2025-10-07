@@ -154,12 +154,6 @@ namespace Yarn.Unity
         /// <returns>A task that represents any work done by this dialogue presenter
         /// in order to clean up after running dialogue.</returns>
         public abstract YarnTask OnDialogueCompleteAsync();
-
-        /// <summary>
-        /// The collection of action markup handlers that the dialogue presenter
-        /// uses when presenting content.
-        /// </summary>
-        public virtual List<IActionMarkupHandler> ActionMarkupHandlers { get; } = new();
     }
 }
 

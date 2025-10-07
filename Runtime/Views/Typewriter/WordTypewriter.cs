@@ -25,7 +25,7 @@ namespace Yarn.Unity
         /// should be invoked as needed during the typewriter's delivery in <see
         /// cref="RunTypewriter"/>, depending upon the contents of a line.
         /// </summary>
-        public IEnumerable<IActionMarkupHandler> ActionMarkupHandlers { get; set; } = Array.Empty<IActionMarkupHandler>();
+        public List<IActionMarkupHandler> ActionMarkupHandlers { get; set; } = new();
 
         /// <summary>
         /// The number of words per second to deliver.

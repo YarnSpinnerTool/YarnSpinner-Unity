@@ -381,19 +381,6 @@ namespace Yarn.Unity
         }
         private LineStatus status = LineStatus.Unknown;
 
-        void Start()
-        {
-            // If we have a dialogue presenter configured, register ourselves as
-            // a temporal processor, so that we get notified when the line is
-            // fully visible. This is so that when a line is fully visible, the
-            // 'hurry up' action will instead trigger a 'next line' action,
-            // (because there's nothing left to hurry up.)
-            if (presenter != null)
-            {
-                presenter.ActionMarkupHandlers.Add(this);
-            }
-        }
-
         /// <summary>
         /// Called by a dialogue runner when dialogue starts to add input action
         /// handlers for advancing the line.
