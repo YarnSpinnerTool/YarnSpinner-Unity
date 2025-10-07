@@ -13,8 +13,6 @@ namespace Yarn.Unity.Tests
     using UnityEngine.TestTools;
 
 #nullable enable
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-#pragma warning disable CS0612 // Type or member is obsolete
 
     public class LineViewTests : IPrebuildSetup, IPostBuildCleanup
     {
@@ -33,7 +31,7 @@ namespace Yarn.Unity.Tests
         [AllowNull]
         DialogueRunner dialogueRunner;
         [AllowNull]
-        LinePresenter lineView;
+        LinePresenter linePresenter;
         [AllowNull]
         OptionsPresenter optionsView;
 
@@ -55,15 +53,14 @@ namespace Yarn.Unity.Tests
             dialogueRunner = UnityEngine.Object.FindAnyObjectByType<DialogueRunner>();
             dialogueRunner.Should().NotBeNull();
 
-            lineView = dialogueRunner.GetComponentInChildren<LinePresenter>();
+            linePresenter = dialogueRunner.GetComponentInChildren<LinePresenter>();
             optionsView = dialogueRunner.GetComponentInChildren<OptionsPresenter>();
 
-            lineView.Should().NotBeNull();
+            linePresenter.Should().NotBeNull();
             optionsView.Should().NotBeNull();
 
-            dialogueRunner.DialoguePresenters.Should().Contain(lineView);
+            dialogueRunner.DialoguePresenters.Should().Contain(linePresenter);
             dialogueRunner.DialoguePresenters.Should().Contain(optionsView);
-            dialogueRunner.YarnProject!.Should().NotBeNull();
 
             // Tests may need to control which node runs, so automatically
             // starting a fixed node is not a great idea. Ensure that we're not
@@ -83,18 +80,18 @@ namespace Yarn.Unity.Tests
                 new[] { "#metadata" }
             );
 
-            lineView.canvasGroup!.alpha.Should().BeEqualTo(0, "The line view is not yet visible");
+            linePresenter.canvasGroup!.alpha.Should().BeEqualTo(0, "The line view is not yet visible");
 
-            var runTask = lineView.RunLineAsync(line, dialogueRunner, default);
+            var runTask = linePresenter.RunLineAsync(line, dialogueRunner, default);
 
             await YarnTask.Delay(TimeSpan.FromSeconds(0.5f));
 
             runTask.IsCompleted().Should().BeFalse("we're still running the line");
 
-            lineView.lineText!.text.Should().BeEqualTo("Well, this is great.");
-            lineView.characterNameText!.text.Should().BeEqualTo("Mae");
+            linePresenter.lineText!.text.Should().BeEqualTo("Well, this is great.");
+            linePresenter.characterNameText!.text.Should().BeEqualTo("Mae");
 
-            lineView.canvasGroup.alpha.Should().BeEqualTo(1, "the line is now visible");
+            linePresenter.canvasGroup.alpha.Should().BeEqualTo(1, "the line is now visible");
         });
 
         private LocalizedLine MakeLocalizedLine(string lineText, string[]? substitutions = null, string[]? metadata = null, string? lineID = null)
@@ -122,95 +119,91 @@ namespace Yarn.Unity.Tests
             };
         }
 
-        // [UnityTest]
+        [UnityTest]
         // [Timeout(200)] // should complete basically immediately
-        // public IEnumerator LineView_WhenManuallyAdvancingLine_CompletesLineTask() => YarnTask.ToCoroutine(async () =>
-        // {
-        //     LocalizedLine line = MakeLocalizedLine("Line 1");
+        public IEnumerator LineView_WhenManuallyAdvancingLine_CompletesLineTask() => YarnTask.ToCoroutine(async () =>
+        {
+            LocalizedLine line = MakeLocalizedLine("Line 1");
 
-        //     // Configure the line view to display the entire line immediately
-        //     lineView.useFadeEffect = false;
-        //     lineView.useTypewriterEffect = false;
+            // Configure the line view to display the entire line immediately
+            linePresenter.useFadeEffect = false;
+            linePresenter.typewriterStyle = LinePresenter.TypewriterType.Instant;
 
-        //     var cancellationSource = new CancellationTokenSource();
+            var cancellationSource = new CancellationTokenSource();
+            var lineCancellationToken = new LineCancellationToken
+            {
+                NextLineToken = cancellationSource.Token
+            };
 
-        //     // Set the line view's 'interrupt handler' to be one that soft-cancels the line
-        //     lineView.requestInterrupt = () => cancellationSource.Cancel();
+            YarnTask runTask = linePresenter.RunLineAsync(line, null, lineCancellationToken);
 
-        //     var lineCancellationToken = new LineCancellationToken
-        //     {
-        //         NextLineToken = cancellationSource.Token
-        //     };
+            runTask.IsCompleted().Should().BeFalse();
+            linePresenter.lineText!.text.Should().BeEqualTo("Line 1");
 
-        //     YarnTask runTask = lineView.RunLineAsync(dialogueRunner, line, lineCancellationToken);
+            cancellationSource.Cancel();
 
-        //     runTask.IsCompleted().Should().BeFalse();
-        //     lineView.lineText!.text.Should().BeEqualTo("Line 1");
+            await runTask;
 
-        //     lineView.UserRequestedViewAdvancement();
+            linePresenter.canvasGroup!.alpha.Should().BeEqualTo(0, "The line view should now be dismissed");
+        });
 
-        //     await runTask;
+        [UnityTest]
+        public IEnumerator LineView_TextEffects_RenderTextGradually() => YarnTask.ToCoroutine(async () =>
+        {
+            LocalizedLine line = MakeLocalizedLine("Line 1");
 
-        //     lineView.canvasGroup!.alpha.Should().BeEqualTo(0, "The line view should now be dismissed");
-        // });
+            // Configure the line view to use all of the effects
+            linePresenter.useFadeEffect = true;
+            linePresenter.typewriterStyle = LinePresenter.TypewriterType.ByLetter;
+            linePresenter.fadeDownDuration = 1.0f;
+            linePresenter.fadeUpDuration = 1f;
 
-        // [UnityTest]
-        // public IEnumerator LineView_TextEffects_RenderTextGradually() => YarnTask.ToCoroutine(async () =>
-        // {
-        //     LocalizedLine line = MakeLocalizedLine("Line 1");
+            var cancellationSource = new CancellationTokenSource();
+            var lineCancellationToken = new LineCancellationToken
+            {
+                NextLineToken = cancellationSource.Token
+            };
 
-        //     // Configure the line view to use all of the effects
-        //     lineView.useFadeEffect = true;
-        //     lineView.useTypewriterEffect = true;
-        //     lineView.fadeOutTime = 1.0f;
+            linePresenter.lineText.Should().NotBeNull();
 
-        //     var cancellationSource = new CancellationTokenSource();
+            var continueButton = linePresenter.GetComponentInChildren<LinePresenterButtonHandler>(true);
+            continueButton.Should().NotBeNull();
 
-        //     // Set the line view's 'interrupt handler' to be one that soft-cancels the line
-        //     lineView.requestInterrupt = () => cancellationSource.Cancel();
+            YarnTask runTask = linePresenter.RunLineAsync(line, null, lineCancellationToken);
 
-        //     var lineCancellationToken = new LineCancellationToken
-        //     {
-        //         NextLineToken = cancellationSource.Token
-        //     };
+            int characterCount = line.Text.Text.Length;
+            characterCount.Should().BeGreaterThan(0);
+            linePresenter.lineText!.maxVisibleCharacters.Should().BeEqualTo(0, "The typewriter effect has not yet begun");
 
-        //     YarnTask runTask = lineView.RunLineAsync(dialogueRunner, line, lineCancellationToken);
+            linePresenter.canvasGroup!.alpha.Should().BeGreaterThan(0);
+            linePresenter.canvasGroup.alpha.Should().BeLessThan(1);
+            linePresenter.lineText.maxVisibleCharacters.Should().BeEqualTo(0, "The typewriter effect has not yet begun");
 
-        //     int characterCount = lineView.lineText!.textInfo.characterCount;
-        //     characterCount.Should().BeGreaterThan(0);
-        //     lineView.lineText.maxVisibleCharacters.Should().BeEqualTo(0, "The typewriter effect has not yet begun");
+            // Wait for the fade to finish
+            await YarnTask.Delay(TimeSpan.FromSeconds(linePresenter.fadeUpDuration));
 
-        //     await YarnTask.Delay(TimeSpan.FromSeconds(0.05f));
+            linePresenter.canvasGroup.alpha.Should().BeEqualTo(1);
 
-        //     lineView.canvasGroup!.alpha.Should().BeGreaterThan(0);
-        //     lineView.canvasGroup.alpha.Should().BeLessThan(1);
-        //     lineView.lineText.maxVisibleCharacters.Should().BeEqualTo(0, "The typewriter effect has not yet begun");
+            linePresenter.lineText.maxVisibleCharacters.Should().BeGreaterThanOrEqualTo(0, "the typewriter effect has begun");
+            linePresenter.lineText.maxVisibleCharacters.Should().BeLessThan(characterCount, "the entire line should not yet be visible");
 
-        //     // Wait for the fade to finish
-        //     await YarnTask.Delay(TimeSpan.FromSeconds(lineView.fadeInTime));
+            // Wait for the typewriter effect to complete
+            await YarnTask.Delay(TimeSpan.FromSeconds(2f));
 
-        //     lineView.canvasGroup.alpha.Should().BeEqualTo(1);
+            linePresenter.lineText.maxVisibleCharacters.Should().BeGreaterThanOrEqualTo(characterCount);
+            continueButton.gameObject.activeInHierarchy.Should().BeTrue();
 
-        //     lineView.lineText.maxVisibleCharacters.Should().BeGreaterThanOrEqualTo(0, "the typewriter effect has begun");
-        //     lineView.lineText.maxVisibleCharacters.Should().BeLessThan(characterCount, "the entire line should not yet be visible");
+            // Dismiss the line
+            cancellationSource.Cancel();
 
-        //     // Wait for the typewriter effect to complete
-        //     await YarnTask.Delay(TimeSpan.FromSeconds(2f));
+            runTask.IsCompleted().Should().BeFalse();
 
-        //     lineView.lineText.maxVisibleCharacters.Should().BeGreaterThanOrEqualTo(characterCount);
-        //     lineView.continueButton!.activeInHierarchy.Should().BeTrue();
+            // Wait for the fade out to complete
+            await YarnTask.Delay(TimeSpan.FromSeconds(linePresenter.fadeDownDuration));
+            await YarnTask.Delay(TimeSpan.FromSeconds(0.05));
 
-        //     // Dismiss the line
-        //     lineView.UserRequestedViewAdvancement();
-
-        //     runTask.IsCompleted().Should().BeFalse();
-
-        //     // Wait for the fade out to complete
-        //     await YarnTask.Delay(TimeSpan.FromSeconds(lineView.fadeOutTime));
-        //     await YarnTask.Delay(TimeSpan.FromSeconds(0.05));
-
-        //     runTask.IsCompleted().Should().BeTrue();
-        //     lineView.canvasGroup.alpha.Should().BeEqualTo(0);
-        // });
+            runTask.IsCompleted().Should().BeTrue();
+            linePresenter.canvasGroup.alpha.Should().BeEqualTo(0);
+        });
     }
 }

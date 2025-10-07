@@ -25,7 +25,7 @@ namespace Yarn.Unity
     [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-view/line-view")]
     public sealed class LinePresenter : DialoguePresenterBase
     {
-        enum TypewriterType
+        internal enum TypewriterType
         {
             Instant, ByLetter, ByWord, Custom,
         }
@@ -171,7 +171,7 @@ namespace Yarn.Unity
         // typewriter fields
 
         [Group("Typewriter")]
-        [SerializeField] private TypewriterType typewriterStyle = TypewriterType.ByLetter;
+        [SerializeField] internal TypewriterType typewriterStyle = TypewriterType.ByLetter;
 
         /// <summary>
         /// The number of characters per second that should appear during a
