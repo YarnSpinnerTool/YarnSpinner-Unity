@@ -216,7 +216,7 @@ namespace Yarn.Unity
         }
 
         /// <inheritdoc/>
-        public override YarnTask OnDialogueCompleteAsync()
+        public override YarnTask OnDialogueCompleteAsync(DialogueRunner? dialogueRunner)
         {
             if (canvasGroup != null)
             {
@@ -226,7 +226,7 @@ namespace Yarn.Unity
         }
 
         /// <inheritdoc/>
-        public override YarnTask OnDialogueStartedAsync()
+        public override YarnTask OnDialogueStartedAsync(DialogueRunner? dialogueRunner)
         {
             if (canvasGroup != null)
             {
@@ -325,7 +325,7 @@ namespace Yarn.Unity
         /// <summary>Presents a line using the configured text view.</summary>
         /// <inheritdoc cref="DialoguePresenterBase.RunLineAsync(LocalizedLine, LineCancellationToken)" path="/param"/>
         /// <inheritdoc cref="DialoguePresenterBase.RunLineAsync(LocalizedLine, LineCancellationToken)" path="/returns"/>
-        public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
+        public override async YarnTask RunLineAsync(LocalizedLine line, DialogueRunner? dialogueRunner, LineCancellationToken token)
         {
             if (lineText == null)
             {
@@ -422,7 +422,7 @@ namespace Yarn.Unity
         /// <remarks>
         /// This dialogue presenter does not handle any options.
         /// </remarks>
-        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, DialogueRunner? dialogueRunner, CancellationToken cancellationToken)
         {
             return DialogueRunner.NoOptionSelected;
         }
