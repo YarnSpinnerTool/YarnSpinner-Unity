@@ -6,7 +6,6 @@ using System.Threading;
 using UnityEngine;
 using Yarn.Markup;
 using Yarn.Unity.Attributes;
-using System.Collections.Generic;
 
 #if USE_TMP
 using TMPro;
@@ -380,6 +379,19 @@ namespace Yarn.Unity
             Unknown, Began, Waiting
         }
         private LineStatus status = LineStatus.Unknown;
+
+        private void Start()
+        {
+            // If we have a dialogue presenter configured, register ourselves as
+            // a temporal processor, so that we get notified when the line is
+            // fully visible. This is so that when a line is fully visible, the
+            // 'hurry up' action will instead trigger a 'next line' action,
+            // (because there's nothing left to hurry up.)
+            if (presenter != null)
+            {
+                presenter.Typewriter?.ActionMarkupHandlers.Add(this);
+            }
+        }
 
         /// <summary>
         /// Called by a dialogue runner when dialogue starts to add input action

@@ -192,7 +192,6 @@ namespace Yarn.Unity
         [Group("Typewriter")]
         [ShowIf(nameof(typewriterStyle), TypewriterType.Custom)]
         public UnityEngine.Object? CustomTypewriter;
-        private IAsyncTypewriter? typewriter;
 
         /// <summary>
         /// A list of <see cref="ActionMarkupHandler"/> objects that will be
@@ -214,43 +213,6 @@ namespace Yarn.Unity
                 ActionMarkupHandlers.AddRange(eventHandlers);
                 return ActionMarkupHandlers;
             }
-        }
-
-        void OnValidate()
-        {
-            if (this.CustomTypewriter != null)
-            {
-                if (this.typewriterStyle != TypewriterType.Custom)
-                {
-                    return;
-                }
-                
-                // if the object is an iasynctypewriter no need to go any further
-                if (this.CustomTypewriter is IAsyncTypewriter)
-                {
-                    this.typewriter = this.CustomTypewriter as IAsyncTypewriter;
-                    return;
-                }
-
-                // let's find the typewriter on it's components then
-                if (this.CustomTypewriter is GameObject gameObject)
-                {
-                    foreach (var component in gameObject.GetComponents<Component>())
-                    {
-                        if (component is IAsyncTypewriter)
-                        {
-                            // I set this directly so that it updates the UI in the inspector
-                            // otherwise it appears as whatever the obejct itselt is (often a prefab) instead of the expected script icon
-                            // probably isn't necessary but whatever, it's not a lot of work
-                            this.CustomTypewriter = component;
-                            this.typewriter = component as IAsyncTypewriter;
-                            return;
-                        }
-                    }
-                }
-            }
-
-            this.CustomTypewriter = null;
         }
 
         /// <inheritdoc/>
@@ -282,14 +244,11 @@ namespace Yarn.Unity
             {
                 characterNameContainer = characterNameText.gameObject;
             }
-        }
 
-        private void Start()
-        {
             switch (typewriterStyle)
             {
                 case TypewriterType.Instant:
-                    typewriter = new InstantTypewriter()
+                    Typewriter = new InstantTypewriter()
                     {
                         ActionMarkupHandlers = ActionMarkupHandlers,
                         Text = this.lineText,
@@ -297,7 +256,7 @@ namespace Yarn.Unity
                     break;
 
                 case TypewriterType.ByLetter:
-                    typewriter = new LetterTypewriter()
+                    Typewriter = new LetterTypewriter()
                     {
                         ActionMarkupHandlers = ActionMarkupHandlers,
                         Text = this.lineText,
@@ -306,7 +265,7 @@ namespace Yarn.Unity
                     break;
 
                 case TypewriterType.ByWord:
-                    typewriter = new WordTypewriter()
+                    Typewriter = new WordTypewriter()
                     {
                         ActionMarkupHandlers = ActionMarkupHandlers,
                         Text = this.lineText,
@@ -315,10 +274,52 @@ namespace Yarn.Unity
                     break;
 
                 case TypewriterType.Custom:
-                    OnValidate();
-                    typewriter?.ActionMarkupHandlers.AddRange(ActionMarkupHandlers);
+                    Typewriter = ValidateCustomTypewriter();
+                    Typewriter?.ActionMarkupHandlers.AddRange(ActionMarkupHandlers);
+                    if (Typewriter == null)
+                    {
+                        Debug.Log("shit");
+                    }
                     break;
             }
+        }
+
+        void OnValidate()
+        {
+            var tw = ValidateCustomTypewriter();
+            if (tw == null)
+            {
+                CustomTypewriter = null;
+            }
+            else
+            {
+                CustomTypewriter = tw as Component;
+            }
+        }
+
+        private IAsyncTypewriter? ValidateCustomTypewriter()
+        {
+            if (CustomTypewriter is GameObject gameObject)
+            {
+                foreach (var component in gameObject.GetComponents<Component>())
+                {
+                    if (component is IAsyncTypewriter)
+                    {
+                        CustomTypewriter = component;
+                        return component as IAsyncTypewriter;
+                    }
+                }
+            }
+
+            if (CustomTypewriter is Component)
+            {
+                if (CustomTypewriter is IAsyncTypewriter)
+                {
+                    return CustomTypewriter as IAsyncTypewriter;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>Presents a line using the configured text view.</summary>
@@ -365,13 +366,13 @@ namespace Yarn.Unity
                 }
             }
 
-            typewriter ??= new InstantTypewriter()
+            Typewriter ??= new InstantTypewriter()
             {
                 ActionMarkupHandlers = this.ActionMarkupHandlers,
                 Text = this.lineText,
             };
 
-            typewriter.PrepareForContent(text);
+            Typewriter.PrepareForContent(text);
 
             if (canvasGroup != null)
             {
@@ -387,7 +388,7 @@ namespace Yarn.Unity
                 }
             }
 
-            await typewriter.RunTypewriter(text, token.HurryUpToken);
+            await Typewriter.RunTypewriter(text, token.HurryUpToken);
 
             // if we are set to autoadvance how long do we hold for before continuing?
             if (autoAdvance)
@@ -399,7 +400,7 @@ namespace Yarn.Unity
                 await YarnTask.WaitUntilCanceled(token.NextLineToken).SuppressCancellationThrow();
             }
 
-            typewriter.ContentWillDismiss();
+            Typewriter.ContentWillDismiss();
 
             if (canvasGroup != null)
             {

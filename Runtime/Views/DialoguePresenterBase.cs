@@ -154,6 +154,8 @@ namespace Yarn.Unity
         /// <returns>A task that represents any work done by this dialogue presenter
         /// in order to clean up after running dialogue.</returns>
         public abstract YarnTask OnDialogueCompleteAsync();
+
+        public virtual IAsyncTypewriter? Typewriter { get; set; }
     }
 }
 
