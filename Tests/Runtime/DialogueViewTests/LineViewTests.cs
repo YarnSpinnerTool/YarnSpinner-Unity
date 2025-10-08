@@ -190,7 +190,7 @@ namespace Yarn.Unity.Tests
             // Wait for the typewriter effect to complete
             await YarnTask.Delay(TimeSpan.FromSeconds(2f));
 
-            linePresenter.lineText.maxVisibleCharacters.Should().BeGreaterThanOrEqualTo(characterCount);
+            linePresenter.lineText.maxVisibleCharacters.Should().BeEqualTo(characterCount);
             continueButton.gameObject.activeInHierarchy.Should().BeTrue();
 
             // Dismiss the line
