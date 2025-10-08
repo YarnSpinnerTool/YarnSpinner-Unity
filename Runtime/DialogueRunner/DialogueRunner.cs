@@ -586,11 +586,39 @@ namespace Yarn.Unity
         private void OnNodeCompleted(string completedNodeName)
         {
             onNodeComplete?.Invoke(completedNodeName);
+            foreach (var presenter in dialoguePresenters)
+            {
+                if (presenter == null)
+                {
+                    continue;
+                }
+
+                if (presenter.enabled == false)
+                {
+                    continue;
+                }
+
+                presenter.OnNodeExit(completedNodeName, this);
+            }
         }
 
         private void OnNodeStarted(string startedNodeName)
         {
             onNodeStart?.Invoke(startedNodeName);
+            foreach (var presenter in dialoguePresenters)
+            {
+                if (presenter == null)
+                {
+                    continue;
+                }
+
+                if (presenter.enabled == false)
+                {
+                    continue;
+                }
+
+                presenter.OnNodeEnter(startedNodeName, this);
+            }
         }
 
         private void OnCommandReceived(Command command)
