@@ -82,7 +82,12 @@ namespace Yarn.Unity
                 // If a 'character' attribute is present, remove its text
                 if (Text.TryGetAttributeWithName("character", out var characterNameAttribute))
                 {
-                    return Text.DeleteRange(characterNameAttribute);
+                    // because of how we delete the text we also clear up the attributes
+                    // most of the time this is the right play
+                    // however the character feels important enough to add it back in
+                    var characterless = Text.DeleteRange(characterNameAttribute);
+                    characterless.Attributes.Add(characterNameAttribute);
+                    return characterless;
                 }
                 else
                 {
