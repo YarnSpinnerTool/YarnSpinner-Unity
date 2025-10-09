@@ -49,7 +49,13 @@ namespace Yarn.Unity
         {
             if (lineProvider == null)
             {
-                lineProvider = (LineProviderBehaviour)GameObject.FindAnyObjectByType<DialogueRunner>().LineProvider;
+                var runner = DialogueRunner.FindRunner(this);
+                if (runner == null)
+                {
+                    Debug.LogWarning("Was unable to find a dialogue runner, unable to register the style markup.");
+                    return;
+                }
+                lineProvider = (LineProviderBehaviour)runner.LineProvider;
             }
             lineProvider.RegisterMarkerProcessor("style", this);
 

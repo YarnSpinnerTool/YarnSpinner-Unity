@@ -396,5 +396,15 @@ namespace Yarn.Unity
                 return true;
             }
         }
+
+        public static DialogueRunner? FindRunner(Component component)
+        {
+            var runner = component.GetComponentInParent<DialogueRunner>();
+            if (runner == null)
+            {
+                runner = FindAnyObjectByType<DialogueRunner>();
+            }
+            return runner;
+        }
     }
 }

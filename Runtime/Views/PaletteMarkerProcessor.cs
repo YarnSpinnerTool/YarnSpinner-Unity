@@ -98,7 +98,13 @@ public sealed class PaletteMarkerProcessor : Yarn.Unity.ReplacementMarkupHandler
 
         if (lineProvider == null)
         {
-            lineProvider = (LineProviderBehaviour)GameObject.FindAnyObjectByType<DialogueRunner>().LineProvider;
+            var runner = DialogueRunner.FindRunner(this);
+            if (runner == null)
+            {
+                Debug.LogWarning("Was unable to find a dialogue runner, unable to register the markup palettes.");
+                return;
+            }
+            lineProvider = (LineProviderBehaviour)runner.LineProvider;
         }
 
         foreach (var marker in palette.BasicMarkers)
