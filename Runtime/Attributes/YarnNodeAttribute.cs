@@ -7,6 +7,8 @@ using UnityEngine;
 
 namespace Yarn.Unity.Attributes
 {
+    public enum YarnNodeFilter { None, Contains, Start, End }
+
     /// <summary>
     /// Specifies that a field represents a reference to a named Yarn node that
     /// exists in a Yarn project.
@@ -28,6 +30,16 @@ namespace Yarn.Unity.Attributes
         /// </summary>
         public readonly string yarnProjectAttribute;
 
+        /// <summary>
+        /// The text that specifies the Nodes you want to include in the dropdown.
+        /// </summary>
+        public readonly string filter;
+
+        /// <summary>
+        /// The filter type you'd like to use to find Nodes.
+        /// </summary>
+        public readonly YarnNodeFilter filterType;
+
         public readonly bool requiresYarnProject;
 
         /// <summary>
@@ -35,10 +47,12 @@ namespace Yarn.Unity.Attributes
         /// </summary>
         /// <param name="yarnProjectAttribute"><inheritdoc
         /// cref="yarnProjectAttribute" path="/summary/node()"/></param>
-        public YarnNodeAttribute(string yarnProjectAttribute, bool requiresYarnProject = true)
+        public YarnNodeAttribute(string yarnProjectAttribute, bool requiresYarnProject = true, string filter = default, YarnNodeFilter filterType = YarnNodeFilter.Contains)
         {
             this.yarnProjectAttribute = yarnProjectAttribute;
             this.requiresYarnProject = requiresYarnProject;
+            this.filter = filter;
+            this.filterType = filterType;
         }
     }
 }
