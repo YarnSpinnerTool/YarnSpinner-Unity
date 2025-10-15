@@ -21,7 +21,7 @@ namespace Yarn.Unity
         public LineProviderBehaviour? lineProvider;
 
         /// <inheritdoc/>
-        public override List<LineParser.MarkupDiagnostic> ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, string localeCode)
+        public override ReplacementMarkerResult ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, string localeCode)
         {
             // ok so we check if we have a property called style
             // if not give up
@@ -31,8 +31,10 @@ namespace Yarn.Unity
                 {
                     new LineParser.MarkupDiagnostic("Unable to identify a name for the style.")
                 };
-                return error;
+                return new ReplacementMarkerResult(error, 0);
             }
+
+            var originalLength = childBuilder.Length;
 
             childBuilder.Insert(0, $"<style=\"{property}\">");
             childBuilder.Append("</style>");
@@ -41,7 +43,9 @@ namespace Yarn.Unity
             // but it is entirely possible that style has added visible characters
             // we have no way of knowing this
             // so if this is the case any attributes will now be off
-            return ReplacementMarkupHandler.NoDiagnostics;
+            // unfortunately that is a downside to using the style replacement system
+            // most of the time this won't be a problem
+            return new ReplacementMarkerResult(childBuilder.Length - originalLength);
         }
 
         // Start is called before the first frame update

@@ -1408,7 +1408,7 @@ namespace Yarn.Unity.Editor
         {
             CompilationJob compilationJob = GetCompilationJob();
 
-            if (compilationJob.Files.Any() == false)
+            if (compilationJob.Inputs.Any() == false)
             {
                 // We have no scripts to work with. In this case, return an
                 // empty collection - there's no error, but there's no content

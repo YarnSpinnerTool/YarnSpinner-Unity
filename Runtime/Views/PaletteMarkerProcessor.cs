@@ -45,17 +45,19 @@ public sealed class PaletteMarkerProcessor : Yarn.Unity.ReplacementMarkupHandler
     /// apply, but this is ignored for TextMeshPro styles.</param>
     /// <param name="localeCode">The locale code to use when formatting the style.</param>
     /// <returns>A list of markup diagnostics if there are any errors, otherwise an empty list.</returns>
-    public override List<LineParser.MarkupDiagnostic> ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, string localeCode)
+    public override ReplacementMarkerResult ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, string localeCode)
     {
         if (palette == null)
         {
-            return new List<LineParser.MarkupDiagnostic>() {
-                new LineParser.MarkupDiagnostic($"can't apply palette for marker {marker.Name}, because palette was not set")
+            var error = new List<LineParser.MarkupDiagnostic>() {
+                new LineParser.MarkupDiagnostic($"can't apply palette for marker {marker.Name}, because a palette was not set")
             };
+            return new ReplacementMarkerResult(error, 0);
         }
 
         if (palette.PaletteForMarker(marker.Name, out var format))
         {
+            var childrenLength = childBuilder.Length;
             childBuilder.Insert(0, format.Start);
             childBuilder.Append(format.End);
 
@@ -73,11 +75,16 @@ public sealed class PaletteMarkerProcessor : Yarn.Unity.ReplacementMarkupHandler
                 }
             }
 
-            return ReplacementMarkupHandler.NoDiagnostics;
+            // finally we need to calculate the number of invisible characters we added
+            // which is the difference between the new and original string lengths - the total number of visible characters inserted
+            // we don't care WHERE those visible characters were added, just that they were
+            // we can't just use the marker offset because that only worries about visible elements added at the front of the string
+            // most of the time this is just gonna be 0 anyways and you don't have to think about it
+            return new ReplacementMarkerResult(childBuilder.Length - childrenLength - format.TotalVisibleCharacterCount);
         }
 
-        var diagnostic = new LineParser.MarkupDiagnostic($"was unable to find a matching sprite for {marker.Name}");
-        return new List<LineParser.MarkupDiagnostic>() { diagnostic };
+        var diagnostics = new List<LineParser.MarkupDiagnostic>() { new LineParser.MarkupDiagnostic($"was unable to find a matching sprite for {marker.Name}") };
+        return new ReplacementMarkerResult(diagnostics, 0);
     }
 
     /// <summary>

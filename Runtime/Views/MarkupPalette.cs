@@ -2,10 +2,8 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Yarn.Unity.Attributes;
 
 namespace Yarn.Unity
 {
@@ -40,7 +38,6 @@ namespace Yarn.Unity
             /// <summary>
             /// The color to use for text associated with this marker.
             /// </summary>
-            [ShowIf(nameof(CustomColor))]
             public Color Color;
 
             /// <summary>
@@ -75,6 +72,7 @@ namespace Yarn.Unity
             public string Start;
             public string End;
             public int MarkerOffset;
+            public int TotalVisibleCharacterCount;
         }
 
         /// <summary>
@@ -156,6 +154,7 @@ namespace Yarn.Unity
                         Start = front.ToString(),
                         End = back.ToString(),
                         MarkerOffset = 0,
+                        TotalVisibleCharacterCount = 0,
                     };
                     return true;
                 }
