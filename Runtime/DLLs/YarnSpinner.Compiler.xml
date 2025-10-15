@@ -521,6 +521,15 @@
             objects.
             </summary>
         </member>
+        <member name="M:Yarn.Compiler.EnumTypeBuilder.FromEnum``1(System.String)">
+            <summary>
+            Creates a new <see cref="T:Yarn.EnumType"/> given a CLR enum type.
+            </summary>
+            <typeparam name="TEnum">The type of the CLR enum.</typeparam>
+            <param name="description">An optional description to apply to the
+            new Yarn enum type.</param>
+            <returns>A Yarn type representing the enum.</returns>
+        </member>
         <member name="T:Yarn.Compiler.FunctionTypeBuilder">
             <summary>
             Provides methods for constructing <see cref="T:Yarn.FunctionType"/>
@@ -580,6 +589,16 @@
             <returns>The <see cref="T:Yarn.Compiler.FunctionTypeBuilder"/> instance that
             received this method call.</returns>
         </member>
+        <member name="T:Yarn.Compiler.ISourceInput">
+            <summary>
+            An input into a Yarn Spinner compilation.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.ISourceInput.FileName">
+            <summary>
+            The name of the input.
+            </summary>
+        </member>
         <member name="T:Yarn.Compiler.CompilationJob">
             <summary>
             An object that contains Yarn source code to compile, and instructions on
@@ -596,7 +615,7 @@
             Represents the contents of a file to compile.
             </summary>
         </member>
-        <member name="F:Yarn.Compiler.CompilationJob.File.FileName">
+        <member name="P:Yarn.Compiler.CompilationJob.File.FileName">
             <summary>
             The name of the file.
             </summary>
@@ -634,7 +653,7 @@
             <summary>The compiler will generate a string table
             only.</summary>
         </member>
-        <member name="F:Yarn.Compiler.CompilationJob.Files">
+        <member name="P:Yarn.Compiler.CompilationJob.Files">
             <summary>
             The <see cref="T:Yarn.Compiler.CompilationJob.File"/> structs that represent the content to
             parse..
@@ -692,6 +711,16 @@
             <inheritdoc cref="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.Library)" path="/summary"/>
             <inheritdoc cref="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.Library)" path="/param[@name='paths']"/>
             <inheritdoc cref="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.Library)" path="/returns"/>
+        </member>
+        <member name="M:Yarn.Compiler.CompilationJob.CreateFromInputs(System.Collections.Generic.IEnumerable{Yarn.Compiler.ISourceInput},Yarn.Library,System.Int32)">
+            <summary>
+            Creates a new <see cref="T:Yarn.Compiler.CompilationJob"/> using the contents of a
+            collection of source inputs.
+            </summary>
+            <param name="inputs">The inputs to the compilation.</param>
+            <param name="library">The <see cref="F:Yarn.Compiler.CompilationJob.Library"/> containing functions
+            to use for this compilation.</param>
+            <returns>A new <see cref="T:Yarn.Compiler.CompilationJob"/>.</returns>
         </member>
         <member name="M:Yarn.Compiler.CompilationJob.CreateFromString(System.String,System.String,Yarn.Library,System.Int32)">
             <summary>
@@ -784,9 +813,9 @@
             Gets the collection of file-level tags found in the source code.
             </summary>
             <remarks>The keys of this dictionary are the file names (as
-            indicated by the <see cref="F:Yarn.Compiler.CompilationJob.File.FileName"/> property
+            indicated by the <see cref="P:Yarn.Compiler.CompilationJob.File.FileName"/> property
             of the <see cref="T:Yarn.Compiler.CompilationJob"/>'s <see
-            cref="F:Yarn.Compiler.CompilationJob.Files"/> collection), and the values are the
+            cref="P:Yarn.Compiler.CompilationJob.Files"/> collection), and the values are the
             file tags associated with that file.
             </remarks>
         </member>
@@ -838,6 +867,11 @@
         </member>
         <member name="M:Yarn.Compiler.CompilationResult.GetStringForKey(System.String)">
             <inheritdoc/>
+        </member>
+        <member name="P:Yarn.Compiler.CompilationResult.ParseResults">
+            <summary>
+            Contains the results of parsing each input of  the compilation.
+            </summary>
         </member>
         <member name="F:Yarn.Compiler.ContentIdentifierType.Line">
             <summary>
@@ -1098,10 +1132,22 @@
             statement.
             </summary>
         </member>
+        <member name="P:Yarn.Compiler.YarnSpinnerParser.Line_statementContext.LineIDIsImplicit">
+            <summary>
+            Gets or sets a value indiciating whether the line ID was added
+            implicitly.
+            </summary>
+        </member>
         <member name="P:Yarn.Compiler.YarnSpinnerParser.Line_statementContext.ShadowLineID">
             <summary>
             Gets or sets the shadow line ID associated with this line
             statement.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.YarnSpinnerParser.Line_statementContext.IsLastLineBeforeOptions">
+            <summary>
+            Gets or sets a value indicating whether this line is the last
+            one before a group of options.
             </summary>
         </member>
         <member name="T:Yarn.Compiler.YarnSpinnerParser.ExpressionContext">
@@ -1821,20 +1867,28 @@
         </member>
         <member name="P:Yarn.Compiler.FileParseResult.Name">
             <summary>
-            <inheritdoc cref="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream)" path="/param[@name='name']"/>
+            <inheritdoc cref="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.IEnumerable{Yarn.Compiler.Diagnostic})" path="/param[@name='name']"/>
             </summary>
+        </member>
+        <member name="P:Yarn.Compiler.FileParseResult.FileName">
+            <inheritdoc/>>
         </member>
         <member name="P:Yarn.Compiler.FileParseResult.Tree">
             <summary>
-            <inheritdoc cref="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream)" path="/param[@name='tree']"/>
+            <inheritdoc cref="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.IEnumerable{Yarn.Compiler.Diagnostic})" path="/param[@name='tree']"/>
             </summary>
         </member>
         <member name="P:Yarn.Compiler.FileParseResult.Tokens">
             <summary>
-            <inheritdoc cref="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream)" path="/param[@name='tokens']"/>
+            <inheritdoc cref="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.IEnumerable{Yarn.Compiler.Diagnostic})" path="/param[@name='tokens']"/>
             </summary>
         </member>
-        <member name="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream)">
+        <member name="P:Yarn.Compiler.FileParseResult.Diagnostics">
+            <summary>
+            <inheritdoc cref="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.IEnumerable{Yarn.Compiler.Diagnostic})" path="/param[@name='tokens']"/>
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.IEnumerable{Yarn.Compiler.Diagnostic})">
             <summary>
             Initializes a new instance of the <see cref="T:Yarn.Compiler.FileParseResult"/>
             struct.
@@ -1842,6 +1896,7 @@
             <param name="name">The name of the file.</param>
             <param name="tree">The parse tree extracted from the file.</param>
             <param name="tokens">The tokens extracted from the file.</param>
+            <param name="diagnostics">The diagnostics produced from parsing the file.</param>
         </member>
         <member name="M:Yarn.Compiler.FileParseResult.Equals(System.Object)">
             <inheritdoc/>
@@ -3396,6 +3451,11 @@
             <param name="context">The parse tree.</param>
             <return>The visitor result.</return>
         </member>
+        <member name="T:Yarn.Compiler.ParserRuleContextExtension">
+            <summary>
+            Contains extension methods for <see cref="T:Antlr4.Runtime.ParserRuleContext"/> objects.
+            </summary>
+        </member>
         <member name="M:Yarn.Compiler.ParserRuleContextExtension.GetTextWithWhitespace(Antlr4.Runtime.ParserRuleContext)">
             <summary>
             Returns the original text of this <see cref="T:Antlr4.Runtime.ParserRuleContext"/>,
@@ -4758,7 +4818,7 @@
             The message associated with the warning.
             </summary>
         </member>
-        <member name="M:Yarn.Compiler.NodeGroupCompiler.#ctor(System.String,System.Collections.Generic.IDictionary{System.String,Yarn.Compiler.Declaration},System.Collections.Generic.IEnumerable{Yarn.Compiler.YarnSpinnerParser.NodeContext},System.Collections.Generic.List{Yarn.Node})">
+        <member name="M:Yarn.Compiler.NodeGroupCompiler.#ctor(System.String,System.Collections.Generic.IDictionary{System.String,Yarn.Compiler.Declaration},System.Collections.Generic.IEnumerable{Yarn.Compiler.YarnSpinnerParser.NodeContext},System.Collections.Generic.List{Yarn.Node},System.Collections.Generic.IEnumerable{System.String})">
             <summary>
             Initializes a new instance of the NodeGroupCompiler class.
             </summary>
@@ -4770,6 +4830,8 @@
             contexts that all belong to this node group.</param>
             <param name="compiledNodes">The collection of existing compiled
             nodes in the compilation.</param>
+            <param name="trackingNodes">The collection of node names for whom
+            tracking information should be added.</param>
         </member>
         <member name="M:Yarn.Compiler.NodeGroupCompiler.Emit(Antlr4.Runtime.IToken,Antlr4.Runtime.IToken,Yarn.Instruction)">
             <inheritdoc/>
@@ -5105,9 +5167,6 @@
             <param name="metadata">The string's metadata.</param>
             <param name="shadowID">The ID of the line that this entry is
             shadowing, or null.</param>
-        </member>
-        <member name="M:Yarn.Compiler.StringInfo.ToString">
-            <inheritdoc/>
         </member>
         <member name="M:Yarn.Compiler.StringTableManager.RegisterString(Yarn.Compiler.YarnSpinnerParser.Line_statementContext,System.String,System.String,System.String,System.String,System.Int32,System.String[],System.String)">
             <summary>
@@ -5629,6 +5688,16 @@
             cref="T:Yarn.Compiler.Diagnostic"/> objects that describe problems in the source
             code.</returns>
         </member>
+        <member name="M:Yarn.Compiler.Utility.ParseSourceText(System.String,System.String)">
+            <summary>
+            Parses a string of Yarn source code, and produces a <see
+            cref="T:Yarn.Compiler.FileParseResult"/>.
+            </summary>
+            <param name="source">The source code to parse.</param>
+            <param name="sourceName">The name of the source.</param>
+            <returns>A <see cref="T:Yarn.Compiler.FileParseResult"/> representing the result of
+            parsing the source.</returns>
+        </member>
         <member name="M:Yarn.Compiler.Utility.GenerateString(System.Collections.Generic.ICollection{System.String})">
             <summary>
             Generates a new unique line tag that is not present in
@@ -5638,6 +5707,14 @@
             considered when generating a new, unique line tag.</param>
             <returns>A unique line tag that is not already present in <paramref
             name="existingKeys"/>.</returns>
+        </member>
+        <member name="M:Yarn.Compiler.Utility.GetRange(Antlr4.Runtime.ParserRuleContext)">
+            <summary>
+            Gets the range covered by a <see cref="T:Antlr4.Runtime.ParserRuleContext"/> in the
+            source code.
+            </summary>
+            <param name="context">The context to get a range for.</param>
+            <returns>The <see cref="T:Yarn.Compiler.Range"/> covered by this context.</returns>
         </member>
         <member name="T:Yarn.Compiler.Utility.UntaggedLineListener">
             <summary>
