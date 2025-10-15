@@ -554,7 +554,7 @@ namespace Yarn.Unity
                 {
                     try
                     {
-                        await view.OnDialogueCompleteAsync(this);
+                        await view.OnDialogueCompleteAsync();
                     }
                     catch (System.Exception e)
                     {
@@ -598,7 +598,7 @@ namespace Yarn.Unity
                     continue;
                 }
 
-                presenter.OnNodeExit(completedNodeName, this);
+                presenter.OnNodeExit(completedNodeName);
             }
         }
 
@@ -617,7 +617,7 @@ namespace Yarn.Unity
                     continue;
                 }
 
-                presenter.OnNodeEnter(startedNodeName, this);
+                presenter.OnNodeEnter(startedNodeName);
             }
         }
 
@@ -687,6 +687,7 @@ namespace Yarn.Unity
         private async YarnTask OnLineReceivedAsync(Line line)
         {
             var localisedLine = await LineProvider.GetLocalizedLineAsync(line, dialogueCancellationSource?.Token ?? CancellationToken.None);
+            localisedLine.Source = this;
 
             if (localisedLine == LocalizedLine.InvalidLine)
             {
@@ -760,7 +761,7 @@ namespace Yarn.Unity
                     try
                     {
                         // Run the line and wait for it to finish
-                        await view.RunLineAsync(localisedLine, this, token);
+                        await view.RunLineAsync(localisedLine, token);
                     }
                     catch (System.OperationCanceledException)
                     {
@@ -822,6 +823,7 @@ namespace Yarn.Unity
             {
                 var opt = options.Options[i];
                 LocalizedLine localizedLine = await LineProvider.GetLocalizedLineAsync(opt.Line, optionCancellationSource.Token);
+                localizedLine.Source = this;
 
                 if (localizedLine == LocalizedLine.InvalidLine)
                 {
@@ -847,7 +849,7 @@ namespace Yarn.Unity
                 }
                 try
                 {
-                    var result = await view.RunOptionsAsync(localisedOptions, this, optionCancellationSource.Token);
+                    var result = await view.RunOptionsAsync(localisedOptions, optionCancellationSource.Token);
                     if (result != null)
                     {
                         // We no longer need the other views, so tell them to stop
@@ -1010,7 +1012,7 @@ namespace Yarn.Unity
                     {
                         continue;
                     }
-                    tasks.Add(view.OnDialogueStartedAsync(this));
+                    tasks.Add(view.OnDialogueStartedAsync());
                 }
             }
             await YarnTask.WhenAll(tasks);

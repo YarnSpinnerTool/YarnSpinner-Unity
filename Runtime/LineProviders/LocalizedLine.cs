@@ -62,6 +62,17 @@ namespace Yarn.Unity
         public Object? Asset;
 
         /// <summary>
+        /// The object that created this line.
+        /// Most of the time will be the <see cref="DialogueRuner"/> that passed the presenter the line.
+        /// </summary>
+        /// <remarks>
+        /// This exists for situations where you need the dialogue runner (or your custom equivalent) to send back messages.
+        /// In particular this is used by the <see cref="VoiceOverPresenter"/> to get a reference to the dialogue runner to advance lines after playback is finished without needing a specific reference.
+        /// Allowing the presenter to be reused across multiple runners.
+        /// </remarks>
+        public object? Source;
+
+        /// <summary>
         /// The underlying <see cref="Yarn.Markup.MarkupParseResult"/> for this
         /// line.
         /// </summary>
