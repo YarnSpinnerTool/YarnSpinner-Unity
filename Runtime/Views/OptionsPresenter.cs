@@ -171,6 +171,22 @@ namespace Yarn.Unity
                 optionViews.Add(optionView);
             }
 
+            // if all options are unavailable then we need to return null
+            // it's the responsibility of the dialogue runner to handle this, not the presenter
+            bool anyAvailable = false;
+            foreach (var option in dialogueOptions)
+            {
+                if (option.IsAvailable)
+                {
+                    anyAvailable = true;
+                    break;
+                }
+            }
+            if (!anyAvailable)
+            {
+                return null;
+            }
+
             // A completion source that represents the selected option.
             YarnTaskCompletionSource<DialogueOption?> selectedOptionCompletionSource = new YarnTaskCompletionSource<DialogueOption?>();
 
