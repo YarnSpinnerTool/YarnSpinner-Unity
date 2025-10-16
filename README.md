@@ -1,6 +1,6 @@
-<img src="https://downloads.yarnspinner.dev/get/YarnSpinnerLogo.png" alt="Yarn Spinner logo" width="100px;" align="right">
-
 # Yarn Spinner for Unity
+
+<img src="https://downloads.yarnspinner.dev/get/YarnSpinnerLogo.png" alt="Yarn Spinner logo" width="100px;" align="right">
 
 > [!TIP]
 > To get Yarn Spinner, and support the team behind it, buy a copy for Unity from [the Yarn Spinner Itch.io Store](https://yarnspinner.itch.io) or from [the Unity Asset Store](https://assetstore.unity.com/packages/tools/behavior-ai/yarn-spinner-for-unity-267061), or check out the [Yarn Spinner Documentation](https://docs.yarnspinner.dev) to install from Git.
@@ -37,9 +37,10 @@ This project has been assisted by the Australian Government through the [Austral
 
 ## Help Us Make Yarn Spinner!
 
-Yarn Spinner needs your help to be as awesome as it can be! You don't have to be a coder to help out.
+Yarn Spinner needs your help to be as awesome as it can be. You don't have to be a coder to help out - help might mean promotion, ideas, great explanations for our documentation, anything!
 
-* Yarn Spinner's development is powered by our wonderful Patreon supporters and Itch.io. [Become a patron](https://patreon.com/secretlab), or [buy Yarn Spinner on Itch.io](https://yarnspinner.itch.io), and help us make Yarn Spinner be amazing.
-* Our [issues page](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues) contains a list of things we'd love your help in improving.
-* Follow [Yarn Spinner on Bluesky](https://bsky.app/profile/yarnspinner.dev)).
-* If you want to contribute to Yarn Spinner, [go read our contributor's guide!](CONTRIBUTING.md)
+* Yarn Spinner's development is powered by our wonderful Patreon supporters, and purchases on storefronts like Itch.io. If you can afford to do so, [becoming a patron](https://patreon.com/secretlab), or [buying Yarn Spinner on Itch.io](https://yarnspinner.itch.io) would really help us to continue making Yarn Spinner.
+* Our [issues repo](https://github.com/YarnSpinnerTool/IssuesDiscussion/issues) contains problems we're solving and features we're considering. Any issues you make will work to make Yarn Spinner better for everyone.
+* Follow [Yarn Spinner on Bluesky](https://bsky.app/profile/yarnspinner.dev), or [tell us about a game you're making with Yarn Spinner!](https://www.yarnspinner.dev/tell-us). 
+
+If you want to contribute to Yarn Spinner, [go read our contributor's guide!](CONTRIBUTING.md)
