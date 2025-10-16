@@ -17,11 +17,6 @@ namespace Yarn.Unity
     /// <seealso cref="LineProviderBehaviour"/>
     public abstract class ReplacementMarkupHandler : MonoBehaviour, IAttributeMarkerProcessor
     {
-        /// <summary>
-        /// An empty collection of diagnostics.
-        /// </summary>
-        public static readonly List<LineParser.MarkupDiagnostic> NoDiagnostics = new List<LineParser.MarkupDiagnostic>();
-
         /// <inheritdoc/>
         public abstract ReplacementMarkerResult ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, string localeCode);
     }
