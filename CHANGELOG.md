@@ -11,6 +11,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `DialogueRunner` will now log warnings if a dialogue presenter throws an `OperationCanceledException` - these usually indicate that a task they were themselves waiting on was cancelled, and that the presenter didn't clean up.
 - The generated `.ysls.json` file now contains more complete command and function information.
 - Added a new attribute for Yarn Spinner editors: `LabelFrom` allows specifying a dynamic label for a property by invoking a method.
+- Added multiple typewriters and support for them on the `LinePresenter`:
+  - By Word
+  - By Letter
+  - Instantly
+- A virtual `IAsyncTypewriter` field `Typewriter` onto `DialoguePresenterBase`
+- Virtual `OnNodeEnter` and `OnNodeExit` calls onto `DialoguePresenterBase`
+- A static `FindRunner` call onto `DialogueRunner` which first tries to find it on the game object itself and then anywhere in the scene
+- A `Source` field to the `LocalizedLine`, this can be of any type but by default will be the `DialogueRunner` that caused the line to be created
 
 ### Changed
 
@@ -19,8 +27,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed a bug where versions of Unity prior to Unity 2022.3.33 had compilation errors around packages.
 - Fixed a bug where some inspector property fields weren't bound preventing configuring Unity localisation or addressables in Unity 2022.3.
 - Added more specificity to the `Analyser` class's use of the C# code generation API.
+- `AddLineTagsToFilesInYarnProject` is now `public`, allowing for easier use of it in editor scripting.
+- Showing character name behaviour in the `LinePresenter` now correctly matches the documentation.
+- `DialogueRunner.StartDialogue` is now asynchronous and waits for all presenters to finish their `OnDialogueStartedAsync` calls before exiting
+- `DialogueRunner.Stop` is now asynchronous and waits for all presenters to finish their `OnDialogueCompleteAsync` calls before exiting
+- Fixed a bug where the continue button on the `LinePresenter` could become non interactive.
+- `PaletteMarkerProcessor` and `StyleMarkerProcessor` now look less aggressively for their Dialogue Runner.
+- `LocalizedLine.TextWithoutCharacterName` still does not contain the text of the character but does contain the Markup attribute of the character
+  - this allows other pieces that might need to know who said a line still use the `TextWithoutCharacterName` property
+- `ReplacementMarkuphandler` now returns a `ReplacementMarkerResult` instead of a list of diagnostics
+  - this is to match the behaviour change in core to fix a markup offset bug
+- `OptionsPresenter` now returns null if there are no options that can be selected due to their availability.
+- Now if there are no available options Dialogue Runner will now fallthrough to the next piece of content
+  - this behaviour can be disabled in the `allowOptionFallthrough` field on the runner
 
 ### Removed
+
+- `ActionMarkupHandlers` list from `DialoguePresenterBase` as this was only used by the default line presenter and for 
+  - this is now handled by typewriters which is more representative of what Action Markup Handling entailed
+- Legacy Dialogue Views, Typewriter, and Effects
+- `ReplacementMarkupHandler.NoDiagnostics` as this no longer matches any need due to core changes around replacement markup
 
 ## [3.0.3] 2025-06-21
 
