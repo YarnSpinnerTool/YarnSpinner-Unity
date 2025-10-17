@@ -135,8 +135,7 @@ namespace Yarn.Unity
 
         private async YarnTask<Object?> GetLocalizedAssetAsync(string sourceLineID)
         {
-
-            var baseLoc = GetLocalization(sourceLineID);
+            var baseLoc = GetLocalization(_assetLocaleCode);
             Object? result = await baseLoc.GetLocalizedObjectAsync<Object>(sourceLineID);
 
             if (result != null)

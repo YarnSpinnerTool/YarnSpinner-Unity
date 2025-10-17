@@ -40,6 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `OptionsPresenter` now returns null if there are no options that can be selected due to their availability.
 - Now if there are no available options Dialogue Runner will now fallthrough to the next piece of content
   - this behaviour can be disabled in the `allowOptionFallthrough` field on the runner
+- Fixed an issue where Builtin localisation would always use the base localisation when fetching a localised asset ([#344](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/344))
 
 ### Removed
 
