@@ -642,7 +642,14 @@ namespace Yarn.Unity
                     // case of commands that complete synchronously, this task
                     // will be Task.Completed, so this 'await' will return
                     // immediately.)
-                    await dispatchResult.Task;
+                    if (dispatchResult.Task.IsCompletedSuccessfully())
+                    {
+                        Dialogue.SetCommandComplete();
+                    }
+                    else
+                    {
+                        await dispatchResult.Task;
+                    }
                     break;
                 case CommandDispatchResult.StatusType.NoTargetFound:
                     Debug.LogError($"Can't call command <<{command.Text}>>: failed to find a game object named {parts.ElementAtOrDefault(1)}", this);
