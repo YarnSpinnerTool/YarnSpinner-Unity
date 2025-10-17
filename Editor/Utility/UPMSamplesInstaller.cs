@@ -7,7 +7,7 @@ namespace Yarn.Unity.Editor
 {
     internal static class UPMSamplesInstaller
     {
-        private const string samplesPackageURL = "https://github.com/YarnSpinnerTool/YarnSpinner-Unity-Samples.git";
+        private const string samplesPackageURL = "https://github.com/YarnSpinnerTool/YarnSpinner-Unity-Samples.git#current";
         private static AddRequest? installationRequest;
 
         private static void MonitorInstallation()
