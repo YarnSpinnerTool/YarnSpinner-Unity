@@ -82,7 +82,7 @@ namespace Yarn.Unity.Tests
 
             linePresenter.canvasGroup!.alpha.Should().BeEqualTo(0, "The line view is not yet visible");
 
-            var runTask = linePresenter.RunLineAsync(line, dialogueRunner, default);
+            var runTask = linePresenter.RunLineAsync(line, default);
 
             await YarnTask.Delay(TimeSpan.FromSeconds(0.5f));
 
@@ -135,7 +135,7 @@ namespace Yarn.Unity.Tests
                 NextLineToken = cancellationSource.Token
             };
 
-            YarnTask runTask = linePresenter.RunLineAsync(line, null, lineCancellationToken);
+            YarnTask runTask = linePresenter.RunLineAsync(line, lineCancellationToken);
 
             runTask.IsCompleted().Should().BeFalse();
             linePresenter.lineText!.text.Should().BeEqualTo("Line 1");
@@ -169,7 +169,7 @@ namespace Yarn.Unity.Tests
             var continueButton = linePresenter.GetComponentInChildren<LinePresenterButtonHandler>(true);
             continueButton.Should().NotBeNull();
 
-            YarnTask runTask = linePresenter.RunLineAsync(line, null, lineCancellationToken);
+            YarnTask runTask = linePresenter.RunLineAsync(line, lineCancellationToken);
 
             int characterCount = line.Text.Text.Length;
             characterCount.Should().BeGreaterThan(0);
