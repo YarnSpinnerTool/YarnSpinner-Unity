@@ -164,13 +164,6 @@ namespace Yarn.Unity
         /// path="/returns"/>
         public override async YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
         {
-            // If we don't already have enough option views, create more
-            while (dialogueOptions.Length > optionViews.Count)
-            {
-                var optionView = CreateNewOptionView();
-                optionViews.Add(optionView);
-            }
-
             // if all options are unavailable then we need to return null
             // it's the responsibility of the dialogue runner to handle this, not the presenter
             bool anyAvailable = false;
@@ -185,6 +178,13 @@ namespace Yarn.Unity
             if (!anyAvailable)
             {
                 return null;
+            }
+
+            // If we don't already have enough option views, create more
+            while (dialogueOptions.Length > optionViews.Count)
+            {
+                var optionView = CreateNewOptionView();
+                optionViews.Add(optionView);
             }
 
             // A completion source that represents the selected option.

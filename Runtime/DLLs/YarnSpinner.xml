@@ -452,6 +452,11 @@
         <member name="F:Yarn.Dialogue.DefaultStartNodeName">
             <summary>The node that execution will start from.</summary>
         </member>
+        <member name="F:Yarn.Dialogue.NoOptionSelected">
+            <summary>
+            The value to indicate to the dialogue runner that no option was selected and dialogue should fallthrough to the rest of the program.
+            </summary>
+        </member>
         <member name="P:Yarn.Dialogue.Program">
             <summary>Gets or sets the compiled Yarn program.</summary>
         </member>
@@ -2867,7 +2872,7 @@
         </member>
         <member name="M:Yarn.Markup.ReplacementMarkerResult.#ctor(System.Int32)">
             <summary>
-            Convenience form of <see cref="M:Yarn.Markup.ReplacementMarkerResult.#ctor(System.Collections.Generic.List{Yarn.Markup.LineParser.MarkupDiagnostic},System.Int32)"/>
+            Convenience form of <see cref="M:Yarn.Markup.ReplacementMarkerResult.#ctor(System.Collections.Generic.List{Yarn.Markup.LineParser.MarkupDiagnostic},System.Int32)"/> for when there are no diagnostics.
             </summary>
             <param name="invisibleCharacters">the number of invisible characters generated during processing.</param>
         </member>

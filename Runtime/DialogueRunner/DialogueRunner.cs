@@ -252,6 +252,8 @@ namespace Yarn.Unity
         [Group("Behaviour")]
         public bool runSelectedOptionAsLine = false;
 
+        [SerializeField] private bool allowOptionFallthrough = true;
+
         /// <summary>
         /// A Unity event that is called when a node starts running.
         /// </summary>
@@ -839,7 +841,7 @@ namespace Yarn.Unity
                 };
             }
 
-            var dialogueSelectionTCS = new YarnTaskCompletionSource<DialogueOption?>();
+            DialogueOption? selectedOption = null;
 
             async YarnTask WaitForOptionsView(DialoguePresenterBase? view)
             {
@@ -855,7 +857,7 @@ namespace Yarn.Unity
                         // We no longer need the other views, so tell them to stop
                         // by cancelling the option selection.
                         optionCancellationSource.Cancel();
-                        dialogueSelectionTCS.TrySetResult(result);
+                        selectedOption = result;
                     }
                 }
                 catch (System.OperationCanceledException)
@@ -886,20 +888,6 @@ namespace Yarn.Unity
             // at this point now every view has finished their handling of the options
             // the first one to return a non-null value will be the one that is chosen option
             // or if everyone returned null that's an error
-            DialogueOption? selectedOption;
-
-            try
-            {
-                selectedOption = await dialogueSelectionTCS.Task;
-            }
-            catch (Exception e)
-            {
-                // If a view threw an exception while getting the option,
-                // propagate it
-                Debug.LogException(e);
-                return;
-                // throw;
-            }
 
             optionCancellationSource.Dispose();
 
@@ -909,23 +897,29 @@ namespace Yarn.Unity
                 // choice. Stop here, and do not provide it to the Dialogue.
                 return;
             }
-
             else if (selectedOption == null)
             {
-                // None of our option views returned an option, and our dialogue
-                // wasn't cancelled. That's not allowed, because we don't know what
-                // to do next!
-                Debug.LogError($"No dialogue view returned an option selection! Hanging here!");
-                return;
+                if (allowOptionFallthrough)
+                {
+                    Dialogue.SetSelectedOption(Dialogue.NoOptionSelected);
+                }
+                else
+                {
+                    // None of our option views returned an option, and our dialogue wasn't cancelled, and we've said we don't want to do fallthrough.
+                    // That's not allowed, because we don't know what to do next!
+                    Debug.LogError($"All presenters have returned from {nameof(DialoguePresenterBase.RunOptionsAsync)} but none returned an option, and fallthrough is disabled. This is not allowed.");
+                    return;
+                }
             }
-
-            Dialogue.SetSelectedOption(selectedOption.DialogueOptionID);
-
-            if (runSelectedOptionAsLine)
+            else
             {
-                // Run the selected option's line content as though we had received
-                // it as a line.
-                await RunLocalisedLine(selectedOption.Line);
+                Dialogue.SetSelectedOption(selectedOption.DialogueOptionID);
+                if (runSelectedOptionAsLine)
+                {
+                    // Run the selected option's line content as though we had received
+                    // it as a line.
+                    await RunLocalisedLine(selectedOption.Line);
+                }
             }
 
             if (dialogueCancellationSource?.IsCancellationRequested ?? false)
