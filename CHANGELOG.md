@@ -43,8 +43,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 
-- `ActionMarkupHandlers` list from `DialoguePresenterBase` as this was only used by the default line presenter and for 
-  - this is now handled by typewriters which is more representative of what Action Markup Handling entailed
+- `ActionMarkupHandlers` list from `DialoguePresenterBase` as this was only used by the default line presenter
+  - this is now handled by typewriters which is more representative of what Action Markup Handling entailed anyways
 - Legacy Dialogue Views, Typewriter, and Effects
 - `ReplacementMarkupHandler.NoDiagnostics` as this no longer matches any need due to core changes around replacement markup
 
