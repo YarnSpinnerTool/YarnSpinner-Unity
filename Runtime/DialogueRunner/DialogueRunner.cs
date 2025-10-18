@@ -638,16 +638,16 @@ namespace Yarn.Unity
             switch (dispatchResult.Status)
             {
                 case CommandDispatchResult.StatusType.Succeeded:
-                    // The command succeeded. Wait for it to complete. (In the
-                    // case of commands that complete synchronously, this task
-                    // will be Task.Completed, so this 'await' will return
-                    // immediately.)
                     if (dispatchResult.Task.IsCompletedSuccessfully())
                     {
-                        Dialogue.SetCommandComplete();
+                        // The command was dispatched and completed
+                        // synchronously.
+                        Dialogue.SignalContentComplete();
                     }
                     else
                     {
+                        // The command has successfully dispatched, but has not
+                        // yet finished running. Wait for it to finish.
                         await dispatchResult.Task;
                     }
                     break;
@@ -795,7 +795,16 @@ namespace Yarn.Unity
             }
 
             // Wait for all line view tasks to finish delivering the line.
-            await YarnTask.WhenAll(pendingTasks);
+            var waitForAllLines = YarnTask.WhenAll(pendingTasks);
+            if (waitForAllLines.IsCompletedSuccessfully())
+            {
+                // All lines completed synchronously. Signal that we're done.
+                Dialogue.SignalContentComplete();
+            }
+            else
+            {
+                await waitForAllLines;
+            }
 
             // We're done; dispose of the cancellation sources. (Null-check them because if we're leaving play mode, then these references may no longer be valid.)
 

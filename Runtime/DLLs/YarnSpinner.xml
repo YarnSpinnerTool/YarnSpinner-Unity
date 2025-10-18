@@ -634,6 +634,14 @@
             <seealso cref="T:Yarn.OptionSet"/>
             <seealso cref="M:Yarn.Dialogue.Continue"/>
         </member>
+        <member name="M:Yarn.Dialogue.SignalContentComplete">
+            <summary>
+            Signals that the currently running content has completed synchronously.
+            </summary>
+            <remarks>
+            This method is not intended to be called by user code.
+            </remarks>
+        </member>
         <member name="M:Yarn.Dialogue.Continue">
              <summary>
              Starts, or continues, execution of the current Program.
