@@ -132,7 +132,7 @@ namespace Yarn.Unity.Tests
             var cancellationSource = new CancellationTokenSource();
             var lineCancellationToken = new LineCancellationToken
             {
-                NextLineToken = cancellationSource.Token
+                NextContentToken = cancellationSource.Token
             };
 
             YarnTask runTask = linePresenter.RunLineAsync(line, lineCancellationToken);
@@ -161,7 +161,7 @@ namespace Yarn.Unity.Tests
             var cancellationSource = new CancellationTokenSource();
             var lineCancellationToken = new LineCancellationToken
             {
-                NextLineToken = cancellationSource.Token
+                NextContentToken = cancellationSource.Token
             };
 
             linePresenter.lineText.Should().NotBeNull();

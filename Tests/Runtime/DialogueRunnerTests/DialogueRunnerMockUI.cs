@@ -159,7 +159,7 @@ namespace Yarn.Unity.Tests
             readyToAdvance = false;
         }
 
-        public override async YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public override async YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, LineCancellationToken cancellationToken)
         {
             CurrentOptions.Clear();
             foreach (var option in dialogueOptions)

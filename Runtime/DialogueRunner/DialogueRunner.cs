@@ -34,8 +34,10 @@ namespace Yarn.Unity
         /// the current line. For example, on-screen UI should be dismissed, and
         /// any ongoing audio playback should be stopped.
         /// </summary>
-        public CancellationToken NextLineToken;
+        [System.Obsolete("Please use NextContentToken instead")]
+        public readonly CancellationToken NextLineToken => NextContentToken;
 
+        public CancellationToken NextContentToken;
 
         // this token will ALWAYS be a dependant token on the above 
 
@@ -64,7 +66,10 @@ namespace Yarn.Unity
         /// If this property is <see langword="true"/>, then <see
         /// cref="IsHurryUpRequested"/> will also be true.</para>
         /// </remarks>
+        [System.Obsolete("Please use IsNextContentRequested instead")]
         public readonly bool IsNextLineRequested => NextLineToken.IsCancellationRequested;
+
+        public readonly bool IsNextContentRequested => NextContentToken.IsCancellationRequested;
 
         /// <summary>
         /// Gets a value indicating whether the user has requested that the line
@@ -363,6 +368,11 @@ namespace Yarn.Unity
         private CancellationTokenSource? dialogueCancellationSource;
         private CancellationTokenSource? currentLineCancellationSource;
         private CancellationTokenSource? currentLineHurryUpSource;
+
+        private CancellationTokenSource? currentOptionsHurryUpSource;
+        private CancellationTokenSource? currentOptionsCancellationSource;
+
+
         private YarnTaskCompletionSource? dialogueCompletionSource;
         private YarnTaskCompletionSource? dialogueCancellationCompletion;
 
@@ -742,7 +752,7 @@ namespace Yarn.Unity
             currentLineHurryUpSource = CancellationTokenSource.CreateLinkedTokenSource(currentLineCancellationSource.Token);
             var metaToken = new LineCancellationToken
             {
-                NextLineToken = currentLineCancellationSource.Token,
+                NextContentToken = currentLineCancellationSource.Token,
                 HurryUpToken = currentLineHurryUpSource.Token,
             };
 
@@ -822,25 +832,36 @@ namespace Yarn.Unity
 
         private async YarnTask OnOptionsReceivedAsync(OptionSet options)
         {
+            // if we have an existing cancellation and hurry up source we want to clean those up first.
+            currentOptionsCancellationSource?.Dispose();
+            currentOptionsHurryUpSource?.Dispose();
+
             // Create a cancellation source that represents 'we don't need you to
             // select an option anymore'. Link it to the dialogue cancellation
             // source, so that if dialogue gets cancelled, all options get
             // cancelled.
-            CancellationTokenSource optionCancellationSource;
             if (dialogueCancellationSource != null)
             {
-                optionCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(dialogueCancellationSource.Token);
+                currentOptionsCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(dialogueCancellationSource.Token);
             }
             else
             {
-                optionCancellationSource = new CancellationTokenSource();
+                currentOptionsCancellationSource = new CancellationTokenSource();
             }
+
+            // now we make a new dependant hurry up cancellation token
+            currentOptionsHurryUpSource = CancellationTokenSource.CreateLinkedTokenSource(currentOptionsCancellationSource.Token);
+            var metaToken = new LineCancellationToken
+            {
+                NextContentToken = currentOptionsCancellationSource.Token,
+                HurryUpToken = currentOptionsHurryUpSource.Token,
+            };
 
             DialogueOption[] localisedOptions = new DialogueOption[options.Options.Length];
             for (int i = 0; i < options.Options.Length; i++)
             {
                 var opt = options.Options[i];
-                LocalizedLine localizedLine = await LineProvider.GetLocalizedLineAsync(opt.Line, optionCancellationSource.Token);
+                LocalizedLine localizedLine = await LineProvider.GetLocalizedLineAsync(opt.Line, currentOptionsCancellationSource.Token);
                 localizedLine.Source = this;
 
                 if (localizedLine == LocalizedLine.InvalidLine)
@@ -867,12 +888,12 @@ namespace Yarn.Unity
                 }
                 try
                 {
-                    var result = await view.RunOptionsAsync(localisedOptions, optionCancellationSource.Token);
+                    var result = await view.RunOptionsAsync(localisedOptions, metaToken);
                     if (result != null)
                     {
                         // We no longer need the other views, so tell them to stop
                         // by cancelling the option selection.
-                        optionCancellationSource.Cancel();
+                        currentOptionsCancellationSource.Cancel();
                         selectedOption = result;
                     }
                 }
@@ -905,7 +926,7 @@ namespace Yarn.Unity
             // the first one to return a non-null value will be the one that is chosen option
             // or if everyone returned null that's an error
 
-            optionCancellationSource.Dispose();
+            currentOptionsCancellationSource.Dispose();
 
             if (dialogueCancellationSource?.IsCancellationRequested ?? false)
             {
@@ -1018,12 +1039,9 @@ namespace Yarn.Unity
             {
                 if (view == null)
                 {
-                    if (view == null)
-                    {
-                        continue;
-                    }
-                    tasks.Add(view.OnDialogueStartedAsync());
+                    continue;
                 }
+                tasks.Add(view.OnDialogueStartedAsync());
             }
             await YarnTask.WhenAll(tasks);
 
@@ -1091,6 +1109,20 @@ namespace Yarn.Unity
             }
 
             currentLineHurryUpSource.Cancel();
+        }
+
+        public void RequestHurryUpOption()
+        {
+            if (currentOptionsCancellationSource == null)
+            {
+                return;
+            }
+            if (currentOptionsHurryUpSource == null)
+            {
+                return;
+            }
+
+            currentOptionsHurryUpSource.Cancel();
         }
     }
 }

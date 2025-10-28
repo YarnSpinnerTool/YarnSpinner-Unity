@@ -393,11 +393,11 @@ namespace Yarn.Unity
             // if we are set to autoadvance how long do we hold for before continuing?
             if (autoAdvance)
             {
-                await YarnTask.Delay((int)(autoAdvanceDelay * 1000), token.NextLineToken).SuppressCancellationThrow();
+                await YarnTask.Delay((int)(autoAdvanceDelay * 1000), token.NextContentToken).SuppressCancellationThrow();
             }
             else
             {
-                await YarnTask.WaitUntilCanceled(token.NextLineToken).SuppressCancellationThrow();
+                await YarnTask.WaitUntilCanceled(token.NextContentToken).SuppressCancellationThrow();
             }
 
             Typewriter.ContentWillDismiss();
@@ -414,17 +414,6 @@ namespace Yarn.Unity
                     canvasGroup.alpha = 0;
                 }
             }
-        }
-
-        /// <inheritdoc cref="DialoguePresenterBase.RunOptionsAsync(DialogueOption[], CancellationToken)" path="/summary"/> 
-        /// <inheritdoc cref="DialoguePresenterBase.RunOptionsAsync(DialogueOption[], CancellationToken)" path="/param"/> 
-        /// <inheritdoc cref="DialoguePresenterBase.RunOptionsAsync(DialogueOption[], CancellationToken)" path="/returns"/> 
-        /// <remarks>
-        /// This dialogue presenter does not handle any options.
-        /// </remarks>
-        public override YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
-        {
-            return DialogueRunner.NoOptionSelected;
         }
     }
 }

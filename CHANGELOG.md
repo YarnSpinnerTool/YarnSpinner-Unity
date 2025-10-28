@@ -19,6 +19,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Virtual `OnNodeEnter` and `OnNodeExit` calls onto `DialoguePresenterBase`
 - A static `FindRunner` call onto `DialogueRunner` which first tries to find it on the game object itself and then anywhere in the scene
 - A `Source` field to the `LocalizedLine`, this can be of any type but by default will be the `DialogueRunner` that caused the line to be created
+- Options can now be hurried up, the same as lines
+  - added `RunOptionsAsync(DialogueOption[], LineCancellationToken)` to `DialoguePresenterBase`.
+    - this method is virtual and is now the recommended way to respond to options
+    - the default implementation just returns nothing selected
+  - added `NextContentToken` to `LineCancellationToken` which mirrors the existing `NextLineToken`.
+  - added `IsNextContentRequested` to `LineCancellationToken` which mirrors the existing `IsNextLineRequested` bool.
+  - added `RequestHurryUpOption` to `DialogueRunner`.
+  - added hurry up option inputs to `LineAdvancer`
 
 ### Changed
 
@@ -42,6 +50,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - this behaviour can be disabled in the `allowOptionFallthrough` field on the runner
 - Fixed an issue where Builtin localisation would always use the base localisation when fetching a localised asset ([#344](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/344))
 - The UPM samples installer now installs from a specific tag, rather than the head of the repo.
+- Options can now be hurried up, the same as lines, this necessitated several obsolences
+  - `RunOptionsAsync(DialogueOption[], CancellationToken)` is now obsolete
+  - `IsNextLineRequested` is now obsolete
+  - `NextLineToken` is now obsolete
+- `RunOptionsAsync(DialogueOption[], CancellationToken)` is now virtual
+  - the default implementation selects nothing and instantly returns.
+- Dialogue Presenter template file now has the newer form of `RunOptionsAsync`.
+- Built in presenters now use the newer form of `RunOptionsAsync`
 
 ### Removed
 
@@ -49,6 +65,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - this is now handled by typewriters which is more representative of what Action Markup Handling entailed anyways
 - Legacy Dialogue Views, Typewriter, and Effects
 - `ReplacementMarkupHandler.NoDiagnostics` as this no longer matches any need due to core changes around replacement markup
+- `RunOptionsAsync(DialogueOption[], CancellationToken)` from `LinePresenter`
+  - this method is virtual and the default implementation does what we needed here.
 
 ## [3.0.3] 2025-06-21
 
