@@ -29,6 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - added hurry up option inputs to `LineAdvancer`
   - `LineAdvancer` now better handles situations where you want to use the same input for hurrying up and skipping lines.
     - This behaviour is controllable via the `separateHurryUpAndAdvanceControls` field
+  - `InterfaceContainer` is a wrapper class to clean up some interface serialisation pains
 
 ### Changed
 
