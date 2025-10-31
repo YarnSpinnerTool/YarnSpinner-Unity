@@ -27,6 +27,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - added `IsNextContentRequested` to `LineCancellationToken` which mirrors the existing `IsNextLineRequested` bool.
   - added `RequestHurryUpOption` to `DialogueRunner`.
   - added hurry up option inputs to `LineAdvancer`
+  - `LineAdvancer` now better handles situations where you want to use the same input for hurrying up and skipping lines.
+    - This behaviour is controllable via the `separateHurryUpAndAdvanceControls` field
 
 ### Changed
 
@@ -58,6 +60,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - the default implementation selects nothing and instantly returns.
 - Dialogue Presenter template file now has the newer form of `RunOptionsAsync`.
 - Built in presenters now use the newer form of `RunOptionsAsync`
+- `InputSystemAvailability` static class has been made public
+- `LineAdvancer` will ignore hurry up if it comes in the same frame as line was requested to be shown
+  - This fixes a bug where the same key was used to start conversation as well hurry up dialoge
 
 ### Removed
 
