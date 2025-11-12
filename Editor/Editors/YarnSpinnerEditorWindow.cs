@@ -1,80 +1,158 @@
-/*
-Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
-*/
-
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 using UnityEngine.Networking;
-using Yarn.Compiler.Upgrader;
+using System.Reflection;
+using System.Linq;
 
 #nullable enable
 
-namespace Yarn.Unity
+namespace Yarn.Unity.Editor
 {
     public class YarnSpinnerEditorWindow : EditorWindow
     {
-
-        // Current scrolling position for the About view
-        Vector2 aboutViewScrollPos;
-
-        // Current scrolling position for the Upgrade view
-        Vector2 upgradeViewScrollPos;
-
-        // The list paths to Yarn scripts in the project. Updated by the
-        // UpgradeProgram method. 
-        List<string> yarnProjectList = new List<string>();
-
-        // The URL for the text document containing supporter information
-        private const string SupportersURL = "https://yarnspinner.dev/supporters.txt";
-
-        // URLs to open when buttons on the about page are clicked
-        private const string DocumentationURL = "https://docs.yarnspinner.dev/yarn-spinner-for-unity/";
-        private const string PatreonURL = "https://www.patreon.com/bePatron?u=11132340";
-
-        // The request object, used to fetch supportersText
         static UnityWebRequest? supportersRequest;
+        static string supportersList = string.Empty;
 
-        // The dynamically fetched text to show in the About page.
-        static string? supportersText = null;
+        [SerializeField]
+        private VisualTreeAsset? m_VisualTreeAsset = default;
 
-        // Unity requires all directory separators to be forward slashes, on all
-        // platforms.
-        const char DirectorySeparatorChar = '/';
-
-        // Shows the window.
-        [MenuItem("Window/Yarn Spinner/About Yarn Spinner... %#y", false, 2000)]
-        static void ShowWindow()
+        [InitializeOnLoadMethod]
+        internal static void TryShowingWindowOnLoad()
         {
-            EditorWindow.GetWindow<YarnSpinnerEditorWindow>();
+            EditorApplication.delayCall += () =>
+            {
+                // do a check to see if it is time to show
+                if (ShouldShowAboutPage())
+                {
+                    ShowAbout();
+                }
+            };
         }
 
-        // Called when the window first appears.
-        void OnEnable()
+        [MenuItem("Window/Yarn Spinner/About Yarn Spinner... %#y", false, 2000)]
+        public static void ShowAbout()
         {
+            YarnSpinnerEditorWindow window = GetWindow<YarnSpinnerEditorWindow>(true, "About Yarn Spinner", true);
+            window.minSize = new Vector2(512, 768);
+            window.maxSize = window.minSize;
+            window.Show();
+        }
 
-            // Set the window title
-            this.titleContent.text = "Yarn Spinner";
-            this.titleContent.image = Icons.WindowIcon;
+        public void CreateGUI()
+        {
+            // Each editor window contains a root VisualElement object
+            VisualElement root = rootVisualElement;
 
-            this.YarnSpinnerCoreVersion = GetInformationalVersionForType(typeof(Dialogue));
-            this.YarnSpinnerCompilerVersion = GetInformationalVersionForType(typeof(Compiler.Compiler));
-            this.YarnSpinnerUnityVersion = GetInformationalVersionForType(typeof(DialogueRunner));
-
-            if (supportersText == null)
+            if (m_VisualTreeAsset == null)
             {
-                RequestSupporterText();
+                Debug.LogError("Unable to load the UXML file for the About Window");
+                return;
             }
 
-            // Subscribe to be notified of asset changes - we'll use them
-            // to refresh our asset list
-            EditorApplication.projectChanged += RefreshYarnProjectList;
+            // Instantiate UXML
+            VisualElement labelFromUXML = m_VisualTreeAsset.Instantiate();
+            root.Add(labelFromUXML);
 
-            // Also refresh the list right
-            RefreshYarnProjectList();
+            // ok so will need to get lots of different pieces
+            // core version, compiler version, unity version
+            var coreLabel = root.Q<Label>("coreVLabel");
+            var compLabel = root.Q<Label>("compVLabel");
+            var unityLabel = root.Q<Label>("unityVLabel");
+
+            coreLabel.text = $"Core: {GetInformationalVersionForType(typeof(Yarn.Dialogue))}";
+            compLabel.text = $"Compiler: {GetInformationalVersionForType(typeof(Yarn.Compiler.Compiler))}";
+            unityLabel.text = $"Unity: {GetInformationalVersionForType(typeof(Yarn.Unity.DialogueRunner))}";
+
+            // docs link and discord link
+            var resourcesContainer = root.Q("resources");
+            var resourcesButtonContainer = resourcesContainer.Q("buttons");
+            var dissy = resourcesButtonContainer.Q<Button>("support");
+            var docs = resourcesButtonContainer.Q<Button>("docs");
+            dissy.clicked += () =>
+            {
+                Application.OpenURL("https://discord.com/invite/yarnspinner");
+            };
+            docs.clicked += () =>
+            {
+                Application.OpenURL("https://docs.yarnspinner.dev/yarn-spinner-for-unity/");
+            };
+
+            var extrasContainer = root.Q("extras");
+            var showcase = extrasContainer.Q<Button>("showcaseButton");
+            var patreon = extrasContainer.Q<Button>("patreonButton");
+
+            showcase.clicked += () =>
+            {
+                Application.OpenURL("https://www.yarnspinner.dev/tell-us");
+            };
+
+            patreon.clicked += () =>
+            {
+                Application.OpenURL("https://www.patreon.com/bePatron?u=11132340");
+            };
+
+            // list of patreons
+            var patronsList = extrasContainer.Q<ScrollView>("patreonList");
+            FillScrollList(patronsList);
+
+            var review = extrasContainer.Q<Button>("reviewButton");
+            var reviewLabel = extrasContainer.Q("reviewLabel");
+            string reviewText;
+            string reviewURL;
+
+#pragma warning disable 162
+            switch (Yarn.Unity.Editor.YarnPackageImporter.InstallationApproach)
+            {
+                case Yarn.Unity.Editor.YarnPackageImporter.InstallApproach.AssetStore:
+                    review.style.display = DisplayStyle.Flex;
+                    reviewLabel.style.display = DisplayStyle.Flex;
+                    reviewText = "Review on the Asset Store";
+                    reviewURL = "https://assetstore.unity.com/packages/tools/behavior-ai/yarn-spinner-for-unity-the-friendly-dialogue-and-narrative-tool-267061";
+                    break;
+                case Yarn.Unity.Editor.YarnPackageImporter.InstallApproach.Itch:
+                    review.style.display = DisplayStyle.Flex;
+                    reviewLabel.style.display = DisplayStyle.Flex;
+                    reviewText = "Review at Itch";
+                    reviewURL = "https://yarnspinner.itch.io/yarn-spinner/rate";
+                    break;
+                default:
+                    review.style.display = DisplayStyle.None;
+                    reviewLabel.style.display = DisplayStyle.None;
+                    return;
+            }
+
+            review.text = reviewText;
+            review.clicked += () =>
+            {
+                Application.OpenURL(reviewURL);
+            };
+#pragma warning restore
+        }
+
+        private void FillScrollList(ScrollView patronsList)
+        {
+            foreach (var child in patronsList.Children())
+            {
+                child.style.display = DisplayStyle.None;
+            }
+
+            if (string.IsNullOrEmpty(supportersList))
+            {
+                var label = new Label("Loading supporters...");
+                patronsList.Add(label);
+                RequestSupporterText();
+            }
+            else
+            {
+                var sponsors = supportersList.Split('\n');
+                foreach (var sponsor in sponsors)
+                {
+                    var label = new Label(sponsor);
+                    label.style.unityTextAlign = TextAnchor.MiddleCenter;
+                    patronsList.Add(label);
+                }
+            }
         }
 
         private static string GetInformationalVersionForType(System.Type type)
@@ -91,254 +169,64 @@ namespace Yarn.Unity
             return version;
         }
 
-        private void OnDisable()
+        private static bool ShouldShowAboutPage()
         {
-            // Tidy up our update-list delegate when we're going away
-            EditorApplication.projectChanged -= RefreshYarnProjectList;
+            var version = Assembly.GetAssembly(typeof(DialogueRunner)).GetName().Version;
+
+            var settings = YarnSpinnerProjectSettings.GetOrCreateSettings();
+            var storedVersion = settings.Version;
+
+            if (storedVersion.major != version.Major || storedVersion.minor != version.Minor)
+            {
+                settings.Version = (version.Major, version.Minor);
+                settings.WriteSettings();
+                return true;
+            }
+
+            return false;
         }
 
-        private static void EditorUpdate()
+
+        private void EditorUpdate()
         {
             if (supportersRequest == null)
             {
-                // The UnityWebRequest hasn't been created, so this method
-                // should be called. Remove the callback so we don't get
-                // called again.
                 EditorApplication.update -= EditorUpdate;
                 return;
             }
-
-            if (supportersRequest.isDone == false)
+            if (!supportersRequest.isDone)
             {
-                // Not done loading yet; continue waiting
                 return;
             }
 
+            // regardless of the success or failure of the process we want to unregister the editor update
             EditorApplication.update -= EditorUpdate;
 
             bool isError = supportersRequest.result != UnityWebRequest.Result.Success;
 
             if (isError)
             {
-                Debug.LogError("Error loading Yarn Spinner supporter data: " + supportersRequest.error);
-                supportersText = ""; // set to the empty string to prevent future loads
-                return;
+                supportersList = string.Empty;
             }
+            else
+            {
+                supportersList = supportersRequest.downloadHandler.text;
 
-            supportersText = supportersRequest.downloadHandler.text;
-
+                var extras = rootVisualElement.Q<VisualElement>("extras");
+                var list = extras.Q<ScrollView>("patreonList");
+                FillScrollList(list);
+                list.MarkDirtyRepaint();
+            }
         }
-
-        private static void RequestSupporterText()
+        private void RequestSupporterText()
         {
             // Start requesting the supporters text.
-            supportersRequest = UnityWebRequest.Get(SupportersURL);
+            supportersRequest = UnityWebRequest.Get("https://yarnspinner.dev/supporters.txt");
             supportersRequest.SendWebRequest();
 
             // Run EditorUpdate every editor frame so that we can handle
             // when the request ends.
             EditorApplication.update += EditorUpdate;
-        }
-
-        enum SelectedMode
-        {
-            About,
-        }
-
-        SelectedMode selectedMode = 0;
-
-        private string? YarnSpinnerCoreVersion;
-        private string? YarnSpinnerCompilerVersion;
-        private string? YarnSpinnerUnityVersion;
-
-        void OnGUI()
-        {
-            var modes = System.Enum.GetNames(typeof(SelectedMode))
-                                   .Select((x) => ObjectNames.NicifyVariableName(x))
-                                   .ToArray();
-
-            // selectedMode = (SelectedMode)GUILayout.Toolbar((int)selectedMode, modes);
-            selectedMode = SelectedMode.About;
-
-            switch (selectedMode)
-            {
-                case SelectedMode.About:
-                    DrawAboutGUI();
-                    break;
-            }
-
-        }
-
-        void DrawAboutGUI()
-        {
-
-            float logoSize = Mathf.Min(EditorGUIUtility.currentViewWidth, 200);
-
-            using (var scroll = new EditorGUILayout.ScrollViewScope(aboutViewScrollPos))
-            using (new EditorGUILayout.VerticalScope(EditorStyles.inspectorDefaultMargins))
-            {
-                aboutViewScrollPos = scroll.scrollPosition;
-
-                GUIStyle logoLabel = new GUIStyle(EditorStyles.label)
-                {
-                    alignment = TextAnchor.MiddleCenter
-                };
-
-                GUIStyle titleLabel = new GUIStyle(EditorStyles.largeLabel)
-                {
-                    fontSize = 20,
-                    alignment = TextAnchor.MiddleCenter
-                };
-
-                GUIStyle versionLabel = new GUIStyle(EditorStyles.largeLabel)
-                {
-                    fontSize = 12,
-                    alignment = TextAnchor.MiddleCenter,
-                    wordWrap = true,
-                };
-
-                GUIStyle creditsLabel = new GUIStyle(EditorStyles.wordWrappedLabel)
-                {
-                    alignment = TextAnchor.MiddleCenter,
-                    richText = true
-                };
-
-                using (new EditorGUILayout.HorizontalScope(GUILayout.Height(logoSize)))
-                {
-                    GUILayout.FlexibleSpace();
-                    using (new EditorGUILayout.VerticalScope())
-                    {
-                        GUILayout.Label(new GUIContent(Icons.Logo), logoLabel, /* GUILayout.Width(logoSize) ,*/ GUILayout.Height(logoSize));
-                        GUILayout.Label("Yarn Spinner", titleLabel);
-                        GUILayout.Label("Core: " + YarnSpinnerCoreVersion, versionLabel);
-                        GUILayout.Label("Compiler: " + YarnSpinnerCompilerVersion, versionLabel);
-                        GUILayout.Label("Unity: " + YarnSpinnerUnityVersion, versionLabel);
-
-                        GUILayout.Space(10);
-
-                        if (GUILayout.Button("Documentation"))
-                        {
-                            Application.OpenURL(DocumentationURL);
-                        }
-                        if (GUILayout.Button("Support Us On Patreon"))
-                        {
-                            Application.OpenURL(PatreonURL);
-                        }
-                    }
-                    GUILayout.FlexibleSpace();
-                }
-
-                GUILayout.Space(20);
-                GUILayout.Label("Yarn Spinner is made possible thanks to our wonderful supporters on Patreon.", creditsLabel);
-                GUILayout.Space(20);
-
-                using (new EditorGUILayout.VerticalScope(GUILayout.Width(EditorGUIUtility.currentViewWidth - 40)))
-                {
-                    if (supportersText == null)
-                    {
-                        // We're still waiting for supporters text to
-                        // finish arriving (or error out)
-                        GUILayout.Label("Loading supporters...", creditsLabel);
-                    }
-                    else
-                    {
-                        GUILayout.Label(supportersText, creditsLabel);
-                    }
-                }
-            }
-        }
-
-        private void RefreshYarnProjectList()
-        {
-            // Search for all Yarn scripts, and load them into the list.
-            yarnProjectList = Directory.GetFiles(Application.dataPath, "*.yarn", SearchOption.AllDirectories)
-                                .Concat(Directory.GetFiles(Application.dataPath, "*.yarnproject", SearchOption.AllDirectories))
-                                // Unity requires all paths to use forward slashes
-                                .Select(path => path.Replace(Path.DirectorySeparatorChar, DirectorySeparatorChar))
-                                .ToList();
-
-            // Repaint to ensure that any changes to the list are visible
-            Repaint();
-        }
-    }
-
-    // Icons used by this editor window.
-    internal class Icons
-    {
-
-        private static Texture? GetTexture(string textureName)
-        {
-            var guids = AssetDatabase.FindAssets(string.Format("{0} t:texture", textureName));
-            if (guids.Length == 0)
-                return null;
-
-            var path = AssetDatabase.GUIDToAssetPath(guids[0]);
-            return AssetDatabase.LoadAssetAtPath<Texture>(path);
-        }
-
-        static Texture? _successIcon;
-        public static Texture? SuccessIcon
-        {
-            get
-            {
-                if (_successIcon == null)
-                {
-                    _successIcon = GetTexture("YarnSpinnerSuccess");
-                }
-                return _successIcon;
-            }
-        }
-
-        static Texture? _failedIcon;
-        public static Texture? FailedIcon
-        {
-            get
-            {
-                if (_failedIcon == null)
-                {
-                    _failedIcon = GetTexture("YarnSpinnerFailed");
-                }
-                return _failedIcon;
-            }
-        }
-
-        static Texture? _notTestedIcon;
-        public static Texture? NotTestedIcon
-        {
-            get
-            {
-                if (_notTestedIcon == null)
-                {
-                    _notTestedIcon = GetTexture("YarnSpinnerNotTested");
-                }
-                return _notTestedIcon;
-            }
-        }
-
-        static Texture? _windowIcon;
-        public static Texture? WindowIcon
-        {
-            get
-            {
-                if (_windowIcon == null)
-                {
-                    _windowIcon = GetTexture("YarnSpinnerEditorWindow");
-                }
-                return _windowIcon;
-            }
-        }
-
-        static Texture? _logo;
-        public static Texture? Logo
-        {
-            get
-            {
-                if (_logo == null)
-                {
-                    _logo = GetTexture("YarnSpinnerLogo");
-                }
-                return _logo;
-            }
         }
     }
 }

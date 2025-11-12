@@ -32,7 +32,7 @@ namespace Yarn.Unity.Editor
         private const string yarnSpinnerPackageName = "dev.yarnspinner.unity";
         private const string samplesPackageName = "dev.yarnspinner.unity.samples";
 
-        private enum InstallApproach
+        public enum InstallApproach
         {
             Itch, AssetStore, Manual
         }
@@ -53,7 +53,8 @@ namespace Yarn.Unity.Editor
                 // only UPM can really do anything. so in that case we bounce
                 // out to it, and for all others they are not installed later on
                 // this will ideally change
-                switch (installApproach)
+#pragma warning disable 162
+                switch (InstallationApproach)
                 {
                     case InstallApproach.Manual:
                         {
@@ -61,6 +62,7 @@ namespace Yarn.Unity.Editor
                         }
                 }
                 return SamplesPackageStatus.NotInstalled;
+#pragma warning restore
             }
         }
 
@@ -68,7 +70,8 @@ namespace Yarn.Unity.Editor
         [UnityEditor.MenuItem("Window/Yarn Spinner/Install Samples Package", false)]
         internal static void InstallSamples()
         {
-            switch (installApproach)
+#pragma warning disable 162
+            switch (InstallationApproach)
             {
                 // there are two variants here
                 case InstallApproach.Manual:
@@ -99,6 +102,7 @@ namespace Yarn.Unity.Editor
                         break;
                     }
             }
+#pragma warning restore
         }
 
         // open the samples up if they are installed

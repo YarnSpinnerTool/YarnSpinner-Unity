@@ -6,6 +6,7 @@ namespace Yarn.Unity.Editor
 {
     using System.Collections.Generic;
     using System.IO;
+    using System.Reflection;
 #if UNITY_EDITOR
     using UnityEditor;
     using UnityEngine;
@@ -28,8 +29,28 @@ namespace Yarn.Unity.Editor
         public bool automaticallyLinkAttributedYarnCommandsAndFunctions = true;
         public bool generateYSLSFile = false;
         public bool enableDirectLinkToVSCode = false;
+        public (int major, int minor) Version
+        {
+            get
+            {
+                return (majorVersion, minorVersion);
+            }
+            set
+            {
+                majorVersion = value.major;
+                minorVersion = value.minor;
+            }
+        }
+        private int majorVersion = 0;
+        private int minorVersion = 0;
 
-        // need to make it os the output can be passed in also so it can log
+        private const string automaticallyLinkAttributedYarnCommandsAndFunctionsKey = "automaticallyLinkAttributedYarnCommandsAndFunctions";
+        private const string autoRefreshLocalisedAssetsKey = "autoRefreshLocalisedAssets";
+        private const string generateYSLSFileKey = "generateYSLSFile";
+        private const string enableDirectLinkToVSCodeKey = "enableDirectLinkToVSCode";
+        private const string majorVersionKey = "majorVersion";
+        private const string minorVersionKey = "minorVersion";
+
         internal static YarnSpinnerProjectSettings GetOrCreateSettings(string? path = null, Yarn.Unity.ILogger? iLogger = null)
         {
             var settingsPath = YarnSpinnerProjectSettingsPath;
@@ -45,7 +66,7 @@ namespace Yarn.Unity.Editor
                 try
                 {
                     var settingsData = File.ReadAllText(settingsPath);
-                    settings = YarnSpinnerProjectSettings.FromJson(settingsData, logger);
+                    settings = FromJson(settingsData, logger);
 
                     return settings;
                 }
@@ -58,6 +79,8 @@ namespace Yarn.Unity.Editor
             settings.autoRefreshLocalisedAssets = true;
             settings.automaticallyLinkAttributedYarnCommandsAndFunctions = true;
             settings.generateYSLSFile = false;
+            settings.majorVersion = 0;
+            settings.minorVersion = 0;
             settings.WriteSettings(path, logger);
 
             return settings;
@@ -68,34 +91,47 @@ namespace Yarn.Unity.Editor
             var logger = ValidLogger(iLogger);
 
             YarnSpinnerProjectSettings settings = new YarnSpinnerProjectSettings();
-            var jsonDict = Json.Deserialize(jsonString) as System.Collections.Generic.Dictionary<string, object>;
-            if (jsonDict == null)
+
+            try
             {
-                logger.WriteLine($"Failed to parse Yarn Spinner project settings JSON");
-                return settings;
-            }
+                var jsonDict = Json.Deserialize(jsonString) as Dictionary<string, object>;
 
-            T GetValueOrDefault<T>(string key, T defaultValue)
+                if (jsonDict == null)
+                {
+                    logger.WriteLine($"Failed to parse Yarn Spinner project settings JSON");
+                    return settings;
+                }
+
+                T GetValueOrDefault<T>(string key, T defaultValue)
+                {
+                    if (jsonDict.TryGetValue(key, out object result))
+                    {
+                        return (T)System.Convert.ChangeType(result, typeof(T));
+                    }
+                    else
+                    {
+                        return defaultValue;
+                    }
+                }
+
+                bool automaticallyLinkAttributedYarnCommandsAndFunctions = GetValueOrDefault(automaticallyLinkAttributedYarnCommandsAndFunctionsKey, true);
+                bool autoRefreshLocalisedAssets = GetValueOrDefault(autoRefreshLocalisedAssetsKey, true);
+                bool generateYSLSFile = GetValueOrDefault(generateYSLSFileKey, false);
+                bool enableDirectLinkToVSCode = GetValueOrDefault(enableDirectLinkToVSCodeKey, false);
+                int major = GetValueOrDefault(majorVersionKey, 0);
+                int minor = GetValueOrDefault(minorVersionKey, 0);
+
+                settings.automaticallyLinkAttributedYarnCommandsAndFunctions = automaticallyLinkAttributedYarnCommandsAndFunctions;
+                settings.autoRefreshLocalisedAssets = autoRefreshLocalisedAssets;
+                settings.generateYSLSFile = generateYSLSFile;
+                settings.enableDirectLinkToVSCode = enableDirectLinkToVSCode;
+                settings.majorVersion = major;
+                settings.minorVersion = minor;
+            }
+            catch (System.Exception ex)
             {
-                if (jsonDict.TryGetValue(key, out object result))
-                {
-                    return (T)result;
-                }
-                else
-                {
-                    return defaultValue;
-                }
+                Debug.LogException(ex);
             }
-
-            bool automaticallyLinkAttributedYarnCommandsAndFunctions = GetValueOrDefault("automaticallyLinkAttributedYarnCommandsAndFunctions", true);
-            bool autoRefreshLocalisedAssets = GetValueOrDefault("autoRefreshLocalisedAssets", true);
-            bool generateYSLSFile = GetValueOrDefault("generateYSLSFile", false);
-            bool enableDirectLinkToVSCode = GetValueOrDefault("enableDirectLinkToVSCode", false);
-
-            settings.automaticallyLinkAttributedYarnCommandsAndFunctions = automaticallyLinkAttributedYarnCommandsAndFunctions;
-            settings.autoRefreshLocalisedAssets = autoRefreshLocalisedAssets;
-            settings.generateYSLSFile = generateYSLSFile;
-            settings.enableDirectLinkToVSCode = enableDirectLinkToVSCode;
 
             return settings;
         }
@@ -110,12 +146,13 @@ namespace Yarn.Unity.Editor
                 settingsPath = Path.Combine(path, settingsPath);
             }
 
-            // var jsonValue = EditorJsonUtility.ToJson(this);
-            var dictForm = new System.Collections.Generic.Dictionary<string, bool>();
-            dictForm["automaticallyLinkAttributedYarnCommandsAndFunctions"] = this.automaticallyLinkAttributedYarnCommandsAndFunctions;
-            dictForm["autoRefreshLocalisedAssets"] = this.autoRefreshLocalisedAssets;
-            dictForm["generateYSLSFile"] = this.generateYSLSFile;
-            dictForm["enableDirectLinkToVSCode"] = this.enableDirectLinkToVSCode;
+            var dictForm = new System.Collections.Generic.Dictionary<string, object>();
+            dictForm[automaticallyLinkAttributedYarnCommandsAndFunctionsKey] = this.automaticallyLinkAttributedYarnCommandsAndFunctions;
+            dictForm[autoRefreshLocalisedAssetsKey] = this.autoRefreshLocalisedAssets;
+            dictForm[generateYSLSFileKey] = this.generateYSLSFile;
+            dictForm[enableDirectLinkToVSCodeKey] = this.enableDirectLinkToVSCode;
+            dictForm[majorVersionKey] = this.majorVersion;
+            dictForm[minorVersionKey] = this.minorVersion;
 
             var jsonValue = Json.Serialize(dictForm);
 
