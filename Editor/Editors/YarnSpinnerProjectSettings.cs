@@ -6,7 +6,6 @@ namespace Yarn.Unity.Editor
 {
     using System.Collections.Generic;
     using System.IO;
-    using System.Reflection;
 #if UNITY_EDITOR
     using UnityEditor;
     using UnityEngine;
@@ -72,7 +71,7 @@ namespace Yarn.Unity.Editor
                 }
                 catch (System.Exception e)
                 {
-                    logger.WriteLine($"Failed to load Yarn Spinner project settings at {settingsPath}: {e.Message}");
+                    logger.WriteException(e, $"Failed to load Yarn Spinner project settings at {settingsPath}");
                 }
             }
 
@@ -130,7 +129,7 @@ namespace Yarn.Unity.Editor
             }
             catch (System.Exception ex)
             {
-                Debug.LogException(ex);
+                logger.WriteException(ex);
             }
 
             return settings;
@@ -156,7 +155,7 @@ namespace Yarn.Unity.Editor
 
             var jsonValue = Json.Serialize(dictForm);
 
-            var folder = Path.GetDirectoryName(YarnSpinnerProjectSettingsPath);
+            var folder = Path.GetDirectoryName(settingsPath);
             if (!Directory.Exists(folder))
             {
                 Directory.CreateDirectory(folder);
@@ -164,11 +163,11 @@ namespace Yarn.Unity.Editor
 
             try
             {
-                File.WriteAllText(YarnSpinnerProjectSettingsPath, jsonValue);
+                File.WriteAllText(settingsPath, jsonValue);
             }
             catch (System.Exception e)
             {
-                logger.WriteLine($"Failed to save Yarn Spinner project settings to {YarnSpinnerProjectSettingsPath}: {e.Message}");
+                logger.WriteException(e, $"Failed to save Yarn Spinner project settings to {settingsPath}");
             }
         }
 

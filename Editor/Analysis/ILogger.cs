@@ -10,10 +10,12 @@ using UnityEngine;
 
 namespace Yarn.Unity
 {
+#nullable enable
     public interface ILogger : IDisposable
     {
         void Write(object obj);
         void WriteLine(object obj);
+        void WriteException(System.Exception ex, string? message = null);
     }
 
     public class FileLogger : ILogger
@@ -40,6 +42,17 @@ namespace Yarn.Unity
         {
             writer.WriteLine(text);
         }
+        public void WriteException(System.Exception ex, string? message)
+        {
+            if (message == null)
+            {
+                writer.WriteLine($"Exception: {ex.Message}");
+            }
+            else
+            {
+                writer.WriteLine($"{message}: {ex.Message}");
+            }
+        }
     }
 
     public class UnityLogger : ILogger
@@ -57,6 +70,13 @@ namespace Yarn.Unity
             Debug.LogWarning(text.ToString());
 #endif
         }
+
+        public void WriteException(System.Exception ex, string? message = null)
+        {
+#if UNITY_EDITOR
+            Debug.LogException(ex);
+#endif
+        }
     }
 
     public class NullLogger : ILogger
@@ -66,5 +86,7 @@ namespace Yarn.Unity
         public void Write(object text) { }
 
         public void WriteLine(object text) { }
+
+        public void WriteException(System.Exception ex, string? message = null) { }
     }
 }
