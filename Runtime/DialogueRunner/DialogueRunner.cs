@@ -119,6 +119,18 @@ namespace Yarn.Unity
                     dialogue.DialogueCompleteHandler = OnDialogueCompleted;
                     dialogue.PrepareForLinesHandler = OnPrepareForLines;
 
+                    dialogue.LogDebugMessage = delegate (string message)
+                    {
+                        if (verboseLogging)
+                        {
+                            Debug.Log(message, this);
+                        }
+                    };
+                    dialogue.LogErrorMessage = delegate (string message)
+                    {
+                        Debug.LogError(message, this);
+                    };
+
                     if (yarnProject != null)
                     {
                         Dialogue.SetProgram(yarnProject.Program);
@@ -166,6 +178,10 @@ namespace Yarn.Unity
                 // InMemoryVariableStorage and use that.
                 if (variableStorage == null)
                 {
+                    if (verboseLogging)
+                    {
+                        Debug.Log($"Dialogue Runner has no Variable Storage; creating a {nameof(InMemoryVariableStorage)}", this);
+                    }
                     this.variableStorage = gameObject.AddComponent<InMemoryVariableStorage>();
                 }
                 if (this.variableStorage.Program == null && this.YarnProject != null)
@@ -202,6 +218,11 @@ namespace Yarn.Unity
                             $"Line text and assets will not be available.", this);
                     }
 
+                    if (verboseLogging)
+                    {
+                        Debug.Log($"Dialogue Runner has no LineProvider; creating a {nameof(BuiltinLocalisedLineProvider)}.", this);
+                    }
+
                     lineProvider = gameObject.AddComponent<BuiltinLocalisedLineProvider>();
                     lineProvider.YarnProject = yarnProject;
                 }
@@ -216,6 +237,13 @@ namespace Yarn.Unity
         [Space]
         [UnityEngine.Serialization.FormerlySerializedAs("dialogueViews")]
         [SerializeField] List<DialoguePresenterBase?> dialoguePresenters = new List<DialoguePresenterBase?>();
+
+        /// <summary>
+        /// If true, will print Debug.Log messages every time it enters a
+        /// node, and other frequent events.
+        /// </summary>
+        [Tooltip("If true, will print Debug.Log messages every time it enters a node, and other frequent events")]
+        public bool verboseLogging = false;
 
         /// <summary>
         /// Gets a value that indicates if the dialogue is actively
