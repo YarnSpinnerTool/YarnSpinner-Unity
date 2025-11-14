@@ -18,11 +18,7 @@ namespace Yarn.Unity
     {
         void OnValidate()
         {
-            if (!IsInputModuleInScene)
-            {
-                // No input module was found in the scene. Try to add one.
-                AddInputModule();
-            }
+            AddInputModule();
         }
 
         private void AddInputModule()
@@ -36,14 +32,29 @@ namespace Yarn.Unity
 
             UnityEditor.EditorApplication.delayCall += () =>
             {
-                if (IsInputModuleInScene)
+                UnityEngine.EventSystems.BaseInputModule? inputModule = ActiveInputSystem;
+                if (inputModule != null)
                 {
-                    // An input module was added between us scheduling the call
-                    // and the call running. Nothing to do.
+                    // there is an input system in the scene now, but it might not be the right one
+                    if (IsUsingCorrectInputSystem(inputModule))
+                    {
+                        // it is the right one, so we can just jump over this
+                        // either there was always one in the scene or one was added in between this call being scheduled and run
+                        return;
+                    }
+
+                    // the input system we have is the wrong type
+                    // so we will need to destroy it and then make a new one
+                    DestroyImmediate(inputModule);
+                }
+
+                // because we are doing this as a delayed action it's possible it will run after entering/exiting playback
+                // in which case the temporary version that unity makes for in-editor playing will be destroyed
+                // and we don't want that
+                if (this == null)
+                {
                     return;
                 }
-                UnityEngine.EventSystems.BaseInputModule inputModule;
-
 #if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
                 // Create an input module that uses the Legacy Input Manager.
                 inputModule = this.gameObject.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
@@ -86,13 +97,35 @@ namespace Yarn.Unity
             return isInPackages;
         }
 
-        private bool IsInputModuleInScene
+        // if we have an input system this will return it
+        private UnityEngine.EventSystems.BaseInputModule? ActiveInputSystem
         {
             get
             {
-                return this.TryGetComponent<UnityEngine.EventSystems.BaseInputModule>(out _)
-                    || FindAnyObjectByType<UnityEngine.EventSystems.BaseInputModule>(FindObjectsInactive.Include) != null;
+                // because we are doing this called as part of a delayed action it's possible it will run after entering/exiting playback
+                // in which case the temporary version that unity makes for in-editor playing will be destroyed
+                // and we don't want that
+                if (this == null)
+                {
+                    return null;
+                }
+                if (this.TryGetComponent<UnityEngine.EventSystems.BaseInputModule>(out var inputSystem))
+                {
+                    return inputSystem;
+                }
+                return FindAnyObjectByType<UnityEngine.EventSystems.BaseInputModule>(FindObjectsInactive.Include);
             }
+        }
+
+        private bool IsUsingCorrectInputSystem(UnityEngine.EventSystems.BaseInputModule system)
+        {
+#if USE_INPUTSYSTEM && ENABLE_INPUT_SYSTEM
+            return system is UnityEngine.InputSystem.UI.InputSystemUIInputModule;
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            return system is UnityEngine.EventSystems.StandaloneInputModule;
+#else
+            return false;
+#endif
         }
     }
 

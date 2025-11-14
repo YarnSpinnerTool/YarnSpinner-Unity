@@ -64,6 +64,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `InputSystemAvailability` static class has been made public
 - `LineAdvancer` will ignore hurry up if it comes in the same frame as line was requested to be shown
   - This fixes a bug where the same key was used to start conversation as well hurry up dialoge
+- Fixed an issue on `EnsureInputModuleAvailable` where if there was an input system in the scene but it was of the wrong type the console would fill up with errors
 
 ### Removed
 
