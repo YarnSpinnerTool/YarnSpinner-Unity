@@ -171,6 +171,12 @@ namespace Yarn.Unity.Editor
 
         private static bool ShouldShowAboutPage()
         {
+            // turns out that headless mode doesn't prevent windows being summoned
+            if (Application.isBatchMode)
+            {
+                return false;
+            }
+
             var version = Assembly.GetAssembly(typeof(DialogueRunner)).GetName().Version;
 
             var settings = YarnSpinnerProjectSettings.GetOrCreateSettings();
