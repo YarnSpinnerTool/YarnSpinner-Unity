@@ -5,8 +5,12 @@ namespace Yarn.Unity
     using System;
     using System.Collections.Generic;
     using System.Threading;
-    using TMPro;
     using UnityEngine;
+#if USE_TMP
+    using TMPro;
+#else
+    using TMP_Text = Yarn.Unity.TMPShim;
+#endif
 
     /// <summary>
     /// An implementation of <see cref="IAsyncTypewriter"/> that delivers

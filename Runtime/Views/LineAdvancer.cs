@@ -12,6 +12,7 @@ using Yarn.Unity.Attributes;
 using TMPro;
 #else
 using TextMeshProUGUI = Yarn.Unity.TMPShim;
+using TMP_Text = Yarn.Unity.TMPShim;
 #endif
 
 #nullable enable
