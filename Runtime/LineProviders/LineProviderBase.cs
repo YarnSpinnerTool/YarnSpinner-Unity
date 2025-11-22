@@ -92,7 +92,6 @@ namespace Yarn.Unity
     /// to get <see cref="LocalizedLine"/>s, which contain the localized
     /// information that is presented to the player through dialogue presenters.
     /// </remarks>
-    /// <seealso cref="DialogueViewBase"/>
     public abstract class LineProviderBehaviour : MonoBehaviour, ILineProvider
     {
         /// <inheritdoc/>

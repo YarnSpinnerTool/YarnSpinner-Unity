@@ -17,7 +17,6 @@ namespace Yarn.Unity
     /// A subclass of <see cref="DialoguePresenterBase"/> that plays voice-over
     /// <see cref="AudioClip"/>s for lines of dialogue.
     /// </summary>
-    /// <seealso cref="DialogueViewBase"/>
     public sealed class VoiceOverPresenter : DialoguePresenterBase
     {
 
