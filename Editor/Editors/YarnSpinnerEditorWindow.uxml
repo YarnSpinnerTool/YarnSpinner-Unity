@@ -1,11 +1,11 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Packages/dev.yarnspinner.unity/Editor/Editors/AboutWindow.uss?fileID=7433441132597879392&amp;guid=b4f2c0e54086641babbe5855064e2c88&amp;type=3#AboutWindow" />
-    <engine:VisualElement style="flex-grow: 0; background-image: url(&quot;project://database/Packages/dev.yarnspinner.unity/Editor/Editors/Icons/YarnSpinnerLogo.png?fileID=21300000&amp;guid=528a6dd601766934abb8b1053bd798ef&amp;type=3#YarnSpinnerLogo&quot;); min-width: 256px; min-height: 256px; max-width: 512px; max-height: 512px; -unity-background-scale-mode: scale-to-fit;" />
-    <engine:Label text="Yarn Spinner for Unity" style="-unity-text-align: upper-center; -unity-font-style: normal; font-size: 32px; margin-top: 0;" />
-    <engine:Label text="Thank you for using Yarn Spinner, have fun adding dialogue to your games." style="margin-bottom: 8px; margin-top: 0; margin-left: 4px;" />
-    <engine:Label text="Core Version: aaaaaaaa" name="coreVLabel" style="margin-bottom: 4px; margin-left: 8px;" />
-    <engine:Label text="Compiler Version: aaaaaaaa" name="compVLabel" style="margin-bottom: 4px; margin-left: 8px;" />
-    <engine:Label text="Unity Version: aaaaaaaa" name="unityVLabel" style="margin-bottom: 4px; margin-left: 8px;" />
+    <Style src="project://database/Packages/dev.yarnspinner.unity/Editor/Editors/YarnSpinnerEditorWindow.uss?fileID=7433441132597879392&amp;guid=b4f2c0e54086641babbe5855064e2c88&amp;type=3#YarnSpinnerEditorWindow" />
+    <engine:VisualElement style="flex-grow: 0; background-image: url(&quot;project://database/Packages/dev.yarnspinner.unity/Editor/Editors/Icons/YarnSpinnerLogo.png?fileID=21300000&amp;guid=528a6dd601766934abb8b1053bd798ef&amp;type=3#YarnSpinnerLogo&quot;); -unity-background-scale-mode: scale-to-fit; min-height: 128px;" />
+    <engine:Label text="Yarn Spinner for Unity" style="-unity-text-align: upper-center; -unity-font-style: bold; font-size: 32px; margin-top: 0;" />
+    <engine:Label text="Thank you for using Yarn Spinner! Have fun adding dialogue to your amazing game!" style="margin-bottom: 8px; margin-top: 0; margin-left: 4px; -unity-text-align: upper-center; white-space: normal;" />
+    <engine:Label text="Core Version: aaaaaaaa" name="coreVLabel" selectable="true" focusable="true" style="margin-bottom: 4px; margin-left: 8px; white-space: normal; font-size: 10px;" />
+    <engine:Label text="Compiler Version: aaaaaaaa" name="compVLabel" selectable="true" focusable="true" style="margin-bottom: 4px; margin-left: 8px; white-space: normal; font-size: 10px;" />
+    <engine:Label text="Unity Version: aaaaaaaa" name="unityVLabel" selectable="true" focusable="true" style="margin-bottom: 4px; margin-left: 8px; white-space: normal; font-size: 10px;" />
     <engine:VisualElement name="resources" style="flex-grow: 0;">
         <engine:Label text="Resources" style="-unity-font-style: bold; margin-top: 6px; margin-left: 4px;" />
         <engine:Label text="Here are some useful resources." style="margin-left: 4px;" />
@@ -16,11 +16,11 @@
     </engine:VisualElement>
     <engine:VisualElement name="extras" style="flex-grow: 1;">
         <engine:Label text="Extras" style="-unity-font-style: bold; margin-top: 6px; margin-left: 4px;" />
-        <engine:Label text="Would you like to be included in the Yarn Spinner showcase?" style="margin-left: 4px;" />
+        <engine:Label text="Would you like to be included in the Yarn Spinner showcase on our website? Submit info about your game!" style="margin-left: 4px; white-space: normal;" />
         <engine:Button text="Submit your game" name="showcaseButton" style="margin-bottom: 4px; margin-left: 8px; margin-right: 8px;" />
-        <engine:Label text="If you are enjoying Yarn Spinner please consider writing a review of Yarn Spinner. It only takes a moment and it hugely helps us. Thank you!" name="reviewLabel" style="white-space: normal; margin-top: 6px; margin-left: 4px;" />
+        <engine:Label text="If you are enjoying Yarn Spinner, please consider writing a review of Yarn Spinner. It only takes a moment and it hugely helps us. Thank you!" name="reviewLabel" style="white-space: normal; margin-top: 6px; margin-left: 4px;" />
         <engine:Button text="Review on the Asset Store" name="reviewButton" style="margin-bottom: 4px; margin-left: 8px; margin-right: 8px;" />
-        <engine:Label text="Yarn Spinner is made possible thanks to our wonderful supporters on Patreon. If you would like to join the Patreon this would be much appreciated!" style="white-space: normal; margin-top: 6px; margin-left: 4px;" />
+        <engine:Label text="Yarn Spinner is made possible thanks to our wonderful supporters on Patreon. If you would like to join the Patreon, this would be much appreciated!" style="white-space: normal; margin-top: 6px; margin-left: 4px;" />
         <engine:Button text="Support Us On Patreon" name="patreonButton" style="margin-right: 8px; margin-left: 8px;" />
         <engine:ScrollView horizontal-scroller-visibility="Hidden" name="patreonList" style="flex-grow: 1;" />
     </engine:VisualElement>
