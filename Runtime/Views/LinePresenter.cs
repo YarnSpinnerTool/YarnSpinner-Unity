@@ -193,6 +193,7 @@ namespace Yarn.Unity
         [Group("Typewriter")]
         [ShowIf(nameof(typewriterStyle), TypewriterType.Custom)]
         [UnityEngine.Serialization.FormerlySerializedAs("CustomTypewriter")]
+        [MustNotBeNull("Attach a component that implements the " + nameof(IAsyncTypewriter) + " interface.")]
         public UnityEngine.Object? customTypewriter;
 
         /// <summary>
