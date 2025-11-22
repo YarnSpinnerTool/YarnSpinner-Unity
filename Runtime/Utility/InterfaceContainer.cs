@@ -6,18 +6,18 @@ using UnityEditor;
 namespace Yarn.Unity
 {
     [System.Serializable]
-    public class InterfaceContainer<I> : ISerializationCallbackReceiver where I : class
+    public class InterfaceContainer<TContainedType> : ISerializationCallbackReceiver where TContainedType : class
     {
         public UnityEngine.Object? targetObject;
-        public I? Interface
+        public TContainedType? Interface
         {
             get
             {
-                return targetObject as I;
+                return targetObject as TContainedType;
             }
         }
 
-        public static implicit operator I?(InterfaceContainer<I> value)
+        public static implicit operator TContainedType?(InterfaceContainer<TContainedType> value)
         {
             return value.Interface;
         }
@@ -26,13 +26,13 @@ namespace Yarn.Unity
         // and otherwise we null it out, also wiping the connection in the inspector
         void OnValidate()
         {
-            if (!targetObject is I)
+            if (!targetObject is TContainedType)
             {
                 if (targetObject is GameObject gameObject)
                 {
                     foreach (var component in gameObject.GetComponents<Component>())
                     {
-                        if (component is I)
+                        if (component is TContainedType)
                         {
                             targetObject = component;
                             return;
