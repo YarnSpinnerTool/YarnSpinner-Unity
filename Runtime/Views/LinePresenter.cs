@@ -78,7 +78,7 @@ namespace Yarn.Unity
         /// a character name, this object will be left blank.
         /// </remarks>
         [Group("Character")]
-        [Label("Name field")]
+        [Label("Name Field")]
         public TMP_Text? characterNameText = null;
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace Yarn.Unity
         /// <see langword="true"/>.</remarks>
         [Group("Automatically Advance Dialogue")]
         [ShowIf(nameof(autoAdvance))]
-        [Label("Delay before advancing")]
+        [Label("Delay Before Advancing")]
         public float autoAdvanceDelay = 1f;
 
 
@@ -180,13 +180,13 @@ namespace Yarn.Unity
         /// </summary>
         [Group("Typewriter")]
         [ShowIf(nameof(typewriterStyle), TypewriterType.ByLetter)]
-        [Label("Letters per second")]
+        [Label("Letters per Second")]
         [Min(0)]
         public int lettersPerSecond = 60;
 
         [Group("Typewriter")]
         [ShowIf(nameof(typewriterStyle), TypewriterType.ByWord)]
-        [Label("words per second")]
+        [Label("Words per Second")]
         [Min(0)]
         public int wordsPerSecond = 10;
 
