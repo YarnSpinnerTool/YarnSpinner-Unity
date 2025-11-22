@@ -63,7 +63,7 @@ namespace Yarn.Unity
 
         /// <summary>
         /// The object that created this line.
-        /// Most of the time will be the <see cref="DialogueRuner"/> that passed the presenter the line.
+        /// Most of the time will be the <see cref="DialogueRunner"/> that passed the presenter the line.
         /// </summary>
         /// <remarks>
         /// This exists for situations where you need the dialogue runner (or your custom equivalent) to send back messages.
