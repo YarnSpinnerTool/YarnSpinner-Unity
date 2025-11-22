@@ -192,7 +192,8 @@ namespace Yarn.Unity
 
         [Group("Typewriter")]
         [ShowIf(nameof(typewriterStyle), TypewriterType.Custom)]
-        public UnityEngine.Object? CustomTypewriter;
+        [UnityEngine.Serialization.FormerlySerializedAs("CustomTypewriter")]
+        public UnityEngine.Object? customTypewriter;
 
         /// <summary>
         /// A list of <see cref="ActionMarkupHandler"/> objects that will be
@@ -290,33 +291,33 @@ namespace Yarn.Unity
             var tw = ValidateCustomTypewriter();
             if (tw == null)
             {
-                CustomTypewriter = null;
+                customTypewriter = null;
             }
             else
             {
-                CustomTypewriter = tw as Component;
+                customTypewriter = tw as Component;
             }
         }
 
         private IAsyncTypewriter? ValidateCustomTypewriter()
         {
-            if (CustomTypewriter is GameObject gameObject)
+            if (customTypewriter is GameObject gameObject)
             {
                 foreach (var component in gameObject.GetComponents<Component>())
                 {
                     if (component is IAsyncTypewriter)
                     {
-                        CustomTypewriter = component;
+                        customTypewriter = component;
                         return component as IAsyncTypewriter;
                     }
                 }
             }
 
-            if (CustomTypewriter is Component)
+            if (customTypewriter is Component)
             {
-                if (CustomTypewriter is IAsyncTypewriter)
+                if (customTypewriter is IAsyncTypewriter)
                 {
-                    return CustomTypewriter as IAsyncTypewriter;
+                    return customTypewriter as IAsyncTypewriter;
                 }
             }
 
