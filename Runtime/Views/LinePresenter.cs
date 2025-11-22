@@ -201,7 +201,7 @@ namespace Yarn.Unity
         /// used to handle markers in the line.
         /// </summary>
         [Group("Typewriter")]
-        [Label("Event Handler")]
+        [Label("Event Handlers")]
         [UnityEngine.Serialization.FormerlySerializedAs("actionMarkupHandlers")]
         [SerializeField] List<ActionMarkupHandler> eventHandlers = new List<ActionMarkupHandler>();
         private List<IActionMarkupHandler> ActionMarkupHandlers
