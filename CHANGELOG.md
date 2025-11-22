@@ -57,6 +57,9 @@ We've updated the way that typewriters are used in the built-in Line Presenter s
 
 To create a custom typewriter, create a class that implements [`IAsyncTypewriter`](https://docs.yarnspinner.dev/3.1/api/csharp/yarn.unity/yarn.unity.iasynctypewriter). You can find an example of how to write a custom typewriter in the source code for the [`LetterTypewriter`](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/blob/main/Runtime/Views/Typewriter/LetterTypewriter.cs) class.
 
+> [!NOTE]
+> As part of this change, the On Character Typed event on Line Presenter has been removed. If you want to run code every time a character appears, create a new script that subclasses from [ActionMarkupHandler](https://docs.yarnspinner.dev/3.1/api/csharp/yarn.unity/yarn.unity.actionmarkuphandler), and add that to an object in your scene. Add that object to the Line Presenter's "Event Handlers" list. In your ActionMarkupHandler subclass, you can write code that gets called every time characters appear on screen by implementing the [OnCharacterWillAppear method](https://docs.yarnspinner.dev/3.1/api/csharp/yarn.unity/yarn.unity.actionmarkuphandler/yarn.unity.actionmarkuphandler.oncharacterwillappear).
+
 #### Removed Legacy `DialogueView` Classes
 
 Yarn Spinner 3.0 introduced a new programming model for presenting dialogue, called [Dialogue Presenters](https://docs.yarnspinner.dev/3.1/components/dialogue-view). As part of the rollout of this new API, we made the old `DialogueView` class act as a compatibility layer, and marked it as deprecated. Yarn Spinner 3.1 removes this deprecated code. If you have code that started life as a Yarn Spinner 2.0 project, you will need to [migrate your legacy dialogue presentation UI code to use Dialogue Presenters](https://docs.yarnspinner.dev/3.1/changelog/upgrading-from-yarn-spinner-2#dialogueviewbase-is-now-dialoguepresenter).
