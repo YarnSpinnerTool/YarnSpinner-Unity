@@ -494,6 +494,11 @@ namespace Yarn.Unity
             {
                 try
                 {
+                    // there are numerous situations where kicking off dialogue immediately from Start causes annoying issues around timing of different game objects
+                    // while these can all be fixed it it much easier in our case to just wait one frame before starting.
+                    // This still has the same feel of the older start automatically but just simplifies so many things.
+                    // For situations where you absolutely must start immediately call StartDialogue yourself.
+                    await YarnTask.Yield();
                     await StartDialogue(startNode);
                 }
                 catch (System.OperationCanceledException ex)

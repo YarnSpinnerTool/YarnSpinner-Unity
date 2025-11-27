@@ -123,6 +123,7 @@ Yarn Spinner 3.0 introduced a new programming model for presenting dialogue, cal
 - `LineAdvancer` will now ignore the signal to 'hurry up' if it comes in the same frame as line was requested to be shown.
   - This fixes a bug where the same key was used to start conversation as well hurry up dialogue.
 - Fixed an issue on `EnsureInputModuleAvailable` where, if there was an input system in the scene but it was of the wrong type, the console would fill up with errors.
+- `DialogueRunner` now waits one frame before starting dialogue when automatically start dialogue is turned on.
 
 ### Removed
 
