@@ -281,7 +281,7 @@ namespace Yarn.Unity
                     Typewriter?.ActionMarkupHandlers.AddRange(ActionMarkupHandlers);
                     if (Typewriter == null)
                     {
-                        Debug.Log("shit");
+                        Debug.LogWarning("Typewriter mode is set to custom but there is no typewriter set.");
                     }
                     break;
             }
@@ -391,7 +391,7 @@ namespace Yarn.Unity
                 }
             }
 
-            await Typewriter.RunTypewriter(text, token.HurryUpToken);
+            await Typewriter.RunTypewriter(text, token.HurryUpToken).SuppressCancellationThrow();
 
             // if we are set to autoadvance how long do we hold for before continuing?
             if (autoAdvance)
