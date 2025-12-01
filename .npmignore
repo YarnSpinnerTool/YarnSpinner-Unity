@@ -5,3 +5,17 @@
 # developing.
 Samples
 Samples.meta
+
+# Ignore markdown files when packaging for asset stores - they'll be converted
+# into PDFs or other more readable formats.
+*.md
+*.md.meta
+
+# Ignore test files, which don't need to be shipped (they're not needed by
+# end-users)
+Tests
+Tests.meta
+
+# Ignore the file that defines which way we install the samples - the
+# appropriate setting will be manually copied in.
+YarnPackageImporter.SamplesInstallApproach.cs
