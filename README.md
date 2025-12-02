@@ -44,3 +44,5 @@ Yarn Spinner needs your help to be as awesome as it can be. You don't have to be
 * Follow [Yarn Spinner on Bluesky](https://bsky.app/profile/yarnspinner.dev), or [tell us about a game you're making with Yarn Spinner!](https://www.yarnspinner.dev/tell-us). 
 
 If you want to contribute to Yarn Spinner, [go read our contributor's guide!](CONTRIBUTING.md)
+
+CLA test.
