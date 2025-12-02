@@ -18,3 +18,4 @@ The following people have contributed to the development of Yarn Spinner. If you
 * 2023: Thomas Ingram (https://vertx.xyz)
 * 2023: Isaac Berman (https://github.com/bermanisaac)
 * 20??: Mars Buttfield-Addison (https://github.com/TheMartianLife)
+* 2025: Jay Xavier Peet (https://github.com/JayPeet)
