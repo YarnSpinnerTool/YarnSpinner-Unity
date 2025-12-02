@@ -1,6 +1,6 @@
 {
   "name": "dev.yarnspinner.unity",
-  "version": "3.0.3",
+  "version": "3.1.0",
   "displayName": "Yarn Spinner",
   "description": "Yarn Spinner is the friendly tool for interactive conversations. Write your dialogue in a simple programming language that's designed to be straightforward for writers and powerful for programmers, and then attach it to your scenes to power your conversations.",
   "unity": "2022.3",
