@@ -450,11 +450,12 @@
             </summary>
         </member>
         <member name="F:Yarn.Dialogue.DefaultStartNodeName">
-            <summary>The node that execution will start from.</summary>
+            <summary>The default name of the node that execution will start
+            from.</summary>
         </member>
         <member name="F:Yarn.Dialogue.NoOptionSelected">
             <summary>
-            The value to indicate to the dialogue runner that no option was selected and dialogue should fallthrough to the rest of the program.
+            The value to indicate to the dialogue runner that no option was selected and dialogue should fall through to the rest of the program.
             </summary>
         </member>
         <member name="P:Yarn.Dialogue.Program">
@@ -1083,6 +1084,14 @@
             The collection of initial values for variables; if a PUSH_VARIABLE
             instruction is run, and the value is not found in the storage, this
             value will be used
+            </summary>
+        </member>
+        <member name="F:Yarn.Program.LanguageVersionFieldNumber">
+            <summary>Field number for the "language_version" field.</summary>
+        </member>
+        <member name="P:Yarn.Program.LanguageVersion">
+            <summary>
+            The version of the Yarn Spinner language that this program was compiled under.
             </summary>
         </member>
         <member name="T:Yarn.Instruction">
