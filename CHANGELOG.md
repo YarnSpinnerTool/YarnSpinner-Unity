@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Removed
+
+## [3.1.1] 2025-12-03
+
 ### Overview
 
 Yarn Spinner for Unity 3.1 contains a number of improvements and useful changes.
