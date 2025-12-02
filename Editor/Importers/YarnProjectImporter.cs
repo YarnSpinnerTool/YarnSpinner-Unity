@@ -27,7 +27,7 @@ namespace Yarn.Unity.Editor
     /// Imports a .yarnproject file and produces a <see cref="YarnProject"/>
     /// asset.
     /// </summary>
-    [ScriptedImporter(6, new[] { "yarnproject" }, 1000), HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/importing-yarn-files/yarn-projects")]
+    [ScriptedImporter(7, new[] { "yarnproject" }, 1000), HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/importing-yarn-files/yarn-projects")]
     [InitializeOnLoad]
     public class YarnProjectImporter : ScriptedImporter
     {
