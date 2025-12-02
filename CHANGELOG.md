@@ -62,7 +62,7 @@ To create a custom typewriter, create a class that implements [`IAsyncTypewriter
 
 #### Removed Legacy `DialogueView` Classes
 
-Yarn Spinner 3.0 introduced a new programming model for presenting dialogue, called [Dialogue Presenters](https://docs.yarnspinner.dev/3.1/components/dialogue-view). As part of the rollout of this new API, we made the old `DialogueView` class act as a compatibility layer, and marked it as deprecated. Yarn Spinner 3.1 removes this deprecated code. If you have code that started life as a Yarn Spinner 2.0 project, you will need to [migrate your legacy dialogue presentation UI code to use Dialogue Presenters](https://docs.yarnspinner.dev/3.1/changelog/upgrading-from-yarn-spinner-2#dialogueviewbase-is-now-dialoguepresenter).
+Yarn Spinner 3.0 introduced a new programming model for presenting dialogue, called [Dialogue Presenters](https://docs.yarnspinner.dev/3.1/components/dialogue-view). As part of the rollout of this new API, we made the old `DialogueView` class act as a compatibility layer, and marked it as deprecated. Yarn Spinner 3.1 removes this deprecated code. If you have code that started life as a Yarn Spinner 2.0 project, you will need to [migrate your legacy dialogue presentation UI code to use Dialogue Presenters](https://docs.yarnspinner.dev/3.1/changelog/upgrading-from-yarn-spinner-2#dialogueviewbase-is-now-dialoguepresenter) by changing their parent class to `DialoguePresenter`, and implementing the new methods for presenting lines and options
 
 ### Added
 
@@ -85,9 +85,9 @@ Yarn Spinner 3.0 introduced a new programming model for presenting dialogue, cal
   - added `IsNextContentRequested` to `LineCancellationToken` which mirrors the existing `IsNextLineRequested` bool.
   - added `RequestHurryUpOption` to `DialogueRunner`.
   - added hurry up option inputs to `LineAdvancer`
-  - `LineAdvancer` now better handles situations where you want to use the same input for hurrying up and skipping lines.
-    - This behaviour is controllable via the `separateHurryUpAndAdvanceControls` field
-  - Added a new container type `InterfaceContainer`, a wrapper class to clean up some interface serialisation pains
+- `LineAdvancer` now better handles situations where you want to use the same input for hurrying up and skipping lines.
+  - This behaviour is controllable via the `separateHurryUpAndAdvanceControls` field
+- Added a new container type `InterfaceContainer`, a wrapper class to clean up some interface serialisation pains
 
 ### Changed
 
@@ -128,7 +128,7 @@ Yarn Spinner 3.0 introduced a new programming model for presenting dialogue, cal
 ### Removed
 
 - Removed `ActionMarkupHandlers` list from `DialoguePresenterBase`. This was only used by the default line presenter, and is now handled by the typewriter system. This which is more representative of what Action Markup Handling already entailed.
-- Removed the legacy Dialo Dialogue Views, Typewriter, and Effects
+- Removed the legacy Dialogue Views, Typewriter, and Effects.
 - Removed the `ReplacementMarkupHandler.NoDiagnostics` static property, as this no longer matches any need due to core changes around replacement markup.
 - Removed `RunOptionsAsync(DialogueOption[], CancellationToken)` from `LinePresenter`. This method is now virtual, and the default implementation does what we needed here.
 
