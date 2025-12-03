@@ -1,0 +1,4 @@
+# Ignore test files, which don't need to be shipped (they're not needed by
+# end-users)
+Tests
+Tests.meta
