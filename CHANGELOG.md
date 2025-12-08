@@ -12,6 +12,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 
+## [3.1.2] 2025-12-09
+
+### Changed
+
+- Fixed an issue that caused OpenUPM downloads to fail to compile.
+
 ## [3.1.1] 2025-12-03
 
 ### Overview
