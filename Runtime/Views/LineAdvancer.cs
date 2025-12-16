@@ -769,7 +769,7 @@ namespace Yarn.Unity
             return YarnTask.CompletedTask;
         }
 
-        public YarnTask OnLineDisplayComplete()
+        public YarnTask OnLineDisplayComplete(CancellationToken cancellationToken)
         {
             if (status == PresentationStatus.LineBegan)
             {

@@ -76,7 +76,9 @@ namespace Yarn.Unity
             Text.maxVisibleCharacters = visibleCharacterCount;
 
             // Let each markup handler know the line has finished displaying
-            await YarnTask.WhenAll(ActionMarkupHandlers.Select(handler => handler.OnLineDisplayComplete()));
+            await YarnTask.WhenAll(
+                ActionMarkupHandlers.Select(handler => handler.OnLineDisplayComplete(cancellationToken))
+            );
         }
 
         public void PrepareForContent(MarkupParseResult line)
