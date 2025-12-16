@@ -85,6 +85,10 @@ namespace Yarn.Unity
         /// <remarks>This method is an opportunity for a <see
         /// cref="ActionMarkupHandler"/> to finalise its presentation after
         /// all of the characters in the line have been presented.</remarks>
+        /// <returns>A task that completes when the <see
+        /// cref="ActionMarkupHandler"/> has completed presenting this
+        /// character. Dialogue presenters will wait until this task is complete
+        /// before proceeding to dismiss the line.</returns>
         public YarnTask OnLineDisplayComplete();
 
         /// <summary>
