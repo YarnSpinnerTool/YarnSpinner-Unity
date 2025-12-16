@@ -769,7 +769,7 @@ namespace Yarn.Unity
             return YarnTask.CompletedTask;
         }
 
-        public void OnLineDisplayComplete()
+        public YarnTask OnLineDisplayComplete()
         {
             if (status == PresentationStatus.LineBegan)
             {
@@ -779,6 +779,8 @@ namespace Yarn.Unity
             {
                 status = PresentationStatus.OptionsWaiting;
             }
+
+            return YarnTask.CompletedTask;
         }
 
         public void OnLineWillDismiss()

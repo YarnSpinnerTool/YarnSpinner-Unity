@@ -69,9 +69,9 @@ namespace Yarn.Unity
             return YarnTask.CompletedTask;
         }
 
-        public override void OnLineDisplayComplete()
+        public override YarnTask OnLineDisplayComplete()
         {
-            return;
+            return YarnTask.CompletedTask;
         }
 
         public override void OnLineWillDismiss()

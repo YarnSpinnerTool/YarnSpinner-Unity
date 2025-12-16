@@ -4,6 +4,7 @@ namespace Yarn.Unity
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using UnityEngine;
     using Yarn.Markup;
@@ -75,10 +76,7 @@ namespace Yarn.Unity
             Text.maxVisibleCharacters = visibleCharacterCount;
 
             // Let each markup handler know the line has finished displaying
-            foreach (var markupHandler in ActionMarkupHandlers)
-            {
-                markupHandler.OnLineDisplayComplete();
-            }
+            await YarnTask.WhenAll(ActionMarkupHandlers.Select(handler => handler.OnLineDisplayComplete()));
         }
 
         public void PrepareForContent(MarkupParseResult line)

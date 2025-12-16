@@ -85,7 +85,7 @@ namespace Yarn.Unity
         /// <remarks>This method is an opportunity for a <see
         /// cref="ActionMarkupHandler"/> to finalise its presentation after
         /// all of the characters in the line have been presented.</remarks>
-        public void OnLineDisplayComplete();
+        public YarnTask OnLineDisplayComplete();
 
         /// <summary>
         /// Called right before the line will dismiss itself.
@@ -117,7 +117,7 @@ namespace Yarn.Unity
         public abstract YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line, CancellationToken cancellationToken);
 
         /// <inheritdoc/>
-        public abstract void OnLineDisplayComplete();
+        public abstract YarnTask OnLineDisplayComplete();
 
         /// <inheritdoc/>
         public abstract void OnLineWillDismiss();

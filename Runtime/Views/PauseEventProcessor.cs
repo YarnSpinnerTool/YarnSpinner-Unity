@@ -23,9 +23,10 @@ namespace Yarn.Unity
     public sealed class PauseEventProcessor : IActionMarkupHandler
     {
         private Dictionary<int, float> pauses = new();
-        public void OnLineDisplayComplete()
+        public YarnTask OnLineDisplayComplete()
         {
             pauses.Clear();
+            return YarnTask.CompletedTask;
         }
 
         public void OnLineDisplayBegin(MarkupParseResult line, TMP_Text text)
