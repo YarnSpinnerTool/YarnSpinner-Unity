@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- `YarnProjectImporter` now updates asset addresses after the project import completes, rather than during the import.
+- `YarnProjectImporter` now updates asset addresses and generates the C# variable storage class after the project import completes, rather than during the import.
 
 ### Removed
 

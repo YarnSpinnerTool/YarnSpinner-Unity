@@ -623,15 +623,20 @@ namespace Yarn.Unity.Editor
 
                 if (generateVariablesSourceFile)
                 {
-
-                    var fileName = variablesClassName + ".cs";
-
-                    var generatedSourcePath = Path.Combine(Path.GetDirectoryName(ctx.assetPath), fileName);
-                    bool generated = GenerateVariableSource(generatedSourcePath, project, compilationResult);
-                    if (generated)
+                    // Generate the variable source; if it's different to what's
+                    // on disk, import it.
+                    var assetPath = ctx.assetPath;
+                    EditorApplication.delayCall += () =>
                     {
-                        AssetDatabase.ImportAsset(generatedSourcePath);
-                    }
+                        var fileName = variablesClassName + ".cs";
+
+                        var generatedSourcePath = Path.Combine(Path.GetDirectoryName(assetPath), fileName);
+                        bool generated = GenerateVariableSource(generatedSourcePath, project, compilationResult);
+                        if (generated)
+                        {
+                            AssetDatabase.ImportAsset(generatedSourcePath);
+                        }
+                    };
                 }
             }
 
