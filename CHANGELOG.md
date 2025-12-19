@@ -14,6 +14,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 
+## [3.1.4] 2025-12-19
+
+### Changed
+
+- Fixed an issue that caused build errors when using the Text Animator add-on.
+
 ## [3.1.3] 2025-12-09
 
 ### Changed
