@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 [assembly: AssemblyVersion("3.1.3.0")]
 [assembly: AssemblyFileVersion("3.1.3.0")]
-[assembly: AssemblyInformationalVersion("3.1.3.Branch.main.Sha.e1ba6f471d923270d2a0ba7b4f8ae81dc3f76adb")]
+[assembly: AssemblyInformationalVersion("3.1.3.Branch.HEAD.Sha.040b0f4542b56f6092320c9b667472bb10b265c3")]
 [assembly: InternalsVisibleTo("YarnSpinnerTests")]
 [assembly: InternalsVisibleTo("YarnSpinner.Editor.Tests")]
 [assembly: InternalsVisibleTo("YarnSpinner.Unity.Editor")]
