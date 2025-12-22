@@ -4,6 +4,7 @@ namespace Yarn.Unity
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using UnityEngine;
 #if USE_TMP
@@ -105,10 +106,9 @@ namespace Yarn.Unity
             }
 
             // Let each markup handler know the line has finished displaying
-            foreach (var markupHandler in ActionMarkupHandlers)
-            {
-                markupHandler.OnLineDisplayComplete();
-            }
+            await YarnTask.WhenAll(
+                ActionMarkupHandlers.Select(handler => handler.OnLineDisplayComplete(cancellationToken))
+            );
         }
 
         public void PrepareForContent(Markup.MarkupParseResult line)

@@ -71,7 +71,7 @@ namespace Yarn.Unity
         /// <param name="text">A <see cref="TMP_Text"/> object that the line is
         /// being displayed in.</param>
         /// <param name="cancellationToken">A cancellation token representing
-        /// whether the </param>
+        /// whether cancellation has been requested.</param>
         /// <returns>A task that completes when the <see
         /// cref="ActionMarkupHandler"/> has completed presenting this
         /// character. Dialogue presenters will wait until this task is complete
@@ -85,7 +85,13 @@ namespace Yarn.Unity
         /// <remarks>This method is an opportunity for a <see
         /// cref="ActionMarkupHandler"/> to finalise its presentation after
         /// all of the characters in the line have been presented.</remarks>
-        public void OnLineDisplayComplete();
+        /// <param name="cancellationToken">A cancellation token representing
+        /// whether cancellation has been requested.</param>
+        /// <returns>A task that completes when the <see
+        /// cref="ActionMarkupHandler"/> has completed presenting this
+        /// character. Dialogue presenters will wait until this task is complete
+        /// before proceeding to dismiss the line.</returns>
+        public YarnTask OnLineDisplayComplete(CancellationToken cancellationToken);
 
         /// <summary>
         /// Called right before the line will dismiss itself.
@@ -117,7 +123,7 @@ namespace Yarn.Unity
         public abstract YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line, CancellationToken cancellationToken);
 
         /// <inheritdoc/>
-        public abstract void OnLineDisplayComplete();
+        public abstract YarnTask OnLineDisplayComplete();
 
         /// <inheritdoc/>
         public abstract void OnLineWillDismiss();
