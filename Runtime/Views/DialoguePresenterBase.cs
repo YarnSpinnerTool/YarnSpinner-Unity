@@ -169,8 +169,8 @@ namespace Yarn.Unity
 
         // these are virtual because it's quite likely you don't need them
         // they are also void instead of YarnTask because currently the VM doesn't wait on node enter/exit so we can't either
-        public virtual void OnNodeEnter(string nodeName) { }
-        public virtual void OnNodeExit(string nodeName) { }
+        public virtual YarnTask OnNodeEnter(string nodeName, CancellationToken token = default) { return YarnTask.CompletedTask; }
+        public virtual YarnTask OnNodeExit(string nodeName, CancellationToken token = default) { return YarnTask.CompletedTask; }
 
         public virtual IAsyncTypewriter? Typewriter { get; set; }
     }
