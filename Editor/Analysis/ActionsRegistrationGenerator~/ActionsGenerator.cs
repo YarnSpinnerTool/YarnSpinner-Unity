@@ -117,6 +117,7 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
             output.WriteLine($"Unable to determine project location on disk. Settings values will be ignored and codegen will occur");
         }
 
+        bool hasCriticalActionErrors = false;
         try
         {
             output.WriteLine("Source code generation for assembly " + context.Compilation.AssemblyName);
@@ -188,7 +189,6 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
             {
                 output.WriteLine($"Not generating registration code for {context.Compilation.AssemblyName}: we've been told to exclude it, because its name begins with one of these prefixes: {string.Join(", ", prefixesToIgnore)}");
                 return;
-
             }
 
             if (!(context.Compilation is CSharpCompilation compilation))
@@ -227,12 +227,12 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                     {
                         output.WriteLine($"Flagging '{action.Name}' ({action.MethodName}): {diagnostic}");
                         action.ContainsErrors = true;
+                    
+                        if (diagnostic.Severity == DiagnosticSeverity.Error)
+                        {
+                            hasCriticalActionErrors = true;
+                        }
                     }
-                }
-
-                if (diagnostics.Count > 0)
-                {
-                    continue;
                 }
 
                 // Commands are parsed as whitespace, so spaces in the command name
@@ -259,6 +259,13 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 }
 
                 output.WriteLine($"Action {action.Name}: {action.SourceFileName}:{action.Declaration?.GetLocation()?.GetLineSpan().StartLinePosition.Line} ({action.Type})");
+            }
+
+            if (hasCriticalActionErrors)
+            {
+                stopwatch.Stop();
+                output.WriteLine($"Critical issues were encountered in the actions, aborting code generation, stopping analysis after {stopwatch.Elapsed.TotalMilliseconds}ms");
+                return;
             }
 
             output.Write($"Generating source code...");
