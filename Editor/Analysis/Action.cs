@@ -410,7 +410,7 @@ namespace Yarn.Unity.ActionAnalyser
                             // is not
                             var typeName = containingType.Name ?? "(anonymous)";
                             diagnostics.Add(Diagnostic.Create(
-                                Diagnostics.YS1007ActionsMustBeInPublicTypes,
+                                Diagnostics.YS1001ActionMethodsMustBePublic,
                                 diagnosticLocation, identifier, typeName, containingType.DeclaredAccessibility));
                             break;
                         }
