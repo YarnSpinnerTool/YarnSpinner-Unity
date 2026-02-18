@@ -34,6 +34,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Generated YSLS file now matches the newer schema, see the YS core repo for details of this
 - When matching assets to line IDs the importer now prefers exact matches to the line ID
 - `YarnProjectImporterEditor` now resets some internal state when creating its UI, which should help avoid a bug where the list of sources would grow over time.
+- Added explicit registration for `Awaitable`, and the missing cases for `System.Threading.Tasks.Task` commands, fixing issues where some times certain specific configurations would fail to register the command
+  - as part of this also made it so Commands can now be registered with up to 16 parameters
 
 ### Removed
 
