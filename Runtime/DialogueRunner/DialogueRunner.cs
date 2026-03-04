@@ -552,7 +552,27 @@ namespace Yarn.Unity
         // but for now it just does what the current one does
         public async ValueTask HandleCommand(Command command, CancellationToken token)
         {
-            CommandDispatchResult dispatchResult = this.CommandDispatcher.DispatchCommand(command.Text, this);
+            // if we have an existing cancellation source we will still dispose of it before creating a new one linked to the dialogue token
+            // but this is HIGHLY likely indicative of an issue inside the dialogue runner
+            if (currentContentCancellationSource != null)
+            {
+                Debug.LogWarning("Encountered a non-null current content cancellation token during Handle Command, this is likely a bug.");
+            }
+            currentContentCancellationSource?.Dispose();
+            currentContentHurryUpSource?.Dispose();
+
+            var mainToken = dialogueCancellationSource?.Token ?? CancellationToken.None;
+            currentContentCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(mainToken, token);
+
+            // now we make a new dependant hurry up cancellation token
+            currentContentHurryUpSource = CancellationTokenSource.CreateLinkedTokenSource(currentContentCancellationSource.Token);
+            var metaToken = new LineCancellationToken
+            {
+                NextContentToken = currentContentCancellationSource.Token,
+                HurryUpToken = currentContentHurryUpSource.Token,
+            };
+
+            CommandDispatchResult dispatchResult = this.CommandDispatcher.DispatchCommand(command.Text, this, metaToken);
 
             var parts = SplitCommandText(command.Text);
             string commandName = parts.ElementAtOrDefault(0);
@@ -587,10 +607,16 @@ namespace Yarn.Unity
                         // error.
                         Debug.LogError($"No Command \"{commandName}\" was found. Did you remember to use the YarnCommand attribute or AddCommandHandler() function in C#?");
                     }
-                    return;
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException($"Internal error: Unknown command dispatch result status {dispatchResult}");
             }
+
+            // finally we need to clean up our tokens for the next piece of content
+            currentContentCancellationSource?.Dispose();
+            currentContentHurryUpSource?.Dispose();
+            currentContentCancellationSource = null;
+            currentContentHurryUpSource = null;
         }
 
         private async YarnTask PresentLine(LocalizedLine line, CancellationToken token)

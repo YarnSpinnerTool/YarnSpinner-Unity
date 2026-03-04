@@ -160,11 +160,36 @@ namespace Yarn.Unity
                 var parameters = Method.GetParameters();
 
                 var lastParameterIsArray = parameters.Length > 0 && parameters[parameters.Length - 1].ParameterType.IsArray;
+                var lastParameterIsToken = false;
+                if (parameters.Length > 0 && parameters[parameters.Length - 1].ParameterType == typeof(LineCancellationToken))
+                {
+                    lastParameterIsToken = true;
+                }
+                else if (parameters.Length > 0 && parameters[parameters.Length - 1].ParameterType == typeof(System.Threading.CancellationToken))
+                {
+                    lastParameterIsToken = true;
+                }
 
                 var (min, max) = ParameterCount;
 
                 int argumentCount = args.Length;
-                if (argumentCount < min || (argumentCount > max && !lastParameterIsArray))
+
+                if (lastParameterIsToken)
+                {
+                    if (min != max)
+                    {
+                        message = $"{this.Name} has an equality parameter mismatch, got {parameters.Length} and expected {min} -> {max}";
+                        result = default;
+                        return CommandDispatchResult.ParameterParseStatusType.InvalidParameterCount;
+                    }
+                    if (args.Length != min - 1)
+                    {
+                        message = $"{this.Name} has a parameter mismatch, got {parameters.Length} and expected {min} -> {max}";
+                        result = default;
+                        return CommandDispatchResult.ParameterParseStatusType.InvalidParameterCount;
+                    }
+                }
+                else if (argumentCount < min || (argumentCount > max && !lastParameterIsArray))
                 {
                     // Wrong number of arguments.
                     string requirementDescription;
@@ -185,7 +210,7 @@ namespace Yarn.Unity
                     return CommandDispatchResult.ParameterParseStatusType.InvalidParameterCount;
                 }
 
-                var finalArgs = new object?[parameters.Length];
+                var finalArgs = new object?[lastParameterIsToken ? parameters.Length - 1: parameters.Length];
 
                 var argsQueue = new Queue(args);
 
@@ -326,7 +351,7 @@ namespace Yarn.Unity
                 }
             }
 
-            internal CommandDispatchResult Invoke(MonoBehaviour dispatcher, List<string> parameters)
+            internal CommandDispatchResult Invoke(MonoBehaviour dispatcher, List<string> parameters, LineCancellationToken token)
             {
                 object? target;
 
@@ -409,6 +434,41 @@ namespace Yarn.Unity
                     {
                         Message = errorMessage,
                     };
+                }
+
+                // do a quick check if the last param is a token
+                // if it is then cool beans
+                var magicBeans = this.Method.GetParameters();
+                if (magicBeans != null)
+                {
+                    if (magicBeans[^1].ParameterType == typeof(LineCancellationToken))
+                    {
+                        Debug.Log("gave it the full token");
+                        // add this into the array
+                        // which means making a new one
+                        // sigh
+                        List<object?> newBeans = new();
+                        if (finalParameters != null)
+                        {
+                            newBeans.AddRange(finalParameters);
+                        }
+                        newBeans.Add(token);
+                        finalParameters = newBeans.ToArray();
+                    }
+                    else if (magicBeans[^1].ParameterType == typeof(System.Threading.CancellationToken))
+                    {
+                        Debug.Log("gave it a partial token");
+                        // add this into the array
+                        // which means making a new one
+                        // sigh
+                        List<object?> newBeans = new();
+                        if (finalParameters != null)
+                        {
+                            newBeans.AddRange(finalParameters);
+                        }
+                        newBeans.Add(token.NextContentToken);
+                        finalParameters = newBeans.ToArray();
+                    }
                 }
 
                 var returnValue = this.Method.Invoke(target, finalParameters);
@@ -634,7 +694,7 @@ namespace Yarn.Unity
             // no-op
         }
 
-        CommandDispatchResult ICommandDispatcher.DispatchCommand(string command, MonoBehaviour coroutineHost)
+        CommandDispatchResult ICommandDispatcher.DispatchCommand(string command, MonoBehaviour coroutineHost, LineCancellationToken token)
         {
             var commandPieces = new List<string>(DialogueRunner.SplitCommandText(command));
 
@@ -652,7 +712,7 @@ namespace Yarn.Unity
                 // passed to the command.
                 commandPieces.RemoveAt(0);
 
-                return registration.Invoke(coroutineHost, commandPieces);
+                return registration.Invoke(coroutineHost, commandPieces, token);
             }
             else
             {

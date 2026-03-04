@@ -114,6 +114,7 @@ namespace Yarn.Unity
         public static void AddCommandHandler(this IActionRegistration registration, string commandName, System.Action handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
 
         // GYB11 START
+        public static void AddCommandHandler(this IActionRegistration registration, string commandName, System.Action<string, LineCancellationToken> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>
         public static void AddCommandHandler<T1>(this IActionRegistration registration, string commandName, System.Action<T1> handler) => registration.AddCommandHandler(commandName, (Delegate)handler);
         /// <inheritdoc cref="IActionRegistration.AddCommandHandler(string, Delegate)"/>

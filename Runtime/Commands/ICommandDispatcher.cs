@@ -12,7 +12,7 @@ namespace Yarn.Unity
 {
     interface ICommandDispatcher : IActionRegistration
     {
-        CommandDispatchResult DispatchCommand(string command, MonoBehaviour coroutineHost);
+        CommandDispatchResult DispatchCommand(string command, MonoBehaviour coroutineHost, LineCancellationToken token);
 
         void SetupForProject(YarnProject yarnProject);
 
