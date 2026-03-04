@@ -526,12 +526,12 @@ namespace Yarn.Unity
 
         private Dictionary<string, CommandRegistration> _commands = new Dictionary<string, CommandRegistration>();
 
-        public Library Library { get; }
+        public BasicFunctionLibrary Library { get; }
         public IActionRegistration ActionRegistrar { get; }
 
         public IEnumerable<ICommand> Commands => _commands.Values;
 
-        public Actions(IActionRegistration actionRegistrar, Library library)
+        public Actions(IActionRegistration actionRegistrar, BasicFunctionLibrary library)
         {
             Library = library;
             ActionRegistrar = actionRegistrar;
@@ -580,7 +580,7 @@ namespace Yarn.Unity
                 return;
             }
 
-            if (Library.FunctionExists(name))
+            if (Library.TryGetFunctionDefinition(name, out _))
             {
                 Debug.LogError($"Cannot add function {name}: one already exists");
                 return;
@@ -621,7 +621,7 @@ namespace Yarn.Unity
 
         public void RemoveFunction(string name)
         {
-            if (Library.FunctionExists(name) == false)
+            if (Library.TryGetFunctionDefinition(name, out _) == false)
             {
                 Debug.LogError($"Cannot remove function {name}: no function with that name exists in the library");
                 return;

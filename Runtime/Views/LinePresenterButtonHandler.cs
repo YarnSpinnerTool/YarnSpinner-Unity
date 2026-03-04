@@ -55,7 +55,7 @@ namespace Yarn.Unity
                     return;
                 }
 
-                dialogueRunner.RequestNextLine();
+                dialogueRunner.RequestNextContent();
             });
         }
 

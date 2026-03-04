@@ -608,7 +608,7 @@ namespace Yarn.Unity
                 {
                     if (runner != null)
                     {
-                        runner.RequestHurryUpLine();
+                        runner.RequestHurryUpContent();
                     }
                     else
                     {
@@ -625,7 +625,7 @@ namespace Yarn.Unity
                     {
                         if (runner != null)
                         {
-                            runner.RequestHurryUpLine();
+                            runner.RequestHurryUpContent();
                         }
                         else
                         {
@@ -660,7 +660,7 @@ namespace Yarn.Unity
             {
                 if (runner != null)
                 {
-                    runner.RequestHurryUpLine();
+                    runner.RequestHurryUpContent();
                 }
                 else
                 {
@@ -686,12 +686,12 @@ namespace Yarn.Unity
             {
                  if (status == PresentationStatus.OptionsBegan || status == PresentationStatus.OptionsWaiting)
                 {
-                    runner.RequestHurryUpOption();
+                    runner.RequestHurryUpContent();
                 }
             }
             else
             {
-                runner.RequestHurryUpOption();
+                runner.RequestHurryUpContent();
             }
         }
 
@@ -703,7 +703,7 @@ namespace Yarn.Unity
             ResetLineTracking();
             if (runner != null)
             {
-                runner.RequestNextLine();
+                runner.RequestNextContent();
             }
             else
             {

@@ -43,12 +43,12 @@
         <member name="M:Yarn.Compiler.BasicBlock.ToString">
             <inheritdoc/>
         </member>
-        <member name="M:Yarn.Compiler.BasicBlock.ToString(Yarn.Library,Yarn.Compiler.CompilationResult)">
+        <member name="M:Yarn.Compiler.BasicBlock.ToString(Yarn.ILibrary,Yarn.Compiler.CompilationResult)">
             <summary>
             Gets a string containing the textual description of the instructions
             in this <see cref="T:Yarn.Compiler.BasicBlock"/>.
             </summary>
-            <param name="library">The <see cref="T:Yarn.Library"/> to use when
+            <param name="library">The <see cref="T:Yarn.ILibrary"/> to use when
             converting instructions to strings.</param>
             <param name="compilationResult">The <see cref="T:Yarn.Compiler.CompilationResult"/>
             that produced <see cref="F:Yarn.Compiler.BasicBlock.Node"/>.</param>
@@ -697,7 +697,7 @@
             should be cancelled.
             </summary>
         </member>
-        <member name="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.Library)">
+        <member name="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.ILibrary)">
             <summary>
             Creates a new <see cref="T:Yarn.Compiler.CompilationJob"/> using the contents of a
             collection of files.
@@ -708,11 +708,11 @@
             <returns>A new <see cref="T:Yarn.Compiler.CompilationJob"/>.</returns>
         </member>
         <member name="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.String[])">
-            <inheritdoc cref="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.Library)" path="/summary"/>
-            <inheritdoc cref="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.Library)" path="/param[@name='paths']"/>
-            <inheritdoc cref="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.Library)" path="/returns"/>
+            <inheritdoc cref="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.ILibrary)" path="/summary"/>
+            <inheritdoc cref="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.ILibrary)" path="/param[@name='paths']"/>
+            <inheritdoc cref="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.ILibrary)" path="/returns"/>
         </member>
-        <member name="M:Yarn.Compiler.CompilationJob.CreateFromInputs(System.Collections.Generic.IEnumerable{Yarn.Compiler.ISourceInput},Yarn.Library,System.Int32)">
+        <member name="M:Yarn.Compiler.CompilationJob.CreateFromInputs(System.Collections.Generic.IEnumerable{Yarn.Compiler.ISourceInput},Yarn.ILibrary,System.Int32)">
             <summary>
             Creates a new <see cref="T:Yarn.Compiler.CompilationJob"/> using the contents of a
             collection of source inputs.
@@ -722,7 +722,7 @@
             to use for this compilation.</param>
             <returns>A new <see cref="T:Yarn.Compiler.CompilationJob"/>.</returns>
         </member>
-        <member name="M:Yarn.Compiler.CompilationJob.CreateFromString(System.String,System.String,Yarn.Library,System.Int32)">
+        <member name="M:Yarn.Compiler.CompilationJob.CreateFromString(System.String,System.String,Yarn.ILibrary,System.Int32)">
             <summary>
             Creates a new <see cref="T:Yarn.Compiler.CompilationJob"/> using the contents of a
             string.
@@ -922,15 +922,6 @@
             check.</param>
             <param name="diagnostics">A collection of diagnostics to add
             to.</param>
-        </member>
-        <member name="M:Yarn.Compiler.Compiler.GetDeclarationsFromLibrary(Yarn.Library)">
-            <summary>
-            Returns a collection of <see cref="T:Yarn.Compiler.Declaration"/> structs that
-            describe the functions present in <paramref name="library"/>.
-            </summary>
-            <param name="library">The <see cref="T:Yarn.Library"/> to get declarations
-            from.</param>
-            <returns>The <see cref="T:Yarn.Compiler.Declaration"/> structs found.</returns>
         </member>
         <member name="M:Yarn.Compiler.Compiler.GetTokensFromFile(System.String)">
             <summary>
@@ -1506,7 +1497,7 @@
             <summary>
             Gets the default value of this <see cref="T:Yarn.Compiler.Declaration"/>, if no
             value has been specified in code or is available from a <see
-            cref="T:Yarn.Dialogue"/>'s <see cref="T:Yarn.IVariableStorage"/>.
+            cref="!:Dialogue"/>'s <see cref="T:Yarn.IVariableStorage"/>.
             </summary>
         </member>
         <member name="P:Yarn.Compiler.Declaration.Description">
@@ -5771,7 +5762,7 @@
             <param name="YarnFileContents">The collection of yarn file content to parse and walk</param>
             <returns>A list of lists of GraphingNode each containing a node, its jumps, and any positional info.</returns>
         </member>
-        <member name="M:Yarn.Compiler.Utility.GetCompiledCodeAsString(Yarn.Program,Yarn.Library,Yarn.Compiler.CompilationResult)">
+        <member name="M:Yarn.Compiler.Utility.GetCompiledCodeAsString(Yarn.Program,Yarn.ILibrary,Yarn.Compiler.CompilationResult)">
             <summary>
             Gets a string containing a representation of the compiled bytecode
             for a <see cref="T:Yarn.Program"/>.

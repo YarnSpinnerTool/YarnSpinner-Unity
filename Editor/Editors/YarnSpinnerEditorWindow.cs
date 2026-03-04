@@ -60,7 +60,7 @@ namespace Yarn.Unity.Editor
             var compLabel = root.Q<Label>("compVLabel");
             var unityLabel = root.Q<Label>("unityVLabel");
 
-            coreLabel.text = $"Core: {GetInformationalVersionForType(typeof(Yarn.Dialogue))}";
+            coreLabel.text = $"Core: {GetInformationalVersionForType(typeof(Yarn.AsyncDialogue))}";
             compLabel.text = $"Compiler: {GetInformationalVersionForType(typeof(Yarn.Compiler.Compiler))}";
             unityLabel.text = $"Unity: {GetInformationalVersionForType(typeof(Yarn.Unity.DialogueRunner))}";
 

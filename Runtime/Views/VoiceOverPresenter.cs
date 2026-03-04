@@ -122,7 +122,7 @@ namespace Yarn.Unity
                     // If we didn't get a line, but we were configured to
                     // advance the line on end, then we should act as though
                     // we've reached the end of the line now and advance.
-                    dialogueRunner.RequestNextLine();
+                    dialogueRunner.RequestNextContent();
                 }
                 return;
             }
@@ -211,7 +211,7 @@ namespace Yarn.Unity
                 }
                 else
                 {
-                    dialogueRunner.RequestNextLine();
+                    dialogueRunner.RequestNextContent();
                 }
             }
         }

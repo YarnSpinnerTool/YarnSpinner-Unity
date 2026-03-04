@@ -120,18 +120,10 @@ namespace Yarn.Unity
         /// <returns>A task that indicates which option was selected, or that this dialogue presenter did not select an option.</returns>
         /// <seealso cref="RunLineAsync(LocalizedLine, LineCancellationToken)"/>
         /// <seealso cref="YarnAsync.NoOptionSelected"/> 
-        [System.Obsolete("The LineCancellationToken form of RunOptionsAsync allows for option cancellation and hurrying up and is prefered.")]
-        public virtual YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, CancellationToken cancellationToken)
+        public virtual YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, LineCancellationToken cancellationToken)
         {
             return YarnTask<DialogueOption?>.FromResult(null);
         }
-
-#pragma warning disable 0618
-        public virtual YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, LineCancellationToken cancellationToken)
-        {
-            return RunOptionsAsync(dialogueOptions, cancellationToken.NextLineToken);
-        }
-#pragma warning restore 0618
 
 
         /// <summary>Called by the <see cref="DialogueRunner"/> to signal that

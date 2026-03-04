@@ -570,7 +570,7 @@ namespace Yarn.Unity.Editor
             // not generated code. Get the full names of the result.
             var variableStorageClasses = AppDomain.CurrentDomain
                 .GetAssemblies()
-                .Where(a => a != typeof(Yarn.Dialogue).Assembly)
+                .Where(a => a != typeof(Yarn.AsyncDialogue).Assembly)
                 .SelectMany(a => a.GetTypes())
                 .Where(t => t.GetInterfaces().Any(i => i == typeof(IVariableStorage)))
                 .Where(t => t.IsAbstract == false)

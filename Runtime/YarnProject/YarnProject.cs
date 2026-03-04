@@ -121,20 +121,6 @@ namespace Yarn.Unity
         private Dictionary<string, Dictionary<string, List<string>>> nodeHeaders = new Dictionary<string, Dictionary<string, List<string>>>();
 
         /// <summary>
-        /// Gets the headers for the requested node.
-        /// </summary>
-        /// <remarks>
-        /// The first time this is called, the values are extracted from <see
-        /// cref="Program"/> and cached inside <see cref="nodeHeaders"/>. Future
-        /// calls will then return the cached values.
-        /// </remarks>
-        [System.Obsolete("Use " + nameof(Dialogue) + "." + nameof(Dialogue.GetHeaders), true)]
-        public Dictionary<string, List<string>> GetHeaders(string nodeName)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        /// <summary>
         /// Gets a Localization given a locale code.
         /// </summary>
         /// <param name="localeCode">The locale code to find a <see
