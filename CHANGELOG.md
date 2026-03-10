@@ -9,33 +9,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - When using the Unity Localization package Yarn Spinner can now sort the localisation tables based on a lines position in the file.
-  - This resolves an issue where lines added into the middle of a Yarn file however this does require sorting your localisation table every time you edit your Yarn files
-  - Defaults to off, can be changed in Yarn Spinners settings in `Edit -> Project Settings -> Yarn Spinner`
-  - Will log any values found in the localisation table that didn't come from your Yarn files and sort them to the top of the table
+  - This resolves an issue where lines added into the middle of a Yarn file. However, this does require sorting your localisation table every time you edit your Yarn files.
+  - This setting defaults to off, and can be enabled in Yarn Spinners settings in `Edit -> Project Settings -> Yarn Spinner`.
+  - When sorting, any values found in the localisation table that didn't come from your Yarn files will be logged, and sorted to the top of the table.
 - `YarnSpinnerAssemblyGeneratedYSLSPath` function to the `YarnSpinnerProjectSettings` so that each assembly can have a generated and consistent path.
-- Generated YSLS file now includes subtype information for instance commands
-  - This means a command like `<<move gary left>>` now knows that the `"gary"` is the name of a game object and the specific game object subclass
-  - Only works at a single level of monobehaviour depth, subclasses of a monobehaviour subclass will not be recognised
+- Generated YSLS files now include subtype information for instance commands.
+  - This means a command like `<<move gary left>>` now knows that the `"gary"` is the name of a game object, and the specific game object subclass.
+  - This only works at a single level of MonoBehaviour depth; subclasses of a `MonoBehaviour` subclass will not be recognised.
 - `YarnNodeParameterAttribute` can now be added to string parameters in function and command methods
-  - Intended to allow you to hint to the VSCode extension that when writing this parameter in commands and functions to limit suggestions to nodes
-- `YarnEnumParameterAttribute` can now be added to parameters in functions and command methods
-  - has one field which is the name the enum as declared in your Yarn
-  - Intended to allow you to hint to the VSCode extension to offer enum based suggestions
-  - this is temporary until forward declaration of Yarn enums into C# works
+  - This is intended to allow you to hint to the VSCode extension that, when writing this parameter in commands and functions, it should limit suggestions to nodes.
+- `YarnEnumParameterAttribute` can now be added to parameters in functions and command methods.
+  - This has one field, which is the name the enum as declared in your Yarn.
+  - This is intended to allow you to hint to the VSCode extension to offer enum based suggestions. This is a temporary solution, until forward declaration of Yarn enums into C# works.
 - Incorrectly defined parameters for commands and functions will now generate diagnostics on the C# implementation, warnings exist for:
-  - invalid types
-  - incorrectly attributed parameters
+  - Invalid types
+  - Incorrectly attributed parameters
 
 ### Changed
 
-- `YarnProjectImporter` now updates asset addresses and generates the C# variable storage class after the project import completes, rather than during the import.
-- Each assembly now gets it's own YSLS file when generating them.
-  - renamed the test asmdef files from `YarnSpinnerTests.x` to `YarnSpinner.Unity.Tests.X` so that they are matched by the existing filters.
-- Generated YSLS file now matches the newer schema, see the YS core repo for details of this
-- When matching assets to line IDs the importer now prefers exact matches to the line ID
+- `YarnProjectImporter` now updates asset addresses and generates the C# variable storage class _after_ the project import completes, rather than during the import.
+- Each assembly now gets its own YSLS file when generating them.
+  - We renamed the test `.asmdef` files from `YarnSpinnerTests.x` to `YarnSpinner.Unity.Tests.X`, so that they are matched by the existing filters.
+- Generated a YSLS file now matches the newer schema. See the [Yarn Spinner core repo](https://github.com/YarnSpinnerTool/YarnSpinner/blob/main/YarnSpinner.LanguageServer/src/Server/Documentation/ysls.schema.json) for details of this.
+- When matching assets to line IDs, the importer now prefers exact matches to the line ID.
 - `YarnProjectImporterEditor` now resets some internal state when creating its UI, which should help avoid a bug where the list of sources would grow over time.
-- Added explicit registration for `Awaitable`, and the missing cases for `System.Threading.Tasks.Task` commands, fixing issues where some times certain specific configurations would fail to register the command
-  - as part of this also made it so Commands can now be registered with up to 16 parameters
+- Added explicit registration for `UnityEngine.Awaitable`, and the missing cases for `System.Threading.Tasks.Task` commands, fixing issues where some times certain specific configurations would fail to register the command.
+  - As part of this, we also made it so Commands can now be registered with up to 16 parameters.
+  - Please don't actually register a command with 16 parameters.
 
 ### Removed
 
