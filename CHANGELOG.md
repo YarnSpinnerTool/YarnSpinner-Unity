@@ -36,6 +36,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `YarnProjectImporterEditor` now resets some internal state when creating its UI, which should help avoid a bug where the list of sources would grow over time.
 - Added explicit registration for `Awaitable`, and the missing cases for `System.Threading.Tasks.Task` commands, fixing issues where some times certain specific configurations would fail to register the command
   - as part of this also made it so Commands can now be registered with up to 16 parameters
+- Fixed a bug where the InterfaceContainer would sometimes lose it's connection.
+  - unsure why this happens, just Unity things™
 
 ### Removed
 
