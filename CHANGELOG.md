@@ -24,7 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Incorrectly defined parameters for commands and functions will now generate diagnostics on the C# implementation, warnings exist for:
   - invalid types
   - incorrectly attributed parameters
-- `ContentDidDismss` call to the `IAsyncTypewriter` to let typewriters know they are safe to do any cleanup
+- `ContentDidDismiss` call to the `IAsyncTypewriter` to let typewriters know they are safe to do any cleanup
 - A `TMP_Text` property called `TextElement` to the `IAsyncTypewriter`
   - this is optional but most of the time custom typewriters will need to get the main text element anyway so might as well just have it as something they are given at the start
 
@@ -39,6 +39,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added explicit registration for `UnityEngine.Awaitable`, and the missing cases for `System.Threading.Tasks.Task` commands, fixing issues where some times certain specific configurations would fail to register the command.
   - As part of this, we also made it so Commands can now be registered with up to 16 parameters.
   - Please don't actually register a command with 16 parameters.
+- Fixed a bug where the InterfaceContainer would sometimes lose it's connection.
+  - unsure why this happens, just Unity things™
 - Line Presenter now uses the `InterfaceContainer` for custom typewriters.
 
 ### Removed
