@@ -41,6 +41,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - as part of this also made it so Commands can now be registered with up to 16 parameters
 - Fixed a bug where the InterfaceContainer would sometimes lose it's connection.
   - unsure why this happens, just Unity things™
+- Line Presenter now uses the `InterfaceContainer` for custom typewriters.
 
 ### Removed
 
