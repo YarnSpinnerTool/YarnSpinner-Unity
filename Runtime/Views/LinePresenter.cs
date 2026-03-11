@@ -254,7 +254,7 @@ namespace Yarn.Unity
                     Typewriter = new InstantTypewriter()
                     {
                         ActionMarkupHandlers = ActionMarkupHandlers,
-                        Text = this.lineText,
+                        TextElement = this.lineText,
                     };
                     break;
 
@@ -262,7 +262,7 @@ namespace Yarn.Unity
                     Typewriter = new LetterTypewriter()
                     {
                         ActionMarkupHandlers = ActionMarkupHandlers,
-                        Text = this.lineText,
+                        TextElement = this.lineText,
                         CharactersPerSecond = this.lettersPerSecond,
                     };
                     break;
@@ -271,17 +271,21 @@ namespace Yarn.Unity
                     Typewriter = new WordTypewriter()
                     {
                         ActionMarkupHandlers = ActionMarkupHandlers,
-                        Text = this.lineText,
+                        TextElement = this.lineText,
                         WordsPerSecond = this.wordsPerSecond,
                     };
                     break;
 
                 case TypewriterType.Custom:
                     Typewriter = ValidateCustomTypewriter();
-                    Typewriter?.ActionMarkupHandlers.AddRange(ActionMarkupHandlers);
                     if (Typewriter == null)
                     {
                         Debug.LogWarning("Typewriter mode is set to custom but there is no typewriter set.");
+                    }
+                    else
+                    {    
+                        Typewriter.ActionMarkupHandlers.AddRange(ActionMarkupHandlers);
+                        Typewriter.TextElement = this.lineText;
                     }
                     break;
             }
@@ -372,7 +376,7 @@ namespace Yarn.Unity
             Typewriter ??= new InstantTypewriter()
             {
                 ActionMarkupHandlers = this.ActionMarkupHandlers,
-                Text = this.lineText,
+                TextElement = this.lineText,
             };
 
             Typewriter.PrepareForContent(text);
@@ -417,6 +421,8 @@ namespace Yarn.Unity
                     canvasGroup.alpha = 0;
                 }
             }
+
+            Typewriter.ContentDidDismiss();
         }
     }
 }

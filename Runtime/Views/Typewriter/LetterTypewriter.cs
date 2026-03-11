@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 #nullable enable
 
 namespace Yarn.Unity
@@ -22,7 +26,7 @@ namespace Yarn.Unity
         /// <summary>
         /// The <see cref="TMP_Text"/> to display the text in.
         /// </summary>
-        public TMP_Text? Text { get; set; }
+        public TMP_Text? TextElement { get; set; }
 
         /// <summary>
         /// A collection of <see cref="IActionMarkupHandler"/> objects that
@@ -42,19 +46,19 @@ namespace Yarn.Unity
         /// <inheritdoc/>
         public async YarnTask RunTypewriter(Markup.MarkupParseResult line, CancellationToken cancellationToken)
         {
-            if (Text == null)
+            if (TextElement == null)
             {
-                Debug.LogWarning($"Can't show text as typewriter, because {nameof(Text)} was not provided");
+                Debug.LogWarning($"Can't show text as typewriter, because {nameof(TextElement)} was not provided");
             }
             else
             {
-                Text.maxVisibleCharacters = 0;
-                Text.text = line.Text;
+                TextElement.maxVisibleCharacters = 0;
+                TextElement.text = line.Text;
 
                 // Let every markup handler know that display is about to begin
                 foreach (var markupHandler in ActionMarkupHandlers)
                 {
-                    markupHandler.OnLineDisplayBegin(line, Text);
+                    markupHandler.OnLineDisplayBegin(line, TextElement);
                 }
 
                 double secondsPerCharacter = 0;
@@ -64,7 +68,7 @@ namespace Yarn.Unity
                 }
 
                 // Get the count of visible characters from TextMesh to exclude markup characters
-                var visibleCharacterCount = Text.GetTextInfo(line.Text).characterCount;
+                var visibleCharacterCount = TextElement.GetTextInfo(line.Text).characterCount;
 
                 // Start with a full time budget so that we immediately show the first character
                 double accumulatedDelay = secondsPerCharacter;
@@ -94,14 +98,14 @@ namespace Yarn.Unity
                             .SuppressCancellationThrow();
                     }
 
-                    Text.maxVisibleCharacters += 1;
+                    TextElement.maxVisibleCharacters += 1;
 
                     accumulatedDelay -= secondsPerCharacter;
                 }
 
                 // We've finished showing every character (or we were
                 // cancelled); ensure that everything is now visible.
-                Text.maxVisibleCharacters = visibleCharacterCount;
+                TextElement.maxVisibleCharacters = visibleCharacterCount;
             }
 
             // Let each markup handler know the line has finished displaying
@@ -113,17 +117,17 @@ namespace Yarn.Unity
 
         public void PrepareForContent(Markup.MarkupParseResult line)
         {
-            if (Text == null)
+            if (TextElement == null)
             {
                 return;
             }
 
-            Text.maxVisibleCharacters = 0;
-            Text.text = line.Text;
+            TextElement.maxVisibleCharacters = 0;
+            TextElement.text = line.Text;
 
             foreach (var processor in ActionMarkupHandlers)
             {
-                processor.OnPrepareForLine(line, Text);
+                processor.OnPrepareForLine(line, TextElement);
             }
         }
 
@@ -134,6 +138,14 @@ namespace Yarn.Unity
             {
                 processor.OnLineWillDismiss();
             }
+        }
+        public void ContentDidDismiss()
+        {
+            if (TextElement == null)
+            {
+                return;
+            }
+            TextElement.maxVisibleCharacters = 0;
         }
     }
 }

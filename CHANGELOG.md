@@ -25,6 +25,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Incorrectly defined parameters for commands and functions will now generate diagnostics on the C# implementation, warnings exist for:
   - invalid types
   - incorrectly attributed parameters
+- `ContentDidDismss` call to the `IAsyncTypewriter` to let typewriters know they are safe to do any cleanup
+- A `TMP_Text` property called `TextElement` to the `IAsyncTypewriter`
+  - this is optional but most of the time custom typewriters will need to get the main text element anyway so might as well just have it as something they are given at the start
 
 ### Changed
 
