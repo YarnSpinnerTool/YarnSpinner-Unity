@@ -873,6 +873,12 @@
             Contains the results of parsing each input of  the compilation.
             </summary>
         </member>
+        <member name="P:Yarn.Compiler.CompilationResult.NodeMetadata">
+            <summary>
+            contains metadata about all nodes extracted during compilation for use by language server features
+            includes information about jumps, function calls, commands, variables, character names, tags, and structural information
+            </summary>
+        </member>
         <member name="F:Yarn.Compiler.ContentIdentifierType.Line">
             <summary>
             The content identifier is a <c>#line:</c> tag.
@@ -1611,6 +1617,414 @@
         <member name="M:Yarn.Compiler.Declaration.ToString">
             <inheritdoc/>
         </member>
+        <member name="T:Yarn.Compiler.DiagnosticDescriptor">
+            <summary>
+            Describes a diagnostic message with a unique code and template.
+            </summary>
+            <remarks>
+            This class ensures that diagnostic codes and their descriptions
+            are always paired correctly, preventing typos and mismatches.
+            All diagnostics should be created using the predefined descriptors
+            in this class.
+            </remarks>
+        </member>
+        <member name="P:Yarn.Compiler.DiagnosticDescriptor.Code">
+            <summary>
+            Gets the unique error code for this diagnostic (e.g., "YS0001").
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.DiagnosticDescriptor.MessageTemplate">
+            <summary>
+            Gets the message template for this diagnostic.
+            </summary>
+            <remarks>
+            The template may contain placeholders like {0}, {1}, etc. for
+            string formatting.
+            </remarks>
+        </member>
+        <member name="P:Yarn.Compiler.DiagnosticDescriptor.DefaultSeverity">
+            <summary>
+            Gets the default severity for this diagnostic.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.DiagnosticDescriptor.Description">
+            <summary>
+            Gets a brief description of what this diagnostic means.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.DiagnosticDescriptor.Create(System.String,System.String[])">
+            <summary>
+            Creates a new Diagnostic using this descriptor.
+            </summary>
+            <param name="sourceFile">The name of the file in which this error
+            occurred.</param>
+            <param name="args">The arguments to use when composing the
+            diagnostic's message.</param>
+            <returns>The diagnostic.</returns>
+        </member>
+        <member name="M:Yarn.Compiler.DiagnosticDescriptor.Create(System.String,Antlr4.Runtime.ParserRuleContext,System.String[])">
+            <summary>
+            Creates a new Diagnostic using this descriptor.
+            </summary>
+            <param name="sourceFile">The name of the file in which this error
+            occurred.</param>
+            <param name="context">The parse context associated with this error.</param>
+            <param name="args">The arguments to use when composing the
+            diagnostic's message.</param>
+            <returns>The diagnostic.</returns>
+        </member>
+        <member name="M:Yarn.Compiler.DiagnosticDescriptor.Create(System.String,Antlr4.Runtime.IToken,System.String[])">
+            <summary>
+            Creates a new Diagnostic using this descriptor.
+            </summary>
+            <param name="sourceFile">The name of the file in which this error
+            occurred.</param>
+            <param name="token">The token associated with this error.</param>
+            <param name="args">The arguments to use when composing the
+            diagnostic's message.</param>
+            <returns>The diagnostic.</returns>
+        </member>
+        <member name="M:Yarn.Compiler.DiagnosticDescriptor.Create(System.String,Yarn.Compiler.Range,System.String[])">
+            <summary>
+            Creates a new Diagnostic using this descriptor.
+            </summary>
+            <param name="sourceFile">The name of the file in which this error
+            occurred.</param>
+            <param name="range">The range of the file associated with this error.</param>
+            <param name="args">The arguments to use when composing the
+            diagnostic's message.</param>
+            <returns>The diagnostic.</returns>
+        </member>
+        <member name="M:Yarn.Compiler.DiagnosticDescriptor.FormatMessage(System.Object[])">
+            <summary>
+            Formats the message template with the provided arguments.
+            </summary>
+            <param name="args">Arguments to format the message template with.</param>
+            <returns>The formatted message.</returns>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.ImplicitVariableTypeConflict">
+            <summary>
+            YS0001: A variable has been implicitly declared with multiple conflicting types.
+            </summary>
+            <remarks>
+            <para>This error occurs when a variable is used with different types across
+            different files or contexts without an explicit declaration, and the
+            compiler cannot determine which type is correct.</para>
+            <para>Format placeholders: 0: variable name, 1: type names.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.TypeMismatch">
+            <summary>
+            YS0002: A type mismatch occurred during type checking.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: expected type, 1: actual type.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.UndefinedVariable">
+            <summary>
+            YS0003: An undefined variable was referenced.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: variable name.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.MissingDelimiter">
+            <summary>
+            YS0004: Missing node delimiter (=== or ---).
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.SyntaxError">
+            <summary>
+            YS0005: Malformed dialogue or syntax error.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: specific syntax error message.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.UnclosedCommand">
+            <summary>
+            YS0006: Unclosed command (missing >>).
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.UnclosedScope">
+            <summary>
+            YS0007: Unclosed control flow scope (missing endif, endonce, etc.).
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: missing token.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.UnreachableCode">
+            <summary>
+            YS0008: Unreachable code detected.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.UnusedNode">
+            <summary>
+            YS0009: Node is never referenced.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: node title.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.UnusedVariable">
+            <summary>
+            YS0010: Variable is declared but never used.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: variable name.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.DuplicateNodeTitle">
+            <summary>
+            YS0011: Duplicate node title.
+            </summary>
+            <remarks>
+            <para>This diagnostic is not emitted for node groups where nodes
+            share a title but have different `when:` clauses.</para>
+            <para>Format placeholders: 0: node title.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.UndefinedNode">
+            <summary>
+            YS0012: Jump to undefined node.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: node title.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.InvalidFunctionCall">
+            <summary>
+            YS0013: Invalid function call.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: function name.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.InvalidCommand">
+            <summary>
+            YS0014: Invalid command.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: command name</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.CyclicDependency">
+            <summary>
+            YS0015: Cyclic dependency detected.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: error message.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.UnknownCharacter">
+            <summary>
+            YS0016: Unknown character name.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: character name.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.LinesCantHaveLineAndShadowTag">
+            <summary>
+            YS0017: Lines cannot have both a '#line' tag and a '#shadow' tag.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.DuplicateLineID">
+            <summary>
+            YS0018: Lines cannot have both a '#line' tag and a '#shadow' tag.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: line ID.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.LineContentAfterCommand">
+            <summary>
+            YS0019: Line content after a non-flow-control command.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.LineContentBeforeCommand">
+            <summary>
+            YS0020: Line content before a non-flow-control command.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.StrayCommandEnd">
+            <summary>
+            YS0021: Stray command end marker without matching start marker.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.UnenclosedCommand">
+            <summary>
+            YS0022: Command keyword outside of command block.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.InvalidNodeName">
+            <summary>
+            YS0027: Node title or subtitle contains invalid characters.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: "title" or "subtitle", 1: the invalid name.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.RedeclarationOfExistingVariable">
+            <summary>
+            YSXXX1: Redeclaration of existing variable
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: variable name.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.RedeclarationOfExistingType">
+            <summary>
+            YSXXX2: Redeclaration of existing type
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: type name.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.InternalError">
+            <summary>
+            YSXXX3: Internal error.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: error description.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.UnknownLineIDForShadowLine">
+            <summary>
+            YSXXX4: Unknown line ID {0} for shadow line.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: line ID.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.ShadowLinesCantHaveExpressions">
+            <summary>
+            YSXXX5: Shadow lines must not have expressions
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.ShadowLinesMustHaveSameTextAsSource">
+            <summary>
+            YSXXX6: Shadow lines must have the same text as their source
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.SmartVariableLoop">
+            <summary>
+            YSXXX7: Smart variables cannot contain reference loops.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: variable reference, 1: smart variable name.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.NullDefaultValue">
+            <summary>
+            YSXXX8: Variable declaration has a null default value.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: variable name, 1: type name.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.TypeSolverTimeout">
+            <summary>
+            YSXXX9: Expression failed to resolve in a reasonable time.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: time limit in seconds.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.TypeInferenceFailure">
+            <summary>
+            YS0028: Can't determine type of variable given its usage.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: variable name.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.ExpressionTypeUndetermined">
+            <summary>
+            YS0029: Can't determine the type of an expression.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.SmartVariableReadOnly">
+            <summary>
+            YS0030: Smart variable cannot be modified.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: variable name.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.NodeGroupMissingWhen">
+            <summary>
+            YS0031: All nodes in a group must have a 'when' clause.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: node group title.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.DuplicateSubtitle">
+            <summary>
+            YS0032: Duplicate subtitle in a node group.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: group name, 1: subtitle.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.EmptyNode">
+            <summary>
+            YS0033: Node is empty and will not be compiled.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: node title.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.InvalidLibraryFunction">
+            <summary>
+            YS0034: Function cannot be used in Yarn Spinner scripts.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: function name, 1: reason.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.EnumDeclarationError">
+            <summary>
+            YS0035: Enum declaration error.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: error message.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.LanguageVersionTooLow">
+            <summary>
+            YS0036: Language version too low for feature.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: error message.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.InvalidLiteralValue">
+            <summary>
+            YS0037: Invalid literal value.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: error message.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.InvalidMemberAccess">
+            <summary>
+            YS0038: Invalid member access.
+            </summary>
+            <remarks>
+            <para>Format placeholders: 0: error message.</para>
+            </remarks>
+        </member>
+        <member name="M:Yarn.Compiler.DiagnosticDescriptor.GetDescriptor(System.String)">
+            <summary>
+            Gets a diagnostic descriptor by its code.
+            </summary>
+            <param name="code">The diagnostic code to look up.</param>
+            <returns>The descriptor, or null if not found.</returns>
+        </member>
         <member name="T:Yarn.Compiler.Diagnostic">
             <summary>
             A diagnostic message that describes an error, warning or informational
@@ -1648,6 +2062,15 @@
             <summary>
             Gets or sets the severity of the issue.
             </summary>
+        </member>
+        <member name="P:Yarn.Compiler.Diagnostic.Code">
+            <summary>
+            Gets or sets the error code for this diagnostic.
+            </summary>
+            <remarks>
+            Error codes help users look up documentation and categorize issues.
+            Follows the format YS0001, YS0002, etc.
+            </remarks>
         </member>
         <member name="P:Yarn.Compiler.Diagnostic.Line">
             <summary>
@@ -1720,6 +2143,45 @@
             <param name="severity"><inheritdoc cref="P:Yarn.Compiler.Diagnostic.Severity"
             path="/summary/node()"/></param>
         </member>
+        <member name="M:Yarn.Compiler.Diagnostic.CreateDiagnostic(System.String,Yarn.Compiler.DiagnosticDescriptor,System.Object[])">
+            <summary>
+            Creates a new <see cref="T:Yarn.Compiler.Diagnostic"/> using a <see cref="T:Yarn.Compiler.DiagnosticDescriptor"/>.
+            </summary>
+            <param name="fileName">The file where the diagnostic occurred.</param>
+            <param name="descriptor">The diagnostic descriptor defining the error code and message template.</param>
+            <param name="args">Arguments to format the message template.</param>
+            <returns>A new diagnostic instance.</returns>
+        </member>
+        <member name="M:Yarn.Compiler.Diagnostic.CreateDiagnostic(System.String,Yarn.Compiler.Range,Yarn.Compiler.DiagnosticDescriptor,System.Object[])">
+            <summary>
+            Creates a new <see cref="T:Yarn.Compiler.Diagnostic"/> using a <see cref="T:Yarn.Compiler.DiagnosticDescriptor"/> with range information.
+            </summary>
+            <param name="fileName">The file where the diagnostic occurred.</param>
+            <param name="range">The range in the file where the diagnostic occurred.</param>
+            <param name="descriptor">The diagnostic descriptor defining the error code and message template.</param>
+            <param name="args">Arguments to format the message template.</param>
+            <returns>A new diagnostic instance.</returns>
+        </member>
+        <member name="M:Yarn.Compiler.Diagnostic.CreateDiagnostic(System.String,Antlr4.Runtime.ParserRuleContext,Yarn.Compiler.DiagnosticDescriptor,System.Object[])">
+            <summary>
+            Creates a new <see cref="T:Yarn.Compiler.Diagnostic"/> using a <see cref="T:Yarn.Compiler.DiagnosticDescriptor"/> with parser context.
+            </summary>
+            <param name="fileName">The file where the diagnostic occurred.</param>
+            <param name="context">The parser context where the diagnostic occurred.</param>
+            <param name="descriptor">The diagnostic descriptor defining the error code and message template.</param>
+            <param name="args">Arguments to format the message template.</param>
+            <returns>A new diagnostic instance.</returns>
+        </member>
+        <member name="M:Yarn.Compiler.Diagnostic.CreateDiagnostic(System.String,Antlr4.Runtime.IToken,Yarn.Compiler.DiagnosticDescriptor,System.Object[])">
+            <summary>
+            Creates a new <see cref="T:Yarn.Compiler.Diagnostic"/> using a <see cref="T:Yarn.Compiler.DiagnosticDescriptor"/> with token information.
+            </summary>
+            <param name="fileName">The file where the diagnostic occurred.</param>
+            <param name="token">The token where the diagnostic occurred.</param>
+            <param name="descriptor">The diagnostic descriptor defining the error code and message template.</param>
+            <param name="args">Arguments to format the message template.</param>
+            <returns>A new diagnostic instance.</returns>
+        </member>
         <member name="T:Yarn.Compiler.Diagnostic.DiagnosticSeverity">
             <summary>
             The severity of the issue.
@@ -1736,7 +2198,7 @@
         </member>
         <member name="F:Yarn.Compiler.Diagnostic.DiagnosticSeverity.Warning">
             <summary>
-            An warning.
+            A warning.
             </summary>
             <remarks>
             Warnings represent possible problems that the user should fix,
@@ -1760,6 +2222,11 @@
         </member>
         <member name="M:Yarn.Compiler.Diagnostic.GetHashCode">
             <inheritdoc/>
+        </member>
+        <member name="M:Yarn.Compiler.ParserErrorListener.CategorizeParserError(System.String)">
+            <summary>
+            Categorizes parser errors from ANTLR messages and assigns appropriate error codes
+            </summary>
         </member>
         <member name="T:Yarn.Compiler.FileCompiler">
             <summary>
@@ -4842,6 +5309,179 @@
         <member name="M:Yarn.Compiler.NodeGroupCompiler.Emit(Yarn.Instruction)">
             <inheritdoc/>
         </member>
+        <member name="T:Yarn.Compiler.NodeMetadata">
+            <summary>
+            contains metadata about a node extracted during compilation for use by language server features
+            this is different from nodedebuginfo which is for instruction level debugging
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.Title">
+            <summary>
+            the title of the node
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.SourceTitle">
+            <summary>
+            the original title as written in source (before any rewriting by NodeGroupVisitor)
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.UniqueTitle">
+            <summary>
+            the rewritten unique title (e.g. "Meeting.happy" or "Meeting.checksum"), set by NodeGroupVisitor
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.NodeGroup">
+            <summary>
+            the node group name (equals sourceTitle when when: headers exist, null otherwise)
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.Subtitle">
+            <summary>
+            the subtitle of the node (optional)
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.Uri">
+            <summary>
+            the file uri where this node is defined
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.Jumps">
+            <summary>
+            all jump and detour destinations referenced from this node
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.FunctionCalls">
+            <summary>
+            all function names called within this node
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.CommandCalls">
+            <summary>
+            all command names called within this node (excludes flow control like if/else/endif)
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.VariableReferences">
+            <summary>
+            all variable names referenced within this node
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.NodeGroupComplexity">
+            <summary>
+            complexity score for node groups or negative one if not part of a group
+            calculated by the compiler based on when clauses
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.CharacterNames">
+            <summary>
+            character names found in dialogue lines within this node
+            extracted from lines matching the pattern charactername: dialogue
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.Tags">
+            <summary>
+            tags from the node tags header
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.PreviewText">
+            <summary>
+            preview text from the first few lines of dialogue in the node
+            used for quick previews in ui
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.OptionCount">
+            <summary>
+            number of shortcut options in this node
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.Options">
+            <summary>
+            detailed information about each shortcut option in this node
+            includes text, conditions, and grouping for visual display
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.HeaderStartLine">
+            <summary>
+            zero based line number where the node header starts (first three dashes)
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.TitleLine">
+            <summary>
+            zero based line number where the title declaration is (title: nodename)
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.BodyStartLine">
+            <summary>
+            zero based line number where the node body starts (after second three dashes)
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.NodeMetadata.BodyEndLine">
+            <summary>
+            zero based line number where the node body ends (at or before three equals signs)
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.JumpInfo">
+            <summary>
+            information about a jump or detour from one node to another
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.JumpInfo.Uri">
+            <summary>
+            The URI of the file in which this jump occurs.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.JumpInfo.DestinationTitle">
+            <summary>
+            the title of the destination node
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.JumpInfo.Type">
+            <summary>
+            whether this is a jump or a detour
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.JumpInfo.Range">
+            <summary>
+            the source location of this jump statement in the file
+            used for precise error reporting (YS0002)
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.JumpType">
+            <summary>
+            type of jump between nodes
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.JumpType.Jump">
+            <summary>
+            a standard jump to another node
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.JumpType.Detour">
+            <summary>
+            a detour to another node that will return
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.OptionInfo">
+            <summary>
+            information about a shortcut option within a node
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.OptionInfo.Text">
+            <summary>
+            the display text of the option (before any pipe separator)
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.OptionInfo.LineNumber">
+            <summary>
+            zero based line number where this option appears
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.OptionInfo.GroupId">
+            <summary>
+            group identifier - consecutive options that are presented together get the same group id
+            used for visual grouping in the editor to show which options appear at the same time
+            increments each time options are separated by dialogue or commands
+            </summary>
+        </member>
         <member name="T:Yarn.Compiler.Project">
             <summary>
             Yarn Projects represent instructions on where to find Yarn scripts and
@@ -5236,6 +5876,15 @@
             command text to be parsed.</param>
             <returns>A <see cref="T:Yarn.Compiler.StructuredCommandParser.ParseResult"/> object encapsulating the parsed
             context and any diagnostics.</returns>
+        </member>
+        <member name="T:Yarn.Compiler.SyntaxValidationListener">
+            <summary>
+            Validates syntax patterns that the parser accepts but are semantically incorrect.
+            This includes:
+            - Stray command end markers without matching start markers
+            - Command keywords outside of command blocks
+            - Line content on the same line as non-flow-control commands
+            </summary>
         </member>
         <member name="T:Yarn.Compiler.TypeCheckerListener">
             <summary>
@@ -5902,6 +6551,29 @@
             <param name="sourceFileName">The name of the file that is being
             visited by this instance.</param>
             <param name="diagnostics">The list of diagnostics to add to.</param>
+        </member>
+        <member name="T:Yarn.Compiler.NodeMetadataVisitor">
+            <summary>
+            Extracts node metadata during compilation for language server features.
+            </summary>
+            <remarks>
+            This visitor walks the parse tree and gathers information about nodes including
+            jumps, function calls, commands, variables, character names, and structural information.
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.NodeMetadataVisitor.implicitCharacterRegex">
+            <summary>
+            Regex for detecting implicit character names in dialogue lines.
+            </summary>
+            <remarks>
+            Matches the pattern "characterName: " at the start of a line.
+            This uses the same logic as LineParser for consistency.
+            </remarks>
+        </member>
+        <member name="M:Yarn.Compiler.NodeMetadataVisitor.Extract(System.String,Yarn.Compiler.YarnSpinnerParser.DialogueContext)">
+            <summary>
+            Extracts metadata from a parse tree.
+            </summary>
         </member>
         <member name="T:Yarn.Compiler.StringTableGeneratorVisitor">
             <summary>
