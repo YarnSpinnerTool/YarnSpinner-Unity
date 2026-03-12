@@ -356,7 +356,10 @@ namespace Yarn.Unity
             // disabling ALL the options views now
             foreach (var optionView in optionViews)
             {
-                optionView.gameObject.SetActive(false);
+                if (optionView != null)
+                {
+                    optionView.gameObject.SetActive(false);
+                }
             }
             await YarnTask.Yield();
 

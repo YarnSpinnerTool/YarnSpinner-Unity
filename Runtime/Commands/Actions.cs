@@ -443,7 +443,6 @@ namespace Yarn.Unity
                 {
                     if (magicBeans[^1].ParameterType == typeof(LineCancellationToken))
                     {
-                        Debug.Log("gave it the full token");
                         // add this into the array
                         // which means making a new one
                         // sigh
@@ -457,7 +456,6 @@ namespace Yarn.Unity
                     }
                     else if (magicBeans[^1].ParameterType == typeof(System.Threading.CancellationToken))
                     {
-                        Debug.Log("gave it a partial token");
                         // add this into the array
                         // which means making a new one
                         // sigh

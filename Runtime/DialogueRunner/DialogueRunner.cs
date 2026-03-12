@@ -719,6 +719,11 @@ namespace Yarn.Unity
         {
             var metaTokenSource = CancellationTokenSource.CreateLinkedTokenSource(dialogueCancellationSource?.Token ?? CancellationToken.None, token);
 
+            if (this == null || metaTokenSource.IsCancellationRequested)
+            {
+                return;
+            }
+
             var localisedLine = await LineProvider.GetLocalizedLineAsync(line, metaTokenSource.Token);
             localisedLine.Source = this;
 
