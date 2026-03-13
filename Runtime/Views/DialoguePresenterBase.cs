@@ -125,6 +125,10 @@ namespace Yarn.Unity
             return YarnTask<DialogueOption?>.FromResult(null);
         }
 
+        public virtual YarnTask RunCommand(Command command, LineCancellationToken cancellationToken)
+        {
+            return YarnTask.CompletedTask;
+        }
 
         /// <summary>Called by the <see cref="DialogueRunner"/> to signal that
         /// dialogue has started.</summary>

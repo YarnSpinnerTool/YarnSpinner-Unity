@@ -260,37 +260,6 @@ namespace Yarn.Unity
         [SerializeField] private bool allowOptionFallthrough = true;
 
         /// <summary>
-        /// A <see cref="UnityEventString"/> that is called when a <see
-        /// cref="Command"/> is received and no command handler was able to
-        /// handle it.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// Use this method to dispatch a command to other parts of your game.
-        /// This method is only called if the <see cref="Command"/> has not been
-        /// handled by a command handler that has been added to the <see
-        /// cref="DialogueRunner"/>, or by a method on a <see
-        /// cref="MonoBehaviour"/> in the scene with the attribute <see
-        /// cref="YarnCommandAttribute"/>.
-        /// </para>
-        /// <para style="hint">
-        /// When a command is delivered in this way, the <see
-        /// cref="DialogueRunner"/> will not pause execution. If you want a
-        /// command to make the DialogueRunner pause execution, see <see
-        /// cref="AddCommandHandler(string, Delegate)"/>.
-        /// </para>
-        /// <para>
-        /// This method receives the full text of the command, as it appears
-        /// between the <c>&lt;&lt;</c> and <c>&gt;&gt;</c> markers.
-        /// </para>
-        /// </remarks>
-        /// <seealso cref="AddCommandHandler(string, Delegate)"/>
-        /// <seealso cref="YarnCommandAttribute"/>
-        [Group("Events", foldOut: true)]
-        [UnityEngine.Serialization.FormerlySerializedAs("onCommand")]
-        public UnityEventString? onUnhandledCommand;
-
-        /// <summary>
         /// Gets or sets the collection of dialogue presenters attached to this
         /// dialogue runner.
         /// </summary>
@@ -572,6 +541,16 @@ namespace Yarn.Unity
                 HurryUpToken = currentContentHurryUpSource.Token,
             };
 
+            List<YarnTask> commandNotification = new List<YarnTask>();
+            foreach (var presenter in dialoguePresenters)
+            {
+                if (presenter != null)
+                {
+                    commandNotification.Add(presenter.RunCommand(command, metaToken));
+                }
+            }
+            await YarnTask.WhenAll(commandNotification);
+
             CommandDispatchResult dispatchResult = this.CommandDispatcher.DispatchCommand(command.Text, this, metaToken);
 
             var parts = SplitCommandText(command.Text);
@@ -594,19 +573,7 @@ namespace Yarn.Unity
                     Debug.LogError($"Can't call command <<{command.Text}>>: {dispatchResult.Message ?? "incorrect number of parameters"}");
                     break;
                 case CommandDispatchResult.StatusType.CommandUnknown:
-                    // Attempt a last-ditch dispatch by invoking our 'onCommand'
-                    // Unity Event.
-                    if (onUnhandledCommand != null && onUnhandledCommand.GetPersistentEventCount() > 0)
-                    {
-                        // We can invoke the event!
-                        onUnhandledCommand.Invoke(command.Text);
-                    }
-                    else
-                    {
-                        // We're out of ways to handle this command! Log this as an
-                        // error.
-                        Debug.LogError($"No Command \"{commandName}\" was found. Did you remember to use the YarnCommand attribute or AddCommandHandler() function in C#?");
-                    }
+                    Debug.Log($"Encountered undispatched command <<{command.Text}>>.");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException($"Internal error: Unknown command dispatch result status {dispatchResult}");
