@@ -10,6 +10,13 @@ using System.Linq;
 
 #if UNITY_EDITOR
 using UnityEditor;
+
+#if UNITY_6000_4_OR_NEWER
+using UnityGUID = UnityEngine.GUID;
+#else
+using UnityGUID = UnityEditor.GUID;
+#endif
+
 #endif
 
 namespace Yarn.Unity.Tests
@@ -36,7 +43,7 @@ namespace Yarn.Unity.Tests
             }
 
             // Add the test scene 
-            var dialogueRunnerTestScene = new EditorBuildSettingsScene(new UnityEngine.GUID(GUID), true);
+            var dialogueRunnerTestScene = new EditorBuildSettingsScene(new UnityGUID(GUID), true);
             EditorBuildSettings.scenes = EditorBuildSettings.scenes.Concat(new[] { dialogueRunnerTestScene }).ToArray();
 #endif
         }
