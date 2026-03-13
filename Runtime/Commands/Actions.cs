@@ -155,24 +155,28 @@ namespace Yarn.Unity
             /// <summary>
             /// Attempt to parse the arguments with cached converters.
             /// </summary>
-            public CommandDispatchResult.ParameterParseStatusType TryParseArgs(string[] args, out object?[]? result, out string? message)
+            public CommandDispatchResult.ParameterParseStatusType TryParseArgs(string[] args, LineCancellationToken token, out object?[]? result, out string? message)
             {
                 var parameters = Method.GetParameters();
 
-                var lastParameterIsArray = parameters.Length > 0 && parameters[parameters.Length - 1].ParameterType.IsArray;
+                var lastParameterIsArray = parameters.Length > 0 && parameters[^1].ParameterType.IsArray;
                 var lastParameterIsToken = false;
-                if (parameters.Length > 0 && parameters[parameters.Length - 1].ParameterType == typeof(LineCancellationToken))
+                if (parameters.Length > 0 && parameters[^1].ParameterType == typeof(LineCancellationToken))
                 {
                     lastParameterIsToken = true;
                 }
-                else if (parameters.Length > 0 && parameters[parameters.Length - 1].ParameterType == typeof(System.Threading.CancellationToken))
+                else if (parameters.Length > 0 && parameters[^1].ParameterType == typeof(System.Threading.CancellationToken))
                 {
                     lastParameterIsToken = true;
                 }
 
                 var (min, max) = ParameterCount;
 
-                int argumentCount = args.Length;
+                // if our command is expecting a token then the number of arguments we will need is one more than the number of parameters in the command
+                // otherwise it's just the same as the number of arguments
+                // this might be different from the length of the parameters as the command can have optional parameters or have a params array 
+                // but the number of parameters is fixed
+                int argumentCount = lastParameterIsToken ? args.Length + 1 : args.Length;
 
                 if (lastParameterIsToken)
                 {
@@ -210,22 +214,19 @@ namespace Yarn.Unity
                     return CommandDispatchResult.ParameterParseStatusType.InvalidParameterCount;
                 }
 
-                var finalArgs = new object?[lastParameterIsToken ? parameters.Length - 1: parameters.Length];
-
-                var argsQueue = new Queue(args);
-
-                var paramsArgs = new List<object>();
+                var finalArgs = new object?[parameters.Length];
 
                 for (int i = 0; i < argumentCount; i++)
                 {
                     var parameterIsArray = parameters[i].ParameterType.IsArray;
-
-                    string arg = args[i];
-                    Converter converter = Converters[i];
+                    var parameterIsToken = parameters[i].ParameterType == typeof(LineCancellationToken) || parameters[i].ParameterType == typeof(System.Threading.CancellationToken);
 
                     if (parameterIsArray)
                     {
-                        if (i < parameters.Length - 1)
+                        string arg = args[i];
+                        Converter converter = Converters[i];
+
+                        if (i != parameters.Length - 1)
                         {
                             // The parameter is an array, but it isn't the last
                             // parameter. That's not allowed.
@@ -240,7 +241,6 @@ namespace Yarn.Unity
                         // the method.
                         var parameterArrayElementType = parameters[i].ParameterType.GetElementType();
                         var paramIndex = i;
-                        // var paramsArray = new List<object?>();
                         var paramsArray = Array.CreateInstance(parameterArrayElementType, argumentCount - i);
                         while (i < argumentCount)
                         {
@@ -267,8 +267,32 @@ namespace Yarn.Unity
                         }
                         finalArgs[paramIndex] = paramsArray;
                     }
+                    else if (parameterIsToken)
+                    {
+                        if (i != parameters.Length - 1)
+                        {
+                            // The parameter is a token, but it isn't the last parameter. That's not allowed.
+                            message = $"Parameter {i} ({parameters[i].Name}): is a cancellation token, but is not the last parameter of {parameters[i].Member.Name}.";
+                            result = default;
+                            return CommandDispatchResult.ParameterParseStatusType.InvalidParameterType;
+                        }
+
+                        // we don't need to convert any arguments as none apply
+                        // we just need to chuck in the appropriate token into the end of the array
+                        if (parameters[i].ParameterType == typeof(LineCancellationToken))
+                        {
+                            finalArgs[i] = token;
+                        }
+                        else
+                        {
+                            finalArgs[i] = token.NextContentToken;
+                        }
+                    }
                     else
                     {
+                        string arg = args[i];
+                        Converter converter = Converters[i];
+                        
                         // Consume a single argument
                         if (converter == null)
                         {
@@ -289,6 +313,7 @@ namespace Yarn.Unity
                         }
                     }
                 }
+
                 for (int i = argumentCount; i < finalArgs.Length; i++)
                 {
                     var parameter = parameters[i];
@@ -306,9 +331,12 @@ namespace Yarn.Unity
                     }
                     else
                     {
-                        throw new InvalidOperationException($"Can't provide a default value for parameter {parameter.Name}");
+                        message = $"Can't provide a default value for parameter {parameter.Name}";
+                        result = default;
+                        return CommandDispatchResult.ParameterParseStatusType.InvalidParameterType;
                     }
                 }
+
                 result = finalArgs;
                 message = default;
                 return CommandDispatchResult.ParameterParseStatusType.Succeeded;
@@ -418,7 +446,7 @@ namespace Yarn.Unity
                     throw new InvalidOperationException($"Internal error: {nameof(CommandRegistration)} \"{this.Name}\" has no {nameof(Target)}, but method is not static and ${DynamicallyFindsTarget} is false");
                 }
 
-                var parseArgsStatus = this.TryParseArgs(parameters.ToArray(), out var finalParameters, out var errorMessage);
+                var parseArgsStatus = this.TryParseArgs(parameters.ToArray(), token, out var finalParameters, out var errorMessage);
 
                 if (parseArgsStatus != CommandDispatchResult.ParameterParseStatusType.Succeeded)
                 {
@@ -434,39 +462,6 @@ namespace Yarn.Unity
                     {
                         Message = errorMessage,
                     };
-                }
-
-                // do a quick check if the last param is a token
-                // if it is then cool beans
-                var magicBeans = this.Method.GetParameters();
-                if (magicBeans != null)
-                {
-                    if (magicBeans[^1].ParameterType == typeof(LineCancellationToken))
-                    {
-                        // add this into the array
-                        // which means making a new one
-                        // sigh
-                        List<object?> newBeans = new();
-                        if (finalParameters != null)
-                        {
-                            newBeans.AddRange(finalParameters);
-                        }
-                        newBeans.Add(token);
-                        finalParameters = newBeans.ToArray();
-                    }
-                    else if (magicBeans[^1].ParameterType == typeof(System.Threading.CancellationToken))
-                    {
-                        // add this into the array
-                        // which means making a new one
-                        // sigh
-                        List<object?> newBeans = new();
-                        if (finalParameters != null)
-                        {
-                            newBeans.AddRange(finalParameters);
-                        }
-                        newBeans.Add(token.NextContentToken);
-                        finalParameters = newBeans.ToArray();
-                    }
                 }
 
                 var returnValue = this.Method.Invoke(target, finalParameters);
