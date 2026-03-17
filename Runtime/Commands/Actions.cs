@@ -223,7 +223,6 @@ namespace Yarn.Unity
 
                     if (parameterIsArray)
                     {
-                        string arg = args[i];
                         Converter converter = Converters[i];
 
                         if (i != parameters.Length - 1)
@@ -244,7 +243,7 @@ namespace Yarn.Unity
                         var paramsArray = Array.CreateInstance(parameterArrayElementType, argumentCount - i);
                         while (i < argumentCount)
                         {
-                            arg = args[i];
+                            string arg = args[i];
                             if (converter == null)
                             {
                                 // Use relative index into paramsArray

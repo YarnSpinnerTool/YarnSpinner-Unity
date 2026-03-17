@@ -164,7 +164,6 @@ namespace Yarn.Unity
         public abstract YarnTask OnDialogueCompleteAsync();
 
         // these are virtual because it's quite likely you don't need them
-        // they are also void instead of YarnTask because currently the VM doesn't wait on node enter/exit so we can't either
         public virtual YarnTask OnNodeEnter(string nodeName, CancellationToken token = default) { return YarnTask.CompletedTask; }
         public virtual YarnTask OnNodeExit(string nodeName, CancellationToken token = default) { return YarnTask.CompletedTask; }
 
