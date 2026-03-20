@@ -485,8 +485,10 @@ namespace Yarn.Unity.ActionAnalyser
                 throw new NotImplementedException("Todo: handle case where action's method is not a IMethodSymbol");
             }
 
-            // Functions must be static
-            if (this.MethodSymbol.MethodKind == MethodKind.Ordinary && this.MethodSymbol.IsStatic == false)
+            // Functions must be static if they're declared via attributes
+            if (this.DeclarationType == DeclarationType.Attribute
+                && this.MethodSymbol.MethodKind == MethodKind.Ordinary
+                && this.MethodSymbol.IsStatic == false)
             {
                 yield return Diagnostic.Create(Diagnostics.YS1006YarnFunctionsMustBeStatic, identifierLocation);
             }
@@ -533,7 +535,7 @@ namespace Yarn.Unity.ActionAnalyser
             List<Diagnostic> diagnostics = new List<Diagnostic>();
             ParameterListSyntax? parameterList = null;
             string? identifier = null;
-            
+
             if (this.MethodDeclarationSyntax is MethodDeclarationSyntax methodDeclaration)
             {
                 identifier = methodDeclaration.Identifier.ToString();
@@ -546,7 +548,7 @@ namespace Yarn.Unity.ActionAnalyser
                 logger?.WriteLine($"identified {identifier} as a local function");
                 parameterList = localFunctionStatement.ParameterList;
             }
-            else if(this.MethodDeclarationSyntax is LambdaExpressionSyntax lambdaExpression)
+            else if (this.MethodDeclarationSyntax is LambdaExpressionSyntax lambdaExpression)
             {
                 logger?.WriteLine("identifed the action as a lambda.");
                 var actionLocation = lambdaExpression.GetLocation();
@@ -569,7 +571,7 @@ namespace Yarn.Unity.ActionAnalyser
                     diagnostics.Add(Diagnostic.Create(Diagnostics.YS1012ActionIsALambda, actionLocation));
                 }
             }
-            
+
             if (parameterList == null || parameterList.Parameters.Count() == 0)
             {
                 logger?.WriteLine($"{identifier} has no parameters, ignoring");
@@ -622,7 +624,7 @@ namespace Yarn.Unity.ActionAnalyser
                     }
                 }
                 else
-                {    
+                {
                     if (typeInfo.GetYarnTypeString() == "any" && typeInfo.BaseType?.Name != "Component")
                     {
                         // we have an invalid type
