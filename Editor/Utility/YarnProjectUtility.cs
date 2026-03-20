@@ -15,6 +15,13 @@ using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 #endif
 
+#if !UNITY_6000_4_OR_HIGHER
+// EntityId was introduced in Unity 6.4 to replace integer-based instance IDs.
+// We'll use a type alias so that versions earlier than that can keep working
+// with the older APIs.
+using EntityId = System.Int32;
+#endif
+
 #nullable enable
 
 namespace Yarn.Unity.Editor
@@ -238,7 +245,7 @@ namespace Yarn.Unity.Editor
             var allFiles = Directory.EnumerateFiles(assetsFolderPath, "*", SearchOption.AllDirectories)
                 .Where(path => path.EndsWith(".meta") == false)
                 .Where(path => assetType.IsAssignableFrom(AssetDatabase.GetMainAssetTypeAtPath(path)));
-            
+
             // Match files with those whose filenames contain a line ID
             // If a direct file match is found prefer that
             Dictionary<string, string> assets = new();
@@ -657,7 +664,7 @@ namespace Yarn.Unity.Editor
         }
 
         [OnOpenAsset(OnOpenAssetAttributeMode.Execute)]
-        public static bool OnOpenAsset(int instanceID)
+        public static bool OnOpenAsset(EntityId instanceID)
         {
             var path = AssetDatabase.GetAssetPath(instanceID);
 
@@ -686,7 +693,7 @@ namespace Yarn.Unity.Editor
         }
 
         [OnOpenAsset(OnOpenAssetAttributeMode.Validate)]
-        public static bool OnValidateAsset(int instanceID)
+        public static bool OnValidateAsset(EntityId instanceID)
         {
             var path = AssetDatabase.GetAssetPath(instanceID);
             var project = AssetDatabase.LoadAssetAtPath<YarnProject>(path);
