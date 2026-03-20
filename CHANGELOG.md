@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed a bug where the InterfaceContainer would sometimes lose it's connection.
   - unsure why this happens, just Unity things™
 - Line Presenter now uses the `InterfaceContainer` for custom typewriters.
+- `.ysls.json` file generation is now on by default.
 
 ### Removed
 

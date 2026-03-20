@@ -31,7 +31,7 @@ namespace Yarn.Unity.Editor
 
         public bool autoRefreshLocalisedAssets = true;
         public bool automaticallyLinkAttributedYarnCommandsAndFunctions = true;
-        public bool generateYSLSFile = false;
+        public bool generateYSLSFile = true;
         public bool enableDirectLinkToVSCode = false;
         public (int major, int minor) Version
         {
