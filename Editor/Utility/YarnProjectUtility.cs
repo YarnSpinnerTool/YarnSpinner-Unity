@@ -275,7 +275,7 @@ namespace Yarn.Unity.Editor
                     assets[lineID] = candidates.FirstOrDefault();
                     if (count > 1)
                     {
-                        Debug.LogWarning($"Discovered {count} candidates for {lineID}. Selecting one.");
+                        Debug.LogWarning($"Discovered {count} candidates for {lineID}. Selecting one.\nCandidates:\n" + string.Join("\n", candidates));
                     }
                 }
             }
