@@ -259,7 +259,7 @@ namespace Yarn.Unity.Editor
 
                     if (file == lineIDWithoutPrefix)
                     {
-                        assets[lineIDWithoutPrefix] = asset;
+                        assets[lineID] = asset;
                         break;
                     }
 
