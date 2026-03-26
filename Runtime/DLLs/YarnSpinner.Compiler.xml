@@ -517,18 +517,100 @@
         </member>
         <member name="T:Yarn.Compiler.EnumTypeBuilder">
             <summary>
-            Provides methods for constructing <see cref="T:Yarn.EnumType"/>
-            objects.
+            Provides methods for constructing <see cref="T:Yarn.EnumType"/> objects.
             </summary>
+            <remarks>
+            To use this class, create an instance of it, and call the
+            <c>With</c>-prefixed methods to set properties. When you're done, access
+            the <see cref="P:Yarn.Compiler.EnumTypeBuilder.EnumType"/> property to get the final, constructed <see
+            cref="T:Yarn.EnumType"/>.
+            </remarks>
         </member>
         <member name="M:Yarn.Compiler.EnumTypeBuilder.FromEnum``1(System.String)">
             <summary>
-            Creates a new <see cref="T:Yarn.EnumType"/> given a CLR enum type.
+            Creates a new <see cref="P:Yarn.Compiler.EnumTypeBuilder.EnumType"/> given a CLR enum type.
             </summary>
             <typeparam name="TEnum">The type of the CLR enum.</typeparam>
             <param name="description">An optional description to apply to the
             new Yarn enum type.</param>
             <returns>A Yarn type representing the enum.</returns>
+        </member>
+        <member name="P:Yarn.Compiler.EnumTypeBuilder.EnumType">
+            <summary>
+            Gets the constructed enum type.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.EnumTypeBuilder.WithName(System.String)">
+            <summary>
+            Sets the <see cref="P:Yarn.EnumType.Name"/> property of the constructed
+            enum type.
+            </summary>
+            <param name="name">The new name.</param>
+            <returns>The <see cref="T:Yarn.Compiler.EnumTypeBuilder"/> instance that received
+            this method call.</returns>
+        </member>
+        <member name="M:Yarn.Compiler.EnumTypeBuilder.WithDescription(System.String)">
+            <summary>
+            Sets the <see cref="P:Yarn.EnumType.Description"/> property of the
+            constructed enum type.
+            </summary>
+            <param name="description">The new description.</param>
+            <returns>The <see cref="T:Yarn.Compiler.EnumTypeBuilder"/> instance that received
+            this method call.</returns>
+        </member>
+        <member name="M:Yarn.Compiler.EnumTypeBuilder.WithRawType(Yarn.IType)">
+            <summary>
+            Sets the <see cref="P:Yarn.EnumType.RawType"/> property of the constructed
+            enum type.
+            </summary>
+            <param name="rawType">The new raw type.</param>
+            <returns>The <see cref="T:Yarn.Compiler.EnumTypeBuilder"/> instance that received
+            this method call.</returns>
+            <exception cref="T:System.InvalidOperationException">Thrown if the enum has
+            any cases added to it.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref
+            name="rawType"/> is neither a string type nor a number
+            type.</exception>
+        </member>
+        <member name="M:Yarn.Compiler.EnumTypeBuilder.WithCase(System.String,System.String,System.String)">
+            <summary>
+            Adds a new string case to the constructed enum type.
+            </summary>
+            <param name="caseName">The name of the case, as it appears in Yarn
+            Spinner scripts.</param>
+            <param name="rawValue">The raw value of the case.</param>
+            <param name="description">The optional description for the
+            case.</param>
+            <inheritdoc cref="M:Yarn.Compiler.EnumTypeBuilder.WithCase(System.String,Yarn.IType,System.IConvertible,System.String)"
+            path="/exception"/>
+            <returns>The <see cref="T:Yarn.Compiler.EnumTypeBuilder"/> instance that received
+            this method call.</returns>
+        </member>
+        <member name="M:Yarn.Compiler.EnumTypeBuilder.WithCase(System.String,System.Single,System.String)">
+            <summary>
+            Adds a new string case to the constructed enum type.
+            </summary>
+            <inheritdoc cref="M:Yarn.Compiler.EnumTypeBuilder.WithCase(System.String,Yarn.IType,System.IConvertible,System.String)"
+            path="/param"/>
+            <inheritdoc cref="M:Yarn.Compiler.EnumTypeBuilder.WithCase(System.String,Yarn.IType,System.IConvertible,System.String)"
+            path="/exception"/>
+            <returns>The <see cref="T:Yarn.Compiler.EnumTypeBuilder"/> instance that received
+            this method call.</returns>
+        </member>
+        <member name="M:Yarn.Compiler.EnumTypeBuilder.WithCase(System.String,Yarn.IType,System.IConvertible,System.String)">
+            <summary>
+            Adds a new case to the constructed enum type.
+            </summary>
+            <param name="caseName">The name of the case, as it appears in Yarn
+            Spinner scripts.</param>
+            <param name="rawValue">The raw value of the case.</param>
+            <param name="description">The optional description for the
+            case.</param>
+            <param name="rawType">The type of the case.</param>
+            <returns></returns>
+            <exception cref="T:System.ArgumentException">Thrown if the raw type doesn't
+            match the enum's type, if a case with the given name already exists,
+            or if a case with the given value already exists.</exception>
         </member>
         <member name="T:Yarn.Compiler.FunctionTypeBuilder">
             <summary>
@@ -5501,12 +5583,17 @@
         </member>
         <member name="F:Yarn.Compiler.Project.YarnSpinnerProjectVersion2">
             <summary>
-             A version number representing Yarn Spinner 2.
+             A version number representing project version 2 (released with Yarn Spinner 2.0)
             </summary>
         </member>
         <member name="F:Yarn.Compiler.Project.YarnSpinnerProjectVersion3">
             <summary>
-             A version number representing Yarn Spinner 3.
+             A version number representing project version 3 (released with Yarn Spinner 3.0).
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.Project.YarnSpinnerProjectVersion4">
+            <summary>
+             A version number representing project version 4 (released with Yarn Spinner 3.2.0).
             </summary>
         </member>
         <member name="M:Yarn.Compiler.Project.#ctor">
@@ -5580,8 +5667,9 @@
         </member>
         <member name="P:Yarn.Compiler.Project.Definitions">
             <summary>
-            Gets or sets the path to a JSON file containing command and function
-            definitions that this project references.
+            Gets or sets the patterns for matching paths to JSON files that
+            contain command and function definitions that this project
+            references.
             </summary>
             <remarks>
             Definitions files are used by editing tools to provide type
@@ -6559,15 +6647,6 @@
             <remarks>
             This visitor walks the parse tree and gathers information about nodes including
             jumps, function calls, commands, variables, character names, and structural information.
-            </remarks>
-        </member>
-        <member name="F:Yarn.Compiler.NodeMetadataVisitor.implicitCharacterRegex">
-            <summary>
-            Regex for detecting implicit character names in dialogue lines.
-            </summary>
-            <remarks>
-            Matches the pattern "characterName: " at the start of a line.
-            This uses the same logic as LineParser for consistency.
             </remarks>
         </member>
         <member name="M:Yarn.Compiler.NodeMetadataVisitor.Extract(System.String,Yarn.Compiler.YarnSpinnerParser.DialogueContext)">
