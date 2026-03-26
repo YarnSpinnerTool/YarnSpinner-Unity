@@ -111,12 +111,11 @@ namespace Yarn.Unity.Editor
         [MenuItem("Assets/Create/Yarn Spinner/Yarn Script", false, 10)]
         public static void CreateYarnAsset()
         {
-
             // This method call is undocumented, but public. It's defined
             // in ProjectWindowUtil, and used by other parts of the editor
             // to create other kinds of assets (scripts, textures, etc).
             ProjectWindowUtil.StartNameEditingIfProjectWindowExists(
-                0,
+                default,
                 ScriptableObject.CreateInstance<DoCreateYarnScriptAsset>(),
                 "NewYarnScript.yarn",
                 GetYarnDocumentIconTexture(),
@@ -134,7 +133,7 @@ namespace Yarn.Unity.Editor
             // in ProjectWindowUtil, and used by other parts of the editor
             // to create other kinds of assets (scripts, textures, etc).
             ProjectWindowUtil.StartNameEditingIfProjectWindowExists(
-                0,
+                default,
                 ScriptableObject.CreateInstance<DoCreateYarnProjectAsset>(),
                 "NewProject.yarnproject",
                 GetYarnProjectIconTexture(),
@@ -153,7 +152,7 @@ namespace Yarn.Unity.Editor
             // in ProjectWindowUtil, and used by other parts of the editor
             // to create other kinds of assets (scripts, textures, etc).
             ProjectWindowUtil.StartNameEditingIfProjectWindowExists(
-                0,
+                default,
                 ScriptableObject.CreateInstance<DoCreateYarnScriptAsset>(),
                 "NewDialoguePresenter.cs",
                 null,
@@ -251,49 +250,64 @@ namespace Yarn.Unity.Editor
             return AssetDatabase.LoadAssetAtPath<Object>(pathName);
         }
 
-        // A handler that receives a callback after the user finishes
-        // naming a new file.
-        private class DoCreateYarnScriptAsset : UnityEditor.ProjectWindowCallback.EndNameEditAction
+        private static void CreateYarnScriptAsset(string pathName, string resourceFile)
         {
-            // The user just finished typing (and didn't cancel it by
-            // pressing escape or anything.) Commit the action by
-            // generating the file on disk.
-            public override void Action(int instanceId, string pathName, string resourceFile)
-            {
-                // Produce the asset.
-                Object o = CreateScriptAssetFromTemplate(pathName, resourceFile);
+            // Produce the asset.
+            Object o = CreateScriptAssetFromTemplate(pathName, resourceFile);
 
-                // Reveal it on disk.
-                ProjectWindowUtil.ShowCreatedAsset(o);
-            }
+            // Reveal it on disk.
+            ProjectWindowUtil.ShowCreatedAsset(o);
+        }
+
+        private static void CreateYarnProjectAsset(string pathName)
+        {
+            // Produce the asset.
+            var project = YarnProjectUtility.CreateDefaultYarnProject();
+            var json = project.GetJson();
+
+            // Write it all out to disk as UTF-8
+            var fullPath = Path.GetFullPath(pathName);
+            File.WriteAllText(fullPath, json, System.Text.Encoding.UTF8);
+
+            // Force Unity to notice the new asset.
+            AssetDatabase.ImportAsset(pathName);
+
+            Object o = AssetDatabase.LoadAssetAtPath<Object>(pathName);
+
+            // Reveal it on disk.
+            ProjectWindowUtil.ShowCreatedAsset(o);
         }
 
         // A handler that receives a callback after the user finishes
         // naming a new file.
+#if UNITY_6000_4_OR_NEWER
+        private class DoCreateYarnScriptAsset : UnityEditor.ProjectWindowCallback.AssetCreationEndAction
+        {
+            public override void Action(EntityId entityId, string pathName, string resourceFile) => CreateYarnScriptAsset(pathName, resourceFile);
+        }
+#else
+        private class DoCreateYarnScriptAsset : UnityEditor.ProjectWindowCallback.AssetCreationEndAction
+        {
+            public override void Action(int instanceId, string pathName, string resourceFile) => CreateYarnScriptAsset(pathName, resourceFile);
+        }
+#endif
+
+        // A handler that receives a callback after the user finishes naming a
+        // new file. The user just finished typing (and didn't cancel it by
+        // pressing escape or anything.) Commit the action by generating the
+        // file on disk.
+#if UNITY_6000_4_OR_NEWER
+        private class DoCreateYarnProjectAsset : UnityEditor.ProjectWindowCallback.AssetCreationEndAction
+        {
+            public override void Action(EntityId entityId, string pathName, string resourceFile) => CreateYarnProjectAsset(pathName);
+        }
+#else      
         private class DoCreateYarnProjectAsset : UnityEditor.ProjectWindowCallback.EndNameEditAction
         {
-            // The user just finished typing (and didn't cancel it by
-            // pressing escape or anything.) Commit the action by
-            // generating the file on disk.
-            public override void Action(int instanceId, string pathName, string resourceFile)
-            {
-                // Produce the asset.
-                var project = YarnProjectUtility.CreateDefaultYarnProject();
-                var json = project.GetJson();
-
-                // Write it all out to disk as UTF-8
-                var fullPath = Path.GetFullPath(pathName);
-                File.WriteAllText(fullPath, json, System.Text.Encoding.UTF8);
-
-                // Force Unity to notice the new asset.
-                AssetDatabase.ImportAsset(pathName);
-
-                Object o = AssetDatabase.LoadAssetAtPath<Object>(pathName);
-
-                // Reveal it on disk.
-                ProjectWindowUtil.ShowCreatedAsset(o);
-            }
+            public override void Action(int instanceId, string pathName, string resourceFile) => CreateYarnProjectAsset(pathName);
         }
+#endif
+
 
         /// <summary>
         /// Get all assets of a given type.

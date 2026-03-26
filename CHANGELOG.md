@@ -43,6 +43,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - unsure why this happens, just Unity things™
 - Line Presenter now uses the `InterfaceContainer` for custom typewriters.
 - `.ysls.json` file generation is now on by default.
+- Yarn Spinner for Unity now works with `EntityId` objects instead of instance ID integers in Unity 6.4 and later.
 
 ### Removed
 

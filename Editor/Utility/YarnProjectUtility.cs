@@ -15,7 +15,7 @@ using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 #endif
 
-#if !UNITY_6000_4_OR_HIGHER
+#if !UNITY_6000_4_OR_NEWER
 // EntityId was introduced in Unity 6.4 to replace integer-based instance IDs.
 // We'll use a type alias so that versions earlier than that can keep working
 // with the older APIs.
