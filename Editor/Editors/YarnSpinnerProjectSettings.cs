@@ -124,7 +124,7 @@ namespace Yarn.Unity.Editor
 
                 bool automaticallyLinkAttributedYarnCommandsAndFunctions = GetValueOrDefault(automaticallyLinkAttributedYarnCommandsAndFunctionsKey, true);
                 bool autoRefreshLocalisedAssets = GetValueOrDefault(autoRefreshLocalisedAssetsKey, true);
-                bool generateYSLSFile = GetValueOrDefault(generateYSLSFileKey, false);
+                bool generateYSLSFile = GetValueOrDefault(generateYSLSFileKey, true);
                 bool enableDirectLinkToVSCode = GetValueOrDefault(enableDirectLinkToVSCodeKey, false);
                 int major = GetValueOrDefault(majorVersionKey, 0);
                 int minor = GetValueOrDefault(minorVersionKey, 0);
