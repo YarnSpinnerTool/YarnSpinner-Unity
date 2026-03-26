@@ -286,7 +286,7 @@ namespace Yarn.Unity.Editor
             public override void Action(EntityId entityId, string pathName, string resourceFile) => CreateYarnScriptAsset(pathName, resourceFile);
         }
 #else
-        private class DoCreateYarnScriptAsset : UnityEditor.ProjectWindowCallback.AssetCreationEndAction
+        private class DoCreateYarnScriptAsset : UnityEditor.ProjectWindowCallback.EndNameEditAction
         {
             public override void Action(int instanceId, string pathName, string resourceFile) => CreateYarnScriptAsset(pathName, resourceFile);
         }
