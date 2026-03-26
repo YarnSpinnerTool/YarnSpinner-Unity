@@ -85,7 +85,7 @@ namespace Yarn.Unity.Editor
 
             settings.autoRefreshLocalisedAssets = true;
             settings.automaticallyLinkAttributedYarnCommandsAndFunctions = true;
-            settings.generateYSLSFile = false;
+            settings.generateYSLSFile = true;
             settings.majorVersion = 0;
             settings.minorVersion = 0;
             settings.sortLocalisationValuesInsideStringTable = false;
