@@ -18,24 +18,23 @@ using Yarn.Unity;
 
 namespace Yarn.Unity.Tests
 {
-    [TestFixture]
-    public class CommandDispatchTests : IPrebuildSetup, IPostBuildCleanup
+#if UNITY_EDITOR
+    public static class CommandTestSetup
     {
 
-#if UNITY_EDITOR
-        string outputFilePath => TestFilesDirectoryPath + "YarnActionRegistration.cs";
-        readonly string[] testScriptGUIDs = new string[] {
+        static string outputFilePath => TestFilesDirectoryPath + "YarnActionRegistration.cs";
+        static readonly string[] testScriptGUIDs = new string[] {
             "32f15ac5211d54a68825dfb9532e93f4",
             "38cc17b47f2af4fb5a9f4837db188e62",
         };
 
-        string TestFolderName => nameof(CommandDispatchTests);
-        string TestFilesDirectoryPath => $"Assets/{TestFolderName}/";
-        IEnumerable<string> TestScriptPathSources => testScriptGUIDs.Select(g => UnityEditor.AssetDatabase.GUIDToAssetPath(g));
-#endif
+        static string TestFolderName => nameof(CommandDispatchTests);
+        static string TestFilesDirectoryPath => $"Assets/{TestFolderName}/";
+        static IEnumerable<string> TestScriptPathSources => testScriptGUIDs.Select(g => UnityEditor.AssetDatabase.GUIDToAssetPath(g));
 
-        public void Setup()
+        public static void Setup()
         {
+
             if (Directory.Exists(TestFilesDirectoryPath) == false)
             {
                 UnityEditor.AssetDatabase.CreateFolder("Assets", TestFolderName);
@@ -48,11 +47,28 @@ namespace Yarn.Unity.Tests
             UnityEditor.AssetDatabase.Refresh();
         }
 
-        public void Cleanup()
+        public static void Cleanup()
         {
             UnityEditor.AssetDatabase.DeleteAsset(TestFilesDirectoryPath);
             UnityEditor.AssetDatabase.Refresh();
         }
+    }
+#endif
+
+    [TestFixture]
+    public class CommandDispatchTests : IPrebuildSetup, IPostBuildCleanup
+    {
+
+#if UNITY_EDITOR
+        void IPrebuildSetup.Setup()
+        {
+            CommandTestSetup.Setup();
+        }
+        void IPostBuildCleanup.Cleanup()
+        {
+            CommandTestSetup.Cleanup();
+        }
+#endif
 
         [Test]
         public void CommandDispatch_Passes()

@@ -16,13 +16,12 @@ using YarnAction = Yarn.Unity.ActionAnalyser.Action;
 
 #nullable enable
 
-
-
 [Generator]
 public class ActionRegistrationSourceGenerator : ISourceGenerator
 {
     const string YarnSpinnerUnityAssemblyName = "YarnSpinner.Unity";
     const string DebugLoggingPreprocessorSymbol = "YARN_SOURCE_GENERATION_DEBUG_LOGGING";
+    const string IncludeTestCommands = "YARN_INCLUDE_TEST_COMMANDS";
     const string MinimumUnityVersionPreprocessorSymbol = "UNITY_2021_2_OR_NEWER";
 
     public static string? GetProjectRoot(GeneratorExecutionContext context)
@@ -173,11 +172,18 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 "YarnSpinner.Editor",
             };
 
-            // But DO generate source code for the Samples assembly.
+            // But DO generate source code for the Samples assembly and the Test assembly
             var prefixesToKeep = new List<string>()
             {
                 "YarnSpinner.Unity.Samples",
             };
+
+            // Additionally, if we're building for unit tests, include the Yarn
+            // Spinner unit tests assembly.
+            if (context.ParseOptions.PreprocessorSymbolNames.Contains(IncludeTestCommands))
+            {
+                prefixesToKeep.Add("YarnSpinner.Unity.Tests");
+            }
 
             if (context.Compilation.AssemblyName == null)
             {
@@ -227,7 +233,7 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                     {
                         output.WriteLine($"Flagging '{action.Name}' ({action.MethodName}): {diagnostic}");
                         action.ContainsErrors = true;
-                    
+
                         if (diagnostic.Severity == DiagnosticSeverity.Error)
                         {
                             hasCriticalActionErrors = true;
