@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+### Changed
+
+### Removed
+
+## [3.2.0] 2026-03-27
+
+### Added
+
 - When using the Unity Localization package Yarn Spinner can now sort the localisation tables based on a lines position in the file.
   - This resolves an issue where lines added into the middle of a Yarn file. However, this does require sorting your localisation table every time you edit your Yarn files.
   - This setting defaults to off, and can be enabled in Yarn Spinners settings in `Edit -> Project Settings -> Yarn Spinner`.
@@ -44,8 +52,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Line Presenter now uses the `InterfaceContainer` for custom typewriters.
 - `.ysls.json` file generation is now on by default.
 - Yarn Spinner for Unity now works with `EntityId` objects instead of instance ID integers in Unity 6.4 and later.
-
-### Removed
 
 ## [3.1.4] 2025-12-19
 
