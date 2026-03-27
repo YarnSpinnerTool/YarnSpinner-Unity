@@ -1842,14 +1842,6 @@
             YS0008: Unreachable code detected.
             </summary>
         </member>
-        <member name="F:Yarn.Compiler.DiagnosticDescriptor.UnusedNode">
-            <summary>
-            YS0009: Node is never referenced.
-            </summary>
-            <remarks>
-            <para>Format placeholders: 0: node title.</para>
-            </remarks>
-        </member>
         <member name="F:Yarn.Compiler.DiagnosticDescriptor.UnusedVariable">
             <summary>
             YS0010: Variable is declared but never used.
@@ -1951,7 +1943,7 @@
         </member>
         <member name="F:Yarn.Compiler.DiagnosticDescriptor.RedeclarationOfExistingVariable">
             <summary>
-            YSXXX1: Redeclaration of existing variable
+            YS0039: Redeclaration of existing variable
             </summary>
             <remarks>
             <para>Format placeholders: 0: variable name.</para>
@@ -1959,7 +1951,7 @@
         </member>
         <member name="F:Yarn.Compiler.DiagnosticDescriptor.RedeclarationOfExistingType">
             <summary>
-            YSXXX2: Redeclaration of existing type
+            YS0040: Redeclaration of existing type
             </summary>
             <remarks>
             <para>Format placeholders: 0: type name.</para>
@@ -1967,7 +1959,7 @@
         </member>
         <member name="F:Yarn.Compiler.DiagnosticDescriptor.InternalError">
             <summary>
-            YSXXX3: Internal error.
+            YS0041: Internal error.
             </summary>
             <remarks>
             <para>Format placeholders: 0: error description.</para>
@@ -1975,7 +1967,7 @@
         </member>
         <member name="F:Yarn.Compiler.DiagnosticDescriptor.UnknownLineIDForShadowLine">
             <summary>
-            YSXXX4: Unknown line ID {0} for shadow line.
+            YS0042: Unknown line ID {0} for shadow line.
             </summary>
             <remarks>
             <para>Format placeholders: 0: line ID.</para>
@@ -1983,17 +1975,17 @@
         </member>
         <member name="F:Yarn.Compiler.DiagnosticDescriptor.ShadowLinesCantHaveExpressions">
             <summary>
-            YSXXX5: Shadow lines must not have expressions
+            YS0043: Shadow lines must not have expressions
             </summary>
         </member>
         <member name="F:Yarn.Compiler.DiagnosticDescriptor.ShadowLinesMustHaveSameTextAsSource">
             <summary>
-            YSXXX6: Shadow lines must have the same text as their source
+            YS0044: Shadow lines must have the same text as their source
             </summary>
         </member>
         <member name="F:Yarn.Compiler.DiagnosticDescriptor.SmartVariableLoop">
             <summary>
-            YSXXX7: Smart variables cannot contain reference loops.
+            YS0045: Smart variables cannot contain reference loops.
             </summary>
             <remarks>
             <para>Format placeholders: 0: variable reference, 1: smart variable name.</para>
@@ -2001,7 +1993,7 @@
         </member>
         <member name="F:Yarn.Compiler.DiagnosticDescriptor.NullDefaultValue">
             <summary>
-            YSXXX8: Variable declaration has a null default value.
+            YS0046: Variable declaration has a null default value.
             </summary>
             <remarks>
             <para>Format placeholders: 0: variable name, 1: type name.</para>
@@ -2009,7 +2001,7 @@
         </member>
         <member name="F:Yarn.Compiler.DiagnosticDescriptor.TypeSolverTimeout">
             <summary>
-            YSXXX9: Expression failed to resolve in a reasonable time.
+            YS0047: Expression failed to resolve in a reasonable time.
             </summary>
             <remarks>
             <para>Format placeholders: 0: time limit in seconds.</para>
