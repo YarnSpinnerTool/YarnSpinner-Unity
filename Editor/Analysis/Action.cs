@@ -580,8 +580,12 @@ namespace Yarn.Unity.ActionAnalyser
             }
 
             logger?.WriteLine($"Will be checking {parameterList.Parameters.Count()} parameters");
+
+            int parameterIndex = 0;
+            int parameterCount = parameterList.Parameters.Count;
             foreach (var parameter in parameterList.Parameters)
             {
+                parameterIndex += 1;
                 logger?.Inc();
                 if (parameter.Type == null)
                 {
@@ -611,16 +615,17 @@ namespace Yarn.Unity.ActionAnalyser
                     continue;
                 }
 
-                if (symbol.IsParams)
+                // Params arrays or arrays that are the final parameter make
+                // that parameter variadic in Yarn Spinner. Check that the
+                // element type of that array is of the right type.
+                if (symbol.Type is IArrayTypeSymbol arrayTypeSymbol
+                    && (symbol.IsParams || parameterIndex == parameterCount))
                 {
-                    if (symbol.Type is IArrayTypeSymbol arrayTypeSymbol)
+                    var subtype = arrayTypeSymbol.ElementType;
+                    if (subtype.GetYarnTypeString() == "any")
                     {
-                        var subtype = arrayTypeSymbol.ElementType;
-                        if (subtype.GetYarnTypeString() == "any")
-                        {
-                            logger?.WriteLine($"{parameterName} is a parameter array of non Yarn compatible types!");
-                            diagnostics.Add(Diagnostic.Create(Diagnostics.YS1008ActionsParamsArraysMustBeOfYarnTypes, parameter.GetLocation(), parameterName, subtype.Name));
-                        }
+                        logger?.WriteLine($"{parameterName} is a parameter array of non Yarn compatible types!");
+                        diagnostics.Add(Diagnostic.Create(Diagnostics.YS1008ActionsParamsArraysMustBeOfYarnTypes, parameter.GetLocation(), parameterName, subtype.Name));
                     }
                 }
                 else
