@@ -12,6 +12,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 
+## [3.2.1] 2026-03-27
+
+### Changed
+
+- Fixed an issue in Unity 6.4 where newly created Yarn scripts could fail to import correctly.
+
 ## [3.2.0] 2026-03-27
 
 ### Added
