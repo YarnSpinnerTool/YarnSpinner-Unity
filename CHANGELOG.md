@@ -12,6 +12,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 
+## [3.2.2] 2026-04-03
+
+### Changed
+
+- Text Animator: Fixed an issue where support files were not being installed correctly
+- Text Animator: Fixed an issue where the support files for Text Animator 2 could cause a build error
+- Text Animator: Fixed an issue where the Dialogue Runner prefab was losing its reference to its typewriter.
+
 ## [3.2.1] 2026-03-27
 
 ### Changed
