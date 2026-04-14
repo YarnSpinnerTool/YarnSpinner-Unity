@@ -465,11 +465,11 @@ namespace Yarn.Unity.Editor
             return (allExistingTags, projectImplicitTags);
         }
 
-        public static void AddLineTagsToFilesInYarnProject(YarnProjectImporter importer)
+        public static void AddLineTagsToFilesInYarnProject(YarnProjectImporter importer, HashSet<string>? excludedTags = null, ILineTagGenerator? tagger = null)
         {
+#if USE_UNITY_LOCALIZATION
             var (AllExistingTags, ProjectImplicitTags) = YarnProjectUtility.ExtantLineTags(importer);
 
-#if USE_UNITY_LOCALIZATION
             // if we are using Unity localisation we need to first remove the
             // implicit tags for this project from the strings table
             if (importer.UseUnityLocalisationSystem && importer.UnityLocalisationStringTableCollection != null)
@@ -499,14 +499,33 @@ namespace Yarn.Unity.Editor
 
                     // Produce a version of this file that contains line tags
                     // added where they're needed.
-                    var tagged = Yarn.Compiler.Utility.TagLines(contents, AllExistingTags ?? new List<string>());
-                    var taggedVersion = tagged.Item1;
+
+                    var tagged = Yarn.Compiler.Utility.TagLines(contents, excludedTags, tagger);
+
+                    var taggedVersion = tagged.ModifiedSource;
 
                     // if the file has an error it returns null we want to bail
                     // out then otherwise we'd wipe the yarn file
                     if (taggedVersion == null)
                     {
                         continue;
+                    }
+
+                    if (tagged.TagExceptions.Count > 0)
+                    {
+                        System.Text.StringBuilder stringBuilder = new();
+                        foreach (var ex in tagged.TagExceptions)
+                        {
+                            if (!string.IsNullOrWhiteSpace(ex.SourceFile) && ex.LineNumber != -1)
+                            {
+                                stringBuilder.AppendLine($"Unable to tag line {ex.LineNumber} in {ex.SourceFile}: {ex.Message}");
+                            }
+                            else
+                            {
+                                stringBuilder.AppendLine($"\t- {ex.Message}");
+                            }
+                        }
+                        Debug.LogError($"Encountered the following issues while attempting to tag lines:\n{stringBuilder.ToString()}");
                     }
 
                     // If this produced a modified version of the file, write it
@@ -517,8 +536,6 @@ namespace Yarn.Unity.Editor
 
                         File.WriteAllText(assetPath, taggedVersion, System.Text.Encoding.UTF8);
                         AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.Default);
-
-                        AllExistingTags = tagged.Item2 as List<string>;
                     }
                 }
             }
@@ -541,7 +558,6 @@ namespace Yarn.Unity.Editor
             {
                 Debug.Log("No files needed updating.");
             }
-
         }
 
         /// <summary>

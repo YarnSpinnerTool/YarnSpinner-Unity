@@ -262,6 +262,9 @@ namespace Yarn.Unity.Editor
         }
 #endif
 
+        public bool useCustomLineTagger;
+        public string? lineTaggerClass;
+
         /// <summary>
         /// Gets a <see cref="Project"/> loaded from this importer's asset file,
         /// or <see langword="null"/> if an error is encountered.

@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Yarn Projects now support specifying which style line tagger to use
+  - You can create your own by conforming to the `ILineTagGenerator` interface
+
 ### Changed
 
 ### Removed

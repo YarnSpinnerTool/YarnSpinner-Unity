@@ -67,6 +67,9 @@ namespace Yarn.Unity.Editor
         private SerializedProperty? variablesClassNamespaceProperty;
         private SerializedProperty? variablesClassParentProperty;
 
+        private SerializedProperty? lineTaggerClassProperty;
+        private SerializedProperty? useCustomLineTaggerProperty;
+
 #if USE_UNITY_LOCALIZATION
         private SerializedProperty? useUnityLocalisationSystemProperty;
         private SerializedProperty? unityLocalisationTableCollectionGUIDProperty;
@@ -106,6 +109,9 @@ namespace Yarn.Unity.Editor
             variablesClassNameProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.variablesClassName));
             variablesClassNamespaceProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.variablesClassNamespace));
             variablesClassParentProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.variablesClassParent));
+
+            lineTaggerClassProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.lineTaggerClass));
+            useCustomLineTaggerProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.useCustomLineTagger));
         }
 
         public override void OnDisable()
@@ -528,10 +534,79 @@ namespace Yarn.Unity.Editor
                 EditorGUILayout.HelpBox($"All lines must have a line ID tag in order to create a string table. Click '{AddStringTagsButtonLabel}' to fix this problem.", MessageType.Warning);
             });
 
+            var unableToAddLineTagsDueToChangesWarningBox = new IMGUIContainer(() =>
+            {
+                EditorGUILayout.HelpBox("Unable to add line tags while the project has unsaved changes.", MessageType.Info);
+            });
+
+            var useCustomTaggerValue = useCustomLineTaggerProperty?.boolValue ?? false;
+            var currentTaggerClass = lineTaggerClassProperty?.stringValue ?? null;
+
+            var taggerChoice = new DropdownField();
+            var allTaggers = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(t => typeof(ILineTagGenerator).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
+            foreach (var tagger in allTaggers)
+            {
+                taggerChoice.choices.Add(tagger.FullName);
+                if (tagger.FullName == currentTaggerClass)
+                {
+                    taggerChoice.value = tagger.FullName;
+                }
+            }
+            taggerChoice.RegisterValueChangedCallback(v =>
+            {
+                if (lineTaggerClassProperty != null)
+                {
+                    lineTaggerClassProperty.stringValue = v.newValue;
+                    serializedObject.ApplyModifiedProperties();
+                    UpdateTaggingButtonsEnabled();
+                }
+            });
+
+            var useCustomTagger = new Toggle
+            {
+                label = "Use custom line tagging",
+                value = useCustomTaggerValue
+            };
+            useCustomTagger.RegisterValueChangedCallback((change) =>
+            {
+                SetElementVisible(taggerChoice, change.newValue);
+                
+                if (useCustomLineTaggerProperty != null)
+                {
+                    useCustomLineTaggerProperty.boolValue = change.newValue;
+                    serializedObject.ApplyModifiedProperties();
+
+                    UpdateTaggingButtonsEnabled();
+                }
+            });
+
             addStringTagsButton.text = AddStringTagsButtonLabel;
             addStringTagsButton.clicked += () =>
             {
-                YarnProjectUtility.AddLineTagsToFilesInYarnProject(yarnProjectImporter);
+                ILineTagGenerator? tagger = null;
+                if (useCustomTagger.value)
+                {
+                    if (taggerChoice.value != null)
+                    {
+                        if (lineTaggerClassProperty != null)
+                        {
+                            lineTaggerClassProperty.stringValue = taggerChoice.value;
+                        }
+                        if (useCustomLineTaggerProperty != null)
+                        {
+                            useCustomLineTaggerProperty.boolValue = true;
+                        }
+                        serializedObject.ApplyModifiedProperties();
+
+                        var taggerType = allTaggers.SingleOrDefault(t => t.FullName == taggerChoice.value);
+                        if (taggerType != null)
+                        {
+                            tagger = Activator.CreateInstance(taggerType) as ILineTagGenerator;
+                        }
+                    }
+                }
+
+                YarnProjectUtility.AddLineTagsToFilesInYarnProject(yarnProjectImporter, null, tagger);
                 UpdateTaggingButtonsEnabled();
             };
 
@@ -546,6 +621,12 @@ namespace Yarn.Unity.Editor
             };
             yarnInternalControls.Add(updateExistingStringsFilesButton);
 
+            // if it's already on we want it to show without having to toggle
+            SetElementVisible(taggerChoice, useCustomTagger.value);
+            
+            yarnInternalControls.Add(useCustomTagger);
+            yarnInternalControls.Add(taggerChoice);
+
             localisationControls.Add(yarnInternalControls);
             localisationControls.Add(unityControls);
 
@@ -553,6 +634,7 @@ namespace Yarn.Unity.Editor
 
             ui.Add(cantGenerateUnityStringTableMessage);
 
+            ui.Add(unableToAddLineTagsDueToChangesWarningBox);
             ui.Add(addStringTagsButton);
             ui.Add(generateStringsFileButton);
 
@@ -619,8 +701,11 @@ namespace Yarn.Unity.Editor
 
             void UpdateTaggingButtonsEnabled()
             {
-                addStringTagsButton.SetEnabled(yarnProjectImporter.CanGenerateStringsTable == false && importData.yarnFiles.Any());
-                generateStringsFileButton.SetEnabled(yarnProjectImporter.CanGenerateStringsTable);
+                bool isUnsaved = HasModified();
+                addStringTagsButton.SetEnabled(yarnProjectImporter.CanGenerateStringsTable == false && importData.yarnFiles.Any() && !isUnsaved);
+                generateStringsFileButton.SetEnabled(yarnProjectImporter.CanGenerateStringsTable && !isUnsaved);
+
+                SetElementVisible(unableToAddLineTagsDueToChangesWarningBox, isUnsaved);
 
                 bool isUnityLocalisationAvailable;
 #if USE_UNITY_LOCALIZATION
