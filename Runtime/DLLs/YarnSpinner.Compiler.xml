@@ -999,13 +999,7 @@
             <seealso cref="T:Yarn.Compiler.CompilationResult"/>
         </member>
         <member name="M:Yarn.Compiler.Compiler.GetContentViewedVariableName(System.String)">
-            <summary>
-            Gets the name of the boolean variable that stores whether the
-            content identified by lineID has been seen by the player before.
-            </summary>
-            <param name="lineID">The line ID to generate a variable name
-            for.</param>
-            <returns>A variable name.</returns>
+            <inheritdoc cref="M:Yarn.Library.GenerateUniqueContentViewedVariableName(System.String)"/>
         </member>
         <member name="M:Yarn.Compiler.Compiler.AddErrorsForInvalidNodeNames(System.Collections.Generic.List{Yarn.Compiler.FileParseResult},System.Collections.Generic.List{Yarn.Compiler.Diagnostic}@)">
             <summary>
@@ -2412,6 +2406,22 @@
             <item>Command name</item>
             <item>Number of parameters used</item>
             <item>Number of parameters expected</item>
+            </list></para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.MultipleLineOrShadowIDsOnALine">
+            <summary>YS0062: Dialogue has multiple '#line' or '#shadow' IDs.</summary>
+            <remarks>
+            <para>Lines of dialogue can only have a single line ID or shadow line, having multiple means we cannot uniquely identify this line.</para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.MarkupFailedToParse">
+            <summary>YS0063: Dialogue has malformed or invalid markup.</summary>
+            <remarks>
+            <para>Markup has it's own specific syntax. The line of dialogue has malformed, invalid, unbalanced, or incomplete markup.</para>
+            <para>Format placeholders:
+            <list type="number">
+            <item>Markup parse message</item>
             </list></para>
             </remarks>
         </member>

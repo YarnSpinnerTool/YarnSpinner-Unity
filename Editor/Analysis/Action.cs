@@ -231,13 +231,55 @@ namespace Yarn.Unity.ActionAnalyser
 
         public bool ContainsErrors = false;
 
-        public string ToJSON()
+        // System.IO.Path.GetRelativePath(projectRoot, SourceFileName); siiiiiiigh
+        // this is based on: https://stackoverflow.com/questions/275689/how-to-get-relative-path-from-absolute-path
+        private static string GetRelativePath(String projectRoot, String SourceFileName)
+        {
+            if (string.IsNullOrEmpty(projectRoot))
+            {
+                throw new ArgumentNullException("root is null");
+            }
+            if (string.IsNullOrEmpty(SourceFileName))
+            {
+                throw new ArgumentNullException("absolute is null");
+            }
+
+            Uri from = new Uri(projectRoot);
+            Uri to = new Uri(SourceFileName);
+
+            if (from.Scheme != to.Scheme)
+            {
+                return SourceFileName;
+            }
+
+            Uri relativeUri = from.MakeRelativeUri(to);
+            string relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+
+            if (to.Scheme.Equals("file", StringComparison.InvariantCultureIgnoreCase))
+            {
+                relativePath = relativePath.Replace(System.IO.Path.AltDirectorySeparatorChar, System.IO.Path.DirectorySeparatorChar);
+            }
+
+            return relativePath;
+        }
+
+        public string ToJSON(string? projectRoot)
         {
             var result = new Dictionary<string, object?>();
 
+            string? relativePath;
+            if (projectRoot != null && SourceFileName != null)
+            {
+                relativePath = GetRelativePath(projectRoot, SourceFileName);
+            }
+            else
+            {
+                relativePath = SourceFileName;
+            }
+
             result["yarnName"] = this.Name;
             result["definitionName"] = this.MethodName;
-            result["fileName"] = this.SourceFileName;
+            result["fileName"] = relativePath;
             if (!string.IsNullOrEmpty(this.Description))
             {
                 result["documentation"] = this.Description;

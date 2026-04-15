@@ -297,8 +297,8 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                     output.Write($"Generating ysls...");
                     // generating the ysls
 
-                    IEnumerable<string> commandJSON = actions.Where(a => a.Type == ActionType.Command).Select(a => a.ToJSON());
-                    IEnumerable<string> functionJSON = actions.Where(a => a.Type == ActionType.Function).Select(a => a.ToJSON());
+                    IEnumerable<string> commandJSON = actions.Where(a => a.Type == ActionType.Command).Select(a => a.ToJSON(projectPath));
+                    IEnumerable<string> functionJSON = actions.Where(a => a.Type == ActionType.Function).Select(a => a.ToJSON(projectPath));
 
                     var ysls = "{" +
                     @"""version"":2," +

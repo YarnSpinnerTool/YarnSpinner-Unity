@@ -13,6 +13,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- YSLS files are now generated with paths set relative to the project root
+  - if the root can't be determined it will still use full path
+
 ### Removed
 
 ## [3.2.2] 2026-04-03

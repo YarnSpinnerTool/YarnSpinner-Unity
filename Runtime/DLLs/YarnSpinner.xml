@@ -978,6 +978,34 @@
             have a tracking variable created.</param>
             <returns>The new variable name.</returns>
         </member>
+        <member name="M:Yarn.Library.GenerateUniqueContentViewedVariableName(System.String)">
+            <summary>
+            Gets the name of the boolean variable that stores whether the
+            content identified by lineID has been seen by the player before.
+            </summary>
+            <remarks>
+            The value provided should be the full line ID without the #.
+            So if you have a line <c>Alice: this is my once line &lt;&lt;once&gt;&gt; #line:abc123</c> the input should be <c>"line:abc123"</c>.
+            </remarks>
+            <param name="lineID">The line ID to generate a variable name
+            for.</param>
+            <returns>A variable name.</returns>
+        </member>
+        <member name="M:Yarn.Library.GenerateUniqueCommandBlockViewedVariableName(System.String,System.String,System.Int32)">
+            <summary>
+            Gets the name of the boolean variable that stores whether or not the content inside a once block has been seen by the player before.
+            </summary>
+            <remarks>
+            This is an inherently unstable identifer as it relies of layout attributes of the yarn code.
+            Later versions of Yarn Spinner will likely change how this works to be more stable.
+            Moreso than GenerateUniqueContentViewedVariableName this is only really useful during development.
+            Sorry.
+            </remarks>
+            <param name="sourceFileName">The absolute path to the yarn file that contains the once block.</param>
+            <param name="node">the node that contains the once block.</param>
+            <param name="lineNumber">The line number in the editor that opens the once block.</param>
+            <returns>A variable name.</returns>
+        </member>
         <member name="M:Yarn.ICodeDumpHelper.GetStringForKey(System.String)">
             <summary>
             Gets the user-facing string for a given key from the code dump
@@ -3012,6 +3040,10 @@
         </member>
         <member name="M:Yarn.Markup.LineParser.ParseString(System.String,System.String,System.Boolean)">
             <inheritdoc cref="M:Yarn.Markup.LineParser.ParseString(System.String,System.String,System.Boolean,System.Boolean,System.Boolean)"/>
+        </member>
+        <member name="M:Yarn.Markup.LineParser.ParseStringAndIncludeMarkupDiagnostics(System.String,System.String,System.Boolean)">
+            <returns>A markup parse result and a collection of diagnostics encountered while parsing the markup.</returns>
+            <inheritdoc cref="M:Yarn.Markup.LineParser.ParseString(System.String,System.String,System.Boolean,System.Boolean,System.Boolean)" />
         </member>
         <member name="M:Yarn.Markup.LineParser.ParseString(System.String,System.String,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
