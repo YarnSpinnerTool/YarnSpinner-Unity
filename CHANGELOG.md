@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - YSLS files are now generated with paths set relative to the project root
   - if the root can't be determined it will still use full path
+- `VariableStorageBehaviour` can now add change listeners for variable defined outside of Yarn
 
 ### Removed
 
