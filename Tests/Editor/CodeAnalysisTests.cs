@@ -146,7 +146,7 @@ namespace Yarn.Unity.Tests
                 documentedDirectAction.Parameters[1].Name.Should().BeEqualTo("b");
                 documentedDirectAction.Parameters[1].Description.Should().BeEqualTo("The second parameter.");
 
-                var text = documentedAttributeAction.ToJSON();
+                var text = documentedAttributeAction.ToJSON(Path.GetDirectoryName(Application.dataPath));
                 Debug.Log(text);
             }
             finally
