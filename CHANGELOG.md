@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - if the root can't be determined it will still use full path
 - `VariableStorageBehaviour` can now add change listeners for variable defined outside of Yarn
 - Fixed a bug where empty or whitespace only file paths in diagnostics could cause importing to break and throw exceptions
+- Yarn diagnostics generated during import now have their line number set which should let the editor jump directly to them where possible.
 
 ### Removed
 

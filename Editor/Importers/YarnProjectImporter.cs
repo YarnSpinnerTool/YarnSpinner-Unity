@@ -627,7 +627,7 @@ namespace Yarn.Unity.Editor
                                 }
                                 else
                                 {
-                                    ctx.LogImportWarning($"<a href=\"{relativeWarningFileName}\">{relativeWarningFileName}</a> line {warning.Range.Start.Line + 1}: {warning.Message}", asset);
+                                    ctx.LogImportWarning($"<a href=\"{relativeWarningFileName}\" line=\"{warning.Range.Start.Line + 1}\">{relativeWarningFileName}</a> {warning.Range.Start.Line + 1}: {warning.Message}", asset);
                                 }
                             }
 
