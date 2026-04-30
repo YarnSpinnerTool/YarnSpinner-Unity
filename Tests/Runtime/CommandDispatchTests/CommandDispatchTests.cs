@@ -71,12 +71,6 @@ namespace Yarn.Unity.Tests
 #endif
 
         [Test]
-        public void IntentionallyFailingTest()
-        {
-            false.Should().BeTrue();
-        }
-
-        [Test]
         public void CommandDispatch_Passes()
         {
             var dialogueRunnerGO = new GameObject("Dialogue Runner");
