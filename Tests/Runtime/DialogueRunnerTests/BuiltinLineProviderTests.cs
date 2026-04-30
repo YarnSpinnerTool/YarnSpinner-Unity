@@ -90,6 +90,11 @@ namespace Yarn.Unity.Tests
         [UnityTest]
         public IEnumerator LineProvider_CorrectLineID_FetchesLineContent() => YarnTask.ToCoroutine(async () =>
         {
+#if UNITY_EDITOR
+            var package = UnityEditor.PackageManager.PackageInfo.FindForPackageName("dev.yarnspinner.unity");
+            package.source.Should().NotBeEqualTo(UnityEditor.PackageManager.PackageSource.Local, "This test cannot be run as a local package, please symlink the package.");
+#endif
+
             var line = new Line("line:shadowtest_1", new string[] { });
 
             lineProvider.LocaleCode = "en";
@@ -99,6 +104,7 @@ namespace Yarn.Unity.Tests
 
             localisedLine.TextID.Should().BeEqualTo("line:shadowtest_1");
             localisedLine.Asset!.Should().NotBeNull();
+
             localisedLine.Asset!.Should().BeOfType<AudioClip>();
             localisedLine.CharacterName!.Should().NotBeNull();
             localisedLine.CharacterName!.Should().BeEqualTo("Ava");
@@ -118,7 +124,10 @@ namespace Yarn.Unity.Tests
         [UnityTest]
         public IEnumerator LineProvider_ShadowLineID_FetchesSourceContent() => YarnTask.ToCoroutine(async () =>
         {
-
+#if UNITY_EDITOR
+            var package = UnityEditor.PackageManager.PackageInfo.FindForPackageName("dev.yarnspinner.unity");
+            package.source.Should().NotBeEqualTo(UnityEditor.PackageManager.PackageSource.Local, "This test cannot be run as a local package, please symlink the package.");
+#endif
             lineProvider.LocaleCode = "en";
 
             // Find the shadow line in 'ShadowLines_Kitchen' - it'll be the only

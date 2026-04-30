@@ -117,7 +117,7 @@ namespace Yarn.Unity.Tests
             {
                 SetUpTestActionCode();
 
-                var analysis = new Yarn.Unity.ActionAnalyser.Analyser(TestScriptFolderInProject);
+                var analysis = new Yarn.Unity.ActionAnalyser.Analyser(Path.Join(Environment.CurrentDirectory,TestScriptFolderInProject));
                 var actions = analysis.GetActions();
 
                 var documentedAttributeAction = actions.Single(a => a.Name == "instance_demo_action_with_optional_params");
