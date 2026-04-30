@@ -297,6 +297,21 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                     output.Write($"Generating ysls...");
                     // generating the ysls
 
+                    output.WriteLine("Command paths:");
+                    output.Inc();
+                    foreach (var command in actions.Where(a => a.Type == ActionType.Command))
+                    {
+                        output.WriteLine($"{command.Name ?? "NULL NAME"}: {command.SourceFileName ?? "NULL FILE"}");
+                    }
+                    output.Dec();
+                    output.WriteLine("Function paths:");
+                    output.Inc();
+                    foreach (var function in actions.Where(a => a.Type == ActionType.Function))
+                    {
+                        output.WriteLine($"{function.Name ?? "NULL NAME"}: {function.SourceFileName ?? "NULL FILE"}");
+                    }
+                    output.Dec();
+
                     IEnumerable<string> commandJSON = actions.Where(a => a.Type == ActionType.Command).Select(a => a.ToJSON(projectPath));
                     IEnumerable<string> functionJSON = actions.Where(a => a.Type == ActionType.Function).Select(a => a.ToJSON(projectPath));
 
