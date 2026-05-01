@@ -161,6 +161,7 @@ namespace Yarn.Unity.Editor
             dictForm[autoRefreshLocalisedAssetsKey] = this.autoRefreshLocalisedAssets;
             dictForm[generateYSLSFileKey] = this.generateYSLSFile;
             dictForm[enableDirectLinkToVSCodeKey] = this.enableDirectLinkToVSCode;
+            dictForm[sortLocalisationValuesInsideStringTableKey] = this.sortLocalisationValuesInsideStringTable;
             dictForm[majorVersionKey] = this.majorVersion;
             dictForm[minorVersionKey] = this.minorVersion;
 
