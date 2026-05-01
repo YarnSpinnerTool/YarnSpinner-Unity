@@ -21,29 +21,11 @@ namespace Yarn.Unity.Tests
 #if UNITY_EDITOR
     public static class CommandTestSetup
     {
-
-        static string outputFilePath => TestFilesDirectoryPath + "YarnActionRegistration.cs";
-        static readonly string[] testScriptGUIDs = new string[] {
-            "32f15ac5211d54a68825dfb9532e93f4",
-            "38cc17b47f2af4fb5a9f4837db188e62",
-        };
-
         static string TestFolderName => nameof(CommandDispatchTests);
         static string TestFilesDirectoryPath => $"Assets/{TestFolderName}/";
-        static IEnumerable<string> TestScriptPathSources => testScriptGUIDs.Select(g => UnityEditor.AssetDatabase.GUIDToAssetPath(g));
 
         public static void Setup()
         {
-
-            if (Directory.Exists(TestFilesDirectoryPath) == false)
-            {
-                UnityEditor.AssetDatabase.CreateFolder("Assets", TestFolderName);
-                foreach (var path in TestScriptPathSources)
-                {
-                    UnityEditor.AssetDatabase.CopyAsset(path, Path.Join(TestFilesDirectoryPath, Path.GetFileName(path)));
-                }
-            }
-
             UnityEditor.AssetDatabase.Refresh();
         }
 
