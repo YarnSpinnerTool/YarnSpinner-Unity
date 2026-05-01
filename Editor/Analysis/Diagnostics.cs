@@ -15,7 +15,7 @@ public static class Diagnostics
                         title: $"Yarn action methods must be public",
                         messageFormat: "YarnCommand and YarnFunction methods must be public. \"{0}\" is {1}.",
                         category: "Yarn Spinner",
-                        defaultSeverity: DiagnosticSeverity.Warning,
+                        defaultSeverity: DiagnosticSeverity.Error,
                         isEnabledByDefault: true,
                         description: "[YarnCommand] and [YarnFunction] attributed methods must be public so that the codegen can reference them.",
                         helpLinkUri: "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/creating-commands-functions");
@@ -34,7 +34,7 @@ public static class Diagnostics
                         title: $"YarnCommand methods must return a valid type",
                         messageFormat: $"YarnCommand methods must return a valid type (either void, a coroutine, or a task). \"{{0}}\"'s return type is {{1}}.",
                         category: "Yarn Spinner",
-                        defaultSeverity: DiagnosticSeverity.Warning,
+                        defaultSeverity: DiagnosticSeverity.Error,
                         isEnabledByDefault: true,
                         helpLinkUri: "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/creating-commands-functions");
     public static readonly DiagnosticDescriptor YS1004FunctionMethodsMustHaveAValidReturnType = new DiagnosticDescriptor(
@@ -42,7 +42,7 @@ public static class Diagnostics
                         title: $"YarnFunction methods must return a valid type",
                         messageFormat: $"YarnFunction methods must return a valid type (either bool, string, or a numeric type). \"{{0}}\"'s return type is {{1}}.",
                         category: "Yarn Spinner",
-                        defaultSeverity: DiagnosticSeverity.Warning,
+                        defaultSeverity: DiagnosticSeverity.Error,
                         isEnabledByDefault: true,
                         helpLinkUri: "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/creating-commands-functions");
     public static readonly DiagnosticDescriptor YS1005ActionMethodsMustHaveOneActionAttribute = new DiagnosticDescriptor(
@@ -59,16 +59,7 @@ public static class Diagnostics
                         title: $"YarnFunction methods be static",
                         messageFormat: $"YarnFunction methods are required to be static.",
                         category: "Yarn Spinner",
-                        defaultSeverity: DiagnosticSeverity.Warning,
-                        isEnabledByDefault: true,
-                        helpLinkUri: "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/creating-commands-functions");
-
-    public static readonly DiagnosticDescriptor YS1007ActionsMustBeInPublicTypes = new DiagnosticDescriptor(
-                        "YS1007",
-                        title: $"Yarn action methods must be in a public type",
-                        messageFormat: "Yarn actions must be in a publicly accessible type. {0}'s containing type, {1}, is {2}.",
-                        category: "Yarn Spinner",
-                        defaultSeverity: DiagnosticSeverity.Warning,
+                        defaultSeverity: DiagnosticSeverity.Error,
                         isEnabledByDefault: true,
                         helpLinkUri: "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/creating-commands-functions");
     
@@ -110,8 +101,8 @@ public static class Diagnostics
     
     public static readonly DiagnosticDescriptor YS1012ActionIsALambda = new DiagnosticDescriptor(
                         "YS1012",
-                        title: "Yarn actions can be lambdas but this generally isn't recommended.",
-                        messageFormat: "Yarn actions can be lambdas but this generally isn't recommended.",
+                        title: "Yarn actions can be lambdas but this generally isn't recommended",
+                        messageFormat: "Yarn actions can be lambdas but this generally isn't recommended. Lambda based actions cannot be unregistered and are more difficult to debug",
                         category: "Yarn Spinner",
                         defaultSeverity: DiagnosticSeverity.Info,
                         isEnabledByDefault: true,

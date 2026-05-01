@@ -142,6 +142,12 @@ namespace Yarn.Unity
                     lineCancellationToken.NextContentToken).SuppressCancellationThrow();
             }
 
+            if (!DialogueRunner.IsInPlaymode)
+            {
+                // We left play mode while waiting before starting playback
+                return;
+            }
+
             // Start playing the audio.
             audioSource.PlayOneShot(voiceOverClip);
 
@@ -151,6 +157,7 @@ namespace Yarn.Unity
 
             if (!DialogueRunner.IsInPlaymode)
             {
+                // We left play mode before the audio started playing
                 return;
             }
 
@@ -160,6 +167,7 @@ namespace Yarn.Unity
 
             if (!DialogueRunner.IsInPlaymode)
             {
+                // We left play mode while the audio was playing
                 return;
             }
 
@@ -201,6 +209,12 @@ namespace Yarn.Unity
                     TimeSpan.FromSeconds(waitTimeAfterLineComplete),
                     lineCancellationToken.NextContentToken
                 ).SuppressCancellationThrow();
+            }
+
+            if (!DialogueRunner.IsInPlaymode)
+            {
+                // We left play mode while waiting after the line completed
+                return;
             }
 
             if (endLineWhenVoiceoverComplete)

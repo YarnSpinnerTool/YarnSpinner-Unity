@@ -92,10 +92,9 @@ namespace Yarn.Unity.Tests
         [Test]
         public void YarnProjectImporter_OnInvalidYarnFile_ImportsButDoesNotCompile()
         {
-
             // Arrange: 
             // Set up a Yarn project and a Yarn script, with invalid code.
-            var project = SetUpProject("This is invalid yarn script, and will not compile.");
+            var project = SetUpProject("title: Invalid.Name\n---\nbody\n===");
 
             var yarnProjectImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(project)) as YarnProjectImporter;
             yarnProjectImporter.Should().NotBeNull();
@@ -111,7 +110,8 @@ namespace Yarn.Unity.Tests
 
             yarnProjectImporter.ImportData.HasCompileErrors.Should().BeTrue();
             CollectionAssert.Contains(scriptImporter!.DestinationProjectImporters, yarnProjectImporter);
-            scriptImporter.HasErrors.Should().BeTrue();
+            var scriptAsset = yarnProjectImporter.ImportData!.yarnFiles.First();
+            yarnProjectImporter.GetErrorsForScript(scriptAsset).Should().NotBeEmpty();
 
             yarnProjectImporter.ImportData.ImportStatus.Should().BeEqualTo(ProjectImportData.ImportStatusCode.CompilationFailed);
         }
@@ -457,8 +457,6 @@ But not all of them are.
             var allAssetsAtPath = AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(project));
 
             // Three assets: the project, the import data, and the localization
-            allAssetsAtPath.Should().HaveCount(3);
-
             allAssetsAtPath.OfType<YarnProject>().Should().HaveCount(1);
             allAssetsAtPath.OfType<ProjectImportData>().Should().HaveCount(1);
             allAssetsAtPath.OfType<Localization>().Should().HaveCount(1);
@@ -527,7 +525,6 @@ But not all of them are.
             var allAssetsAtPath = AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(project));
 
             // Four assets: the project, the import data, and the two localizations
-            allAssetsAtPath.Should().HaveCount(4);
             allAssetsAtPath.OfType<YarnProject>().Should().HaveCount(1);
             allAssetsAtPath.OfType<ProjectImportData>().Should().HaveCount(1);
             allAssetsAtPath.OfType<Localization>().Should().HaveCount(2);

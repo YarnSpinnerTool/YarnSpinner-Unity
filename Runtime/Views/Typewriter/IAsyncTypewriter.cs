@@ -1,9 +1,19 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 #nullable enable
 
 namespace Yarn.Unity
 {
     using System.Threading;
     using System.Collections.Generic;
+
+#if USE_TMP
+    using TMPro;
+#else
+    using TMP_Text = Yarn.Unity.TMPShim;
+#endif
 
     /// <summary>
     /// An object that can handle delivery of a line's text over time.
@@ -43,8 +53,26 @@ namespace Yarn.Unity
         public void ContentWillDismiss();
 
         /// <summary>
+        /// Called after the content has been visibly hidden.
+        /// </summary>
+        /// <remarks>
+        /// This is the typewriters last chance to do any cleanup that they may need to do before more content or full destruction occurs, will always be called after <see cref="ContentWillDismiss"/>.
+        /// It is the responsibility of the <see cref="DialoguePresenterBase"/> to only call this after hiding anything that might look weird if state is reset.
+        /// </remarks>
+        public void ContentDidDismiss();
+
+        /// <summary>
         /// The list of action markup handlers that this typewriter should call out to while typewriting.
         /// </summary>
         public List<IActionMarkupHandler> ActionMarkupHandlers { get; }
+
+        /// <summary>
+        /// The main text element that the presenter intends the typewriter to work with
+        /// </summary>
+        /// <remarks>
+        /// Most of the time the typewriter is just going to be changing the visible characters so will need this anyways.
+        /// Is safe to not worry about this if your typewriter has no need of it.
+        /// </remarks>
+        public TMP_Text? TextElement { get; set; }
     }
 }

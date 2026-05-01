@@ -18,41 +18,39 @@ using Yarn.Unity;
 
 namespace Yarn.Unity.Tests
 {
+#if UNITY_EDITOR
+    public static class CommandTestSetup
+    {
+        static string TestFolderName => nameof(CommandDispatchTests);
+        static string TestFilesDirectoryPath => $"Assets/{TestFolderName}/";
+
+        public static void Setup()
+        {
+            UnityEditor.AssetDatabase.Refresh();
+        }
+
+        public static void Cleanup()
+        {
+            UnityEditor.AssetDatabase.DeleteAsset(TestFilesDirectoryPath);
+            UnityEditor.AssetDatabase.Refresh();
+        }
+    }
+#endif
+
     [TestFixture]
     public class CommandDispatchTests : IPrebuildSetup, IPostBuildCleanup
     {
 
 #if UNITY_EDITOR
-        string outputFilePath => TestFilesDirectoryPath + "YarnActionRegistration.cs";
-        readonly string[] testScriptGUIDs = new string[] {
-            "32f15ac5211d54a68825dfb9532e93f4",
-            "38cc17b47f2af4fb5a9f4837db188e62",
-        };
-
-        string TestFolderName => nameof(CommandDispatchTests);
-        string TestFilesDirectoryPath => $"Assets/{TestFolderName}/";
-        IEnumerable<string> TestScriptPathSources => testScriptGUIDs.Select(g => UnityEditor.AssetDatabase.GUIDToAssetPath(g));
+        void IPrebuildSetup.Setup()
+        {
+            CommandTestSetup.Setup();
+        }
+        void IPostBuildCleanup.Cleanup()
+        {
+            CommandTestSetup.Cleanup();
+        }
 #endif
-
-        public void Setup()
-        {
-            if (Directory.Exists(TestFilesDirectoryPath) == false)
-            {
-                UnityEditor.AssetDatabase.CreateFolder("Assets", TestFolderName);
-                foreach (var path in TestScriptPathSources)
-                {
-                    UnityEditor.AssetDatabase.CopyAsset(path, Path.Join(TestFilesDirectoryPath, Path.GetFileName(path)));
-                }
-            }
-
-            UnityEditor.AssetDatabase.Refresh();
-        }
-
-        public void Cleanup()
-        {
-            UnityEditor.AssetDatabase.DeleteAsset(TestFilesDirectoryPath);
-            UnityEditor.AssetDatabase.Refresh();
-        }
 
         [Test]
         public void CommandDispatch_Passes()

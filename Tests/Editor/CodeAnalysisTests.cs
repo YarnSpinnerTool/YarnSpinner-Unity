@@ -77,11 +77,11 @@ namespace Yarn.Unity.Tests
             {
                 AssetDatabase.CopyAsset(source, Path.Combine(TestScriptFolderInProject, Path.GetFileName(source)));
             }
-
         }
         private void TearDownTestActionCode()
         {
             AssetDatabase.DeleteAsset(YarnTestUtility.TestFilesDirectoryPath);
+
             AssetDatabase.Refresh();
         }
 
@@ -117,7 +117,7 @@ namespace Yarn.Unity.Tests
             {
                 SetUpTestActionCode();
 
-                var analysis = new Yarn.Unity.ActionAnalyser.Analyser(TestScriptFolderInProject);
+                var analysis = new Yarn.Unity.ActionAnalyser.Analyser(Path.Join(Environment.CurrentDirectory,TestScriptFolderInProject));
                 var actions = analysis.GetActions();
 
                 var documentedAttributeAction = actions.Single(a => a.Name == "instance_demo_action_with_optional_params");
@@ -146,7 +146,7 @@ namespace Yarn.Unity.Tests
                 documentedDirectAction.Parameters[1].Name.Should().BeEqualTo("b");
                 documentedDirectAction.Parameters[1].Description.Should().BeEqualTo("The second parameter.");
 
-                var text = documentedAttributeAction.ToJSON();
+                var text = documentedAttributeAction.ToJSON(Path.GetDirectoryName(Application.dataPath));
                 Debug.Log(text);
             }
             finally
@@ -197,6 +197,7 @@ namespace Yarn.Unity.Tests
 
             public void AddCommandHandler(string commandName, Delegate handler) => RegisteredCommandNames.Add(commandName);
 
+            //InstanceDemoActionWithNoName
             public void AddCommandHandler(string commandName, MethodInfo methodInfo) => RegisteredCommandNames.Add(commandName);
 
             public void AddFunction(string name, Delegate implementation) { }
@@ -208,6 +209,7 @@ namespace Yarn.Unity.Tests
             public void RemoveFunction(string name) { }
         }
 
+        const string definesKey = "Yarn.Unity.Testing.ExistingDefines";
         [UnityTest]
         public IEnumerator CodeAnalysis_OnDomainReload_RegistersCommandsAndFunctions()
         {
@@ -215,6 +217,23 @@ namespace Yarn.Unity.Tests
             {
                 // Given: a .cs file containing actions is added to the codebase
                 SetUpTestActionCode();
+
+                // the YARN_INCLUDE_TEST_COMMANDS define is often used in some other runtime tests and is common to set during development but it has a downside
+                // it being turned on means the test files we are about to copy over to Assets folder are already being scanned for actions
+                // so we are gonna be finding duplicates of the actions and that would then break this test.
+                // We need it to be disabled for this test and just this test, but I also don't wanna mess up any other defines.
+                // so I stash into editor session state the current list of defines and then strip out this extra one so I can later add all the defines back in
+                var buildTarget = UnityEditor.Build.NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+                var currentDefines = PlayerSettings.GetScriptingDefineSymbols(buildTarget);
+                if (currentDefines.Contains("YARN_INCLUDE_TEST_COMMANDS"))
+                {
+                    Debug.Log(currentDefines);
+                    UnityEditor.SessionState.SetString(definesKey, currentDefines);
+
+                    string stripped = currentDefines.Replace("YARN_INCLUDE_TEST_COMMANDS", "").Replace(";;", ";");
+                    PlayerSettings.SetScriptingDefineSymbols(buildTarget, stripped);
+                }
+
                 yield return new RecompileScripts(expectScriptCompilation: true, expectScriptCompilationSuccess: true);
 
                 var registrationMethods = Actions.ActionRegistrationMethods;
@@ -243,6 +262,17 @@ namespace Yarn.Unity.Tests
             finally
             {
                 TearDownTestActionCode();
+                
+                // if we have any stashed defines we wanna grab them back out and reset them
+                string? newDefines = UnityEditor.SessionState.GetString(definesKey, null);
+                if (newDefines != null)
+                {
+                    Debug.Log(newDefines);
+                    var buildTarget = UnityEditor.Build.NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+                    PlayerSettings.SetScriptingDefineSymbols(buildTarget, newDefines);
+                }
+                // finally we need to delete this session state because we don't want it lying around to mess up anything else, even though the key should be unique...
+                UnityEditor.SessionState.EraseString(definesKey);
             }
         }
     }

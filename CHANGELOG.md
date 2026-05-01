@@ -8,34 +8,77 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- When using the Unity Localization package Yarn Spinner can now sort the localisation tables based on a lines position in the file.
-  - This resolves an issue where lines added into the middle of a Yarn file however this does require sorting your localisation table every time you edit your Yarn files
-  - Defaults to off, can be changed in Yarn Spinners settings in `Edit -> Project Settings -> Yarn Spinner`
-  - Will log any values found in the localisation table that didn't come from your Yarn files and sort them to the top of the table
-- `YarnSpinnerAssemblyGeneratedYSLSPath` function to the `YarnSpinnerProjectSettings` so that each assembly can have a generated and consistent path.
-- Generated YSLS file now includes subtype information for instance commands
-  - This means a command like `<<move gary left>>` now knows that the `"gary"` is the name of a game object and the specific game object subclass
-  - Only works at a single level of monobehaviour depth, subclasses of a monobehaviour subclass will not be recognised
-- `YarnNodeParameterAttribute` can now be added to string parameters in function and command methods
-  - Intended to allow you to hint to the VSCode extension that when writing this parameter in commands and functions to limit suggestions to nodes
-- `YarnEnumParameterAttribute` can now be added to parameters in functions and command methods
-  - has one field which is the name the enum as declared in your Yarn
-  - Intended to allow you to hint to the VSCode extension to offer enum based suggestions
-  - this is temporary until forward declaration of Yarn enums into C# works
-- Incorrectly defined parameters for commands and functions will now generate diagnostics on the C# implementation, warnings exist for:
-  - invalid types
-  - incorrectly attributed parameters
+- Yarn Projects now support specifying which style line tagger to use
+  - You can create your own by conforming to the `ILineTagGenerator` interface
+- Warning severity diagnostics are now logged
+  - similar to errors due to quirks of Unity we can't prevent these being wiped from the console
+  - the Yarn Project will keep any relevant warnings within it however if you need to resummon them.
 
 ### Changed
 
-- `YarnProjectImporter` now updates asset addresses and generates the C# variable storage class after the project import completes, rather than during the import.
-- Each assembly now gets it's own YSLS file when generating them.
-  - renamed the test asmdef files from `YarnSpinnerTests.x` to `YarnSpinner.Unity.Tests.X` so that they are matched by the existing filters.
-- Generated YSLS file now matches the newer schema, see the YS core repo for details of this
-- When matching assets to line IDs the importer now prefers exact matches to the line ID
-- `YarnProjectImporterEditor` now resets some internal state when creating its UI, which should help avoid a bug where the list of sources would grow over time.
+- YSLS files are now generated with paths set relative to the project root
+  - if the root can't be determined it will still use full path
+- `VariableStorageBehaviour` can now add change listeners for variable defined outside of Yarn
+- Fixed a bug where empty or whitespace only file paths in diagnostics could cause importing to break and throw exceptions
+- Yarn diagnostics generated during import now have their line number set which should let the editor jump directly to them where possible.
+- Fixed a bug that prevented sorting Unity Loc tables.
 
 ### Removed
+
+## [3.2.2] 2026-04-03
+
+### Changed
+
+- Text Animator: Fixed an issue where support files were not being installed correctly
+- Text Animator: Fixed an issue where the support files for Text Animator 2 could cause a build error
+- Text Animator: Fixed an issue where the Dialogue Runner prefab was losing its reference to its typewriter.
+
+## [3.2.1] 2026-03-27
+
+### Changed
+
+- Fixed an issue in Unity 6.4 where newly created Yarn scripts could fail to import correctly.
+
+## [3.2.0] 2026-03-27
+
+### Added
+
+- When using the Unity Localization package Yarn Spinner can now sort the localisation tables based on a lines position in the file.
+  - This resolves an issue where lines added into the middle of a Yarn file. However, this does require sorting your localisation table every time you edit your Yarn files.
+  - This setting defaults to off, and can be enabled in Yarn Spinners settings in `Edit -> Project Settings -> Yarn Spinner`.
+  - When sorting, any values found in the localisation table that didn't come from your Yarn files will be logged, and sorted to the top of the table.
+- `YarnSpinnerAssemblyGeneratedYSLSPath` function to the `YarnSpinnerProjectSettings` so that each assembly can have a generated and consistent path.
+- Generated YSLS files now include subtype information for instance commands.
+  - This means a command like `<<move gary left>>` now knows that the `"gary"` is the name of a game object, and the specific game object subclass.
+  - This only works at a single level of MonoBehaviour depth; subclasses of a `MonoBehaviour` subclass will not be recognised.
+- `YarnNodeParameterAttribute` can now be added to string parameters in function and command methods
+  - This is intended to allow you to hint to the VSCode extension that, when writing this parameter in commands and functions, it should limit suggestions to nodes.
+- `YarnEnumParameterAttribute` can now be added to parameters in functions and command methods.
+  - This has one field, which is the name the enum as declared in your Yarn.
+  - This is intended to allow you to hint to the VSCode extension to offer enum based suggestions. This is a temporary solution, until forward declaration of Yarn enums into C# works.
+- Incorrectly defined parameters for commands and functions will now generate diagnostics on the C# implementation, warnings exist for:
+  - invalid types
+  - incorrectly attributed parameters
+- `ContentDidDismiss` call to the `IAsyncTypewriter` to let typewriters know they are safe to do any cleanup
+- A `TMP_Text` property called `TextElement` to the `IAsyncTypewriter`
+  - this is optional but most of the time custom typewriters will need to get the main text element anyway so might as well just have it as something they are given at the start
+
+### Changed
+
+- `YarnProjectImporter` now updates asset addresses and generates the C# variable storage class _after_ the project import completes, rather than during the import.
+- Each assembly now gets its own YSLS file when generating them.
+  - We renamed the test `.asmdef` files from `YarnSpinnerTests.x` to `YarnSpinner.Unity.Tests.X`, so that they are matched by the existing filters.
+- Generated a YSLS file now matches the newer schema. See the [Yarn Spinner core repo](https://github.com/YarnSpinnerTool/YarnSpinner/blob/main/YarnSpinner.LanguageServer/src/Server/Documentation/ysls.schema.json) for details of this.
+- When matching assets to line IDs, the importer now prefers exact matches to the line ID.
+- `YarnProjectImporterEditor` now resets some internal state when creating its UI, which should help avoid a bug where the list of sources would grow over time.
+- Added explicit registration for `UnityEngine.Awaitable`, and the missing cases for `System.Threading.Tasks.Task` commands, fixing issues where some times certain specific configurations would fail to register the command.
+  - As part of this, we also made it so Commands can now be registered with up to 16 parameters.
+  - Please don't actually register a command with 16 parameters.
+- Fixed a bug where the InterfaceContainer would sometimes lose it's connection.
+  - unsure why this happens, just Unity things™
+- Line Presenter now uses the `InterfaceContainer` for custom typewriters.
+- `.ysls.json` file generation is now on by default.
+- Yarn Spinner for Unity now works with `EntityId` objects instead of instance ID integers in Unity 6.4 and later.
 
 ## [3.1.4] 2025-12-19
 

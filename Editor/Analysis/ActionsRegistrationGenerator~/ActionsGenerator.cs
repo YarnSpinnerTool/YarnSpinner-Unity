@@ -16,13 +16,12 @@ using YarnAction = Yarn.Unity.ActionAnalyser.Action;
 
 #nullable enable
 
-
-
 [Generator]
 public class ActionRegistrationSourceGenerator : ISourceGenerator
 {
     const string YarnSpinnerUnityAssemblyName = "YarnSpinner.Unity";
     const string DebugLoggingPreprocessorSymbol = "YARN_SOURCE_GENERATION_DEBUG_LOGGING";
+    const string IncludeTestCommands = "YARN_INCLUDE_TEST_COMMANDS";
     const string MinimumUnityVersionPreprocessorSymbol = "UNITY_2021_2_OR_NEWER";
 
     public static string? GetProjectRoot(GeneratorExecutionContext context)
@@ -117,6 +116,7 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
             output.WriteLine($"Unable to determine project location on disk. Settings values will be ignored and codegen will occur");
         }
 
+        bool hasCriticalActionErrors = false;
         try
         {
             output.WriteLine("Source code generation for assembly " + context.Compilation.AssemblyName);
@@ -172,11 +172,18 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 "YarnSpinner.Editor",
             };
 
-            // But DO generate source code for the Samples assembly.
+            // But DO generate source code for the Samples assembly and the Test assembly
             var prefixesToKeep = new List<string>()
             {
                 "YarnSpinner.Unity.Samples",
             };
+
+            // Additionally, if we're building for unit tests, include the Yarn
+            // Spinner unit tests assembly.
+            if (context.ParseOptions.PreprocessorSymbolNames.Contains(IncludeTestCommands))
+            {
+                prefixesToKeep.Add("YarnSpinner.Unity.Tests");
+            }
 
             if (context.Compilation.AssemblyName == null)
             {
@@ -188,7 +195,6 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
             {
                 output.WriteLine($"Not generating registration code for {context.Compilation.AssemblyName}: we've been told to exclude it, because its name begins with one of these prefixes: {string.Join(", ", prefixesToIgnore)}");
                 return;
-
             }
 
             if (!(context.Compilation is CSharpCompilation compilation))
@@ -227,12 +233,12 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                     {
                         output.WriteLine($"Flagging '{action.Name}' ({action.MethodName}): {diagnostic}");
                         action.ContainsErrors = true;
-                    }
-                }
 
-                if (diagnostics.Count > 0)
-                {
-                    continue;
+                        if (diagnostic.Severity == DiagnosticSeverity.Error)
+                        {
+                            hasCriticalActionErrors = true;
+                        }
+                    }
                 }
 
                 // Commands are parsed as whitespace, so spaces in the command name
@@ -261,6 +267,13 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                 output.WriteLine($"Action {action.Name}: {action.SourceFileName}:{action.Declaration?.GetLocation()?.GetLineSpan().StartLinePosition.Line} ({action.Type})");
             }
 
+            if (hasCriticalActionErrors)
+            {
+                stopwatch.Stop();
+                output.WriteLine($"Critical issues were encountered in the actions, aborting code generation, stopping analysis after {stopwatch.Elapsed.TotalMilliseconds}ms");
+                return;
+            }
+
             output.Write($"Generating source code...");
 
             var source = Analyser.GenerateRegistrationFileSource(actions);
@@ -284,8 +297,23 @@ public class ActionRegistrationSourceGenerator : ISourceGenerator
                     output.Write($"Generating ysls...");
                     // generating the ysls
 
-                    IEnumerable<string> commandJSON = actions.Where(a => a.Type == ActionType.Command).Select(a => a.ToJSON());
-                    IEnumerable<string> functionJSON = actions.Where(a => a.Type == ActionType.Function).Select(a => a.ToJSON());
+                    output.WriteLine("Command paths:");
+                    output.Inc();
+                    foreach (var command in actions.Where(a => a.Type == ActionType.Command))
+                    {
+                        output.WriteLine($"{command.Name ?? "NULL NAME"}: {command.SourceFileName ?? "NULL FILE"}");
+                    }
+                    output.Dec();
+                    output.WriteLine("Function paths:");
+                    output.Inc();
+                    foreach (var function in actions.Where(a => a.Type == ActionType.Function))
+                    {
+                        output.WriteLine($"{function.Name ?? "NULL NAME"}: {function.SourceFileName ?? "NULL FILE"}");
+                    }
+                    output.Dec();
+
+                    IEnumerable<string> commandJSON = actions.Where(a => a.Type == ActionType.Command).Select(a => a.ToJSON(projectPath));
+                    IEnumerable<string> functionJSON = actions.Where(a => a.Type == ActionType.Function).Select(a => a.ToJSON(projectPath));
 
                     var ysls = "{" +
                     @"""version"":2," +

@@ -120,13 +120,19 @@ namespace Yarn.Unity.Editor
                 // We now have a list of project importers that SHOULD be
                 // depending on this script, but currently aren't (because this
                 // script was created after the project was last imported.)
-
-                // Re-import each project.
-                foreach (var importer in missingProjectImporters)
+                // Reimport these assets, which will cause them to add a
+                // dependency on us. Do this on the next frame, because we're in
+                // the middle of an import now, and aren't allowed to start
+                // another one.
+                EditorApplication.delayCall += () =>
                 {
-                    EditorUtility.SetDirty(importer);
-                    importer.SaveAndReimport();
-                }
+                    // Re-import each project.
+                    foreach (var importer in missingProjectImporters)
+                    {
+                        EditorUtility.SetDirty(importer);
+                        importer.SaveAndReimport();
+                    }
+                };
 
             }
             else if (extension == ".yarnc")

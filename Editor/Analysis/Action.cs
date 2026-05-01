@@ -231,13 +231,55 @@ namespace Yarn.Unity.ActionAnalyser
 
         public bool ContainsErrors = false;
 
-        public string ToJSON()
+        // System.IO.Path.GetRelativePath(projectRoot, SourceFileName); siiiiiiigh
+        // this is based on: https://stackoverflow.com/questions/275689/how-to-get-relative-path-from-absolute-path
+        private static string GetRelativePath(String projectRoot, String SourceFileName)
+        {
+            if (string.IsNullOrEmpty(projectRoot))
+            {
+                throw new ArgumentNullException("root is null");
+            }
+            if (string.IsNullOrEmpty(SourceFileName))
+            {
+                throw new ArgumentNullException("absolute is null");
+            }
+
+            Uri from = new Uri(projectRoot);
+            Uri to = new Uri(SourceFileName);
+
+            if (from.Scheme != to.Scheme)
+            {
+                return SourceFileName;
+            }
+
+            Uri relativeUri = from.MakeRelativeUri(to);
+            string relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+
+            if (to.Scheme.Equals("file", StringComparison.InvariantCultureIgnoreCase))
+            {
+                relativePath = relativePath.Replace(System.IO.Path.AltDirectorySeparatorChar, System.IO.Path.DirectorySeparatorChar);
+            }
+
+            return relativePath;
+        }
+
+        public string ToJSON(string? projectRoot)
         {
             var result = new Dictionary<string, object?>();
 
+            string? relativePath;
+            if (projectRoot != null && SourceFileName != null)
+            {
+                relativePath = GetRelativePath(projectRoot, SourceFileName);
+            }
+            else
+            {
+                relativePath = SourceFileName;
+            }
+
             result["yarnName"] = this.Name;
             result["definitionName"] = this.MethodName;
-            result["fileName"] = this.SourceFileName;
+            result["fileName"] = relativePath;
             if (!string.IsNullOrEmpty(this.Description))
             {
                 result["documentation"] = this.Description;
@@ -410,7 +452,7 @@ namespace Yarn.Unity.ActionAnalyser
                             // is not
                             var typeName = containingType.Name ?? "(anonymous)";
                             diagnostics.Add(Diagnostic.Create(
-                                Diagnostics.YS1007ActionsMustBeInPublicTypes,
+                                Diagnostics.YS1001ActionMethodsMustBePublic,
                                 diagnosticLocation, identifier, typeName, containingType.DeclaredAccessibility));
                             break;
                         }
@@ -485,8 +527,10 @@ namespace Yarn.Unity.ActionAnalyser
                 throw new NotImplementedException("Todo: handle case where action's method is not a IMethodSymbol");
             }
 
-            // Functions must be static
-            if (this.MethodSymbol.MethodKind == MethodKind.Ordinary && this.MethodSymbol.IsStatic == false)
+            // Functions must be static if they're declared via attributes
+            if (this.DeclarationType == DeclarationType.Attribute
+                && this.MethodSymbol.MethodKind == MethodKind.Ordinary
+                && this.MethodSymbol.IsStatic == false)
             {
                 yield return Diagnostic.Create(Diagnostics.YS1006YarnFunctionsMustBeStatic, identifierLocation);
             }
@@ -533,7 +577,7 @@ namespace Yarn.Unity.ActionAnalyser
             List<Diagnostic> diagnostics = new List<Diagnostic>();
             ParameterListSyntax? parameterList = null;
             string? identifier = null;
-            
+
             if (this.MethodDeclarationSyntax is MethodDeclarationSyntax methodDeclaration)
             {
                 identifier = methodDeclaration.Identifier.ToString();
@@ -546,7 +590,7 @@ namespace Yarn.Unity.ActionAnalyser
                 logger?.WriteLine($"identified {identifier} as a local function");
                 parameterList = localFunctionStatement.ParameterList;
             }
-            else if(this.MethodDeclarationSyntax is LambdaExpressionSyntax lambdaExpression)
+            else if (this.MethodDeclarationSyntax is LambdaExpressionSyntax lambdaExpression)
             {
                 logger?.WriteLine("identifed the action as a lambda.");
                 var actionLocation = lambdaExpression.GetLocation();
@@ -569,7 +613,7 @@ namespace Yarn.Unity.ActionAnalyser
                     diagnostics.Add(Diagnostic.Create(Diagnostics.YS1012ActionIsALambda, actionLocation));
                 }
             }
-            
+
             if (parameterList == null || parameterList.Parameters.Count() == 0)
             {
                 logger?.WriteLine($"{identifier} has no parameters, ignoring");
@@ -578,8 +622,12 @@ namespace Yarn.Unity.ActionAnalyser
             }
 
             logger?.WriteLine($"Will be checking {parameterList.Parameters.Count()} parameters");
+
+            int parameterIndex = 0;
+            int parameterCount = parameterList.Parameters.Count;
             foreach (var parameter in parameterList.Parameters)
             {
+                parameterIndex += 1;
                 logger?.Inc();
                 if (parameter.Type == null)
                 {
@@ -609,20 +657,21 @@ namespace Yarn.Unity.ActionAnalyser
                     continue;
                 }
 
-                if (symbol.IsParams)
+                // Params arrays or arrays that are the final parameter make
+                // that parameter variadic in Yarn Spinner. Check that the
+                // element type of that array is of the right type.
+                if (symbol.Type is IArrayTypeSymbol arrayTypeSymbol
+                    && (symbol.IsParams || parameterIndex == parameterCount))
                 {
-                    if (symbol.Type is IArrayTypeSymbol arrayTypeSymbol)
+                    var subtype = arrayTypeSymbol.ElementType;
+                    if (subtype.GetYarnTypeString() == "any")
                     {
-                        var subtype = arrayTypeSymbol.ElementType;
-                        if (subtype.GetYarnTypeString() == "any")
-                        {
-                            logger?.WriteLine($"{parameterName} is a parameter array of non Yarn compatible types!");
-                            diagnostics.Add(Diagnostic.Create(Diagnostics.YS1008ActionsParamsArraysMustBeOfYarnTypes, parameter.GetLocation(), parameterName, subtype.Name));
-                        }
+                        logger?.WriteLine($"{parameterName} is a parameter array of non Yarn compatible types!");
+                        diagnostics.Add(Diagnostic.Create(Diagnostics.YS1008ActionsParamsArraysMustBeOfYarnTypes, parameter.GetLocation(), parameterName, subtype.Name));
                     }
                 }
                 else
-                {    
+                {
                     if (typeInfo.GetYarnTypeString() == "any" && typeInfo.BaseType?.Name != "Component")
                     {
                         // we have an invalid type

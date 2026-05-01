@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 #nullable enable
 
 namespace Yarn.Unity
@@ -22,7 +26,7 @@ namespace Yarn.Unity
         /// <summary>
         /// The <see cref="TMP_Text"/> to display the text in.
         /// </summary>
-        public TMP_Text? Text { get; set; }
+        public TMP_Text? TextElement { get; set; }
 
         /// <summary>
         /// A collection of <see cref="IActionMarkupHandler"/> objects that
@@ -48,19 +52,19 @@ namespace Yarn.Unity
             // then at each point in the line we move char by char
             // when we hit a break point (which we know in advance)
 
-            if (Text == null)
+            if (TextElement == null)
             {
-                Debug.LogWarning($"Can't show text as typewriter, because {nameof(Text)} was not provided");
+                Debug.LogWarning($"Can't show text as typewriter, because {nameof(TextElement)} was not provided");
             }
             else
             {
-                Text.maxVisibleCharacters = 0;
-                Text.text = line.Text;
+                TextElement.maxVisibleCharacters = 0;
+                TextElement.text = line.Text;
 
                 // Let every markup handler know that display is about to begin
                 foreach (var markupHandler in ActionMarkupHandlers)
                 {
-                    markupHandler.OnLineDisplayBegin(line, Text);
+                    markupHandler.OnLineDisplayBegin(line, TextElement);
                 }
 
                 double secondsPerWord = 0;
@@ -70,7 +74,7 @@ namespace Yarn.Unity
                 }
 
                 var wordBoundaries = new SortedSet<int>();
-                var textInfo = Text.GetTextInfo(line.Text);
+                var textInfo = TextElement.GetTextInfo(line.Text);
                 for (int i = 0; i < textInfo.wordCount; i++)
                 {
                     var word = textInfo.wordInfo[i];
@@ -122,12 +126,12 @@ namespace Yarn.Unity
                             .SuppressCancellationThrow();
                     }
 
-                    Text.maxVisibleCharacters += 1;
+                    TextElement.maxVisibleCharacters += 1;
                 }
 
                 // We've finished showing every character (or we were
                 // cancelled); ensure that everything is now visible.
-                Text.maxVisibleCharacters = visibleCharacterCount;
+                TextElement.maxVisibleCharacters = visibleCharacterCount;
             }
 
             // Let each markup handler know the line has finished displaying
@@ -139,17 +143,17 @@ namespace Yarn.Unity
 
         public void PrepareForContent(Markup.MarkupParseResult line)
         {
-            if (Text == null)
+            if (TextElement == null)
             {
                 return;
             }
 
-            Text.maxVisibleCharacters = 0;
-            Text.text = line.Text;
+            TextElement.maxVisibleCharacters = 0;
+            TextElement.text = line.Text;
 
             foreach (var processor in ActionMarkupHandlers)
             {
-                processor.OnPrepareForLine(line, Text);
+                processor.OnPrepareForLine(line, TextElement);
             }
         }
 
@@ -160,6 +164,14 @@ namespace Yarn.Unity
             {
                 processor.OnLineWillDismiss();
             }
+        }
+        public void ContentDidDismiss()
+        {
+            if (TextElement == null)
+            {
+                return;
+            }
+            TextElement.maxVisibleCharacters = 0;
         }
     }
 }

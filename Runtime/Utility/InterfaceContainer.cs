@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 using UnityEngine;
 
 #nullable enable
@@ -25,23 +29,25 @@ namespace Yarn.Unity
         // and otherwise we null it out, also wiping the connection in the inspector
         void OnValidate()
         {
-            if (!targetObject is TContainedType)
-            {
-                if (targetObject is GameObject gameObject)
-                {
-                    foreach (var component in gameObject.GetComponents<Component>())
-                    {
-                        if (component is TContainedType)
-                        {
-                            targetObject = component;
-                            return;
-                        }
-                    }
-                }
-            }
-            else
+            if (targetObject == null)
             {
                 return;
+            }
+            if (this.Interface != null)
+            {
+                return;
+            }
+
+            if (targetObject is GameObject gameObject)
+            {
+                foreach (var component in gameObject.GetComponents<Component>())
+                {
+                    if (component is TContainedType)
+                    {
+                        targetObject = component;
+                        return;
+                    }
+                }
             }
 
             targetObject = null;

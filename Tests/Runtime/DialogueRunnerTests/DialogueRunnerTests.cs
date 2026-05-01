@@ -27,11 +27,13 @@ namespace Yarn.Unity.Tests
         public void Setup()
         {
             RuntimeTestUtility.AddSceneToBuild(DialogueRunnerTestSceneGUID);
+            CommandTestSetup.Setup();
         }
 
         public void Cleanup()
         {
             RuntimeTestUtility.RemoveSceneFromBuild(DialogueRunnerTestSceneGUID);
+            CommandTestSetup.Cleanup();
         }
 
         [AllowNull]
@@ -69,7 +71,7 @@ namespace Yarn.Unity.Tests
             var storage = runner.VariableStorage;
 
             var testFile = "TemporaryTestingFile.json";
-            runner.StartDialogue("LotsOfVars");
+            runner.StartDialogue("LotsOfVars").Forget();
             yield return null;
 
             var originals = storage.GetAllVariables();
@@ -105,7 +107,7 @@ namespace Yarn.Unity.Tests
         {
             var storage = runner.VariableStorage;
 
-            runner.StartDialogue("LotsOfVars");
+            runner.StartDialogue("LotsOfVars").Forget();
             yield return null;
 
             var originals = storage.GetAllVariables();
@@ -123,7 +125,7 @@ namespace Yarn.Unity.Tests
         {
             var storage = runner.VariableStorage;
 
-            runner.StartDialogue("LotsOfVars");
+            runner.StartDialogue("LotsOfVars").Forget();
             yield return null;
 
             var testKey = "TemporaryTestingKey";
@@ -476,11 +478,11 @@ namespace Yarn.Unity.Tests
             LogAssert.Expect(LogType.Log, "Dialogue start");
             LogAssert.Expect(LogType.Log, "Dialogue complete");
 
-            runner.StartDialogue(runner.startNode);
+            runner.StartDialogue(runner.startNode).Forget();
 
             yield return new WaitForSeconds(0.5f);
 
-            runner.Stop();
+            runner.Stop().Forget();
         }
 
         [Test]
