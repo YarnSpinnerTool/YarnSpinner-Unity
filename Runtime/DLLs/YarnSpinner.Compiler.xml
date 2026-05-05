@@ -752,6 +752,12 @@
             The type of compilation to perform.
             </summary>
         </member>
+        <member name="F:Yarn.Compiler.CompilationJob.Options">
+            <summary>
+            A dictionary describing additional internal options for the
+            compilation job. 
+            </summary>
+        </member>
         <member name="P:Yarn.Compiler.CompilationJob.VariableDeclarations">
             <summary>
             The declarations for variables.
@@ -2422,6 +2428,16 @@
             <para>Format placeholders:
             <list type="number">
             <item>Markup parse message</item>
+            </list></para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.RogueChevronWithCommand">
+            <summary>YS0064: Extra chevrons on the same line as a command.</summary>
+            <remarks>
+            <para>Commands must start on their own line and should not have additional chevrons before or after. This is often indicative of a mistake.</para>
+            <para>Format placeholders:
+            <list type="number">
+            <item>Command content</item>
             </list></para>
             </remarks>
         </member>
@@ -5959,7 +5975,7 @@
         <member name="P:Yarn.Compiler.JumpInfo.Range">
             <summary>
             the source location of this jump statement in the file
-            used for precise error reporting (YS0002)
+            used for precise error reporting
             </summary>
         </member>
         <member name="T:Yarn.Compiler.JumpType">
