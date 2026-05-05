@@ -8,20 +8,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Yarn Projects now support specifying which style line tagger to use
-  - You can create your own by conforming to the `ILineTagGenerator` interface
-- Warning severity diagnostics are now logged
-  - similar to errors due to quirks of Unity we can't prevent these being wiped from the console
-  - the Yarn Project will keep any relevant warnings within it however if you need to resummon them.
+- Yarn Projects now support specifying which style line tagger to use.
+  - You can create your own by conforming to the `ILineTagGenerator` interface.
+- Warning severity diagnostics are now logged.
+  - Similar to error-level severity, due to quirks of Unity, we can't prevent these being wiped from the console.
+  - The Yarn Project will keep any relevant warnings within it however if you need to resummon them.
 
 ### Changed
 
-- YSLS files are now generated with paths set relative to the project root
-  - if the root can't be determined it will still use full path
+- YSLS files are now generated with paths set relative to the project root.
+  - If the root of the project can't be determined, it will still use full path.
 - `VariableStorageBehaviour` can now add change listeners for variable defined outside of Yarn
-- Fixed a bug where empty or whitespace only file paths in diagnostics could cause importing to break and throw exceptions
+- Fixed a bug where empty or whitespace only file paths in diagnostics could cause importing to break and throw exceptions.
 - Yarn diagnostics generated during import now have their line number set which should let the editor jump directly to them where possible.
-- Fixed a bug that prevented sorting Unity Loc tables.
+- Fixed a bug that prevented sorting Unity Localization tables.
 
 ### Removed
 
