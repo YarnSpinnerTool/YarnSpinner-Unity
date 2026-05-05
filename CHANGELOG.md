@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+### Changed
+
+### Removed
+
+## [3.2.3] 2026-05-05
+
+### Added
+
 - Yarn Projects now support specifying which style line tagger to use.
   - You can create your own by conforming to the `ILineTagGenerator` interface.
 - Warning severity diagnostics are now logged.
@@ -22,8 +30,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed a bug where empty or whitespace only file paths in diagnostics could cause importing to break and throw exceptions.
 - Yarn diagnostics generated during import now have their line number set which should let the editor jump directly to them where possible.
 - Fixed a bug that prevented sorting Unity Localization tables.
-
-### Removed
 
 ## [3.2.2] 2026-04-03
 
