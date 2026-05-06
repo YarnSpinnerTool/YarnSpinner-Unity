@@ -70,13 +70,6 @@ namespace Yarn.Unity
         public readonly bool IsHurryUpRequested => HurryUpToken.IsCancellationRequested;
     }
 
-    /// <summary>
-    /// A <see cref="UnityEvent"/> that takes a single <see langword="string"/>
-    /// parameter.
-    /// </summary>
-    [System.Serializable]
-    public class UnityEventString : UnityEvent<string> { }
-
     [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-runner")]
     public sealed partial class DialogueRunner : MonoBehaviour, IDialogueResponder
     {
@@ -285,7 +278,6 @@ namespace Yarn.Unity
             }
         }
 
-
         private CancellationTokenSource? dialogueCancellationSource;
         private CancellationTokenSource? currentContentCancellationSource;
         private CancellationTokenSource? currentContentHurryUpSource;
@@ -308,6 +300,7 @@ namespace Yarn.Unity
             }
         }
 
+        private ICommandDispatcher? _commandDispatcher;
         BasicFunctionLibrary lib = new();
 
         private void EnsureCommandDispatcherReady()
@@ -319,8 +312,6 @@ namespace Yarn.Unity
                 actions.RegisterActions();
             }
         }
-
-        private ICommandDispatcher? _commandDispatcher;
 
         /// <summary>
         /// Called by Unity to set up the object.

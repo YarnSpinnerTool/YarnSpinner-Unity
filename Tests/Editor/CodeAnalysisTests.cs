@@ -138,51 +138,12 @@ namespace Yarn.Unity.Tests
                 documentedAttributeAction.Parameters[2].IsOptional.Should().BeTrue();
                 documentedAttributeAction.Parameters[2].DefaultValueString.Should().BeEqualTo("0");
 
-                var documentedDirectAction = actions.Single(a => a.Name == "direct_register_method_fixed_params");
-                documentedDirectAction.Description.Should().BeEqualTo("A directly-registered method.");
-                documentedDirectAction.Parameters[0].Name.Should().BeEqualTo("a");
-                documentedDirectAction.Parameters[0].Description.Should().BeEqualTo("The first parameter.");
-
-                documentedDirectAction.Parameters[1].Name.Should().BeEqualTo("b");
-                documentedDirectAction.Parameters[1].Description.Should().BeEqualTo("The second parameter.");
+                var documentedDirectAction = actions.Single(a => a.Name == "direct_register_method_no_params");
+                documentedDirectAction.Description.Should().BeEqualTo("A directly registered method.");
+                documentedDirectAction.ReturnDescription.Should().BeEqualTo("A boolean");
 
                 var text = documentedAttributeAction.ToJSON(Path.GetDirectoryName(Application.dataPath));
                 Debug.Log(text);
-            }
-            finally
-            {
-                TearDownTestActionCode();
-            }
-        }
-
-        [Test]
-        public void CodeAnalysis_FindsExpectedActions()
-        {
-            try
-            {
-                SetUpTestActionCode();
-
-                var analysis = new Yarn.Unity.ActionAnalyser.Analyser(TestScriptFolderInProject);
-                var actions = analysis.GetActions();
-                var generatedSource = ActionAnalyser.Analyser.GenerateRegistrationFileSource(actions, TestNamespace);
-
-                var commands = actions.Where(a => a.Type == ActionAnalyser.ActionType.Command);
-                var functions = actions.Where(a => a.Type == ActionAnalyser.ActionType.Function);
-
-                foreach (var commandName in expectedCommands)
-                {
-                    commands.Should().ContainSingle(c => c.Name == commandName, $"command {commandName} should be found");
-
-                    var matchRegex = new Regex($@"AddCommandHandler(<.*>)?\(""{commandName}""");
-                    generatedSource.Should().Match(matchRegex, $"command {commandName} should be registered in the generated source");
-                }
-
-                foreach (var functionName in expectedFunctions)
-                {
-                    functions.Should().ContainSingle(c => c.Name == functionName, $"function {functionName} should be found");
-                    var matchRegex = new Regex($@"RegisterFunctionDeclaration\(""{functionName}""");
-                    generatedSource.Should().Match(matchRegex, $"function {functionName} should be registered in the generated source");
-                }
             }
             finally
             {

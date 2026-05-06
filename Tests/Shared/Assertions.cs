@@ -12,7 +12,6 @@ using UnityEngine.Assertions;
 
 namespace Yarn.Unity.Tests
 {
-
     /// <summary>
     /// Contains assertions for objects.
     /// </summary>

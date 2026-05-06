@@ -88,5 +88,15 @@ namespace Yarn.Unity.Tests
             };
 #endif
         }
+
+        public static LineCancellationToken CreateNoneToken()
+        {
+            var token = new LineCancellationToken
+            {
+                NextContentToken = System.Threading.CancellationToken.None,
+                HurryUpToken = System.Threading.CancellationToken.None,
+            };
+            return token;
+        }
     }
 }

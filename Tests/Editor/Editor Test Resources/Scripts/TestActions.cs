@@ -46,7 +46,6 @@ namespace Yarn.Unity
                 runner.AddFunction<int, int, int>("direct_register_method_fixed_params", DirectRegisterMethodFixedParams);
                 runner.AddFunction<int[], int>("direct_register_method_variadic_params", DirectRegisterMethodVariadicParams);
 
-
                 const string LocalConstantFunctionName = "local_constant_name";
 
                 runner.AddFunction(LocalConstantFunctionName, () => true);
@@ -63,6 +62,10 @@ namespace Yarn.Unity
             return true;
         }
 
+        /// <summary>
+        /// A directly registered method.
+        /// </summary>
+        /// <returns>A boolean</returns>
         private bool DirectRegisterMethodNoParams() => true;
 
         /// <summary>

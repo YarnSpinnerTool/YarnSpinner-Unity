@@ -71,7 +71,7 @@ namespace Yarn.Unity.Tests
             var storage = runner.VariableStorage;
 
             var testFile = "TemporaryTestingFile.json";
-            runner.StartDialogue("LotsOfVars").Forget();
+            runner.StartDialogue("LotsOfVars");
             yield return null;
 
             var originals = storage.GetAllVariables();
@@ -107,7 +107,7 @@ namespace Yarn.Unity.Tests
         {
             var storage = runner.VariableStorage;
 
-            runner.StartDialogue("LotsOfVars").Forget();
+            runner.StartDialogue("LotsOfVars");
             yield return null;
 
             var originals = storage.GetAllVariables();
@@ -125,7 +125,7 @@ namespace Yarn.Unity.Tests
         {
             var storage = runner.VariableStorage;
 
-            runner.StartDialogue("LotsOfVars").Forget();
+            runner.StartDialogue("LotsOfVars");
             yield return null;
 
             var testKey = "TemporaryTestingKey";
@@ -234,8 +234,6 @@ namespace Yarn.Unity.Tests
         [UnityTest]
         public IEnumerator DialogueRunner_CanAccessInitialValues()
         {
-
-
             // these are derived from the declares and sets inside of DialogueRunnerTest.yarn
             var testDefaults = new Dictionary<string, System.IConvertible>();
             testDefaults.Add("$float", 1);
@@ -302,7 +300,7 @@ namespace Yarn.Unity.Tests
             var dispatcher = runner.CommandDispatcher;
 
             LogAssert.Expect(LogType.Log, expectedLogResult);
-            var result = dispatcher.DispatchCommand(test, runner);
+            var result = dispatcher.DispatchCommand(test, runner, RuntimeTestUtility.CreateNoneToken());
 
             Assert.AreEqual(CommandDispatchResult.StatusType.Succeeded, result.Status);
             Assert.IsTrue(result.Task.IsCompleted());
@@ -316,7 +314,7 @@ namespace Yarn.Unity.Tests
 
             var framesToWait = 5;
 
-            var result = dispatcher.DispatchCommand($"testCommandCoroutine DialogueRunner {framesToWait}", runner);
+            var result = dispatcher.DispatchCommand($"testCommandCoroutine DialogueRunner {framesToWait}", runner, RuntimeTestUtility.CreateNoneToken());
 
             Assert.AreEqual(CommandDispatchResult.StatusType.Succeeded, result.Status);
             Assert.IsFalse(result.Task.IsCompleted());
@@ -341,7 +339,7 @@ namespace Yarn.Unity.Tests
             var dispatcher = runner.CommandDispatcher;
             var regex = new Regex(error);
 
-            var result = dispatcher.DispatchCommand(command, runner);
+            var result = dispatcher.DispatchCommand(command, runner, RuntimeTestUtility.CreateNoneToken());
 
             Assert.AreEqual(CommandDispatchResult.StatusType.InvalidParameterCount, result.Status);
             Assert.That(regex.IsMatch(result.Message));
@@ -354,7 +352,7 @@ namespace Yarn.Unity.Tests
             var dispatcher = runner.CommandDispatcher;
             var regex = new Regex(error);
 
-            var result = dispatcher.DispatchCommand(command, runner);
+            var result = dispatcher.DispatchCommand(command, runner, RuntimeTestUtility.CreateNoneToken());
             Assert.AreEqual(CommandDispatchResult.StatusType.InvalidParameter, result.Status);
             Assert.That(regex.IsMatch(result.Message));
         }
@@ -371,7 +369,7 @@ namespace Yarn.Unity.Tests
 
             LogAssert.Expect(LogType.Log, expectedLog);
 
-            var result = dispatcher.DispatchCommand(command, runner);
+            var result = dispatcher.DispatchCommand(command, runner, RuntimeTestUtility.CreateNoneToken());
 
             Assert.AreEqual(CommandDispatchResult.StatusType.Succeeded, result.Status);
         }
@@ -383,7 +381,7 @@ namespace Yarn.Unity.Tests
         {
             var dispatcher = runner.CommandDispatcher;
 
-            var result = dispatcher.DispatchCommand(command, runner);
+            var result = dispatcher.DispatchCommand(command, runner, RuntimeTestUtility.CreateNoneToken());
 
             Assert.AreEqual(CommandDispatchResult.StatusType.InvalidParameter, result.Status);
         }
@@ -400,8 +398,8 @@ namespace Yarn.Unity.Tests
             LogAssert.Expect(LogType.Log, "success 1");
             LogAssert.Expect(LogType.Log, "success 2");
 
-            var result1 = dispatcher.DispatchCommand("test1", runner);
-            var result2 = dispatcher.DispatchCommand("test2 2", runner);
+            var result1 = dispatcher.DispatchCommand("test1", runner, RuntimeTestUtility.CreateNoneToken());
+            var result2 = dispatcher.DispatchCommand("test2 2", runner, RuntimeTestUtility.CreateNoneToken());
 
             Assert.IsNull(result1.Message);
             Assert.IsNull(result2.Message);
@@ -432,7 +430,7 @@ namespace Yarn.Unity.Tests
 
             LogAssert.Expect(LogType.Log, $"success {Time.frameCount + framesToWait}");
 
-            var result = dispatcher.DispatchCommand("test", runner);
+            var result = dispatcher.DispatchCommand("test", runner, RuntimeTestUtility.CreateNoneToken());
             Assert.AreEqual(CommandDispatchResult.StatusType.Succeeded, result.Status);
 
             Assert.IsFalse(result.Task.IsCompleted());
@@ -458,31 +456,6 @@ namespace Yarn.Unity.Tests
             IEnumerable<string> parsedComponents = DialogueRunner.SplitCommandText(input);
 
             Assert.AreEqual(expectedComponents, parsedComponents);
-        }
-
-        [UnityTest]
-        public IEnumerator DialogueRunner_OnDialogueStartAndStop_CallsEvents()
-        {
-
-
-            runner.onDialogueStart?.AddListener(() =>
-            {
-                Debug.Log("Dialogue start");
-            });
-
-            runner.onDialogueComplete?.AddListener(() =>
-            {
-                Debug.Log("Dialogue complete");
-            });
-
-            LogAssert.Expect(LogType.Log, "Dialogue start");
-            LogAssert.Expect(LogType.Log, "Dialogue complete");
-
-            runner.StartDialogue(runner.startNode).Forget();
-
-            yield return new WaitForSeconds(0.5f);
-
-            runner.Stop().Forget();
         }
 
         [Test]

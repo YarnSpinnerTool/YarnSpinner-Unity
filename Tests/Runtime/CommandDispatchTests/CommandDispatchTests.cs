@@ -87,7 +87,7 @@ namespace Yarn.Unity.Tests
 
             foreach (var expectedFunctionName in expectedFunctionNames)
             {
-                Assert.True(dialogueRunner.Dialogue.Library.FunctionExists(expectedFunctionName), "expected function {0} to be registered", expectedFunctionName);
+                Assert.True(dialogueRunner.Dialogue.Responder.TryGetFunctionDefinition(expectedFunctionName, out _), "expected function {0} to be registered", expectedFunctionName);
             }
         }
 
@@ -111,7 +111,7 @@ namespace Yarn.Unity.Tests
 
             LogAssert.Expect(LogType.Log, "1;2;3;4");
 
-            var dispatchResult = dialogueRunner.CommandDispatcher.DispatchCommand("test_command 1 2 3 4", dialogueRunner);
+            var dispatchResult = dialogueRunner.CommandDispatcher.DispatchCommand("test_command 1 2 3 4", dialogueRunner, RuntimeTestUtility.CreateNoneToken());
 
             dispatchResult.Status.Should().BeEqualTo(CommandDispatchResult.StatusType.Succeeded, "the command dispatch should succeed");
             dispatchResult.Task.IsCompletedSuccessfully().Should().BeTrue("the command should run synchronously");
