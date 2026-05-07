@@ -537,7 +537,7 @@ namespace Yarn.Unity.ActionAnalyser
 
             logger?.Inc();
             logger?.WriteLine($"Validating {identifier} as a function");
-            var paramDiags = ValidateParameters(compilation, logger);
+            var paramDiags = ValidateParameters(compilation, ActionType.Function, logger);
             foreach (var p in paramDiags)
             {
                 yield return p;
@@ -571,7 +571,7 @@ namespace Yarn.Unity.ActionAnalyser
         }
 
         // validates the parameters are correct
-        private List<Diagnostic> ValidateParameters(Compilation compilation, ILogger? logger)
+        private List<Diagnostic> ValidateParameters(Compilation compilation, ActionType actionType, ILogger? logger)
         {
             logger?.Inc();
             List<Diagnostic> diagnostics = new List<Diagnostic>();
@@ -612,6 +612,16 @@ namespace Yarn.Unity.ActionAnalyser
 
                     diagnostics.Add(Diagnostic.Create(Diagnostics.YS1012ActionIsALambda, actionLocation));
                 }
+            }
+
+            if (actionType == ActionType.Invalid || actionType == ActionType.NotAnAction)
+            {
+                logger?.WriteLine($"{identifier} is not a function or command, ignoring.");
+                logger?.Dec();
+
+                diagnostics.Add(Diagnostic.Create(Diagnostics.YS1000UnknownError, this.MethodDeclarationSyntax?.GetLocation(), $"Asked to process {identifier} but this action is {actionType}"));
+
+                return diagnostics;
             }
 
             if (parameterList == null || parameterList.Parameters.Count() == 0)
@@ -672,11 +682,31 @@ namespace Yarn.Unity.ActionAnalyser
                 }
                 else
                 {
-                    if (typeInfo.GetYarnTypeString() == "any" && typeInfo.BaseType?.Name != "Component")
+                    var type = GetParameterType(typeInfo);
+                    switch (type)
                     {
-                        // we have an invalid type
-                        logger?.WriteLine($"{parameterName} is an invalid type for use in a Yarn action");
-                        diagnostics.Add(Diagnostic.Create(Diagnostics.YS1011ActionsParameterIsAnIncompatibleType, parameter.GetLocation(), parameterName, typeInfo.Name));
+                        case ParameterTypes.Token:
+                            if (parameterIndex != parameterCount)
+                            {
+                                logger?.WriteLine($"{parameterName} is a {typeInfo.Name} but isn't the last parameter, it's at position {parameterIndex}/{parameterCount}");
+                                diagnostics.Add(Diagnostic.Create(Diagnostics.YS1013CancellationTokenInWrongLocation, parameter.GetLocation(), parameterName, parameterIndex));
+                            }
+                            break;
+
+                        case ParameterTypes.Component:
+                            goto case ParameterTypes.GameObject;
+                        case ParameterTypes.GameObject:
+                            if (actionType == ActionType.Function)
+                            {
+                                logger?.WriteLine($"{parameterName} is a {typeInfo.Name} which is invalid type inside of functions");
+                                diagnostics.Add(Diagnostic.Create(Diagnostics.YS1011ActionsParameterIsAnIncompatibleType, parameter.GetLocation(), parameterName, typeInfo.Name, "function"));
+                            }
+                            break;
+
+                        case ParameterTypes.Invalid:
+                            logger?.WriteLine($"{parameterName} is an invalid type ({typeInfo.Name}) for use in a Yarn action");
+                            diagnostics.Add(Diagnostic.Create(Diagnostics.YS1011ActionsParameterIsAnIncompatibleType, parameter.GetLocation(), parameterName, typeInfo.Name, actionType == ActionType.Command ? "command" : "function"));
+                            break;
                     }
                 }
 
@@ -703,8 +733,51 @@ namespace Yarn.Unity.ActionAnalyser
                 logger?.Dec();
             }
 
+            ParameterTypes GetParameterType(ITypeSymbol typeInfo)
+            {
+                var yarnType = typeInfo.GetYarnTypeString();
+                if (typeInfo.GetYarnTypeString() == "any")
+                {
+                    if (typeInfo.Name == "CancellationToken" || typeInfo.Name == "LineCancellationToken")
+                    {
+                        // probably should do more checking here also, but eh
+                        return ParameterTypes.Token;
+                    }
+                    if (typeInfo.Name == "GameObject" && typeInfo.ContainingNamespace.Name == "UnityEngine")
+                    {
+                        return ParameterTypes.GameObject;
+                    }
+                    // or a component subclass
+                    var baseSymbol = typeInfo.BaseType;
+                    while (baseSymbol != null)
+                    {
+                        if (baseSymbol.Name == "MonoBehaviour" || baseSymbol.Name == "Component")
+                        {
+                            if (baseSymbol.ContainingNamespace.Name == "UnityEngine")
+                            {
+                                logger?.WriteLine($"Discovered the base type of {typeInfo.Name} in the {baseSymbol.ContainingAssembly.Name} assembly in the {baseSymbol.ContainingNamespace.Name} namespace");
+                                return ParameterTypes.Component;
+                            }
+                        }
+                        baseSymbol = baseSymbol.BaseType;
+                    }
+                }
+                return yarnType switch
+                {
+                    "bool" => ParameterTypes.Bool,
+                    "number" => ParameterTypes.Number,
+                    "string" => ParameterTypes.String,
+                    _ => ParameterTypes.Invalid,
+                };
+            }
+
             logger?.Dec();
             return diagnostics;
+        }
+
+        private enum ParameterTypes
+        {
+            Bool, Number, String, Token, GameObject, Component, Invalid
         }
 
         private IEnumerable<Diagnostic> ValidateCommand(Compilation compilation, ILogger? logger)
@@ -773,7 +846,7 @@ namespace Yarn.Unity.ActionAnalyser
 
             logger?.WriteLine($"Validating {identifier} as a command");
 
-            var paramDiags = ValidateParameters(compilation, logger);
+            var paramDiags = ValidateParameters(compilation, ActionType.Command, logger);
             foreach (var p in paramDiags)
             {
                 yield return p;

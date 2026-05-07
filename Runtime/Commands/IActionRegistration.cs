@@ -69,12 +69,6 @@ namespace Yarn.Unity
         ///     myFunction returned true!
         /// &lt;&lt;endif&gt;&gt;
         /// </code>
-        ///
-        /// <para>The <c>call</c> command can also be used to invoke the function:</para>
-        ///
-        /// <code lang="yarn">
-        /// &lt;&lt;call myFunction(1, 2)&gt;&gt;
-        /// </code>
         /// </remarks>
         /// <param name="name">The name of the function to add.</param>
         /// <param name="implementation">The <see cref="Delegate"/> that
