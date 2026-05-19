@@ -94,8 +94,23 @@ namespace Yarn.Unity
     [System.Serializable]
     public class UnityEventString : UnityEvent<string> { }
 
+    /// <summary>
+    /// Contains methods for signalling that a line should be cancelled. Used
+    /// internally by the Dialogue Runner.
+    /// </summary>
+    public interface IRequestLineCancellation
+    {
+        /// <summary>
+        /// Called by a Dialogue Presenter that wishes to request that the line
+        /// be ended because they finished their own presentation (for example,
+        /// proceeding to the next line after voice over completes.)
+        /// </summary>
+        /// <param name="line">The line whose presentation is complete.</param>
+        public void RequestLineCancellation(LocalizedLine line);
+    }
+
     [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-runner")]
-    public sealed partial class DialogueRunner : MonoBehaviour
+    public sealed partial class DialogueRunner : MonoBehaviour, IRequestLineCancellation
     {
         private Dialogue? dialogue;
 
@@ -1156,6 +1171,11 @@ namespace Yarn.Unity
             }
 
             currentOptionsHurryUpSource.Cancel();
+        }
+
+        void IRequestLineCancellation.RequestLineCancellation(LocalizedLine line)
+        {
+            this.RequestNextLine();
         }
     }
 }
