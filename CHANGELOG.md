@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+### Removed
+
+## [3.2.4] 2026-05-05
+
+### Added
+
+### Changed
+
 - VoiceOverPresenter now no longer requires that the line's `Source` be a `DialogueRunner` in order to signal that the line should be ended at the end of playback, and instead requires that it be a new interface `IRequestLineCancellation`.
   - Made `DialogueRunner` implement `IRequestLineCancellation`.
   - This feature exists to support some upcoming new features.
