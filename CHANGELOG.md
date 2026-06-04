@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Moved the input handling logic for `LineAdvancer` out to separate components, and made `LineAdvancer` add and remove those components depending on which mode is selected.
+
 ### Removed
 
 ## [3.2.4] 2026-06-01
