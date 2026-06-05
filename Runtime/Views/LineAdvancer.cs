@@ -326,7 +326,7 @@ namespace Yarn.Unity
             }
         }
 
-        private void SetupInput<T>(System.Action<T>? setup) where T : MonoBehaviour, ILineAdvancerInput
+        private void SetupInput<T>(System.Action<T>? onLineAdvancerInputComponentAdded) where T : MonoBehaviour, ILineAdvancerInput
         {
             if (UnityEditor.PrefabUtility.IsPartOfPrefabAsset(this)
                 && UnityEditor.SceneManagement.PrefabStageUtility.GetPrefabStage(this.gameObject) == null)
@@ -368,7 +368,7 @@ namespace Yarn.Unity
                 input.LineAdvancer = this;
                 UnityEditor.EditorUtility.SetDirty(this);
 
-                setup?.Invoke(newInput);
+                onLineAdvancerInputComponentAdded?.Invoke(newInput);
             }
         }
 #endif
