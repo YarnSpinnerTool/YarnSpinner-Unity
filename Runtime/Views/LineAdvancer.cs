@@ -107,13 +107,14 @@ namespace Yarn.Unity
             /// cref="RequestLineHurryUp"/>, <see cref="RequestNextLine"/> and
             /// <see cref="RequestDialogueCancellation"/> methods directly from
             /// your code to control line advancement.</remarks>
-            None,
+            [InspectorName("Manual")] None,
             /// <summary>
             /// The line advancer responds to input from the legacy <a
             /// href="https://docs.unity3d.com/Manual/class-InputManager.html">Input
             /// Manager</a>.
             /// </summary>
             LegacyInputAxes,
+            [InspectorName("Third-Party")] External,
         }
 
         /// <summary>
@@ -162,6 +163,14 @@ namespace Yarn.Unity
                 if (!InputSystemAvailability.enableInputSystem)
                 {
                     return MessageBoxAttribute.Warning("The Unity Input System is not enabled.\n\nEither change this setting, or enable Input System in Project Settings > Player > Configuration > Active Input Handling.\n\nFalling back to the keyboard in the meantime.");
+                }
+            }
+
+            if (this.inputMode == InputMode.External)
+            {
+                if (TryGetComponent<ILineAdvancerInput>(out _) == false)
+                {
+                    return MessageBoxAttribute.Info($"Add an input-handling component that implements the {nameof(ILineAdvancerInput)} interface.");
                 }
             }
 
@@ -279,8 +288,7 @@ namespace Yarn.Unity
                     });
                     break;
                 case InputMode.None:
-                    var components = this.GetComponents<MonoBehaviour>();
-                    foreach (var c in components)
+                    foreach (var c in this.GetComponents<MonoBehaviour>())
                     {
                         if (!(c is ILineAdvancerInput))
                         {
@@ -291,9 +299,33 @@ namespace Yarn.Unity
                         UnityEditor.EditorUtility.SetDirty(this);
                     }
                     break;
+                case InputMode.External:
+                    foreach (var c in this.GetComponents<ILineAdvancerInput>())
+                    {
+                        if (c is LineAdvancerInput.KeyCodes k)
+                        {
+                            DestroyImmediate(k);
+                            UnityEditor.EditorUtility.SetDirty(this);
+                            continue;
+                        }
+                        if (c is LineAdvancerInput.InputActions i)
+                        {
+                            DestroyImmediate(i);
+                            UnityEditor.EditorUtility.SetDirty(this);
+                            continue;
+                        }
+                        if (c is LineAdvancerInput.LegacyInputAxes a)
+                        {
+                            DestroyImmediate(a);
+                            UnityEditor.EditorUtility.SetDirty(this);
+                            continue;
+                        }
+                    }
+                    break;
 
             }
         }
+
         private void SetupInput<T>(System.Action<T>? setup) where T : MonoBehaviour, ILineAdvancerInput
         {
             if (UnityEditor.PrefabUtility.IsPartOfPrefabAsset(this)
