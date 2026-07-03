@@ -10,12 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added Rewired integration to Yarn Spinner+.
 
+## [3.2.5] 2027-07-03
+
 ### Changed
 
 - Moved the input handling logic for `LineAdvancer` out to separate components, and made `LineAdvancer` add and remove those components depending on which mode is selected.
 - Fixed a compile error when the legacy input manager is not available.
-
-### Removed
+- Fixed an issue where YSLS files were not being written to disk.
 
 ## [3.2.4] 2026-06-01
 
