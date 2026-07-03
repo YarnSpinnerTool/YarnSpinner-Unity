@@ -10,7 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added Rewired integration to Yarn Spinner+.
 
-## [3.2.5] 2027-07-03
+## [3.2.6] 2026-07-03
+
+### Changed
+
+- Fixed an issue in the GitHub release where the built DLL didn't include v3.2.5's changes.
+
+## [3.2.5] 2026-07-03
 
 ### Changed
 
