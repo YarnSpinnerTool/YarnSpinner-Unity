@@ -9,6 +9,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Added Rewired integration to Yarn Spinner+.
+## [3.2.7] 2026-07-04
+
+### Changed
+
+- Fixed an issue where Yarn Spinner would fail to compile if the Input System was not enabled.
 
 ## [3.2.6] 2026-07-03
 

@@ -112,6 +112,10 @@ namespace Yarn.Unity.LineAdvancerInput
         {
             if (LineAdvancer != null) { LineAdvancer.OnInputCancelDialogue(); }
         }
+#else // USE_INPUTSYSTEM
+        // Define stub methods for ILineAdvancerInput to prevent compiler errors
+        public void OnDialogueStarted() { }
+        public void OnDialogueComplete() { }
 #endif
     }
 
