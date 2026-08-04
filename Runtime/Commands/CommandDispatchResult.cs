@@ -15,17 +15,8 @@ namespace Yarn.Unity
     /// <seealso cref="DispatchCommandToRegisteredHandlers(Command, Action)"/>
     internal struct CommandDispatchResult
     {
-
-        internal enum ParameterParseStatusType
-        {
-            Succeeded,
-            InvalidParameterType,
-            InvalidParameterCount,
-        }
-
         internal enum StatusType
         {
-
             Succeeded,
 
             NoTargetFound,

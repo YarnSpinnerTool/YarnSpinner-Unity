@@ -52,6 +52,9 @@ namespace Yarn.Unity
 
         /// <summary>
         /// Removes a command handler.
+        /// This does not impact the compiled Yarn program, only the runtime actions.
+        /// The Yarn VM will still attempt to call the command when it encounters it, likely results in an exception being thrown.
+        /// In general you should only remove commands if you know they won't be needed.
         /// </summary>
         /// <param name="commandName">The name of the command to remove.</param>
         void RemoveCommandHandler(string commandName);
@@ -80,20 +83,18 @@ namespace Yarn.Unity
         /// Remove a registered function.
         /// </summary>
         /// <remarks>
-        /// After a function has been removed, it cannot be called from
-        /// Yarn scripts.
+        /// <para>
+        /// After a function has been removed, it cannot be called from Yarn scripts.
+        /// </para>
+        /// <para>
+        /// This does not impact the compiled Yarn program, only the runtime actions.
+        /// The Yarn VM will still attempt to call the function when it encounters it, likely resulting in an exception being thrown.
+        /// In general you should only remove functions if you know they won't be needed.
+        /// </para>
         /// </remarks>
         /// <param name="name">The name of the function to remove.</param>
         /// <seealso cref="AddFunction(string, Delegate)"/>
         void RemoveFunction(string name);
-
-        /// <summary>
-        /// Registers a function as existing, without supplying an implementation.
-        /// </summary>
-        /// <param name="name">The name of the function.</param>
-        /// <param name="returnType">The return type of the function.</param>
-        /// <param name="parameterTypes">The types of the function's parameters.</param>
-        void RegisterFunctionDeclaration(string name, Type returnType, Type[] parameterTypes);
     }
 
     /// <summary>

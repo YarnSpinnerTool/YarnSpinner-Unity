@@ -7,67 +7,97 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 namespace Yarn.Unity.Editor
 {
     using System;
-    using System.Collections;
+    using System.IO;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
     using UnityEditor;
     using UnityEngine;
     using UnityEngine.UIElements;
-    using Yarn.Unity;
 
-    internal class CommandsCollection : IActionRegistration
+    internal class CommandsCollection
     {
-        public List<Actions.CommandRegistration> commandRegistrations = new List<Actions.CommandRegistration>();
+        private List<Yarn.Compiler.Definitions>? yslses;
 
-        public List<(string Name, Delegate Function)> functionRegistrations = new List<(string Name, Delegate Function)>();
-
-        public IEnumerable<CommandsWindow.IListItem> GetListItems()
+        private List<Yarn.Compiler.Definitions> loadDefintions()
         {
-            foreach (var registrationMethod in Actions.ActionRegistrationMethods)
+            var definitions = new List<Yarn.Compiler.Definitions>();
+
+            // getting all text assets in the project
+            // this I think gets those both in assets and packages
+            foreach (var guid in AssetDatabase.FindAssets("t:TextAsset"))
             {
-                registrationMethod.Invoke(this, RegistrationType.Compilation);
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (string.IsNullOrWhiteSpace(path))
+                {
+                    continue;
+                }
+                // ok is it a ysls.json file?
+                if (!path.EndsWith(".ysls.json"))
+                {
+                    continue;
+                }
+
+                var source = AssetDatabase.LoadAssetAtPath<TextAsset>(path).text;
+                var ysls = new Yarn.Compiler.Definitions(source);
+                definitions.Add(ysls);
             }
 
-            yield return new CommandsWindow.HeaderListItem("Commands");
+            // now to check the project settings folder to see if it has any ysls files also
+            var settingPaths = Path.Combine(Path.GetDirectoryName(Application.dataPath), "ProjectSettings", "Packages", "dev.yarnspinner");
+            try
+            {
+                var yslsPaths = Directory.EnumerateFiles(settingPaths, "*.ysls.json");
+                foreach (var yslsPath in yslsPaths)
+                {
+                    if (string.IsNullOrWhiteSpace(yslsPath))
+                    {
+                        continue;
+                    }
+                    var source = File.ReadAllBytes(yslsPath);
+                    var ysls = new Yarn.Compiler.Definitions(source);
+                    definitions.Add(ysls);
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogException(ex);
+            }
 
-            foreach (var command in commandRegistrations)
+            return definitions;
+        }
+
+        public IEnumerable<CommandsWindow.IListItem> GetCommandItems()
+        {
+            if (yslses == null)
+            {
+                yslses = loadDefintions();
+            }
+
+            var allCommands = yslses.SelectMany(y => y.commands);
+
+            foreach (var command in allCommands)
             {
                 yield return new CommandsWindow.CommandListItem(command);
             }
 
-            // Add a fake 'stop' command to the list, so that it appears in the
-            // window
-            System.Action fakeStop = () => { };
-            yield return new CommandsWindow.CommandListItem(new Actions.CommandRegistration("stop", fakeStop));
+            // Add a fake 'stop' command to the list, so that it appears in the window
+            yield return new CommandsWindow.CommandListItem("stop", "<<stop>>");
         }
-
-        public void AddCommandHandler(string commandName, Delegate handler)
+        public IEnumerable<CommandsWindow.IListItem> GetFunctionItems()
         {
-            commandRegistrations.Add(new Actions.CommandRegistration(commandName, handler));
+            if (yslses == null)
+            {
+                yslses = loadDefintions();
+            }
 
-        }
+            var allFunctions = yslses.SelectMany(y => y.functions);
+            foreach (var function in allFunctions)
+            {
+                yield return new CommandsWindow.CommandListItem(function);
+            }
 
-        public void AddCommandHandler(string commandName, MethodInfo methodInfo)
-        {
-            commandRegistrations.Add(new Actions.CommandRegistration(commandName, methodInfo));
-        }
-
-        public void AddFunction(string name, Delegate implementation) => functionRegistrations.Add((name, implementation));
-
-        public void RemoveCommandHandler(string commandName)
-        {
-            // No-op
-        }
-
-        public void RemoveFunction(string name)
-        {
-            // No-op
-        }
-
-        public void RegisterFunctionDeclaration(string name, Type returnType, Type[] parameterTypes)
-        {
-            /* TODO: Implement */
+            // how do I want to handle the built in functions?
+            // most are just gonna be noise (so like Number.Add) but ones like visited are good to know right?
         }
     }
 
@@ -87,14 +117,30 @@ namespace Yarn.Unity.Editor
 
         public class CommandListItem : IListItem
         {
-            internal Actions.CommandRegistration Command;
-
-            internal CommandListItem(Actions.CommandRegistration command)
+            internal CommandListItem(Yarn.Shared.Action command)
             {
-                Command = command;
+                DisplayName = command.Name;
+                UsageString = command.Usage;
             }
 
-            public string DisplayName => Command.Name;
+            internal CommandListItem(Compiler.Declaration function)
+            {
+                DisplayName = function.Name;
+                if (function.Type is not FunctionType fType)
+                {
+                    throw new System.ArgumentException($"attempted to create a function declaration when we don't have a function, we have a {function.Type}");
+                }
+                UsageString = $"{function.Name}({string.Join(',', fType.Parameters.Select(p => p.Name))})";
+            }
+
+            internal CommandListItem(string display, string usage)
+            {
+                DisplayName = display;
+                UsageString = usage;
+            }
+
+            public string DisplayName { get; private set; }
+            public string UsageString;
         }
 
         [SerializeField] private VisualTreeAsset? uxml;
@@ -104,10 +150,10 @@ namespace Yarn.Unity.Editor
         private List<IListItem> listItems = new();
         private List<IListItem> filteredListItems = new();
 
-        [MenuItem("Window/Yarn Spinner/Commands...")]
+        [MenuItem("Window/Yarn Spinner/Commands and Functions...")]
         static void Summon()
         {
-            var window = GetWindow<CommandsWindow>("Yarn Commands");
+            var window = GetWindow<CommandsWindow>("Yarn Actions");
             window.Show();
         }
 
@@ -130,7 +176,13 @@ namespace Yarn.Unity.Editor
 
             var commandsCollection = new CommandsCollection();
 
-            listItems = new List<IListItem>(commandsCollection.GetListItems().OrderBy(item => item.DisplayName));
+            listItems = new List<IListItem>
+            {
+                new CommandsWindow.HeaderListItem("Commands")
+            };
+            listItems.AddRange(commandsCollection.GetCommandItems().OrderBy(item => item.DisplayName));
+            listItems.Add(new CommandsWindow.HeaderListItem("Functions"));
+            listItems.AddRange(commandsCollection.GetFunctionItems().OrderBy(item => item.DisplayName));
 
             UpdateFilter(listView, searchField.value);
 
@@ -163,7 +215,7 @@ namespace Yarn.Unity.Editor
                 else if (listItem is CommandListItem command)
                 {
                     element.AddToClassList("command");
-                    element.Q<Label>("Subtitle").text = "<<" + command.Command.UsageString + ">>";
+                    element.Q<Label>("Subtitle").text = command.UsageString;
                 }
             };
         }
@@ -184,7 +236,7 @@ namespace Yarn.Unity.Editor
                     }
                     if (item is CommandListItem command)
                     {
-                        return command.Command.Name.IndexOf(value, StringComparison.InvariantCultureIgnoreCase) != -1;
+                        return command.DisplayName.IndexOf(value, StringComparison.InvariantCultureIgnoreCase) != -1;
                     }
                     return true;
                 }).ToList();

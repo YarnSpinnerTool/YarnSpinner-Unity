@@ -20,7 +20,8 @@
         "Antlr4.Runtime.Standard.dll",
         "CsvHelper.dll",
         "Google.Protobuf.dll",
-        "System.Text.Json.dll"
+        "System.Text.Json.dll",
+        "YarnSpinner.Shared.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

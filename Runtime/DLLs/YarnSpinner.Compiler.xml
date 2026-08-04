@@ -43,12 +43,12 @@
         <member name="M:Yarn.Compiler.BasicBlock.ToString">
             <inheritdoc/>
         </member>
-        <member name="M:Yarn.Compiler.BasicBlock.ToString(Yarn.ILibrary,Yarn.Compiler.CompilationResult)">
+        <member name="M:Yarn.Compiler.BasicBlock.ToString(Yarn.Compiler.CompilationResult)">
             <summary>
             Gets a string containing the textual description of the instructions
             in this <see cref="T:Yarn.Compiler.BasicBlock"/>.
             </summary>
-            <param name="library">The <see cref="T:Yarn.ILibrary"/> to use when
+            <param name="library">The <see cref="!:ILibrary"/> to use when
             converting instructions to strings.</param>
             <param name="compilationResult">The <see cref="T:Yarn.Compiler.CompilationResult"/>
             that produced <see cref="F:Yarn.Compiler.BasicBlock.Node"/>.</param>
@@ -676,9 +676,10 @@
             An input into a Yarn Spinner compilation.
             </summary>
         </member>
-        <member name="P:Yarn.Compiler.ISourceInput.FileName">
+        <member name="P:Yarn.Compiler.ISourceInput.Name">
             <summary>
             The name of the input.
+            Must be unique across the entire list of all inputs.
             </summary>
         </member>
         <member name="T:Yarn.Compiler.CompilationJob">
@@ -697,19 +698,27 @@
             Represents the contents of a file to compile.
             </summary>
         </member>
-        <member name="P:Yarn.Compiler.CompilationJob.File.FileName">
+        <member name="P:Yarn.Compiler.CompilationJob.File.Name">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.Compiler.CompilationJob.File.Path">
             <summary>
-            The name of the file.
+            The path of the file
             </summary>
-            <remarks>
-            This may be a full path, or just the filename or anything in
-            between. This is useful for diagnostics, and for attributing
-            <see cref="T:Yarn.Line"/> objects to their original source
-            files.</remarks>
+            <remarks> 
+            This can be a relative or absolute path provided other pieces of the pipeline can manage to process it for diagnostic and debug purposes
+            </remarks>
         </member>
         <member name="F:Yarn.Compiler.CompilationJob.File.Source">
             <summary>
             The source code of this file.
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.CompilationJob.Raw">
+            <summary>
+            Represents a <see langword="string"/> being passed in directly for the compiler to use.
+            This is in constrast to loading it from a file.   
+            Mostly used internally for testing.
             </summary>
         </member>
         <member name="T:Yarn.Compiler.CompilationJob.Type">
@@ -739,12 +748,6 @@
             <summary>
             The <see cref="T:Yarn.Compiler.CompilationJob.File"/> structs that represent the content to
             parse..
-            </summary>
-        </member>
-        <member name="F:Yarn.Compiler.CompilationJob.Library">
-            <summary>
-            The <see cref="F:Yarn.Compiler.CompilationJob.Library"/> that contains declarations for
-            functions.
             </summary>
         </member>
         <member name="F:Yarn.Compiler.CompilationJob.CompilationType">
@@ -792,41 +795,35 @@
             </summary>
             <see cref="P:Yarn.Compiler.Project.CompilerOptionsData.DiagnosticsSeverity"/> 
         </member>
-        <member name="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.ILibrary)">
+        <member name="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String})">
             <summary>
             Creates a new <see cref="T:Yarn.Compiler.CompilationJob"/> using the contents of a
             collection of files.
             </summary>
             <param name="paths">The paths to the files.</param>
-            <param name="library">The <see cref="F:Yarn.Compiler.CompilationJob.Library"/> containing functions
-            to use for this compilation.</param>
             <returns>A new <see cref="T:Yarn.Compiler.CompilationJob"/>.</returns>
         </member>
         <member name="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.String[])">
-            <inheritdoc cref="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.ILibrary)" path="/summary"/>
-            <inheritdoc cref="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.ILibrary)" path="/param[@name='paths']"/>
-            <inheritdoc cref="M:Yarn.Compiler.CompilationJob.CreateFromFiles(System.Collections.Generic.IEnumerable{System.String},Yarn.ILibrary)" path="/returns"/>
+            <inheritdoc cref="!:CreateFromFiles(IEnumerable&lt;string&gt;, ILibrary)" path="/summary"/>
+            <inheritdoc cref="!:CreateFromFiles(IEnumerable&lt;string&gt;, ILibrary)" path="/param[@name='paths']"/>
+            <inheritdoc cref="!:CreateFromFiles(IEnumerable&lt;string&gt;, ILibrary)" path="/returns"/>
         </member>
-        <member name="M:Yarn.Compiler.CompilationJob.CreateFromInputs(System.Collections.Generic.IEnumerable{Yarn.Compiler.ISourceInput},Yarn.ILibrary,System.Int32)">
+        <member name="M:Yarn.Compiler.CompilationJob.CreateFromInputs(System.Collections.Generic.IEnumerable{Yarn.Compiler.ISourceInput},System.Collections.Generic.IEnumerable{Yarn.Compiler.Declaration},System.Int32)">
             <summary>
             Creates a new <see cref="T:Yarn.Compiler.CompilationJob"/> using the contents of a
             collection of source inputs.
             </summary>
             <param name="inputs">The inputs to the compilation.</param>
-            <param name="library">The <see cref="F:Yarn.Compiler.CompilationJob.Library"/> containing functions
-            to use for this compilation.</param>
             <returns>A new <see cref="T:Yarn.Compiler.CompilationJob"/>.</returns>
         </member>
-        <member name="M:Yarn.Compiler.CompilationJob.CreateFromString(System.String,System.String,Yarn.ILibrary,System.Int32)">
+        <member name="M:Yarn.Compiler.CompilationJob.CreateFromString(System.String,System.String,System.Collections.Generic.IEnumerable{Yarn.Compiler.Declaration},System.Int32)">
             <summary>
             Creates a new <see cref="T:Yarn.Compiler.CompilationJob"/> using the contents of a
             string.
             </summary>
-            <param name="fileName">The name to assign to the compiled
+            <param name="inputName">The name to assign to the compiled
             file.</param>
             <param name="source">The text to compile.</param>
-            <param name="library">Library of function definitions to use during
-            compilation.</param>
             <param name="languageVersion">The version of the Yarn language to
             use.</param>
             <returns>A new <see cref="T:Yarn.Compiler.CompilationJob"/>.</returns>
@@ -899,7 +896,7 @@
             compilations when the source file does not change. If you want line
             IDs to remain the same when the source code may be modified in the
             future, add a <c>#line:</c> tag to the line. This may be done by
-            hand, or added using the <see cref="M:Yarn.Compiler.Utility.TagLines(Yarn.Compiler.CompilationJob.File,System.Collections.Generic.HashSet{System.String},ILineTagGenerator,ILineTagGenerator.TagAbortBehaviour)"/> method.
+            hand, or added using the <see cref="!:Utility.TagLines(CompilationJob.File, HashSet&lt;string&gt;?, ILineTagGenerator?, ILineTagGenerator.TagAbortBehaviour)"/> method.
             </para>
             </remarks>
         </member>
@@ -908,7 +905,7 @@
             Gets the collection of file-level tags found in the source code.
             </summary>
             <remarks>The keys of this dictionary are the file names (as
-            indicated by the <see cref="P:Yarn.Compiler.CompilationJob.File.FileName"/> property
+            indicated by the <see cref="P:Yarn.Compiler.CompilationJob.File.Name"/> property
             of the <see cref="T:Yarn.Compiler.CompilationJob"/>'s <see
             cref="P:Yarn.Compiler.CompilationJob.Files"/> collection), and the values are the
             file tags associated with that file.
@@ -2671,15 +2668,6 @@
             This is supplied as part of a <see cref="T:Yarn.Compiler.CompilationJob"/>.
             </remarks>
         </member>
-        <member name="P:Yarn.Compiler.FileCompiler.Library">
-            <summary>
-            The Library, which contains the function declarations known to the
-            compiler.
-            </summary>
-            <remarks>
-            This is supplied as part of a <see cref="T:Yarn.Compiler.CompilationJob"/>.
-            </remarks>
-        </member>
         <member name="M:Yarn.Compiler.FileCompiler.#ctor(Yarn.Compiler.FileCompiler.CompilationContext)">
             <summary>
             Initializes a new instance of the <see cref="T:Yarn.Compiler.Compiler"/> class.
@@ -2754,9 +2742,6 @@
             <summary>
             <inheritdoc cref="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.IEnumerable{Yarn.Compiler.Diagnostic})" path="/param[@name='name']"/>
             </summary>
-        </member>
-        <member name="P:Yarn.Compiler.FileParseResult.FileName">
-            <inheritdoc/>>
         </member>
         <member name="P:Yarn.Compiler.FileParseResult.Tree">
             <summary>
@@ -6858,7 +6843,7 @@
             cref="P:Yarn.Compiler.Declaration.Type"/> of any of the declarations is an
             invalid value.</throws>
         </member>
-        <member name="M:Yarn.Compiler.Utility.TagLines(Yarn.Compiler.CompilationJob.File,System.Collections.Generic.HashSet{System.String},ILineTagGenerator,ILineTagGenerator.TagAbortBehaviour)">
+        <member name="M:Yarn.Compiler.Utility.TagLines(Yarn.Compiler.ISourceInput,System.Collections.Generic.HashSet{System.String},ILineTagGenerator,ILineTagGenerator.TagAbortBehaviour)">
             <summary>
             Given Yarn source code, adds line tags to the ends of all lines that
             need one and do not already have one.
@@ -6878,7 +6863,7 @@
             </returns>
         </member>
         <member name="M:Yarn.Compiler.Utility.TagLines(System.String,System.Collections.Generic.HashSet{System.String},ILineTagGenerator,ILineTagGenerator.TagAbortBehaviour)">
-            <inheritdoc cref="M:Yarn.Compiler.Utility.TagLines(Yarn.Compiler.CompilationJob.File,System.Collections.Generic.HashSet{System.String},ILineTagGenerator,ILineTagGenerator.TagAbortBehaviour)"/>
+            <inheritdoc cref="!:TagLines(CompilationJob.File, System.Collections.Generic.HashSet&lt;string&gt;, ILineTagGenerator?, ILineTagGenerator.TagAbortBehaviour)"/>
         </member>
         <member name="M:Yarn.Compiler.Utility.ParseSource(System.String)">
             <summary>
@@ -6965,7 +6950,7 @@
             <param name="YarnFileContents">The collection of yarn file content to parse and walk</param>
             <returns>A list of lists of GraphingNode each containing a node, its jumps, and any positional info.</returns>
         </member>
-        <member name="M:Yarn.Compiler.Utility.GetCompiledCodeAsString(Yarn.Program,Yarn.ILibrary,Yarn.Compiler.CompilationResult)">
+        <member name="M:Yarn.Compiler.Utility.GetCompiledCodeAsString(Yarn.Program,Yarn.Compiler.CompilationResult)">
             <summary>
             Gets a string containing a representation of the compiled bytecode
             for a <see cref="T:Yarn.Program"/>.

@@ -283,36 +283,6 @@ namespace Yarn.Unity
         private CancellationTokenSource? currentContentHurryUpSource;
         private YarnTaskCompletionSource? dialogueCancellationCompletion;
 
-        internal ICommandDispatcher CommandDispatcher
-        {
-            get
-            {
-                EnsureCommandDispatcherReady();
-
-                if (_commandDispatcher != null)
-                {
-                    return _commandDispatcher;
-                }
-                else
-                {
-                    throw new InvalidOperationException($"{nameof(EnsureCommandDispatcherReady)} failed to set up command dispatcher");
-                }
-            }
-        }
-
-        private ICommandDispatcher? _commandDispatcher;
-        BasicFunctionLibrary lib = new();
-
-        private void EnsureCommandDispatcherReady()
-        {
-            if (_commandDispatcher == null)
-            {
-                var actions = new Actions(this, lib);
-                _commandDispatcher = actions;
-                actions.RegisterActions();
-            }
-        }
-
         /// <summary>
         /// Called by Unity to set up the object.
         /// </summary>
@@ -507,6 +477,16 @@ namespace Yarn.Unity
             }
         }
 
+        public bool CanCallFunction(string functionName)
+        {
+            return ActionInvoker.CanInvoke(functionName);
+        }
+
+        public async ValueTask<IConvertible> InvokeFunction(string functionName, IConvertible[] parameters, CancellationToken token)
+        {
+            return await ActionInvoker.Invoke(functionName, parameters, token);
+        }
+
         // this one should be fundamentally changed IMO
         // if only to be able to give commands a cancellation token
         // but for now it just does what the current one does
@@ -542,33 +522,7 @@ namespace Yarn.Unity
             }
             await YarnTask.WhenAll(commandNotification);
 
-            CommandDispatchResult dispatchResult = this.CommandDispatcher.DispatchCommand(command.Text, this, metaToken);
-
-            var parts = SplitCommandText(command.Text);
-            string commandName = parts.ElementAtOrDefault(0);
-
-            switch (dispatchResult.Status)
-            {
-                case CommandDispatchResult.StatusType.Succeeded:
-                    // The command has successfully dispatched, but has not
-                    // yet finished running. Wait for it to finish.
-                    await dispatchResult.Task;
-                    break;
-                case CommandDispatchResult.StatusType.NoTargetFound:
-                    Debug.LogError($"Can't call command <<{command.Text}>>: failed to find a game object named {parts.ElementAtOrDefault(1)}", this);
-                    break;
-                case CommandDispatchResult.StatusType.TargetMissingComponent:
-                    Debug.LogError($"Can't call command <<{command.Text}>>, because {parts.ElementAtOrDefault(1)} doesn't have the correct component");
-                    break;
-                case CommandDispatchResult.StatusType.InvalidParameterCount:
-                    Debug.LogError($"Can't call command <<{command.Text}>>: {dispatchResult.Message ?? "incorrect number of parameters"}");
-                    break;
-                case CommandDispatchResult.StatusType.CommandUnknown:
-                    Debug.Log($"Encountered undispatched command <<{command.Text}>>.");
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException($"Internal error: Unknown command dispatch result status {dispatchResult}");
-            }
+            await ActionInvoker.Invoke(command, this, metaToken);
 
             // finally we need to clean up our tokens for the next piece of content
             currentContentCancellationSource?.Dispose();
@@ -654,24 +608,6 @@ namespace Yarn.Unity
             currentContentCancellationSource = null;
             currentContentHurryUpSource = null;
         }
-
-        public ValueTask<IConvertible> thunk(string functionName, IConvertible[] parameters, CancellationToken token)
-        {
-            return lib.Invoke(functionName, parameters, token);
-        }
-
-        public bool TryGetFunctionDefinition(string name, out FunctionDefinition function)
-        {
-            return lib.TryGetFunctionDefinition(name, out function);
-        }
-
-        public Dictionary<string, FunctionDefinition> allDefinitions => lib.allDefinitions;
-
-        public void DeregisterFunction(string name)
-        {
-            lib.DeregisterFunction(name);
-        }
-
 
         public async ValueTask HandleLine(Line line, CancellationToken token)
         {
@@ -890,8 +826,6 @@ namespace Yarn.Unity
 
             dialogueCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(this.destroyCancellationToken);
             LineProvider.YarnProject = yarnProject;
-
-            EnsureCommandDispatcherReady();
 
             Dialogue.Program = yarnProject.Program;
             await Dialogue.SetNode(nodeName);

@@ -25,7 +25,8 @@
         "Microsoft.CodeAnalysis.CSharp.dll",
         "System.Collections.Immutable.dll",
         "System.Text.Json.dll",
-        "Google.Protobuf.dll"
+        "Google.Protobuf.dll",
+        "YarnSpinner.Shared.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

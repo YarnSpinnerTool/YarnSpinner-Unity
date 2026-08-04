@@ -2,41 +2,12 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
-internal class DemoAction
-{
-    public static async System.Threading.Tasks.Task DemoCommandAsync()
-    {
-        await System.Threading.Tasks.Task.Delay(1000);
-    }
-}
 
 namespace Yarn.Unity
 {
-    internal class DefaultActions : MonoBehaviour
+    public class DefaultActions : MonoBehaviour
     {
-#if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
-#endif
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        public static void AddRegisterFunction()
-        {
-            // When the domain is reloaded, scripts are recompiled, or the game
-            // starts, add RegisterActions as a method that populates a
-            // DialogueRunner or Library with commands and functions.
-            Actions.AddRegistrationMethod(RegisterActions);
-        }
-
-        public static void RegisterActions(IActionRegistration target, RegistrationType registrationType)
-        {
-            // Register the built-in methods and commands from Yarn Spinner for Unity.
-            target.AddCommandHandler<float>("wait", Wait);
-        }
-
         #region Commands
         /// <summary>
         /// Yarn Spinner defines two built-in commands: "wait", and "stop".
@@ -45,10 +16,14 @@ namespace Yarn.Unity
         /// </summary>
         /// <param name="duration">How long to wait, in seconds.</param>
         [YarnCommand("wait")]
-        public static IEnumerator Wait(float duration)
+        public static YarnTask Wait(float duration, LineCancellationToken token)
         {
-            yield return new WaitForSeconds(duration);
+            int milliseconds = (int)(duration * 1000);
+            return YarnTask.Delay(milliseconds, token.HurryUpToken);
         }
         #endregion
     }
+
+    // I can probably actually just move this into its own assembly
+    // that should probably fix everything
 }

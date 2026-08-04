@@ -102,71 +102,6 @@ namespace Yarn.Unity.Editor
             }
         }
 
-        private class FunctionDeclarationReceiver : IActionRegistration
-        {
-            public List<Declaration> FunctionDeclarations = new();
-
-            public void AddCommandHandler(string commandName, System.Delegate handler) { }
-
-            public void AddCommandHandler(string commandName, MethodInfo methodInfo) { }
-
-            public void AddFunction(string name, System.Delegate implementation) { }
-
-            public void RegisterFunctionDeclaration(string name, System.Type returnType, System.Type[] parameterTypes)
-            {
-                if (Types.TypeMappings.TryGetValue(returnType, out var returnYarnType) == false)
-                {
-                    Debug.LogError($"Can't register function {name}: can't convert return type {returnType} to a Yarn type");
-                    return;
-                }
-
-                var typeBuilder = new FunctionTypeBuilder().WithReturnType(returnYarnType);
-
-
-                for (int i = 0; i < parameterTypes.Length; i++)
-                {
-                    System.Type? parameter = parameterTypes[i];
-
-                    bool isParamsArray = false;
-
-                    if (i == parameterTypes.Length - 1 && parameter.IsArray)
-                    {
-                        // If this is the last parameter and it is an array,
-                        // treat it as though it were a params array and use the
-                        // type of the array
-                        parameter = parameter.GetElementType();
-                        isParamsArray = true;
-                    }
-
-                    if (Types.TypeMappings.TryGetValue(parameter, out var parameterYarnType) == false)
-                    {
-                        Debug.LogError($"Can't register function {name}: can't convert parameter {i} type {parameterYarnType} to a Yarn type");
-                        return;
-                    }
-
-                    if (isParamsArray)
-                    {
-                        typeBuilder = typeBuilder.WithVariadicParameterType(parameterYarnType);
-                    }
-                    else
-                    {
-                        typeBuilder = typeBuilder.WithParameter(parameterYarnType);
-                    }
-                }
-
-                var decl = new DeclarationBuilder()
-                    .WithName(name)
-                    .WithType(typeBuilder.FunctionType)
-                    .Declaration;
-
-                this.FunctionDeclarations.Add(decl);
-            }
-
-            public void RemoveCommandHandler(string commandName) { }
-
-            public void RemoveFunction(string name) { }
-        }
-
         /// <summary>
         /// Whether to generate a C# file that contains properties for each variable.
         /// </summary>
@@ -318,38 +253,6 @@ namespace Yarn.Unity.Editor
         }
 
         /// <summary>
-        /// Gets the Yarn string table produced as a result of compiling the Yarn
-        /// Project, or <see langword="null"/> if no string table could be produced.
-        /// </summary>
-        private Dictionary<string, StringInfo>? GetYarnStringTable()
-        {
-            Project project;
-            try
-            {
-                project = Project.LoadFromFile(this.assetPath);
-            }
-            catch (System.Exception)
-            {
-                return null;
-            }
-
-            var job = CompilationJob.CreateFromFiles(project.SourceFiles);
-            job.LanguageVersion = project.FileVersion;
-            job.CompilationType = CompilationJob.Type.StringsOnly;
-
-            try
-            {
-                var compilationResult = Compiler.Compiler.Compile(job);
-
-                return new(compilationResult.StringTable);
-            }
-            catch (System.Exception)
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
         /// Called by Unity to import an asset.
         /// </summary>
         /// <param name="ctx">The context for the asset import
@@ -464,18 +367,8 @@ namespace Yarn.Unity.Editor
                     importData.yarnFiles.Add(AssetDatabase.LoadAssetAtPath<TextAsset>(scriptPath));
                 }
 
-                // Get all function declarations found in the Unity project
-                var functionDeclarationReceiver = new FunctionDeclarationReceiver();
-
-                foreach (var registrationAction in Actions.ActionRegistrationMethods)
-                {
-                    registrationAction(functionDeclarationReceiver, RegistrationType.Compilation);
-                }
-
                 // Now to compile the scripts associated with this project.
-                var job = CompilationJob.CreateFromFiles(project.SourceFiles);
-                job.LanguageVersion = project.FileVersion;
-                job.Declarations = functionDeclarationReceiver.FunctionDeclarations;
+                var job = CompilationJob.CreateFromProject(project);
 
                 try
                 {
@@ -734,6 +627,17 @@ namespace Yarn.Unity.Editor
             int indentLevel = 0;
             const int indentSize = 4;
 
+            void Open()
+            {
+                WriteLine("{");
+                indentLevel += 1;
+            }
+            void Close()
+            {
+                indentLevel -= 1;
+                WriteLine("}");
+            }
+
             void WriteLine(string line = "", int offset = 0)
             {
                 if (line.Length > 0)
@@ -782,6 +686,8 @@ namespace Yarn.Unity.Editor
                 WriteLine($"/// </remarks>");
 
                 WriteGeneratedCodeAttribute();
+                var backingType = type.RawType == Types.String ? "String" : "Int";
+                WriteLine($"[Yarn.Unity.Attributes.YarnGeneratedEnum(Yarn.Shared.YarnEnum.BackingType.{backingType})]");
 
                 // Enums are always stored as integers; strings are represented
                 // as CRC32 hashes of the raw value
@@ -875,6 +781,76 @@ namespace Yarn.Unity.Editor
                 }
                 indentLevel -= 1;
                 WriteLine("}");
+            }
+
+            // generate out the specific enum converters
+            foreach (var enumType in enumTypes)
+            {
+                WriteGeneratedCodeAttribute();
+                WriteLine($"public static class {enumType.Name}EnumHelper");
+                Open();
+
+                    var backingType = enumType.RawType == Types.Number ? "int" : "string";
+                    WriteLine($"public static bool TryGet{enumType.Name}FromBacking({backingType} backingInput, out {enumType.Name} {enumType.Name.ToLower()})");
+                    Open();
+
+                        WriteLine("switch (backingInput)");
+                        Open();
+                        foreach (var @case in enumType.EnumCases)
+                        {
+                            if (enumType.RawType == Types.Number)
+                            {
+                                WriteLine($"case {@case.Value.Value}:");
+                            }
+                            else if (enumType.RawType == Types.String)
+                            {
+                                WriteLine($"case \"{@case.Value.Value}\":");
+                            }
+                            else
+                            {
+                                throw new System.ArgumentException($"Invalid Yarn enum raw type {enumType.RawType}");
+                            }
+                            indentLevel += 1;
+                            WriteLine($"{enumType.Name.ToLower()} = {enumType.Name}.{@case.Key};");
+                            WriteLine("return true;");
+                            indentLevel -= 1;
+
+                        }
+                        Close();
+
+                        WriteLine();
+                        WriteLine($"{enumType.Name.ToLower()} = default;");
+                        WriteLine("return false;");
+
+                    Close();
+
+                    WriteLine($"public static bool TryGet{enumType.Name}ByName(string name, out {enumType.Name} {enumType.Name.ToLower()})");
+                    Open();
+                        WriteComment("because in yarn both EnumType.Value and .Value are valid forms of the enum we need to test if we are the short or full form first.");
+                        WriteLine("if (name.StartsWith('.'))");
+                        Open();
+                            WriteLine($"name = $\"{enumType.Name}{{name}}\";");
+                        Close();
+
+                        WriteLine();
+                        WriteLine("switch(name)");
+                        Open();
+                            foreach (var @case in enumType.EnumCases)
+                            {
+                                WriteLine($"case \"{enumType.Name}.{@case.Key}\":");
+                                indentLevel += 1;
+                                WriteLine($"{enumType.Name.ToLower()} = {enumType.Name}.{@case.Key};");
+                                WriteLine("return true;");
+                                indentLevel -= 1;
+                            }
+                        Close();
+
+                        WriteLine();
+                        WriteLine($"{enumType.Name.ToLower()} = default;");
+                        WriteLine("return false;");
+                    Close();
+
+                Close();
             }
 
             WriteGeneratedCodeAttribute();
@@ -1477,7 +1453,7 @@ namespace Yarn.Unity.Editor
                 return default;
             }
 
-            return CompilationJob.CreateFromFiles(project.SourceFiles);
+            return CompilationJob.CreateFromProject(project);
         }
 
         internal IEnumerable<string> GetErrorsForScript(TextAsset sourceScript)

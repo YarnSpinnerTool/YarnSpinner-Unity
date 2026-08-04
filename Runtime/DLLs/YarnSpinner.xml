@@ -169,7 +169,7 @@
             function.</typeparam>
             <exception cref="T:System.ArgumentException">Thrown when a function
             named <paramref name="name"/> already exists in the <see
-            cref="T:Yarn.ILibrary"/>.</exception>
+            cref="!:ILibrary"/>.</exception>
             <exception cref="T:System.ArgumentNullException">Thrown when name is
             null.</exception>
         </member>
@@ -210,13 +210,6 @@
         </member>
         <member name="M:Yarn.BasicFunctionLibrary.RegisterFunction(System.String,System.Delegate)">
             <inheritdoc cref="M:Yarn.BasicFunctionLibrary.RegisterFunction``1(System.String,System.Func{``0})"/>
-        </member>
-        <member name="M:Yarn.BasicFunctionLibrary.FunctionExists(System.String)">
-            <summary>
-            Gets a value indicating whether this <see cref="T:Yarn.ILibrary"/> contains a function named <c>name</c>.
-            </summary>
-            <param name="name">The name of the function to look for.</param>
-            <returns><c>true</c> if a function exists in this Library; <c>false</c> otherwise.</returns>
         </member>
         <member name="M:Yarn.BasicFunctionLibrary.DeregisterFunction(System.String)">
             <summary>
@@ -1402,7 +1395,7 @@
             <param name="name">The name of the smart variable.</param>
             <param name="variableAccess">An <see cref="T:Yarn.IVariableAccess"/> object
             that can be used for fetching variable values.</param>
-            <param name="library">A <see cref="T:Yarn.ILibrary"/> containing functions
+            <param name="library">A <see cref="!:ILibrary"/> containing functions
             to use while evaluating the variable.</param>
             <param name="result">On return, the computed value of the smart
             variable.</param>
