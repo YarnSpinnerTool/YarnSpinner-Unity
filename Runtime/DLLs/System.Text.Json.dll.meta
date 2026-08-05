@@ -5,8 +5,7 @@ PluginImporter:
   serializedVersion: 2
   iconMap: {}
   executionOrder: {}
-  defineConstraints:
-  - '!UNITY_6000_0_OR_NEWER'
+  defineConstraints: []
   isPreloaded: 0
   isOverridable: 1
   isExplicitlyReferenced: 0

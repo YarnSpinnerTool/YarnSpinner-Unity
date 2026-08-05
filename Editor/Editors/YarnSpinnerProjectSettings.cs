@@ -58,7 +58,7 @@ namespace Yarn.Unity.Editor
         private const string minorVersionKey = "minorVersion";
         private const string sortLocalisationValuesInsideStringTableKey = "sortLocalisationValuesInsideStringTable";
 
-        internal static YarnSpinnerProjectSettings GetOrCreateSettings(string? path = null, Yarn.Unity.ILogger? iLogger = null)
+        internal static YarnSpinnerProjectSettings GetOrCreateSettings(string? path = null, Yarn.Shared.ILogger? iLogger = null)
         {
             var settingsPath = YarnSpinnerProjectSettingsPath;
             if (path != null)
@@ -94,7 +94,7 @@ namespace Yarn.Unity.Editor
             return settings;
         }
 
-        private static YarnSpinnerProjectSettings FromJson(string jsonString, Yarn.Unity.ILogger? iLogger = null)
+        private static YarnSpinnerProjectSettings FromJson(string jsonString, Yarn.Shared.ILogger? iLogger = null)
         {
             var logger = ValidLogger(iLogger);
 
@@ -146,7 +146,7 @@ namespace Yarn.Unity.Editor
             return settings;
         }
 
-        internal void WriteSettings(string? path = null, Yarn.Unity.ILogger? iLogger = null)
+        internal void WriteSettings(string? path = null, Yarn.Shared.ILogger? iLogger = null)
         {
             var logger = ValidLogger(iLogger);
 
@@ -185,7 +185,7 @@ namespace Yarn.Unity.Editor
 
         // if the provided logger is valid just return it
         // otherwise return the default logger
-        private static Yarn.Unity.ILogger ValidLogger(Yarn.Unity.ILogger? iLogger)
+        private static Yarn.Shared.ILogger ValidLogger(Yarn.Shared.ILogger? iLogger)
         {
             var logger = iLogger;
             if (logger == null)
@@ -197,6 +197,57 @@ namespace Yarn.Unity.Editor
 #endif
             }
             return logger;
+        }
+
+        private class NullLogger: Yarn.Shared.ILogger
+        {
+            public void Write(object obj){}
+            public void WriteLine(object obj){}
+            public void WriteException(System.Exception ex, string? message = null){}
+            public void Inc(){}
+            public void Dec(){}
+            public void SetDepth(int depth){}
+
+            public void Dispose() {}
+        }
+        
+        private class UnityLogger : Yarn.Shared.ILogger
+        {
+            public void Dispose() { }
+
+            public void Write(object text)
+            {
+                WriteLine(text);
+            }
+
+            public void WriteLine(object text)
+            {
+                var tabs = new string('\t', depth);
+    #if UNITY_EDITOR
+                Debug.LogWarning(tabs + text.ToString());
+    #endif
+            }
+
+            public void WriteException(System.Exception ex, string? message = null)
+            {
+    #if UNITY_EDITOR
+                Debug.LogException(ex);
+    #endif
+            }
+
+            private int depth = 0;
+            public void Inc()
+            {
+                depth +=1 ;
+            }
+            public void Dec()
+            {
+                depth = System.Math.Max(depth - 1, 0);
+            }
+            public void SetDepth(int depth)
+            {
+                this.depth = System.Math.Max(depth, 0);
+            }
         }
     }
 }
