@@ -9,6 +9,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Added Rewired integration to Yarn Spinner+.
+- Added filtering in `[YarnNode]` dropdowns (thanks to  [Shane Marks](https://github.com/unknowndevice)!).
+  - You can now limit which nodes appear in the Inspector by specifying a filter string in `YarnNode`-attributed strings.
+  - To filter the list, provide a `filter` parameter on your `[YarnNode]` attribute:
+    ```csharp
+    public YarnProject project;
+
+    // Only show nodes in 'project' whose title contains 'Start'
+    [YarnNode(nameof(project), filter: "Start")]
+    public string node;
+    ```
+  - You can customise how the filtering is done by providing a `filterType`:
+    ```csharp
+    // Only show nodes whose titles contain "Start" (this is the default)
+    [YarnNode(nameof(project), filterType: YarnNodeFilter.Contains, filter: "Start")]
+    
+    // Only show nodes whose titles start with "Entry"
+    [YarnNode(nameof(project), filterType: YarnNodeFilter.StartsWith, filter: "Entry")]
+    
+    // Only show nodes whose titles end with "Entry"
+    [YarnNode(nameof(project), filterType: YarnNodeFilter.EndsWith, filter: "Entry")]
+
+    // Only show nodes whose titles match the regular expression "Test[0-9]+"
+    [YarnNode(nameof(project), filterType: YarnNodeFilter.MatchesRegex, filter: "Test[0-9]+")]
+    ```
+  - You can customise which header to filter on. By default, nodes will be filtered based on their `title`, but you can specify most other headers, including `tags`, `cluster` or your own custom headers.
+    ```csharp
+    // Only show nodes whose colour in the editor is red
+    [YarnNode(nameof(project), filterHeader: "color", filter: "red")]
+    ```
+  - Filtering is case-sensitive for all filter types except `YarnNodeFilter.MatchesRegex`.
 
 ## [3.2.8]
 

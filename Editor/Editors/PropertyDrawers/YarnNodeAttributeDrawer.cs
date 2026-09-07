@@ -2,6 +2,7 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -41,7 +42,7 @@ namespace Yarn.Unity
 
             while (true)
             {
-                string testPath;
+                string? testPath;
 
                 if (propertyPathComponents.Count == 0)
                 {
@@ -234,19 +235,51 @@ namespace Yarn.Unity
                             });
                         }
 
+                        System.Text.RegularExpressions.Regex? filterRegex = null;
+                        if (attribute.filterType == YarnNodeFilter.MatchesRegex)
+                        {
+                            try
+                            {
+                                filterRegex = new(attribute.filter);
+                            }
+                            catch (ArgumentException)
+                            {
+                                menu.AddDisabledItem(new GUIContent("Filter regex is invalid!"));
+                            }
+                        }
+
                         foreach (var node in GetNodes(project))
                         {
                             var name = node.Name;
 
-	                        if (!string.IsNullOrEmpty(attribute.filter))
+                            if (string.IsNullOrEmpty(attribute.filter) == false && attribute.filterType != YarnNodeFilter.None)
                             {
-                                var filter = attribute.filter.ToLower().Replace('-', '_');
-
-                                switch (attribute.filterType)
+                                var filteredHeader = attribute.filterHeader switch
                                 {
-                                    case YarnNodeFilter.Contains: if (!name.ToLower().Contains(filter)) continue; break;
-                                    case YarnNodeFilter.Start: if (!name.ToLower().StartsWith(filter)) continue; break;
-                                    case YarnNodeFilter.End: if (!name.ToLower().EndsWith(filter)) continue; break;
+                                    null => name,
+                                    "title" => name,
+                                    string headerName => GetHeader(node, headerName) ?? ""
+                                };
+
+                                if (!string.IsNullOrEmpty(attribute.filter) && attribute.filterType != YarnNodeFilter.None)
+                                {
+                                    var filter = attribute.filter?.ToLower().Replace('-', '_');
+
+                                    switch (attribute.filterType)
+                                    {
+                                        case YarnNodeFilter.Contains:
+                                            if (!filteredHeader.ToLower().Contains(filter)) { continue; }
+                                            break;
+                                        case YarnNodeFilter.StartsWith:
+                                            if (!filteredHeader.ToLower().StartsWith(filter)) { continue; }
+                                            break;
+                                        case YarnNodeFilter.EndsWith:
+                                            if (!filteredHeader.ToLower().EndsWith(filter)) { continue; }
+                                            break;
+                                        case YarnNodeFilter.MatchesRegex when filterRegex != null:
+                                            if (!filterRegex.IsMatch((string?)filteredHeader)) { continue; }
+                                            break;
+                                    }
                                 }
                             }
 
@@ -294,6 +327,18 @@ namespace Yarn.Unity
                     yield return node;
                 }
             }
+        }
+
+        private static string? GetHeader(Node n, string headerName)
+        {
+            foreach (var header in n.Headers)
+            {
+                if (header.Key == headerName)
+                {
+                    return header.Value;
+                }
+            }
+            return null;
         }
 
         private static bool ShouldEndEditing(string controlName)
