@@ -21,6 +21,46 @@ namespace Yarn.Unity
         public delegate YarnTask InvokeCommand(Command command, LineCancellationToken token);
         private static List<(CanHandleCommand check, InvokeCommand call)> commandDelegates = new();
 
+
+        public delegate bool ConvertRuntimeStringValue(string input, Type type, out object? value);
+        public delegate bool ConvertRuntimeIConvertibleValue(IConvertible input, Type type, out object? value);
+        private static List<ConvertRuntimeStringValue> runtimeStringConverters = new();
+        private static List<ConvertRuntimeIConvertibleValue> runtimeConvertibleConverters = new();
+        public static void RegisterRuntimeStringConverter(ConvertRuntimeStringValue converter)
+        {
+            runtimeStringConverters.Add(converter);
+        }
+        public static bool TryRuntimeConvert(string input, Type type, out object? value)
+        {
+            foreach (var converter in runtimeStringConverters)
+            {
+                if (converter(input, type, out value))
+                {
+                    return true;
+                }
+            }
+
+            value = null;
+            return false;
+        }
+        public static void RegisterRuntimeIConvertibleConverter(ConvertRuntimeIConvertibleValue converter)
+        {
+            runtimeConvertibleConverters.Add(converter);
+        }
+        public static bool TryRuntimeConvert(IConvertible input, Type type, out object? value)
+        {
+            foreach (var converter in runtimeConvertibleConverters)
+            {
+                if (converter(input, type, out value))
+                {
+                    return true;
+                }
+            }
+
+            value = null;
+            return false;
+        }
+
         public static void RegisterFunctionHandler(CanHandleFunction check, InvokeFunction call)
         {
             functionDelegates.Add((check, call));
@@ -37,7 +77,7 @@ namespace Yarn.Unity
             }
 
             // now check all the runtime registered methods
-            return actionDelegateThing?.CanInvoke(functionName) ?? false;
+            return runtimeDelegateActionInvoker?.CanInvoke(functionName) ?? false;
         }
         public static YarnTask<IConvertible> Invoke(string functionName, IConvertible[] parameters, CancellationToken token)
         {
@@ -53,11 +93,11 @@ namespace Yarn.Unity
             Debug.Log("falling back on the runtime function approach");
 
             // now check the run time registered ones
-            if (actionDelegateThing != null)
+            if (runtimeDelegateActionInvoker != null)
             {
-                if (actionDelegateThing.CanInvoke(functionName))
+                if (runtimeDelegateActionInvoker.CanInvoke(functionName))
                 {
-                    return actionDelegateThing.Invoke(functionName, parameters, token);
+                    return runtimeDelegateActionInvoker.Invoke(functionName, parameters, token);
                 }
             }
 
@@ -89,12 +129,12 @@ namespace Yarn.Unity
             // get back to this
             Debug.Log("falling back on the runtime command approach");
 
-            if (actionDelegateThing == null)
+            if (runtimeDelegateActionInvoker == null)
             {
                 throw new ArgumentException($"Internal error: command dispatcher has not been configured");
             }
 
-            CommandDispatchResult dispatchResult = actionDelegateThing.DispatchCommand(command.Text, host, token);
+            CommandDispatchResult dispatchResult = runtimeDelegateActionInvoker.DispatchCommand(command.Text, host, token);
             switch (dispatchResult.Status)
             {
                 case CommandDispatchResult.StatusType.Succeeded:
@@ -118,7 +158,7 @@ namespace Yarn.Unity
             }
         }
 
-        private static Actions? actionDelegateThing;
+        private static Actions? runtimeDelegateActionInvoker;
         public static void AddCommandHandler(string commandName, Delegate handler)
         {
             foreach (var (check, _) in commandDelegates)
@@ -128,8 +168,8 @@ namespace Yarn.Unity
                     return;
                 }
             }
-            actionDelegateThing ??= new Actions();
-            actionDelegateThing.AddCommandHandler(commandName, handler);
+            runtimeDelegateActionInvoker ??= new Actions();
+            runtimeDelegateActionInvoker.AddCommandHandler(commandName, handler);
         }
         public static void AddCommandHandler(string commandName, System.Reflection.MethodInfo method)
         {
@@ -140,8 +180,8 @@ namespace Yarn.Unity
                     return;
                 }
             }
-            actionDelegateThing ??= new Actions();
-            actionDelegateThing.AddCommandHandler(commandName, method);
+            runtimeDelegateActionInvoker ??= new Actions();
+            runtimeDelegateActionInvoker.AddCommandHandler(commandName, method);
         }
         public static void RemoveCommandHandler(string commandName)
         {
@@ -153,8 +193,8 @@ namespace Yarn.Unity
                     return;
                 }
             }
-            actionDelegateThing ??= new Actions();
-            actionDelegateThing.RemoveCommandHandler(commandName);
+            runtimeDelegateActionInvoker ??= new Actions();
+            runtimeDelegateActionInvoker.RemoveCommandHandler(commandName);
         }
         public static void AddFunction(string name, Delegate implementation)
         {
@@ -165,8 +205,8 @@ namespace Yarn.Unity
                     return;
                 }
             }
-            actionDelegateThing ??= new Actions();
-            actionDelegateThing.AddFunction(name, implementation);
+            runtimeDelegateActionInvoker ??= new Actions();
+            runtimeDelegateActionInvoker.AddFunction(name, implementation);
         }
         public static void RemoveFunction(string name)
         {
@@ -178,8 +218,8 @@ namespace Yarn.Unity
                     return;
                 }
             }
-            actionDelegateThing ??= new Actions();
-            actionDelegateThing.RemoveFunction(name);
+            runtimeDelegateActionInvoker ??= new Actions();
+            runtimeDelegateActionInvoker.RemoveFunction(name);
         }
     }
 }
