@@ -163,6 +163,11 @@ namespace Yarn.Unity
             return new YarnTask<T> { Task = task };
         }
 
+        public static implicit operator YarnTask<T>(System.Threading.Tasks.Task<T> task)
+        {
+            return new YarnTask<T> { Task = task.AsUniTask() };
+        }
+
 #if UNITY_2023_1_OR_NEWER
         // Allow implicitly converting Awaitables to YarnTasks
         public static implicit operator YarnTask<T>(UnityEngine.Awaitable<T> awaitable)
