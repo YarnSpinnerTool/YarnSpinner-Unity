@@ -835,6 +835,7 @@ namespace Yarn.Unity
                     return new ActionDispatchFailed(StatusType.InvalidReturn);
                 }
 
+                // the cases here are generated from Runtime/Commands/taskgyb.py
                 return returnValue switch
                 {
                     // are we a synchronous function, ie we already have the final value ready to be pushed into the vm
