@@ -8,48 +8,58 @@ using System;
 
 namespace Yarn.Unity
 {
-    /// <summary>
-    /// Represents the result of attempting to locate and call a command.
-    /// </summary>
-    /// <seealso cref="DispatchCommandToGameObject(Command, Action)"/>
-    /// <seealso cref="DispatchCommandToRegisteredHandlers(Command, Action)"/>
-    internal struct CommandDispatchResult
+    internal enum StatusType
     {
-        internal enum StatusType
-        {
-            Succeeded,
+        NoTargetFound,
 
-            NoTargetFound,
+        InvalidParameterCount,
 
-            TargetMissingComponent,
+        InvalidParameter,
 
-            InvalidParameterCount,
+        /// <summary>
+        /// The action could not be found.
+        /// </summary>
+        ActionUnknown,
 
-            InvalidParameter,
+        InvalidReturn,
+    }
 
-            /// <summary>
-            /// The command could not be found.
-            /// </summary>
-            CommandUnknown,
-        };
-
+    internal interface IDispatchResult { }
+    internal struct ActionDispatchFailed: IDispatchResult
+    {
         internal StatusType Status;
 
-        internal string? Message;
-
+        internal ActionDispatchFailed(StatusType status)
+        {
+            Status = status;
+        }
+    }
+    internal struct CommandDispatchSucceededSynchronously: IDispatchResult { }
+    internal struct CommandDispatchSucceededAsynchronously: IDispatchResult
+    {
         internal YarnTask Task;
 
-        public CommandDispatchResult(StatusType status)
+        internal CommandDispatchSucceededAsynchronously(YarnTask task)
         {
-            Status = status;
-            Task = YarnTask.CompletedTask;
-            Message = null;
-        }
-        public CommandDispatchResult(StatusType status, YarnTask task)
-        {
-            Status = status;
             Task = task;
-            Message = null;
+        }
+    }
+    internal struct FunctionDispatchSucceededAsynchronously<T>: IDispatchResult
+    {
+        internal YarnTask<T> Task;
+
+        internal FunctionDispatchSucceededAsynchronously(YarnTask<T> task)
+        {
+            Task = task;
+        }
+    }
+    internal struct FunctionDispatchSucceededSynchronously: IDispatchResult
+    {
+        internal IConvertible Result;
+
+        internal FunctionDispatchSucceededSynchronously(IConvertible result)
+        {
+            Result = result;
         }
     }
 }

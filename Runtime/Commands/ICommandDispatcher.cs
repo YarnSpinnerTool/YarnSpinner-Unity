@@ -125,8 +125,6 @@ namespace Yarn.Unity
                 }
             }
 
-            // I might have to special case wait
-            // get back to this
             Debug.Log("falling back on the runtime command approach");
 
             if (runtimeDelegateActionInvoker == null)
@@ -134,28 +132,47 @@ namespace Yarn.Unity
                 throw new ArgumentException($"Internal error: command dispatcher has not been configured");
             }
 
-            CommandDispatchResult dispatchResult = runtimeDelegateActionInvoker.DispatchCommand(command.Text, host, token);
-            switch (dispatchResult.Status)
+            var dispatchResult = runtimeDelegateActionInvoker.DispatchCommand(command.Text, host, token);
+
+            if (dispatchResult is ActionDispatchFailed adf)
             {
-                case CommandDispatchResult.StatusType.Succeeded:
-                    // The command has successfully dispatched, but has not
-                    // yet finished running. Wait for it to finish.
-                    return dispatchResult.Task;
-                case CommandDispatchResult.StatusType.NoTargetFound:
-                    Debug.LogError($"Can't call command <<{command.Text}>>: failed to find a game object named {parts[1]}");
-                    return YarnTask.CompletedTask;
-                case CommandDispatchResult.StatusType.TargetMissingComponent:
-                    Debug.LogError($"Can't call command <<{command.Text}>>, because {parts[1]} doesn't have the correct component");
-                    return YarnTask.CompletedTask;
-                case CommandDispatchResult.StatusType.InvalidParameterCount:
-                    Debug.LogError($"Can't call command <<{command.Text}>>: {dispatchResult.Message ?? "incorrect number of parameters"}");
-                    return YarnTask.CompletedTask;
-                case CommandDispatchResult.StatusType.CommandUnknown:
-                    Debug.Log($"Encountered undispatched command <<{command.Text}>>.");
-                    return YarnTask.CompletedTask;
-                default:
-                    throw new ArgumentOutOfRangeException($"Internal error: Unknown command dispatch result status {dispatchResult}");
+                switch (adf.Status)
+                {
+                    case StatusType.ActionUnknown:
+                        Debug.Log($"Encountered undispatched command <<{command.Text}>>.");
+                        return YarnTask.CompletedTask;
+                    case StatusType.NoTargetFound:
+                        Debug.LogError($"Can't call command <<{command.Text}>>: failed to find a target object named {parts[1]}");
+                        return YarnTask.CompletedTask;
+                    case StatusType.InvalidReturn:
+                        Debug.LogError($"Can't call command <<{command.Text}>>: the action had an invalid return type for a command");
+                        return YarnTask.CompletedTask;
+                    case StatusType.InvalidParameterCount:
+                        Debug.LogError($"Can't call command <<{command.Text}>>: incorrect number of parameters");
+                        return YarnTask.CompletedTask;
+                    case StatusType.InvalidParameter:
+                        Debug.LogError($"Can't call command <<{command.Text}>>: invalid parameter encountered during invocation");
+                        return YarnTask.CompletedTask;
+                }
             }
+
+            // we are a synchronous command
+            // aka we are already done, so just say so
+            if (dispatchResult is CommandDispatchSucceededSynchronously)
+            {
+                return YarnTask.CompletedTask;
+            }
+
+            // we are an ASYNC command
+            // so we want to return the task within so the rest of the system can await us
+            if (dispatchResult is CommandDispatchSucceededAsynchronously cdsa)
+            {
+                return cdsa.Task;
+            }
+
+            // there is no other form of dispatch result we'd expect
+            // so it's an error to get here
+            throw new System.InvalidOperationException($"Encountered a dispatched command: <<{command.Text}>> that did not fail or succeed?!");
         }
 
         private static Actions? runtimeDelegateActionInvoker;
@@ -208,6 +225,19 @@ namespace Yarn.Unity
             runtimeDelegateActionInvoker ??= new Actions();
             runtimeDelegateActionInvoker.AddFunction(name, implementation);
         }
+        public static void AddFunction(string name, System.Reflection.MethodInfo implementation)
+        {
+            foreach (var (check, _) in functionDelegates)
+            {
+                if (check(name))
+                {
+                    return;
+                }
+            }
+            runtimeDelegateActionInvoker ??= new Actions();
+            runtimeDelegateActionInvoker.AddFunction(name, implementation);
+        }
+
         public static void RemoveFunction(string name)
         {
             foreach (var (check, _) in functionDelegates)
