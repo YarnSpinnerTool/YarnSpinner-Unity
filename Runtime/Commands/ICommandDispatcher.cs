@@ -85,7 +85,6 @@ namespace Yarn.Unity
             {
                 if (check(functionName))
                 {
-                    Debug.Log("found a delegate to handle the function");
                     return call(functionName, parameters, token);
                 }
             }
@@ -118,18 +117,14 @@ namespace Yarn.Unity
             {
                 if (check(commandName))
                 {
-                    Debug.Log($"found a delegate for {commandName}");
-
                     var result = call(command, token);
                     return result;
                 }
             }
 
-            Debug.Log("falling back on the runtime command approach");
-
             if (runtimeDelegateActionInvoker == null)
             {
-                throw new ArgumentException($"Internal error: command dispatcher has not been configured");
+                throw new ArgumentException($"Internal error: command dispatcher has not been configured to handle {commandName}");
             }
 
             var dispatchResult = runtimeDelegateActionInvoker.DispatchCommand(command.Text, host, token);

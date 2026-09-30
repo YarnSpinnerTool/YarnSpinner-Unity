@@ -562,7 +562,7 @@ namespace Yarn.Unity
                     continue;
                 }
 
-                if (view.enabled == false)
+                if (view.gameObject.activeInHierarchy == false || !view.enabled)
                 {
                     // The view is not enabled. Skip it.
                     continue;

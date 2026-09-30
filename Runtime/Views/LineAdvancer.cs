@@ -375,7 +375,7 @@ namespace Yarn.Unity
 
         private void OnNextLinePerformed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
         {
-            RequestNextLine();
+            RequestNextContent();
         }
         private void OnCancelDialoguePerformed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
         {

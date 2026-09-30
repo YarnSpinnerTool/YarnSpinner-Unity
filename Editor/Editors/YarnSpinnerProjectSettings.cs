@@ -193,33 +193,14 @@ namespace Yarn.Unity.Editor
 #if UNITY_EDITOR
                 logger = new UnityLogger();
 #else
-                logger = new NullLogger();
+                logger = Yarn.Shared.NullLogger.Default;
 #endif
             }
             return logger;
         }
-
-        private class NullLogger: Yarn.Shared.ILogger
-        {
-            public void Write(object obj){}
-            public void WriteLine(object obj){}
-            public void WriteException(System.Exception ex, string? message = null){}
-            public void Inc(){}
-            public void Dec(){}
-            public void SetDepth(int depth){}
-
-            public void Dispose() {}
-        }
         
         private class UnityLogger : Yarn.Shared.ILogger
         {
-            public void Dispose() { }
-
-            public void Write(object text)
-            {
-                WriteLine(text);
-            }
-
             public void WriteLine(object text)
             {
                 var tabs = new string('\t', depth);

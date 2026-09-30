@@ -227,7 +227,8 @@ namespace Yarn.Unity
             };
             for (int i = 0; i < basics.Length; i++)
             {
-                if (basics[i] != parameterInfo.ParameterType)
+                var basic = basics[i];
+                if (basic != pType)
                 {
                     continue;
                 }
