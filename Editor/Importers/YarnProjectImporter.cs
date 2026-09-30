@@ -306,6 +306,12 @@ namespace Yarn.Unity.Editor
             importData.sourceFilePatterns = new();
             importData.sourceFilePatterns.AddRange(project.SourceFilePatterns);
 
+            importData.definitionFilePatterns = new();
+            if (project.Definitions != null)
+            {
+                importData.definitionFilePatterns.AddRange(project.Definitions);
+            }
+
             importData.baseLanguageName = project.BaseLanguage;
 
             foreach (var loc in project.Localisation)

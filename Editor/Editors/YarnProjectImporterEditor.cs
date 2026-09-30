@@ -57,10 +57,15 @@ namespace Yarn.Unity.Editor
         private string? baseLanguage = null;
         private List<LocalizationEntryElement> localizationEntryFields = new List<LocalizationEntryElement>();
         private List<SourceFileEntryElement> sourceEntryFields = new List<SourceFileEntryElement>();
+        private List<SourceFileEntryElement> definitionEntryFields = new List<SourceFileEntryElement>();
 
         private VisualElement? localisationFieldsContainer;
         private VisualElement? sourceFileEntriesContainer;
+        private VisualElement? definitionFileEntriesContainer;
         private VisualElement? variableStorageSettingsContainer;
+
+        private HelpBox? defintionsMissingWarningElement;
+        private HelpBox? yarnsMissingWarningElement;
 
         private SerializedProperty? generateVariablesSourceFileProperty;
         private SerializedProperty? variablesClassNameProperty;
@@ -81,6 +86,7 @@ namespace Yarn.Unity.Editor
             {
                 return AnyLocalisationModifications
                 || AnySourceFileModifications
+                || AnyDefinitionFileModifications
                 ;
             }
         }
@@ -88,10 +94,12 @@ namespace Yarn.Unity.Editor
         private bool AnyLocalisationModifications => LocalisationsAddedOrRemoved || localizationEntryFields.Any(f => f.IsModified) || BaseLanguageNameModified || StringTableModified;
 
         private bool AnySourceFileModifications => SourceFilesAddedOrRemoved || sourceEntryFields.Any(f => f.IsModified);
+        private bool AnyDefinitionFileModifications => DefinitionsFilesAddedOrRemoved || definitionEntryFields.Any(f => f.IsModified);
 
         private bool LocalisationsAddedOrRemoved = false;
         private bool BaseLanguageNameModified = false;
         private bool SourceFilesAddedOrRemoved = false;
+        private bool DefinitionsFilesAddedOrRemoved = false;
         private bool StringTableModified = false;
 
         public override void OnEnable()
@@ -112,6 +120,9 @@ namespace Yarn.Unity.Editor
 
             lineTaggerClassProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.lineTaggerClass));
             useCustomLineTaggerProperty = serializedObject.FindProperty(nameof(YarnProjectImporter.useCustomLineTagger));
+
+            defintionsMissingWarningElement = new HelpBox("You have no definitions files. Any custom commands or functions can't be used.", HelpBoxMessageType.Info);
+            yarnsMissingWarningElement = new HelpBox("This project contains no Yarn files.", HelpBoxMessageType.Warning);
         }
 
         public override void OnDisable()
@@ -154,10 +165,10 @@ namespace Yarn.Unity.Editor
             }
 
             data.SourceFilePatterns = this.sourceEntryFields.Select(f => f.value);
+            data.Definitions = this.definitionEntryFields.Select(f => f.value).ToList();
 
             foreach (var locField in localizationEntryFields)
             {
-
                 // Does this localisation field represent a localisation that
                 // used to be the base localisation, but is now no longer? If it
                 // is, even if it's unmodified, we need to make sure we add it
@@ -221,8 +232,14 @@ namespace Yarn.Unity.Editor
                 sourceField.ClearModified();
             }
 
+            foreach (var defintionField in this.definitionEntryFields)
+            {
+                defintionField.ClearModified();
+            }
+
             BaseLanguageNameModified = false;
             SourceFilesAddedOrRemoved = false;
+            DefinitionsFilesAddedOrRemoved = false;
             LocalisationsAddedOrRemoved = false;
             StringTableModified = false;
 
@@ -245,9 +262,11 @@ namespace Yarn.Unity.Editor
         {
             localizationEntryFields.Clear();
             sourceEntryFields.Clear();
+            definitionEntryFields.Clear();
             LocalisationsAddedOrRemoved = false;
             BaseLanguageNameModified = false;
             SourceFilesAddedOrRemoved = false;
+            DefinitionsFilesAddedOrRemoved = false;
 
             base.DiscardChanges();
 
@@ -267,6 +286,7 @@ namespace Yarn.Unity.Editor
             var importData = yarnProjectImporter.ImportData;
 
             sourceEntryFields.Clear();
+            definitionEntryFields.Clear();
             localizationEntryFields.Clear();
 
             var ui = new VisualElement();
@@ -336,6 +356,7 @@ namespace Yarn.Unity.Editor
 
             localisationFieldsContainer = new VisualElement();
             sourceFileEntriesContainer = new VisualElement();
+            definitionFileEntriesContainer = new VisualElement();
             variableStorageSettingsContainer = new VisualElement();
 
             localisationControls.style.marginBottom = 8;
@@ -394,9 +415,21 @@ namespace Yarn.Unity.Editor
 
             foreach (var path in importData.sourceFilePatterns)
             {
-                var locElement = CreateSourceFileEntryElement(path);
+                var locElement = CreateSourceFileEntry(path);
                 sourceFileEntriesContainer.Add(locElement);
-                sourceEntryFields.Add(locElement);
+            }
+            sourceFileEntriesContainer.Add(yarnsMissingWarningElement);
+
+            if (yarnsMissingWarningElement != null)
+            {    
+                if (sourceEntryFields.Count == 0)
+                {
+                    yarnsMissingWarningElement.style.display = DisplayStyle.Flex;
+                }
+                else
+                {
+                    yarnsMissingWarningElement.style.display = DisplayStyle.None;
+                }
             }
 
             var addSourceFileButton = new Button();
@@ -405,11 +438,66 @@ namespace Yarn.Unity.Editor
             addSourceFileButton.style.marginLeft = 8;
             addSourceFileButton.clicked += () =>
             {
-                var loc = CreateSourceFileEntryElement("**/*.yarn");
-                sourceEntryFields.Add(loc);
+                var loc = CreateSourceFileEntry("**/*.yarn");
                 sourceFileEntriesContainer.Add(loc);
                 SourceFilesAddedOrRemoved = true;
+
+                if (yarnsMissingWarningElement != null)
+                {
+                    yarnsMissingWarningElement.style.display = DisplayStyle.None;
+                }
             };
+
+            var yslsHeader = new Label();
+            yslsHeader.text = "Definitions";
+            yslsHeader.style.unityFontStyleAndWeight = FontStyle.Bold;
+            yslsHeader.style.marginTop = 8;
+            sourceFilesContainer.Add(yslsHeader);
+
+            definitionFileEntriesContainer.style.marginLeft = 8;
+            definitionFileEntriesContainer.Add(defintionsMissingWarningElement);
+
+            foreach (var def in importData.definitionFilePatterns)
+            {
+                if (string.IsNullOrWhiteSpace(def))
+                {
+                    continue;
+                }
+
+                var defEntry = CreateDefinitionsFileEntry(def);
+                definitionFileEntriesContainer.Add(defEntry);
+            }
+
+            if (defintionsMissingWarningElement != null)
+            {     
+                if (definitionEntryFields.Count == 0)
+                {
+                    defintionsMissingWarningElement.style.display = DisplayStyle.Flex;
+                }
+                else
+                {
+                    defintionsMissingWarningElement.style.display = DisplayStyle.None;
+                }
+            }
+
+
+            sourceFilesContainer.Add(definitionFileEntriesContainer);
+            
+            var addDefintionButton = new Button();
+            addDefintionButton.text = "Add";
+            addDefintionButton.style.marginLeft = 8;
+            addDefintionButton.clicked += () =>
+            {
+                var defEntry = CreateDefinitionsFileEntry("**/*.ysls.json");
+                definitionFileEntriesContainer.Add(defEntry);
+                DefinitionsFilesAddedOrRemoved = true;
+
+                if (defintionsMissingWarningElement != null)
+                {
+                    defintionsMissingWarningElement.style.display = DisplayStyle.None;
+                }
+            };
+            sourceFilesContainer.Add(addDefintionButton);
 
             var localisationHeader = new Label();
 
@@ -735,28 +823,55 @@ namespace Yarn.Unity.Editor
             return locElement;
         }
 
-        private SourceFileEntryElement CreateSourceFileEntryElement(string path)
+        private SourceFileEntryElement CreateSourceFileEntry(string path)
+        {
+            var entry = CreateFileEntryElement(path);
+            sourceEntryFields.Add(entry);
+
+            entry.OnDelete += () =>
+            {
+                entry.RemoveFromHierarchy();
+                sourceEntryFields.Remove(entry);
+                SourceFilesAddedOrRemoved = true;
+
+                if (sourceEntryFields.Count == 0 && yarnsMissingWarningElement != null)
+                {
+                    yarnsMissingWarningElement.style.display = DisplayStyle.Flex;
+                }
+            };
+            return entry;
+        }
+        private SourceFileEntryElement CreateDefinitionsFileEntry(string path)
+        {
+            var entry = CreateFileEntryElement(path);
+            definitionEntryFields.Add(entry);
+
+            entry.OnDelete += () =>
+            {
+                entry.RemoveFromHierarchy();
+                definitionEntryFields.Remove(entry);
+                DefinitionsFilesAddedOrRemoved = true;
+                if (definitionEntryFields.Count == 0 && defintionsMissingWarningElement != null)
+                {
+                    defintionsMissingWarningElement.style.display = DisplayStyle.Flex;
+                }
+            };
+            return entry;
+        }
+        private SourceFileEntryElement CreateFileEntryElement(string path)
         {
             if (sourceFileUIAsset == null)
             {
                 throw new InvalidOperationException($"Can't create {nameof(SourceFileEntryElement)}: {nameof(sourceFileUIAsset)} is null");
             }
-
             if (!(this.target is YarnProjectImporter importer))
             {
                 throw new InvalidOperationException($"Internal error: importer for {this.target} is not a {nameof(YarnProjectImporter)}!");
             }
 
-            var sourceElement = new SourceFileEntryElement(sourceFileUIAsset, path, importer);
-            sourceElement.OnDelete += () =>
-            {
-                sourceElement.RemoveFromHierarchy();
-                sourceEntryFields.Remove(sourceElement);
-                SourceFilesAddedOrRemoved = true;
-            };
+            var sourceElement = new SourceFileEntryElement(sourceFileUIAsset, path);
             return sourceElement;
         }
-
 
         private void ExportStringsData(YarnProjectImporter yarnProjectImporter)
         {

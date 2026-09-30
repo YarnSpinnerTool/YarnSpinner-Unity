@@ -21,7 +21,7 @@ namespace Yarn.Unity.Editor
 
         public string path = "";
 
-        public SourceFileEntryElement(VisualTreeAsset asset, string path, YarnProjectImporter importer)
+        public SourceFileEntryElement(VisualTreeAsset asset, string path)
         {
             asset.CloneTree(this);
             sourceFileField = this.Q<TextField>("sourceFile");

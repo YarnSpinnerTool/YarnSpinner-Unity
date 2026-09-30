@@ -52,6 +52,8 @@ namespace Yarn.Unity
 
         public List<string> sourceFilePatterns = new List<string>();
 
+        public List<string> definitionFilePatterns = new List<string>();
+
         public List<LocalizationEntry> localizations = new List<LocalizationEntry>();
 
         public string? baseLanguageName;
