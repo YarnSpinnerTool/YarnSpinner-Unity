@@ -4,6 +4,7 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using Yarn.Unity.Attributes;
@@ -248,12 +249,20 @@ namespace Yarn.Unity
                             }
                         }
 
-                        foreach (var node in GetNodes(project))
-                        {
-                            var name = node.Name;
+                        IEnumerable<Node>? filteredNodes;
 
-                            if (string.IsNullOrEmpty(attribute.filter) == false && attribute.filterType != YarnNodeFilter.None)
+                        if (string.IsNullOrEmpty(attribute.filter) || attribute.filterType == YarnNodeFilter.None)
+                        {
+                            // No filter; show all nodes
+                            filteredNodes = GetNodes(project);
+                        }
+                        else
+                        {
+                            // Limit which nodes to show based on the filter
+                            filteredNodes = GetNodes(project).Where(node =>
                             {
+                                var name = node.Name;
+
                                 var filteredHeader = attribute.filterHeader switch
                                 {
                                     null => name,
@@ -268,20 +277,30 @@ namespace Yarn.Unity
                                     switch (attribute.filterType)
                                     {
                                         case YarnNodeFilter.Contains:
-                                            if (!filteredHeader.ToLower().Contains(filter)) { continue; }
+                                            if (!filteredHeader.ToLower().Contains(filter)) { return false; }
                                             break;
                                         case YarnNodeFilter.StartsWith:
-                                            if (!filteredHeader.ToLower().StartsWith(filter)) { continue; }
+                                            if (!filteredHeader.ToLower().StartsWith(filter)) { return false; }
                                             break;
                                         case YarnNodeFilter.EndsWith:
-                                            if (!filteredHeader.ToLower().EndsWith(filter)) { continue; }
+                                            if (!filteredHeader.ToLower().EndsWith(filter)) { return false; }
                                             break;
                                         case YarnNodeFilter.MatchesRegex when filterRegex != null:
-                                            if (!filterRegex.IsMatch((string?)filteredHeader)) { continue; }
+                                            if (!filterRegex.IsMatch((string?)filteredHeader)) { return false; }
                                             break;
+                                        default:
+                                            // Unknown filter type; show it
+                                            return true;
                                     }
                                 }
-                            }
+
+                                return true;
+                            });
+                        }
+
+                        foreach (var node in filteredNodes.OrderBy(n => n.Name))
+                        {
+                            var name = node.Name;
 
                             menu.AddItem(new GUIContent(name), name == nodeName && !hasMixedNodeValues, () =>
                             {

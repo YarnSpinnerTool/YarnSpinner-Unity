@@ -40,6 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     ```
   - Filtering is case-sensitive for all filter types except `YarnNodeFilter.MatchesRegex`.
 - Paths in generated YSLS files now use a consistent path separator (the forward slash `/`), independent of the current operating system.
+- `YarnNode` and `DialogueReference` now sort their nodes alphabetically.
 
 ## [3.2.8]
 
