@@ -7,8 +7,10 @@ namespace Yarn.Unity.Tests
     using NUnit.Framework;
     using System;
     using System.Collections;
+    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Threading;
+    using UnityEngine.EventSystems;
     using UnityEngine.SceneManagement;
     using UnityEngine.TestTools;
 
@@ -204,6 +206,57 @@ namespace Yarn.Unity.Tests
 
             runTask.IsCompleted().Should().BeTrue();
             linePresenter.canvasGroup.alpha.Should().BeEqualTo(0);
+        });
+
+        [UnityTest]
+        public IEnumerator OptionsPresenter_WhenShowingOptionsAgain_RaisesSelectEventForReusedOption() => YarnTask.ToCoroutine(async () =>
+        {
+            var eventSystem = EventSystem.current;
+            eventSystem.Should().NotBeNull();
+
+            optionsView.useFadeEffect = false;
+
+            var option = new DialogueOption
+            {
+                DialogueOptionID = 0,
+                IsAvailable = true,
+                Line = MakeLocalizedLine("Option 1"),
+            };
+            var options = new[] { option };
+            var cancellationToken = new LineCancellationToken
+            {
+                NextContentToken = CancellationToken.None,
+            };
+
+            var firstRun = optionsView.RunOptionsAsync(options, cancellationToken);
+            var optionItem = optionsView.GetComponentInChildren<OptionItem>(true);
+            optionItem.Should().NotBeNull();
+
+            var selectEventCount = 0;
+            var eventTrigger = optionItem.gameObject.AddComponent<EventTrigger>();
+            eventTrigger.triggers = new List<EventTrigger.Entry>();
+            var selectEntry = new EventTrigger.Entry
+            {
+                eventID = EventTriggerType.Select,
+                callback = new EventTrigger.TriggerEvent(),
+            };
+            selectEntry.callback.AddListener(_ => selectEventCount++);
+            eventTrigger.triggers.Add(selectEntry);
+
+            optionItem.InvokeOptionSelected();
+            await firstRun;
+
+            // Recreate the stale EventSystem state: this pooled view is still selected, but inactive.
+            eventSystem.SetSelectedGameObject(optionItem.gameObject);
+            selectEventCount = 0;
+
+            var secondRun = optionsView.RunOptionsAsync(options, cancellationToken);
+            bool selectionEventWasRaised = selectEventCount > 0;
+
+            optionItem.InvokeOptionSelected();
+            await secondRun;
+
+            selectionEventWasRaised.Should().BeTrue("reselecting a pooled option must restore its highlighted state");
         });
     }
 }
