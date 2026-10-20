@@ -4,6 +4,7 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Yarn.Unity.Attributes;
 
 #if USE_TMP
@@ -264,6 +265,11 @@ namespace Yarn.Unity
             }
             if (optionIndexToSelect > -1)
             {
+                // A reused option may still be the EventSystem's selected object after its style is reset.
+                if (EventSystem.current != null)
+                {
+                    EventSystem.current.SetSelectedGameObject(null);
+                }
                 optionViews[optionIndexToSelect].Select();
             }
 
