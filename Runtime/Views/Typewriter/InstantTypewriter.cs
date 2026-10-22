@@ -85,6 +85,7 @@ namespace Yarn.Unity
             }
         }
 
+        /// <inheritdoc/>
         public void PrepareForContent(MarkupParseResult line)
         {
             if (TextElement == null)
@@ -101,6 +102,7 @@ namespace Yarn.Unity
             }
         }
 
+        /// <inheritdoc/>
         public void ContentWillDismiss()
         {
             // we tell all action processors that the line is finished and is about to go away
@@ -110,6 +112,7 @@ namespace Yarn.Unity
             }
         }
 
+        /// <inheritdoc/>
         public void ContentDidDismiss()
         {
             if (TextElement == null)

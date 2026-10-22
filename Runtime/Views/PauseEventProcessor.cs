@@ -18,7 +18,7 @@ using TMP_Text = Yarn.Unity.TMPShim;
 namespace Yarn.Unity
 {
     /// <summary>
-    /// Allows pausing the current typewrite through [pause/] markers.
+    /// Allows pausing the current typewriter through [pause/] markers.
     /// </summary>
     public sealed class PauseEventProcessor : IActionMarkupHandler
     {
@@ -28,6 +28,10 @@ namespace Yarn.Unity
             pauses.Clear();
         }
 
+        /// <summary
+        /// When the dialogue is about to begin we scan through the markup looking for any pauses, recording them as we find them.
+        /// </summary
+        /// <inheritdoc cref="IActionMarkupHandler.OnLineDisplayBegin" path="/param" />
         public void OnLineDisplayBegin(MarkupParseResult line, TMP_Text text)
         {
             pauses = new();
@@ -67,11 +71,17 @@ namespace Yarn.Unity
             }
         }
 
+        /// <inheritdoc />
         public void OnPrepareForLine(MarkupParseResult line, TMP_Text text)
         {
             return;
         }
 
+        /// <summary
+        /// As each character is being presented if there is a pause at that characters index we delay the typewriter for the requested duration
+        /// </summary
+        /// <inheritdoc cref="IActionMarkupHandler.OnCharacterWillAppear" path="/param" />
+        /// <inheritdoc cref="IActionMarkupHandler.OnCharacterWillAppear" path="/returns" />
         public async YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line, CancellationToken cancellationToken)
         {
             if (pauses.TryGetValue(currentCharacterIndex, out var duration))
@@ -80,6 +90,7 @@ namespace Yarn.Unity
             }
         }
 
+        /// <inheritdoc />
         public void OnLineWillDismiss()
         {
             return;

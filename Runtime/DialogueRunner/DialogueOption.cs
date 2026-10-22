@@ -6,6 +6,9 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// Represents a single option in an option group.
+    /// </summary>
     public class DialogueOption
     {
         /// <summary>

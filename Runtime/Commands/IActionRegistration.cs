@@ -18,10 +18,12 @@ namespace Yarn.Unity
     public interface IActionRegistration
     {
         /// <summary>
-        /// Adds a command handler. Dialogue will pause execution after the
-        /// command is called.
+        /// Adds a command handler and registers the command with Yarn as one that can be called.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// You can also register commands via the <see cref="Yarn.Unity.YarnCommandAttribute"/> attribute on your methods.
+        /// </para>
         /// <para>When this command handler has been added, it can be called
         /// from your Yarn scripts like so:</para>
         ///
@@ -29,19 +31,13 @@ namespace Yarn.Unity
         /// &lt;&lt;commandName param1 param2&gt;&gt;
         /// </code>
         ///
-        /// <para>If <paramref name="handler"/> is a method that returns a <see
-        /// cref="Coroutine"/>, when the command is run, the <see
-        /// cref="DialogueRunner"/> will wait for the returned coroutine to stop
-        /// before delivering any more content.</para>
-        /// <para>If <paramref name="handler"/> is a method that returns an <see
-        /// cref="IEnumerator"/>, when the command is run, the <see
-        /// cref="DialogueRunner"/> will start a coroutine using that method and
-        /// wait for that coroutine to stop before delivering any more content.
+        /// <para>If <paramref name="handler"/> is a method that returns a <see cref="YarnTask"/>, <see cref="Task"/>, <see cref="Awaitable"/>, or <see cref="UniTask"/> when the command is run, the <see cref="DialogueRunner"/> will wait for the task to finish before delivering any more content.</para>
+        /// <para>If <paramref name="handler"/> is a method that returns a <see cref="Coroutine"/>, when the command is run, the <see cref="DialogueRunner"/> will wait for the returned coroutine to stop before delivering any more content.</para>
+        /// <para>If <paramref name="handler"/> is a method that returns an <see cref="IEnumerator"/>, when the command is run, the <see cref="DialogueRunner"/> will start a coroutine using that method and wait for that coroutine to stop before delivering any more content.
         /// </para>
         /// </remarks>
         /// <param name="commandName">The name of the command.</param>
-        /// <param name="handler">The <see cref="CommandHandler"/> that will be
-        /// invoked when the command is called.</param>
+        /// <param name="handler">The <see cref="CommandHandler"/> that will be invoked when the command is called.</param>
         void AddCommandHandler(string commandName, Delegate handler);
 
         /// <inheritdoc cref="AddCommandHandler(string, Delegate)"/>
@@ -60,10 +56,12 @@ namespace Yarn.Unity
         void RemoveCommandHandler(string commandName);
 
         /// <summary>
-        /// Add a new function that returns a value, so that it can be called
-        /// from Yarn scripts.
+        /// Add a new function that returns a value, so that it can be called from Yarn scripts.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// You can also register functions via the <see cref="Yarn.Unity.YarnFunctionAttribute"/> attribute on your methods.
+        /// </para>
         /// <para>When this function has been registered, it can be called from
         /// your Yarn scripts like so:</para>
         ///

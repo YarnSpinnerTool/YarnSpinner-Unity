@@ -16,6 +16,9 @@ using System.Linq;
 
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// A localization is a bundle of strings and assets for a particular culture
+    /// </summary>
     [CreateAssetMenu(fileName = "NewLocalization", menuName = "Yarn Spinner/Built-In Localization/Localization", order = 105)]
     public class Localization : ScriptableObject
     {
@@ -173,6 +176,15 @@ namespace Yarn.Unity
         #region Localised Objects
 
 #if USE_ADDRESSABLES
+        /// <summary>
+        /// Attempts to load an asset for the localised line.
+        /// </summary>
+        /// <remarks>
+        /// This method does not take in a cancellation token because there is no mechanism to pass it through to the underlying addressables load request
+        /// </remarks>
+        /// <typeparam name="T">The expected type of the asset</typeparam>
+        /// <param name="key">the line id of the localised entry whos asset you're after</param>
+        /// <returns>The localised asset, or null if there wasn't one found</returns>
         public async YarnTask<T?> GetLocalizedObjectAsync<T>(string key) where T : UnityEngine.Object
         {
             if (!entries.TryGetValue(key, out var entry))
@@ -196,6 +208,15 @@ namespace Yarn.Unity
             return null;
         }
 #else
+        /// <summary>
+        /// Attempts to load an asset for the localised line.
+        /// </summary>
+        /// <remarks>
+        /// While this is called GetLocalizedObjectAsync and is a YarnTask because this is loading using the normal file IO in unity it will be a synchronous method
+        /// </remarks>
+        /// <typeparam name="T">The expected type of the asset</typeparam>
+        /// <param name="key">the line id of the localised entry whos asset you're after</param>
+        /// <returns>The localised asset, or null if there wasn't one found</returns>
         public YarnTask<T?> GetLocalizedObjectAsync<T>(string key) where T : UnityEngine.Object
         {
             if (!entries.TryGetValue(key, out var entry))
@@ -251,6 +272,12 @@ namespace Yarn.Unity
             return entry;
         }
 
+        /// <summary>
+        /// Checks if there is a localised asset of the requested type for the requested line
+        /// </summary>
+        /// <typeparam name="T">The expected asset type</typeparam>
+        /// <param name="key">the id of the localised line</param>
+        /// <returns>true if there is an asset of the requested type under the requested key, false otherwise.</returns>
         public bool ContainsLocalizedObject<T>(string key) where T : UnityEngine.Object => entries.TryGetValue(key, out var asset) && asset is T;
 
 #if UNITY_EDITOR
@@ -281,6 +308,9 @@ namespace Yarn.Unity
 #endif
         #endregion
 
+        /// <summary>
+        /// Removes all entries from the localisation
+        /// </summary>
         public virtual void Clear()
         {
             entries.Clear();
@@ -309,80 +339,3 @@ namespace Yarn.Unity
         }
     }
 }
-
-#if UNITY_EDITOR
-namespace Yarn.Unity
-{
-    /// <summary>
-    /// Provides methods for finding voice over <see cref="AudioClip"/>s in the
-    /// project matching a Yarn linetag/string ID and a language ID.
-    /// </summary>
-    public static class FindVoiceOver
-    {
-        /// <summary>
-        /// Finds all voice over <see cref="AudioClip"/>s in the project with a
-        /// filename matching a Yarn linetag and a language ID.
-        /// </summary>
-        /// <param name="linetag">The linetag/string ID the voice over filename
-        /// should match.</param>
-        /// <param name="language">The language ID the voice over filename
-        /// should match.</param>
-        /// <returns>A string array with GUIDs of all matching <see
-        /// cref="AudioClip"/>s.</returns>
-        public static string[] GetMatchingVoiceOverAudioClip(string linetag, string language)
-        {
-            var lineTagContents = linetag.Replace("line:", "");
-
-            string[] result = Array.Empty<String>();
-            string[] searchPatterns = new string[] {
-                $"t:AudioClip {lineTagContents} ({language})",
-                $"t:AudioClip {lineTagContents}  {language}",
-                $"t:AudioClip {lineTagContents}"
-            };
-
-            foreach (var searchPattern in searchPatterns)
-            {
-                result = SearchAssetDatabase(searchPattern, language);
-                if (result.Length > 0)
-                {
-                    return result;
-                }
-            }
-
-            return result;
-        }
-
-        public static string[] SearchAssetDatabase(string searchPattern, string language)
-        {
-            var result = AssetDatabase.FindAssets(searchPattern);
-            // Check if result is ambiguous and try to improve the situation
-            if (result.Length > 1)
-            {
-                var assetsInMatchingLanguageDirectory = GetAsseetsInMatchingLanguageDirectory(result, language);
-                // Check if this improved the situation
-                if (assetsInMatchingLanguageDirectory.Length == 1 || (assetsInMatchingLanguageDirectory.Length != 0 && assetsInMatchingLanguageDirectory.Length < result.Length))
-                {
-                    result = assetsInMatchingLanguageDirectory;
-                }
-            }
-            return result;
-        }
-
-        public static string[] GetAsseetsInMatchingLanguageDirectory(string[] result, string language)
-        {
-            var list = new List<string>();
-            foreach (var assetId in result)
-            {
-                var testPath = AssetDatabase.GUIDToAssetPath(assetId);
-                if (AssetDatabase.GUIDToAssetPath(assetId).Contains($"/{language}/"))
-                {
-                    list.Add(assetId);
-                }
-            }
-            return list.ToArray();
-        }
-    }
-}
-
-#endif
-

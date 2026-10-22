@@ -25,6 +25,9 @@ namespace Yarn.Unity
     {
     }
 
+    /// <summary>
+    /// Provides convenience methods for <see cref="IGeneratedVariableStorage">
+    /// </summary>
     public static class GeneratedVariableStorageExtensions
     {
         /// <summary>
@@ -54,6 +57,14 @@ namespace Yarn.Unity
             }
         }
 
+        /// <summary>
+        /// Sets a value into the generated variable storage
+        /// </summary>
+        /// <typeparam name="T">The new values type</typeparam>
+        /// <param name="storage">the storage itself</param>
+        /// <param name="v">the name of the variable</param>
+        /// <param name="value">the value itself</param>
+        /// <exception cref="ArgumentOutOfRangeException">If the value is an unexpected type</exception>
         public static void SetValue<T>(this IGeneratedVariableStorage storage, string v, T value) where T : IConvertible
         {
             switch (value)
@@ -73,6 +84,13 @@ namespace Yarn.Unity
             }
         }
 
+        /// <summary>
+        /// attempts to get an enum value of the requested type from the requested variable
+        /// </summary>
+        /// <typeparam name="T">The enum type</typeparam>
+        /// <param name="storage">the storage</param>
+        /// <param name="variableName">the variable name</param>
+        /// <returns></returns>
         public static T? GetEnumValueOrDefault<T>(this IGeneratedVariableStorage storage, string variableName) where T : System.Enum
         {
             if (!storage.TryGetValue(variableName, out object? result))
@@ -112,6 +130,5 @@ namespace Yarn.Unity
                 return default;
             }
         }
-
     }
 }

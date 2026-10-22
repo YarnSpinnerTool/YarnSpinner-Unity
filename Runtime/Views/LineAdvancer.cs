@@ -439,7 +439,7 @@ namespace Yarn.Unity
         /// handlers for advancing the line.
         /// </summary>
         /// <returns>A completed task.</returns>
-        public override YarnTask OnDialogueStartedAsync()
+        public override YarnTask OnDialogueStartedAsync(CancellationToken token)
         {
 #if USE_INPUTSYSTEM
             if (enableActions)
@@ -468,7 +468,7 @@ namespace Yarn.Unity
         /// action handlers.
         /// </summary>
         /// <returns>A completed task.</returns>
-        public override YarnTask OnDialogueCompleteAsync()
+        public override YarnTask OnDialogueCompleteAsync(CancellationToken token)
         {
 #if USE_INPUTSYSTEM
             // If we're using the input system, remove the callbacks.
@@ -657,21 +657,25 @@ namespace Yarn.Unity
             }
         }
 
+        /// <inheritdoc>
         public void OnPrepareForLine(MarkupParseResult line, TMP_Text text)
         {
             return;
         }
 
+        /// <inheritdoc>
         public void OnLineDisplayBegin(MarkupParseResult line, TMP_Text text)
         {
             return;
         }
 
+        /// <inheritdoc>
         public YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line, CancellationToken cancellationToken)
         {
             return YarnTask.CompletedTask;
         }
 
+        /// <inheritdoc>
         public void OnLineDisplayComplete()
         {
             if (status == PresentationStatus.LineBegan)
@@ -684,6 +688,7 @@ namespace Yarn.Unity
             }
         }
 
+        /// <inheritdoc>
         public void OnLineWillDismiss()
         {
             return;

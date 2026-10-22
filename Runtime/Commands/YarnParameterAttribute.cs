@@ -11,8 +11,9 @@ using UnityEngine;
 
 namespace Yarn.Unity.Attributes
 {
+    /// <summary>
+    /// abstract parent class for all attributes on yarn action parameters
+    /// </summary>
     [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
-    public abstract class YarnParameterAttribute : Attribute
-    {
-    }
+    public abstract class YarnParameterAttribute : Attribute { }
 }

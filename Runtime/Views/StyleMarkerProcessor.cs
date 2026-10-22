@@ -15,8 +15,18 @@ namespace Yarn.Unity
     /// An attribute marker processor that inserts TextMeshPro style tags where
     /// Yarn Spinner <c>[style]</c> tags appear in a line.
     /// </summary>
+    /// <remarks>
+    /// While this provides a lot of extra styling for basically no work there is a tradeoff.
+    /// The TMP stylesheets can't be inspected to see how they work, as such we have no way of knowing if a style will add in visible characters.
+    /// As an example of this the <c>H1</c> tag in the default style sheet adds wraps asterisks and this will offset other markers.
+    /// So while we could special case that specific tag if you (or Unity) were to change it we'd again have no way to know this.
+    /// The practical upshot of this is if you are mixing TMP styles with other markup be wary.
+    /// </remarks>
     public sealed class StyleMarkerProcessor : ReplacementMarkupHandler
     {
+        /// <summary>
+        /// The line provider this markup processor needs to register itself with
+        /// </summary>
         [SerializeField]
         public LineProviderBehaviour? lineProvider;
 
@@ -48,7 +58,6 @@ namespace Yarn.Unity
             return new ReplacementMarkerResult(childBuilder.Length - originalLength);
         }
 
-        // Start is called before the first frame update
         void Start()
         {
             if (lineProvider == null)

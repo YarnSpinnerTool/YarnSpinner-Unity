@@ -9,6 +9,9 @@ using System.Collections.Generic;
 
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// Represents a single entry in the string table
+    /// </summary>
     public struct StringTableEntry
     {
         /// <summary>

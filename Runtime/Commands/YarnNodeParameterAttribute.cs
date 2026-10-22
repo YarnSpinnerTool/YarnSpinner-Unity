@@ -11,5 +11,9 @@ using UnityEngine;
 
 namespace Yarn.Unity.Attributes
 {
+    /// <summary>
+    /// Flags a string parameter in a command or function as one that the editor should offer autocomplete support for node names.
+    /// This is just a convenience mechanism, it doesn't change any behaviour of the action in any way.
+    /// </summary>
     public class YarnNodeParameterAttribute: YarnParameterAttribute {}
 }

@@ -24,9 +24,11 @@ namespace Yarn.Unity
     /// cref="GameObject"/>s.
     /// </remarks>
     public abstract class VariableStorageBehaviour : MonoBehaviour, Yarn.IVariableStorage
-    {
+    {       
+        /// <inheritdoc/>
         public Program? Program { get; set; }
 
+        /// <inheritdoc/>
         public ISmartVariableEvaluator? SmartVariableEvaluator { get; set; }
 
         /// <inheritdoc/>
@@ -94,6 +96,7 @@ namespace Yarn.Unity
         /// </summary>
         public abstract (FloatDictionary FloatVariables, StringDictionary StringVariables, BoolDictionary BoolVariables) GetAllVariables();
 
+        /// <inheritdoc/>
         public VariableKind GetVariableKind(string name)
         {
             if (this.Contains(name))

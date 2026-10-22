@@ -20,10 +20,9 @@ using TMP_Text = Yarn.Unity.TMPShim;
 namespace Yarn.Unity
 {
     /// <summary>
-    /// A Dialogue Presenter that presents lines of dialogue, using Unity UI
-    /// elements.
+    /// A Dialogue Presenter that presents lines of dialogue, using Unity UI elements.
     /// </summary>
-    [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-view/line-view")]
+    [HelpURL("https://docs.yarnspinner.dev/yarn-spinner-for-godot/godot-csharp/components/dialogue-presenters/line-presenter")]
     public sealed class LinePresenter : DialoguePresenterBase
     {
         internal enum TypewriterType
@@ -190,6 +189,12 @@ namespace Yarn.Unity
         [Min(0)]
         public int wordsPerSecond = 10;
 
+        /// <summary>
+        /// Provides a mechanism to connect a typewriter up to this presenter.
+        /// </summary>
+        /// <remarks>
+        /// This uses the <see cref="InterfaceContainer"/> class to provide a wrapper around an interface, otherwise all typewriters would need to be  monobehaviours
+        /// </remarks>
         [Group("Typewriter")]
         [ShowIf(nameof(typewriterStyle), TypewriterType.Custom)]
         [UnityEngine.Serialization.FormerlySerializedAs("CustomTypewriter")]
@@ -218,7 +223,7 @@ namespace Yarn.Unity
         }
 
         /// <inheritdoc/>
-        public override YarnTask OnDialogueCompleteAsync()
+        public override YarnTask OnDialogueCompleteAsync(CancellationToken token)
         {
             if (canvasGroup != null)
             {
@@ -228,7 +233,7 @@ namespace Yarn.Unity
         }
 
         /// <inheritdoc/>
-        public override YarnTask OnDialogueStartedAsync()
+        public override YarnTask OnDialogueStartedAsync(CancellationToken token)
         {
             if (canvasGroup != null)
             {

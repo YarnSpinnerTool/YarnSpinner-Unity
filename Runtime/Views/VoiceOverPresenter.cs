@@ -234,7 +234,7 @@ namespace Yarn.Unity
         /// <remarks>
         /// Stops any audio if there is still any playing.
         /// </remarks>
-        public override YarnTask OnDialogueCompleteAsync()
+        public override YarnTask OnDialogueCompleteAsync(CancellationToken token)
         {
             // just in case we are still playing audio we want it to stop
             audioSource.Stop();
@@ -243,7 +243,7 @@ namespace Yarn.Unity
         }
 
         /// <inheritdoc/>
-        public override YarnTask OnDialogueStartedAsync()
+        public override YarnTask OnDialogueStartedAsync(CancellationToken token)
         {
             return YarnTask.CompletedTask;
         }

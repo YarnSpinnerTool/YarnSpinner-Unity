@@ -41,32 +41,11 @@ namespace Yarn.Unity
             .Append(new Culture { Name = "mi", DisplayName = "Maori", NativeName = "Māori", IsNeutralCulture = true })
             .OrderBy(c => c.DisplayName);
 
-        public static IEnumerable<Culture> GetCultures() => _allCultures.Value;
-
         /// <summary>
-        /// Returns the <see cref="Culture"/> represented by the language code
-        /// in <paramref name="name"/>.
+        /// Returns the collection of all cultures your system knows about.
         /// </summary>
-        /// <param name="name">The name of the <see cref="Culture"/> to
-        /// retrieve.</param>
-        /// <returns>The <see cref="Culture"/>.</returns>
-        /// <exception cref="ArgumentException">Thrown when no <see
-        /// cref="Culture"/> with the given language ID can be
-        /// found.</exception>
-        [Obsolete("Use " + nameof(TryGetCulture) + ", which does not throw if the culture can't be found.")]
-        public static Culture GetCulture(string name)
-        {
-            var exists = _allCulturesTable.Value.TryGetValue(name, out var result);
-
-            if (exists)
-            {
-                return result;
-            }
-            else
-            {
-                throw new ArgumentException($"Culture {name} not found", name);
-            }
-        }
+        /// <returns>The collection of cultures</returns>
+        public static IEnumerable<Culture> GetCultures() => _allCultures.Value;
 
         /// <summary>
         /// Gets the <see cref="Culture"/> represented by the language code in
@@ -86,7 +65,7 @@ namespace Yarn.Unity
         /// <summary>
         /// Returns a boolean value indicating whether <paramref name="name"/>
         /// is a valid identifier for retrieving a <see cref="Culture"/> from
-        /// <see cref="GetCulture"/>.
+        /// <see cref="TryGetCulture"/>.
         /// </summary>
         /// <param name="name"></param>
         /// <returns><see langword="true"/> if name is a valid <see cref="Culture"/> name; <see langword="false"/> otherwise.</returns>
@@ -95,6 +74,12 @@ namespace Yarn.Unity
             return _allCulturesTable.Value.ContainsKey(name);
         }
 
+        /// <summary>
+        /// Returns the neutral culture of the current culture.
+        /// </summary>
+        /// <remarks>
+        /// So in the case of en-AU for Australian English this would return en
+        /// </remarks>
         public static Culture CurrentNeutralCulture
         {
             get

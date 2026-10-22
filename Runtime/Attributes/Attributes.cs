@@ -1,3 +1,7 @@
+/*
+Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+*/
+
 using System;
 
 namespace Yarn.Unity.Attributes
@@ -38,7 +42,6 @@ namespace Yarn.Unity.Attributes
     /// </summary>
     public abstract class VisibilityAttribute : YarnEditorAttribute
     {
-
         /// <summary>
         /// The type of test represented by <see cref="Condition"/>.
         /// </summary>

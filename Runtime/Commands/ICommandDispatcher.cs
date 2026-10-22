@@ -124,7 +124,8 @@ namespace Yarn.Unity
 
             if (runtimeDelegateActionInvoker == null)
             {
-                throw new ArgumentException($"Internal error: command dispatcher has not been configured to handle {commandName}");
+                Debug.LogError($"The command dispatcher has not been configured to handle {commandName}");
+                return YarnTask.CompletedTask;
             }
 
             var dispatchResult = runtimeDelegateActionInvoker.DispatchCommand(command.Text, host, token);

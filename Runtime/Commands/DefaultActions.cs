@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Yarn.Unity
 {
-    public class DefaultActions : MonoBehaviour
+    public static class DefaultActions
     {
         #region Commands
         /// <summary>
@@ -23,7 +23,4 @@ namespace Yarn.Unity
         }
         #endregion
     }
-
-    // I can probably actually just move this into its own assembly
-    // that should probably fix everything
 }

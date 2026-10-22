@@ -10,6 +10,24 @@ using UnityEngine;
 
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// Represents the bundles of metadata across all lines and a mechanism to retrieve a specific metadata bundle for a line.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Line metadata is the contents of hashtags at the end of a line and any synthesised metadata added by the compiler or dialogue runner.
+    /// <code>
+    /// Character: Why hello there #happy
+    /// </code>
+    /// This shows off a a line with one entry in the metadata <c>happy</c>.
+    /// </para>
+    /// <para>
+    /// Yarn Spinner may also synthesis metadata and add it to this entry as if you had manually done so.
+    /// This is done for a variety of reasons and any metadata you do not care about can safely be ignored if you don't need that metadata.
+    /// The most common synthesised metadata added to line is the <c>lastline</c> metadata.
+    /// For more details on adding metadata see <see cref="https://docs.yarnspinner.dev/write-yarn-scripts/advanced-scripting/tags-metadata"/>.
+    /// </para>
+    /// </remarks>
     [Serializable]
     public class LineMetadata
     {
@@ -46,6 +64,12 @@ namespace Yarn.Unity
 
         public LineMetadata() { }
 
+        /// <summary>
+        /// adds a new metadata entry to the requested line.
+        /// This will override any metadata already on the line.
+        /// </summary>
+        /// <param name="lineID">the id of the line, if the line has implicit tags this value may change between runs</param>
+        /// <param name="metadata">the metadata to add onto this line</param>
         public void AddMetadata(string lineID, IEnumerable<string> metadata)
         {
             _lineMetadata.Add(lineID, string.Join(" ", metadata));
@@ -78,6 +102,16 @@ namespace Yarn.Unity
             return null;
         }
 
+        /// <summary>
+        /// Shadow lines are specialcased because while their contents is the same as another line they may have significantly different metadata.
+        /// </summary>
+        /// <remarks>
+        /// The most common situation where a shadow line has different metadata than it's origin line is when it is the last line before options.
+        /// In this case you will still want to know that this line is going to be followed by options and it is added by the compiler for you.
+        /// You can also add your own custom line metadata to shadow lines as hashtags.
+        /// </remarks>
+        /// <param name="lineID">the id of the shadow line</param>
+        /// <returns>the metadata for the shadow line</returns>
         public string? GetShadowLineSource(string lineID)
         {
             if (_lineMetadata.TryGetValue(lineID, out var metadataString) == false)

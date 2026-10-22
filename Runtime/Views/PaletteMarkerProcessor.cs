@@ -19,7 +19,7 @@ using Yarn.Unity;
 /// whose name is equal to the name of a style in the given palette. For
 /// example, if the palette defines a style named "happy", this marker processor
 /// will process tags in a Yarn line named <c>[happy]</c> by inserting the
-/// appropriate TextMeshProp style tags defined for the "happy" style.</remarks>
+/// appropriate TextMeshPro style tags defined for the "happy" style.</remarks>
 public sealed class PaletteMarkerProcessor : Yarn.Unity.ReplacementMarkupHandler
 {
     /// <summary>

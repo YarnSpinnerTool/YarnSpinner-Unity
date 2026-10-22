@@ -18,6 +18,12 @@ using TMP_Text = Yarn.Unity.TMPShim;
 
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// An ActionMarkupHandler that provides the little advance button on the built in <see cref="LinePresenter"/> prefab.
+    /// </summary>
+    /// <remarks>
+    /// Is an ActionMarkupHandler so that it can configure itself correctly for when
+    /// </remarks>
     public class LinePresenterButtonHandler : ActionMarkupHandler
     {
         [MustNotBeNull, SerializeField] Button? continueButton;
@@ -36,6 +42,10 @@ namespace Yarn.Unity
             continueButton.enabled = false;
         }
 
+        /// <summary
+        /// When dialogue is about to begin we enable interaction one the button
+        /// </summary
+        /// <inheritdoc cref="IActionMarkupHandler.OnPrepareForLine" path="/param" />
         public override void OnPrepareForLine(MarkupParseResult line, TMP_Text text)
         {
             if (continueButton == null)
@@ -59,21 +69,28 @@ namespace Yarn.Unity
             });
         }
 
+        /// <inheritdoc/>
         public override void OnLineDisplayBegin(MarkupParseResult line, TMP_Text text)
         {
             return;
         }
 
+        /// <inheritdoc/>
         public override YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line, CancellationToken cancellationToken)
         {
             return YarnTask.CompletedTask;
         }
 
+        /// <inheritdoc/>
         public override void OnLineDisplayComplete()
         {
             return;
         }
 
+        /// <summary
+        /// When dialogue is about to end we enable disable interaction one the button
+        /// </summary
+        /// <inheritdoc cref="IActionMarkupHandler.OnPrepareForLine" />
         public override void OnLineWillDismiss()
         {
             if (continueButton == null)

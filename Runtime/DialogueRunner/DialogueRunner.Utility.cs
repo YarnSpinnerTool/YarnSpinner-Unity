@@ -298,6 +298,9 @@ namespace Yarn.Unity
             return results;
         }
 
+        /// <summary>
+        /// Convenience property to determine if the game is in playmode or editor mode
+        /// </summary>
         public static bool IsInPlaymode
         {
             get
@@ -320,6 +323,17 @@ namespace Yarn.Unity
             }
         }
 
+        /// <summary>
+        /// Attempts to find the "nearest" dialogue runner for the requested component
+        /// </summary>
+        /// <remarks>
+        /// Because there can be multiple dialogue runners in a scene performing a normal FindAnyObjectByType call may return a runner that isn't the runner we are after.
+        /// This method makes an assumption about scene hierarchy (but one we've seen multiple times) that the dialogue runner you care about is a parent or sibling of the current component.
+        /// This works because dialogue and related components tend to be all ultimately packaged together into one Game Object in the scene.
+        /// If this assumption fails to find  it will fall back on a FindAnyObjectByType call to collect any runner.
+        /// </remarks>
+        /// <param name="component">The component whos dialogue runner we are after</param>
+        /// <returns>The runner, or null if one couldn't be found</returns>
         public static DialogueRunner? FindRunner(Component component)
         {
             var runner = component.GetComponentInParent<DialogueRunner>();

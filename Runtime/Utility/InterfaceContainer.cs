@@ -8,6 +8,16 @@ using UnityEngine;
 
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// This type exists to allow connecting up interfaces into objects via the inspector.
+    /// </summary>
+    /// <remarks>
+    /// This is a convenience mechanism because there is no practical way to serialise an interface in Unity.
+    /// Your interfaces do still need to be something that is a subclass of <c>UnityEngine.Object</c> for it to be serialisable using this wrapper.
+    /// Essentially this is just a wrapper around a monobehaviour but allows you to think only in the terms of the interface.
+    /// Which is generally more useful and helpful.
+    /// </remarks>
+    /// <typeparam name="TContainedType">The interface type to be contained, it must be a unity object.</typeparam>
     [System.Serializable]
     public class InterfaceContainer<TContainedType> : ISerializationCallbackReceiver where TContainedType : class
     {

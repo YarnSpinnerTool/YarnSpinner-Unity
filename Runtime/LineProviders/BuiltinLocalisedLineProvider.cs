@@ -13,8 +13,13 @@ using Yarn.Unity.Attributes;
 
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// Provides the necessary <see cref="ILineProvider"/> behaviours in a form that supports the built-in localisation system that Yarn Spinner creates.
+    /// </summary>
+    /// <<seealso cref="UnityLocalisedLineProvider"/>
     public sealed class BuiltinLocalisedLineProvider : LineProviderBehaviour, ILineProvider
     {
+        /// <inheritdoc />
         public override string LocaleCode
         {
             get => _textLocaleCode;
@@ -29,6 +34,9 @@ namespace Yarn.Unity
         [ShowIf(nameof(_useFallback))]
         [SerializeField, Language] private string _fallbackLocaleCode = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
 
+        /// <summary>
+        /// The locale to be used when providing assets
+        /// </summary>
         public string AssetLocaleCode
         {
             get => _assetLocaleCode;
@@ -38,10 +46,12 @@ namespace Yarn.Unity
         private Markup.LineParser lineParser = new Markup.LineParser();
         private Markup.BuiltInMarkupReplacer builtInReplacer = new Markup.BuiltInMarkupReplacer();
 
+        /// <inheritdoc />
         public override void RegisterMarkerProcessor(string attributeName, Markup.IAttributeMarkerProcessor markerProcessor)
         {
             lineParser.RegisterMarkerProcessor(attributeName, markerProcessor);
         }
+        /// <inheritdoc />
         public override void DeregisterMarkerProcessor(string attributeName)
         {
             lineParser.DeregisterMarkerProcessor(attributeName);
@@ -54,6 +64,7 @@ namespace Yarn.Unity
             lineParser.RegisterMarkerProcessor("ordinal", builtInReplacer);
         }
 
+        /// <inheritdoc />
         public override async YarnTask<LocalizedLine> GetLocalizedLineAsync(Line line, CancellationToken cancellationToken)
         {
             string sourceLineID = line.ID;
@@ -152,6 +163,7 @@ namespace Yarn.Unity
             return null;
         }
 
+        /// <inheritdoc />
         public async override YarnTask PrepareForLinesAsync(IEnumerable<string> lineIDs, CancellationToken cancellationToken)
         {
             if (YarnProject == null)

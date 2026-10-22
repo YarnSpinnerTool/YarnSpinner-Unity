@@ -65,6 +65,9 @@ namespace Yarn.Unity
             public bool Strikedthrough;
         }
 
+        /// <summary>
+        /// Represents a marker itself including it's offsets (if needed)
+        /// </summary>
         [System.Serializable]
         public struct CustomMarker
         {
@@ -106,6 +109,12 @@ namespace Yarn.Unity
             return false;
         }
 
+        /// <summary>
+        /// Returns the named palette
+        /// </summary>
+        /// <param name="markerName">The name of the requested palette</param>
+        /// <param name="palette">The out var of where the found palette will be stored</param>
+        /// <returns>True if the palette was found, false otherwise</returns>
         public bool PaletteForMarker(string markerName, out CustomMarker palette)
         {
             // we first check if we have a marker of that name in the basic markers

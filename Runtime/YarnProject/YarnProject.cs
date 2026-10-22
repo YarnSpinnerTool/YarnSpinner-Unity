@@ -11,24 +11,47 @@ using UnityEngine;
 
 namespace Yarn.Unity
 {
-    [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/importing-yarn-files/yarn-projects")]
+    /// <summary>
+    /// The scrobject that is the Yarn Project.
+    /// </summary>
+    /// <remarks>
+    /// The Yarn Project is a container for your Yarn scripts and related content necessary to actually make use of your dialogue.
+    /// It holds the individual Yarn scripts, localisation information, string table, compiled program, and other useful and necessary information.
+    /// </remarks>
+    [HelpURL("https://docs.yarnspinner.dev/yarn-spinner-for-unity/yarn-spinner-in-unity-scenes/yarn-projects")]
     public sealed class YarnProject : ScriptableObject
     {
+        /// <summary>
+        /// The yarn program.
+        /// This is the result of the compilation process and will be a protobuf binary.
+        /// </summary>
         [HideInInspector]
         public byte[]? compiledYarnProgram;
 
+        /// <summary>
+        /// The base localisation for the project, will default to your machines localisation when the project is created.
+        /// </summary>
         [HideInInspector]
         [NotNull]
 #pragma warning disable CS8618
         public Localization baseLocalization;
 #pragma warning restore CS8618
 
+        /// <summary>
+        /// All the localisations in the project.
+        /// </summary>
         [SerializeField]
         [HideInInspector]
         public SerializableDictionary<string, Localization> localizations = new SerializableDictionary<string, Localization>();
 
+        /// <summary>
+        /// The line metadata bundle
+        /// </summary>
         public LineMetadata? lineMetadata;
 
+        /// <summary>
+        /// The localisation technique used in the project
+        /// </summary>
         [HideInInspector]
         public LocalizationType localizationType;
 
@@ -49,6 +72,9 @@ namespace Yarn.Unity
             }
         }
 
+        /// <summary>
+        /// Represents a shadow line, which is a collection of metadata on that line, and a link to it's origin line
+        /// </summary>
         [System.Serializable]
         public struct ShadowTableEntry
         {
@@ -56,6 +82,9 @@ namespace Yarn.Unity
             public string[] shadowMetadata;
         }
 
+        /// <summary>
+        /// The collection of shadow lines within the project, may be empty.
+        /// </summary>
         [System.Serializable]
         public class ShadowTableDictionary : SerializableDictionary<string, ShadowTableEntry> { }
 
@@ -207,6 +236,9 @@ namespace Yarn.Unity
         }
     }
 
+    /// <summary>
+    /// What type of localisation is this project using, the built in or the unity loc package?
+    /// </summary>
     public enum LocalizationType
     {
         YarnInternal,

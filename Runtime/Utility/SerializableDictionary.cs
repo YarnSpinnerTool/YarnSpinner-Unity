@@ -1,5 +1,6 @@
 /*
-Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
+Based upon https://github.com/azixMcAze/Unity-SerializableDictionary, available under the MIT license.
+Please see the linked repository for more details.
 */
 
 using System;

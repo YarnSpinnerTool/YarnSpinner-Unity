@@ -8,12 +8,24 @@ using System;
 
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// If an action fails in it's dispatch this captures the reason why
+    /// </summary>
     internal enum StatusType
     {
+        /// <summary>
+        /// Was unable to find a valid target for the action.
+        /// </summary>
         NoTargetFound,
 
+        /// <summary>
+        /// The number of provided parameters does not match the expected number for this action
+        /// </summary>
         InvalidParameterCount,
 
+        /// <summary>
+        /// The parameter is not of the expected type
+        /// </summary>
         InvalidParameter,
 
         /// <summary>
@@ -21,10 +33,20 @@ namespace Yarn.Unity
         /// </summary>
         ActionUnknown,
 
+        /// <summary>
+        /// The return is not of the expected type
+        /// </summary>
         InvalidReturn,
     }
 
+    /// <summary>
+    /// Represents any number of different results that could have happened while dispatching an action.
+    /// </summary>
+    /// <remarks>
+    /// This includes all success conditions as well as failure conditions.
+    /// </remarks>
     internal interface IDispatchResult { }
+
     internal struct ActionDispatchFailed: IDispatchResult
     {
         internal StatusType Status;

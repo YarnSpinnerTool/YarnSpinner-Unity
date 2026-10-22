@@ -13,22 +13,48 @@ using Yarn.Shared;
 
 namespace Yarn.Unity
 {
+    /// <summary>
+    /// Provides a series of extensions and helper methods reflection types and their <see cref="Yarn.Shared.Action" /> (and related) forms.
+    /// </summary>
+    /// <remarks>
+    /// These are mostly used when performing any runtime analysis and invocation of actions as opposed to the compiletime analysis and invocation.
+    /// </remarks>
     public static class ActionExtensions
     {
+        /// <summary>
+        /// Converts a runtime Type into a Yarn NamedType
+        /// </summary>
+        /// <param name="type">The type to be converted</param>
+        /// <returns>The Yarn NamedType equivalent</returns>
         public static NamedType ToNamedType(this Type type)
         {
             bool isUnityComponent = typeof(Component).IsAssignableFrom(type);
             var nt = new NamedType($"global::{type.FullName}", type.Name, type.FullName, YarnSpecialType.Other, isUnityComponent);
             return nt;
         }
-        public static string GlobalMethodName(this MethodInfo methodInfo) // I think this is right, will have to double check that
+        /// <summary>
+        /// Given a reflection method info returns the string global string form of the method name
+        /// <param name="methodInfo">The methodinfo to convert</param>
+        /// </summary>
+        /// <returns>A string equivalent of the method</returns>
+        public static string GlobalMethodName(this MethodInfo methodInfo)
         {
             return $"global::{methodInfo.FullMethodName()}";
         }
+        /// <summary>
+        /// Given a reflection method info returns a full form string form of the method name
+        /// </summary>
+        /// <param name="method">The methodinfo to convert</param>
+        /// <returns>A string equivalent of the method</returns>
         public static string FullMethodName(this MethodInfo method)
         {
             return $"{method.DeclaringType.FullName}.{method.Name}";
         }
+        /// <summary>
+        /// Given a Type converts it into the Yarn.Shared.YarnSpecialType equivalent
+        /// </summary>
+        /// <param name="type">The type to convert</param>
+        /// <returns>the converted YarnSpecialType</returns>
         public static YarnSpecialType ToSpecialType(this Type type)
         {
             Dictionary<Type, YarnSpecialType> basicReturns = new()
@@ -56,6 +82,9 @@ namespace Yarn.Unity
         }
     }
 
+    /// <summary>
+    /// The "default" action registration system used 
+    /// </summary>
     public class Actions : IActionRegistration
     {
         private static string[] asyncReturns =
@@ -90,6 +119,13 @@ namespace Yarn.Unity
             {typeof(decimal), ReturnType.Number},
         };
 
+        /// <summary>
+        /// Given a methodinfo collected via reflection converts into a <see cref="Yarn.Shared.Action"/>
+        /// </summary>
+        /// <param name="method">The method itseld</param>
+        /// <param name="yarnName">the yarn name of the method</param>
+        /// <param name="actionType">The type of the action, so is it a command or a function?</param>
+        /// <returns>The action. If something went wrong will be an <see cref="Yarn.Shared.InvalidAction"/> instead.</returns>
         public static Yarn.Shared.Action ActionFromMethodInfo(MethodInfo method, string yarnName, ActionType actionType)
         {
             List<Parameter> parameters = new();
@@ -141,7 +177,6 @@ namespace Yarn.Unity
                 // ok so at this stage we are either an invalid action
                 // or we are a generic task
                 // which requires a bit more work
-                // le sigh
                 if (method.ReturnType.IsGenericType)
                 {
                     var wrappedTypes = method.ReturnType.GetGenericArguments();
@@ -174,7 +209,7 @@ namespace Yarn.Unity
             return new InvalidAction(method.Name, actionType);
         }
 
-        public static Parameter ParameterFromInfo(ParameterInfo parameterInfo)
+        private static Parameter ParameterFromInfo(ParameterInfo parameterInfo)
         {
             // parameters are allowed to be
                 // various numeric types
@@ -264,9 +299,13 @@ namespace Yarn.Unity
             return new UnknownParameter(parameterInfo.Name, pType.ToNamedType(), parameterInfo.ParameterType.IsArray, parameterInfo.IsOut, parameterInfo.HasDefaultValue, defaultDisplay, isNodeAttributed, enumAttributeValue);
         }
 
-        internal class RuntimeCommand
+        /// <summary>
+        /// Bundles up the action and it's delegate (however this was collected) into one type for convenience.
+        /// Yarn Spinner itself thinks in terms of the <see cref="Yarn.Shared.Action"/> but when it comes time to actually invoke the action this type holds the necessary info to run the delegate.
+        /// </summary>
+        internal class RuntimeAction
         {
-            public RuntimeCommand(string name, Delegate @delegate, ActionType actionType)
+            internal RuntimeAction(string name, Delegate @delegate, ActionType actionType)
             {
                 // we make an action from the method info
                 // and it's possible we can make a valid action but one we can't invoke
@@ -290,7 +329,7 @@ namespace Yarn.Unity
                 Target = @delegate.Target;
             }
 
-            public RuntimeCommand(string name, MethodInfo method, ActionType actionType)
+            internal RuntimeAction(string name, MethodInfo method, ActionType actionType)
             {
                 // we make an action from the method info
                 // and it's possible we can make a valid action but one we can't invoke
@@ -309,8 +348,8 @@ namespace Yarn.Unity
                 Action = action;
             }
 
-            public string Name { get; set; }
-            public MethodInfo Method { get; set; }
+            internal string Name { get; set; }
+            internal MethodInfo Method { get; set; }
             private Shared.Action Action;
             private object? Target { get; set; }
 
@@ -535,7 +574,7 @@ namespace Yarn.Unity
                 }
             }
 
-            public IDispatchResult Invoke(IConvertible[] parameters, System.Threading.CancellationToken token)
+            internal IDispatchResult Invoke(IConvertible[] parameters, System.Threading.CancellationToken token)
             {
                 if (Action is InvalidAction)
                 {
@@ -676,7 +715,7 @@ namespace Yarn.Unity
                 return ProcessFunctionReturn(returnValue);
             }
 
-            public IDispatchResult Invoke(string[] parameters, LineCancellationToken token, MonoBehaviour dispatcher)
+            internal IDispatchResult Invoke(string[] parameters, LineCancellationToken token, MonoBehaviour dispatcher)
             {
                 if (Action is InvalidAction)
                 {
@@ -964,9 +1003,10 @@ namespace Yarn.Unity
             }
         }
 
-        private Dictionary<string, RuntimeCommand> _commands = new Dictionary<string, RuntimeCommand>();
-        private Dictionary<string, RuntimeCommand> _functions = new Dictionary<string, RuntimeCommand>();
+        private Dictionary<string, RuntimeAction> _commands = new Dictionary<string, RuntimeAction>();
+        private Dictionary<string, RuntimeAction> _functions = new Dictionary<string, RuntimeAction>();
 
+        /// <inheritdoc />
         public void AddCommandHandler(string commandName, Delegate handler)
         {
             if (commandName.Contains(' '))
@@ -985,10 +1025,11 @@ namespace Yarn.Unity
 #if YARN_SOURCE_GENERATION_DEBUG_LOGGING
                 Debug.Log($"Registering command {commandName}");
 #endif
-                _commands.Add(commandName, new RuntimeCommand(commandName, handler, ActionType.Command));
+                _commands.Add(commandName, new RuntimeAction(commandName, handler, ActionType.Command));
             }
         }
 
+        /// <inheritdoc />
         public void AddFunction(string name, Delegate implementation)
         {
             if (name.Contains(' '))
@@ -1006,9 +1047,9 @@ namespace Yarn.Unity
             Debug.Log($"Registering command {name} from method {implementation.Method.DeclaringType.FullName}.{implementation.Method.Name}");
 #endif
 
-            _functions.Add(name, new RuntimeCommand(name, implementation, ActionType.Function));
+            _functions.Add(name, new RuntimeAction(name, implementation, ActionType.Function));
         }
-        public void AddFunction(string name, MethodInfo implementation)
+        internal void AddFunction(string name, MethodInfo implementation)
         {
             if (name.Contains(' '))
             {
@@ -1025,9 +1066,10 @@ namespace Yarn.Unity
             Debug.Log($"Registering command {name} from method {implementation.Method.DeclaringType.FullName}.{implementation.Method.Name}");
 #endif
 
-            _functions.Add(name, new RuntimeCommand(name, implementation, ActionType.Function));
+            _functions.Add(name, new RuntimeAction(name, implementation, ActionType.Function));
         }
 
+        /// <inheritdoc />
         public void AddCommandHandler(string commandName, MethodInfo methodInfo)
         {
             if (commandName.Contains(' '))
@@ -1043,9 +1085,10 @@ namespace Yarn.Unity
             }
             else
             {
-                _commands.Add(commandName, new RuntimeCommand(commandName, methodInfo, ActionType.Command));
+                _commands.Add(commandName, new RuntimeAction(commandName, methodInfo, ActionType.Command));
             }
         }
+        /// <inheritdoc />
         public void RemoveCommandHandler(string commandName)
         {
             if (_commands.Remove(commandName) == false)
@@ -1054,6 +1097,7 @@ namespace Yarn.Unity
             }
         }
 
+        /// <inheritdoc />
         public void RemoveFunction(string name)
         {
             if (!_functions.ContainsKey(name))
@@ -1064,11 +1108,11 @@ namespace Yarn.Unity
             _functions.Remove(name);
         }
 
-        public bool CanInvoke(string functionName)
+        internal bool CanInvoke(string functionName)
         {
             return _functions.ContainsKey(functionName);
         }
-        public bool CanDispatch(string commandName)
+        internal bool CanDispatch(string commandName)
         {
             return _commands.ContainsKey(commandName);
         }
@@ -1094,7 +1138,7 @@ namespace Yarn.Unity
             }
         }
 
-        public async YarnTask<IConvertible> Invoke(string functionName, IConvertible[] parameters, System.Threading.CancellationToken token)
+        internal async YarnTask<IConvertible> Invoke(string functionName, IConvertible[] parameters, System.Threading.CancellationToken token)
         {
             if (_functions.TryGetValue(functionName, out var function))
             {
@@ -1166,11 +1210,6 @@ namespace Yarn.Unity
                 throw new ArgumentException($"Unable to correctly dispatch the {functionName} function it dispatched as a {result.GetType()}");
             }
             throw new ArgumentException($"Unable to find a function called {functionName}");
-        }
-
-        public void AddCommandHandler(string commandName, Func<object> handler)
-        {
-            this.AddCommandHandler(commandName, (Delegate)handler);
         }
     }
 }

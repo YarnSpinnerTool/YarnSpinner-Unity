@@ -21,11 +21,12 @@ namespace Yarn.Unity
     /// presenter should stop its delivery.
     /// </summary>
     /// <remarks>
-    /// <para>Dialogue presenters receive Line Cancellation Tokens as a parameter to
-    /// <see cref="DialoguePresenterBase.RunLineAsync"/>. Line Cancellation
-    /// Tokens indicate whether the user has requested that the line's delivery
-    /// should be hurried up, and whether the dialogue presenter should stop showing
-    /// the current line.</para>
+    /// <para>
+    /// Main use of this is for Dialogue presenters where they receive a Line Cancellation Tokens as a parameter to <see cref="DialoguePresenterBase.RunLineAsync"/>. Line Cancellation Tokens indicate whether the user has requested that the line's delivery should be hurried up, and whether the dialogue presenter should stop showing the current line.
+    /// </para>
+    /// <para>
+    /// While the main use of this type is for controlling lines (which have a generally agreed upon understanding or hurrying up and skipping) this type is provided as the cancellation mechanism for many different events on the <see cref="DialoguePresenterBase"/>.
+    /// </para>
     /// </remarks>
     public struct LineCancellationToken
     {
@@ -74,6 +75,9 @@ namespace Yarn.Unity
     public sealed partial class DialogueRunner : MonoBehaviour, IDialogueResponder
     {
         private AsyncDialogue? dialogue;
+        /// <summary>
+        /// The current dialogue for this runner.
+        /// </summary>
         public AsyncDialogue Dialogue
         {
             get
@@ -135,6 +139,9 @@ namespace Yarn.Unity
         /// Gets the VariableStorage that this dialogue runner uses to store and
         /// access Yarn variables.
         /// </summary>
+        /// <remarks>
+        /// If there is no variable storage set an <see cref="InMemoryVariableStorage"/> will be created and used instead.
+        /// </remarks>
         public VariableStorageBehaviour VariableStorage
         {
             get
@@ -220,6 +227,10 @@ namespace Yarn.Unity
         /// Whether the dialogue runner will immediately start running dialogue
         /// after loading.
         /// </summary>
+        /// <remarks>
+        /// If this is set the dialogue runner will wait one frame after <see cref="Start"/> is called and then start dialogue.
+        /// This one frame wait is due to some timing issues that can occur but if it is an issue disable this and manually call <see cref="RunDialogue"/> yourself on the first frame.
+        /// </remarks>
         [Group("Behaviour")]
         [Label("Start Automatically")]
         public bool autoStart = false;
@@ -278,9 +289,24 @@ namespace Yarn.Unity
             }
         }
 
+        /// <summary>
+        /// source for controlling if the current dialogue should be cancelled
+        /// </summary>
         private CancellationTokenSource? dialogueCancellationSource;
+        /// <summary>
+        /// source for controlling if the current content (so a line, command, etc) should be cancelled
+        /// </summary>
         private CancellationTokenSource? currentContentCancellationSource;
+        /// <summary>
+        /// source for controlling if the current content (so a line, command, etc) should be hurried up
+        /// </summary>
         private CancellationTokenSource? currentContentHurryUpSource;
+        /// <summary>
+        /// Used to control the completion event of stopping dialogue.
+        /// </summary>
+        /// <remarks>
+        /// Because the completion of stopping dialogue is calling <see cref="IDialogueResponder.HandleDialogueComplete"/> and we want this method to wait until then we use this to cause that behaviour.
+        /// </remarks>
         private YarnTaskCompletionSource? dialogueCancellationCompletion;
 
         /// <summary>
@@ -393,11 +419,13 @@ namespace Yarn.Unity
             dialogueCancellationSource?.Cancel();
         }
 
+        /// <inheritdoc />
         public async ValueTask PrepareForLines(List<string> lineIDs, CancellationToken token)
         {
             await this.LineProvider.PrepareForLinesAsync(lineIDs, token);
         }
 
+        /// <inheritdoc />
         public async ValueTask HandleDialogueComplete()
         {
             // cleaning up the old cancellation token
@@ -420,7 +448,7 @@ namespace Yarn.Unity
                 {
                     try
                     {
-                        await view.OnDialogueCompleteAsync();
+                        await view.OnDialogueCompleteAsync(this.destroyCancellationToken);
                     }
                     catch (System.Exception e)
                     {
@@ -441,6 +469,7 @@ namespace Yarn.Unity
             dialogueCancellationCompletion?.TrySetResult();
         }
 
+        /// <inheritdoc />
         public async ValueTask HandleNodeComplete(string node, CancellationToken token)
         {
             foreach (var presenter in dialoguePresenters)
@@ -459,6 +488,7 @@ namespace Yarn.Unity
             }
         }
 
+        /// <inheritdoc />
         public async ValueTask HandleNodeStart(string node, CancellationToken token)
         {
             foreach (var presenter in dialoguePresenters)
@@ -477,19 +507,19 @@ namespace Yarn.Unity
             }
         }
 
+        /// <inheritdoc />
         public bool CanCallFunction(string functionName)
         {
             return ActionInvoker.CanInvoke(functionName);
         }
 
+        /// <inheritdoc />
         public async ValueTask<IConvertible> InvokeFunction(string functionName, IConvertible[] parameters, CancellationToken token)
         {
             return await ActionInvoker.Invoke(functionName, parameters, token);
         }
 
-        // this one should be fundamentally changed IMO
-        // if only to be able to give commands a cancellation token
-        // but for now it just does what the current one does
+        /// <inheritdoc />
         public async ValueTask HandleCommand(Command command, CancellationToken token)
         {
             // if we have an existing cancellation source we will still dispose of it before creating a new one linked to the dialogue token
@@ -609,6 +639,7 @@ namespace Yarn.Unity
             currentContentHurryUpSource = null;
         }
 
+        /// <inheritdoc />
         public async ValueTask HandleLine(Line line, CancellationToken token)
         {
             var metaTokenSource = CancellationTokenSource.CreateLinkedTokenSource(dialogueCancellationSource?.Token ?? CancellationToken.None, token);
@@ -629,6 +660,7 @@ namespace Yarn.Unity
             await PresentLine(localisedLine, metaTokenSource.Token);
         }
 
+        /// <inheritdoc />
         public async ValueTask<int> HandleOptions(OptionSet options, CancellationToken token)
         {
             // if we have an existing cancellation source for this option group we will still dispose of it before creating a new one linked to the dialogue token
@@ -789,19 +821,37 @@ namespace Yarn.Unity
             Dialogue.Program = project.Program;
         }
 
+        /// <summary>
+        /// Starts running a node of dialogue.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method asks the runner to begin dialogue and then returns immediately.
+        /// This means your presenters may not yet have been told that dialogue has started by the time this method finishes.
+        /// </para>
+        /// <para>
+        /// Where possible we recommend that you initiate dialogue with <see cref="RunDialogue"/> which holds until the dialogue finishes entirely before returning.
+        /// </para>
+        /// </remarks>
+        /// <param name="nodeName">The node to start dialogue from</param>
         [System.Obsolete("This method kicks off dialogue but doesn't await it's completion. Prefer RunDialogue where possible")]
         public void StartDialogue(string nodeName)
         {
             RunDialogue(nodeName).Forget();
         }
-
+        
         /// <summary>
         /// Starts running a node of dialogue.
         /// </summary>
-        /// <remarks><paramref name="nodeName"/> must be the name of a node in
-        /// <see cref="YarnProject"/>.</remarks>
+        /// <remarks>
+        /// <paramref name="nodeName"/> must be the name of a node in <see cref="YarnProject"/>.
+        /// <para>
+        /// This task that starts will run the entire duration of the dialogue.
+        /// Essentially this task will only complete once the dialogue ends or <see cref="Stop()"/> is called.
+        /// </para>
+        /// </remarks>
         /// <param name="nodeName">The name of the node to run.</param>
-        public async YarnTask RunDialogue(string nodeName)
+        public async YarnTask RunDialogue(string nodeName, CancellationToken cancellationToken = default)
         {
             if (yarnProject == null)
             {
@@ -824,7 +874,7 @@ namespace Yarn.Unity
                 return;
             }
 
-            dialogueCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(this.destroyCancellationToken);
+            dialogueCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, this.destroyCancellationToken);
             LineProvider.YarnProject = yarnProject;
 
             Dialogue.Program = yarnProject.Program;
@@ -843,7 +893,7 @@ namespace Yarn.Unity
                 {
                     continue;
                 }
-                tasks.Add(view.OnDialogueStartedAsync());
+                tasks.Add(view.OnDialogueStartedAsync(dialogueCancellationSource.Token));
             }
             await YarnTask.WhenAll(tasks);
 
@@ -856,7 +906,17 @@ namespace Yarn.Unity
             dialogueCancellationSource = null;
         }
 
-
+        /// <summary>
+        /// Requests that presenters stop showing the current content (be that line, command, or option), and prepare to show the next piece of content.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The specific behaviour of what happens when this method is called depends on the implementation of the Dialogue Runner's current dialogue presenters.
+        /// </para>
+        /// <para>
+        /// If the dialogue runner is not currently running dialogue at all, this method has no effect.
+        /// </para>
+        /// </remarks>
         public void RequestNextContent()
         {
             currentContentCancellationSource?.Cancel();
@@ -865,24 +925,23 @@ namespace Yarn.Unity
         /// Requests that all dialogue presenters stop showing the current line, and
         /// prepare to show the next piece of content.
         /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The specific behaviour of what happens when this method is called
-        /// depends on the implementation of the Dialogue Runner's current
-        /// dialogue presenters.
-        /// </para>
-        /// <para>
-        /// If the dialogue runner is not currently running a line (for example,
-        /// if it is running options, or is not running dialogue at all), this
-        /// method has no effect.
-        /// </para>
-        /// </remarks>
         [Obsolete("This method has been superceded by RequestNextContent and now forwards calls to that")]
         public void RequestNextLine()
         {
             RequestNextContent();
         }
 
+        /// <summary>
+        /// Requests that all dialogue presenters speed up their delivery of the current content.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The specific behaviour of what happens when this method is called depends on the implementation of the Dialogue Runner's current dialogue presenters.
+        /// </para>
+        /// <para>
+        /// If the dialogue runner is not currently running dialogue this method has no effect.
+        /// </para>
+        /// </remarks>
         public void RequestHurryUpContent()
         {
             currentContentHurryUpSource?.Cancel();
@@ -891,24 +950,15 @@ namespace Yarn.Unity
         /// Requests that all dialogue presenters speed up their delivery of the
         /// current line.
         /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The specific behaviour of what happens when this method is called
-        /// depends on the implementation of the Dialogue Runner's current
-        /// dialogue presenters.
-        /// </para>
-        /// <para>
-        /// If the dialogue runner is not currently running a line (for example,
-        /// if it is running options, or is not running dialogue at all), this
-        /// method has no effect.
-        /// </para>
-        /// </remarks>
         [Obsolete("This method has been superceded by RequestHurryUpContent and now forwards calls to that")]
         public void RequestHurryUpLine()
         {
             RequestHurryUpContent();
         }
 
+        /// <summary>
+        /// Requests that all dialogue presenters speed up their delivery of the current option group
+        /// </summary>
         [Obsolete("This method has been superceded by RequestHurryUpContent and now forwards calls to that")]
         public void RequestHurryUpOption()
         {

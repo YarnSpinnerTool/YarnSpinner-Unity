@@ -34,6 +34,9 @@ namespace Yarn.Unity
         /// </summary>
         public string NativeName;
 
+        /// <summary>
+        /// Is the locale a neutral culture (so a language that isn't tied specifically to a region or people) as is defined in the spec
+        /// </summary>
         public bool IsNeutralCulture;
 
         internal System.Globalization.CultureInfo? CultureInfo

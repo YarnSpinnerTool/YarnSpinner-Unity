@@ -23,11 +23,18 @@ namespace Yarn.Unity
         [SerializeField] internal Color colour;
     }
 
+    /// <summary>
+    /// Represents a single item (so a choice that can be made) in a group of options.
+    /// Is used by the <see cref="OptionsPresenter"/> to populate it's UI with choices for the player to make
+    /// </summary>
     public sealed class OptionItem : UnityEngine.UI.Selectable, ISubmitHandler, IPointerClickHandler, IPointerEnterHandler
     {
         [MustNotBeNull, SerializeField] TextMeshProUGUI? text;
         [SerializeField] UnityEngine.UI.Image? selectionImage;
 
+        /// <summary>
+        /// Because the Unity UI is not async aware we use completion sources to create an async behaviour in this class and the others that call into it
+        /// </summary>
         [Group("Appearance"), SerializeField] InternalAppearance normal;
         [Group("Appearance"), SerializeField] InternalAppearance selected;
         [Group("Appearance"), SerializeField] InternalAppearance disabled;
@@ -35,11 +42,18 @@ namespace Yarn.Unity
         [Group("Appearance"), SerializeField] bool disabledStrikeThrough = true;
 
         public YarnTaskCompletionSource<DialogueOption?>? OnOptionSelected;
+        /// <summary>
+        /// Token provided by the <see cref="OptionsPresenter"/> to control if this content should be cancelled or not.
+        /// Will be set cancelled if another option item is chosen.
+        /// </summary>
         public System.Threading.CancellationToken completionToken;
 
         private bool hasSubmittedOptionSelection = false;
 
         private DialogueOption? _option;
+        /// <summary>
+        /// Configures the necessary UI and async machinery of this class when given an option
+        /// </summary>
         public DialogueOption Option
         {
             get
@@ -112,6 +126,7 @@ namespace Yarn.Unity
             }
         }
 
+        /// <inheritdoc />
         public override void OnSelect(BaseEventData eventData)
         {
             base.OnSelect(eventData);
@@ -119,6 +134,7 @@ namespace Yarn.Unity
             ApplyStyle(selected);
         }
 
+        /// <inheritdoc />
         public override void OnDeselect(BaseEventData eventData)
         {
             base.OnDeselect(eventData);
@@ -126,6 +142,9 @@ namespace Yarn.Unity
             ApplyStyle(normal);
         }
 
+        /// <summary>
+        /// A wrapper around the weird highlight detection of unitys UI
+        /// </summary>
         new public bool IsHighlighted
         {
             get
@@ -134,12 +153,18 @@ namespace Yarn.Unity
             }
         }
 
-        // If we receive a submit or click event, invoke our "we just selected this option" handler.
+        /// <summary>
+        /// If we receive a submit or click event, invoke our "we just selected this option" handler.
+        /// </summary>
+        /// <param name="eventData">the event that triggered selection</param>
         public void OnSubmit(BaseEventData eventData)
         {
             InvokeOptionSelected();
         }
 
+        /// <summary>
+        /// Handles selecting the option and passing this information back up through to the presenter
+        /// </summary>
         public void InvokeOptionSelected()
         {
             // turns out that Selectable subclasses aren't intrinsically interactive/non-interactive
@@ -159,13 +184,16 @@ namespace Yarn.Unity
             }
         }
 
+        /// <inheritdoc />
         public void OnPointerClick(PointerEventData eventData)
         {
             InvokeOptionSelected();
         }
 
-        // If we mouse-over, we're telling the UI system that this element is
-        // the currently 'selected' (i.e. focused) element. 
+        /// <remarks>
+        /// If we mouse-over, we're telling the UI system that this element is the currently 'selected' (i.e. focused) element.  
+        /// </remarksy>
+        /// <inheritdoc />
         public override void OnPointerEnter(PointerEventData eventData)
         {
             base.Select();
