@@ -8,7 +8,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UIElements;
 using Yarn.Unity.Attributes;
 
@@ -408,6 +407,7 @@ namespace Yarn.Unity
 
             await dialogueCancellationCompletion.Task;
             dialogueCancellationCompletion = null;
+            dialogueCancellationSource = null;
         }
 
         /// <summary>
@@ -416,7 +416,26 @@ namespace Yarn.Unity
         /// </summary>
         private void OnDestroy()
         {
-            dialogueCancellationSource?.Cancel();
+            dialogueCancellationSource?.Dispose();
+            dialogueCancellationSource = null;
+        }
+
+        /// <summary>
+        /// Adds the new presenter into the collection of dialogue presenters the runner will inform of important dialogue events.
+        /// </summary>
+        /// <param name="presenter">the new presenter to add</param>
+        public void AddPresenter(DialoguePresenterBase presenter)
+        {
+            dialoguePresenters.Add(presenter);
+        }
+        /// <summary>
+        /// Removes the requested parameter from the collection of presenters
+        /// </summary>
+        /// <param name="presenter">the presenter to remove</param>
+        /// <returns>true if the presenter was in the collection, false otherwise</returns>
+        public bool RemovePresenter(DialoguePresenterBase presenter)
+        {
+            return dialoguePresenters.Remove(presenter);
         }
 
         /// <inheritdoc />
@@ -433,6 +452,7 @@ namespace Yarn.Unity
             currentContentCancellationSource = null;
             currentContentHurryUpSource?.Dispose();
             currentContentHurryUpSource = null;
+            dialogueCancellationSource?.Dispose();
 
             var pendingTasks = new HashSet<YarnTask>();
             foreach (var view in this.dialoguePresenters)
@@ -687,6 +707,10 @@ namespace Yarn.Unity
             DialogueOption[] localisedOptions = new DialogueOption[options.Options.Length];
             for (int i = 0; i < options.Options.Length; i++)
             {
+                if (currentContentCancellationSource.Token.IsCancellationRequested)
+                {
+                    throw new OperationCanceledException();
+                }
                 var opt = options.Options[i];
                 LocalizedLine localizedLine = await LineProvider.GetLocalizedLineAsync(opt.Line, currentContentCancellationSource.Token);
                 localizedLine.Source = this;

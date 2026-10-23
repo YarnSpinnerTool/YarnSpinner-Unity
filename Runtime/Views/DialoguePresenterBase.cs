@@ -27,7 +27,7 @@ namespace Yarn.Unity
     /// </para>
     /// <para>
     /// While the main focus of Dialogue Presenters is on the <i>presentation</i> of content to the user they also are informed of a much wider gamut of important dialogue events.
-    /// There is no restriction or limitation on what you do with your Dialogue Presenters other than with the exception of Options you cannot use them to <b>influence</b> how the dialogue works.
+    /// There is no restriction or limitation on what you do with your Dialogue Presenters, other than with the exception of Options, you cannot use them to <b>influence</b> how the dialogue works.
     /// Think of Dialogue Presenters as a read-only responder to your story.
     /// </para>
     /// </remarks>
@@ -61,7 +61,7 @@ namespace Yarn.Unity
         /// <returns>A task that completes when the dialogue presenter has finished showing the line to the user.</returns>
         /// <seealso cref="RunOptionsAsync(DialogueOption[],
         /// CancellationToken)"/>
-        public abstract YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token);
+        public virtual YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token) => YarnTask.CompletedTask;
 
         /// <summary>
         /// Called by the <see cref="DialogueRunner"/> to signal that a set of options should be displayed to the user.
@@ -91,10 +91,7 @@ namespace Yarn.Unity
         /// <returns>A task that indicates which option was selected, or that this dialogue presenter did not select an option.</returns>
         /// <seealso cref="RunLineAsync(LocalizedLine, LineCancellationToken)"/>
         /// <seealso cref="YarnAsync.NoOptionSelected"/> 
-        public virtual YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, LineCancellationToken cancellationToken)
-        {
-            return YarnTask<DialogueOption?>.FromResult(null);
-        }
+        public virtual YarnTask<DialogueOption?> RunOptionsAsync(DialogueOption[] dialogueOptions, LineCancellationToken cancellationToken) => YarnTask<DialogueOption?>.FromResult(null);
 
         /// <summary>
         /// Called by the dialogue runner whenever a command is encountered in the dialogue.
@@ -111,10 +108,7 @@ namespace Yarn.Unity
         /// </remarks>
         /// <param name="command">The command. It's values come entirely from the Yarn</param>
         /// <param name="cancellationToken">The cancellation token for this task, if cancelled this method should finish as soon as possible.</param>
-        public virtual YarnTask RunCommand(Command command, LineCancellationToken cancellationToken)
-        {
-            return YarnTask.CompletedTask;
-        }
+        public virtual YarnTask RunCommand(Command command, LineCancellationToken cancellationToken) => YarnTask.CompletedTask;
 
         /// <summary>Called by the <see cref="DialogueRunner"/> to signal that dialogue has started.</summary>
         /// <remarks>
@@ -129,7 +123,11 @@ namespace Yarn.Unity
         /// </remarks>
         /// <param name="token">The cancellation token for this task, if cancelled this method should finish as soon as possible.</param>
         /// <returns>A task that represents any work done by this dialogue presenter in order to get ready for dialogue to run.</returns>
-        public abstract YarnTask OnDialogueStartedAsync(CancellationToken token);
+        public virtual YarnTask OnDialogueStartedAsync(CancellationToken token) => YarnTask.CompletedTask;
+
+        /// <inheritdoc cref="OnDialogueStartedAsync(CancellationToken)" />
+        [System.Obsolete("This method is deprecated in favour of OnDialogueStartedAsync(CancellationToken)")]
+        public virtual YarnTask OnDialogueStartedAsync() => OnDialogueCompleteAsync(CancellationToken.None);
 
         /// <summary>
         /// Called by the <see cref="DialogueRunner"/> to signal that the dialogue has ended, and no more content will be delivered.
@@ -147,7 +145,11 @@ namespace Yarn.Unity
         /// </remarks>
         /// <param name="token">The cancellation token for this task, if cancelled this method should finish as soon as possible.</param>
         /// <returns>A task that represents any work done by this dialogue presenter in order to clean up after running dialogue.</returns>
-        public abstract YarnTask OnDialogueCompleteAsync(CancellationToken token);
+        public virtual YarnTask OnDialogueCompleteAsync(CancellationToken token) => YarnTask.CompletedTask;
+
+        /// <inheritdoc cref="OnDialogueCompleteAsync(CancellationToken)" />
+        [System.Obsolete("This method is deprecated in favour of OnDialogueCompleteAsync(CancellationToken)")]
+        public virtual YarnTask OnDialogueCompleteAsync() => OnDialogueCompleteAsync(CancellationToken.None);
 
         /// <summary>
         /// Called by the <see cref="DialogueRunner"/> when a node is entered.
@@ -160,7 +162,7 @@ namespace Yarn.Unity
         /// </remarks>
         /// <param name="nodeName">the node being entered</param>
         /// <param name="token">The cancellation token for this task, if cancelled this method should finish as soon as possible.</param>
-        public virtual YarnTask OnNodeEnter(string nodeName, CancellationToken token = default) { return YarnTask.CompletedTask; }
+        public virtual YarnTask OnNodeEnter(string nodeName, CancellationToken token = default) => YarnTask.CompletedTask;
 
          /// <summary>
         /// Called by the <see cref="DialogueRunner"/> when a node is exited.
@@ -173,7 +175,7 @@ namespace Yarn.Unity
         /// </remarks>
         /// <param name="nodeName">the node being exited</param>
         /// <param name="token">The cancellation token for this task, if cancelled this method should finish as soon as possible.</param>
-        public virtual YarnTask OnNodeExit(string nodeName, CancellationToken token = default) { return YarnTask.CompletedTask; }
+        public virtual YarnTask OnNodeExit(string nodeName, CancellationToken token = default) => YarnTask.CompletedTask;
 
         /// <summary>
         /// The typewriter is the object that is responsible for controlling the timing of visual presentation content.

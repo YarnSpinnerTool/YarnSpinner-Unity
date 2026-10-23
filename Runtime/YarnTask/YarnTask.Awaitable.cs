@@ -252,6 +252,14 @@ namespace Yarn.Unity
             return new YarnTask<T> { Awaitable = awaitable };
         }
 
+        /// this feels like such a hack... surely this has consequences?
+        private static async Awaitable<T> AwaitableFromTask(System.Threading.Tasks.Task<T> task) => await task;
+        public static implicit operator YarnTask<T>(System.Threading.Tasks.Task<T> task)
+        {
+            return new YarnTask<T> { Awaitable = AwaitableFromTask(task) };
+        }
+
+
 #if USE_UNITASK
         public static implicit operator YarnTask<T>(Cysharp.Threading.Tasks.UniTask<T> uniTask)
         {

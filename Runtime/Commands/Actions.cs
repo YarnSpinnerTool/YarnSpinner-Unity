@@ -98,7 +98,9 @@ namespace Yarn.Unity
         {
             typeof(Yarn.Unity.YarnTask<>),
             typeof(System.Threading.Tasks.Task<>),
+#if USE_UNITASK
             typeof(Cysharp.Threading.Tasks.UniTask<>),
+#endif
             typeof(UnityEngine.Awaitable<>),
         };
         private static Dictionary<Type, ReturnType> basicReturns = new()
