@@ -8,22 +8,98 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Yarn Projects now support specifying which style line tagger to use
-  - You can create your own by conforming to the `ILineTagGenerator` interface
-- Warning severity diagnostics are now logged
-  - similar to errors due to quirks of Unity we can't prevent these being wiped from the console
-  - the Yarn Project will keep any relevant warnings within it however if you need to resummon them.
+- Added Rewired integration to Yarn Spinner+.
+- Added filtering in `[YarnNode]` dropdowns (thanks to  [Shane Marks](https://github.com/unknowndevice)!).
+  - You can now limit which nodes appear in the Inspector by specifying a filter string in `YarnNode`-attributed strings.
+  - To filter the list, provide a `filter` parameter on your `[YarnNode]` attribute:
+    ```csharp
+    public YarnProject project;
+
+    // Only show nodes in 'project' whose title contains 'Start'
+    [YarnNode(nameof(project), filter: "Start")]
+    public string node;
+    ```
+  - You can customise how the filtering is done by providing a `filterType`:
+    ```csharp
+    // Only show nodes whose titles contain "Start" (this is the default)
+    [YarnNode(nameof(project), filterType: YarnNodeFilter.Contains, filter: "Start")]
+    
+    // Only show nodes whose titles start with "Entry"
+    [YarnNode(nameof(project), filterType: YarnNodeFilter.StartsWith, filter: "Entry")]
+    
+    // Only show nodes whose titles end with "Entry"
+    [YarnNode(nameof(project), filterType: YarnNodeFilter.EndsWith, filter: "Entry")]
+
+    // Only show nodes whose titles match the regular expression "Test[0-9]+"
+    [YarnNode(nameof(project), filterType: YarnNodeFilter.MatchesRegex, filter: "Test[0-9]+")]
+    ```
+  - You can customise which header to filter on. By default, nodes will be filtered based on their `title`, but you can specify most other headers, including `tags`, `cluster` or your own custom headers.
+    ```csharp
+    // Only show nodes whose colour in the editor is red
+    [YarnNode(nameof(project), filterHeader: "color", filter: "red")]
+    ```
+  - Filtering is case-sensitive for all filter types except `YarnNodeFilter.MatchesRegex`.
+- Paths in generated YSLS files now use a consistent path separator (the forward slash `/`), independent of the current operating system.
+- `YarnNode` and `DialogueReference` now sort their nodes alphabetically.
+
+## [3.2.8]
+
+- Updated Yarn Spinner DLLs to target .NET Standard 2.1.
+- Removed a number of unnecessary .NET Standard 2.0 supporting DLLs.
+- Fixed an issue where IL2CPP builds would fail on Unity 6.5.
+
+## [3.2.7] 2026-07-04
 
 ### Changed
 
-- YSLS files are now generated with paths set relative to the project root
-  - if the root can't be determined it will still use full path
-- `VariableStorageBehaviour` can now add change listeners for variable defined outside of Yarn
-- Fixed a bug where empty or whitespace only file paths in diagnostics could cause importing to break and throw exceptions
-- Yarn diagnostics generated during import now have their line number set which should let the editor jump directly to them where possible.
-- Fixed a bug that prevented sorting Unity Loc tables.
+- Fixed an issue where Yarn Spinner would fail to compile if the Input System was not enabled.
 
-### Removed
+## [3.2.6] 2026-07-03
+
+### Changed
+
+- Fixed an issue in the GitHub release where the built DLL didn't include v3.2.5's changes.
+
+## [3.2.5] 2026-07-03
+
+### Changed
+
+- Moved the input handling logic for `LineAdvancer` out to separate components, and made `LineAdvancer` add and remove those components depending on which mode is selected.
+- Fixed a compile error when the legacy input manager is not available.
+- Fixed an issue where YSLS files were not being written to disk.
+
+## [3.2.4] 2026-06-01
+
+### Added
+
+- Added Snaaake to Yarn Spinner+.
+- Added Classic RPG to Yarn Spinner+.
+
+### Changed
+
+- VoiceOverPresenter now no longer requires that the line's `Source` be a `DialogueRunner` in order to signal that the line should be ended at the end of playback, and instead requires that it be a new interface `IRequestLineCancellation`.
+  - Made `DialogueRunner` implement `IRequestLineCancellation`.
+  - This feature exists to support some upcoming new features.
+- Fixed a crash when importing `.yarn` files in Unity 2022.3.
+
+## [3.2.3] 2026-05-05
+
+### Added
+
+- Yarn Projects now support specifying which style line tagger to use.
+  - You can create your own by conforming to the `ILineTagGenerator` interface.
+- Warning severity diagnostics are now logged.
+  - Similar to error-level severity, due to quirks of Unity, we can't prevent these being wiped from the console.
+  - The Yarn Project will keep any relevant warnings within it however if you need to resummon them.
+
+### Changed
+
+- YSLS files are now generated with paths set relative to the project root.
+  - If the root of the project can't be determined, it will still use full path.
+- `VariableStorageBehaviour` can now add change listeners for variable defined outside of Yarn
+- Fixed a bug where empty or whitespace only file paths in diagnostics could cause importing to break and throw exceptions.
+- Yarn diagnostics generated during import now have their line number set which should let the editor jump directly to them where possible.
+- Fixed a bug that prevented sorting Unity Localization tables.
 
 ## [3.2.2] 2026-04-03
 

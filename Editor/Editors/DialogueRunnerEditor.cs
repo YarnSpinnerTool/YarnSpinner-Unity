@@ -883,6 +883,30 @@ namespace Yarn.Unity.Editor
     [CustomEditor(typeof(BuiltinLocalisedLineProvider))]
     public class BuiltinLocalisedLineProviderEditor : YarnEditor { }
 
+    namespace LineAdvancerInput
+    {
+        /// <summary>
+        /// The editor for <see cref="Yarn.Unity.LineAdvancerInput.InputActions"/> objects.
+        /// </summary>
+        [CanEditMultipleObjects]
+        [CustomEditor(typeof(Yarn.Unity.LineAdvancerInput.InputActions))]
+        public class InputActionsEditor : YarnEditor { }
+
+        /// <summary>
+        /// The editor for <see cref="Yarn.Unity.LineAdvancerInput.InputActions"/> objects.
+        /// </summary>
+        [CanEditMultipleObjects]
+        [CustomEditor(typeof(Yarn.Unity.LineAdvancerInput.KeyCodes))]
+        public class KeyCodesEditor : YarnEditor { }
+
+        /// <summary>
+        /// The editor for <see cref="Yarn.Unity.LineAdvancerInput.LegacyInputAxes"/> objects.
+        /// </summary>
+        [CanEditMultipleObjects]
+        [CustomEditor(typeof(Yarn.Unity.LineAdvancerInput.LegacyInputAxes))]
+        public class LegacyInputAxesEditor : YarnEditor { }
+    }
+
     /// <summary>
     /// The editor for <see cref="DialogueRunner"/> objects.
     /// </summary>

@@ -802,7 +802,7 @@ namespace Yarn.Unity
                         throw new OperationCanceledException();
                     }
                     else
-                    {    
+                    {
                         // None of our option views returned an option, and our dialogue wasn't cancelled, and we've said we don't want to do fallthrough.
                         // That's not allowed, because we don't know what to do next!
                         Debug.LogError($"All presenters have returned from {nameof(DialoguePresenterBase.RunOptionsAsync)} but none returned an option, and fallthrough is disabled. This is not allowed.");
@@ -863,7 +863,7 @@ namespace Yarn.Unity
         {
             RunDialogue(nodeName).Forget();
         }
-        
+
         /// <summary>
         /// Starts running a node of dialogue.
         /// </summary>
@@ -988,5 +988,6 @@ namespace Yarn.Unity
         {
             RequestHurryUpContent();
         }
+
     }
 }

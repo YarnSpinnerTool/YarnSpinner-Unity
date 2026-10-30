@@ -1732,6 +1732,13 @@
             'random' and 'dice'.
             </summary>
         </member>
+        <member name="M:Yarn.StandardLibrary.AllFunctions">
+            <summary>
+            Creates all function definitions of the built in functions
+            </summary>
+            <returns>A dictionary of every function and it's definition keyed by name</returns>
+            <exception cref="T:System.ArgumentException">If an expected function doesn't exist</exception>
+        </member>
         <member name="M:Yarn.StandardLibrary.GenerateUniqueVisitedVariableForNode(System.String)">
             <summary>
             Generates a unique tracking variable name.
@@ -1770,6 +1777,24 @@
             <param name="node">the node that contains the once block.</param>
             <param name="lineNumber">The line number in the editor that opens the once block.</param>
             <returns>A variable name.</returns>
+        </member>
+        <member name="M:Yarn.StandardLibrary.TryGetFunction(System.String,Yarn.FunctionType@)">
+            <summary>
+            Finds the definition (so the parameters and return) for the requested function
+            </summary>
+            <param name="functionName">the name of the function</param>
+            <param name="function">The function definition</param>
+            <returns>true if the function has a definition</returns>
+        </member>
+        <member name="M:Yarn.StandardLibrary.CallFunc(System.String,Yarn.Value[],System.Threading.CancellationToken)">
+            <summary>
+            Invoke the function
+            </summary>
+            <param name="functionName">The name of the function</param>
+            <param name="parameters">the list of parameters the function needs</param>
+            <param name="token">Cancellation token to use</param>
+            <returns>The Yarn Value that is the result of the function</returns>
+            <exception cref="T:System.ArgumentException">If the function doesn't exist in the standard library</exception>
         </member>
         <member name="T:Yarn.Operator">
             <summary>

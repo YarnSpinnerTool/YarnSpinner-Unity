@@ -90,12 +90,13 @@ namespace Yarn.Unity.Editor
             var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
 
-            var extension = System.IO.Path.GetExtension(ctx.assetPath);
+            var assetPath = ctx.assetPath;
+            var extension = System.IO.Path.GetExtension(assetPath);
 
             if (extension == ".yarn")
             {
                 // Import this file as a TextAsset.
-                var textAsset = new TextAsset(File.ReadAllText(ctx.assetPath));
+                var textAsset = new TextAsset(File.ReadAllText(assetPath));
                 ctx.AddObjectToAsset("Script", textAsset, YarnEditorUtility.GetYarnDocumentIconTexture());
                 ctx.SetMainObject(textAsset);
 
@@ -113,7 +114,7 @@ namespace Yarn.Unity.Editor
                     .Where(importer =>
                     {
                         var dependencies = AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(importer));
-                        var importerDependsOnThisAsset = dependencies.Contains(ctx.assetPath);
+                        var importerDependsOnThisAsset = dependencies.Contains(assetPath);
                         return importerDependsOnThisAsset == false;
                     });
 

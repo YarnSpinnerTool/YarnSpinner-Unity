@@ -2,7 +2,9 @@
 Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using Yarn.Unity.Attributes;
@@ -41,7 +43,7 @@ namespace Yarn.Unity
 
             while (true)
             {
-                string testPath;
+                string? testPath;
 
                 if (propertyPathComponents.Count == 0)
                 {
@@ -234,7 +236,69 @@ namespace Yarn.Unity
                             });
                         }
 
-                        foreach (var node in GetNodes(project))
+                        System.Text.RegularExpressions.Regex? filterRegex = null;
+                        if (attribute.filterType == YarnNodeFilter.MatchesRegex)
+                        {
+                            try
+                            {
+                                filterRegex = new(attribute.filter);
+                            }
+                            catch (ArgumentException)
+                            {
+                                menu.AddDisabledItem(new GUIContent("Filter regex is invalid!"));
+                            }
+                        }
+
+                        IEnumerable<Node>? filteredNodes;
+
+                        if (string.IsNullOrEmpty(attribute.filter) || attribute.filterType == YarnNodeFilter.None)
+                        {
+                            // No filter; show all nodes
+                            filteredNodes = GetNodes(project);
+                        }
+                        else
+                        {
+                            // Limit which nodes to show based on the filter
+                            filteredNodes = GetNodes(project).Where(node =>
+                            {
+                                var name = node.Name;
+
+                                var filteredHeader = attribute.filterHeader switch
+                                {
+                                    null => name,
+                                    "title" => name,
+                                    string headerName => GetHeader(node, headerName) ?? ""
+                                };
+
+                                if (!string.IsNullOrEmpty(attribute.filter) && attribute.filterType != YarnNodeFilter.None)
+                                {
+                                    var filter = attribute.filter?.ToLower().Replace('-', '_');
+
+                                    switch (attribute.filterType)
+                                    {
+                                        case YarnNodeFilter.Contains:
+                                            if (!filteredHeader.ToLower().Contains(filter)) { return false; }
+                                            break;
+                                        case YarnNodeFilter.StartsWith:
+                                            if (!filteredHeader.ToLower().StartsWith(filter)) { return false; }
+                                            break;
+                                        case YarnNodeFilter.EndsWith:
+                                            if (!filteredHeader.ToLower().EndsWith(filter)) { return false; }
+                                            break;
+                                        case YarnNodeFilter.MatchesRegex when filterRegex != null:
+                                            if (!filterRegex.IsMatch((string?)filteredHeader)) { return false; }
+                                            break;
+                                        default:
+                                            // Unknown filter type; show it
+                                            return true;
+                                    }
+                                }
+
+                                return true;
+                            });
+                        }
+
+                        foreach (var node in filteredNodes.OrderBy(n => n.Name))
                         {
                             var name = node.Name;
 
@@ -282,6 +346,18 @@ namespace Yarn.Unity
                     yield return node;
                 }
             }
+        }
+
+        private static string? GetHeader(Node n, string headerName)
+        {
+            foreach (var header in n.Headers)
+            {
+                if (header.Key == headerName)
+                {
+                    return header.Value;
+                }
+            }
+            return null;
         }
 
         private static bool ShouldEndEditing(string controlName)

@@ -253,6 +253,38 @@ namespace Yarn.Unity.Editor
         }
 
         /// <summary>
+        /// Gets the Yarn string table produced as a result of compiling the Yarn
+        /// Project, or <see langword="null"/> if no string table could be produced.
+        /// </summary>
+        private Dictionary<string, StringInfo>? GetYarnStringTable()
+        {
+            Project project;
+            try
+            {
+                project = Project.LoadFromFile(this.assetPath);
+            }
+            catch (System.Exception)
+            {
+                return null;
+            }
+
+            var job = CompilationJob.CreateFromFiles(project.SourceFiles);
+            job.LanguageVersion = project.FileVersion;
+            job.CompilationType = CompilationJob.Type.StringsOnly;
+
+            try
+            {
+                var compilationResult = Compiler.Compiler.Compile(job);
+
+                return new(compilationResult.StringTable);
+            }
+            catch (System.Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Called by Unity to import an asset.
         /// </summary>
         /// <param name="ctx">The context for the asset import
@@ -518,7 +550,7 @@ namespace Yarn.Unity.Editor
                             foreach (var warning in warningGroup)
                             {
                                 var relativeWarningFileName = GetRelativePath(warning.FileName);
-                                
+
                                 // some warnings don't seem to have line numbers?
                                 if (warning.Range.Start.Line == -1)
                                 {
@@ -796,65 +828,65 @@ namespace Yarn.Unity.Editor
                 WriteLine($"public static class {enumType.Name}EnumHelper");
                 Open();
 
-                    var backingType = enumType.RawType == Types.Number ? "int" : "string";
-                    WriteLine($"public static bool TryGet{enumType.Name}FromBacking({backingType} backingInput, out {enumType.Name} {enumType.Name.ToLower()})");
-                    Open();
+                var backingType = enumType.RawType == Types.Number ? "int" : "string";
+                WriteLine($"public static bool TryGet{enumType.Name}FromBacking({backingType} backingInput, out {enumType.Name} {enumType.Name.ToLower()})");
+                Open();
 
-                        WriteLine("switch (backingInput)");
-                        Open();
-                        foreach (var @case in enumType.EnumCases)
-                        {
-                            if (enumType.RawType == Types.Number)
-                            {
-                                WriteLine($"case {@case.Value.Value}:");
-                            }
-                            else if (enumType.RawType == Types.String)
-                            {
-                                WriteLine($"case \"{@case.Value.Value}\":");
-                            }
-                            else
-                            {
-                                throw new System.ArgumentException($"Invalid Yarn enum raw type {enumType.RawType}");
-                            }
-                            indentLevel += 1;
-                            WriteLine($"{enumType.Name.ToLower()} = {enumType.Name}.{@case.Key};");
-                            WriteLine("return true;");
-                            indentLevel -= 1;
+                WriteLine("switch (backingInput)");
+                Open();
+                foreach (var @case in enumType.EnumCases)
+                {
+                    if (enumType.RawType == Types.Number)
+                    {
+                        WriteLine($"case {@case.Value.Value}:");
+                    }
+                    else if (enumType.RawType == Types.String)
+                    {
+                        WriteLine($"case \"{@case.Value.Value}\":");
+                    }
+                    else
+                    {
+                        throw new System.ArgumentException($"Invalid Yarn enum raw type {enumType.RawType}");
+                    }
+                    indentLevel += 1;
+                    WriteLine($"{enumType.Name.ToLower()} = {enumType.Name}.{@case.Key};");
+                    WriteLine("return true;");
+                    indentLevel -= 1;
 
-                        }
-                        Close();
+                }
+                Close();
 
-                        WriteLine();
-                        WriteLine($"{enumType.Name.ToLower()} = default;");
-                        WriteLine("return false;");
+                WriteLine();
+                WriteLine($"{enumType.Name.ToLower()} = default;");
+                WriteLine("return false;");
 
-                    Close();
+                Close();
 
-                    WriteLine($"public static bool TryGet{enumType.Name}ByName(string name, out {enumType.Name} {enumType.Name.ToLower()})");
-                    Open();
-                        WriteComment("because in yarn both EnumType.Value and .Value are valid forms of the enum we need to test if we are the short or full form first.");
-                        WriteLine("if (name.StartsWith('.'))");
-                        Open();
-                            WriteLine($"name = $\"{enumType.Name}{{name}}\";");
-                        Close();
+                WriteLine($"public static bool TryGet{enumType.Name}ByName(string name, out {enumType.Name} {enumType.Name.ToLower()})");
+                Open();
+                WriteComment("because in yarn both EnumType.Value and .Value are valid forms of the enum we need to test if we are the short or full form first.");
+                WriteLine("if (name.StartsWith('.'))");
+                Open();
+                WriteLine($"name = $\"{enumType.Name}{{name}}\";");
+                Close();
 
-                        WriteLine();
-                        WriteLine("switch(name)");
-                        Open();
-                            foreach (var @case in enumType.EnumCases)
-                            {
-                                WriteLine($"case \"{enumType.Name}.{@case.Key}\":");
-                                indentLevel += 1;
-                                WriteLine($"{enumType.Name.ToLower()} = {enumType.Name}.{@case.Key};");
-                                WriteLine("return true;");
-                                indentLevel -= 1;
-                            }
-                        Close();
+                WriteLine();
+                WriteLine("switch(name)");
+                Open();
+                foreach (var @case in enumType.EnumCases)
+                {
+                    WriteLine($"case \"{enumType.Name}.{@case.Key}\":");
+                    indentLevel += 1;
+                    WriteLine($"{enumType.Name.ToLower()} = {enumType.Name}.{@case.Key};");
+                    WriteLine("return true;");
+                    indentLevel -= 1;
+                }
+                Close();
 
-                        WriteLine();
-                        WriteLine($"{enumType.Name.ToLower()} = default;");
-                        WriteLine("return false;");
-                    Close();
+                WriteLine();
+                WriteLine($"{enumType.Name.ToLower()} = default;");
+                WriteLine("return false;");
+                Close();
 
                 Close();
             }
@@ -1368,7 +1400,7 @@ namespace Yarn.Unity.Editor
                 }
 
                 HashSet<string> invalidKeys = new();
-                unityStringTable.SharedData.Entries.Sort((a,b) =>
+                unityStringTable.SharedData.Entries.Sort((a, b) =>
                 {
                     // if we encounter a key that doesn't match a value we got from the string table we want to log this and push it to one end
                     if (sortKeys.TryGetValue(unityStringTable.GetEntry(a.Id).Key, out var aKey))
