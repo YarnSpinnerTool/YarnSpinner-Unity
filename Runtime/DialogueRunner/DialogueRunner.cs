@@ -530,13 +530,40 @@ namespace Yarn.Unity
         /// <inheritdoc />
         public bool CanCallFunction(string functionName)
         {
-            return ActionInvoker.CanInvoke(functionName);
+            return functionName switch
+            {
+                // If this is an engine-provided function, we'll handle it
+                StandardLibrary.EngineProvidedFunctionNames.Visited => true,
+                StandardLibrary.EngineProvidedFunctionNames.VisitedCount => true,
+
+                // Otherwise, forward it to the action invoker to find out if they can handle it
+                _ => ActionInvoker.CanInvoke(functionName),
+            };
         }
 
         /// <inheritdoc />
         public async ValueTask<IConvertible> InvokeFunction(string functionName, IConvertible[] parameters, CancellationToken token)
         {
-            return await ActionInvoker.Invoke(functionName, parameters, token);
+            return functionName switch
+            {
+                // If this is an engine-provided function, it's on us to handle
+                StandardLibrary.EngineProvidedFunctionNames.Visited => GetNodeVisitCount(this, parameters) > 0,
+                StandardLibrary.EngineProvidedFunctionNames.VisitedCount => GetNodeVisitCount(this, parameters),
+
+                // Otherwise, forward it to the action invoker who can (hopefully) handle it
+                _ => await ActionInvoker.Invoke(functionName, parameters, token),
+            };
+
+            static int GetNodeVisitCount(DialogueRunner runner, IConvertible[] parameters)
+            {
+                // Check our parameter count and extract the first parameter from it, and use that to ask the Dialogue for the visit count
+                if (parameters.Length == 0)
+                {
+                    throw new InvalidOperationException("Internal error: visit-count-tracking function called with not enough parameters");
+                }
+                var nodeName = parameters[0].ToString();
+                return (int)runner.Dialogue.GetNodeVisitCount(nodeName);
+            }
         }
 
         /// <inheritdoc />

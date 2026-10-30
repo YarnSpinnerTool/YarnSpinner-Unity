@@ -1732,6 +1732,21 @@
             'random' and 'dice'.
             </summary>
         </member>
+        <member name="T:Yarn.StandardLibrary.EngineProvidedFunctionNames">
+            <summary>
+            Contains the names of standard library functions whose implementations are expected to be provided by the game engine.
+            </summary>
+        </member>
+        <member name="F:Yarn.StandardLibrary.EngineProvidedFunctionNames.Visited">
+            <summary>
+            The name of the built-in 'visited' function.
+            </summary>
+        </member>
+        <member name="F:Yarn.StandardLibrary.EngineProvidedFunctionNames.VisitedCount">
+            <summary>
+            The name of the built-in 'visited_count' function.
+            </summary>
+        </member>
         <member name="M:Yarn.StandardLibrary.AllFunctions">
             <summary>
             Creates all function definitions of the built in functions
