@@ -9,6 +9,7 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 using Yarn.Unity;
+using Yarn.Compiler;
 
 #if USE_ADDRESSABLES
 using UnityEditor.AddressableAssets;
