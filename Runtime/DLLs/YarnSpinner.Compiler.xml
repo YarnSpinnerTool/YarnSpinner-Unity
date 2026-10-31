@@ -926,7 +926,7 @@
             compilations when the source file does not change. If you want line
             IDs to remain the same when the source code may be modified in the
             future, add a <c>#line:</c> tag to the line. This may be done by
-            hand, or added using the <see cref="M:Yarn.Compiler.Utility.TagLines(Yarn.Compiler.ISourceInput,System.Collections.Generic.HashSet{System.String},ILineTagGenerator,ILineTagGenerator.TagAbortBehaviour)"/> method.
+            hand, or added using the <see cref="M:Yarn.Compiler.Utility.TagLines(Yarn.Compiler.ISourceInput,System.Collections.Generic.HashSet{System.String},Yarn.Compiler.ILineTagGenerator,Yarn.Compiler.ILineTagGenerator.TagAbortBehaviour)"/> method.
             </para>
             </remarks>
         </member>
@@ -2446,6 +2446,16 @@
             <para>Format placeholders:
             <list type="number">
             <item>Markup parse message</item>
+            </list></para>
+            </remarks>
+        </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.RogueChevronWithCommand">
+            <summary>YS0064: Extra chevrons on the same line as a command.</summary>
+            <remarks>
+            <para>Commands must start on their own line and should not have additional chevrons before or after. This is often indicative of a mistake.</para>
+            <para>Format placeholders:
+            <list type="number">
+            <item>Command content</item>
             </list></para>
             </remarks>
         </member>
@@ -5779,11 +5789,135 @@
             </para>
             </remarks>
         </member>
-        <member name="M:Yarn.Compiler.DescriptiveLineTagGenerator.PrepareForLines(System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{ILineTagGenerator.LineTagContext}},System.Collections.Generic.HashSet{System.String})">
+        <member name="M:Yarn.Compiler.DescriptiveLineTagGenerator.PrepareForLines(System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{Yarn.Compiler.ILineTagGenerator.LineTagContext}},System.Collections.Generic.HashSet{System.String})">
             <inheritdocs/>
         </member>
         <member name="M:Yarn.Compiler.DescriptiveLineTagGenerator.GenerateLineTag(System.String,System.Int32)">
             <inheritdoc/>
+        </member>
+        <member name="T:Yarn.Compiler.ILineTagGenerator">
+            <summary>
+            Line tag generators are responsible for producing unique line IDs in a Yarn
+            Spinner project.
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.ILineTagGenerator.LineTaggingException">
+            <summary>
+            Represents a situation where the tagger was unable to create a tag for the line.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.ILineTagGenerator.LineTaggingException.#ctor">
+            <summary>
+            Creates a new LineTaggingException
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.ILineTagGenerator.LineTaggingException.#ctor(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.Compiler.ILineTagGenerator.LineTaggingException.#ctor(System.String,System.Exception)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Yarn.Compiler.ILineTagGenerator.LineTaggingException.#ctor(System.String,System.String,System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.Compiler.ILineTagGenerator.LineTaggingException.Message">
+            <inheritdoc/>
+        </member>
+        <member name="F:Yarn.Compiler.ILineTagGenerator.LineTaggingException.SourceFile">
+            <summary>
+            The Yarn file that caused that the tagging exception.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.ILineTagGenerator.LineTaggingException.LineNumber">
+            <summary>
+            The line number inside of <cref name="SourceFile"/> that caused the exception
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.ILineTagGenerator.CompilationTagException">
+            <summary>
+            Represents the specific situation where tagging didn't even begin due to compilation errors in the script.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.ILineTagGenerator.CompilationTagException.Message">
+            <inheritdoc/>
+        </member>
+        <member name="T:Yarn.Compiler.ILineTagGenerator.TagAbortBehaviour">
+            <summary>
+            Represents how Yarn Spinner should handle encountering a <cref name="LineTaggingException"/> exception during tagging.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.ILineTagGenerator.TagAbortBehaviour.EntireTagging">
+            <summary>
+            The line tagging will be fully aborted. Any changes across all files will be undone.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.ILineTagGenerator.TagAbortBehaviour.CurrentNode">
+            <summary>
+            The line tagging for the current node will be aborted. Any changes inside the current node will be undone but other nodes in the same and other files will be preserved.
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.ILineTagGenerator.TagAbortBehaviour.CurrentLine">
+            <summary>
+            The line tagging for the current line will be aborted. All changes in the current node, and all other nodes and files will be preserved.
+            </summary>
+        </member>
+        <member name="T:Yarn.Compiler.ILineTagGenerator.LineTagContext">
+            <summary>
+            Contains contextual information needed for generating a line tag.
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.ILineTagGenerator.LineTagContext.Line">
+            <summary>
+            The current line parse statement.
+            <remarks>
+            This gives your custom taggers access to the same information we use internally, unlikely you'll need this but it exists just in case.
+            A lot of the information contained within the context is already derived from this.
+            </remarks>
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.ILineTagGenerator.LineTagContext.LineNumber">
+            <summary>
+            The line number inside the file for this specifc line of dialogue.
+            This matches the line number as seen inside an editor.
+            </summary>
+            <remarks>
+            While this can be used as part of your line id generation this is mostly intended to be used for error messaging, as line numbers are very rarely stable.
+            It is highly unlikely for this value to remain the same across multiple tagging runs or edits of Yarn files.
+            Meaning your tagger might have unexpected behaviour across multiple invocations if you are relying on this value.
+            </remarks>
+        </member>
+        <member name="P:Yarn.Compiler.ILineTagGenerator.LineTagContext.SourceFileName">
+            <summary>
+            The name of the file currently being processed.
+            <remarks>
+            If the tagging is requested as part of string based compilation instead of a file compilation this value will always be &lt;input&gt;.
+            </remarks>
+            </summary>
+        </member>
+        <member name="P:Yarn.Compiler.ILineTagGenerator.LineTagContext.LineText">
+            <summary>
+            The text of the line of dialogue
+            </summary>
+        </member>
+        <member name="F:Yarn.Compiler.ILineTagGenerator.LineTagContext.LineID">
+            <summary>
+            The line id of the current line, will only have a value for lines that are already tagged.
+            </summary>
+        </member>
+        <member name="M:Yarn.Compiler.ILineTagGenerator.GenerateLineTag(System.String,System.Int32)">
+            <summary>
+            Generates a unique line tag.
+            </summary>
+            <param name="node">The node in which the line exist</param>
+            <param name="lineIndex">The relative line number of the dialogue.</param>
+            <returns>The generated line tag.</returns>
+        </member>
+        <member name="M:Yarn.Compiler.ILineTagGenerator.PrepareForLines(System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{Yarn.Compiler.ILineTagGenerator.LineTagContext}},System.Collections.Generic.HashSet{System.String})">
+            <summary>
+            Called by Yarn Spinner before any line generation is
+            </summary>
+            <param name="LineContexts">The combined information of all nodes and lines</param>
+            <param name="excludedIDs">A collection of strings that should not be used for generation.</param>
         </member>
         <member name="T:Yarn.Compiler.RandomLineTagGenerator">
             <summary>
@@ -5791,7 +5925,7 @@
             string.
             </summary>
         </member>
-        <member name="M:Yarn.Compiler.RandomLineTagGenerator.PrepareForLines(System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{ILineTagGenerator.LineTagContext}},System.Collections.Generic.HashSet{System.String})">
+        <member name="M:Yarn.Compiler.RandomLineTagGenerator.PrepareForLines(System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{Yarn.Compiler.ILineTagGenerator.LineTagContext}},System.Collections.Generic.HashSet{System.String})">
             <inheritdoc/>
         </member>
         <member name="M:Yarn.Compiler.RandomLineTagGenerator.GenerateLineTag(System.String,System.Int32)">
@@ -6816,12 +6950,6 @@
         <member name="M:Yarn.Compiler.TypeCheckerListener.ExitJumpToExpression(Yarn.Compiler.YarnSpinnerParser.JumpToExpressionContext)">
             <inheritdoc />
         </member>
-        <member name="M:Yarn.Compiler.TypeCheckerListener.ExitEnum_statement(Yarn.Compiler.YarnSpinnerParser.Enum_statementContext)">
-            <inheritdoc />
-        </member>
-        <member name="M:Yarn.Compiler.TypeCheckerListener.ExitOnce_statement(Yarn.Compiler.YarnSpinnerParser.Once_statementContext)">
-            <inheritdoc />
-        </member>
         <member name="M:Yarn.Compiler.TypeCheckerListener.ExitHeader_when_expression(Yarn.Compiler.YarnSpinnerParser.Header_when_expressionContext)">
             <inheritdoc />
         </member>
@@ -7090,7 +7218,7 @@
             cref="P:Yarn.Compiler.Declaration.Type"/> of any of the declarations is an
             invalid value.</throws>
         </member>
-        <member name="M:Yarn.Compiler.Utility.TagLines(Yarn.Compiler.ISourceInput,System.Collections.Generic.HashSet{System.String},ILineTagGenerator,ILineTagGenerator.TagAbortBehaviour)">
+        <member name="M:Yarn.Compiler.Utility.TagLines(Yarn.Compiler.ISourceInput,System.Collections.Generic.HashSet{System.String},Yarn.Compiler.ILineTagGenerator,Yarn.Compiler.ILineTagGenerator.TagAbortBehaviour)">
             <summary>
             Given Yarn source code, adds line tags to the ends of all lines that
             need one and do not already have one.
@@ -7109,8 +7237,8 @@
             <returns>Tuple of the modified source code, with line tags added, an updated list of line IDs that were added, and any tagging exceptions that were encountered during tagging.
             </returns>
         </member>
-        <member name="M:Yarn.Compiler.Utility.TagLines(System.String,System.Collections.Generic.HashSet{System.String},ILineTagGenerator,ILineTagGenerator.TagAbortBehaviour)">
-            <inheritdoc cref="M:Yarn.Compiler.Utility.TagLines(Yarn.Compiler.ISourceInput,System.Collections.Generic.HashSet{System.String},ILineTagGenerator,ILineTagGenerator.TagAbortBehaviour)"/>
+        <member name="M:Yarn.Compiler.Utility.TagLines(System.String,System.Collections.Generic.HashSet{System.String},Yarn.Compiler.ILineTagGenerator,Yarn.Compiler.ILineTagGenerator.TagAbortBehaviour)">
+            <inheritdoc cref="M:Yarn.Compiler.Utility.TagLines(Yarn.Compiler.ISourceInput,System.Collections.Generic.HashSet{System.String},Yarn.Compiler.ILineTagGenerator,Yarn.Compiler.ILineTagGenerator.TagAbortBehaviour)"/>
         </member>
         <member name="M:Yarn.Compiler.Utility.ParseSource(System.String)">
             <summary>
@@ -7146,7 +7274,7 @@
             An <see cref="T:Yarn.Compiler.IYarnSpinnerParserListener"/> that produces line tags.
             </summary>
         </member>
-        <member name="M:Yarn.Compiler.Utility.UntaggedLineListener.#ctor(ILineTagGenerator,System.Collections.Generic.HashSet{System.String},Antlr4.Runtime.CommonTokenStream,System.String)">
+        <member name="M:Yarn.Compiler.Utility.UntaggedLineListener.#ctor(Yarn.Compiler.ILineTagGenerator,System.Collections.Generic.HashSet{System.String},Antlr4.Runtime.CommonTokenStream,System.String)">
             <summary>
             Initializes a new instance of the <see
             cref="T:Yarn.Compiler.Utility.UntaggedLineListener"/> class.
@@ -7396,122 +7524,6 @@
             Gets the collection of <see cref="T:Yarn.Compiler.Diagnostic"/> objects
             generated by this object.
             </summary>
-        </member>
-        <member name="T:ILineTagGenerator">
-            <summary>
-            Line tag generators are responsible for producing unique line IDs in a Yarn
-            Spinner project.
-            </summary>
-        </member>
-        <member name="T:ILineTagGenerator.LineTaggingException">
-            <summary>
-            Represents a situation where the tagger was unable to create a tag for the line.
-            </summary>
-        </member>
-        <member name="M:ILineTagGenerator.LineTaggingException.#ctor">
-            <summary>
-            Creates a new LineTaggingException
-            </summary>
-        </member>
-        <member name="M:ILineTagGenerator.LineTaggingException.#ctor(System.String)">
-            <inheritdoc/>
-        </member>
-        <member name="M:ILineTagGenerator.LineTaggingException.#ctor(System.String,System.Exception)">
-            <inheritdoc/>
-        </member>
-        <member name="M:ILineTagGenerator.LineTaggingException.#ctor(System.String,System.String,System.Int32)">
-            <inheritdoc/>
-        </member>
-        <member name="P:ILineTagGenerator.LineTaggingException.Message">
-            <inheritdoc/>
-        </member>
-        <member name="F:ILineTagGenerator.LineTaggingException.SourceFile">
-            <summary>
-            The Yarn file that caused that the tagging exception.
-            </summary>
-        </member>
-        <member name="F:ILineTagGenerator.LineTaggingException.LineNumber">
-            <summary>
-            The line number inside of <cref name="SourceFile"/> that caused the exception
-            </summary>
-        </member>
-        <member name="T:ILineTagGenerator.TagAbortBehaviour">
-            <summary>
-            Represents how Yarn Spinner should handle encountering a <cref name="LineTaggingException"/> exception during tagging.
-            </summary>
-        </member>
-        <member name="F:ILineTagGenerator.TagAbortBehaviour.EntireTagging">
-            <summary>
-            The line tagging will be fully aborted. Any changes across all files will be undone.
-            </summary>
-        </member>
-        <member name="F:ILineTagGenerator.TagAbortBehaviour.CurrentNode">
-            <summary>
-            The line tagging for the current node will be aborted. Any changes inside the current node will be undone but other nodes in the same and other files will be preserved.
-            </summary>
-        </member>
-        <member name="F:ILineTagGenerator.TagAbortBehaviour.CurrentLine">
-            <summary>
-            The line tagging for the current line will be aborted. All changes in the current node, and all other nodes and files will be preserved.
-            </summary>
-        </member>
-        <member name="T:ILineTagGenerator.LineTagContext">
-            <summary>
-            Contains contextual information needed for generating a line tag.
-            </summary>
-        </member>
-        <member name="P:ILineTagGenerator.LineTagContext.Line">
-            <summary>
-            The current line parse statement.
-            <remarks>
-            This gives your custom taggers access to the same information we use internally, unlikely you'll need this but it exists just in case.
-            A lot of the information contained within the context is already derived from this.
-            </remarks>
-            </summary>
-        </member>
-        <member name="P:ILineTagGenerator.LineTagContext.LineNumber">
-            <summary>
-            The line number inside the file for this specifc line of dialogue.
-            This matches the line number as seen inside an editor.
-            </summary>
-            <remarks>
-            While this can be used as part of your line id generation this is mostly intended to be used for error messaging, as line numbers are very rarely stable.
-            It is highly unlikely for this value to remain the same across multiple tagging runs or edits of Yarn files.
-            Meaning your tagger might have unexpected behaviour across multiple invocations if you are relying on this value.
-            </remarks>
-        </member>
-        <member name="P:ILineTagGenerator.LineTagContext.SourceFileName">
-            <summary>
-            The name of the file currently being processed.
-            <remarks>
-            If the tagging is requested as part of string based compilation instead of a file compilation this value will always be &lt;input&gt;.
-            </remarks>
-            </summary>
-        </member>
-        <member name="P:ILineTagGenerator.LineTagContext.LineText">
-            <summary>
-            The text of the line of dialogue
-            </summary>
-        </member>
-        <member name="F:ILineTagGenerator.LineTagContext.LineID">
-            <summary>
-            The line id of the current line, will only have a value for lines that are already tagged.
-            </summary>
-        </member>
-        <member name="M:ILineTagGenerator.GenerateLineTag(System.String,System.Int32)">
-            <summary>
-            Generates a unique line tag.
-            </summary>
-            <param name="node">The node in which the line exist</param>
-            <param name="lineIndex">The relative line number of the dialogue.</param>
-            <returns>The generated line tag.</returns>
-        </member>
-        <member name="M:ILineTagGenerator.PrepareForLines(System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{ILineTagGenerator.LineTagContext}},System.Collections.Generic.HashSet{System.String})">
-            <summary>
-            Called by Yarn Spinner before any line generation is
-            </summary>
-            <param name="LineContexts">The combined information of all nodes and lines</param>
-            <param name="excludedIDs">A collection of strings that should not be used for generation.</param>
         </member>
         <member name="T:TypeChecker.ConjunctionConstraint">
             <summary>
