@@ -684,17 +684,17 @@ namespace Yarn.Unity.Editor
         public static bool OnOpenAsset(EntityId instanceID)
         {
 
-// temporarily disabling the obsolete warning for the GetAssetPath call
-// but only for Unity <6.4, otherwise we want the warning
-// because this code needs to exist across multiple unity versions
-// and it's only an actual concern on 6.4+ we can disable it when earlier
+            // temporarily disabling the obsolete warning for the GetAssetPath call
+            // but only for Unity <6.4, otherwise we want the warning
+            // because this code needs to exist across multiple unity versions
+            // and it's only an actual concern on 6.4+ we can disable it when earlier
 #if !UNITY_6000_4_OR_NEWER
-            #pragma warning disable 0618
+#pragma warning disable 0618
 #endif
             var path = AssetDatabase.GetAssetPath(instanceID);
 
 #if !UNITY_6000_4_OR_NEWER
-            #pragma warning restore 0618
+#pragma warning restore 0618
 #endif
 
             var project = AssetDatabase.LoadAssetAtPath<YarnProject>(path);
@@ -724,17 +724,17 @@ namespace Yarn.Unity.Editor
         [OnOpenAsset(OnOpenAssetAttributeMode.Validate)]
         public static bool OnValidateAsset(EntityId instanceID)
         {
-// temporarily disabling the obsolete warning for the GetAssetPath call
-// but only for Unity <6.4, otherwise we want the warning
-// because this code needs to exist across multiple unity versions
-// and it's only an actual concern on 6.4+ we can disable it when earlier
+            // temporarily disabling the obsolete warning for the GetAssetPath call
+            // but only for Unity <6.4, otherwise we want the warning
+            // because this code needs to exist across multiple unity versions
+            // and it's only an actual concern on 6.4+ we can disable it when earlier
 #if !UNITY_6000_4_OR_NEWER
-            #pragma warning disable 0618
+#pragma warning disable 0618
 #endif
             var path = AssetDatabase.GetAssetPath(instanceID);
 
 #if !UNITY_6000_4_OR_NEWER
-            #pragma warning restore 0618
+#pragma warning restore 0618
 #endif
             var project = AssetDatabase.LoadAssetAtPath<YarnProject>(path);
 
