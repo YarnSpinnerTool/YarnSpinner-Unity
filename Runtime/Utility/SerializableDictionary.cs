@@ -665,38 +665,46 @@ namespace Yarn.Unity.Editor
             return conflictState;
         }
 
-        static Dictionary<SerializedPropertyType, PropertyInfo> s_serializedPropertyValueAccessorsDict = new();
-
-        SerializableDictionaryPropertyDrawer()
+        
+        static Dictionary<SerializedPropertyType, PropertyInfo>? inner = null;
+        static Dictionary<SerializedPropertyType, PropertyInfo> s_serializedPropertyValueAccessorsDict
         {
-            Dictionary<SerializedPropertyType, string> serializedPropertyValueAccessorsNameDict = new Dictionary<SerializedPropertyType, string>() {
-            { SerializedPropertyType.Integer, "intValue" },
-            { SerializedPropertyType.Boolean, "boolValue" },
-            { SerializedPropertyType.Float, "floatValue" },
-            { SerializedPropertyType.String, "stringValue" },
-            { SerializedPropertyType.Color, "colorValue" },
-            { SerializedPropertyType.ObjectReference, "objectReferenceValue" },
-            { SerializedPropertyType.LayerMask, "intValue" },
-            { SerializedPropertyType.Enum, "intValue" },
-            { SerializedPropertyType.Vector2, "vector2Value" },
-            { SerializedPropertyType.Vector3, "vector3Value" },
-            { SerializedPropertyType.Vector4, "vector4Value" },
-            { SerializedPropertyType.Rect, "rectValue" },
-            { SerializedPropertyType.ArraySize, "intValue" },
-            { SerializedPropertyType.Character, "intValue" },
-            { SerializedPropertyType.AnimationCurve, "animationCurveValue" },
-            { SerializedPropertyType.Bounds, "boundsValue" },
-            { SerializedPropertyType.Quaternion, "quaternionValue" },
-            };
-            Type serializedPropertyType = typeof(SerializedProperty);
-
-            s_serializedPropertyValueAccessorsDict.Clear();
-            BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
-
-            foreach (var kvp in serializedPropertyValueAccessorsNameDict)
+            get
             {
-                PropertyInfo propertyInfo = serializedPropertyType.GetProperty(kvp.Value, flags);
-                s_serializedPropertyValueAccessorsDict.Add(kvp.Key, propertyInfo);
+                if (inner == null)
+                {
+                    Dictionary<SerializedPropertyType, string> serializedPropertyValueAccessorsNameDict = new Dictionary<SerializedPropertyType, string>()
+                    {
+                        { SerializedPropertyType.Integer, "intValue" },
+                        { SerializedPropertyType.Boolean, "boolValue" },
+                        { SerializedPropertyType.Float, "floatValue" },
+                        { SerializedPropertyType.String, "stringValue" },
+                        { SerializedPropertyType.Color, "colorValue" },
+                        { SerializedPropertyType.ObjectReference, "objectReferenceValue" },
+                        { SerializedPropertyType.LayerMask, "intValue" },
+                        { SerializedPropertyType.Enum, "intValue" },
+                        { SerializedPropertyType.Vector2, "vector2Value" },
+                        { SerializedPropertyType.Vector3, "vector3Value" },
+                        { SerializedPropertyType.Vector4, "vector4Value" },
+                        { SerializedPropertyType.Rect, "rectValue" },
+                        { SerializedPropertyType.ArraySize, "intValue" },
+                        { SerializedPropertyType.Character, "intValue" },
+                        { SerializedPropertyType.AnimationCurve, "animationCurveValue" },
+                        { SerializedPropertyType.Bounds, "boundsValue" },
+                        { SerializedPropertyType.Quaternion, "quaternionValue" },
+                    };
+                    Type serializedPropertyType = typeof(SerializedProperty);
+
+                    inner = new();
+                    BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
+
+                    foreach (var kvp in serializedPropertyValueAccessorsNameDict)
+                    {
+                        PropertyInfo propertyInfo = serializedPropertyType.GetProperty(kvp.Value, flags);
+                        inner.Add(kvp.Key, propertyInfo);
+                    }
+                }
+                return inner;
             }
         }
 
