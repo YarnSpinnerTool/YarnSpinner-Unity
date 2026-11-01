@@ -109,7 +109,9 @@ namespace Yarn.Unity
 #if USE_UNITASK
             typeof(Cysharp.Threading.Tasks.UniTask<>),
 #endif
+#if UNITY_2023_1_OR_NEWER
             typeof(UnityEngine.Awaitable<>),
+#endif
         };
         [NoAutoStaticsCleanup]
         private static Dictionary<Type, ReturnType> basicReturns = new()
