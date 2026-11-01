@@ -16,6 +16,12 @@ using System.Reflection;
 using Yarn.Unity.UnityLocalization;
 using Yarn.Unity.Attributes;
 
+#if UNITY_6000_6_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#else
+using Yarn.Unity.Shim;
+#endif
+
 namespace Yarn.Unity.Editor
 {
 
@@ -912,7 +918,8 @@ namespace Yarn.Unity.Editor
     /// </summary>
     [CanEditMultipleObjects]
     [CustomEditor(typeof(DialogueRunner))]
-    public class DialogueRunnerEditor : YarnEditor
+    [NoAutoStaticsCleanup]
+    public partial class DialogueRunnerEditor : YarnEditor
     {
         private const string docsLabel = "Docs";
         private const string samplesLabel = "Samples";

@@ -3,16 +3,22 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 */
 
 using UnityEngine;
+
+#if UNITY_6000_6_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#else
+using Yarn.Unity.Shim;
+#endif
+
 #nullable enable
 
 namespace Yarn.Unity
 {
-
     /// <summary>
     /// Represents a line, ready to be presented to the user in the localisation
     /// they have specified.
     /// </summary>
-    public class LocalizedLine
+    public partial class LocalizedLine
     {
         /// <summary>
         /// DialogueLine's ID
@@ -111,6 +117,7 @@ namespace Yarn.Unity
         /// A <see cref="LocalizedLine"/> object that represents content not
         /// being found.
         /// </summary>
+        [NoAutoStaticsCleanup]
         public static readonly LocalizedLine InvalidLine = new LocalizedLine
         {
             Asset = null,

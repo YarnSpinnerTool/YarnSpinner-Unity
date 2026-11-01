@@ -9,6 +9,12 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using UnityEngine;
 
+#if UNITY_6000_6_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#else
+using Yarn.Unity.Shim;
+#endif
+
 #nullable enable
 
 namespace Yarn.Unity
@@ -272,15 +278,15 @@ namespace Yarn.Unity
 #if UNITY_EDITOR
 namespace Yarn.Unity.Editor
 {
-
     using System;
     using System.Collections.Generic;
     using System.Reflection;
     using UnityEditor;
     using UnityEngine;
 
+    [AutoStaticsCleanup]
     [CustomPropertyDrawer(typeof(SerializableDictionaryBase), true)]
-    public class SerializableDictionaryPropertyDrawer : PropertyDrawer
+    public partial class SerializableDictionaryPropertyDrawer : PropertyDrawer
     {
         const string KeysFieldName = "m_keys";
         const string ValuesFieldName = "m_values";
@@ -659,9 +665,9 @@ namespace Yarn.Unity.Editor
             return conflictState;
         }
 
-        static Dictionary<SerializedPropertyType, PropertyInfo> s_serializedPropertyValueAccessorsDict;
+        static Dictionary<SerializedPropertyType, PropertyInfo> s_serializedPropertyValueAccessorsDict = new();
 
-        static SerializableDictionaryPropertyDrawer()
+        SerializableDictionaryPropertyDrawer()
         {
             Dictionary<SerializedPropertyType, string> serializedPropertyValueAccessorsNameDict = new Dictionary<SerializedPropertyType, string>() {
             { SerializedPropertyType.Integer, "intValue" },
@@ -681,10 +687,10 @@ namespace Yarn.Unity.Editor
             { SerializedPropertyType.AnimationCurve, "animationCurveValue" },
             { SerializedPropertyType.Bounds, "boundsValue" },
             { SerializedPropertyType.Quaternion, "quaternionValue" },
-        };
+            };
             Type serializedPropertyType = typeof(SerializedProperty);
 
-            s_serializedPropertyValueAccessorsDict = new Dictionary<SerializedPropertyType, PropertyInfo>();
+            s_serializedPropertyValueAccessorsDict.Clear();
             BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
 
             foreach (var kvp in serializedPropertyValueAccessorsNameDict)

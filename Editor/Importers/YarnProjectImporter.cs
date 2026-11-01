@@ -19,6 +19,12 @@ using UnityEditor.Localization;
 using UnityEngine.Localization.Tables;
 #endif
 
+#if UNITY_6000_6_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#else
+using Yarn.Unity.Shim;
+#endif
+
 #nullable enable
 
 namespace Yarn.Unity.Editor
@@ -46,8 +52,9 @@ namespace Yarn.Unity.Editor
         /// Yarn Project.
         /// </summary>
         [System.Serializable]
-        public class SerializedDeclaration
+        public partial class SerializedDeclaration
         {
+            [NoAutoStaticsCleanup]
             internal static List<Yarn.IType> BuiltInTypesList = new List<Yarn.IType> {
                 Yarn.Types.String,
                 Yarn.Types.Boolean,

@@ -11,11 +11,18 @@ using TextMeshProUGUI = Yarn.Unity.TMPShim;
 using TMP_Text = Yarn.Unity.TMPShim;
 #endif
 
+#if UNITY_6000_6_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#else
+using Yarn.Unity.Shim;
+#endif
+
 #nullable enable
 
 namespace Yarn.Unity
 {
-    public static class InputSystemAvailability
+    [AutoStaticsCleanup]
+    public static partial class InputSystemAvailability
     {
 #if USE_INPUTSYSTEM
         internal const bool inputSystemInstalled = true;

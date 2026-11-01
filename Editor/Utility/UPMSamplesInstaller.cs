@@ -1,11 +1,18 @@
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 
+#if UNITY_6000_6_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#else
+using Yarn.Unity.Shim;
+#endif
+
 #nullable enable
 
 namespace Yarn.Unity.Editor
 {
-    internal static class UPMSamplesInstaller
+    [AutoStaticsCleanup]
+    internal static partial class UPMSamplesInstaller
     {
         private const string samplesPackageURL = "https://github.com/YarnSpinnerTool/YarnSpinner-Unity-Samples.git#current";
         private static AddRequest? installationRequest;

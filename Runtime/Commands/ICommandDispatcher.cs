@@ -7,11 +7,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Threading;
 
+#if UNITY_6000_6_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#else
+using Yarn.Unity.Shim;
+#endif
+
 #nullable enable
 
 namespace Yarn.Unity
 {
-    public static class ActionInvoker
+    [AutoStaticsCleanup]
+    public static partial class ActionInvoker
     {
         public delegate YarnTask<IConvertible> InvokeFunction(string functionName, IConvertible[] parameters, CancellationToken token);
         public delegate bool CanHandleFunction(string functionName);

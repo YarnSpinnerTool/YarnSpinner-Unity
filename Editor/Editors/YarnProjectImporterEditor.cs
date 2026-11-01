@@ -28,15 +28,21 @@ using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using System;
 
+#if UNITY_6000_6_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#else
+using Yarn.Unity.Shim;
+#endif
+
 namespace Yarn.Unity.Editor
 {
-
     [CustomEditor(typeof(YarnProjectImporter))]
-    public class YarnProjectImporterEditor : ScriptedImporterEditor
+    [AutoStaticsCleanup]
+    public partial class YarnProjectImporterEditor : ScriptedImporterEditor
     {
         // A runtime-only field that stores the defaultLanguage of the
         // YarnProjectImporter. Used during Inspector GUI drawing.
-        internal static SerializedProperty? CurrentProjectDefaultLanguageProperty;
+        internal static SerializedProperty? CurrentProjectDefaultLanguageProperty = null;
 
         internal const string ProjectUpgradeHelpURL = "https://docs.yarnspinner.dev/using-yarnspinner-with-unity/importing-yarn-files/yarn-projects#upgrading-yarn-projects";
         internal const string CreateNewIssueURL = "https://github.com/YarnSpinnerTool/YarnSpinner-Unity/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=Project Import Error";
@@ -631,7 +637,7 @@ namespace Yarn.Unity.Editor
             var currentTaggerClass = lineTaggerClassProperty?.stringValue ?? null;
 
             var taggerChoice = new DropdownField();
-            var allTaggers = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(t => typeof(ILineTagGenerator).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
+            var allTaggers = AssemblyUtility.GetAssemblies().SelectMany(a => a.GetTypes()).Where(t => typeof(ILineTagGenerator).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
             foreach (var tagger in allTaggers)
             {
                 taggerChoice.choices.Add(tagger.FullName);
@@ -738,7 +744,7 @@ namespace Yarn.Unity.Editor
             // Find all loaded assemblies that are not YarnSpinner.dll. Find all
             // types that implement IVariableStorage, are not abstract, and are
             // not generated code. Get the full names of the result.
-            var variableStorageClasses = AppDomain.CurrentDomain
+            var variableStorageClasses = AssemblyUtility
                 .GetAssemblies()
                 .Where(a => a != typeof(Yarn.AsyncDialogue).Assembly)
                 .SelectMany(a => a.GetTypes())

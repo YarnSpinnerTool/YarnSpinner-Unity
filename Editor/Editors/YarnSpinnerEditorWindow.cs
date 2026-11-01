@@ -5,13 +5,20 @@ using UnityEngine.Networking;
 using System.Reflection;
 using System.Linq;
 
+#if UNITY_6000_6_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#else
+using Yarn.Unity.Shim;
+#endif
+
 #nullable enable
 
 namespace Yarn.Unity.Editor
 {
-    public class YarnSpinnerEditorWindow : EditorWindow
+    [AutoStaticsCleanup]
+    public partial class YarnSpinnerEditorWindow : EditorWindow
     {
-        static UnityWebRequest? supportersRequest;
+        static UnityWebRequest? supportersRequest = null;
         static string supportersList = string.Empty;
 
         [SerializeField]

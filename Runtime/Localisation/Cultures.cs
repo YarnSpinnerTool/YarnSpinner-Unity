@@ -7,12 +7,19 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
+#if UNITY_6000_6_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#else
+using Yarn.Unity.Shim;
+#endif
+
 namespace Yarn.Unity
 {
     /// <summary>
     /// Provides access to all <see cref="Culture"/>s supported by Yarn Spinner.
     /// </summary>
-    public static class Cultures
+    [AutoStaticsCleanup]
+    public static partial class Cultures
     {
         private static Lazy<IEnumerable<Culture>> _allCultures = new Lazy<IEnumerable<Culture>>(() => MakeCultureList());
 

@@ -9,6 +9,12 @@ using System.Reflection;
 using UnityEngine;
 using Yarn.Shared;
 
+#if UNITY_6000_6_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#else
+using Yarn.Unity.Shim;
+#endif
+
 #nullable enable
 
 namespace Yarn.Unity
@@ -85,8 +91,9 @@ namespace Yarn.Unity
     /// <summary>
     /// The "default" action registration system used 
     /// </summary>
-    public class Actions : IActionRegistration
+    public partial class Actions : IActionRegistration
     {
+        [NoAutoStaticsCleanup]
         private static string[] asyncReturns =
         {
             "Yarn.Unity.YarnTask",
@@ -94,6 +101,7 @@ namespace Yarn.Unity
             "Cysharp.Threading.Tasks.UniTask",
             "UnityEngine.Awaitable",
         };
+        [NoAutoStaticsCleanup]
         private static Type[] asyncOpenReturns =
         {
             typeof(Yarn.Unity.YarnTask<>),
@@ -103,6 +111,7 @@ namespace Yarn.Unity
 #endif
             typeof(UnityEngine.Awaitable<>),
         };
+        [NoAutoStaticsCleanup]
         private static Dictionary<Type, ReturnType> basicReturns = new()
         {
             {typeof(string), ReturnType.String},

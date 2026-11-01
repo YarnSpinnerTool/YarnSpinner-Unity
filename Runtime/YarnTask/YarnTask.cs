@@ -28,6 +28,12 @@ using UnityEngine;
 using UnityEngine.ResourceManagement.AsyncOperations;
 #endif
 
+#if UNITY_6000_6_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#else
+using Yarn.Unity.Shim;
+#endif
+
 namespace Yarn.Unity
 {
     /// <summary>
@@ -52,10 +58,14 @@ namespace Yarn.Unity
     /// </para>
     /// </remarks>
     [AsyncMethodBuilder(typeof(YarnTaskMethodBuilder))]
+    [AutoStaticsCleanup]
+    public partial struct YarnTask { }
+
     public partial struct YarnTask { }
 
     /// <inheritdoc cref="YarnTask" />
     [AsyncMethodBuilder(typeof(YarnTaskMethodBuilder<>))]
+    [AutoStaticsCleanup]
     public partial struct YarnTask<T>
     {
         /// <summary>

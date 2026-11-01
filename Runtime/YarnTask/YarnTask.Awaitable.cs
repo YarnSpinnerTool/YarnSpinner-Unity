@@ -17,6 +17,12 @@ Yarn Spinner is licensed to you under the terms found in the file LICENSE.md.
 
 #if YARNTASKS_ARE_AWAITABLES
 
+#if UNITY_6000_6_OR_NEWER
+    using Unity.Scripting.LifecycleManagement;
+#else
+    using Yarn.Unity.Shim;
+#endif
+
 namespace Yarn.Unity
 {
     using System;
@@ -40,6 +46,7 @@ namespace Yarn.Unity
 
         // Thanks to sisus_co on the Unity Discussions forum:
         // https://discussions.unity.com/t/awaitable-equivalent-of-task-completedtask/1546128/4
+        [NoAutoStaticsCleanup]
         static readonly AwaitableCompletionSource completionSource = new();
 
         public static YarnTask CompletedTask
