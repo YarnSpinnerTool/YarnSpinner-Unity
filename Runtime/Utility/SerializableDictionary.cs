@@ -19,6 +19,7 @@ using Yarn.Unity.Shim;
 
 namespace Yarn.Unity
 {
+    [Serializable]
     public abstract class SerializableDictionaryBase
     {
         public abstract class Storage { }

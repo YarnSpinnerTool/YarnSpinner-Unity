@@ -41,11 +41,13 @@ namespace Yarn.Unity
 
         [Group("Appearance"), SerializeField] bool disabledStrikeThrough = true;
 
+        [System.NonSerialized]
         public YarnTaskCompletionSource<DialogueOption?>? OnOptionSelected;
         /// <summary>
         /// Token provided by the <see cref="OptionsPresenter"/> to control if this content should be cancelled or not.
         /// Will be set cancelled if another option item is chosen.
         /// </summary>
+        [System.NonSerialized]
         public System.Threading.CancellationToken completionToken;
 
         private bool hasSubmittedOptionSelection = false;
