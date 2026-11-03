@@ -208,11 +208,22 @@ namespace Yarn.Unity
         [Label("Event Handlers")]
         [UnityEngine.Serialization.FormerlySerializedAs("actionMarkupHandlers")]
         [SerializeField] List<ActionMarkupHandler> eventHandlers = new List<ActionMarkupHandler>();
+
+        /// <summary>
+        /// Whether to use unscaled time when presenting dialogue.
+        /// </summary>
+        [Group("Timing")]
+        [Label("Use Unscaled Time")]
+        public bool useUnscaledTime = false;
+
         private List<IActionMarkupHandler> ActionMarkupHandlers
         {
             get
             {
-                var pauser = new PauseEventProcessor();
+                var pauser = new PauseEventProcessor()
+                {
+                    UseUnscaledTime = this.useUnscaledTime
+                };
                 List<IActionMarkupHandler> ActionMarkupHandlers = new()
                 {
                     pauser,
@@ -268,6 +279,7 @@ namespace Yarn.Unity
                         ActionMarkupHandlers = ActionMarkupHandlers,
                         TextElement = this.lineText,
                         CharactersPerSecond = this.lettersPerSecond,
+                        UseUnscaledTime = this.useUnscaledTime,
                     };
                     break;
 
@@ -277,6 +289,7 @@ namespace Yarn.Unity
                         ActionMarkupHandlers = ActionMarkupHandlers,
                         TextElement = this.lineText,
                         WordsPerSecond = this.wordsPerSecond,
+                        UseUnscaledTime = this.useUnscaledTime,
                     };
                     break;
 
@@ -352,7 +365,7 @@ namespace Yarn.Unity
                 // fading up the UI
                 if (useFadeEffect)
                 {
-                    await Effects.FadeAlphaAsync(canvasGroup, 0, 1, fadeUpDuration, token.HurryUpToken);
+                    await Effects.FadeAlphaAsync(canvasGroup, 0, 1, fadeUpDuration, token.HurryUpToken, useUnscaledTime: this.useUnscaledTime);
                 }
                 else
                 {
@@ -366,7 +379,7 @@ namespace Yarn.Unity
             // if we are set to autoadvance how long do we hold for before continuing?
             if (autoAdvance)
             {
-                await YarnTask.Delay((int)(autoAdvanceDelay * 1000), token.NextContentToken).SuppressCancellationThrow();
+                await YarnTask.Delay((int)(autoAdvanceDelay * 1000), token.NextContentToken, useUnscaledTime: this.useUnscaledTime).SuppressCancellationThrow();
             }
             else
             {
@@ -380,7 +393,7 @@ namespace Yarn.Unity
                 // we fade down the UI
                 if (useFadeEffect)
                 {
-                    await Effects.FadeAlphaAsync(canvasGroup, 1, 0, fadeDownDuration, token.HurryUpToken).SuppressCancellationThrow();
+                    await Effects.FadeAlphaAsync(canvasGroup, 1, 0, fadeDownDuration, token.HurryUpToken, useUnscaledTime: this.useUnscaledTime).SuppressCancellationThrow();
                 }
                 else
                 {

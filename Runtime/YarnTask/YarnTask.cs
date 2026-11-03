@@ -145,13 +145,14 @@ namespace Yarn.Unity
         /// <param name="timeSpan">The amount of time to wait.</param>
         /// <param name="token">A token that can be used to cancel the
         /// task.</param>
+        /// <param name="useUnscaledTime">Whether to use unscaled time.</param>
         /// <returns>A new <see cref="YarnTask"/>.</returns>
-        public static partial YarnTask Delay(TimeSpan timeSpan, CancellationToken token = default);
-        
-        /// <inheritdoc cref="Delay(TimeSpan, CancellationToken)"/>
+        public static partial YarnTask Delay(TimeSpan timeSpan, CancellationToken token = default, bool useUnscaledTime = false);
+
+        /// <inheritdoc cref="Delay(TimeSpan, CancellationToken, bool)"/>
         /// <param name="milliseconds">The amount of time to wait.</param>
-        public static YarnTask Delay(int milliseconds, CancellationToken token = default) => Delay(TimeSpan.FromMilliseconds(milliseconds), token);
-        
+        public static YarnTask Delay(int milliseconds, CancellationToken token = default, bool useUnscaledTime = false) => Delay(TimeSpan.FromMilliseconds(milliseconds), token, useUnscaledTime: useUnscaledTime);
+
         /// <summary>
         /// Task that waits until the <paramref name="predicate"/> evaluates to true.
         /// </summary>
