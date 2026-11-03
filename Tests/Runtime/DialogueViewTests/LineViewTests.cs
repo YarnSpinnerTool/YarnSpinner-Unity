@@ -7,6 +7,7 @@ namespace Yarn.Unity.Tests
     using NUnit.Framework;
     using System;
     using System.Collections;
+    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Threading;
     using UnityEngine.SceneManagement;
@@ -204,6 +205,59 @@ namespace Yarn.Unity.Tests
 
             runTask.IsCompleted().Should().BeTrue();
             linePresenter.canvasGroup.alpha.Should().BeEqualTo(0);
+        });
+
+        [UnityTest]
+        public IEnumerator LineView_UsingUnscaledTime_PresentsDialogueWhilePaused() => YarnTask.ToCoroutine(async () =>
+        {
+            var line = MakeLocalizedLine("Line [pause=250 /] 1");
+
+            linePresenter.useFadeEffect = true;
+            linePresenter.fadeDownDuration = 1f;
+            linePresenter.fadeUpDuration = 1f;
+            linePresenter.useUnscaledTime = true;
+
+            linePresenter.Typewriter = new LetterTypewriter
+            {
+                TextElement = linePresenter.lineText,
+                ActionMarkupHandlers =
+                    new List<IActionMarkupHandler> { new PauseEventProcessor { UseUnscaledTime = true } },
+                CharactersPerSecond = 50,
+                UseUnscaledTime = true
+            };
+
+            var cancellationSource = new CancellationTokenSource();
+            var lineCancellationToken = new LineCancellationToken { NextContentToken = cancellationSource.Token };
+
+            try
+            {
+                UnityEngine.Time.timeScale = 0f;
+                await YarnTask.Yield();
+                var runTask = linePresenter.RunLineAsync(line, lineCancellationToken);
+                var characterCount = line.Text.Text.Length;
+                characterCount.Should().BeGreaterThan(0);
+
+                // Wait for the fade to finish
+                await YarnTask.Delay(TimeSpan.FromSeconds(linePresenter.fadeUpDuration + 0.05f), useUnscaledTime: true);
+                linePresenter.canvasGroup!.alpha.Should().BeEqualTo(1f);
+
+                // Wait for the typewriter effect to complete
+                await YarnTask.Delay(TimeSpan.FromSeconds(2f), useUnscaledTime: true);
+                linePresenter.lineText!.maxVisibleCharacters.Should().BeEqualTo(characterCount);
+
+                // Dismiss the line
+                cancellationSource.Cancel();
+
+                // Wait for the fade out to complete
+                await YarnTask.Delay(TimeSpan.FromSeconds(linePresenter.fadeDownDuration + 0.05f),
+                    useUnscaledTime: true);
+                runTask.IsCompleted().Should().BeTrue();
+                linePresenter.canvasGroup!.alpha.Should().BeEqualTo(0f);
+            }
+            finally
+            {
+                UnityEngine.Time.timeScale = 1f;
+            }
         });
     }
 }
