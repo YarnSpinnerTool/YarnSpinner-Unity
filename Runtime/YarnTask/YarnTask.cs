@@ -72,9 +72,10 @@ namespace Yarn.Unity
         /// <param name="timeSpan">The amount of time to wait.</param>
         /// <param name="token">A token that can be used to cancel the
         /// task.</param>
+        /// <param name="useUnscaledTime">Whether to use unscaled time.</param>
         /// <returns>A new <see cref="YarnTask"/>.</returns>
-        public static partial YarnTask Delay(TimeSpan timeSpan, CancellationToken token = default);
-        public static YarnTask Delay(int milliseconds, CancellationToken token = default) => Delay(TimeSpan.FromMilliseconds(milliseconds), token);
+        public static partial YarnTask Delay(TimeSpan timeSpan, CancellationToken token = default, bool useUnscaledTime = false);
+        public static YarnTask Delay(int milliseconds, CancellationToken token = default, bool useUnscaledTime = false) => Delay(TimeSpan.FromMilliseconds(milliseconds), token, useUnscaledTime: useUnscaledTime);
         public static partial YarnTask WaitUntil(System.Func<bool> predicate, System.Threading.CancellationToken token = default);
         public static partial IEnumerator ToCoroutine(Func<YarnTask> factory);
         public static partial YarnTask Yield();

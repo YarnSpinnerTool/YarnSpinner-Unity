@@ -22,6 +22,8 @@ namespace Yarn.Unity
     /// </summary>
     public sealed class PauseEventProcessor : IActionMarkupHandler
     {
+        public bool UseUnscaledTime { get; set; } = false;
+
         private Dictionary<int, float> pauses = new();
         public void OnLineDisplayComplete()
         {
@@ -76,7 +78,7 @@ namespace Yarn.Unity
         {
             if (pauses.TryGetValue(currentCharacterIndex, out var duration))
             {
-                await YarnTask.Delay(System.TimeSpan.FromMilliseconds(duration), cancellationToken).SuppressCancellationThrow();
+                await YarnTask.Delay(System.TimeSpan.FromMilliseconds(duration), cancellationToken, useUnscaledTime: UseUnscaledTime).SuppressCancellationThrow();
             }
         }
 

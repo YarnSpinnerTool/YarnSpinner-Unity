@@ -93,7 +93,7 @@ namespace Yarn.Unity
         /// <param name="token">A token that can be used to cancel the
         /// task.</param>
         /// <returns>A new <see cref="YarnTask"/>.</returns>
-        public static partial YarnTask Delay(TimeSpan timeSpan, CancellationToken token)
+        public static partial YarnTask Delay(TimeSpan timeSpan, CancellationToken token, bool useUnscaledTime)
         {
             return Task.Delay(timeSpan, token);
         }

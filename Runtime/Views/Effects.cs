@@ -21,12 +21,12 @@ namespace Yarn.Unity
 {
     public static class Effects
     {
-        public static IEnumerator FadeAlpha(CanvasGroup canvas, float from, float to, float duration, CancellationToken token)
+        public static IEnumerator FadeAlpha(CanvasGroup canvas, float from, float to, float duration, CancellationToken token, bool useUnscaledTime = false)
         {
-            return YarnTask.ToCoroutine(() => FadeAlphaAsync(canvas, from, to, duration, token));
+            return YarnTask.ToCoroutine(() => FadeAlphaAsync(canvas, from, to, duration, token, useUnscaledTime: useUnscaledTime));
         }
 
-        public static async YarnTask FadeAlphaAsync(CanvasGroup canvas, float from, float to, float duration, CancellationToken token)
+        public static async YarnTask FadeAlphaAsync(CanvasGroup canvas, float from, float to, float duration, CancellationToken token, bool useUnscaledTime = false)
         {
             if (duration == 0)
             {
@@ -39,7 +39,7 @@ namespace Yarn.Unity
             float accumulator = 0;
             while (!token.IsCancellationRequested && accumulator < duration)
             {
-                accumulator += Time.deltaTime;
+                accumulator += useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
                 canvas.alpha = Mathf.Lerp(from, to, accumulator / duration);
                 await YarnTask.Yield();
             }

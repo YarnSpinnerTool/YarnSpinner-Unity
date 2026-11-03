@@ -43,6 +43,11 @@ namespace Yarn.Unity
         /// cref="ActionMarkupHandlers"/>.</remarks>
         public float WordsPerSecond { get; set; } = 0f;
 
+        /// <summary>
+        /// Whether to use unscaled time when delivering text.
+        /// </summary>
+        public bool UseUnscaledTime { get; set; } = false;
+
         /// <inheritdoc/>
         public async YarnTask RunTypewriter(Markup.MarkupParseResult line, CancellationToken cancellationToken)
         {
@@ -99,9 +104,9 @@ namespace Yarn.Unity
                         // If we don't already have enough accumulated time budget for a word, wait until we do (or until we're cancelled)
                         while (!cancellationToken.IsCancellationRequested && (accumulatedDelay < secondsPerWord))
                         {
-                            var timeBeforeYield = Time.timeAsDouble;
+                            var timeBeforeYield = UseUnscaledTime ? Time.unscaledTimeAsDouble : Time.timeAsDouble;
                             await YarnTask.Yield();
-                            var timeAfterYield = Time.timeAsDouble;
+                            var timeAfterYield = UseUnscaledTime ? Time.unscaledTimeAsDouble : Time.timeAsDouble;
                             accumulatedDelay += timeAfterYield - timeBeforeYield;
                         }
                         accumulatedDelay -= secondsPerWord;
