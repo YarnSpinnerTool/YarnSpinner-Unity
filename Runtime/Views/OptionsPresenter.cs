@@ -76,6 +76,13 @@ namespace Yarn.Unity
         [ShowIf(nameof(useFadeEffect))]
         public float fadeDownDuration = 0.1f;
 
+        /// <summary>
+        /// Whether to use unscaled time when presenting dialogue.
+        /// </summary>
+        [Group("Timing")]
+        [Label("Use Unscaled Time")]
+        public bool useUnscaledTime = false;
+
         private const string TruncateLastLineMarkupName = "lastline";
 
         /// <summary>
@@ -326,7 +333,7 @@ namespace Yarn.Unity
             if (useFadeEffect && canvasGroup != null)
             {
                 // fade up the UI now
-                await Effects.FadeAlphaAsync(canvasGroup, 0, 1, fadeUpDuration, cancellationToken.HurryUpToken);
+                await Effects.FadeAlphaAsync(canvasGroup, 0, 1, fadeUpDuration, cancellationToken.HurryUpToken, useUnscaledTime: this.useUnscaledTime);
             }
 
             // allow interactivity and wait for an option to be selected
@@ -350,7 +357,7 @@ namespace Yarn.Unity
             if (useFadeEffect && canvasGroup != null)
             {
                 // fade down
-                await Effects.FadeAlphaAsync(canvasGroup, 1, 0, fadeDownDuration, cancellationToken.HurryUpToken);
+                await Effects.FadeAlphaAsync(canvasGroup, 1, 0, fadeDownDuration, cancellationToken.HurryUpToken, useUnscaledTime: this.useUnscaledTime);
             }
 
             // disabling ALL the options views now
