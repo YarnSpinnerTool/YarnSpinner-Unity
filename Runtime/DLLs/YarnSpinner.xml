@@ -2004,6 +2004,23 @@
         <member name="P:Yarn.ErrorType.DefaultValue">
             <inheritdoc/>
         </member>
+        <member name="T:Yarn.ForwardDeclaredType">
+            <summary>
+            A forward-declared type represents a type that is not known ahead of compilation type - that is, it's a type that's declared in the Yarn Spinner script itself. The compiler will resolve it during compilation, or fail with an error if it can't be resolved.
+            </summary>
+        </member>
+        <member name="P:Yarn.ForwardDeclaredType.Name">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.ForwardDeclaredType.Parent">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.ForwardDeclaredType.Description">
+            <inheritdoc/>
+        </member>
+        <member name="P:Yarn.ForwardDeclaredType.TypeMembers">
+            <inheritdoc/>
+        </member>
         <member name="T:Yarn.FunctionType">
             <summary>
             A type that represents a function.
