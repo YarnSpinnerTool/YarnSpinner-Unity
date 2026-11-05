@@ -427,7 +427,7 @@ namespace Yarn.Unity.Editor
             sourceFileEntriesContainer.Add(yarnsMissingWarningElement);
 
             if (yarnsMissingWarningElement != null)
-            {    
+            {
                 if (sourceEntryFields.Count == 0)
                 {
                     yarnsMissingWarningElement.style.display = DisplayStyle.Flex;
@@ -475,7 +475,7 @@ namespace Yarn.Unity.Editor
             }
 
             if (defintionsMissingWarningElement != null)
-            {     
+            {
                 if (definitionEntryFields.Count == 0)
                 {
                     defintionsMissingWarningElement.style.display = DisplayStyle.Flex;
@@ -488,7 +488,7 @@ namespace Yarn.Unity.Editor
 
 
             sourceFilesContainer.Add(definitionFileEntriesContainer);
-            
+
             var addDefintionButton = new Button();
             addDefintionButton.text = "Add";
             addDefintionButton.style.marginLeft = 8;
@@ -664,7 +664,7 @@ namespace Yarn.Unity.Editor
             useCustomTagger.RegisterValueChangedCallback((change) =>
             {
                 SetElementVisible(taggerChoice, change.newValue);
-                
+
                 if (useCustomLineTaggerProperty != null)
                 {
                     useCustomLineTaggerProperty.boolValue = change.newValue;
@@ -717,7 +717,7 @@ namespace Yarn.Unity.Editor
 
             // if it's already on we want it to show without having to toggle
             SetElementVisible(taggerChoice, useCustomTagger.value);
-            
+
             yarnInternalControls.Add(useCustomTagger);
             yarnInternalControls.Add(taggerChoice);
 
@@ -746,7 +746,7 @@ namespace Yarn.Unity.Editor
             // not generated code. Get the full names of the result.
             var variableStorageClasses = AssemblyUtility
                 .GetAssemblies()
-                .Where(a => a != typeof(Yarn.AsyncDialogue).Assembly)
+                .Where(a => a != typeof(Yarn.Dialogue).Assembly)
                 .SelectMany(a => a.GetTypes())
                 .Where(t => t.GetInterfaces().Any(i => i == typeof(IVariableStorage)))
                 .Where(t => t.IsAbstract == false)

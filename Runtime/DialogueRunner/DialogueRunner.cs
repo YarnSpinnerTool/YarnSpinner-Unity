@@ -73,17 +73,17 @@ namespace Yarn.Unity
     [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-runner")]
     public sealed partial class DialogueRunner : MonoBehaviour, IDialogueResponder
     {
-        private AsyncDialogue? dialogue;
+        private Dialogue? dialogue;
         /// <summary>
         /// The current dialogue for this runner.
         /// </summary>
-        public AsyncDialogue Dialogue
+        public Dialogue Dialogue
         {
             get
             {
                 if (dialogue == null)
                 {
-                    dialogue = new Yarn.AsyncDialogue(VariableStorage);
+                    dialogue = new Yarn.Dialogue(VariableStorage);
 
                     dialogue.Responder = this;
 
@@ -818,7 +818,7 @@ namespace Yarn.Unity
             {
                 if (allowOptionFallthrough)
                 {
-                    return Yarn.AsyncDialogue.NoOptionSelected;
+                    return Yarn.Dialogue.NoOptionSelected;
                 }
                 else
                 {

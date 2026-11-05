@@ -32,7 +32,7 @@
             <remarks>
             Without a responder the VM won't know when to continue along to the next piece of content or how to respond to user input.
             The VM will always await the action of it's responder before continuining onwards.
-            The VM always has the <see cref="T:Yarn.AsyncDialogue"/> as it's default responder but that just logs these events and otherwise forwards the calls onto it's responder on the <see cref="P:Yarn.AsyncDialogue.Responder"/> field.
+            The VM always has the <see cref="T:Yarn.Dialogue"/> as it's default responder but that just logs these events and otherwise forwards the calls onto it's responder on the <see cref="P:Yarn.Dialogue.Responder"/> field.
             </remarks>
         </member>
         <member name="M:Yarn.IDialogueResponder.HandleLine(Yarn.Line,System.Threading.CancellationToken)">
@@ -45,7 +45,7 @@
         <member name="M:Yarn.IDialogueResponder.HandleOptions(Yarn.OptionSet,System.Threading.CancellationToken)">
             <summary>
             Requests the responder handle the current option group and tell the VM which option was selected.
-            If <see cref="F:Yarn.AsyncDialogue.NoOptionSelected"/> is returned the option group will be skipped over.
+            If <see cref="F:Yarn.Dialogue.NoOptionSelected"/> is returned the option group will be skipped over.
             </summary>
             <param name="options">The collection of options for the responder to use in it's selection</param>
             <param name="token">The cancellation token for this task</param>
@@ -183,105 +183,105 @@
         <member name="T:Yarn.Operand.ValueOneofCase">
             <summary>Enum of possible cases for the "value" oneof.</summary>
         </member>
-        <member name="F:Yarn.AsyncVirtualMachine.State.currentNodeName">
+        <member name="F:Yarn.VirtualMachine.State.currentNodeName">
             <summary>The name of the node that we're currently
             in.</summary>
         </member>
-        <member name="F:Yarn.AsyncVirtualMachine.State.programCounter">
+        <member name="F:Yarn.VirtualMachine.State.programCounter">
             <summary>The instruction number in the current
             node.</summary>
         </member>
-        <member name="F:Yarn.AsyncVirtualMachine.State.currentOptions">
+        <member name="F:Yarn.VirtualMachine.State.currentOptions">
             <summary>The current list of options that will be delivered
             when the next RunOption instruction is
             encountered.</summary>
         </member>
-        <member name="F:Yarn.AsyncVirtualMachine.State.stack">
+        <member name="F:Yarn.VirtualMachine.State.stack">
             <summary>The value stack.</summary>
         </member>
-        <member name="M:Yarn.AsyncVirtualMachine.State.PushValue(Yarn.Value)">
+        <member name="M:Yarn.VirtualMachine.State.PushValue(Yarn.Value)">
             <summary>Pushes a <see cref="T:Yarn.Value"/> object onto the
             stack.</summary>
             <param name="v">The value to push onto the stack.</param>
         </member>
-        <member name="M:Yarn.AsyncVirtualMachine.State.PushValue(System.String)">
-            <inheritdoc cref="M:Yarn.AsyncVirtualMachine.State.PushValue(Yarn.Value)" />
+        <member name="M:Yarn.VirtualMachine.State.PushValue(System.String)">
+            <inheritdoc cref="M:Yarn.VirtualMachine.State.PushValue(Yarn.Value)" />
         </member>
-        <member name="M:Yarn.AsyncVirtualMachine.State.PushValue(System.Single)">
-            <inheritdoc cref="M:Yarn.AsyncVirtualMachine.State.PushValue(Yarn.Value)" />
+        <member name="M:Yarn.VirtualMachine.State.PushValue(System.Single)">
+            <inheritdoc cref="M:Yarn.VirtualMachine.State.PushValue(Yarn.Value)" />
         </member>
-        <member name="M:Yarn.AsyncVirtualMachine.State.PushValue(System.Boolean)">
-            <inheritdoc cref="M:Yarn.AsyncVirtualMachine.State.PushValue(Yarn.Value)" />
+        <member name="M:Yarn.VirtualMachine.State.PushValue(System.Boolean)">
+            <inheritdoc cref="M:Yarn.VirtualMachine.State.PushValue(Yarn.Value)" />
         </member>
-        <member name="M:Yarn.AsyncVirtualMachine.State.PopValue">
+        <member name="M:Yarn.VirtualMachine.State.PopValue">
             <summary>Removes a value from the top of the stack, and
             returns it.</summary>
             <returns>The value that was at the top of the stack when
             this method was called.</returns>
         </member>
-        <member name="M:Yarn.AsyncVirtualMachine.State.PeekValue">
+        <member name="M:Yarn.VirtualMachine.State.PeekValue">
             <summary>Peeks at a value from the stack.</summary>
             <returns>The value at the top of the stack.</returns>
         </member>
-        <member name="M:Yarn.AsyncVirtualMachine.State.ClearStack">
+        <member name="M:Yarn.VirtualMachine.State.ClearStack">
             <summary>Clears the stack.</summary>
         </member>
-        <member name="M:Yarn.AsyncVirtualMachine.State.PushCallStack">
+        <member name="M:Yarn.VirtualMachine.State.PushCallStack">
             <summary>
             Pushes the current node and counter as a callsite onto the call stack
             </summary>
         </member>
-        <member name="M:Yarn.AsyncVirtualMachine.ResetState">
+        <member name="M:Yarn.VirtualMachine.ResetState">
             Reset the state of the VM
         </member>
-        <member name="P:Yarn.AsyncVirtualMachine.Responder">
+        <member name="P:Yarn.VirtualMachine.Responder">
             <summary>
             The VM's responder, responsible for handling all dialogue events
             </summary>
         </member>
-        <member name="P:Yarn.AsyncVirtualMachine.VariableStorage">
+        <member name="P:Yarn.VirtualMachine.VariableStorage">
             <summary>
             Current variable storage
             </summary>
         </member>
-        <member name="P:Yarn.AsyncVirtualMachine.LogDebugMessage">
+        <member name="P:Yarn.VirtualMachine.LogDebugMessage">
             <summary>
             Logger for debug messages
             </summary>
         </member>
-        <member name="P:Yarn.AsyncVirtualMachine.LogErrorMessage">
+        <member name="P:Yarn.VirtualMachine.LogErrorMessage">
             <summary>
             Logger for error messages
             </summary>
         </member>
-        <member name="P:Yarn.AsyncVirtualMachine.Program">
+        <member name="P:Yarn.VirtualMachine.Program">
             <summary>
-            The <see cref="P:Yarn.AsyncVirtualMachine.Program"/> that this virtual machine is running.
+            The <see cref="P:Yarn.VirtualMachine.Program"/> that this virtual machine is running.
             </summary>
         </member>
-        <member name="P:Yarn.AsyncVirtualMachine.CurrentNodeName">
+        <member name="P:Yarn.VirtualMachine.CurrentNodeName">
             <summary>
             The current node, or null if one hasn't been set
             </summary>
         </member>
-        <member name="P:Yarn.AsyncVirtualMachine.ContentSaliencyStrategy">
+        <member name="P:Yarn.VirtualMachine.ContentSaliencyStrategy">
             <summary>
             the current saliency strategy
             </summary>
         </member>
-        <member name="F:Yarn.AsyncVirtualMachine.dialogueCancellationSource">
+        <member name="F:Yarn.VirtualMachine.dialogueCancellationSource">
             <summary>
             when dialogue is initiated this will also be configured and when dialogue is requested to be ended this will also be cancelled.
             This is the main source of all tokens provided from the VM upwards through the dialogue and responders
             </summary>
         </member>
-        <member name="M:Yarn.AsyncVirtualMachine.SetNode(System.String)">
+        <member name="M:Yarn.VirtualMachine.SetNode(System.String)">
             <summary>
             Sets the current node and clears the VMs internal state
             </summary>
             <param name="nodeName">The new node</param>
         </member>
-        <member name="M:Yarn.AsyncVirtualMachine.Stop">
+        <member name="M:Yarn.VirtualMachine.Stop">
             <summary>
             Stops the current running dialogue and resets the VM state
             </summary>
@@ -289,7 +289,7 @@
             Does so by cancelling any existing tokens, so cancellation will ripple outwards from this call.
             </remarks>
         </member>
-        <member name="M:Yarn.AsyncVirtualMachine.Start">
+        <member name="M:Yarn.VirtualMachine.Start">
             <summary>
             Starts the dialogue from the current node.
             </summary>
@@ -298,7 +298,7 @@
             </remarks>
             <exception cref="T:Yarn.DialogueException">Throws if there is already dialogue running</exception>
         </member>
-        <member name="M:Yarn.AsyncVirtualMachine.CallFunction(System.String,System.Collections.Generic.Stack{Yarn.Value},Yarn.IDialogueResponder,System.Threading.CancellationToken)">
+        <member name="M:Yarn.VirtualMachine.CallFunction(System.String,System.Collections.Generic.Stack{Yarn.Value},Yarn.IDialogueResponder,System.Threading.CancellationToken)">
             <summary>
             Invokes the requested function and returns it's value back to the VM
             </summary>
@@ -353,7 +353,7 @@
         </member>
         <member name="T:Yarn.Line">
              <summary>
-             A line of dialogue, sent from the <see cref="T:Yarn.AsyncDialogue"/> to the game.
+             A line of dialogue, sent from the <see cref="T:Yarn.Dialogue"/> to the game.
              </summary>
              <remarks>
              <para>When the game receives a <see cref="T:Yarn.Line"/>, it should do the
@@ -371,7 +371,7 @@
              </list>
             
              <para>You typically do not create instances of this struct yourself.
-             They are created by the <see cref="T:Yarn.AsyncDialogue"/> during program
+             They are created by the <see cref="T:Yarn.Dialogue"/> during program
              execution.</para>
              </remarks>
              <seealso cref="M:Yarn.IDialogueResponder.HandleLine(Yarn.Line,System.Threading.CancellationToken)"/>
@@ -399,11 +399,11 @@
         <member name="T:Yarn.OptionSet">
             <summary>
             A set of <see cref="T:Yarn.OptionSet.Option"/>s, sent from the <see
-            cref="T:Yarn.AsyncDialogue"/> to the game.
+            cref="T:Yarn.Dialogue"/> to the game.
             </summary>
             <remarks>
             You typically do not create instances of this struct yourself. They are
-            created by the <see cref="T:Yarn.AsyncDialogue"/> during program execution.
+            created by the <see cref="T:Yarn.Dialogue"/> during program execution.
             </remarks>
             <seealso cref="M:Yarn.IDialogueResponder.HandleOptions(Yarn.OptionSet,System.Threading.CancellationToken)"/>
         </member>
@@ -461,11 +461,11 @@
         </member>
         <member name="T:Yarn.Command">
             <summary>
-            A command, sent from the <see cref="T:Yarn.AsyncDialogue"/> to the game.
+            A command, sent from the <see cref="T:Yarn.Dialogue"/> to the game.
             </summary>
             <remarks>
             You do not create instances of this struct yourself. They are
-            created by the <see cref="T:Yarn.AsyncDialogue"/> during program execution.
+            created by the <see cref="T:Yarn.Dialogue"/> during program execution.
             </remarks>
             <seealso cref="M:Yarn.IDialogueResponder.HandleCommand(Yarn.Command,System.Threading.CancellationToken)"/>
         </member>
@@ -477,7 +477,7 @@
         <member name="T:Yarn.Logger">
             <summary>
             Represents a method that receives diagnostic messages and error
-            information from a <see cref="T:Yarn.AsyncDialogue"/>.
+            information from a <see cref="T:Yarn.Dialogue"/>.
             </summary>
             <remarks>
             The text that this delegate receives may be output to a console, or
@@ -502,7 +502,7 @@
         <member name="T:Yarn.VariableKind">
             <summary>
             Represents different kinds of variables that can be fetched from a <see
-            cref="T:Yarn.AsyncDialogue"/> using <see cref="M:Yarn.IVariableAccess.TryGetValue``1(System.String,``0@)"/>.
+            cref="T:Yarn.Dialogue"/> using <see cref="M:Yarn.IVariableAccess.TryGetValue``1(System.String,``0@)"/>.
             </summary>
         </member>
         <member name="F:Yarn.VariableKind.Unknown">
@@ -622,75 +622,75 @@
         <member name="M:Yarn.MemoryVariableStore.GetVariableKind(System.String)">
             <inheritdoc/>
         </member>
-        <member name="T:Yarn.AsyncDialogue">
+        <member name="T:Yarn.Dialogue">
             <summary>
             Co-ordinates the execution of Yarn programs.
             </summary>
             <remarks>
-            This type is basically a wrapper around the <see cref="T:Yarn.AsyncVirtualMachine"/> and provides a nicer interface into manipulating the vm from the perspective of dialogue instead of a stack machine.
+            This type is basically a wrapper around the <see cref="T:Yarn.VirtualMachine"/> and provides a nicer interface into manipulating the vm from the perspective of dialogue instead of a stack machine.
             </remarks>
         </member>
-        <member name="M:Yarn.AsyncDialogue.#ctor(Yarn.IVariableStorage)">
+        <member name="M:Yarn.Dialogue.#ctor(Yarn.IVariableStorage)">
             <summary>
             Creates a new AsyncDialogue
             </summary>
             <param name="variableStorage">The varstore for this dialogue</param>
             <exception cref="T:System.ArgumentNullException">If the variable storage is null there is no way to create an a dialogue object</exception>
         </member>
-        <member name="F:Yarn.AsyncDialogue.NoOptionSelected">
+        <member name="F:Yarn.Dialogue.NoOptionSelected">
             <summary>
             The value to indicate to the dialogue runner that no option was selected and dialogue should fall through to the rest of the program.
             </summary>
         </member>
-        <member name="P:Yarn.AsyncDialogue.LogDebugMessage">
+        <member name="P:Yarn.Dialogue.LogDebugMessage">
             <summary>
             The logger for debug messages, is forwarded to the VM
             </summary>
         </member>
-        <member name="P:Yarn.AsyncDialogue.LogErrorMessage">
+        <member name="P:Yarn.Dialogue.LogErrorMessage">
             <summary>
             The logger for error messages, is forwarded to the VM
             </summary>
         </member>
-        <member name="P:Yarn.AsyncDialogue.VariableStorage">
+        <member name="P:Yarn.Dialogue.VariableStorage">
             <summary>
             The variable storage used by the dialogue
             </summary>
         </member>
-        <member name="P:Yarn.AsyncDialogue.Responder">
+        <member name="P:Yarn.Dialogue.Responder">
             <summary>
             The Responder for this dialogue, this is how the dialogue informs the rest of the system of important events
             </summary>
         </member>
-        <member name="P:Yarn.AsyncDialogue.Program">
+        <member name="P:Yarn.Dialogue.Program">
             <summary>
             The compiled Yarn program used by the dialogue.
             </summary>
         </member>
-        <member name="P:Yarn.AsyncDialogue.ContentSaliencyStrategy">
+        <member name="P:Yarn.Dialogue.ContentSaliencyStrategy">
             <summary>
             What saliency content strategy does the dialogue use to select salient content?
             </summary>
         </member>
-        <member name="P:Yarn.AsyncDialogue.IsActive">
+        <member name="P:Yarn.Dialogue.IsActive">
             <summary>
             Is true when dialogue is currently running, false otherwise.
             </summary>
         </member>
-        <member name="M:Yarn.AsyncDialogue.StartDialogue(System.String)">
+        <member name="M:Yarn.Dialogue.StartDialogue(System.String)">
             <summary>
             Starts dialogue from a specific entry node and will run until completion of dialogue.
             </summary>
             <param name="node">The node to use as the entry point for the dialogue</param>
         </member>
-        <member name="M:Yarn.AsyncDialogue.Start">
+        <member name="M:Yarn.Dialogue.Start">
             <summary>
-            Starts dialogue at the value of <see cref="P:Yarn.AsyncDialogue.CurrentNode"/>.
-            <seealso cref="M:Yarn.AsyncDialogue.StartDialogue(System.String)"/>
+            Starts dialogue at the value of <see cref="P:Yarn.Dialogue.CurrentNode"/>.
+            <seealso cref="M:Yarn.Dialogue.StartDialogue(System.String)"/>
             </summary>
             <exception cref="T:System.InvalidOperationException">If there is no node currently set as the entry point this method throws</exception>
         </member>
-        <member name="M:Yarn.AsyncDialogue.IsNodeGroup(System.String)">
+        <member name="M:Yarn.Dialogue.IsNodeGroup(System.String)">
             <summary>
             Works out if the node is part of a node group or not.
             If the node isn't a valid node will always return false.
@@ -699,23 +699,23 @@
             <returns>true if the requested node is part of a node group</returns>
             <exception cref="T:System.InvalidOperationException">Throws if there is no program set</exception>
         </member>
-        <member name="M:Yarn.AsyncDialogue.IsNodeVisited(System.String)">
+        <member name="M:Yarn.Dialogue.IsNodeVisited(System.String)">
             <summary>
             Works out if the node has been visited.
-            See also <seealso cref="M:Yarn.AsyncDialogue.GetNodeVisitCount(System.String)"/>
+            See also <seealso cref="M:Yarn.Dialogue.GetNodeVisitCount(System.String)"/>
             </summary>
             <param name="nodeName">The node whos visitation you are curious about</param>
             <returns>True if the node has been visited at least once</returns>
         </member>
-        <member name="M:Yarn.AsyncDialogue.GetNodeVisitCount(System.String)">
+        <member name="M:Yarn.Dialogue.GetNodeVisitCount(System.String)">
             <summary>
             Works out how many times the node has been visited.
-            See also <seealso cref="M:Yarn.AsyncDialogue.IsNodeVisited(System.String)"/>
+            See also <seealso cref="M:Yarn.Dialogue.IsNodeVisited(System.String)"/>
             </summary>
             <param name="nodeName">the node whos visitation count you are cirous about</param>
             <returns>0 if the node has never been visited, otherwise the number of times the node has been visited</returns>
         </member>
-        <member name="M:Yarn.AsyncDialogue.HasAnyContent(System.String)">
+        <member name="M:Yarn.Dialogue.HasAnyContent(System.String)">
             <summary>
             Determines if the requested node group has any content to show.
             </summary>
@@ -724,14 +724,14 @@
             <list type="bullet">
             <item> the requested node is not a node or nodegroup </item>
             <item> the node group has no elements </item>
-            <item> the node group has been fully exhausted according to the <see cref="P:Yarn.AsyncDialogue.ContentSaliencyStrategy"/> </item>
-            <item> there is only failing content according to the <see cref="P:Yarn.AsyncDialogue.ContentSaliencyStrategy"/> </item>
+            <item> the node group has been fully exhausted according to the <see cref="P:Yarn.Dialogue.ContentSaliencyStrategy"/> </item>
+            <item> there is only failing content according to the <see cref="P:Yarn.Dialogue.ContentSaliencyStrategy"/> </item>
             </list>
             </remarks>
             <param name="nodeGroup">The node group to check for content</param>
             <returns>True if there is content to show, false otherwise</returns>
         </member>
-        <member name="M:Yarn.AsyncDialogue.GetSaliencyOptionsForNodeGroup(System.String)">
+        <member name="M:Yarn.Dialogue.GetSaliencyOptionsForNodeGroup(System.String)">
             <summary>
             Returns the list of salient options inside a node groups
             </summary>
@@ -739,14 +739,14 @@
             <returns>Collection of salient content inside the node group, may be a single item if the requested nodegroup is just a single node</returns>
             <exception cref="T:System.ArgumentException">If the requested nodegroup isn't a node</exception>
         </member>
-        <member name="M:Yarn.AsyncDialogue.NodeExists(System.String)">
+        <member name="M:Yarn.Dialogue.NodeExists(System.String)">
             <summary>
             Determins if the requested node exists in the dialogue
             </summary>
             <param name="nodeName">the node whos existence you are curious about</param>
             <returns>True if the node exists, false otherwise</returns>
         </member>
-        <member name="M:Yarn.AsyncDialogue.TryGetSmartVariable``1(System.String,``0@)">
+        <member name="M:Yarn.Dialogue.TryGetSmartVariable``1(System.String,``0@)">
             <summary>
             Attempts to retrieve the requested smart variable's current value
             </summary>
@@ -755,50 +755,50 @@
             <param name="result">the smart variable itself</param>
             <returns>True if it was possible to retrieve the smart variable</returns>
         </member>
-        <member name="M:Yarn.AsyncDialogue.HandleLine(Yarn.Line,System.Threading.CancellationToken)">
+        <member name="M:Yarn.Dialogue.HandleLine(Yarn.Line,System.Threading.CancellationToken)">
             <inheritdoc />
         </member>
-        <member name="M:Yarn.AsyncDialogue.HandleOptions(Yarn.OptionSet,System.Threading.CancellationToken)">
+        <member name="M:Yarn.Dialogue.HandleOptions(Yarn.OptionSet,System.Threading.CancellationToken)">
             <inheritdoc />
         </member>
-        <member name="M:Yarn.AsyncDialogue.HandleCommand(Yarn.Command,System.Threading.CancellationToken)">
+        <member name="M:Yarn.Dialogue.HandleCommand(Yarn.Command,System.Threading.CancellationToken)">
             <inheritdoc />
         </member>
-        <member name="M:Yarn.AsyncDialogue.HandleNodeStart(System.String,System.Threading.CancellationToken)">
+        <member name="M:Yarn.Dialogue.HandleNodeStart(System.String,System.Threading.CancellationToken)">
             <inheritdoc />
         </member>
-        <member name="M:Yarn.AsyncDialogue.HandleNodeComplete(System.String,System.Threading.CancellationToken)">
+        <member name="M:Yarn.Dialogue.HandleNodeComplete(System.String,System.Threading.CancellationToken)">
             <inheritdoc />
         </member>
-        <member name="M:Yarn.AsyncDialogue.HandleDialogueComplete">
+        <member name="M:Yarn.Dialogue.HandleDialogueComplete">
             <inheritdoc />
         </member>
-        <member name="M:Yarn.AsyncDialogue.PrepareForLines(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+        <member name="M:Yarn.Dialogue.PrepareForLines(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
             <inheritdoc />
         </member>
-        <member name="M:Yarn.AsyncDialogue.CanCallFunction(System.String)">
+        <member name="M:Yarn.Dialogue.CanCallFunction(System.String)">
             <inheritdoc />
         </member>
-        <member name="M:Yarn.AsyncDialogue.InvokeFunction(System.String,System.IConvertible[],System.Threading.CancellationToken)">
+        <member name="M:Yarn.Dialogue.InvokeFunction(System.String,System.IConvertible[],System.Threading.CancellationToken)">
             <inheritdoc />
         </member>
-        <member name="M:Yarn.AsyncDialogue.UnloadAll">
+        <member name="M:Yarn.Dialogue.UnloadAll">
             <summary>
             Wipes the current program
             </summary>
         </member>
-        <member name="P:Yarn.AsyncDialogue.CurrentNode">
+        <member name="P:Yarn.Dialogue.CurrentNode">
             <summary>
             Returns the current node, or null if one hasn't been set
             </summary>
         </member>
-        <member name="M:Yarn.AsyncDialogue.SetNode(System.String)">
+        <member name="M:Yarn.Dialogue.SetNode(System.String)">
             <summary>
             Sets the current node
             </summary>
             <param name="node">the requested node</param>
         </member>
-        <member name="M:Yarn.AsyncDialogue.Stop">
+        <member name="M:Yarn.Dialogue.Stop">
             <summary>
             Requests the current dialogue stop
             </summary>
@@ -806,7 +806,7 @@
             This cancels the various tokens that are provided to all tasks so dialogue cancellation will percolate outwards from this point
             </remarks>
         </member>
-        <member name="M:Yarn.AsyncDialogue.GetHeaders(System.String)">
+        <member name="M:Yarn.Dialogue.GetHeaders(System.String)">
             <summary>
             Returns all headers on the requested node.
             </summary>
@@ -817,19 +817,19 @@
             <returns>The collection of headers as key-value pairs</returns>
             <exception cref="T:System.InvalidOperationException">Throws if there is no program set</exception>
         </member>
-        <member name="M:Yarn.AsyncDialogue.GetHeaderValue(System.String,System.String)">
+        <member name="M:Yarn.Dialogue.GetHeaderValue(System.String,System.String)">
             <summary>
             Returns a single value from a single node's header.
             </summary>
             <remarks>
-            If you are requesting multiple headers it would be better to use <see cref="M:Yarn.AsyncDialogue.GetHeaders(System.String)"/> and filter that collection.
+            If you are requesting multiple headers it would be better to use <see cref="M:Yarn.Dialogue.GetHeaders(System.String)"/> and filter that collection.
             </remarks>
             <param name="nodeName">The node whos header you covet</param>
             <param name="headerName">The header upon the requested node</param>
             <returns>The value of the requested header on the requested node, or null if either the node or header doesn't exist</returns>
             <exception cref="T:System.InvalidOperationException">Throws if there is no program set</exception>
         </member>
-        <member name="P:Yarn.AsyncDialogue.NodeNames">
+        <member name="P:Yarn.Dialogue.NodeNames">
             <summary>
             Returns the names of all nodes in the program.
             </summary>
@@ -839,7 +839,7 @@
         </member>
         <member name="T:Yarn.DialogueException">
             <summary>
-            An exception that is thrown by <see cref="T:Yarn.AsyncDialogue"/> when there is an
+            An exception that is thrown by <see cref="T:Yarn.Dialogue"/> when there is an
             error in executing a <see cref="T:Yarn.Program"/>.
             </summary>
         </member>
@@ -1552,7 +1552,7 @@
             this option is selected.
             </summary>
             <remarks>This property is internal to Yarn Spinner, and is used by
-            the <see cref="T:Yarn.AsyncVirtualMachine"/> class.</remarks>
+            the <see cref="T:Yarn.VirtualMachine"/> class.</remarks>
         </member>
         <member name="T:Yarn.Saliency.FirstSaliencyStrategy">
             <summary>
@@ -1560,7 +1560,7 @@
             item in the list of available options.
             </summary>
             <remarks>
-            This saliency strategy is used when a <see cref="T:Yarn.AsyncDialogue"/> has no
+            This saliency strategy is used when a <see cref="T:Yarn.Dialogue"/> has no
             provided saliency strategy, but is required to make a decision.
             </remarks>
         </member>
@@ -2821,7 +2821,7 @@
             text. This allows users of the <see cref="T:Yarn.Markup.LineParser"/> class
             to dynamically replace text in a line. The <c>nomarkup</c> tag is
             implemented in this way by the <see cref="T:Yarn.Markup.LineParser"/> class
-            directly; the <see cref="T:Yarn.AsyncDialogue"/> class uses this mechanism
+            directly; the <see cref="T:Yarn.Dialogue"/> class uses this mechanism
             to implement the <c>select</c>, <c>plural</c> and <c>ordinal</c> markers.
             </remarks>
             <param name="attributeName">The name of the marker that should
