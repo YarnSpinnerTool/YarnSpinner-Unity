@@ -320,7 +320,8 @@ namespace Yarn.Unity.Editor
             Project project;
             try
             {
-                project = Yarn.Compiler.Project.LoadFromFile(ctx.assetPath);
+                var unityProjectRoot = Path.GetDirectoryName(Application.dataPath);
+                project = Yarn.Compiler.Project.LoadFromFile(ctx.assetPath, unityProjectRoot);
             }
             catch (System.Exception)
             {
