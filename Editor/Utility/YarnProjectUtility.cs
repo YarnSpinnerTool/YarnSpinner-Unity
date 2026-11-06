@@ -710,7 +710,8 @@ namespace Yarn.Unity.Editor
                 return false;
             }
 
-            var yp = Yarn.Compiler.Project.LoadFromFile(path);
+            var unityProjectRoot = Path.GetDirectoryName(Application.dataPath);
+            var yp = Yarn.Compiler.Project.LoadFromFile(path, unityProjectRoot);
             var files = yp.SourceFiles;
 
             if (files.Any())
