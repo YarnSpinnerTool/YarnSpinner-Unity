@@ -33,6 +33,7 @@ namespace Yarn.Unity.Editor
     /// </summary>
     internal static class YarnProjectUtility
     {
+        internal const string AllDefinitionsFilesInProjectPattern = "${workspaceRoot}/ProjectSettings/Packages/dev.yarnspinner/**/*.ysls.json";
 
         /// <summary>
         /// Creates a new .yarnproject asset in the same directory as the Yarn
@@ -84,6 +85,10 @@ namespace Yarn.Unity.Editor
             // name ends with a tilde
             // and also ignoring anything that is inside a sample folder
             newProject.ExcludeFilePatterns = new[] { "**/*~/*", "./Samples/Yarn Spinner*/*" };
+
+            // Reference all YSLS files in the Unity project
+            newProject.Definitions ??= new();
+            newProject.Definitions.Add(AllDefinitionsFilesInProjectPattern);
 
             return newProject;
         }

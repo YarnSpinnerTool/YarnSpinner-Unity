@@ -530,7 +530,7 @@ namespace Yarn.Unity.Editor
             addDefintionButton.style.marginLeft = 8;
             addDefintionButton.clicked += () =>
             {
-                var defEntry = CreateDefinitionsFileEntry("**/*.ysls.json");
+                var defEntry = CreateDefinitionsFileEntry(YarnProjectUtility.AllDefinitionsFilesInProjectPattern);
                 definitionFileEntriesContainer.Add(defEntry);
                 DefinitionsFilesAddedOrRemoved = true;
 
