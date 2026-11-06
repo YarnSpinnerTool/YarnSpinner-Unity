@@ -4,315 +4,6 @@
         <name>YarnSpinner</name>
     </assembly>
     <members>
-        <member name="T:Yarn.ISmartVariableEvaluator">
-            <summary>
-            Contains methods for evaluating the value of smart variables
-            </summary>
-        </member>
-        <member name="M:Yarn.ISmartVariableEvaluator.TryGetSmartVariable``1(System.String,``0@)">
-            <summary>
-            Evaluate the value of a smart variable named <paramref
-            name="name"/>.
-            </summary>
-            <typeparam name="T">The type of the returned value.</typeparam>
-            <param name="name">The name of the variable.</param>
-            <param name="result">On return, contains the returned value of the
-            smart variable, or the <see langword="default"/> value of
-            <typeparamref name="T"/> if a smart variable named <paramref
-            name="name"/> could not be found or its value could not be returned
-            as type <typeparamref name="T"/>.</param>
-            <returns><see langword="true"/> if the smart variable was evaluated,
-            <see langword="false"/> otherwise.</returns>
-        </member>
-        <member name="T:Yarn.IDialogueResponder">
-            <summary>
-            The responder is responsible for handling important dialogue events.
-            This includes all user facing content events (such as lines and options) as well as non-usesr facing events (such as node enters and exits)
-            </summary>
-            <remarks>
-            Without a responder the VM won't know when to continue along to the next piece of content or how to respond to user input.
-            The VM will always await the action of it's responder before continuining onwards.
-            The VM always has the <see cref="T:Yarn.Dialogue"/> as it's default responder but that just logs these events and otherwise forwards the calls onto it's responder on the <see cref="P:Yarn.Dialogue.Responder"/> field.
-            </remarks>
-        </member>
-        <member name="M:Yarn.IDialogueResponder.HandleLine(Yarn.Line,System.Threading.CancellationToken)">
-            <summary>
-            Requests the responder handle the current line and inform the VM when it is done so.
-            </summary>
-            <param name="line">The line encountered</param>
-            <param name="token">The cancellation token for this task</param>
-        </member>
-        <member name="M:Yarn.IDialogueResponder.HandleOptions(Yarn.OptionSet,System.Threading.CancellationToken)">
-            <summary>
-            Requests the responder handle the current option group and tell the VM which option was selected.
-            If <see cref="F:Yarn.Dialogue.NoOptionSelected"/> is returned the option group will be skipped over.
-            </summary>
-            <param name="options">The collection of options for the responder to use in it's selection</param>
-            <param name="token">The cancellation token for this task</param>
-            <returns>The id of the selected option</returns>
-        </member>
-        <member name="M:Yarn.IDialogueResponder.HandleCommand(Yarn.Command,System.Threading.CancellationToken)">
-            <summary>
-            Requests the responder handle the current command and inform the VM when it is done so.
-            </summary>
-            <param name="command">The command encountered</param>
-            <param name="token">The cancellation token for this task</param>
-        </member>
-        <member name="M:Yarn.IDialogueResponder.HandleNodeStart(System.String,System.Threading.CancellationToken)">
-            <summary>
-            Informs the responder that a node has been entered and the VM will await it's processing of this.
-            </summary>
-            <param name="node">The name of the node entered</param>
-            <param name="token">The cancellation token for this task</param>
-        </member>
-        <member name="M:Yarn.IDialogueResponder.HandleNodeComplete(System.String,System.Threading.CancellationToken)">
-            <summary>
-            Informs the responder that a node has been exited and the VM will await it's processing of this.
-            </summary>
-            <param name="node">The name of the node exited</param>
-            <param name="token">The cancellation token for this task</param>
-        </member>
-        <member name="M:Yarn.IDialogueResponder.HandleDialogueComplete">
-            <summary>
-            Informs the responder that dialogue is finishing
-            </summary>
-        </member>
-        <member name="M:Yarn.IDialogueResponder.PrepareForLines(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
-            <summary>
-            Informs the responder that the following lines are likely soon to be encountered and it should perform any preparation for their presentation.
-            </summary>
-            <param name="lineIDs">The collection of line ids</param>
-            <param name="token">The cancellation token for this task</param>
-        </member>
-        <member name="M:Yarn.IDialogueResponder.CanCallFunction(System.String)">
-            <summary>
-            Asks the responder if it can handle the function by this name.
-            </summary>
-            <remarks>
-            For the in-built functions the VM will still ask it's responder if it would like to handle them instead allowing for engine specific overrides.
-            </remarks>
-            <param name="functionName">the name of the function</param>
-            <returns>true if the responder can handle the function</returns>
-        </member>
-        <member name="M:Yarn.IDialogueResponder.InvokeFunction(System.String,System.IConvertible[],System.Threading.CancellationToken)">
-            <summary>
-            Asks the responder to run the function, and provides the parameters from the stack and awaits it's completion.
-            </summary>
-            <param name="functionName">the name of the function</param>
-            <param name="parameters">The collection of parameters for this function, the order is the order they were on the stack</param>
-            <param name="token">The cancellation token for this task</param>
-            <returns>The result of the function</returns>
-        </member>
-        <member name="T:Yarn.Operand">
-            <summary>
-            A value used by an Instruction.
-            </summary>
-            <summary>
-            A value used by an Instruction.
-            </summary>
-        </member>
-        <member name="M:Yarn.Operand.#ctor(System.Boolean)">
-            <summary>
-            Convenience constructor for the Operand type.
-            </summary>
-            <remarks>
-            so that we don't need to have two separate steps for creating and then preparing the Operand
-            </remarks>
-            <param name="value">The boolean value to be made into the operand</param>
-        </member>
-        <member name="M:Yarn.Operand.#ctor(System.String)">
-            <summary>
-            Convenience constructor for the Operand type.
-            </summary>
-            <remarks>
-            so that we don't need to have two separate steps for creating and then preparing the Operand
-            </remarks>
-            <param name="value">The string value to be made into the operand</param>
-        </member>
-        <member name="M:Yarn.Operand.#ctor(System.Single)">
-            <summary>
-            Convenience constructor for the Operand type.
-            </summary>
-            <remarks>
-            so that we don't need to have two separate steps for creating and then preparing the Operand
-            </remarks>
-            <param name="value">The float value to be made into the operand</param>
-        </member>
-        <member name="F:Yarn.Operand.StringValueFieldNumber">
-            <summary>Field number for the "string_value" field.</summary>
-        </member>
-        <member name="P:Yarn.Operand.StringValue">
-            <summary>
-            A string.
-            </summary>
-        </member>
-        <member name="P:Yarn.Operand.HasStringValue">
-            <summary>Gets whether the "string_value" field is set</summary>
-        </member>
-        <member name="M:Yarn.Operand.ClearStringValue">
-            <summary> Clears the value of the oneof if it's currently set to "string_value" </summary>
-        </member>
-        <member name="F:Yarn.Operand.BoolValueFieldNumber">
-            <summary>Field number for the "bool_value" field.</summary>
-        </member>
-        <member name="P:Yarn.Operand.BoolValue">
-            <summary>
-            A boolean (true or false).
-            </summary>
-        </member>
-        <member name="P:Yarn.Operand.HasBoolValue">
-            <summary>Gets whether the "bool_value" field is set</summary>
-        </member>
-        <member name="M:Yarn.Operand.ClearBoolValue">
-            <summary> Clears the value of the oneof if it's currently set to "bool_value" </summary>
-        </member>
-        <member name="F:Yarn.Operand.FloatValueFieldNumber">
-            <summary>Field number for the "float_value" field.</summary>
-        </member>
-        <member name="P:Yarn.Operand.FloatValue">
-            <summary>
-            A floating point number.
-            </summary>
-        </member>
-        <member name="P:Yarn.Operand.HasFloatValue">
-            <summary>Gets whether the "float_value" field is set</summary>
-        </member>
-        <member name="M:Yarn.Operand.ClearFloatValue">
-            <summary> Clears the value of the oneof if it's currently set to "float_value" </summary>
-        </member>
-        <member name="T:Yarn.Operand.ValueOneofCase">
-            <summary>Enum of possible cases for the "value" oneof.</summary>
-        </member>
-        <member name="F:Yarn.VirtualMachine.State.currentNodeName">
-            <summary>The name of the node that we're currently
-            in.</summary>
-        </member>
-        <member name="F:Yarn.VirtualMachine.State.programCounter">
-            <summary>The instruction number in the current
-            node.</summary>
-        </member>
-        <member name="F:Yarn.VirtualMachine.State.currentOptions">
-            <summary>The current list of options that will be delivered
-            when the next RunOption instruction is
-            encountered.</summary>
-        </member>
-        <member name="F:Yarn.VirtualMachine.State.stack">
-            <summary>The value stack.</summary>
-        </member>
-        <member name="M:Yarn.VirtualMachine.State.PushValue(Yarn.Value)">
-            <summary>Pushes a <see cref="T:Yarn.Value"/> object onto the
-            stack.</summary>
-            <param name="v">The value to push onto the stack.</param>
-        </member>
-        <member name="M:Yarn.VirtualMachine.State.PushValue(System.String)">
-            <inheritdoc cref="M:Yarn.VirtualMachine.State.PushValue(Yarn.Value)" />
-        </member>
-        <member name="M:Yarn.VirtualMachine.State.PushValue(System.Single)">
-            <inheritdoc cref="M:Yarn.VirtualMachine.State.PushValue(Yarn.Value)" />
-        </member>
-        <member name="M:Yarn.VirtualMachine.State.PushValue(System.Boolean)">
-            <inheritdoc cref="M:Yarn.VirtualMachine.State.PushValue(Yarn.Value)" />
-        </member>
-        <member name="M:Yarn.VirtualMachine.State.PopValue">
-            <summary>Removes a value from the top of the stack, and
-            returns it.</summary>
-            <returns>The value that was at the top of the stack when
-            this method was called.</returns>
-        </member>
-        <member name="M:Yarn.VirtualMachine.State.PeekValue">
-            <summary>Peeks at a value from the stack.</summary>
-            <returns>The value at the top of the stack.</returns>
-        </member>
-        <member name="M:Yarn.VirtualMachine.State.ClearStack">
-            <summary>Clears the stack.</summary>
-        </member>
-        <member name="M:Yarn.VirtualMachine.State.PushCallStack">
-            <summary>
-            Pushes the current node and counter as a callsite onto the call stack
-            </summary>
-        </member>
-        <member name="M:Yarn.VirtualMachine.ResetState">
-            Reset the state of the VM
-        </member>
-        <member name="P:Yarn.VirtualMachine.Responder">
-            <summary>
-            The VM's responder, responsible for handling all dialogue events
-            </summary>
-        </member>
-        <member name="P:Yarn.VirtualMachine.VariableStorage">
-            <summary>
-            Current variable storage
-            </summary>
-        </member>
-        <member name="P:Yarn.VirtualMachine.LogDebugMessage">
-            <summary>
-            Logger for debug messages
-            </summary>
-        </member>
-        <member name="P:Yarn.VirtualMachine.LogErrorMessage">
-            <summary>
-            Logger for error messages
-            </summary>
-        </member>
-        <member name="P:Yarn.VirtualMachine.Program">
-            <summary>
-            The <see cref="P:Yarn.VirtualMachine.Program"/> that this virtual machine is running.
-            </summary>
-        </member>
-        <member name="P:Yarn.VirtualMachine.CurrentNodeName">
-            <summary>
-            The current node, or null if one hasn't been set
-            </summary>
-        </member>
-        <member name="P:Yarn.VirtualMachine.ContentSaliencyStrategy">
-            <summary>
-            the current saliency strategy
-            </summary>
-        </member>
-        <member name="F:Yarn.VirtualMachine.dialogueCancellationSource">
-            <summary>
-            when dialogue is initiated this will also be configured and when dialogue is requested to be ended this will also be cancelled.
-            This is the main source of all tokens provided from the VM upwards through the dialogue and responders
-            </summary>
-        </member>
-        <member name="M:Yarn.VirtualMachine.SetNode(System.String)">
-            <summary>
-            Sets the current node and clears the VMs internal state
-            </summary>
-            <param name="nodeName">The new node</param>
-        </member>
-        <member name="M:Yarn.VirtualMachine.Stop">
-            <summary>
-            Stops the current running dialogue and resets the VM state
-            </summary>
-            <remarks>
-            Does so by cancelling any existing tokens, so cancellation will ripple outwards from this call.
-            </remarks>
-        </member>
-        <member name="M:Yarn.VirtualMachine.Start">
-            <summary>
-            Starts the dialogue from the current node.
-            </summary>
-            <remarks>
-            This task will run until the dialogue finishes or is stopped.
-            </remarks>
-            <exception cref="T:Yarn.DialogueException">Throws if there is already dialogue running</exception>
-        </member>
-        <member name="M:Yarn.VirtualMachine.CallFunction(System.String,System.Collections.Generic.Stack{Yarn.Value},Yarn.IDialogueResponder,System.Threading.CancellationToken)">
-            <summary>
-            Invokes the requested function and returns it's value back to the VM
-            </summary>
-            <remarks>
-            Will attempt to resolve the function through it's responder first so that if there are any engine specific function overloads they can be handled, and then uses the <see cref="T:Yarn.StandardLibrary"/> which has the built in functions.
-            </remarks>
-            <param name="functionName">the name of the function</param>
-            <param name="state">The current VM stack</param>
-            <param name="responder">the responder of the VM</param>
-            <param name="token">The cancellation token for this task</param>
-            <returns>The new value to be pushed onto the stack</returns>
-            <exception cref="T:System.InvalidOperationException">thrown when the returned value is of a type we can't handle</exception>
-            <exception cref="T:System.ArgumentException">Thrown when the requested function is one we don't know about and neither does our responder</exception>
-        </member>
         <member name="T:Yarn.Utility.CRC32">
             <summary>
             Provides a method for generating CRC32 hashes of strings.
@@ -2499,6 +2190,315 @@
         </member>
         <member name="M:Yarn.Value.ToUInt64(System.IFormatProvider)">
             <inheritdoc />
+        </member>
+        <member name="T:Yarn.ISmartVariableEvaluator">
+            <summary>
+            Contains methods for evaluating the value of smart variables
+            </summary>
+        </member>
+        <member name="M:Yarn.ISmartVariableEvaluator.TryGetSmartVariable``1(System.String,``0@)">
+            <summary>
+            Evaluate the value of a smart variable named <paramref
+            name="name"/>.
+            </summary>
+            <typeparam name="T">The type of the returned value.</typeparam>
+            <param name="name">The name of the variable.</param>
+            <param name="result">On return, contains the returned value of the
+            smart variable, or the <see langword="default"/> value of
+            <typeparamref name="T"/> if a smart variable named <paramref
+            name="name"/> could not be found or its value could not be returned
+            as type <typeparamref name="T"/>.</param>
+            <returns><see langword="true"/> if the smart variable was evaluated,
+            <see langword="false"/> otherwise.</returns>
+        </member>
+        <member name="T:Yarn.IDialogueResponder">
+            <summary>
+            The responder is responsible for handling important dialogue events.
+            This includes all user facing content events (such as lines and options) as well as non-usesr facing events (such as node enters and exits)
+            </summary>
+            <remarks>
+            Without a responder the VM won't know when to continue along to the next piece of content or how to respond to user input.
+            The VM will always await the action of it's responder before continuining onwards.
+            The VM always has the <see cref="T:Yarn.Dialogue"/> as it's default responder but that just logs these events and otherwise forwards the calls onto it's responder on the <see cref="P:Yarn.Dialogue.Responder"/> field.
+            </remarks>
+        </member>
+        <member name="M:Yarn.IDialogueResponder.HandleLine(Yarn.Line,System.Threading.CancellationToken)">
+            <summary>
+            Requests the responder handle the current line and inform the VM when it is done so.
+            </summary>
+            <param name="line">The line encountered</param>
+            <param name="token">The cancellation token for this task</param>
+        </member>
+        <member name="M:Yarn.IDialogueResponder.HandleOptions(Yarn.OptionSet,System.Threading.CancellationToken)">
+            <summary>
+            Requests the responder handle the current option group and tell the VM which option was selected.
+            If <see cref="F:Yarn.Dialogue.NoOptionSelected"/> is returned the option group will be skipped over.
+            </summary>
+            <param name="options">The collection of options for the responder to use in it's selection</param>
+            <param name="token">The cancellation token for this task</param>
+            <returns>The id of the selected option</returns>
+        </member>
+        <member name="M:Yarn.IDialogueResponder.HandleCommand(Yarn.Command,System.Threading.CancellationToken)">
+            <summary>
+            Requests the responder handle the current command and inform the VM when it is done so.
+            </summary>
+            <param name="command">The command encountered</param>
+            <param name="token">The cancellation token for this task</param>
+        </member>
+        <member name="M:Yarn.IDialogueResponder.HandleNodeStart(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Informs the responder that a node has been entered and the VM will await it's processing of this.
+            </summary>
+            <param name="node">The name of the node entered</param>
+            <param name="token">The cancellation token for this task</param>
+        </member>
+        <member name="M:Yarn.IDialogueResponder.HandleNodeComplete(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Informs the responder that a node has been exited and the VM will await it's processing of this.
+            </summary>
+            <param name="node">The name of the node exited</param>
+            <param name="token">The cancellation token for this task</param>
+        </member>
+        <member name="M:Yarn.IDialogueResponder.HandleDialogueComplete">
+            <summary>
+            Informs the responder that dialogue is finishing
+            </summary>
+        </member>
+        <member name="M:Yarn.IDialogueResponder.PrepareForLines(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+            <summary>
+            Informs the responder that the following lines are likely soon to be encountered and it should perform any preparation for their presentation.
+            </summary>
+            <param name="lineIDs">The collection of line ids</param>
+            <param name="token">The cancellation token for this task</param>
+        </member>
+        <member name="M:Yarn.IDialogueResponder.CanCallFunction(System.String)">
+            <summary>
+            Asks the responder if it can handle the function by this name.
+            </summary>
+            <remarks>
+            For the in-built functions the VM will still ask it's responder if it would like to handle them instead allowing for engine specific overrides.
+            </remarks>
+            <param name="functionName">the name of the function</param>
+            <returns>true if the responder can handle the function</returns>
+        </member>
+        <member name="M:Yarn.IDialogueResponder.InvokeFunction(System.String,System.IConvertible[],System.Threading.CancellationToken)">
+            <summary>
+            Asks the responder to run the function, and provides the parameters from the stack and awaits it's completion.
+            </summary>
+            <param name="functionName">the name of the function</param>
+            <param name="parameters">The collection of parameters for this function, the order is the order they were on the stack</param>
+            <param name="token">The cancellation token for this task</param>
+            <returns>The result of the function</returns>
+        </member>
+        <member name="T:Yarn.Operand">
+            <summary>
+            A value used by an Instruction.
+            </summary>
+            <summary>
+            A value used by an Instruction.
+            </summary>
+        </member>
+        <member name="M:Yarn.Operand.#ctor(System.Boolean)">
+            <summary>
+            Convenience constructor for the Operand type.
+            </summary>
+            <remarks>
+            so that we don't need to have two separate steps for creating and then preparing the Operand
+            </remarks>
+            <param name="value">The boolean value to be made into the operand</param>
+        </member>
+        <member name="M:Yarn.Operand.#ctor(System.String)">
+            <summary>
+            Convenience constructor for the Operand type.
+            </summary>
+            <remarks>
+            so that we don't need to have two separate steps for creating and then preparing the Operand
+            </remarks>
+            <param name="value">The string value to be made into the operand</param>
+        </member>
+        <member name="M:Yarn.Operand.#ctor(System.Single)">
+            <summary>
+            Convenience constructor for the Operand type.
+            </summary>
+            <remarks>
+            so that we don't need to have two separate steps for creating and then preparing the Operand
+            </remarks>
+            <param name="value">The float value to be made into the operand</param>
+        </member>
+        <member name="F:Yarn.Operand.StringValueFieldNumber">
+            <summary>Field number for the "string_value" field.</summary>
+        </member>
+        <member name="P:Yarn.Operand.StringValue">
+            <summary>
+            A string.
+            </summary>
+        </member>
+        <member name="P:Yarn.Operand.HasStringValue">
+            <summary>Gets whether the "string_value" field is set</summary>
+        </member>
+        <member name="M:Yarn.Operand.ClearStringValue">
+            <summary> Clears the value of the oneof if it's currently set to "string_value" </summary>
+        </member>
+        <member name="F:Yarn.Operand.BoolValueFieldNumber">
+            <summary>Field number for the "bool_value" field.</summary>
+        </member>
+        <member name="P:Yarn.Operand.BoolValue">
+            <summary>
+            A boolean (true or false).
+            </summary>
+        </member>
+        <member name="P:Yarn.Operand.HasBoolValue">
+            <summary>Gets whether the "bool_value" field is set</summary>
+        </member>
+        <member name="M:Yarn.Operand.ClearBoolValue">
+            <summary> Clears the value of the oneof if it's currently set to "bool_value" </summary>
+        </member>
+        <member name="F:Yarn.Operand.FloatValueFieldNumber">
+            <summary>Field number for the "float_value" field.</summary>
+        </member>
+        <member name="P:Yarn.Operand.FloatValue">
+            <summary>
+            A floating point number.
+            </summary>
+        </member>
+        <member name="P:Yarn.Operand.HasFloatValue">
+            <summary>Gets whether the "float_value" field is set</summary>
+        </member>
+        <member name="M:Yarn.Operand.ClearFloatValue">
+            <summary> Clears the value of the oneof if it's currently set to "float_value" </summary>
+        </member>
+        <member name="T:Yarn.Operand.ValueOneofCase">
+            <summary>Enum of possible cases for the "value" oneof.</summary>
+        </member>
+        <member name="F:Yarn.VirtualMachine.State.currentNodeName">
+            <summary>The name of the node that we're currently
+            in.</summary>
+        </member>
+        <member name="F:Yarn.VirtualMachine.State.programCounter">
+            <summary>The instruction number in the current
+            node.</summary>
+        </member>
+        <member name="F:Yarn.VirtualMachine.State.currentOptions">
+            <summary>The current list of options that will be delivered
+            when the next RunOption instruction is
+            encountered.</summary>
+        </member>
+        <member name="F:Yarn.VirtualMachine.State.stack">
+            <summary>The value stack.</summary>
+        </member>
+        <member name="M:Yarn.VirtualMachine.State.PushValue(Yarn.Value)">
+            <summary>Pushes a <see cref="T:Yarn.Value"/> object onto the
+            stack.</summary>
+            <param name="v">The value to push onto the stack.</param>
+        </member>
+        <member name="M:Yarn.VirtualMachine.State.PushValue(System.String)">
+            <inheritdoc cref="M:Yarn.VirtualMachine.State.PushValue(Yarn.Value)" />
+        </member>
+        <member name="M:Yarn.VirtualMachine.State.PushValue(System.Single)">
+            <inheritdoc cref="M:Yarn.VirtualMachine.State.PushValue(Yarn.Value)" />
+        </member>
+        <member name="M:Yarn.VirtualMachine.State.PushValue(System.Boolean)">
+            <inheritdoc cref="M:Yarn.VirtualMachine.State.PushValue(Yarn.Value)" />
+        </member>
+        <member name="M:Yarn.VirtualMachine.State.PopValue">
+            <summary>Removes a value from the top of the stack, and
+            returns it.</summary>
+            <returns>The value that was at the top of the stack when
+            this method was called.</returns>
+        </member>
+        <member name="M:Yarn.VirtualMachine.State.PeekValue">
+            <summary>Peeks at a value from the stack.</summary>
+            <returns>The value at the top of the stack.</returns>
+        </member>
+        <member name="M:Yarn.VirtualMachine.State.ClearStack">
+            <summary>Clears the stack.</summary>
+        </member>
+        <member name="M:Yarn.VirtualMachine.State.PushCallStack">
+            <summary>
+            Pushes the current node and counter as a callsite onto the call stack
+            </summary>
+        </member>
+        <member name="M:Yarn.VirtualMachine.ResetState">
+            Reset the state of the VM
+        </member>
+        <member name="P:Yarn.VirtualMachine.Responder">
+            <summary>
+            The VM's responder, responsible for handling all dialogue events
+            </summary>
+        </member>
+        <member name="P:Yarn.VirtualMachine.VariableStorage">
+            <summary>
+            Current variable storage
+            </summary>
+        </member>
+        <member name="P:Yarn.VirtualMachine.LogDebugMessage">
+            <summary>
+            Logger for debug messages
+            </summary>
+        </member>
+        <member name="P:Yarn.VirtualMachine.LogErrorMessage">
+            <summary>
+            Logger for error messages
+            </summary>
+        </member>
+        <member name="P:Yarn.VirtualMachine.Program">
+            <summary>
+            The <see cref="P:Yarn.VirtualMachine.Program"/> that this virtual machine is running.
+            </summary>
+        </member>
+        <member name="P:Yarn.VirtualMachine.CurrentNodeName">
+            <summary>
+            The current node, or null if one hasn't been set
+            </summary>
+        </member>
+        <member name="P:Yarn.VirtualMachine.ContentSaliencyStrategy">
+            <summary>
+            the current saliency strategy
+            </summary>
+        </member>
+        <member name="F:Yarn.VirtualMachine.dialogueCancellationSource">
+            <summary>
+            when dialogue is initiated this will also be configured and when dialogue is requested to be ended this will also be cancelled.
+            This is the main source of all tokens provided from the VM upwards through the dialogue and responders
+            </summary>
+        </member>
+        <member name="M:Yarn.VirtualMachine.SetNode(System.String)">
+            <summary>
+            Sets the current node and clears the VMs internal state
+            </summary>
+            <param name="nodeName">The new node</param>
+        </member>
+        <member name="M:Yarn.VirtualMachine.Stop">
+            <summary>
+            Stops the current running dialogue and resets the VM state
+            </summary>
+            <remarks>
+            Does so by cancelling any existing tokens, so cancellation will ripple outwards from this call.
+            </remarks>
+        </member>
+        <member name="M:Yarn.VirtualMachine.Start">
+            <summary>
+            Starts the dialogue from the current node.
+            </summary>
+            <remarks>
+            This task will run until the dialogue finishes or is stopped.
+            </remarks>
+            <exception cref="T:Yarn.DialogueException">Throws if there is already dialogue running</exception>
+        </member>
+        <member name="M:Yarn.VirtualMachine.CallFunction(System.String,System.Collections.Generic.Stack{Yarn.Value},Yarn.IDialogueResponder,System.Threading.CancellationToken)">
+            <summary>
+            Invokes the requested function and returns it's value back to the VM
+            </summary>
+            <remarks>
+            Will attempt to resolve the function through it's responder first so that if there are any engine specific function overloads they can be handled, and then uses the <see cref="T:Yarn.StandardLibrary"/> which has the built in functions.
+            </remarks>
+            <param name="functionName">the name of the function</param>
+            <param name="state">The current VM stack</param>
+            <param name="responder">the responder of the VM</param>
+            <param name="token">The cancellation token for this task</param>
+            <returns>The new value to be pushed onto the stack</returns>
+            <exception cref="T:System.InvalidOperationException">thrown when the returned value is of a type we can't handle</exception>
+            <exception cref="T:System.ArgumentException">Thrown when the requested function is one we don't know about and neither does our responder</exception>
         </member>
         <member name="T:Yarn.YarnSpinnerReflection">
             <summary>Holder for reflection information generated from yarn_spinner.proto</summary>
