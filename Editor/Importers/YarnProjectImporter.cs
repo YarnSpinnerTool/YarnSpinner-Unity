@@ -416,10 +416,10 @@ namespace Yarn.Unity.Editor
                 }
 
                 // Now to compile the scripts associated with this project.
-                var job = CompilationJob.CreateFromProject(project);
 
                 try
                 {
+                    var job = CompilationJob.CreateFromProject(project);
                     compilationResult = Compiler.Compiler.Compile(job);
                 }
                 catch (System.Exception e)
