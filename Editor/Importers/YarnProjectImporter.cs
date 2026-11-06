@@ -342,6 +342,8 @@ namespace Yarn.Unity.Editor
                 return;
             }
 
+            importData.ProjectFileVersion = project.FileVersion;
+
             importData.sourceFilePatterns = new();
             importData.sourceFilePatterns.AddRange(project.SourceFilePatterns);
 
@@ -1689,6 +1691,17 @@ namespace Yarn.Unity.Editor
 
             // Populate the string table collection from the Yarn strings
             AddStringTableEntries(table, tableCollection, ImportData.baseLanguageName);
+        }
+
+        internal void UpdateProjectFileVersion()
+        {
+            var project = GetProject()
+                ?? throw new System.InvalidOperationException($"Unable to open the project at {assetPath} for editing. Is it damaged?");
+            project.FileVersion = Project.CurrentProjectFileVersion;
+
+            project.SaveToFile(assetPath);
+
+            AssetDatabase.ImportAsset(assetPath);
         }
 #endif
 

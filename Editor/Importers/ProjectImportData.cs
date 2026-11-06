@@ -46,6 +46,8 @@ namespace Yarn.Unity
             NeedsUpgradeFromV1 = 3,
         }
 
+        public int ProjectFileVersion = -1;
+
         public ImportStatusCode ImportStatus = ImportStatusCode.Unknown;
 
         public List<DiagnosticEntry> diagnostics = new List<DiagnosticEntry>();

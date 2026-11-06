@@ -330,6 +330,42 @@ namespace Yarn.Unity.Editor
                     }
             }
 
+            if (importData.ProjectFileVersion < Yarn.Compiler.Project.CurrentProjectFileVersion)
+            {
+                // Project can be upgraded
+                var box = new VisualElement();
+                box.AddToClassList("help-box");
+
+                Label header = new Label("This project file uses an older version of the format, and can be upgraded.");
+                header.style.unityFontStyleAndWeight = FontStyle.Bold;
+                box.Add(header);
+
+                Button button = new Button(() =>
+                {
+                    yarnProjectImporter.UpdateProjectFileVersion();
+                })
+                {
+                    text = "Upgrade Project File",
+
+                };
+                box.Add(button);
+
+                ui.Add(box);
+            }
+
+            if (importData.ProjectFileVersion > Yarn.Compiler.Project.CurrentProjectFileVersion)
+            {
+                // Project may be from a version of Yarn Spinner that's newer than us; warn about it, but there's not much we can do
+                var box = new VisualElement();
+                box.AddToClassList("help-box");
+
+                Label header = new Label($"This project file uses an newer version of the format (v{importData.ProjectFileVersion}) than expected (v{Project.CurrentProjectFileVersion}). Not all of its features may work. You may need to update your installation of Yarn Spinner.");
+                header.style.unityFontStyleAndWeight = FontStyle.Bold;
+                box.Add(header);
+                ui.Add(box);
+            }
+
+
             var importDataSO = new SerializedObject(importData);
             var diagnosticsProperty = importDataSO.FindProperty(nameof(ProjectImportData.diagnostics));
 
