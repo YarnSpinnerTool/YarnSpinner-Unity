@@ -1776,6 +1776,11 @@
         <member name="M:Yarn.Compiler.Declaration.ToString">
             <inheritdoc/>
         </member>
+        <member name="T:Yarn.Compiler.Declaration.NameAndTypeComparer">
+            <summary>
+            A simple comparer for declarations that considers them equal if their name and type match
+            </summary>
+        </member>
         <member name="T:Yarn.Compiler.DiagnosticDescriptor">
             <summary>
             Describes a diagnostic message with a unique code and template.
