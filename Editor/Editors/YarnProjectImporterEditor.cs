@@ -336,14 +336,17 @@ namespace Yarn.Unity.Editor
                 var box = new VisualElement();
                 box.AddToClassList("help-box");
 
-                Label header = new Label("This project file uses an older version of the format, and can be upgraded.");
-                header.style.unityFontStyleAndWeight = FontStyle.Bold;
-                box.Add(header);
 
-                Button button = new Button(() =>
+                box.Add(new Label("This project file uses an older version of the format, and can be upgraded.")
                 {
-                    yarnProjectImporter.UpdateProjectFileVersion();
-                })
+                    style = {
+                        unityFontStyleAndWeight = FontStyle.Bold
+                    }
+                });
+
+                box.Add(new Label("You may need to update your .yarn scripts after upgrading the project version."));
+
+                Button button = new Button(() => yarnProjectImporter.UpdateProjectFileVersion())
                 {
                     text = "Upgrade Project File",
 
@@ -530,7 +533,9 @@ namespace Yarn.Unity.Editor
             addDefintionButton.style.marginLeft = 8;
             addDefintionButton.clicked += () =>
             {
-                var defEntry = CreateDefinitionsFileEntry(YarnProjectUtility.AllDefinitionsFilesInProjectPattern);
+                string definitionsPattern = YarnProjectUtility.GetNewDefinitionsFilePattern(importData.ProjectFileVersion);
+
+                var defEntry = CreateDefinitionsFileEntry(definitionsPattern);
                 definitionFileEntriesContainer.Add(defEntry);
                 DefinitionsFilesAddedOrRemoved = true;
 

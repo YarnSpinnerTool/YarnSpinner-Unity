@@ -33,7 +33,24 @@ namespace Yarn.Unity.Editor
     /// </summary>
     internal static class YarnProjectUtility
     {
-        internal const string AllDefinitionsFilesInProjectPattern = "${workspaceRoot}/ProjectSettings/Packages/dev.yarnspinner/**/*.ysls.json";
+
+
+        /// <summary>
+        /// Gets file-matching pattern suitable for use in the 'definitions' setting for a project file of the given version.
+        /// </summary>
+        /// <remarks>
+        /// For project files using version 5 or later, this method returns a string representing all generated definitions files in the Unity project.
+        /// For project files using an earlier version, this method returns a string representing all definitions files in the project file's current directory.
+        /// <param name="projectFileVersion">The project file to version.</param>
+        /// <returns>A pattern for finding definitions files.</returns>
+        internal static string GetNewDefinitionsFilePattern(int projectFileVersion)
+        {
+            return projectFileVersion switch
+            {
+                >= Project.YarnSpinnerProjectVersion5 => "${workspaceRoot}/ProjectSettings/Packages/dev.yarnspinner/**/*.ysls.json",
+                _ => "**/*.ysls.json",
+            };
+        }
 
         /// <summary>
         /// Creates a new .yarnproject asset in the same directory as the Yarn
@@ -88,7 +105,7 @@ namespace Yarn.Unity.Editor
 
             // Reference all YSLS files in the Unity project
             newProject.Definitions ??= new();
-            newProject.Definitions.Add(AllDefinitionsFilesInProjectPattern);
+            newProject.Definitions.Add(GetNewDefinitionsFilePattern(newProject.FileVersion));
 
             return newProject;
         }
