@@ -38,7 +38,7 @@ namespace Yarn.Unity.Editor
                 }
 
                 var source = AssetDatabase.LoadAssetAtPath<TextAsset>(path).text;
-                var ysls = new Yarn.Compiler.Definitions(source);
+                var ysls = new Yarn.Compiler.Definitions(source, Yarn.Compiler.Project.CurrentProjectFileVersion);
                 definitions.Add(ysls);
             }
 
@@ -54,7 +54,7 @@ namespace Yarn.Unity.Editor
                         continue;
                     }
                     var source = File.ReadAllBytes(yslsPath);
-                    var ysls = new Yarn.Compiler.Definitions(source);
+                    var ysls = new Yarn.Compiler.Definitions(source, Yarn.Compiler.Project.CurrentProjectFileVersion);
                     definitions.Add(ysls);
                 }
             }

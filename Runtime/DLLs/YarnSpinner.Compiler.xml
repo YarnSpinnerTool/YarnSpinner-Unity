@@ -2459,6 +2459,15 @@
             </list></para>
             </remarks>
         </member>
+        <member name="F:Yarn.Compiler.DiagnosticDescriptor.UseOfUndeclaredFunctionsInV4IsDeprecated">
+            <summary>YS0065: Use of undeclared functions is deprecated</summary>
+            <remarks>
+            <para>Format placeholders:
+            <list type="number">
+            <item>Function name</item>
+            </list></para>
+            </remarks>
+        </member>
         <member name="M:Yarn.Compiler.DiagnosticDescriptor.GetDescriptorDictionary">
             <summary>Returns a dictionary mapping diagnostic codes to their corresponding descriptor object.</summary>
             <remarks>This method is automatically generated.</remarks>
@@ -6244,6 +6253,11 @@
              A version number representing project version 4 (released with Yarn Spinner 3.2.0).
             </summary>
         </member>
+        <member name="F:Yarn.Compiler.Project.YarnSpinnerProjectVersion5">
+            <summary>
+             A version number representing project version 4 (released with Yarn Spinner 3.3.0).
+            </summary>
+        </member>
         <member name="M:Yarn.Compiler.Project.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:Yarn.Compiler.Project"/> class.
@@ -6501,13 +6515,15 @@
             May be empty
             </summary>
         </member>
-        <member name="M:Yarn.Compiler.Definitions.#ctor(System.String)">
-            <inheritdoc cref="M:Yarn.Compiler.Definitions.#ctor(System.ReadOnlyMemory{System.Byte})" />
+        <member name="M:Yarn.Compiler.Definitions.#ctor(System.String,System.Int32)">
+            <inheritdoc cref="M:Yarn.Compiler.Definitions.#ctor(System.ReadOnlyMemory{System.Byte},System.Int32)" />
         </member>
-        <member name="M:Yarn.Compiler.Definitions.#ctor(System.ReadOnlyMemory{System.Byte})">
+        <member name="M:Yarn.Compiler.Definitions.#ctor(System.ReadOnlyMemory{System.Byte},System.Int32)">
             <summary>
             Creates a new definition from the provided json source
             </summary>
+            <param name="source">The source JSON of the definitions</param>
+            <param name="projectFileVersion">The version number of the project file</param>
         </member>
         <member name="P:Yarn.Compiler.SmartVariableCompiler.CurrentNode">
             <inheritdoc />
@@ -6829,7 +6845,7 @@
             <summary>Maps the names of types as they appear in the language
             (string, bool, number) to actual type objects.</summary>
         </member>
-        <member name="M:Yarn.Compiler.TypeCheckerListener.#ctor(System.String,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.List{Yarn.Compiler.Declaration},System.Collections.Generic.List{Yarn.TypeBase},TypeChecker.Substitution,System.Collections.Generic.HashSet{TypeChecker.TypeConstraint},System.Threading.CancellationToken)">
+        <member name="M:Yarn.Compiler.TypeCheckerListener.#ctor(System.String,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.List{Yarn.Compiler.Declaration},System.Collections.Generic.List{Yarn.TypeBase},TypeChecker.Substitution,System.Collections.Generic.HashSet{TypeChecker.TypeConstraint},System.Int32,System.Threading.CancellationToken)">
             <summary>
             Initializes a new instance of the <see cref="T:Yarn.Compiler.TypeCheckerListener"/>
             class.
@@ -6851,6 +6867,7 @@
             the end of a file.</param>
             <param name="cancellationToken">A token used to indicate that type
             checking should be cancelled.</param>
+            <param name="projectFileVersion">The file version of the project that is being compiled.</param>
         </member>
         <member name="M:Yarn.Compiler.TypeCheckerListener.GetKnownDeclaration(System.String)">
             <summary>
