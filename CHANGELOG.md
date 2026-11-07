@@ -13,8 +13,6 @@ Version 3.3 is a significant update to two main areas of Yarn Spinner for Unity:
 - **Async everywhere:** The `DialogueRunner` now uses async methods across much more of its API.
 - **Async functions:** Functions can now return an awaitable type, and can take as long as they need to return a value. The dialogue runner will pause until the function returns.
 - **Cancellable commands and functions:** If the last parameter of a command or function's method is `CancellationToken` or a `LineCancellationToken`, Yarn Spinner will provide it with a token that becomes cancelled when the command or function should return early.
-- **Undeclared functions are now errors:** If your Yarn script makes use of functions that the compiler doesn't know about, it will result in an error.
-  - In order to assist with the migration from previous versions of Yarn Spinner, if your `.yarnproject` file was created by a previous version, undeclared functions will result in a warning and will prompt you to upgrade your project. Note that not all features from Yarn Spinner v3.3 may be available until you upgrade your project file.
 - **Commands and functions can now take custom objects as parameters:** To use a custom object as a parameter, create a static public method that returns bool and takes two parameters: a string, and an `out` parameter of your custom object's type. Add the `YarnConverter` attribute to this method, and Yarn Spinner will invoke it to convert from strings to your object's type.
     ```csharp
     public class Tool {
@@ -38,6 +36,9 @@ Version 3.3 is a significant update to two main areas of Yarn Spinner for Unity:
     }
     ```
 - **Definitions files are stored relative to the project root:** Previously, references to the `.ysls.json` files that `.yarnproject`s use to identify commands and functions were stored as a relative path to the file, which was brittle and caused breakages if the project file moved. They're now stored as paths relative to the root of the project, which won't change when the Yarn Project moves.
+- **Using lambdas for commands and functions is now deprecated:** Using a lambda when registering a command or function at runtime is now deprecated, because it's slower, can lead to unintended bugs, and isn't automatically cleaned up.
+- **Undeclared functions are now errors:** If your Yarn script makes use of functions that the compiler doesn't know about, it will result in an error.
+  - In order to assist with the migration from previous versions of Yarn Spinner, if your `.yarnproject` file was created by a previous version, undeclared functions will result in a warning and will prompt you to upgrade your project. Note that not all features from Yarn Spinner v3.3 may be available until you upgrade your project file.
 
 
 ### Added
