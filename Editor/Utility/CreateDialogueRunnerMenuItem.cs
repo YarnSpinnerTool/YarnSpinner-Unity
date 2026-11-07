@@ -43,8 +43,12 @@ namespace Yarn.Unity.Editor
 
             var instantiatedPrefab = (GameObject)PrefabUtility.InstantiatePrefab(prefabAsset);
 
-#if UNITY_2023_1_OR_NEWER
+#if UNITY_6000_4_OR_NEWER
             var eventSystems = Object.FindObjectsByType<EventSystem>();
+#elif UNITY_2023_1_OR_NEWER
+            var eventSystems = Object.FindObjectsByType<EventSystem>(
+                FindObjectsInactive.Exclude, FindObjectsSortMode.None
+            );
 #else
             var eventSystems = Object.FindObjectsOfType<EventSystem>();
 #endif
