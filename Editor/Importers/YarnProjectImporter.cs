@@ -1694,6 +1694,7 @@ namespace Yarn.Unity.Editor
             AddStringTableEntries(table, tableCollection, ImportData.baseLanguageName);
         }
 
+#endif
         internal void UpdateProjectFileVersion()
         {
             var project = GetProject()
@@ -1704,7 +1705,6 @@ namespace Yarn.Unity.Editor
 
             AssetDatabase.ImportAsset(assetPath);
         }
-#endif
 
         /// <summary>
         /// A placeholder string that may be used in Yarn Project files that
