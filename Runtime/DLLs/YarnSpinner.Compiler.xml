@@ -2800,22 +2800,22 @@
         </member>
         <member name="P:Yarn.Compiler.FileParseResult.Name">
             <summary>
-            <inheritdoc cref="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.IEnumerable{Yarn.Compiler.Diagnostic})" path="/param[@name='name']"/>
+            <inheritdoc cref="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.IEnumerable{Yarn.Compiler.Diagnostic})" path="/param[@name='name']/node()"/>
             </summary>
         </member>
         <member name="P:Yarn.Compiler.FileParseResult.Tree">
             <summary>
-            <inheritdoc cref="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.IEnumerable{Yarn.Compiler.Diagnostic})" path="/param[@name='tree']"/>
+            <inheritdoc cref="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.IEnumerable{Yarn.Compiler.Diagnostic})" path="/param[@name='tree']/node()"/>
             </summary>
         </member>
         <member name="P:Yarn.Compiler.FileParseResult.Tokens">
             <summary>
-            <inheritdoc cref="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.IEnumerable{Yarn.Compiler.Diagnostic})" path="/param[@name='tokens']"/>
+            <inheritdoc cref="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.IEnumerable{Yarn.Compiler.Diagnostic})" path="/param[@name='tokens']/node()"/>
             </summary>
         </member>
         <member name="P:Yarn.Compiler.FileParseResult.Diagnostics">
             <summary>
-            <inheritdoc cref="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.IEnumerable{Yarn.Compiler.Diagnostic})" path="/param[@name='tokens']"/>
+            <inheritdoc cref="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.IEnumerable{Yarn.Compiler.Diagnostic})" path="/param[@name='tokens']/node()"/>
             </summary>
         </member>
         <member name="M:Yarn.Compiler.FileParseResult.#ctor(System.String,Antlr4.Runtime.Tree.IParseTree,Antlr4.Runtime.CommonTokenStream,System.Collections.Generic.IEnumerable{Yarn.Compiler.Diagnostic})">
@@ -5844,7 +5844,7 @@
         </member>
         <member name="F:Yarn.Compiler.ILineTagGenerator.LineTaggingException.LineNumber">
             <summary>
-            The line number inside of <cref name="SourceFile"/> that caused the exception
+            The line number inside of <see cref="F:Yarn.Compiler.ILineTagGenerator.LineTaggingException.SourceFile"/> that caused the exception
             </summary>
         </member>
         <member name="T:Yarn.Compiler.ILineTagGenerator.CompilationTagException">
@@ -5857,7 +5857,7 @@
         </member>
         <member name="T:Yarn.Compiler.ILineTagGenerator.TagAbortBehaviour">
             <summary>
-            Represents how Yarn Spinner should handle encountering a <cref name="LineTaggingException"/> exception during tagging.
+            Represents how Yarn Spinner should handle encountering a <see cref="T:Yarn.Compiler.ILineTagGenerator.LineTaggingException"/> exception during tagging.
             </summary>
         </member>
         <member name="F:Yarn.Compiler.ILineTagGenerator.TagAbortBehaviour.EntireTagging">
@@ -5883,11 +5883,11 @@
         <member name="P:Yarn.Compiler.ILineTagGenerator.LineTagContext.Line">
             <summary>
             The current line parse statement.
+            </summary>
             <remarks>
             This gives your custom taggers access to the same information we use internally, unlikely you'll need this but it exists just in case.
             A lot of the information contained within the context is already derived from this.
             </remarks>
-            </summary>
         </member>
         <member name="P:Yarn.Compiler.ILineTagGenerator.LineTagContext.LineNumber">
             <summary>
@@ -5903,10 +5903,10 @@
         <member name="P:Yarn.Compiler.ILineTagGenerator.LineTagContext.SourceFileName">
             <summary>
             The name of the file currently being processed.
+            </summary>
             <remarks>
             If the tagging is requested as part of string based compilation instead of a file compilation this value will always be &lt;input&gt;.
             </remarks>
-            </summary>
         </member>
         <member name="P:Yarn.Compiler.ILineTagGenerator.LineTagContext.LineText">
             <summary>

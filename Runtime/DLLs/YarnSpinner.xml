@@ -368,18 +368,19 @@
             Is true when dialogue is currently running, false otherwise.
             </summary>
         </member>
-        <member name="M:Yarn.Dialogue.StartDialogue(System.String)">
+        <member name="M:Yarn.Dialogue.StartDialogue(System.String,System.Threading.CancellationToken)">
             <summary>
             Starts dialogue from a specific entry node and will run until completion of dialogue.
             </summary>
             <param name="node">The node to use as the entry point for the dialogue</param>
+            <param name="cancellationToken">An optional external cancellation source for the dialogue operation.</param>
         </member>
-        <member name="M:Yarn.Dialogue.Start">
+        <member name="M:Yarn.Dialogue.Start(System.Threading.CancellationToken)">
             <summary>
             Starts dialogue at the value of <see cref="P:Yarn.Dialogue.CurrentNode"/>.
-            <seealso cref="M:Yarn.Dialogue.StartDialogue(System.String)"/>
             </summary>
             <exception cref="T:System.InvalidOperationException">If there is no node currently set as the entry point this method throws</exception>
+            <seealso cref="M:Yarn.Dialogue.StartDialogue(System.String,System.Threading.CancellationToken)"/>
         </member>
         <member name="M:Yarn.Dialogue.IsNodeGroup(System.String)">
             <summary>
@@ -393,18 +394,18 @@
         <member name="M:Yarn.Dialogue.IsNodeVisited(System.String)">
             <summary>
             Works out if the node has been visited.
-            See also <seealso cref="M:Yarn.Dialogue.GetNodeVisitCount(System.String)"/>
             </summary>
             <param name="nodeName">The node whos visitation you are curious about</param>
             <returns>True if the node has been visited at least once</returns>
+            <seealso cref="M:Yarn.Dialogue.GetNodeVisitCount(System.String)"/>
         </member>
         <member name="M:Yarn.Dialogue.GetNodeVisitCount(System.String)">
             <summary>
             Works out how many times the node has been visited.
-            See also <seealso cref="M:Yarn.Dialogue.IsNodeVisited(System.String)"/>
             </summary>
             <param name="nodeName">the node whos visitation count you are cirous about</param>
             <returns>0 if the node has never been visited, otherwise the number of times the node has been visited</returns>
+            <seealso cref="M:Yarn.Dialogue.IsNodeVisited(System.String)"/>
         </member>
         <member name="M:Yarn.Dialogue.HasAnyContent(System.String)">
             <summary>
@@ -483,11 +484,12 @@
             Returns the current node, or null if one hasn't been set
             </summary>
         </member>
-        <member name="M:Yarn.Dialogue.SetNode(System.String)">
+        <member name="M:Yarn.Dialogue.SetNode(System.String,System.Threading.CancellationToken)">
             <summary>
             Sets the current node
             </summary>
             <param name="node">the requested node</param>
+            <param name="cancellationToken">A token that can be used to cancel the set node operation</param>
         </member>
         <member name="M:Yarn.Dialogue.Stop">
             <summary>
@@ -2462,11 +2464,12 @@
             This is the main source of all tokens provided from the VM upwards through the dialogue and responders
             </summary>
         </member>
-        <member name="M:Yarn.VirtualMachine.SetNode(System.String)">
+        <member name="M:Yarn.VirtualMachine.SetNode(System.String,System.Threading.CancellationToken)">
             <summary>
             Sets the current node and clears the VMs internal state
             </summary>
             <param name="nodeName">The new node</param>
+            <param name="cancellationToken">A token that can be used to cancel the setup task</param>
         </member>
         <member name="M:Yarn.VirtualMachine.Stop">
             <summary>
@@ -2476,7 +2479,7 @@
             Does so by cancelling any existing tokens, so cancellation will ripple outwards from this call.
             </remarks>
         </member>
-        <member name="M:Yarn.VirtualMachine.Start">
+        <member name="M:Yarn.VirtualMachine.Start(System.Threading.CancellationToken)">
             <summary>
             Starts the dialogue from the current node.
             </summary>
@@ -3265,7 +3268,7 @@
         </member>
         <member name="P:Yarn.Markup.MarkupValue.FloatValue">
             <summary>Gets the float value of this property.</summary>
-            /// <remarks>
+            <remarks>
             This property is only defined when the property's <see
             cref="P:Yarn.Markup.MarkupValue.Type"/> is <see cref="F:Yarn.Markup.MarkupValueType.Float"/>.
             </remarks>

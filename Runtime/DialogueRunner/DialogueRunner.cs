@@ -929,7 +929,7 @@ namespace Yarn.Unity
             LineProvider.YarnProject = yarnProject;
 
             Dialogue.Program = yarnProject.Program;
-            await Dialogue.SetNode(nodeName);
+            await Dialogue.SetNode(nodeName, dialogueCancellationSource.Token);
 
             ApplySaliencyStrategy();
 
@@ -948,7 +948,8 @@ namespace Yarn.Unity
             }
             await YarnTask.WhenAll(tasks);
 
-            await Dialogue.Start();
+            // Run dialogue and wait for it to finish!
+            await Dialogue.Start(dialogueCancellationSource.Token);
 
             // cleaning up the main token
             // we need this nulled out for the purposes of external entities asking if dialogue is running
