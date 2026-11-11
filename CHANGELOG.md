@@ -21,6 +21,7 @@ Version 3.3 is a significant update to two main areas of Yarn Spinner for Unity:
 - **Async everywhere:** The `DialogueRunner` now uses async methods across much more of its API.
 - **Async functions:** Functions can now return an awaitable type, and can take as long as they need to return a value. The dialogue runner will pause until the function returns.
 - **Cancellable commands and functions:** If the last parameter of a command or function's method is `CancellationToken` or a `LineCancellationToken`, Yarn Spinner will provide it with a token that becomes cancelled when the command or function should return early.
+- **Dialogue Presenter methods are now virtual:** Previously, when you were implementing a custom dialogue presenter, you had to implement every single method, even if they did nothing. Now, you can implement just the ones that are relevant to you. (We'll take care of doing all of the nothing for you.)
 - **Commands and functions can now take custom objects as parameters:** To use a custom object as a parameter, create a static public method that returns bool and takes two parameters: a string, and an `out` parameter of your custom object's type. Add the `YarnConverter` attribute to this method, and Yarn Spinner will invoke it to convert from strings to your object's type.
     ```csharp
     public class Tool {
