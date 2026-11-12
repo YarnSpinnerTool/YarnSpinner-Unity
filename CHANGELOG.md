@@ -49,10 +49,8 @@ Version 3.3 is a significant update to two main areas of Yarn Spinner for Unity:
 - **Undeclared functions are now errors:** If your Yarn script makes use of functions that the compiler doesn't know about, it will result in an error.
   - In order to assist with the migration from previous versions of Yarn Spinner, if your `.yarnproject` file was created by a previous version, undeclared functions will result in a warning and will prompt you to upgrade your project. Note that not all features from Yarn Spinner v3.3 may be available until you upgrade your project file.
 
-
 ### Added
 
-- Added Rewired integration to Yarn Spinner+.
 - Added filtering in `[YarnNode]` dropdowns (thanks to  [Shane Marks](https://github.com/unknowndevice)!).
   - You can now limit which nodes appear in the Inspector by specifying a filter string in `YarnNode`-attributed strings.
   - To filter the list, provide a `filter` parameter on your `[YarnNode]` attribute:
@@ -83,8 +81,11 @@ Version 3.3 is a significant update to two main areas of Yarn Spinner for Unity:
     [YarnNode(nameof(project), filterHeader: "color", filter: "red")]
     ```
   - Filtering is case-sensitive for all filter types except `YarnNodeFilter.MatchesRegex`.
+
+### Changed
 - Paths in generated YSLS files now use a consistent path separator (the forward slash `/`), independent of the current operating system.
 - `YarnNode` and `DialogueReference` now sort their nodes alphabetically.
+- `IRequestNextLine` has been replaced with `IContentSource`.
 
 ## [3.2.8]
 
