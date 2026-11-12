@@ -70,8 +70,17 @@ namespace Yarn.Unity
         public readonly bool IsHurryUpRequested => HurryUpToken.IsCancellationRequested;
     }
 
+    /// <summary>
+    /// Contains methods common to sources of Yarn Spinner content: lines, options, and commands.
+    /// </summary>
+    public interface IContentSource
+    {
+        public void RequestHurryUpContent();
+        public void RequestNextContent();
+    }
+
     [HelpURL("https://docs.yarnspinner.dev/using-yarnspinner-with-unity/components/dialogue-runner")]
-    public sealed partial class DialogueRunner : MonoBehaviour, IDialogueResponder
+    public sealed partial class DialogueRunner : MonoBehaviour, IDialogueResponder, IContentSource
     {
         private Dialogue? dialogue;
         /// <summary>
