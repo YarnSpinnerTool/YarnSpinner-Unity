@@ -838,6 +838,8 @@ namespace Yarn.Unity.Editor
                 WriteLine($"public static class {enumType.Name}EnumHelper");
                 Open();
 
+                // We generate a TryGet{Name}FromBacking that takes the enum's backing type, so that we can convert from the backing value to the enum case. Commands work with strings only, if the backing type is not a string, we'll also generate a method that accepts a string.
+
                 var backingType = enumType.RawType == Types.Number ? "int" : "string";
                 WriteLine($"public static bool TryGet{enumType.Name}FromBacking({backingType} backingInput, out {enumType.Name} {enumType.Name.ToLower()})");
                 Open();
@@ -871,6 +873,38 @@ namespace Yarn.Unity.Editor
                 WriteLine("return false;");
 
                 Close();
+
+                if (enumType.RawType != Types.String)
+                {
+                    WriteLine($"public static bool TryGet{enumType.Name}FromBacking(string backingInput, out {enumType.Name} {enumType.Name.ToLower()})");
+                    Open();
+
+                    WriteLine("switch (backingInput)");
+                    Open();
+                    foreach (var @case in enumType.EnumCases)
+                    {
+                        if (enumType.RawType == Types.Number)
+                        {
+                            WriteLine($"case \"{@case.Value.Value.ToString()}\":");
+                        }
+                        else
+                        {
+                            throw new System.ArgumentException($"Invalid Yarn enum raw type {enumType.RawType}");
+                        }
+                        indentLevel += 1;
+                        WriteLine($"{enumType.Name.ToLower()} = {enumType.Name}.{@case.Key};");
+                        WriteLine("return true;");
+                        indentLevel -= 1;
+
+                    }
+                    Close();
+
+                    WriteLine();
+                    WriteLine($"{enumType.Name.ToLower()} = default;");
+                    WriteLine("return false;");
+
+                    Close();
+                }
 
                 WriteLine($"public static bool TryGet{enumType.Name}ByName(string name, out {enumType.Name} {enumType.Name.ToLower()})");
                 Open();
