@@ -80,7 +80,7 @@ Version 3.3 is a significant update to two main areas of Yarn Spinner for Unity:
     // Only show nodes whose colour in the editor is red
     [YarnNode(nameof(project), filterHeader: "color", filter: "red")]
     ```
-  - Filtering is case-sensitive for all filter types except `YarnNodeFilter.MatchesRegex`.
+  - Filtering is case-insensitive for all filter types except `YarnNodeFilter.MatchesRegex`.
 
 ### Changed
 - Paths in generated YSLS files now use a consistent path separator (the forward slash `/`), independent of the current operating system.
