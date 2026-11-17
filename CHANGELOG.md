@@ -10,11 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+### Fixed
+
 ### Removed
 
-## [3.3.0] 10 Nov 2026
-
-<!-- TODO: add links to the docs site -->
+## [3.3.0] 17 Nov 2026
 
 Version 3.3 is a significant update to two main areas of Yarn Spinner for Unity:
 
@@ -48,6 +48,8 @@ Version 3.3 is a significant update to two main areas of Yarn Spinner for Unity:
 - **Using lambdas for commands and functions is now deprecated:** Using a lambda when registering a command or function at runtime is now deprecated, because it's slower, can lead to unintended bugs, and isn't automatically cleaned up.
 - **Undeclared functions are now errors:** If your Yarn script makes use of functions that the compiler doesn't know about, it will result in an error.
   - In order to assist with the migration from previous versions of Yarn Spinner, if your `.yarnproject` file was created by a previous version, undeclared functions will result in a warning and will prompt you to upgrade your project. Note that not all features from Yarn Spinner v3.3 may be available until you upgrade your project file.
+
+Check out the new [docs website](https://yarnspinner.dev/docs/unity/) for v3.3!
 
 ### Added
 
