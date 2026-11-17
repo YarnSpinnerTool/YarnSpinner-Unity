@@ -61,7 +61,7 @@ jobs:
       # Don't proceed unless we're including a build of Yarn Spinner that passes
       # its tests.
       - name: Test
-        run: dotnet test --no-build --configuration Release --verbosity normal
+        run: dotnet test --configuration Release --verbosity normal
         working-directory: ./YarnSpinner
 
       # Make the PR against YarnSpinner-Unity that merges this change
