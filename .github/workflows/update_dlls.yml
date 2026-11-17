@@ -38,6 +38,9 @@ jobs:
 
       - name: Install ilrepack
         run: dotnet tool install -g dotnet-ilrepack
+      
+      - name: Install gitversion
+        run: dotnet tool install -g GitVersion.Tool
 
       # Update the assembly info for this build of YS, so that the About window is
       # appropriate
