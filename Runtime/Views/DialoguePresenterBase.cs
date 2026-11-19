@@ -127,7 +127,7 @@ namespace Yarn.Unity
 
         /// <inheritdoc cref="OnDialogueStartedAsync(CancellationToken)" />
         [System.Obsolete("This method is deprecated in favour of OnDialogueStartedAsync(CancellationToken)")]
-        public virtual YarnTask OnDialogueStartedAsync() => OnDialogueCompleteAsync(CancellationToken.None);
+        public virtual YarnTask OnDialogueStartedAsync() => OnDialogueStartedAsync(CancellationToken.None);
 
         /// <summary>
         /// Called by the <see cref="DialogueRunner"/> to signal that the dialogue has ended, and no more content will be delivered.
