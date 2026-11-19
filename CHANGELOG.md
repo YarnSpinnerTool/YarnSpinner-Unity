@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- A bug the prevented cancelling `Awaitable` based `YarnTask.Delay` calls.
+
 ### Removed
 
 ## [3.3.0] 17 Nov 2026

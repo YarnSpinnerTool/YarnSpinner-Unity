@@ -123,15 +123,15 @@ namespace Yarn.Unity
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static partial YarnTask Delay(TimeSpan timeSpan, CancellationToken token)
+        public static partial async YarnTask Delay(TimeSpan timeSpan, CancellationToken token)
         {
             try
             {
-                return Awaitable.WaitForSecondsAsync((float)timeSpan.TotalSeconds, token);
+                await Awaitable.WaitForSecondsAsync((float)timeSpan.TotalSeconds, token);
             }
             catch (OperationCanceledException)
             {
-                return YarnTask.CompletedTask;
+                return;
             }
         }
 
