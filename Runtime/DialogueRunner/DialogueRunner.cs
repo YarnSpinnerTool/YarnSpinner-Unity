@@ -966,10 +966,13 @@ namespace Yarn.Unity
                 return;
             }
 
-            isDialogueRunningCompletionSource = new YarnTaskCompletionSource();
-            
+            var dialogueRunning = new YarnTaskCompletionSource();
+            isDialogueRunningCompletionSource = dialogueRunning;
+
             OnDialogueStartedAsyncCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, this.destroyCancellationToken);
-            dialogueCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(OnDialogueStartedAsyncCancellationSource.Token);
+            // not linked to the OnDialogueStartedAsync source, Stop() cancels that one first and if the
+            // dialogue token went with it the VM would bail out without ever calling HandleDialogueComplete
+            dialogueCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, this.destroyCancellationToken);
             LineProvider.YarnProject = yarnProject;
 
             Dialogue.Program = yarnProject.Program;
@@ -1001,22 +1004,30 @@ namespace Yarn.Unity
                 await HandleDialogueComplete();
                 dialogueCancellationSource = null;
                 OnDialogueStartedAsyncCancellationSource = null;
-                isDialogueRunningCompletionSource.TrySetResult();
+                dialogueRunning.TrySetResult();
                 return;
             }
 
-            // Run dialogue and wait for it to finish!
-            await Dialogue.Start(dialogueCancellationSource.Token);
+            try
+            {
+                // Run dialogue and wait for it to finish!
+                await Dialogue.Start(dialogueCancellationSource.Token);
+            }
+            finally
+            {
+                // cleaning up the main token
+                // we need this nulled out for our own early outing to avoid double starting dialogue
+                dialogueCancellationSource?.Dispose();
+                dialogueCancellationSource = null;
 
-            // cleaning up the main token
-            // we need this nulled out for the purposes of external entities asking if dialogue is running
-            // and for our own early outing to avoid double starting dialogue
-            dialogueCancellationSource?.Dispose();
-            dialogueCancellationSource = null;
+                // wiping out this dude also just in case he's not already destroyed
+                OnDialogueStartedAsyncCancellationSource?.Dispose();
+                OnDialogueStartedAsyncCancellationSource = null;
 
-            // wiping out this dude also just in case he's not already destroyed
-            OnDialogueStartedAsyncCancellationSource?.Dispose();
-            OnDialogueStartedAsyncCancellationSource = null;
+                // Stop() early-outs once the token above is null, so if the dialogue reached
+                // its end (or threw) nothing else is going to mark it as no longer running
+                dialogueRunning.TrySetResult();
+            }
         }
 
         /// <summary>

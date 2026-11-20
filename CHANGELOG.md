@@ -17,6 +17,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - A bug where the obsolete `OnDialogueStartedAsync` call on presenters was forwarding to `OnDialogueCompleteAsync(CancellationToken)` instead of `OnDialogueStartedAsync(CancellationToken)`
 - A bug where cancelling during `OnDialogueStartedAsync` didn't correctly cancel dialogue.
 - A bug where `IsDialogueRunning` value could be incorrect during dialogue start or end.
+- A bug where `IsDialogueRunning` stayed `true` after dialogue reached the end by itself, so `SetProject` would throw until you ran more dialogue. Calling `Stop()` didn't clear it either.
+- A bug where calling `Stop()` partway through a line could end dialogue without presenters ever getting `OnDialogueCompleteAsync`.
+- If something throws while dialogue is running, the Dialogue Runner now cleans up after itself, so you can start dialogue again.
 
 ### Removed
 
