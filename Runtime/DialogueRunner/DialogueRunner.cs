@@ -229,7 +229,18 @@ namespace Yarn.Unity
         /// Gets a value that indicates if the dialogue is actively
         /// running.
         /// </summary>
-        public bool IsDialogueRunning => Dialogue.IsActive;
+        public bool IsDialogueRunning
+        {
+            get
+            {
+                if (isDialogueRunningCompletionSource == null)
+                {
+                    return false;
+                }
+
+                return !isDialogueRunningCompletionSource.Task.IsCompleted();
+            }
+        }
 
         /// <summary>
         /// Whether the dialogue runner will immediately start running dialogue
@@ -301,6 +312,23 @@ namespace Yarn.Unity
         /// source for controlling if the current dialogue should be cancelled
         /// </summary>
         private CancellationTokenSource? dialogueCancellationSource;
+
+        /// <summary>
+        /// source for controlling if the dialogue has been cancelled during the calls to OnDialogueStartedAsync.
+        /// </summary>
+        /// <remarks>
+        /// This is necessary because these calls aren't part of the VM which means they bypass the normal cancellation workflow so need to be special cased.
+        /// </remarks>
+        private CancellationTokenSource? OnDialogueStartedAsyncCancellationSource;
+
+        /// <summary>
+        /// Exists solely to provide a value for <see cref="IsDialogueRunning" />
+        /// </summary>
+        /// <remarks>
+        /// Because we don't expose this directly to people we don't have to worry about people awaiting it's task so can just blow it away each call to <see cref="RunDialogue"/>.
+        /// </remarks>
+        private YarnTaskCompletionSource? isDialogueRunningCompletionSource;
+
         /// <summary>
         /// source for controlling if the current content (so a line, command, etc) should be cancelled
         /// </summary>
@@ -398,6 +426,8 @@ namespace Yarn.Unity
         /// </summary>
         public async YarnTask Stop()
         {
+            OnDialogueStartedAsyncCancellationSource?.Cancel();
+
             // if dialogue isn't running we can't stop it
             if (dialogueCancellationSource == null)
             {
@@ -417,6 +447,8 @@ namespace Yarn.Unity
             await dialogueCancellationCompletion.Task;
             dialogueCancellationCompletion = null;
             dialogueCancellationSource = null;
+
+            isDialogueRunningCompletionSource?.TrySetResult();
         }
 
         /// <summary>
@@ -455,7 +487,7 @@ namespace Yarn.Unity
 
         /// <inheritdoc />
         public async ValueTask HandleDialogueComplete()
-        {
+        {   
             // cleaning up the old cancellation token
             currentContentCancellationSource?.Dispose();
             currentContentCancellationSource = null;
@@ -934,7 +966,10 @@ namespace Yarn.Unity
                 return;
             }
 
-            dialogueCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, this.destroyCancellationToken);
+            isDialogueRunningCompletionSource = new YarnTaskCompletionSource();
+            
+            OnDialogueStartedAsyncCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, this.destroyCancellationToken);
+            dialogueCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(OnDialogueStartedAsyncCancellationSource.Token);
             LineProvider.YarnProject = yarnProject;
 
             Dialogue.Program = yarnProject.Program;
@@ -953,9 +988,22 @@ namespace Yarn.Unity
                 {
                     continue;
                 }
-                tasks.Add(view.OnDialogueStartedAsync(dialogueCancellationSource.Token));
+                tasks.Add(view.OnDialogueStartedAsync(OnDialogueStartedAsyncCancellationSource.Token));
             }
             await YarnTask.WhenAll(tasks);
+
+            // this is needed because OnDialogueStartedAsync isn't really part of the VM flow
+            // it's just something we do in unity land
+            // so if it's cancelled before we actually start dialogue we want to just bail out ahead of time
+            // but because it's dialogue finishing that actually does the final wrap up with the
+            if (OnDialogueStartedAsyncCancellationSource.IsCancellationRequested)
+            {
+                await HandleDialogueComplete();
+                dialogueCancellationSource = null;
+                OnDialogueStartedAsyncCancellationSource = null;
+                isDialogueRunningCompletionSource.TrySetResult();
+                return;
+            }
 
             // Run dialogue and wait for it to finish!
             await Dialogue.Start(dialogueCancellationSource.Token);
@@ -965,6 +1013,10 @@ namespace Yarn.Unity
             // and for our own early outing to avoid double starting dialogue
             dialogueCancellationSource?.Dispose();
             dialogueCancellationSource = null;
+
+            // wiping out this dude also just in case he's not already destroyed
+            OnDialogueStartedAsyncCancellationSource?.Dispose();
+            OnDialogueStartedAsyncCancellationSource = null;
         }
 
         /// <summary>
