@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed an issue where the Line Advancer would fail to cancel dialogue when the Cancel Dialogue action is performed.
 - A bug the prevented cancelling `Awaitable` based `YarnTask.Delay` calls.
 - A bug where the obsolete `OnDialogueStartedAsync` call on presenters was forwarding to `OnDialogueCompleteAsync(CancellationToken)` instead of `OnDialogueStartedAsync(CancellationToken)`
 

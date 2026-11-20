@@ -110,7 +110,7 @@ namespace Yarn.Unity.LineAdvancerInput
         }
         private void OnCancelDialoguePerformed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
         {
-            if (LineAdvancer != null) { LineAdvancer.CancelInvoke(); }
+            if (LineAdvancer != null) { LineAdvancer.RequestDialogueCancellation(); }
         }
 #else // USE_INPUTSYSTEM
         // Define stub methods for ILineAdvancerInput to prevent compiler errors
