@@ -1008,26 +1008,21 @@ namespace Yarn.Unity
                 return;
             }
 
-            try
-            {
-                // Run dialogue and wait for it to finish!
-                await Dialogue.Start(dialogueCancellationSource.Token);
-            }
-            finally
-            {
-                // cleaning up the main token
-                // we need this nulled out for our own early outing to avoid double starting dialogue
-                dialogueCancellationSource?.Dispose();
-                dialogueCancellationSource = null;
+            // Run dialogue and wait for it to finish!
+            await Dialogue.Start(dialogueCancellationSource.Token);
 
-                // wiping out this dude also just in case he's not already destroyed
-                OnDialogueStartedAsyncCancellationSource?.Dispose();
-                OnDialogueStartedAsyncCancellationSource = null;
+            // cleaning up the main token
+            // we need this nulled out for our own early outing to avoid double starting dialogue
+            dialogueCancellationSource?.Dispose();
+            dialogueCancellationSource = null;
 
-                // Stop() early-outs once the token above is null, so if the dialogue reached
-                // its end (or threw) nothing else is going to mark it as no longer running
-                dialogueRunning.TrySetResult();
-            }
+            // wiping out this dude also just in case he's not already destroyed
+            OnDialogueStartedAsyncCancellationSource?.Dispose();
+            OnDialogueStartedAsyncCancellationSource = null;
+
+            // Stop() early-outs once the token above is null, so if the dialogue reached
+            // its end by itself nothing else is going to mark it as no longer running
+            dialogueRunning.TrySetResult();
         }
 
         /// <summary>
