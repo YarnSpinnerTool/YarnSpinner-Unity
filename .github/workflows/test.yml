@@ -6,15 +6,15 @@ env:
 
 on:
   push:
-    branches:
-      - main
-      - "feature/**"
-      - "release/**"
-    paths:
-      - "Editor/**"
-      - "Runtime/**"
-      - "Samples~/**"
-      - "Tests/**"
+    # branches:
+    #   - main
+    #   - "feature/**"
+    #   - "release/**"
+    # paths:
+    #   - "Editor/**"
+    #   - "Runtime/**"
+    #   - "Samples~/**"
+    #   - "Tests/**"
   workflow_dispatch:
 
 jobs:
