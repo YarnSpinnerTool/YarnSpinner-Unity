@@ -966,8 +966,7 @@ namespace Yarn.Unity
                 return;
             }
 
-            var dialogueRunning = new YarnTaskCompletionSource();
-            isDialogueRunningCompletionSource = dialogueRunning;
+            isDialogueRunningCompletionSource = new YarnTaskCompletionSource();
 
             OnDialogueStartedAsyncCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, this.destroyCancellationToken);
             // not linked to the OnDialogueStartedAsync source, Stop() cancels that one first and if the
@@ -1004,7 +1003,7 @@ namespace Yarn.Unity
                 await HandleDialogueComplete();
                 dialogueCancellationSource = null;
                 OnDialogueStartedAsyncCancellationSource = null;
-                dialogueRunning.TrySetResult();
+                isDialogueRunningCompletionSource.TrySetResult();
                 return;
             }
 
@@ -1022,7 +1021,7 @@ namespace Yarn.Unity
 
             // Stop() early-outs once the token above is null, so if the dialogue reached
             // its end by itself nothing else is going to mark it as no longer running
-            dialogueRunning.TrySetResult();
+            isDialogueRunningCompletionSource?.TrySetResult();
         }
 
         /// <summary>
