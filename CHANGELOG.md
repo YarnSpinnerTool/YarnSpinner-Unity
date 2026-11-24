@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- renamed `isDialogueRunningCompletionSource` and `dialogueCancellationCompletion` inside the runner to `dialogueCompletionSource` and `dialogueStopCompletion` to better reflect their use
+
 ### Fixed
 
 - Fixed an issue where the Line Advancer would fail to cancel dialogue when the Cancel Dialogue action is performed.
