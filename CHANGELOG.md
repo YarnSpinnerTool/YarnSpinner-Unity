@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - A bug where `IsDialogueRunning` stayed `true` after dialogue reached the end by itself, so `SetProject` would throw until you ran more dialogue. Calling `Stop()` didn't clear it either.
 - A bug where calling `Stop()` partway through a line could end dialogue without presenters ever getting `OnDialogueCompleteAsync`.
 - A warning around accessing assemblies in Unity 6.6
+- A bug where `visited` and `visited_count` could fail to return any value.
 
 ### Removed
 

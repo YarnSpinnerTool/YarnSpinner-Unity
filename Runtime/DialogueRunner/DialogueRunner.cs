@@ -591,7 +591,7 @@ namespace Yarn.Unity
                 {
                     throw new InvalidOperationException("Internal error: visit-count-tracking function called with not enough parameters");
                 }
-                var nodeName = parameters[0].ToString();
+                var nodeName = Convert.ToString(parameters[0]);
                 return (int)runner.Dialogue.GetNodeVisitCount(nodeName);
             }
         }
