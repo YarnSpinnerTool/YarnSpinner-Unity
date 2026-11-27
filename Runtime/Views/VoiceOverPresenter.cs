@@ -48,6 +48,13 @@ namespace Yarn.Unity
         public float waitTimeAfterLineComplete = 0f;
 
         /// <summary>
+        /// Whether to use unscaled time when presenting dialogue.
+        /// </summary>
+        [Group("Timing")]
+        [Label("Use Unscaled Time")]
+        public bool useUnscaledTime = false;
+
+        /// <summary>
         /// The <see cref="AudioSource"/> that this voice over view will play
         /// its audio from.
         /// </summary>
@@ -137,9 +144,7 @@ namespace Yarn.Unity
             // If we need to wait before starting playback, do this now
             if (waitTimeBeforeLineStart > 0)
             {
-                await YarnTask.Delay(
-                    TimeSpan.FromSeconds(waitTimeBeforeLineStart),
-                    lineCancellationToken.NextContentToken).SuppressCancellationThrow();
+                await YarnTask.Delay(TimeSpan.FromSeconds(waitTimeBeforeLineStart), lineCancellationToken.NextContentToken, useUnscaledTime: this.useUnscaledTime).SuppressCancellationThrow();
             }
 
             if (!DialogueRunner.IsInPlaymode)
@@ -205,10 +210,7 @@ namespace Yarn.Unity
 
             if (!lineCancellationToken.IsNextContentRequested && waitTimeAfterLineComplete > 0)
             {
-                await YarnTask.Delay(
-                    TimeSpan.FromSeconds(waitTimeAfterLineComplete),
-                    lineCancellationToken.NextContentToken
-                ).SuppressCancellationThrow();
+                await YarnTask.Delay(TimeSpan.FromSeconds(waitTimeAfterLineComplete), lineCancellationToken.NextContentToken, useUnscaledTime: this.useUnscaledTime).SuppressCancellationThrow();
             }
 
             if (!DialogueRunner.IsInPlaymode)

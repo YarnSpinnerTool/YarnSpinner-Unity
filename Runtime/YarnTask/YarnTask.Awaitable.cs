@@ -123,8 +123,14 @@ namespace Yarn.Unity
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static partial async YarnTask Delay(TimeSpan timeSpan, CancellationToken token)
+        public static partial async YarnTask Delay(TimeSpan timeSpan, CancellationToken token, bool useUnscaledTime)
         {
+            if (useUnscaledTime)
+            {
+                await DelayUnscaled(timeSpan, token);
+                return;
+            }
+
             try
             {
                 await Awaitable.WaitForSecondsAsync((float)timeSpan.TotalSeconds, token);
@@ -135,6 +141,14 @@ namespace Yarn.Unity
             }
         }
 
+        private static async YarnTask DelayUnscaled(TimeSpan timeSpan, CancellationToken token)
+        {
+            var waitUntilTime = Time.unscaledTimeAsDouble + timeSpan.TotalSeconds;
+            while (Time.unscaledTimeAsDouble < waitUntilTime)
+            {
+                await Awaitable.NextFrameAsync(token);
+            }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async static partial YarnTask WaitUntil(System.Func<bool> predicate, System.Threading.CancellationToken token)

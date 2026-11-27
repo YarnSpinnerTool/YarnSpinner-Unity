@@ -69,9 +69,9 @@ namespace Yarn.Unity
             return UniTask.WaitUntilCanceled(token);
         }
 
-        public static partial YarnTask Delay(TimeSpan timeSpan, CancellationToken token)
+        public static partial YarnTask Delay(TimeSpan timeSpan, CancellationToken token, bool useUnscaledTime)
         {
-            return UniTask.Delay(timeSpan, cancellationToken: token);
+            return UniTask.Delay(timeSpan, cancellationToken: token, delayType: useUnscaledTime ? DelayType.UnscaledDeltaTime : DelayType.DeltaTime);
         }
 
         public static partial YarnTask WaitUntil(System.Func<bool> predicate, System.Threading.CancellationToken token)

@@ -100,6 +100,7 @@ Check out the new [docs website](https://yarnspinner.dev/docs/unity/) for v3.3!
 - Paths in generated YSLS files now use a consistent path separator (the forward slash `/`), independent of the current operating system.
 - `YarnNode` and `DialogueReference` now sort their nodes alphabetically.
 - `IRequestNextLine` has been replaced with `IContentSource`.
+- Added an option to use unscaled time for built-in dialogue presenters.
 
 ## [3.2.8]
 
